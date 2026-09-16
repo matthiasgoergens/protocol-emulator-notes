@@ -18,12 +18,29 @@ muxes the results. Logarithmic barrel shifter: 64 muxes per stage, 6 stages,
 two directions. PIO needs it because IN/OUT move 1 to 32 bits per
 instruction.
 
-Implication: at several cells per LUT the design is plausibly 5K to 10K
-sg13g2 cells for one state machine, a quarter to a half of the 24-tile
-budget before SRAM. A straight PIO port with four state machines does not
-fit. Fix widths at compile time; shift-by-1 and shift-by-8 cost one or two
-muxes per bit.
+Measured 2026-09-16 with Yosys 0.68 against the IHP sg13g2 liberty file
+(area-oriented abc, no clock constraint, no place and route). Full notes,
+script and logs in `../pio-area-notes/`.
 
-Unverified: LUT-to-cell ratio, and how many state machines the measured top
-level instantiated. Both settled by running Yosys on fpga_pio with the
-sg13g2 liberty file, which is also the synthesis bake-off's baseline.
+| Design | Cells | Area um2 | DFFs |
+| --- | --- | --- | --- |
+| isr as written | 1172 | 17,183 | 38 |
+| isr, shift by 1 only | 239 | 3,743 | 38 |
+| isr, shift by 1 or 8 | 365 | 4,748 | 38 |
+| osr as written | 1065 | 15,380 | 38 |
+| one PIO state machine | 4713 | 61,638 | 193 |
+| uart_rx top (effectively one machine, loader, 512-bit memory in flops) | 5721 | 96,546 | 767 |
+
+One IHP tile is about 31,700 um2 (derived from the Tiny Tapeout memory
+page). So one PIO machine is two tiles at full utilisation, three to four at
+realistic utilisation, and the two shift registers are 53 % of it. Fixing
+the shift width to one bit shrinks the input shifter 4.6x (the flops stay;
+logic drops 8x). Four machines plus instruction memory is roughly 280K to
+300K um2: it fits the 6x4 allocation but uses 16 to 18 of the 24 tiles at
+realistic utilisation. Earlier claim "a straight PIO port with four state
+machines does not fit" was wrong; corrected to "fits but eats most of the
+budget".
+
+Neywiny's 1.4K LUTs is most likely one effective machine: the uart_rx top's
+machine index is a constant, so synthesis removes machines 1 to 3. Ratio
+about 4 cells per LUT for the top, 2.5 for the shifter.
