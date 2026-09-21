@@ -1,0 +1,20 @@
+{
+  "DESIGN_NAME": "PIO32",
+  "VERILOG_FILES": [
+    "dir::../synth/models_pack_onelatch.v",
+    "dir::../hard/Tile/PIO32/PIO32_bel.v",
+    "dir::../hard/Tile/PIO32/PIO32_switch_matrix.v",
+    "dir::../hard/Tile/PIO32/PIO32_ConfigMem.v",
+    "dir::../hard/Tile/PIO32/PIO32.v"
+  ],
+  "CLOCK_PORT": "UserCLK",
+  "CLOCK_PERIOD": 20,
+  "FP_SIZING": "relative",
+  "PL_TARGET_DENSITY_PCT": 70,
+  "RUN_KLAYOUT_XOR": false,
+  "RUN_MAGIC_DRC": false,
+  "RUN_KLAYOUT_DRC": false,
+  "RUN_LVS": false,
+  "RUN_IRDROP_REPORT": false,
+  "FP_CORE_UTIL": 65
+}

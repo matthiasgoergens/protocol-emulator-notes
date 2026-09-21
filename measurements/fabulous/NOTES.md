@@ -261,3 +261,47 @@ Reading:
 - The Hardcaml transmitter and the hand-written one land on identical cell
   counts, as expected for the same behaviour; the wirelength and fmax
   differences are placement noise.
+
+## 2026-09-21, later: the remaining place-and-route runs
+
+Same container flow (`pnr/run_pnr.sh`, configs `synth/librelane_*.json`),
+all at 65 % target core utilisation, 20 ns clock unless stated. Every run
+routed with zero violations; "closes" means the deferred setup checker
+passed. Slack is worst setup slack at each corner; hold slack was positive
+everywhere (worst +0.13 ns, fast corner).
+
+| Run | Die um2 | Final util | Timing buffers | Setup slack fast / typ / slow (ns) | Closes |
+| --- | --- | --- | --- | --- | --- |
+| stock LUT4AB, 55 % target | 83,772 | 65.5 % | 7,031 | -2.4 / -9.9 / -22.7 | no |
+| stock LUT4AB, 65 % target | 71,766 | 77.0 % | 6,545 | -3.5 / -11.7 / -25.5 | no |
+| stock LUT4AB, 40 ns clock | 71,766 | 77.2 % | 6,686 | +8.5 / +0.4 / -13.4 | typical only |
+| sparse LUT4AB | 57,815 | 75.2 % | 4,411 | -1.6 / -8.8 / -20.9 | no |
+| PIO8 tile (hardened 8-bit shifter) | 47,343 | 77.5 % | 4,483 | +5.5 / +5.4 / +5.2 | yes |
+| PIO32 tile (hardened 32-bit shifter) | 65,900 | 76.6 % | 5,559 | +5.5 / +5.4 / +5.2 | yes |
+| stock LUT4AB with magic and KLayout DRC and XOR | 71,766 | 77.0 % | 6,545 | as the 65 % run | no (timing only) |
+
+Reading:
+
+- The sparse tile's 19 % synthesis saving survives place and route
+  exactly: 57.8K against 71.8K um2 at the same target, with fewer timing
+  buffers and slightly better slack.
+- Corners matter by a factor of two. The stock tile's worst path is about
+  32 ns at the typical corner, 23 ns at the fast corner and 45 ns at the
+  slow corner (1.08 V, 125 C); at 40 ns it closes at typical and fast but
+  misses slow by 13 ns, i.e. about 53 ns worst path there. A fabric clock
+  guaranteed over the full corner set is under 20 MHz for tile-crossing
+  paths without timing-driven restructuring. Tiny Tapeout boards run at
+  room temperature and nominal voltage, so the typical figure is the
+  practical one, and the slow figure is what a datasheet would have to say.
+- Both hardened tiles close at 20 ns with 5 ns to spare at every corner,
+  although their through-routing is the same switch matrix. The LUT
+  tile's long paths therefore run through the LUT input muxes and the
+  LUT4 chain, not through the wire switching. That is where a
+  timing-driven redesign of the tile would look first.
+- Full signoff checks pass on the stock tile: magic DRC 0, KLayout DRC 0,
+  and a zero XOR difference between the magic and KLayout GDS streams.
+  LVS was not run. So the flow's only open item on any of these tiles is
+  setup timing, never manufacturability.
+- The 32-bit shifter tile costs 65.9K um2 of die against the 8-bit tile's
+  47.3K, so the 67 extra routed ports cost about 280 um2 each after place
+  and route, against 160 um2 in synthesis. Still small next to the tile.

@@ -117,3 +117,23 @@ fabrics; details, driver and logs in `measurements/fabulous/bench/` and
 The 19 % tile-area saving from dropping the length-4 and length-6 wires
 costs nothing on these designs. The utilisation at which the sparse fabric
 first loses a design is still unknown.
+
+## 2026-09-21, later: remaining place-and-route runs
+
+LibreLane 3.0.14, IHP sg13g2, 65 % target utilisation, 20 ns clock unless
+stated; metrics under `measurements/fabulous/pnr-metrics/`, reading in
+`measurements/fabulous/NOTES.md`.
+
+| Run | Die um2 | Setup slack fast / typ / slow (ns) |
+| --- | --- | --- |
+| stock LUT4AB | 71,766 | -3.5 / -11.7 / -25.5 |
+| stock LUT4AB at 40 ns | 71,766 | +8.5 / +0.4 / -13.4 |
+| sparse LUT4AB | 57,815 | -1.6 / -8.8 / -20.9 |
+| PIO8 hardened tile | 47,343 | +5.5 / +5.4 / +5.2 |
+| PIO32 hardened tile | 65,900 | +5.5 / +5.4 / +5.2 |
+
+All route with zero violations; magic DRC, KLayout DRC and XOR are clean
+on the stock tile. The sparse tile's 19 % saving holds after place and
+route. The LUT tile's worst path is about 32 ns typical and 45 ns at the
+slow corner; both hardened tiles close at 20 ns at every corner, so the
+LUT tile's slow paths are in the LUT input muxes, not the wire switching.
