@@ -70,6 +70,40 @@ why it might win and why it might die.
     across the die give a physically unclonable identity; metastability gives
     a true random source for an on-chip fuzzer. Both only mean anything on
     real silicon, which is the prize.
+16b. **Variation as a resource: calibration by search, and intrinsic
+    evolution as the experiment the extra chips allow.** Thompson evolved a
+    tone discriminator directly on a Xilinx XC6216 in 1996; it used
+    unconnected cells, exploited the physics of that one die, and died with
+    a few degrees of temperature change or on a sibling chip. Stoica's group
+    at JPL then turned the idea round and used the same search to
+    compensate for variation rather than exploit it. The version that fits
+    here: a small block whose analogue behaviour is configurable (inverter
+    chains with programmable taps, current-starved stages, couplings
+    between chains) and measurable on chip (a counter, the delay-line
+    time-to-digital converter of idea 7). After fabrication a search on the
+    dev board's RP2040, chip in the loop, configures it to hit targets no
+    design could promise in advance: an exact delay, an oscillator that
+    holds over temperature, a sub-cycle edge placer, the best-entropy
+    random source. Where a model exists a delay-locked loop wins; the
+    search earns its place only where no model exists. Three things make it
+    strong: the platform reconfigures and measures at kilohertz rates, and
+    partial reconfiguration means only this block reloads per trial; each
+    chip gets a birth certificate, the measured spec of every calibrated
+    element on that die, which is a verification story no simulation can
+    match; and several chips come back, so evolve on one and test on the
+    others, which is the portability experiment Thompson could not run and
+    is publishable either way. It also answers the two "our timing is worse
+    than the clock" problems, the 32 ns tile path and the missing sub-cycle
+    resolution. Raw material in a standard-cell fabric is limited: delay,
+    glitches, metastability, crosstalk, and drive contention, the last being
+    the most powerful and the one that needs a current limit and a watchdog
+    or the search finds the optimum where the chip is on fire. Might die
+    because the Tiny Tapeout precheck may reject anything that looks like a
+    floating node or a bus fight, so the block must be legal standard cells
+    with the misbehaviour purely in configuration, and because a search
+    without seeds, logs and a per-trial objective is Thompson's curiosity
+    again. Does nothing for area: no search shrinks a configuration latch.
+
 17. **A clockless core.** Bundled-data asynchronous engine reacting in gate
     delays with no clock jitter, the theoretical floor for reaction time.
     OpenROAD will fight every step. Highest novelty, highest chance of a
@@ -95,7 +129,8 @@ why it might win and why it might die.
 
 ## Bets
 
-Crazy block beside a safe core: 12 with 11. Chained chips with a shared
+Crazy block beside a safe core: 12 with 11, and 16b as the post-silicon
+experiment that needs no extra design commitment beyond one small block. Chained chips with a shared
 timebase turn the prize itself into the demo and the firing-squad story is
 already written. Second: 18, the only idea here that is a research result
 rather than a feature. Third: 6, the one that makes the reprogrammability
