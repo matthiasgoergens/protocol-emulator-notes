@@ -155,3 +155,19 @@ Place and route at 15 ns: die 36,663 um2, zero routing violations, setup
 slack +8.2 / +7.8 / +7.3 ns at fast / typical / slow corners. The core
 runs at the competition clock at every corner where the LUT fabric does
 not reach it at any.
+
+## 2026-09-21, later: systolic pattern correlator prototype
+
+Sixteen-cell systolic correlator in Hardcaml (`prototypes/systolic-matcher/`),
+lockstep-tested against its closed-form specification on 300 random
+configurations x 500 samples with zero mismatches; directed pattern tests
+pass.
+
+| Design | Cells | Area um2 | Flip-flops |
+| --- | --- | --- | --- |
+| systolic correlator, 16 cells, 37 config bits | 458 | 10,015 | 139 |
+
+Place and route at 5 ns: die 31,488 um2, zero routing violations, setup
+slack +2.7 / +2.2 / +0.9 ns at fast / typical / slow corners, so the array
+runs at 200 MHz at the slow corner. 241 hold buffers were needed after
+clock-tree synthesis, which is the price of an all-register design.

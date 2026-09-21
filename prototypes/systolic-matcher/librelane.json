@@ -1,0 +1,16 @@
+{
+  "DESIGN_NAME": "systolic_matcher",
+  "VERILOG_FILES": [
+    "dir::systolic_matcher.v"
+  ],
+  "CLOCK_PORT": "clock",
+  "CLOCK_PERIOD": 5,
+  "FP_SIZING": "relative",
+  "FP_CORE_UTIL": 45,
+  "PL_TARGET_DENSITY_PCT": 55,
+  "RUN_KLAYOUT_XOR": false,
+  "RUN_MAGIC_DRC": false,
+  "RUN_KLAYOUT_DRC": false,
+  "RUN_LVS": false,
+  "RUN_IRDROP_REPORT": false
+}
