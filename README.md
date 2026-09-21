@@ -8,7 +8,8 @@ I2C, to be fabricated on IHP's 130 nm process through a Tiny Tapeout shuttle.
 Nothing here is a finished design. It is the record of the brainstorming and
 of the measurements that followed, kept so that every number in the notes
 can be traced to the run that produced it.
-`PLAN.md` says where the measurements point and what comes next.
+`PLAN.md` says where the measurements point and what comes next;
+`techniques.md` lists the ways a big host can do the work a tiny chip cannot.
 
 ## Contents
 
