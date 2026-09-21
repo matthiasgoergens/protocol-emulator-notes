@@ -190,3 +190,74 @@ Reading:
 - Not done: the sparse and hardened tiles through place and route (same
   script, different config), timing-driven runs, the slow corner, and
   DRC with magic/KLayout. Each is a config change and a few minutes.
+
+## 2026-09-21, later: routability of the sparse fabric (`bench/`)
+
+Question: does removing the length-4 and length-6 wires (19 % smaller tile)
+cost routability? Method: four small protocol-glue designs with the
+FABulous user-design interface (`clk`, `io_in[27:0]`, `io_out`, `io_oeb`),
+synthesised to LUT4 and LUTFF cells and routed with nextpnr-generic's
+FABulous architecture on stock and sparse fabrics of two sizes.
+
+Designs (`bench/*.v`): `uart_tx` (8N1, selectable divisor), `uart_tx_hc`
+(the same transmitter written in Hardcaml, `hardcaml/`, Verilog emitted by
+Hardcaml v0.17 and self-checked in Cyclesim), `spi_master` (mode 0, 8-bit),
+`i2c_engine` (start, address byte, ack sample, stop, clock stretching,
+open-drain through the output enables).
+
+Tooling note, because it cost hours: FABulous 2.2's nextpnr packer accepts
+the `LUT1..4` and `LUTFF_*` cells produced by the Yosys 0.60-era
+`synth_fabulous`, but the oss-cad-suite Yosys 0.69 `synth_fabulous` emits
+generic `$lut` and `$_SDFFE_*` cells and no longer ships the primitive
+library, and the earlier suite here (Yosys 0.68) shipped neither. The
+driver `bench/run_bench.sh` therefore runs the 0.60 script by hand in the
+0.69 Yosys with the 0.60 technology files (`yosys-fabulous-0.60/`, from
+the Yosys repository at tag v0.60, ISC licence), reading `prims.v` with
+`-DCOMPLEX_DFF` so the enable/reset LUTFF variants exist, and calls
+nextpnr directly with the command FABulous's task file uses. The generated
+top wrapper also has to be patched, since FABulous only connects the ports
+of its own demo design.
+
+| Fabric | Cells | Design | LC used | IO | Wirelength | nextpnr fmax estimate |
+| --- | --- | --- | --- | --- | --- | --- |
+| stock 4x4 | 128 | uart_tx | 60 | 6 | 72 | 38.6 MHz |
+| sparse 4x4 | 128 | uart_tx | 60 | 6 | 72 | 38.6 MHz |
+| stock 4x4 | 128 | uart_tx_hc | 60 | 6 | 72 | 37.5 MHz |
+| sparse 4x4 | 128 | uart_tx_hc | 60 | 6 | 72 | 37.5 MHz |
+| stock 4x4 | 128 | spi_master | 41 | 5 | 62 | 55.3 MHz |
+| sparse 4x4 | 128 | spi_master | 41 | 5 | 62 | 60.6 MHz |
+| stock 4x4 | 128 | i2c_engine | 52 | 8 | 62 | 52.1 MHz |
+| sparse 4x4 | 128 | i2c_engine | 52 | 8 | 62 | 50.0 MHz |
+| stock 3x3 | 72 | uart_tx | 60 | 6 | 64 | 37.5 MHz |
+| sparse 3x3 | 72 | uart_tx | 60 | 6 | 64 | 38.6 MHz |
+| stock 3x3 | 72 | uart_tx_hc | 60 | 6 | 75 | 35.3 MHz |
+| sparse 3x3 | 72 | uart_tx_hc | 60 | 6 | 75 | 36.4 MHz |
+| stock 3x3 | 72 | spi_master | 41 | 5 | 54 | 63.7 MHz |
+| sparse 3x3 | 72 | spi_master | 41 | 5 | 54 | 63.7 MHz |
+| stock 3x3 | 72 | i2c_engine (IO-truncated, see below) | 46 | 6 | 50 | 46.3 MHz |
+| sparse 3x3 | 72 | i2c_engine (IO-truncated) | 46 | 6 | 50 | 46.3 MHz |
+| stock 2x2 | 32 | spi_master | 38 needed | 4 | | fails: no logic cells left |
+| stock 2x2 | 32 | uart_tx | 50 needed | 4 | | fails: no logic cells left |
+
+Reading:
+
+- At every size tried, the sparse fabric routes exactly what the stock one
+  routes, with identical wirelength, up to 83 % logic-cell utilisation. The
+  19 % tile-area saving from dropping the long wires is free for designs
+  of this kind. The first failure, on the 2x2, is cell capacity, not
+  routing, on both fabrics.
+- The fmax figures are nextpnr's estimate from FABulous's generic timing
+  model, not silicon; use them only relatively. They agree with the
+  place-and-route result above that fabric logic runs at tens of MHz.
+- The 3x3 fabric has six I/O pads (one W_IO tile per row, two pads each),
+  so `i2c_engine`, which needs eight, is silently truncated by the wrapper
+  and loses part of its logic there; its 3x3 rows measure routability of a
+  smaller design, not the I2C engine. Pad count is a real constraint of
+  this fabric family: pads come only from the I/O column.
+- Not tried: removing the double wires as well, more designs, or a fabric
+  at 90 %+ utilisation with the sparse switch matrix. The point where the
+  sparse fabric first loses a design the stock one routes is still not
+  found, which is the number a switch-matrix optimiser would need.
+- The Hardcaml transmitter and the hand-written one land on identical cell
+  counts, as expected for the same behaviour; the wirelength and fmax
+  differences are placement noise.

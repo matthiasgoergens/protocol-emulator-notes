@@ -100,3 +100,20 @@ Tiny Tapeout tiles, so the 6x4 allocation holds 75 to 85 LUT4s. Worst
 tile-crossing path is about 32 ns at the typical corner before any
 timing optimisation, so a fabric clock near 66 MHz is not available
 without pipelining; fast protocols must be hardened.
+
+## 2026-09-21, later: routability of the sparse fabric
+
+Four small protocol designs (UART TX hand-written and in Hardcaml, SPI
+master, I2C bit engine) routed with nextpnr on stock and sparse FABulous
+fabrics; details, driver and logs in `measurements/fabulous/bench/` and
+`measurements/fabulous/NOTES.md`.
+
+| Fabric | Result |
+| --- | --- |
+| stock and sparse 4x4 (128 cells) | all four route; identical cell counts and wirelength on both |
+| stock and sparse 3x3 (72 cells) | all route, UART at 83 % utilisation; identical wirelength on both |
+| 2x2 (32 cells) | fails on cell capacity, not routing |
+
+The 19 % tile-area saving from dropping the length-4 and length-6 wires
+costs nothing on these designs. The utilisation at which the sparse fabric
+first loses a design is still unknown.

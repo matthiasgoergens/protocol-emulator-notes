@@ -1,0 +1,201 @@
+Info: Reading BELs file: /.FABulous/bel.v3.txt
+Info: Reading PIPs file: /.FABulous/pips.txt
+
+Info: No PCF file specified, skipping constraints application.
+Info: Checksum: 0x4d8ecaaf
+
+Info: Device utilisation:
+Info: 	         FABULOUS_LC:      41/     72    56%
+Info: 	IO_1_bidirectional_frame_config_pass:       6/      6   100%
+Info: 	        Global_Clock:       1/      1   100%
+Info: 	       FABULOUS_MUX2:       0/     36     0%
+Info: 	       FABULOUS_MUX4:       0/     18     0%
+Info: 	       FABULOUS_MUX8:       0/      9     0%
+Info: 	       Config_access:       0/      6     0%
+
+Info: Placed 6 cells based on constraints.
+Info: Creating initial analytic placement for 44 cells, random placement wirelen = 136.
+Info:     at initial placer iter 0, wirelen = 6
+Info:     at initial placer iter 1, wirelen = 6
+Info:     at initial placer iter 2, wirelen = 6
+Info:     at initial placer iter 3, wirelen = 6
+Info: Running main analytical placer, max placement attempts per cell = 10000.
+Info:     at iteration #1, type FABULOUS_LC: wirelen solved = 6, spread = 67, legal = 93; time = 0.00s
+Info:     at iteration #1, type Global_Clock: wirelen solved = 93, spread = 93, legal = 93; time = 0.00s
+Info:     at iteration #1, type _CONST1_DRV: wirelen solved = 93, spread = 93, legal = 93; time = 0.00s
+Info:     at iteration #1, type _CONST0_DRV: wirelen solved = 93, spread = 93, legal = 93; time = 0.00s
+Info:     at iteration #1, type ALL: wirelen solved = 6, spread = 67, legal = 86; time = 0.00s
+Info:     at iteration #2, type FABULOUS_LC: wirelen solved = 6, spread = 55, legal = 81; time = 0.00s
+Info:     at iteration #2, type Global_Clock: wirelen solved = 81, spread = 81, legal = 81; time = 0.00s
+Info:     at iteration #2, type _CONST1_DRV: wirelen solved = 81, spread = 81, legal = 81; time = 0.00s
+Info:     at iteration #2, type _CONST0_DRV: wirelen solved = 81, spread = 81, legal = 81; time = 0.00s
+Info:     at iteration #2, type ALL: wirelen solved = 9, spread = 55, legal = 88; time = 0.00s
+Info:     at iteration #3, type FABULOUS_LC: wirelen solved = 11, spread = 58, legal = 89; time = 0.00s
+Info:     at iteration #3, type Global_Clock: wirelen solved = 89, spread = 89, legal = 89; time = 0.00s
+Info:     at iteration #3, type _CONST1_DRV: wirelen solved = 89, spread = 89, legal = 89; time = 0.00s
+Info:     at iteration #3, type _CONST0_DRV: wirelen solved = 89, spread = 89, legal = 89; time = 0.00s
+Info:     at iteration #3, type ALL: wirelen solved = 11, spread = 58, legal = 83; time = 0.00s
+Info:     at iteration #4, type FABULOUS_LC: wirelen solved = 12, spread = 54, legal = 90; time = 0.00s
+Info:     at iteration #4, type Global_Clock: wirelen solved = 90, spread = 90, legal = 90; time = 0.00s
+Info:     at iteration #4, type _CONST1_DRV: wirelen solved = 90, spread = 90, legal = 90; time = 0.00s
+Info:     at iteration #4, type _CONST0_DRV: wirelen solved = 90, spread = 90, legal = 90; time = 0.00s
+Info:     at iteration #4, type ALL: wirelen solved = 11, spread = 56, legal = 76; time = 0.00s
+Info:     at iteration #5, type FABULOUS_LC: wirelen solved = 35, spread = 55, legal = 72; time = 0.00s
+Info:     at iteration #5, type Global_Clock: wirelen solved = 72, spread = 72, legal = 72; time = 0.00s
+Info:     at iteration #5, type _CONST1_DRV: wirelen solved = 72, spread = 72, legal = 72; time = 0.00s
+Info:     at iteration #5, type _CONST0_DRV: wirelen solved = 72, spread = 72, legal = 72; time = 0.00s
+Info:     at iteration #5, type ALL: wirelen solved = 39, spread = 57, legal = 88; time = 0.00s
+Info:     at iteration #6, type FABULOUS_LC: wirelen solved = 36, spread = 55, legal = 78; time = 0.00s
+Info:     at iteration #6, type Global_Clock: wirelen solved = 78, spread = 78, legal = 78; time = 0.00s
+Info:     at iteration #6, type _CONST1_DRV: wirelen solved = 78, spread = 78, legal = 78; time = 0.00s
+Info:     at iteration #6, type _CONST0_DRV: wirelen solved = 78, spread = 78, legal = 78; time = 0.00s
+Info:     at iteration #6, type ALL: wirelen solved = 36, spread = 56, legal = 93; time = 0.00s
+Info:     at iteration #7, type FABULOUS_LC: wirelen solved = 31, spread = 59, legal = 73; time = 0.00s
+Info:     at iteration #7, type Global_Clock: wirelen solved = 73, spread = 73, legal = 73; time = 0.00s
+Info:     at iteration #7, type _CONST1_DRV: wirelen solved = 73, spread = 73, legal = 73; time = 0.00s
+Info:     at iteration #7, type _CONST0_DRV: wirelen solved = 73, spread = 73, legal = 73; time = 0.00s
+Info:     at iteration #7, type ALL: wirelen solved = 31, spread = 59, legal = 75; time = 0.00s
+Info:     at iteration #8, type FABULOUS_LC: wirelen solved = 31, spread = 57, legal = 78; time = 0.00s
+Info:     at iteration #8, type Global_Clock: wirelen solved = 78, spread = 78, legal = 78; time = 0.00s
+Info:     at iteration #8, type _CONST1_DRV: wirelen solved = 78, spread = 78, legal = 78; time = 0.00s
+Info:     at iteration #8, type _CONST0_DRV: wirelen solved = 78, spread = 78, legal = 78; time = 0.00s
+Info:     at iteration #8, type ALL: wirelen solved = 31, spread = 57, legal = 74; time = 0.00s
+Info:     at iteration #9, type FABULOUS_LC: wirelen solved = 28, spread = 56, legal = 77; time = 0.00s
+Info:     at iteration #9, type Global_Clock: wirelen solved = 77, spread = 77, legal = 77; time = 0.00s
+Info:     at iteration #9, type _CONST1_DRV: wirelen solved = 77, spread = 77, legal = 77; time = 0.00s
+Info:     at iteration #9, type _CONST0_DRV: wirelen solved = 77, spread = 77, legal = 77; time = 0.00s
+Info:     at iteration #9, type ALL: wirelen solved = 30, spread = 58, legal = 80; time = 0.00s
+Info:     at iteration #10, type FABULOUS_LC: wirelen solved = 31, spread = 56, legal = 76; time = 0.00s
+Info:     at iteration #10, type Global_Clock: wirelen solved = 76, spread = 76, legal = 76; time = 0.00s
+Info:     at iteration #10, type _CONST1_DRV: wirelen solved = 76, spread = 76, legal = 76; time = 0.00s
+Info:     at iteration #10, type _CONST0_DRV: wirelen solved = 76, spread = 76, legal = 76; time = 0.00s
+Info:     at iteration #10, type ALL: wirelen solved = 33, spread = 58, legal = 77; time = 0.00s
+Info:     at iteration #11, type FABULOUS_LC: wirelen solved = 29, spread = 58, legal = 80; time = 0.00s
+Info:     at iteration #11, type Global_Clock: wirelen solved = 80, spread = 80, legal = 80; time = 0.00s
+Info:     at iteration #11, type _CONST1_DRV: wirelen solved = 80, spread = 80, legal = 80; time = 0.00s
+Info:     at iteration #11, type _CONST0_DRV: wirelen solved = 80, spread = 80, legal = 80; time = 0.00s
+Info:     at iteration #11, type ALL: wirelen solved = 29, spread = 58, legal = 80; time = 0.00s
+Info:     at iteration #12, type FABULOUS_LC: wirelen solved = 32, spread = 58, legal = 77; time = 0.00s
+Info:     at iteration #12, type Global_Clock: wirelen solved = 77, spread = 77, legal = 77; time = 0.00s
+Info:     at iteration #12, type _CONST1_DRV: wirelen solved = 77, spread = 77, legal = 77; time = 0.00s
+Info:     at iteration #12, type _CONST0_DRV: wirelen solved = 77, spread = 77, legal = 77; time = 0.00s
+Info:     at iteration #12, type ALL: wirelen solved = 32, spread = 58, legal = 79; time = 0.00s
+Info:     at iteration #13, type FABULOUS_LC: wirelen solved = 30, spread = 56, legal = 74; time = 0.00s
+Info:     at iteration #13, type Global_Clock: wirelen solved = 74, spread = 74, legal = 74; time = 0.00s
+Info:     at iteration #13, type _CONST1_DRV: wirelen solved = 74, spread = 74, legal = 74; time = 0.00s
+Info:     at iteration #13, type _CONST0_DRV: wirelen solved = 74, spread = 74, legal = 74; time = 0.00s
+Info:     at iteration #13, type ALL: wirelen solved = 30, spread = 56, legal = 73; time = 0.00s
+Info:     at iteration #14, type FABULOUS_LC: wirelen solved = 25, spread = 58, legal = 78; time = 0.00s
+Info:     at iteration #14, type Global_Clock: wirelen solved = 78, spread = 78, legal = 78; time = 0.00s
+Info:     at iteration #14, type _CONST1_DRV: wirelen solved = 78, spread = 78, legal = 78; time = 0.00s
+Info:     at iteration #14, type _CONST0_DRV: wirelen solved = 78, spread = 78, legal = 78; time = 0.00s
+Info:     at iteration #14, type ALL: wirelen solved = 25, spread = 58, legal = 76; time = 0.00s
+Info:     at iteration #15, type FABULOUS_LC: wirelen solved = 28, spread = 60, legal = 84; time = 0.00s
+Info:     at iteration #15, type Global_Clock: wirelen solved = 84, spread = 84, legal = 84; time = 0.00s
+Info:     at iteration #15, type _CONST1_DRV: wirelen solved = 84, spread = 84, legal = 84; time = 0.00s
+Info:     at iteration #15, type _CONST0_DRV: wirelen solved = 84, spread = 84, legal = 84; time = 0.00s
+Info:     at iteration #15, type ALL: wirelen solved = 27, spread = 58, legal = 87; time = 0.00s
+Info:     at iteration #16, type FABULOUS_LC: wirelen solved = 27, spread = 58, legal = 77; time = 0.00s
+Info:     at iteration #16, type Global_Clock: wirelen solved = 77, spread = 77, legal = 77; time = 0.00s
+Info:     at iteration #16, type _CONST1_DRV: wirelen solved = 77, spread = 77, legal = 77; time = 0.00s
+Info:     at iteration #16, type _CONST0_DRV: wirelen solved = 77, spread = 77, legal = 77; time = 0.00s
+Info:     at iteration #16, type ALL: wirelen solved = 27, spread = 58, legal = 77; time = 0.00s
+Info:     at iteration #17, type FABULOUS_LC: wirelen solved = 30, spread = 57, legal = 72; time = 0.00s
+Info:     at iteration #17, type Global_Clock: wirelen solved = 72, spread = 72, legal = 72; time = 0.00s
+Info:     at iteration #17, type _CONST1_DRV: wirelen solved = 72, spread = 72, legal = 72; time = 0.00s
+Info:     at iteration #17, type _CONST0_DRV: wirelen solved = 72, spread = 72, legal = 72; time = 0.00s
+Info:     at iteration #17, type ALL: wirelen solved = 30, spread = 57, legal = 80; time = 0.00s
+Info:     at iteration #18, type FABULOUS_LC: wirelen solved = 39, spread = 58, legal = 75; time = 0.00s
+Info:     at iteration #18, type Global_Clock: wirelen solved = 75, spread = 75, legal = 75; time = 0.00s
+Info:     at iteration #18, type _CONST1_DRV: wirelen solved = 75, spread = 75, legal = 75; time = 0.00s
+Info:     at iteration #18, type _CONST0_DRV: wirelen solved = 75, spread = 75, legal = 75; time = 0.00s
+Info:     at iteration #18, type ALL: wirelen solved = 38, spread = 58, legal = 74; time = 0.00s
+Info: HeAP Placer Time: 0.02s
+Info:   of which solving equations: 0.02s
+Info:   of which spreading cells: 0.00s
+Info:   of which strict legalisation: 0.00s
+
+Info: Running simulated annealing placer for refinement.
+Info:   at iteration #1: temp = 0.000000, timing cost = 63, wirelen = 73
+Info:   at iteration #5: temp = 0.000000, timing cost = 52, wirelen = 58
+Info:   at iteration #10: temp = 0.000000, timing cost = 43, wirelen = 52
+Info:   at iteration #11: temp = 0.000000, timing cost = 37, wirelen = 54 
+Info: SA placement time 0.01s
+
+Info: Max frequency for clock 'clk': 40.82 MHz (PASS at 12.00 MHz)
+
+Info: Slack histogram:
+Info:  legend: * represents 1 endpoint(s)
+Info:          + represents [1,1) endpoint(s)
+Info: [ 58833,  59734) |* 
+Info: [ 59734,  60635) | 
+Info: [ 60635,  61536) | 
+Info: [ 61536,  62437) | 
+Info: [ 62437,  63338) | 
+Info: [ 63338,  64239) | 
+Info: [ 64239,  65140) |********* 
+Info: [ 65140,  66041) | 
+Info: [ 66041,  66942) | 
+Info: [ 66942,  67843) | 
+Info: [ 67843,  68744) | 
+Info: [ 68744,  69645) | 
+Info: [ 69645,  70546) | 
+Info: [ 70546,  71447) |**** 
+Info: [ 71447,  72348) | 
+Info: [ 72348,  73249) | 
+Info: [ 73249,  74150) | 
+Info: [ 74150,  75051) | 
+Info: [ 75051,  75952) | 
+Info: [ 75952,  76853) |************************************ 
+Info: Checksum: 0xa74e07ee
+
+Info: Routing..
+Info: Setting up routing queue.
+Info: Routing 186 arcs.
+Info:            |   (re-)routed arcs  |   delta    | remaining|       time spent     |
+Info:    IterCnt |  w/ripup   wo/ripup |  w/r  wo/r |      arcs| batch(sec) total(sec)|
+Info:        287 |       60        227 |   60   227 |         0|       0.02       0.02|
+Info: Routing complete.
+Info: Router1 time 0.02s
+Info: Checksum: 0xdbc13cdb
+
+Info: Critical path report for clock 'clk' (posedge -> posedge):
+Info:       type curr  total name
+Info:   clk-to-q  1.00  1.00 Source $abc$574$blif$574$18.Q
+Info:    routing  7.10  8.10 Net user_design_i.active (3,2) -> (1,3)
+Info:                          Sink $abc$574$blif$574$9.I1
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/fabulous-notes/sparse3x3/user_design/spi_master.v:11.64-11.70
+Info:      logic  3.00  11.10 Source $abc$574$blif$574$9.O
+Info:    routing  2.10  13.20 Net $abc$574$flatten\user_design_i.$procmux$81_Y (1,3) -> (1,3)
+Info:                          Sink $auto$ff.cc:337:slice$318.I0
+Info:      setup  2.50  15.70 Source $auto$ff.cc:337:slice$318.I0
+Info: 6.50 ns logic, 9.20 ns routing
+
+Info: Max frequency for clock 'clk': 63.69 MHz (PASS at 12.00 MHz)
+
+Info: Slack histogram:
+Info:  legend: * represents 1 endpoint(s)
+Info:          + represents [1,1) endpoint(s)
+Info: [ 67633,  68089) |* 
+Info: [ 68089,  68545) | 
+Info: [ 68545,  69001) | 
+Info: [ 69001,  69457) |* 
+Info: [ 69457,  69913) | 
+Info: [ 69913,  70369) | 
+Info: [ 70369,  70825) | 
+Info: [ 70825,  71281) |******** 
+Info: [ 71281,  71737) |** 
+Info: [ 71737,  72193) | 
+Info: [ 72193,  72649) | 
+Info: [ 72649,  73105) | 
+Info: [ 73105,  73561) | 
+Info: [ 73561,  74017) | 
+Info: [ 74017,  74473) |** 
+Info: [ 74473,  74929) | 
+Info: [ 74929,  75385) |*** 
+Info: [ 75385,  75841) | 
+Info: [ 75841,  76297) |****** 
+Info: [ 76297,  76753) |*************************** 
+
+Info: Program finished normally.

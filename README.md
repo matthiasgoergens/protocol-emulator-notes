@@ -26,8 +26,9 @@ can be traced to the run that produced it.
   of its shift register with fixed shift widths.
 - `measurements/fabulous/`: area of a FABulous embedded-FPGA tile and of a
   small 4x4 fabric on the same process, a sparse-routing variant, two tiles
-  containing hardened blocks, and place-and-route results for the stock
-  tile with LibreLane and OpenROAD.
+  containing hardened blocks, place-and-route results for the stock tile
+  with LibreLane and OpenROAD, and a routability benchmark of four small
+  protocol designs (one written in Hardcaml) on stock and sparse fabrics.
 
 ## Headline numbers
 
@@ -40,7 +41,7 @@ file unless stated; details, caveats and logs sit next to each number.
 | Its two shift registers | 53 % of that area; fixing the shift width to one bit shrinks the input shifter 4.6x |
 | One FABulous LUT4AB tile (8 x LUT4) | 36.3K um2 flattened; configuration latches 52 %, switch matrix 37 %, logic about 10 % |
 | Routing share of the tile once its own config bits are counted | 77 to 78 % |
-| Sparse variant without length-4 and length-6 wires | 19 % smaller, routability not yet measured |
+| Sparse variant without length-4 and length-6 wires | 19 % smaller; routes the same four protocol designs as the stock fabric at up to 83 % utilisation |
 | Hardened blocks as tiles | about 20K um2 of through-routing per tile regardless of content; about 160 um2 per extra block port |
 | Stock tile through place and route | routes with zero DRC violations at 77 % utilisation; die 72K to 84K um2; worst path about 32 ns at the typical corner before timing optimisation |
 
