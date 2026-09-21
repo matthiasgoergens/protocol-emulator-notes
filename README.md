@@ -61,3 +61,6 @@ Notes and scripts: MIT. The two shift-register variants under
 `measurements/pio-area/variants/` are derived from fpga_pio and keep its
 BSD-2-Clause header. `measurements/fabulous/synth/models_pack_onelatch.v` is
 derived from FABulous's Apache-2.0 `models_pack.v` with one module replaced.
+`measurements/fabulous/yosys-fabulous-0.60/` holds the FABulous technology
+files from the Yosys repository at tag v0.60, ISC licence, vendored because
+later Yosys releases no longer ship them.
