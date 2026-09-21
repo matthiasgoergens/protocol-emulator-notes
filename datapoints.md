@@ -37,9 +37,9 @@ realistic utilisation, and the two shift registers are 53 % of it. Fixing
 the shift width to one bit shrinks the input shifter 4.6x (the flops stay;
 logic drops 8x). Four machines plus instruction memory is roughly 280K to
 300K um2: it fits the 6x4 allocation but uses 16 to 18 of the 24 tiles at
-realistic utilisation. Earlier claim "a straight PIO port with four state
-machines does not fit" was wrong; corrected to "fits but eats most of the
-budget".
+realistic utilisation. The estimate above this table, made before measuring, said a
+four-machine PIO port would not fit; the measurement says it fits but
+eats most of the budget.
 
 The commenter's 1.4K LUTs is most likely one effective machine: the uart_rx top's
 machine index is a constant, so synthesis removes machines 1 to 3. Ratio
@@ -49,7 +49,7 @@ about 4 cells per LUT for the top, 2.5 for the shifter.
 
 Measured with fabulous-fpga 2.2.0 and Yosys 0.68 against the IHP sg13g2
 liberty file, one latch plus inverter per configuration bit, area-mode abc,
-no place and route. Notes, scripts and logs in `../fabulous-notes/`.
+no place and route. Notes, scripts and logs in `measurements/fabulous/`.
 
 | Design | Area um2 | Of which config latches | Of which switch muxes |
 | --- | --- | --- | --- |
@@ -58,8 +58,8 @@ no place and route. Notes, scripts and logs in `../fabulous-notes/`.
 | 4x4 LUT4AB fabric with IO, terminators and config controller, flattened | 607,704 | 306K (50 %) | 169K (28 %) |
 
 462 of the 616 tile config bits belong to the switch matrix, so routing
-plus its configuration is 77 to 78 % of a tile. This reproduces an
-"almost 80 %" figure heard from another entrant, on the stock fabric. Per
+plus its configuration is 77 to 78 % of a tile. This reproduces, on the stock fabric, the
+"almost 80 %" routing share that is often quoted for small LUT fabrics. Per
 LUT4 all-in about 4,750 um2, so the 6x4 allocation holds roughly 90 LUT4s
 at realistic utilisation with nothing else on the die. A hardened PIO
 machine (61.6K) is 1.7 CLB tiles, and a UART receiver in LUTs does not fit
@@ -68,7 +68,7 @@ is the configuration latch count, i.e. a sparser switch matrix.
 
 ## 2026-09-21, later: FABulous levers measured
 
-Same flow as above (details and logs in `../fabulous-notes/NOTES.md`).
+Same flow as above (details and logs in `measurements/fabulous/NOTES.md`).
 
 | Experiment | Result |
 | --- | --- |
@@ -85,7 +85,7 @@ or live outside the fabric with fixed wiring.
 ## 2026-09-21, later: FABulous LUT4AB tile through place and route
 
 LibreLane 3.0.14 in its container on IHP sg13g2, 20 ns clock, defaults
-otherwise; logs and metrics under `../fabulous-notes/synth/runs/`.
+otherwise; flow logs and per-step metrics under `measurements/fabulous/pnr-metrics/`.
 
 | Target util | Die um2 | Final util | DRC violations | Setup worst slack |
 | --- | --- | --- | --- | --- |

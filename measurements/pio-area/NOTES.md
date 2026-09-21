@@ -11,9 +11,8 @@ registers.
   f38be97cdfa86d4551c96bb98599e3443000628b (2023-05-03), cloned to `fpga_pio/`.
 - Liberty: IHP-Open-PDK `sg13g2_stdcell_typ_1p20V_25C.lib`, fetched from the
   `main` branch on 2026-09-16; last commit touching that file: 721b1499ce1c786c4e83c783fc3497a6b4d58a61 2026-01-15T13:25:34Z.
-  Copy in `sg13g2/`.
-- Yosys 0.68+118 (git sha1 144c707b7-dirty) from the oss-cad-suite in
-  `../hardware-2026-08/oss-cad-suite/`.
+  Not vendored (gitignored); fetch it into `sg13g2/`.
+- Yosys 0.68+118 (git sha1 144c707b7-dirty), an oss-cad-suite build.
 - Flow: `read_verilog -sv; hierarchy -check; synth -flatten; dfflibmap -liberty;
   abc -liberty; opt_clean; stat -liberty`. Area-oriented abc, no clock
   constraint, no place and route, so real numbers after OpenROAD will be

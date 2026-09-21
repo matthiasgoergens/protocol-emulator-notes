@@ -15,8 +15,8 @@ can be traced to the run that produced it.
   different AI systems from the same prompt, followed by a `synthesis.md`
   that compares them and a `brainstorm-wild.md` that deliberately ignores
   where they agree. `second-layer/` pushes further into unusual execution
-  models. Some ideas in these files came from conversations elsewhere;
-  they are recorded here without attribution.
+  models. Not every idea in them is original to this repository; some arrived
+  from outside and are recorded without attribution.
 - `datapoints.md`: the running list of measured facts, each with a pointer
   to its raw run.
 - `measurements/pio-area/`: standard-cell area of an open-source RP2040
@@ -36,7 +36,7 @@ file unless stated; details, caveats and logs sit next to each number.
 | --- | --- |
 | One PIO state machine (fpga_pio, all submodules) | 4,713 cells, 61.6K um2, about two Tiny Tapeout tiles at full utilisation |
 | Its two shift registers | 53 % of that area; fixing the shift width to one bit shrinks the input shifter 4.6x |
-| One FABulous LUT4AB tile (8 x LUT4) | 36.3K um2 flattened; configuration latches 52 %, switch matrix 37 %, logic under 10 % |
+| One FABulous LUT4AB tile (8 x LUT4) | 36.3K um2 flattened; configuration latches 52 %, switch matrix 37 %, logic about 10 % |
 | Routing share of the tile once its own config bits are counted | 77 to 78 % |
 | Sparse variant without length-4 and length-6 wires | 19 % smaller, routability not yet measured |
 | Hardened blocks as tiles | about 20K um2 of through-routing per tile regardless of content; about 160 um2 per extra block port |

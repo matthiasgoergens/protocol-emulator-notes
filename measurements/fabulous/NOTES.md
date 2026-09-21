@@ -1,21 +1,23 @@
 # FABulous eFPGA area on IHP sg13g2: recreating an "80 % routing" figure
 
 Date: 2026-09-21. Purpose: reproduce, from the stock FABulous fabric, the
-figure, heard from another entrant, that the switch matrix and routing eat
-about 80 % of an eFPGA built for the Jane Street protocol-emulator
+often-quoted figure that the switch matrix and routing eat
+about 80 % of a small eFPGA built for the Jane Street protocol-emulator
 competition, and find the levers for shrinking it.
 
 ## Setup
 
 - fabulous-fpga 2.2.0 from PyPI in a project-local venv (`.venv`, Python
   3.12 via uv). No global environment touched.
-- Yosys 0.68+118 from `../hardware-2026-08/oss-cad-suite/`.
+- Yosys 0.68+118, an oss-cad-suite build.
 - Liberty: IHP sg13g2 `sg13g2_stdcell_typ_1p20V_25C.lib`, copy in
-  `../pio-area-notes/sg13g2/` (PDK commit 721b1499, 2026-01-15).
-- Projects: `demo/` is the stock `FABulous create-project` fabric (10x14,
-  LUT4AB, RegFile, DSP, RAM_IO); `small/` is the same template with
-  `fabric.csv` cut down to 4 columns x 4 rows of LUT4AB, a W_IO column and
-  N/S terminators. Both generated with `FABulous -p <proj> run run_fab`.
+  `../pio-area/sg13g2/`, not vendored (PDK commit 721b1499, 2026-01-15).
+- Projects (generated trees, not committed): `demo/` is the stock
+  `FABulous create-project` fabric (10x14, LUT4AB, RegFile, DSP, RAM_IO);
+  `small/` is the same template with `fabric.csv` cut down to 4 columns x
+  4 rows of LUT4AB, a W_IO column and N/S terminators (the edited
+  `fabric.csv` is committed as `tiles/small_fabric.csv`). Both generated
+  with `FABulous -p <proj> run run_fab`.
 - Synthesis: `synth/synth_tile.sh` (one tile) and `synth/synth_fabric.sh`
   (whole `eFPGA_top`), flow `synth [-flatten]; techmap latch; dfflibmap;
   abc -liberty; stat -liberty`. Latches map to `sg13g2_dlhq_1` (30.8 um2)
@@ -25,7 +27,7 @@ competition, and find the levers for shrinking it.
   inverter, which is what a real config cell costs. Area-mode abc, no clock
   constraint, no place and route. Logs in `logs/`.
 - Tile size: one Tiny Tapeout IHP tile is about 31,700 um2 (see
-  `../pio-area-notes/NOTES.md`); 6x4 tiles = 760K um2 raw, roughly 420K
+  `../pio-area/NOTES.md`); 6x4 tiles = 760K um2 raw, roughly 420K
   usable at 55 % utilisation.
 
 ## Results
@@ -71,7 +73,7 @@ budget holds about 160.
   standard-cell latch, which the open PDK does not offer; (4) sharing the
   select polarity so the QN inverters go away (already what flattening
   achieves for the muxes).
-- Cross-check with `../pio-area-notes/`: one hardened PIO state machine is
+- Cross-check with `../pio-area/`: one hardened PIO state machine is
   61.6K um2, about 1.7 CLB tiles, and a UART receiver on PIO needs on the
   order of a thousand LUTs, so on this fabric it does not fit at all. The
   fabric can only be glue around hardened blocks. At 420K usable, four
@@ -84,9 +86,10 @@ budget holds about 160.
 
 ## 2026-09-21, later: the three open measurements
 
-### Sparse routing (`sparse3/`)
+### Sparse routing
 
-Removed the length-4 and length-6 wires (N4, NN4, S4, SS4, EE4, WW4, E6, W6)
+Project `sparse3/` (generated, not committed; `synth/prune_long_wires.py`
+recreates it from the small project). Removed the length-4 and length-6 wires (N4, NN4, S4, SS4, EE4, WW4, E6, W6)
 from `Tile/include/Base.csv`, pruned the matching mux inputs from every
 switch-matrix list elementwise (whole-line removal orphaned jump wires), and
 deleted the stale `*_ConfigMem.csv` maps so the generator rebuilt them.
@@ -100,9 +103,12 @@ deleted the stale `*_ConfigMem.csv` maps so the generator rebuilt them.
 70 %. Routability of the sparse fabric is NOT measured (needs nextpnr on a
 benchmark set); this is the upper bound on the saving from that cut.
 
-### Hardened blocks as tiles (`hard/`)
+### Hardened blocks as tiles
 
-Two custom BEL tiles, switch lists derived from the LUT4AB list (inputs
+Project `hard/` (generated, not committed); the block Verilog, tile CSVs
+and switch lists are committed under `tiles/PIO8/`, `tiles/PIO32/` and
+`tiles/hard_fabric.csv`, and `synth/make_hard_tiles.py` regenerates the
+lists. Two custom BEL tiles, switch lists derived from the LUT4AB list (inputs
 take the LUT-input jump wires, outputs replace LA_O..LH_O in the driver
 lists, carry passed through, shared SR/EN jump wires declared):
 
@@ -126,12 +132,10 @@ wiring and route only their few control signals through it.
 
 Native `gen_tile_macro` failed in LibreLane's Yosys step (`Option 'y' does
 not exist`: the wrapper passes a flag the oss-cad-suite Yosys 0.68 rejects).
-Running LibreLane 3.0.14 in its container instead (`pnr/run_pnr_lut4ab.sh`,
+Running LibreLane 3.0.14 in its container instead (`pnr/run_pnr_util.sh`,
 config `synth/librelane_lut4ab.json`, die area 246 x 245 um from the tile's
 own `gds_config.yaml`, i.e. FABulous's proven IHP floorplan for this tile:
-60,270 um2, which against 36.3K of cells is 60 % utilisation). Docker's
-credential helper needs D-Bus, worked around with an empty DOCKER_CONFIG.
-Getting the container to run took four fixes worth recording: Docker's
+60,270 um2, which against 36.3K of cells is 60 % utilisation). Getting the container to run took four fixes worth recording: Docker's
 credential helper wants D-Bus (empty `DOCKER_CONFIG` fixes it); the
 `--dockerized` wrapper attaches stdin even with `--docker-no-tty`, so the
 container is run directly with the same mounts (`pnr/run_pnr_util.sh`);
@@ -139,7 +143,8 @@ LibreLane phones home to ciel unless given `--manual-pdk`; and with that
 flag `--pdk-root` must be the family directory `~/.ciel/ihp-sg13g2`, not
 `~/.ciel`.
 
-Result at the absolute 246 x 245 um floorplan (`synth/runs/lut4ab_stock`):
+Result at the absolute 246 x 245 um floorplan (flow log and per-step
+metrics in `pnr-metrics/lut4ab_stock/`):
 detailed placement failed after clock-tree synthesis and timing repair.
 Metrics at that point: die 60,270 um2, core 49,584, instance area 45,238
 (91 % of core), of which 5,247 timing-repair buffers and 1,836 other
@@ -148,7 +153,7 @@ FABulous-shipped tile size does not close in this flow at a 20 ns clock.
 Follow-up runs let the tool size the die at 55 % and 65 % core
 utilisation (`synth/librelane_lut4ab_util{55,65}.json`).
 
-### Place-and-route results, tool-sized die (`synth/runs/lut4ab_util55`, `lut4ab_util65`)
+### Place-and-route results, tool-sized die (`pnr-metrics/lut4ab_util55/`, `pnr-metrics/lut4ab_util65/`)
 
 LibreLane 3.0.14 in its container, IHP sg13g2, LUT4AB stock tile with the
 one-latch configuration cell, 20 ns clock, default IO constraints, magic
