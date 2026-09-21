@@ -2,8 +2,8 @@
 
 ## 2026-09-16: PIO clone area, from Hacker News
 
-Source: <https://news.ycombinator.com/item?id=49664981>, comment by Neywiny.
-They synthesised the UART receiver example of lawrie's fpga_pio
+Source: <https://news.ycombinator.com/item?id=49664981>, a comment there.
+They synthesised the UART receiver example of the fpga_pio project
 (<https://github.com/lawrie/fpga_pio>, a Verilog RP2040 PIO clone) with
 Vivado.
 
@@ -41,7 +41,7 @@ realistic utilisation. Earlier claim "a straight PIO port with four state
 machines does not fit" was wrong; corrected to "fits but eats most of the
 budget".
 
-Neywiny's 1.4K LUTs is most likely one effective machine: the uart_rx top's
+The commenter's 1.4K LUTs is most likely one effective machine: the uart_rx top's
 machine index is a constant, so synthesis removes machines 1 to 3. Ratio
 about 4 cells per LUT for the top, 2.5 for the shifter.
 
@@ -58,8 +58,8 @@ no place and route. Notes, scripts and logs in `../fabulous-notes/`.
 | 4x4 LUT4AB fabric with IO, terminators and config controller, flattened | 607,704 | 306K (50 %) | 169K (28 %) |
 
 462 of the 616 tile config bits belong to the switch matrix, so routing
-plus its configuration is 77 to 78 % of a tile. This reproduces the
-"almost 80 %" figure from the collaboration mail on the stock fabric. Per
+plus its configuration is 77 to 78 % of a tile. This reproduces an
+"almost 80 %" figure heard from another entrant, on the stock fabric. Per
 LUT4 all-in about 4,750 um2, so the 6x4 allocation holds roughly 90 LUT4s
 at realistic utilisation with nothing else on the die. A hardened PIO
 machine (61.6K) is 1.7 CLB tiles, and a UART receiver in LUTs does not fit

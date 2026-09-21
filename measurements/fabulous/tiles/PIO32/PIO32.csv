@@ -1,0 +1,8 @@
+TILE,PIO32,,,,,,
+INCLUDE,../include/Base.csv,,,,,,
+NORTH,Co,0,-1,Ci,1,# carry,
+JUMP,J_SR_BEG,0,0,J_SR_END,1,,
+JUMP,J_EN_BEG,0,0,J_EN_END,1,,
+BEL,./PIO32_bel.v,,,,,,
+MATRIX,./PIO32_switch_matrix.list,,,,,,
+EndTILE,,,,,,,

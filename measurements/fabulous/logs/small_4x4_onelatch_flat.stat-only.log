@@ -1,0 +1,52 @@
+# Tail of the original 7.7 GB Yosys log (whole 4x4 fabric, flattened); only the final statistics block is kept.
+Printing statistics.
+
+=== eFPGA_top ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+   126287        - wires
+   200365        - wire bits
+   110506        - public wires
+   184562        - public wire bits
+       14        - ports
+       96        - port bits
+    52542 6.08E+05 cells
+    24814        -   $scopeinfo
+      455 5.78E+03   sg13g2_a21o_1
+     2517 2.28E+04   sg13g2_a21oi_1
+       45  653.184   sg13g2_a221oi_1
+      291 3.16E+03   sg13g2_a22oi_1
+      184 1.67E+03   sg13g2_and2_1
+        4   50.803   sg13g2_and3_1
+      586 2.87E+04   sg13g2_dfrbpq_1
+     9908 3.06E+05   sg13g2_dlhq_1
+     1237 6.73E+03   sg13g2_inv_1
+     1232 2.24E+04   sg13g2_mux2_1
+     3855 1.47E+05   sg13g2_mux4_1
+     1154  8375.27   sg13g2_nand2_1
+      550   4989.6   sg13g2_nand2b_1
+      105   952.56   sg13g2_nand3_1
+        7   88.906   sg13g2_nand3b_1
+       13  141.523   sg13g2_nand4_1
+     1281  9.3E+03   sg13g2_nor2_1
+      970  8799.84   sg13g2_nor2b_1
+      440  3991.68   sg13g2_nor3_1
+       18  195.955   sg13g2_nor4_1
+     2654 2.41E+04   sg13g2_o21ai_1
+      151 1.37E+03   sg13g2_or2_1
+       21  266.717   sg13g2_or3_1
+        3   43.546   sg13g2_or4_1
+       26  377.395   sg13g2_xnor2_1
+       21  304.819   sg13g2_xor2_1
+
+   Area for cell type $scopeinfo is unknown!
+
+   Chip area for module '\eFPGA_top': 607704.136200
+     of which used for sequential elements: 28707.436800 (4.72%)
+
+Warnings: 16309 unique messages, 16309 total
+End of script. Logfile hash: 83a4ea212b, time: 479.86s, user: 263.93s, system: 11.58s, MEM: 8170.91 MB peak
+Yosys 0.68+118 (git sha1 144c707b7-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 61% 3x check (175 sec), 13% 25x opt_clean (38 sec), ...

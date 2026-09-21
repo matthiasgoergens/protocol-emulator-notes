@@ -1,0 +1,996 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.68+118 (git sha1 144c707b7-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+-- Running command `
+  read_verilog -sv /home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v hard/Tile/PIO32/PIO32_bel.v hard/Tile/PIO32/PIO32_switch_matrix.v hard/Tile/PIO32/PIO32_ConfigMem.v hard/Tile/PIO32/PIO32.v
+  hierarchy -check -top PIO32
+  synth -top PIO32 -flatten
+  techmap -map /home/matthias/prog/janestreet/fabulous-notes/synth/sg13g2_latchmap.v
+  dfflibmap -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib
+  abc -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib
+  opt_clean
+  stat -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib
+' --
+
+1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v
+Parsing SystemVerilog input from `/home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v' to AST representation.
+Generating RTLIL representation for module `\config_latch'.
+Generating RTLIL representation for module `\my_buf'.
+Generating RTLIL representation for module `\clk_buf'.
+Generating RTLIL representation for module `\cus_mux41'.
+Generating RTLIL representation for module `\cus_mux21'.
+Generating RTLIL representation for module `\cus_mux81'.
+Generating RTLIL representation for module `\cus_mux161'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: hard/Tile/PIO32/PIO32_bel.v
+Parsing SystemVerilog input from `hard/Tile/PIO32/PIO32_bel.v' to AST representation.
+Generating RTLIL representation for module `\PIO32_bel'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: hard/Tile/PIO32/PIO32_switch_matrix.v
+Parsing SystemVerilog input from `hard/Tile/PIO32/PIO32_switch_matrix.v' to AST representation.
+Generating RTLIL representation for module `\PIO32_switch_matrix'.
+Successfully finished Verilog frontend.
+
+4. Executing Verilog-2005 frontend: hard/Tile/PIO32/PIO32_ConfigMem.v
+Parsing SystemVerilog input from `hard/Tile/PIO32/PIO32_ConfigMem.v' to AST representation.
+Generating RTLIL representation for module `\PIO32_ConfigMem'.
+Successfully finished Verilog frontend.
+
+5. Executing Verilog-2005 frontend: hard/Tile/PIO32/PIO32.v
+Parsing SystemVerilog input from `hard/Tile/PIO32/PIO32.v' to AST representation.
+Generating RTLIL representation for module `\PIO32'.
+Successfully finished Verilog frontend.
+
+6. Executing HIERARCHY pass (managing design hierarchy).
+
+6.1. Analyzing design hierarchy..
+Top module:  \PIO32
+Used module:     \PIO32_switch_matrix
+Used module:         \cus_mux81
+Used module:             \cus_mux21
+Used module:             \cus_mux41
+Used module:         \cus_mux161
+Used module:     \PIO32_bel
+Used module:     \PIO32_ConfigMem
+Used module:         \config_latch
+Used module:     \clk_buf
+Used module:     \my_buf
+
+6.2. Analyzing design hierarchy..
+Top module:  \PIO32
+Used module:     \PIO32_switch_matrix
+Used module:         \cus_mux81
+Used module:             \cus_mux21
+Used module:             \cus_mux41
+Used module:         \cus_mux161
+Used module:     \PIO32_bel
+Used module:     \PIO32_ConfigMem
+Used module:         \config_latch
+Used module:     \clk_buf
+Used module:     \my_buf
+Removed 0 unused modules.
+
+7. Executing SYNTH pass.
+
+7.1. Executing HIERARCHY pass (managing design hierarchy).
+
+7.1.1. Analyzing design hierarchy..
+Top module:  \PIO32
+Used module:     \PIO32_switch_matrix
+Used module:         \cus_mux81
+Used module:             \cus_mux21
+Used module:             \cus_mux41
+Used module:         \cus_mux161
+Used module:     \PIO32_bel
+Used module:     \PIO32_ConfigMem
+Used module:         \config_latch
+Used module:     \clk_buf
+Used module:     \my_buf
+
+7.1.2. Analyzing design hierarchy..
+Top module:  \PIO32
+Used module:     \PIO32_switch_matrix
+Used module:         \cus_mux81
+Used module:             \cus_mux21
+Used module:             \cus_mux41
+Used module:         \cus_mux161
+Used module:     \PIO32_bel
+Used module:     \PIO32_ConfigMem
+Used module:         \config_latch
+Used module:     \clk_buf
+Used module:     \my_buf
+Removed 0 unused modules.
+
+7.2. Executing PROC pass (convert processes to netlists).
+
+7.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+7.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 2 switch rules as full_case in process $proc$hard/Tile/PIO32/PIO32_bel.v:22$13 in module PIO32_bel.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v:10$1 in module config_latch.
+Removed a total of 0 dead cases.
+
+7.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 1 assignment to connection.
+
+7.2.4. Executing PROC_INIT pass (extract init attributes).
+
+7.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+7.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~4 debug messages>
+
+7.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\PIO32_bel.$proc$hard/Tile/PIO32/PIO32_bel.v:22$13'.
+     1/2: $0\count[5:0]
+     2/2: $0\shift_reg[31:0]
+Creating decoders for process `\config_latch.$proc$/home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v:10$1'.
+     1/1: $1\Q[0:0]
+
+7.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+Warning: Latch inferred for signal `\config_latch.\Q' from process `\config_latch.$proc$/home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v:10$1': $auto$proc_dlatch.cc:547:proc_dlatch$50
+
+7.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\PIO32_bel.\shift_reg' using process `\PIO32_bel.$proc$hard/Tile/PIO32/PIO32_bel.v:22$13'.
+  created $dff cell `$procdff$51' with positive edge clock.
+Creating register for signal `\PIO32_bel.\count' using process `\PIO32_bel.$proc$hard/Tile/PIO32/PIO32_bel.v:22$13'.
+  created $dff cell `$procdff$52' with positive edge clock.
+
+7.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+7.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 3 empty switches in `\PIO32_bel.$proc$hard/Tile/PIO32/PIO32_bel.v:22$13'.
+Removing empty process `PIO32_bel.$proc$hard/Tile/PIO32/PIO32_bel.v:22$13'.
+Found and cleaned up 1 empty switch in `\config_latch.$proc$/home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v:10$1'.
+Removing empty process `config_latch.$proc$/home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v:10$1'.
+Cleaned up 4 empty switches.
+
+7.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+Optimizing module PIO32_ConfigMem.
+Optimizing module PIO32_switch_matrix.
+Optimizing module PIO32_bel.
+Optimizing module cus_mux161.
+Optimizing module cus_mux81.
+Optimizing module cus_mux21.
+Optimizing module cus_mux41.
+Optimizing module clk_buf.
+Optimizing module my_buf.
+Optimizing module config_latch.
+<suppressed ~7 debug messages>
+
+7.3. Executing CHECK pass (checking for obvious problems).
+Checking module PIO32...
+Checking module PIO32_ConfigMem...
+Checking module PIO32_switch_matrix...
+Checking module PIO32_bel...
+Checking module cus_mux161...
+Checking module cus_mux81...
+Checking module cus_mux21...
+Checking module cus_mux41...
+Checking module clk_buf...
+Checking module my_buf...
+Checking module config_latch...
+Found and reported 0 problems.
+
+7.4. Executing FLATTEN pass (flatten design).
+Deleting now unused module PIO32_ConfigMem.
+Deleting now unused module PIO32_switch_matrix.
+Deleting now unused module PIO32_bel.
+Deleting now unused module cus_mux161.
+Deleting now unused module cus_mux81.
+Deleting now unused module cus_mux21.
+Deleting now unused module cus_mux41.
+Deleting now unused module clk_buf.
+Deleting now unused module my_buf.
+Deleting now unused module config_latch.
+<suppressed ~944 debug messages>
+
+7.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+<suppressed ~4 debug messages>
+
+7.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+Removed 940 unused cells and 7050 unused wires.
+<suppressed ~2324 debug messages>
+
+7.7. Executing CHECK pass (checking for obvious problems).
+Checking module PIO32...
+Found and reported 0 problems.
+
+7.8. Executing OPT pass (performing simple optimizations).
+
+7.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+
+7.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2683 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO32..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2288 debug messages>
+
+7.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO32.
+Performed a total of 0 changes.
+
+7.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2683 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.8.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+
+7.8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+
+7.8.9. Finished fast OPT passes. (There is nothing left to do.)
+
+7.9. Executing FSM pass (extract and optimize FSM).
+
+7.9.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+7.9.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+7.9.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+7.9.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+
+7.9.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+7.9.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+7.9.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+7.9.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+7.10. Executing OPT pass (performing simple optimizations).
+
+7.10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+
+7.10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2683 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO32..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2288 debug messages>
+
+7.10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO32.
+Performed a total of 0 changes.
+
+7.10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2683 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.10.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $flatten\Inst_PIO32_bel.$procdff$52 ($dff) from module PIO32 (D = $flatten\Inst_PIO32_bel.$procmux$24_Y, Q = \Inst_PIO32_bel.count, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$997 ($sdff) from module PIO32 (D = $flatten\Inst_PIO32_bel.$procmux$24_Y, Q = \Inst_PIO32_bel.count).
+Adding SRST signal on $flatten\Inst_PIO32_bel.$procdff$51 ($dff) from module PIO32 (D = $flatten\Inst_PIO32_bel.$procmux$32_Y, Q = \Inst_PIO32_bel.shift_reg, rval = 0).
+Adding EN signal on $auto$ff.cc:337:slice$1001 ($sdff) from module PIO32 (D = $flatten\Inst_PIO32_bel.$procmux$32_Y, Q = \Inst_PIO32_bel.shift_reg).
+
+7.10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+Removed 2 unused cells and 2 unused wires.
+<suppressed ~3 debug messages>
+
+7.10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+<suppressed ~2 debug messages>
+
+7.10.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+7.10.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO32..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2286 debug messages>
+
+7.10.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO32.
+Performed a total of 0 changes.
+
+7.10.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2683 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Computing hashes of 2682 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+7.10.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.10.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+Removed 0 unused cells and 1 unused wires.
+<suppressed ~1 debug messages>
+
+7.10.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+
+7.10.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+7.10.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO32..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2286 debug messages>
+
+7.10.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO32.
+Performed a total of 0 changes.
+
+7.10.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2682 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.10.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.10.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+
+7.10.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+
+7.10.23. Finished fast OPT passes. (There is nothing left to do.)
+
+7.11. Executing WREDUCE pass (reducing word size of cells).
+Removed top 26 bits (of 32) from port B of cell PIO32.$flatten\Inst_PIO32_bel.$gt$hard/Tile/PIO32/PIO32_bel.v:27$16 ($gt).
+Removed top 25 bits (of 32) from port Y of cell PIO32.$flatten\Inst_PIO32_bel.$add$hard/Tile/PIO32/PIO32_bel.v:27$15 ($add).
+Removed top 26 bits (of 32) from port A of cell PIO32.$flatten\Inst_PIO32_bel.$sub$hard/Tile/PIO32/PIO32_bel.v:21$9 ($sub).
+Removed top 25 bits (of 32) from port Y of cell PIO32.$flatten\Inst_PIO32_bel.$sub$hard/Tile/PIO32/PIO32_bel.v:21$9 ($sub).
+Removed top 2 bits (of 6) from mux cell PIO32.$flatten\Inst_PIO32_bel.$ternary$hard/Tile/PIO32/PIO32_bel.v:19$7 ($mux).
+Removed top 25 bits (of 32) from wire PIO32.$flatten\Inst_PIO32_bel.$add$hard/Tile/PIO32/PIO32_bel.v:27$15_Y.
+Removed top 6 bits (of 460) from wire PIO32.ConfigBits.
+
+7.12. Executing PEEPOPT pass (run peephole optimizers).
+
+7.13. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+7.14. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module PIO32:
+  creating $macc model for $flatten\Inst_PIO32_bel.$sub$hard/Tile/PIO32/PIO32_bel.v:21$9 ($sub).
+  creating $macc model for $flatten\Inst_PIO32_bel.$add$hard/Tile/PIO32/PIO32_bel.v:27$15 ($add).
+  creating $macc model for $flatten\Inst_PIO32_bel.$add$hard/Tile/PIO32/PIO32_bel.v:27$17 ($add).
+  creating $alu model for $macc $flatten\Inst_PIO32_bel.$add$hard/Tile/PIO32/PIO32_bel.v:27$17.
+  creating $alu model for $macc $flatten\Inst_PIO32_bel.$add$hard/Tile/PIO32/PIO32_bel.v:27$15.
+  creating $alu model for $macc $flatten\Inst_PIO32_bel.$sub$hard/Tile/PIO32/PIO32_bel.v:21$9.
+  creating $alu model for $flatten\Inst_PIO32_bel.$gt$hard/Tile/PIO32/PIO32_bel.v:27$16 ($gt): new $alu
+  creating $alu cell for $flatten\Inst_PIO32_bel.$gt$hard/Tile/PIO32/PIO32_bel.v:27$16: $auto$alumacc.cc:548:replace_alu$1008
+  creating $alu cell for $flatten\Inst_PIO32_bel.$sub$hard/Tile/PIO32/PIO32_bel.v:21$9: $auto$alumacc.cc:548:replace_alu$1019
+  creating $alu cell for $flatten\Inst_PIO32_bel.$add$hard/Tile/PIO32/PIO32_bel.v:27$15: $auto$alumacc.cc:548:replace_alu$1022
+  creating $alu cell for $flatten\Inst_PIO32_bel.$add$hard/Tile/PIO32/PIO32_bel.v:27$17: $auto$alumacc.cc:548:replace_alu$1025
+  created 4 $alu and 0 $macc cells.
+
+7.15. Executing SHARE pass (SAT-based resource sharing).
+Found 3 cells in module PIO32 that may be considered for resource sharing.
+  Analyzing resource sharing options for $flatten\Inst_PIO32_bel.$shl$hard/Tile/PIO32/PIO32_bel.v:21$11 ($shl):
+    Found 1 activation_patterns using ctrl signal { \Inst_PIO32_bel.DIR \Inst_PIO32_bel.SET \DO_SHIFT }.
+    No candidates found.
+  Analyzing resource sharing options for $flatten\Inst_PIO32_bel.$shl$hard/Tile/PIO32/PIO32_bel.v:21$10 ($shl):
+    Found 1 activation_patterns using ctrl signal { \Inst_PIO32_bel.DIR \Inst_PIO32_bel.SET \DO_SHIFT }.
+    No candidates found.
+  Analyzing resource sharing options for $flatten\Inst_PIO32_bel.$shr$hard/Tile/PIO32/PIO32_bel.v:20$8 ($shr):
+    Found 1 activation_patterns using ctrl signal { \Inst_PIO32_bel.DIR \Inst_PIO32_bel.SET \DO_SHIFT }.
+    No candidates found.
+
+7.16. Executing OPT pass (performing simple optimizations).
+
+7.16.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+<suppressed ~1 debug messages>
+
+7.16.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2686 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.16.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO32..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2286 debug messages>
+
+7.16.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO32.
+Performed a total of 0 changes.
+
+7.16.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2686 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.16.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.16.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+Removed 1 unused cells and 2 unused wires.
+<suppressed ~2 debug messages>
+
+7.16.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+
+7.16.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+7.16.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO32..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2286 debug messages>
+
+7.16.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO32.
+Performed a total of 0 changes.
+
+7.16.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2685 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.16.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.16.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+
+7.16.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+
+7.16.16. Finished fast OPT passes. (There is nothing left to do.)
+
+7.17. Executing MEMORY pass.
+
+7.17.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+7.17.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+7.17.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+7.17.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+7.17.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+7.17.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+
+7.17.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+7.17.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+7.17.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+
+7.17.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+7.18. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+
+7.19. Executing OPT pass (performing simple optimizations).
+
+7.19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+<suppressed ~41 debug messages>
+
+7.19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2688 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.19.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.19.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+Removed 0 unused cells and 9 unused wires.
+<suppressed ~1 debug messages>
+
+7.19.5. Finished fast OPT passes.
+
+7.20. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+7.21. Executing OPT pass (performing simple optimizations).
+
+7.21.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+
+7.21.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2688 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.21.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO32..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2284 debug messages>
+
+7.21.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO32.
+    Consolidated identical input bits for $mux cell $flatten\Inst_PIO32_bel.$ternary$hard/Tile/PIO32/PIO32_bel.v:19$7:
+      Old ports: A=4'0001, B=4'1000, Y=\Inst_PIO32_bel.shift_val [3:0]
+      New ports: A=2'01, B=2'10, Y={ \Inst_PIO32_bel.shift_val [3] \Inst_PIO32_bel.shift_val [0] }
+      New connections: \Inst_PIO32_bel.shift_val [2:1] = 2'00
+  Optimizing cells in module \PIO32.
+Performed a total of 1 changes.
+
+7.21.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2688 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.21.6. Executing OPT_SHARE pass.
+
+7.21.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.21.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+
+7.21.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+
+7.21.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+7.21.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO32..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2284 debug messages>
+
+7.21.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO32.
+Performed a total of 0 changes.
+
+7.21.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 2688 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.21.14. Executing OPT_SHARE pass.
+
+7.21.15. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.21.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+
+7.21.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+
+7.21.18. Finished fast OPT passes. (There is nothing left to do.)
+
+7.22. Executing TECHMAP pass (map to technology primitives).
+
+7.22.1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/hardware-2026-08/oss-cad-suite/lib/../share/yosys/techmap.v
+Parsing Verilog input from `/home/matthias/prog/janestreet/hardware-2026-08/oss-cad-suite/lib/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+7.22.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $not.
+Using template $paramod$00298f3f8094950cb9a5ff2fda48d0d8bde8806c\_90_alu for cells of type $alu.
+Using template $paramod$12f939b61a2dcd484d76a40e620bc076ddd034fe\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $reduce_and.
+Using template $paramod$d90c3448203144d55644b597072d6cf1b3e54430\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $dlatch.
+Using extmapper simplemap for cells of type $mux.
+Using template $paramod$constmap:45fc6290ce127a95fd05a8dd3b9d576fe1f389f0$paramod$dce7c1188cb25d2520d170426d59301c3b73f9e7\_90_shift_ops_shr_shl_sshl_sshr for cells of type $shl.
+Using template $paramod$constmap:743504a16143a8c5f1fed5acdf5bd76f5f1bcd0a$paramod$da1b9d25017ab9fffdd54bedbb1540b15f92e8df\_90_shift_ops_shr_shl_sshl_sshr for cells of type $shl.
+Using template $paramod$constmap:743504a16143a8c5f1fed5acdf5bd76f5f1bcd0a$paramod$a38ca63589d5073c040497f4afd2c2746e4720be\_90_shift_ops_shr_shl_sshl_sshr for cells of type $shr.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000011011 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000011011 for cells of type $lcu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000111 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000111 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000110 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000110 for cells of type $lcu.
+Using extmapper simplemap for cells of type $and.
+No more expansions possible.
+<suppressed ~4628 debug messages>
+
+7.23. Executing OPT pass (performing simple optimizations).
+
+7.23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+<suppressed ~863 debug messages>
+
+7.23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 3352 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Computing hashes of 3312 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Computing hashes of 3309 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Computing hashes of 3306 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Computing hashes of 3304 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Computing hashes of 3301 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Computing hashes of 3300 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+<suppressed ~156 debug messages>
+Removed a total of 52 cells.
+
+7.23.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+Removed 72 unused cells and 358 unused wires.
+<suppressed ~73 debug messages>
+
+7.23.5. Finished fast OPT passes.
+
+7.24. Executing ABC pass (technology mapping using ABC).
+
+7.24.1. Extracting gate netlist of module `\PIO32' to `<abc-temp-dir>/input.blif'..
+
+7.24.1.1. Executed ABC.
+Extracted 1566 gates and 2167 wires to a netlist network with 599 inputs and 115 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Aug 21 2026 02:12:29)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+7.24.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:      196
+ABC RESULTS:            ANDNOT cells:       80
+ABC RESULTS:               MUX cells:      804
+ABC RESULTS:              NAND cells:      422
+ABC RESULTS:               NOR cells:       34
+ABC RESULTS:               NOT cells:       29
+ABC RESULTS:                OR cells:      139
+ABC RESULTS:             ORNOT cells:      149
+ABC RESULTS:              XNOR cells:        5
+ABC RESULTS:               XOR cells:       32
+ABC RESULTS:        internal signals:     1453
+ABC RESULTS:           input signals:      599
+ABC RESULTS:          output signals:      115
+Removing temp directory.
+Removing global temp directory.
+
+7.25. Executing OPT pass (performing simple optimizations).
+
+7.25.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO32.
+<suppressed ~1 debug messages>
+
+7.25.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO32'.
+Computing hashes of 3552 cells of `\PIO32'.
+Finding duplicate cells in `\PIO32'.
+Removed a total of 0 cells.
+
+7.25.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.25.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+Removed 1 unused cells and 3217 unused wires.
+<suppressed ~2510 debug messages>
+
+7.25.5. Finished fast OPT passes.
+
+7.26. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `PIO32'. Setting top module to PIO32.
+
+7.26.1. Analyzing design hierarchy..
+Top module:  \PIO32
+
+7.26.2. Analyzing design hierarchy..
+Top module:  \PIO32
+Removed 0 unused modules.
+
+7.27. Printing statistics.
+
+=== PIO32 ===
+
+        +----------Local Count, excluding submodules.
+        | 
+     6438 wires
+     9578 wire bits
+     4625 public wires
+     7765 public wire bits
+       48 ports
+      508 port bits
+     3551 cells
+       80   $_ANDNOT_
+      196   $_AND_
+      454   $_DLATCH_P_
+      804   $_MUX_
+      422   $_NAND_
+       34   $_NOR_
+       28   $_NOT_
+      149   $_ORNOT_
+      139   $_OR_
+       38   $_SDFFE_PP0P_
+        5   $_XNOR_
+       32   $_XOR_
+     1170   $scopeinfo
+
+7.28. Executing CHECK pass (checking for obvious problems).
+Checking module PIO32...
+Found and reported 0 problems.
+
+8. Executing TECHMAP pass (map to technology primitives).
+
+8.1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/fabulous-notes/synth/sg13g2_latchmap.v
+Parsing Verilog input from `/home/matthias/prog/janestreet/fabulous-notes/synth/sg13g2_latchmap.v' to AST representation.
+Generating RTLIL representation for module `$_DLATCH_P_'.
+Successfully finished Verilog frontend.
+
+8.2. Continuing TECHMAP pass.
+Using template $_DLATCH_P_ for cells of type $_DLATCH_P_.
+No more expansions possible.
+<suppressed ~457 debug messages>
+
+9. Executing DFFLIBMAP pass (mapping DFF/DLATCH cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  cell sg13g2_dlhq_1 (noninv, pins=3, area=30.84) is a direct match for cell type $_DLATCH_P_.
+  cell sg13g2_dllrq_1 (noninv, pins=4, area=29.03) is a direct match for cell type $_DLATCH_NN0_.
+  cell sg13g2_dlhrq_1 (noninv, pins=4, area=27.22) is a direct match for cell type $_DLATCH_PN0_.
+  final dff/dlatch cell mappings:
+    unmapped dff/dlatch cell: $_DFF_N_
+    unmapped dff/dlatch cell: $_DFF_P_
+    unmapped dff/dlatch cell: $_DFF_NN0_
+    unmapped dff/dlatch cell: $_DFF_NN1_
+    unmapped dff/dlatch cell: $_DFF_NP0_
+    unmapped dff/dlatch cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DFF_PN1_
+    unmapped dff/dlatch cell: $_DFF_PP0_
+    unmapped dff/dlatch cell: $_DFF_PP1_
+    unmapped dff/dlatch cell: $_DFFE_NN_
+    unmapped dff/dlatch cell: $_DFFE_NP_
+    unmapped dff/dlatch cell: $_DFFE_PN_
+    unmapped dff/dlatch cell: $_DFFE_PP_
+    unmapped dff/dlatch cell: $_DFFSR_NNN_
+    unmapped dff/dlatch cell: $_DFFSR_NNP_
+    unmapped dff/dlatch cell: $_DFFSR_NPN_
+    unmapped dff/dlatch cell: $_DFFSR_NPP_
+    unmapped dff/dlatch cell: $_DFFSR_PNN_
+    unmapped dff/dlatch cell: $_DFFSR_PNP_
+    unmapped dff/dlatch cell: $_DFFSR_PPN_
+    unmapped dff/dlatch cell: $_DFFSR_PPP_
+    unmapped dff/dlatch cell: $_DLATCH_N_
+    \sg13g2_dlhq_1 _DLATCH_P_ (.D( D), .GATE( E), .Q( Q));
+    \sg13g2_dllrq_1 _DLATCH_NN0_ (.D( D), .GATE_N( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_NN1_
+    unmapped dff/dlatch cell: $_DLATCH_NP0_
+    unmapped dff/dlatch cell: $_DLATCH_NP1_
+    \sg13g2_dlhrq_1 _DLATCH_PN0_ (.D( D), .GATE( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_PN1_
+    unmapped dff/dlatch cell: $_DLATCH_PP0_
+    unmapped dff/dlatch cell: $_DLATCH_PP1_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPP_
+
+9.1. Executing DFFLEGALIZE pass (convert FFs and LATCHes to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF/DLATCH cells in module `\PIO32':
+  mapped 38 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+10. Executing ABC pass (technology mapping using ABC).
+
+10.1. Extracting gate netlist of module `\PIO32' to `<abc-temp-dir>/input.blif'..
+ABC: using cached merged SCL: /tmp/yosys-liberty-scl-cache/yosys_merged_aa53eb27.scl (1 files)
+
+10.1.1. Executed ABC.
+Extracted 1965 gates and 2566 wires to a netlist network with 600 inputs and 114 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Aug 21 2026 02:12:29)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_scl /tmp/yosys-liberty-scl-cache/yosys_merged_aa53eb27.scl 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+10.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:       16
+ABC RESULTS:    sg13g2_a21oi_1 cells:      222
+ABC RESULTS:   sg13g2_a221oi_1 cells:       38
+ABC RESULTS:    sg13g2_a22oi_1 cells:       25
+ABC RESULTS:     sg13g2_and2_1 cells:       19
+ABC RESULTS:     sg13g2_and3_1 cells:        3
+ABC RESULTS:      sg13g2_inv_1 cells:       95
+ABC RESULTS:     sg13g2_mux2_1 cells:       31
+ABC RESULTS:     sg13g2_mux4_1 cells:      218
+ABC RESULTS:    sg13g2_nand2_1 cells:      113
+ABC RESULTS:   sg13g2_nand2b_1 cells:       32
+ABC RESULTS:    sg13g2_nand3_1 cells:       30
+ABC RESULTS:   sg13g2_nand3b_1 cells:        9
+ABC RESULTS:    sg13g2_nand4_1 cells:        4
+ABC RESULTS:     sg13g2_nor2_1 cells:       69
+ABC RESULTS:    sg13g2_nor2b_1 cells:       35
+ABC RESULTS:     sg13g2_nor3_1 cells:       15
+ABC RESULTS:     sg13g2_nor4_1 cells:        7
+ABC RESULTS:    sg13g2_o21ai_1 cells:      190
+ABC RESULTS:      sg13g2_or2_1 cells:        9
+ABC RESULTS:      sg13g2_or3_1 cells:        1
+ABC RESULTS:    sg13g2_xnor2_1 cells:       13
+ABC RESULTS:     sg13g2_xor2_1 cells:       33
+ABC RESULTS:        internal signals:     1852
+ABC RESULTS:           input signals:      600
+ABC RESULTS:          output signals:      114
+Removing temp directory.
+Removing global temp directory.
+
+11. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO32..
+Removed 0 unused cells and 3927 unused wires.
+<suppressed ~1 debug messages>
+
+12. Printing statistics.
+
+=== PIO32 ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     5776        - wires
+     8916        - wire bits
+     4625        - public wires
+     7765        - public wire bits
+       48        - ports
+      508        - port bits
+     2889 3.36E+04 cells
+     1170        -   $scopeinfo
+       16  203.213   sg13g2_a21o_1
+      222 2.01E+03   sg13g2_a21oi_1
+       38  551.578   sg13g2_a221oi_1
+       25  271.215   sg13g2_a22oi_1
+       19  172.368   sg13g2_and2_1
+        3   38.102   sg13g2_and3_1
+       38 1.86E+03   sg13g2_dfrbpq_1
+      454  1.4E+04   sg13g2_dlhq_1
+       95  517.104   sg13g2_inv_1
+       31  562.464   sg13g2_mux2_1
+      218 8.31E+03   sg13g2_mux4_1
+      113  820.109   sg13g2_nand2_1
+       32  290.304   sg13g2_nand2b_1
+       30   272.16   sg13g2_nand3_1
+        9  114.307   sg13g2_nand3b_1
+        4   43.546   sg13g2_nand4_1
+       69  500.774   sg13g2_nor2_1
+       35   317.52   sg13g2_nor2b_1
+       15   136.08   sg13g2_nor3_1
+        7   76.205   sg13g2_nor4_1
+      190  1723.68   sg13g2_o21ai_1
+        9   81.648   sg13g2_or2_1
+        1   12.701   sg13g2_or3_1
+       13  188.698   sg13g2_xnor2_1
+       33  479.002   sg13g2_xor2_1
+
+   Area for cell type $scopeinfo is unknown!
+
+   Chip area for module '\PIO32': 33558.197400
+     of which used for sequential elements: 1861.574400 (5.55%)
+
+Warnings: 1 unique messages, 1 total
+End of script. Logfile hash: f98c1abb1b, time: 0.78s, user: 0.51s, system: 0.02s, MEM: 57.02 MB peak
+Yosys 0.68+118 (git sha1 144c707b7-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 36% 2x abc (0 sec), 17% 21x opt_clean (0 sec), ...

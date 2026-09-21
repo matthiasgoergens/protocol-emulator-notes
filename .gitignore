@@ -1,0 +1,6 @@
+# tool output and vendored inputs are not committed; see the NOTES.md files
+*.gds
+*.lib
+.venv/
+runs/
+fpga_pio/

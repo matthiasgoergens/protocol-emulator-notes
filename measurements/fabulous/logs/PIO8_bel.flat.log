@@ -1,0 +1,735 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.68+118 (git sha1 144c707b7-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+-- Running command `
+  read_verilog -sv /home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v hard/Tile/PIO8/PIO8_bel.v
+  hierarchy -check -top PIO8_bel
+  synth -top PIO8_bel -flatten
+  techmap -map /home/matthias/prog/janestreet/fabulous-notes/synth/sg13g2_latchmap.v
+  dfflibmap -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib
+  abc -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib
+  opt_clean
+  stat -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib
+' --
+
+1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v
+Parsing SystemVerilog input from `/home/matthias/prog/janestreet/fabulous-notes/synth/models_pack_onelatch.v' to AST representation.
+Generating RTLIL representation for module `\config_latch'.
+Generating RTLIL representation for module `\my_buf'.
+Generating RTLIL representation for module `\clk_buf'.
+Generating RTLIL representation for module `\cus_mux41'.
+Generating RTLIL representation for module `\cus_mux21'.
+Generating RTLIL representation for module `\cus_mux81'.
+Generating RTLIL representation for module `\cus_mux161'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: hard/Tile/PIO8/PIO8_bel.v
+Parsing SystemVerilog input from `hard/Tile/PIO8/PIO8_bel.v' to AST representation.
+Generating RTLIL representation for module `\PIO8_bel'.
+Successfully finished Verilog frontend.
+
+3. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1. Analyzing design hierarchy..
+Top module:  \PIO8_bel
+
+3.2. Analyzing design hierarchy..
+Top module:  \PIO8_bel
+Removing unused module `\cus_mux161'.
+Removing unused module `\cus_mux81'.
+Removing unused module `\cus_mux21'.
+Removing unused module `\cus_mux41'.
+Removing unused module `\clk_buf'.
+Removing unused module `\my_buf'.
+Removing unused module `\config_latch'.
+Removed 7 unused modules.
+
+4. Executing SYNTH pass.
+
+4.1. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1.1. Analyzing design hierarchy..
+Top module:  \PIO8_bel
+
+4.1.2. Analyzing design hierarchy..
+Top module:  \PIO8_bel
+Removed 0 unused modules.
+
+4.2. Executing PROC pass (convert processes to netlists).
+
+4.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$hard/Tile/PIO8/PIO8_bel.v:16$7 in module PIO8_bel.
+Removed a total of 0 dead cases.
+
+4.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+4.2.4. Executing PROC_INIT pass (extract init attributes).
+
+4.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~2 debug messages>
+
+4.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\PIO8_bel.$proc$hard/Tile/PIO8/PIO8_bel.v:16$7'.
+     1/2: $0\cnt[3:0]
+     2/2: $0\sr[7:0]
+
+4.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+4.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\PIO8_bel.\sr' using process `\PIO8_bel.$proc$hard/Tile/PIO8/PIO8_bel.v:16$7'.
+  created $dff cell `$procdff$26' with positive edge clock.
+Creating register for signal `\PIO8_bel.\cnt' using process `\PIO8_bel.$proc$hard/Tile/PIO8/PIO8_bel.v:16$7'.
+  created $dff cell `$procdff$27' with positive edge clock.
+
+4.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 2 empty switches in `\PIO8_bel.$proc$hard/Tile/PIO8/PIO8_bel.v:16$7'.
+Removing empty process `PIO8_bel.$proc$hard/Tile/PIO8/PIO8_bel.v:16$7'.
+Cleaned up 2 empty switches.
+
+4.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+<suppressed ~2 debug messages>
+
+4.3. Executing CHECK pass (checking for obvious problems).
+Checking module PIO8_bel...
+Found and reported 0 problems.
+
+4.4. Executing FLATTEN pass (flatten design).
+
+4.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+
+4.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+Removed 0 unused cells and 8 unused wires.
+<suppressed ~1 debug messages>
+
+4.7. Executing CHECK pass (checking for obvious problems).
+Checking module PIO8_bel...
+Found and reported 0 problems.
+
+4.8. Executing OPT pass (performing simple optimizations).
+
+4.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+
+4.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 14 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO8_bel..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~10 debug messages>
+
+4.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO8_bel.
+Performed a total of 0 changes.
+
+4.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 14 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.8.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+
+4.8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+
+4.8.9. Finished fast OPT passes. (There is nothing left to do.)
+
+4.9. Executing FSM pass (extract and optimize FSM).
+
+4.9.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+4.9.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+4.9.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+4.9.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+
+4.9.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+4.9.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+4.9.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+4.9.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+4.10. Executing OPT pass (performing simple optimizations).
+
+4.10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+
+4.10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 14 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO8_bel..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~10 debug messages>
+
+4.10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO8_bel.
+Performed a total of 0 changes.
+
+4.10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 14 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.10.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $procdff$26 ($dff) from module PIO8_bel (D = $0\sr[7:0], Q = \sr).
+Adding SRST signal on $procdff$27 ($dff) from module PIO8_bel (D = $procmux$16_Y, Q = \cnt, rval = 4'1000).
+Adding EN signal on $auto$ff.cc:337:slice$31 ($sdff) from module PIO8_bel (D = $sub$hard/Tile/PIO8/PIO8_bel.v:20$13_Y, Q = \cnt).
+
+4.10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+Removed 2 unused cells and 2 unused wires.
+<suppressed ~3 debug messages>
+
+4.10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+<suppressed ~1 debug messages>
+
+4.10.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.10.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO8_bel..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~7 debug messages>
+
+4.10.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO8_bel.
+Performed a total of 0 changes.
+
+4.10.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 13 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.10.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.10.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+
+4.10.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+
+4.10.16. Finished fast OPT passes. (There is nothing left to do.)
+
+4.11. Executing WREDUCE pass (reducing word size of cells).
+Removed top 3 bits (of 4) from port B of cell PIO8_bel.$sub$hard/Tile/PIO8/PIO8_bel.v:20$13 ($sub).
+
+4.12. Executing PEEPOPT pass (run peephole optimizers).
+
+4.13. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+
+4.14. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module PIO8_bel:
+  creating $macc model for $sub$hard/Tile/PIO8/PIO8_bel.v:20$13 ($sub).
+  creating $alu model for $macc $sub$hard/Tile/PIO8/PIO8_bel.v:20$13.
+  creating $alu cell for $sub$hard/Tile/PIO8/PIO8_bel.v:20$13: $auto$alumacc.cc:548:replace_alu$33
+  created 1 $alu and 0 $macc cells.
+
+4.15. Executing SHARE pass (SAT-based resource sharing).
+
+4.16. Executing OPT pass (performing simple optimizations).
+
+4.16.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+
+4.16.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 13 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.16.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO8_bel..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~7 debug messages>
+
+4.16.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO8_bel.
+Performed a total of 0 changes.
+
+4.16.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 13 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.16.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.16.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+
+4.16.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+
+4.16.9. Finished fast OPT passes. (There is nothing left to do.)
+
+4.17. Executing MEMORY pass.
+
+4.17.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+4.17.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+4.17.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+4.17.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+4.17.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+4.17.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+
+4.17.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+4.17.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+4.17.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+
+4.17.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+4.18. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+
+4.19. Executing OPT pass (performing simple optimizations).
+
+4.19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+<suppressed ~1 debug messages>
+
+4.19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 12 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.19.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.19.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+Removed 0 unused cells and 1 unused wires.
+<suppressed ~1 debug messages>
+
+4.19.5. Finished fast OPT passes.
+
+4.20. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+4.21. Executing OPT pass (performing simple optimizations).
+
+4.21.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+
+4.21.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 12 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.21.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \PIO8_bel..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~6 debug messages>
+
+4.21.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \PIO8_bel.
+Performed a total of 0 changes.
+
+4.21.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 12 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.21.6. Executing OPT_SHARE pass.
+
+4.21.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.21.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+
+4.21.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+
+4.21.10. Finished fast OPT passes. (There is nothing left to do.)
+
+4.22. Executing TECHMAP pass (map to technology primitives).
+
+4.22.1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/hardware-2026-08/oss-cad-suite/lib/../share/yosys/techmap.v
+Parsing Verilog input from `/home/matthias/prog/janestreet/hardware-2026-08/oss-cad-suite/lib/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+4.22.2. Continuing TECHMAP pass.
+Using template $paramod$8742280fdebca84e1c87f2a86ed84f62d558f4cc\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $dffe.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $logic_and.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000100 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000100 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $and.
+No more expansions possible.
+<suppressed ~253 debug messages>
+
+4.23. Executing OPT pass (performing simple optimizations).
+
+4.23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+<suppressed ~32 debug messages>
+
+4.23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 70 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Computing hashes of 68 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Computing hashes of 67 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+<suppressed ~9 debug messages>
+Removed a total of 3 cells.
+
+4.23.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+Removed 5 unused cells and 52 unused wires.
+<suppressed ~6 debug messages>
+
+4.23.5. Finished fast OPT passes.
+
+4.24. Executing ABC pass (technology mapping using ABC).
+
+4.24.1. Extracting gate netlist of module `\PIO8_bel' to `<abc-temp-dir>/input.blif'..
+
+4.24.1.1. Executed ABC.
+Extracted 50 gates and 75 wires to a netlist network with 25 inputs and 16 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Aug 21 2026 02:12:29)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+4.24.1.2. Re-integrating ABC results.
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               MUX cells:       17
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        3
+ABC RESULTS:              XNOR cells:        3
+ABC RESULTS:               XOR cells:        8
+ABC RESULTS:        internal signals:       34
+ABC RESULTS:           input signals:       25
+ABC RESULTS:          output signals:       16
+Removing temp directory.
+Removing global temp directory.
+
+4.25. Executing OPT pass (performing simple optimizations).
+
+4.25.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module PIO8_bel.
+
+4.25.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\PIO8_bel'.
+Computing hashes of 46 cells of `\PIO8_bel'.
+Finding duplicate cells in `\PIO8_bel'.
+Removed a total of 0 cells.
+
+4.25.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.25.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+Removed 0 unused cells and 50 unused wires.
+<suppressed ~1 debug messages>
+
+4.25.5. Finished fast OPT passes.
+
+4.26. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `PIO8_bel'. Setting top module to PIO8_bel.
+
+4.26.1. Analyzing design hierarchy..
+Top module:  \PIO8_bel
+
+4.26.2. Analyzing design hierarchy..
+Top module:  \PIO8_bel
+Removed 0 unused modules.
+
+4.27. Printing statistics.
+
+=== PIO8_bel ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       32 wires
+       60 wire bits
+       10 public wires
+       28 public wire bits
+        8 ports
+       16 port bits
+       46 cells
+        1   $_ANDNOT_
+        8   $_DFFE_PP_
+       17   $_MUX_
+        1   $_NOR_
+        1   $_NOT_
+        3   $_OR_
+        3   $_SDFFE_PP0P_
+        1   $_SDFFE_PP1P_
+        3   $_XNOR_
+        8   $_XOR_
+
+4.28. Executing CHECK pass (checking for obvious problems).
+Checking module PIO8_bel...
+Found and reported 0 problems.
+
+5. Executing TECHMAP pass (map to technology primitives).
+
+5.1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/fabulous-notes/synth/sg13g2_latchmap.v
+Parsing Verilog input from `/home/matthias/prog/janestreet/fabulous-notes/synth/sg13g2_latchmap.v' to AST representation.
+Generating RTLIL representation for module `$_DLATCH_P_'.
+Successfully finished Verilog frontend.
+
+5.2. Continuing TECHMAP pass.
+No more expansions possible.
+<suppressed ~3 debug messages>
+
+6. Executing DFFLIBMAP pass (mapping DFF/DLATCH cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  cell sg13g2_dlhq_1 (noninv, pins=3, area=30.84) is a direct match for cell type $_DLATCH_P_.
+  cell sg13g2_dllrq_1 (noninv, pins=4, area=29.03) is a direct match for cell type $_DLATCH_NN0_.
+  cell sg13g2_dlhrq_1 (noninv, pins=4, area=27.22) is a direct match for cell type $_DLATCH_PN0_.
+  final dff/dlatch cell mappings:
+    unmapped dff/dlatch cell: $_DFF_N_
+    unmapped dff/dlatch cell: $_DFF_P_
+    unmapped dff/dlatch cell: $_DFF_NN0_
+    unmapped dff/dlatch cell: $_DFF_NN1_
+    unmapped dff/dlatch cell: $_DFF_NP0_
+    unmapped dff/dlatch cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DFF_PN1_
+    unmapped dff/dlatch cell: $_DFF_PP0_
+    unmapped dff/dlatch cell: $_DFF_PP1_
+    unmapped dff/dlatch cell: $_DFFE_NN_
+    unmapped dff/dlatch cell: $_DFFE_NP_
+    unmapped dff/dlatch cell: $_DFFE_PN_
+    unmapped dff/dlatch cell: $_DFFE_PP_
+    unmapped dff/dlatch cell: $_DFFSR_NNN_
+    unmapped dff/dlatch cell: $_DFFSR_NNP_
+    unmapped dff/dlatch cell: $_DFFSR_NPN_
+    unmapped dff/dlatch cell: $_DFFSR_NPP_
+    unmapped dff/dlatch cell: $_DFFSR_PNN_
+    unmapped dff/dlatch cell: $_DFFSR_PNP_
+    unmapped dff/dlatch cell: $_DFFSR_PPN_
+    unmapped dff/dlatch cell: $_DFFSR_PPP_
+    unmapped dff/dlatch cell: $_DLATCH_N_
+    \sg13g2_dlhq_1 _DLATCH_P_ (.D( D), .GATE( E), .Q( Q));
+    \sg13g2_dllrq_1 _DLATCH_NN0_ (.D( D), .GATE_N( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_NN1_
+    unmapped dff/dlatch cell: $_DLATCH_NP0_
+    unmapped dff/dlatch cell: $_DLATCH_NP1_
+    \sg13g2_dlhrq_1 _DLATCH_PN0_ (.D( D), .GATE( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_PN1_
+    unmapped dff/dlatch cell: $_DLATCH_PP0_
+    unmapped dff/dlatch cell: $_DLATCH_PP1_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPP_
+
+6.1. Executing DFFLEGALIZE pass (convert FFs and LATCHes to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF/DLATCH cells in module `\PIO8_bel':
+  mapped 12 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+7. Executing ABC pass (technology mapping using ABC).
+
+7.1. Extracting gate netlist of module `\PIO8_bel' to `<abc-temp-dir>/input.blif'..
+ABC: using cached merged SCL: /tmp/yosys-liberty-scl-cache/yosys_merged_aa53eb27.scl (1 files)
+
+7.1.1. Executed ABC.
+Extracted 50 gates and 77 wires to a netlist network with 25 inputs and 14 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Aug 21 2026 02:12:29)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_scl /tmp/yosys-liberty-scl-cache/yosys_merged_aa53eb27.scl 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+7.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:        9
+ABC RESULTS:    sg13g2_a21oi_1 cells:       10
+ABC RESULTS:      sg13g2_inv_1 cells:        1
+ABC RESULTS:     sg13g2_mux2_1 cells:        9
+ABC RESULTS:    sg13g2_nand2_1 cells:        2
+ABC RESULTS:    sg13g2_nand3_1 cells:        1
+ABC RESULTS:     sg13g2_nor2_1 cells:        3
+ABC RESULTS:    sg13g2_nor2b_1 cells:        8
+ABC RESULTS:     sg13g2_nor3_1 cells:        1
+ABC RESULTS:     sg13g2_nor4_1 cells:        1
+ABC RESULTS:    sg13g2_o21ai_1 cells:       17
+ABC RESULTS:      sg13g2_or3_1 cells:        1
+ABC RESULTS:     sg13g2_xor2_1 cells:        1
+ABC RESULTS:        internal signals:       38
+ABC RESULTS:           input signals:       25
+ABC RESULTS:          output signals:       14
+Removing temp directory.
+Removing global temp directory.
+
+8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \PIO8_bel..
+Removed 0 unused cells and 65 unused wires.
+<suppressed ~1 debug messages>
+
+9. Printing statistics.
+
+=== PIO8_bel ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+       72        - wires
+       90        - wire bits
+       10        - public wires
+       28        - public wire bits
+        8        - ports
+       16        - port bits
+       76 1.28E+03 cells
+        9  114.307   sg13g2_a21o_1
+       10    90.72   sg13g2_a21oi_1
+       12  587.866   sg13g2_dfrbpq_1
+        1    5.443   sg13g2_inv_1
+        9  163.296   sg13g2_mux2_1
+        2   14.515   sg13g2_nand2_1
+        1    9.072   sg13g2_nand3_1
+        3   21.773   sg13g2_nor2_1
+        8   72.576   sg13g2_nor2b_1
+        1    9.072   sg13g2_nor3_1
+        1   10.886   sg13g2_nor4_1
+       17  154.224   sg13g2_o21ai_1
+        1   12.701   sg13g2_or3_1
+        1   14.515   sg13g2_xor2_1
+
+   Chip area for module '\PIO8_bel': 1280.966400
+     of which used for sequential elements: 587.865600 (45.89%)
+
+End of script. Logfile hash: d8a19e688a, time: 0.10s, user: 0.04s, system: 0.02s, MEM: 24.37 MB peak
+Yosys 0.68+118 (git sha1 144c707b7-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 60% 2x abc (0 sec), 12% 5x read_verilog (0 sec), ...
