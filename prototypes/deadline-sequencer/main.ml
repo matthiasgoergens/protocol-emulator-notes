@@ -2,52 +2,12 @@
    random programmes and inputs; (b) a UART transmitter programme; (c) a deadline-timeout programme. *)
 open Hardcaml
 
-let circuit = Sequencer.circuit ()
+let circuit = Harness.circuit
 
 let emit () =
   let oc = open_out "deadline_sequencer.v" in
   Rtl.output ~output_mode:(To_channel oc) Verilog circuit;
   close_out oc
-
-(* Cyclesim harness with a one-cycle-latency instruction memory. *)
-type sim = {
-  sim : Cyclesim.t_port_list; mem : int array array;
-  imem_data : Bits.t ref; pin_in : Bits.t ref; host_in : Bits.t ref; host_in_valid : Bits.t ref; clear : Bits.t ref;
-  imem_addr : Bits.t ref; pin_out : Bits.t ref; pin_oe : Bits.t ref; host_out : Bits.t ref;
-  host_out_valid : Bits.t ref; host_in_ready : Bits.t ref; pcs : Bits.t ref;
-  mutable pending_addr : int;   (* address presented during the next cycle *)
-  mutable current_addr : int;   (* address presented during the last completed cycle *)
-}
-
-let make mem =
-  let sim = Cyclesim.create circuit in
-  let i n = Cyclesim.in_port sim n and o n = Cyclesim.out_port sim n in
-  let s = { sim; mem; imem_data = i "imem_data"; pin_in = i "pin_in"; host_in = i "host_in";
-            host_in_valid = i "host_in_valid"; clear = i "clear"; imem_addr = o "imem_addr";
-            pin_out = o "pin_out"; pin_oe = o "pin_oe"; host_out = o "host_out";
-            host_out_valid = o "host_out_valid"; host_in_ready = o "host_in_ready"; pcs = o "pcs";
-            pending_addr = 0; current_addr = 0 } in
-  s.clear := Bits.vdd; Cyclesim.cycle sim; s.clear := Bits.gnd;
-  (* thread 0 executes first from pc 0: the memory answers address 0 on the first cycle *)
-  s.current_addr <- 0;
-  s.pending_addr <- Bits.to_int !(s.imem_addr);
-  s
-
-let fetch mem addr = mem.(addr lsr Isa.pc_bits).(addr land (Isa.prog_len - 1))
-
-(* One cycle with the given inputs; returns observed outputs after the cycle. *)
-let cycle s ~pin_in ~host_in ~host_in_valid =
-  s.imem_data := Bits.of_int ~width:16 (fetch s.mem s.current_addr);
-  s.pin_in := Bits.of_int ~width:8 pin_in;
-  s.host_in := Bits.of_int ~width:8 host_in;
-  s.host_in_valid := Bits.of_int ~width:1 (if host_in_valid then 1 else 0);
-  Cyclesim.cycle s.sim;
-  s.current_addr <- s.pending_addr;
-  s.pending_addr <- Bits.to_int !(s.imem_addr);
-  (Bits.to_int !(s.pin_out), Bits.to_int !(s.pin_oe),
-   (if Bits.to_int !(s.host_out_valid) = 1 then Some (Bits.to_int !(s.host_out)) else None),
-   Bits.to_int !(s.host_in_ready) = 1,
-   List.init Isa.n_threads (fun t -> (Bits.to_int !(s.pcs) lsr (t * Isa.pc_bits)) land (Isa.prog_len - 1)))
 
 (* Combinational outputs computed from the new state must be compared with the interpreter's
    state after the same step: host_in_ready is combinational within the cycle, so it is compared
@@ -55,13 +15,14 @@ let cycle s ~pin_in ~host_in ~host_in_valid =
 let lockstep ~seed ~cycles =
   Random.init seed;
   let mem = Array.init Isa.n_threads (fun _ -> Array.init Isa.prog_len (fun _ -> Random.int 0x10000)) in
-  let s = make mem in
+  let s = Harness.make mem in
   let st = Isa.init () in
   let mismatches = ref 0 in
   for c = 0 to cycles - 1 do
     let pin_in = Random.int 256 and host_in = Random.int 256 and host_in_valid = Random.bool () in
     let eff = Isa.step st ~mem ~pin_in ~host_in ~host_in_valid in
-    let (po, poe, ho, hir, pcs) = cycle s ~pin_in ~host_in ~host_in_valid in
+    let o = Harness.cycle s ~pin_in ~host_in ~host_in_valid in
+    let (po, poe, ho, hir, pcs) = (o.pin_out, o.pin_oe, o.host_out, o.host_in_ready, o.pcs) in
     let ok = po = st.pin_out && poe = st.pin_oe && ho = eff.host_out && hir = eff.host_in_ready
              && pcs = Array.to_list st.pcs in
     if not ok then begin
@@ -85,7 +46,7 @@ let uart_program =
   set 3 (ldd 12);
   set 4 waitd;
   set 5 (ldc 8);
-  set 6 (sho ~pin:0 ~msb:0);                 (* loop: data bit, lsb first *)
+  set 6 (sho ~pin:0 ~msb:0 ());                 (* loop: data bit, lsb first *)
   set 7 (ldd 12);
   set 8 waitd;
   set 9 (jnz 6);
@@ -97,7 +58,7 @@ let uart_program =
 
 let uart_test () =
   let mem = Array.init Isa.n_threads (fun t -> if t = 0 then uart_program else Array.make Isa.prog_len Isa.halt) in
-  let s = make mem in
+  let s = Harness.make mem in
   let byte = 0x4B in
   (* feed one byte, then record pin 0 for 11 bit periods, sampling mid-bit *)
   let trace = Buffer.create 64 in
@@ -105,7 +66,8 @@ let uart_test () =
   let start_seen = ref None in
   let samples = Buffer.create 16 in
   for c = 0 to 4 * 16 * 14 do
-    let (po, _, _, hir, _) = cycle s ~pin_in:0 ~host_in:byte ~host_in_valid:(not !fed) in
+    let o = Harness.cycle s ~pin_in:0 ~host_in:byte ~host_in_valid:(not !fed) in
+    let po = o.pin_out and hir = o.host_in_ready in
     if hir then fed := true;
     let tx = po land 1 in
     Buffer.add_char trace (if tx = 1 then '1' else '0');
@@ -134,12 +96,12 @@ let deadline_program =
 
 let deadline_test ~rise_at =
   let mem = Array.init Isa.n_threads (fun t -> if t = 1 then deadline_program else Array.make Isa.prog_len Isa.halt) in
-  let s = make mem in
+  let s = Harness.make mem in
   let final = ref 0 in
   for c = 0 to 200 do
     let pin_in = match rise_at with Some r when c >= r -> 2 | _ -> 0 in
-    let (po, _, _, _, _) = cycle s ~pin_in ~host_in:0 ~host_in_valid:false in
-    final := po
+    let o = Harness.cycle s ~pin_in ~host_in:0 ~host_in_valid:false in
+    final := o.pin_out
   done;
   let seen = !final land 0x40 <> 0 and timeout = !final land 0x80 <> 0 in
   Printf.printf "deadline: rise_at=%s -> seen=%b timeout=%b\n"

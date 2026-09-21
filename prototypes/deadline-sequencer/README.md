@@ -64,3 +64,42 @@ synchronisers, any fast-path shifter for USB or Ethernet, and a compiler
 for the timing-contract language. The point of the prototype is the
 number above: the deterministic core is cheap, so the budget goes to
 memory and hardened serialisers.
+
+## Protocol compiler and demo (`compiler.ml`, `decoders.ml`, `demo.ml`)
+
+The point of a deterministic machine is that the difficulty moves into
+software. `compiler.ml` turns protocol descriptions into thread programmes
+whose every edge time is worked out from the one-slot-per-instruction rule:
+a UART transmitter (8N1, any bit period of at least five slots), an SPI
+master (mode 0, any even period of at least eight slots) and an I2C master
+write (START, bytes with acknowledge clocks whose sampled acknowledge goes
+to the host, STOP, with a quarter period of at least four slots). Three
+protocols compiled onto three threads use 38, 27 and 63 of the 64 words.
+
+Writing the I2C generator found an ISA gap: an open-drain line must be
+released for a one and pulled low for a zero, which the shift-out
+instruction could not express. It gained an open-drain mode bit (drive low
+for 0, release for 1) in interpreter and RTL; the lockstep test re-verified
+the change.
+
+`demo.exe` runs the three programmes on the RTL with an I2C slave model in
+the loop and checks them three ways: the interpreter's exact simulation
+agrees with the RTL on every cycle, which for a deterministic machine is
+the schedule proof; independent decoders in `decoders.ml`, which sample
+where a receiver samples and know nothing of the compiler's arithmetic,
+recover "OK!" on the UART, 0xA5 0x3C on SPI, and 0xA0 0x5A with
+acknowledges and a STOP on I2C; and the measured edge spacings equal the
+closed forms with zero deviation (UART bit 64 cycles, SPI period 64, I2C
+clock-high 32).
+
+Then misbehaviour on purpose, which costs nothing once timing is compiled:
+
+- Fault injection: data bit 5 of a byte stretched by d slots. A receiver
+  that samples mid-bit still decodes up to a cumulative shift of exactly
+  half a bit (8 slots, 32 cycles) and breaks with a framing error at 9.
+- Timing microscope: the transmitter's bit period swept around a receiver
+  fixed at 128 cycles per bit. Decoding survives +-3.1 % and fails at
+  +-6.2 %, which is the textbook tolerance of 8N1 framing with mid-bit
+  sampling (half a bit over nine and a half bits is about 5 %).
+
+Both are one parameter in the compiler; the hardware is unchanged.

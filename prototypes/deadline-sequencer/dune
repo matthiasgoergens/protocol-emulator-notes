@@ -1,3 +1,15 @@
+(library
+ (name seqcore)
+ (wrapped false)
+ (modules isa sequencer harness compiler decoders)
+ (libraries hardcaml))
+
 (executable
  (name main)
- (libraries hardcaml))
+ (modules main)
+ (libraries hardcaml seqcore))
+
+(executable
+ (name demo)
+ (modules demo)
+ (libraries hardcaml seqcore))

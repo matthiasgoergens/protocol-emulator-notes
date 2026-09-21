@@ -34,7 +34,6 @@ module deadline_sequencer (
     wire _59;
     wire _2;
     wire _64;
-    wire gnd;
     wire _61;
     wire _62;
     wire _4;
@@ -45,226 +44,283 @@ module deadline_sequencer (
     wire [7:0] _86;
     wire [7:0] _6;
     reg [7:0] _69;
-    wire _95;
-    wire [1:0] _96;
-    wire [3:0] _97;
-    wire [7:0] _98;
-    wire [7:0] _99;
-    wire [7:0] _93;
-    wire [7:0] _94;
-    wire [7:0] _100;
+    wire _139;
+    wire [1:0] _140;
+    wire [3:0] _141;
+    wire [7:0] _142;
+    wire [7:0] _143;
+    wire [7:0] _137;
+    wire [7:0] _138;
+    wire [7:0] _144;
+    wire _131;
+    wire [2:0] _129;
+    wire _130;
+    wire _132;
+    wire _127;
+    wire [2:0] _125;
+    wire _126;
+    wire _128;
+    wire _123;
+    wire [2:0] _121;
+    wire _122;
+    wire _124;
+    wire _119;
+    wire [2:0] _117;
+    wire _118;
+    wire _120;
+    wire _115;
+    wire [2:0] _113;
+    wire _114;
+    wire _116;
+    wire _111;
+    wire [2:0] _109;
+    wire _110;
+    wire _112;
+    wire _107;
+    wire [2:0] _105;
+    wire _106;
+    wire _108;
+    wire _103;
+    wire _98;
+    wire [2:0] _96;
+    wire _97;
+    wire _104;
+    wire [7:0] _133;
+    wire [7:0] _134;
+    wire _90;
+    wire [7:0] _135;
     wire _88;
-    wire [7:0] _101;
+    wire [7:0] _145;
     wire [7:0] _8;
-    reg [7:0] _91;
-    wire _194;
-    wire [1:0] _195;
-    wire [3:0] _196;
-    wire [7:0] _197;
-    wire [7:0] _198;
-    wire [7:0] _92;
-    wire [7:0] _192;
-    wire [7:0] _193;
-    wire [7:0] _199;
-    wire _188;
-    wire [2:0] _186;
-    wire _187;
-    wire _189;
-    wire _184;
-    wire [2:0] _182;
-    wire _183;
-    wire _185;
-    wire _180;
-    wire [2:0] _178;
-    wire _179;
-    wire _181;
-    wire _176;
-    wire [2:0] _174;
-    wire _175;
-    wire _177;
-    wire _172;
-    wire [2:0] _170;
-    wire _171;
-    wire _173;
-    wire _168;
-    wire [2:0] _166;
-    wire _167;
-    wire _169;
-    wire _164;
-    wire [2:0] _162;
-    wire _163;
-    wire _165;
-    wire _159;
-    wire [7:0] _104;
+    reg [7:0] _93;
+    wire _266;
+    wire [1:0] _267;
+    wire [3:0] _268;
+    wire [7:0] _269;
+    wire [7:0] _270;
+    wire [7:0] _136;
+    wire [7:0] _264;
+    wire [7:0] _265;
+    wire [7:0] _271;
+    wire _259;
+    wire _258;
+    wire _260;
+    wire _255;
+    wire _254;
+    wire _256;
+    wire _251;
+    wire _250;
+    wire _252;
+    wire _247;
+    wire _246;
+    wire _248;
+    wire _243;
+    wire _242;
+    wire _244;
+    wire _239;
+    wire _238;
+    wire _240;
+    wire _235;
+    wire _234;
+    wire _236;
+    wire gnd;
+    wire _231;
+    wire _230;
+    wire _232;
+    wire [7:0] _261;
+    wire _226;
+    wire _225;
+    wire _227;
+    wire _222;
+    wire _221;
+    wire _223;
+    wire _218;
+    wire _217;
+    wire _219;
+    wire _214;
+    wire _213;
+    wire _215;
+    wire _210;
+    wire _209;
+    wire _211;
+    wire _206;
+    wire _205;
+    wire _207;
+    wire _202;
+    wire _201;
+    wire _203;
+    wire _101;
+    wire [7:0] _148;
     wire [7:0] _10;
     reg [7:0] _84;
-    wire [7:0] _107;
+    wire [7:0] _151;
     wire [7:0] _11;
     reg [7:0] _81;
-    wire [7:0] _110;
+    wire [7:0] _154;
     wire [7:0] _12;
     reg [7:0] _78;
-    wire [7:0] _145;
-    wire [6:0] _140;
-    wire [7:0] _142;
-    wire [6:0] _138;
-    wire [7:0] _139;
-    wire [7:0] _143;
-    wire [6:0] _133;
-    wire [7:0] _134;
-    wire [6:0] _131;
-    wire [7:0] _132;
-    wire [7:0] _135;
-    wire [7:0] _118;
-    wire _117;
-    wire [7:0] _119;
-    wire _116;
-    wire [7:0] _136;
-    wire _114;
-    wire [7:0] _144;
-    wire [3:0] _111;
-    wire _112;
-    wire [7:0] _146;
+    wire [7:0] _186;
+    wire [6:0] _181;
+    wire [7:0] _183;
+    wire [6:0] _179;
+    wire [7:0] _180;
+    wire [7:0] _184;
+    wire [6:0] _174;
+    wire [7:0] _175;
+    wire [6:0] _172;
+    wire [7:0] _173;
+    wire [7:0] _176;
+    wire [7:0] _161;
+    wire _160;
+    wire [7:0] _162;
+    wire _159;
+    wire [7:0] _177;
+    wire _157;
+    wire [7:0] _185;
+    wire [3:0] _155;
+    wire _156;
+    wire [7:0] _187;
     wire [7:0] _14;
-    wire [7:0] _149;
+    wire [7:0] _190;
     wire [7:0] _15;
     reg [7:0] _75;
     reg [7:0] _85;
-    wire _158;
-    wire _160;
-    wire _157;
-    wire [2:0] _155;
-    wire _156;
-    wire _161;
-    wire [7:0] _190;
-    wire _151;
-    wire [7:0] _191;
+    wire _100;
+    wire _102;
+    wire _198;
+    wire _197;
+    wire _199;
+    wire [7:0] _228;
+    wire _94;
+    wire [7:0] _262;
+    wire _192;
+    wire [7:0] _263;
     wire [3:0] _87;
-    wire _150;
-    wire [7:0] _200;
+    wire _191;
+    wire [7:0] _272;
     wire [7:0] _16;
-    reg [7:0] _154;
+    reg [7:0] _195;
     wire [5:0] _51;
-    wire [11:0] _287;
-    wire _288;
-    wire [5:0] _289;
-    wire _120;
-    wire _129;
-    wire _128;
-    wire _127;
-    wire _126;
-    wire _125;
-    wire _124;
-    wire _123;
-    wire _122;
-    wire [2:0] _121;
-    reg _130;
-    wire _286;
-    wire [5:0] _290;
-    wire [11:0] _204;
+    wire [11:0] _359;
+    wire _360;
+    wire [5:0] _361;
+    wire _99;
+    wire _170;
+    wire _169;
+    wire _168;
+    wire _167;
+    wire _166;
+    wire _165;
+    wire _164;
+    wire _163;
+    wire [2:0] _95;
+    reg _171;
+    wire _358;
+    wire [5:0] _362;
+    wire [11:0] _276;
     wire [11:0] _19;
-    reg [11:0] _203;
-    wire [11:0] _208;
+    reg [11:0] _275;
+    wire [11:0] _280;
     wire [11:0] _20;
-    reg [11:0] _207;
-    wire [11:0] _212;
+    reg [11:0] _279;
+    wire [11:0] _284;
     wire [11:0] _21;
-    reg [11:0] _211;
-    wire [11:0] _221;
-    wire [11:0] _222;
-    wire _220;
-    wire [11:0] _223;
-    wire [3:0] _213;
-    wire _214;
-    wire [11:0] _225;
+    reg [11:0] _283;
+    wire [11:0] _293;
+    wire [11:0] _294;
+    wire _292;
+    wire [11:0] _295;
+    wire [3:0] _285;
+    wire _286;
+    wire [11:0] _297;
     wire [11:0] _22;
-    wire [11:0] _226;
+    wire [11:0] _298;
     wire [11:0] _23;
-    reg [11:0] _217;
-    reg [11:0] _218;
-    wire _283;
-    wire [5:0] _284;
-    wire [5:0] _278;
-    wire [11:0] _230;
+    reg [11:0] _289;
+    reg [11:0] _290;
+    wire _355;
+    wire [5:0] _356;
+    wire [5:0] _350;
+    wire [11:0] _302;
     wire [11:0] _24;
-    reg [11:0] _229;
-    wire [11:0] _234;
+    reg [11:0] _301;
+    wire [11:0] _306;
     wire [11:0] _25;
-    reg [11:0] _233;
-    wire [11:0] _238;
+    reg [11:0] _305;
+    wire [11:0] _310;
     wire [11:0] _26;
-    reg [11:0] _237;
-    wire [11:0] _224;
-    wire [11:0] _251;
-    wire [11:0] _248;
-    wire [3:0] _115;
-    wire _242;
-    wire [11:0] _249;
-    wire [3:0] _113;
-    wire _241;
-    wire [11:0] _252;
-    wire [3:0] _239;
-    wire _240;
-    wire [11:0] _253;
+    reg [11:0] _309;
+    wire [11:0] _296;
+    wire [11:0] _323;
+    wire [11:0] _320;
+    wire [3:0] _158;
+    wire _314;
+    wire [11:0] _321;
+    wire [3:0] _89;
+    wire _313;
+    wire [11:0] _324;
+    wire [3:0] _311;
+    wire _312;
+    wire [11:0] _325;
     wire [11:0] _27;
-    wire [11:0] _254;
+    wire [11:0] _326;
     wire [11:0] _28;
-    reg [11:0] _245;
-    reg [11:0] _246;
-    wire _276;
-    wire _277;
-    wire [5:0] _279;
-    wire [5:0] _273;
-    wire [5:0] _270;
-    wire [1:0] _102;
-    wire _103;
-    wire [5:0] _255;
+    reg [11:0] _317;
+    reg [11:0] _318;
+    wire _348;
+    wire _349;
+    wire [5:0] _351;
+    wire [5:0] _345;
+    wire [5:0] _342;
+    wire [1:0] _146;
+    wire _147;
+    wire [5:0] _327;
     wire [5:0] _30;
     reg [5:0] _43;
-    wire [1:0] _105;
-    wire _106;
-    wire [5:0] _256;
+    wire [1:0] _149;
+    wire _150;
+    wire [5:0] _328;
     wire [5:0] _31;
     reg [5:0] _46;
-    wire [1:0] _108;
-    wire _109;
-    wire [5:0] _257;
+    wire [1:0] _152;
+    wire _153;
+    wire [5:0] _329;
     wire [5:0] _32;
     reg [5:0] _49;
-    reg [5:0] _269;
-    wire [5:0] _271;
-    wire [3:0] _267;
-    wire _268;
-    wire [5:0] _272;
+    reg [5:0] _341;
+    wire [5:0] _343;
+    wire [3:0] _339;
+    wire _340;
+    wire [5:0] _344;
     wire [3:0] _55;
-    wire _266;
-    wire [5:0] _274;
-    wire [3:0] _264;
-    wire _265;
-    wire [5:0] _280;
-    wire [3:0] _262;
-    wire _263;
-    wire [5:0] _281;
-    wire [3:0] _260;
-    wire _261;
-    wire [5:0] _285;
-    wire [3:0] _258;
+    wire _338;
+    wire [5:0] _346;
+    wire [3:0] _336;
+    wire _337;
+    wire [5:0] _352;
+    wire [3:0] _334;
+    wire _335;
+    wire [5:0] _353;
+    wire [3:0] _332;
+    wire _333;
+    wire [5:0] _357;
+    wire [3:0] _330;
     wire [3:0] _54;
-    wire _259;
-    wire [5:0] _291;
+    wire _331;
+    wire [5:0] _363;
     wire [5:0] _34;
-    wire [1:0] _147;
-    wire _148;
-    wire [5:0] _292;
+    wire [1:0] _188;
+    wire _189;
+    wire [5:0] _364;
     wire [5:0] _35;
     reg [5:0] _52;
-    reg [5:0] _297;
+    reg [5:0] _369;
     wire vdd;
-    wire [1:0] _294;
+    wire [1:0] _366;
     wire [1:0] _38;
     reg [1:0] _72;
-    wire [1:0] _296;
-    wire [7:0] _298;
+    wire [1:0] _368;
+    wire [7:0] _370;
     assign _53 = { _43,
                    _46,
                    _49,
@@ -274,7 +330,6 @@ module deadline_sequencer (
     assign _59 = _56 ? _58 : gnd;
     assign _2 = _59;
     assign _64 = 1'b0;
-    assign gnd = 1'b0;
     assign _61 = _54 == _60;
     assign _62 = _61 ? vdd : gnd;
     assign _4 = _62;
@@ -295,119 +350,189 @@ module deadline_sequencer (
         else
             _69 <= _6;
     end
-    assign _95 = imem_data[2:2];
-    assign _96 = { _95,
-                   _95 };
-    assign _97 = { _96,
-                   _96 };
-    assign _98 = { _97,
-                   _97 };
-    assign _99 = _92 & _98;
-    assign _93 = ~ _92;
-    assign _94 = _91 & _93;
-    assign _100 = _94 | _99;
+    assign _139 = imem_data[2:2];
+    assign _140 = { _139,
+                    _139 };
+    assign _141 = { _140,
+                    _140 };
+    assign _142 = { _141,
+                    _141 };
+    assign _143 = _136 & _142;
+    assign _137 = ~ _136;
+    assign _138 = _93 & _137;
+    assign _144 = _138 | _143;
+    assign _131 = _93[0:0];
+    assign _129 = 3'b000;
+    assign _130 = _95 == _129;
+    assign _132 = _130 ? _103 : _131;
+    assign _127 = _93[1:1];
+    assign _125 = 3'b001;
+    assign _126 = _95 == _125;
+    assign _128 = _126 ? _103 : _127;
+    assign _123 = _93[2:2];
+    assign _121 = 3'b010;
+    assign _122 = _95 == _121;
+    assign _124 = _122 ? _103 : _123;
+    assign _119 = _93[3:3];
+    assign _117 = 3'b011;
+    assign _118 = _95 == _117;
+    assign _120 = _118 ? _103 : _119;
+    assign _115 = _93[4:4];
+    assign _113 = 3'b100;
+    assign _114 = _95 == _113;
+    assign _116 = _114 ? _103 : _115;
+    assign _111 = _93[5:5];
+    assign _109 = 3'b101;
+    assign _110 = _95 == _109;
+    assign _112 = _110 ? _103 : _111;
+    assign _107 = _93[6:6];
+    assign _105 = 3'b110;
+    assign _106 = _95 == _105;
+    assign _108 = _106 ? _103 : _107;
+    assign _103 = ~ _102;
+    assign _98 = _93[7:7];
+    assign _96 = 3'b111;
+    assign _97 = _95 == _96;
+    assign _104 = _97 ? _103 : _98;
+    assign _133 = { _104,
+                    _108,
+                    _112,
+                    _116,
+                    _120,
+                    _124,
+                    _128,
+                    _132 };
+    assign _134 = _94 ? _133 : _93;
+    assign _90 = _54 == _89;
+    assign _135 = _90 ? _134 : _93;
     assign _88 = _54 == _87;
-    assign _101 = _88 ? _100 : _91;
-    assign _8 = _101;
+    assign _145 = _88 ? _144 : _135;
+    assign _8 = _145;
     always @(posedge clock) begin
         if (clear)
-            _91 <= _68;
+            _93 <= _68;
         else
-            _91 <= _8;
+            _93 <= _8;
     end
-    assign _194 = imem_data[3:3];
-    assign _195 = { _194,
-                    _194 };
-    assign _196 = { _195,
-                    _195 };
-    assign _197 = { _196,
-                    _196 };
-    assign _198 = _92 & _197;
-    assign _92 = imem_data[11:4];
-    assign _192 = ~ _92;
-    assign _193 = _154 & _192;
-    assign _199 = _193 | _198;
-    assign _188 = _154[0:0];
-    assign _186 = 3'b000;
-    assign _187 = _121 == _186;
-    assign _189 = _187 ? _160 : _188;
-    assign _184 = _154[1:1];
-    assign _182 = 3'b001;
-    assign _183 = _121 == _182;
-    assign _185 = _183 ? _160 : _184;
-    assign _180 = _154[2:2];
-    assign _178 = 3'b010;
-    assign _179 = _121 == _178;
-    assign _181 = _179 ? _160 : _180;
-    assign _176 = _154[3:3];
-    assign _174 = 3'b011;
-    assign _175 = _121 == _174;
-    assign _177 = _175 ? _160 : _176;
-    assign _172 = _154[4:4];
-    assign _170 = 3'b100;
-    assign _171 = _121 == _170;
-    assign _173 = _171 ? _160 : _172;
-    assign _168 = _154[5:5];
-    assign _166 = 3'b101;
-    assign _167 = _121 == _166;
-    assign _169 = _167 ? _160 : _168;
-    assign _164 = _154[6:6];
-    assign _162 = 3'b110;
-    assign _163 = _121 == _162;
-    assign _165 = _163 ? _160 : _164;
-    assign _159 = _85[7:7];
-    assign _104 = _103 ? _14 : _84;
-    assign _10 = _104;
+    assign _266 = imem_data[3:3];
+    assign _267 = { _266,
+                    _266 };
+    assign _268 = { _267,
+                    _267 };
+    assign _269 = { _268,
+                    _268 };
+    assign _270 = _136 & _269;
+    assign _136 = imem_data[11:4];
+    assign _264 = ~ _136;
+    assign _265 = _195 & _264;
+    assign _271 = _265 | _270;
+    assign _259 = _195[0:0];
+    assign _258 = _95 == _129;
+    assign _260 = _258 ? gnd : _259;
+    assign _255 = _195[1:1];
+    assign _254 = _95 == _125;
+    assign _256 = _254 ? gnd : _255;
+    assign _251 = _195[2:2];
+    assign _250 = _95 == _121;
+    assign _252 = _250 ? gnd : _251;
+    assign _247 = _195[3:3];
+    assign _246 = _95 == _117;
+    assign _248 = _246 ? gnd : _247;
+    assign _243 = _195[4:4];
+    assign _242 = _95 == _113;
+    assign _244 = _242 ? gnd : _243;
+    assign _239 = _195[5:5];
+    assign _238 = _95 == _109;
+    assign _240 = _238 ? gnd : _239;
+    assign _235 = _195[6:6];
+    assign _234 = _95 == _105;
+    assign _236 = _234 ? gnd : _235;
+    assign gnd = 1'b0;
+    assign _231 = _195[7:7];
+    assign _230 = _95 == _96;
+    assign _232 = _230 ? gnd : _231;
+    assign _261 = { _232,
+                    _236,
+                    _240,
+                    _244,
+                    _248,
+                    _252,
+                    _256,
+                    _260 };
+    assign _226 = _195[0:0];
+    assign _225 = _95 == _129;
+    assign _227 = _225 ? _102 : _226;
+    assign _222 = _195[1:1];
+    assign _221 = _95 == _125;
+    assign _223 = _221 ? _102 : _222;
+    assign _218 = _195[2:2];
+    assign _217 = _95 == _121;
+    assign _219 = _217 ? _102 : _218;
+    assign _214 = _195[3:3];
+    assign _213 = _95 == _117;
+    assign _215 = _213 ? _102 : _214;
+    assign _210 = _195[4:4];
+    assign _209 = _95 == _113;
+    assign _211 = _209 ? _102 : _210;
+    assign _206 = _195[5:5];
+    assign _205 = _95 == _109;
+    assign _207 = _205 ? _102 : _206;
+    assign _202 = _195[6:6];
+    assign _201 = _95 == _105;
+    assign _203 = _201 ? _102 : _202;
+    assign _101 = _85[7:7];
+    assign _148 = _147 ? _14 : _84;
+    assign _10 = _148;
     always @(posedge clock) begin
         if (clear)
             _84 <= _68;
         else
             _84 <= _10;
     end
-    assign _107 = _106 ? _14 : _81;
-    assign _11 = _107;
+    assign _151 = _150 ? _14 : _81;
+    assign _11 = _151;
     always @(posedge clock) begin
         if (clear)
             _81 <= _68;
         else
             _81 <= _11;
     end
-    assign _110 = _109 ? _14 : _78;
-    assign _12 = _110;
+    assign _154 = _153 ? _14 : _78;
+    assign _12 = _154;
     always @(posedge clock) begin
         if (clear)
             _78 <= _68;
         else
             _78 <= _12;
     end
-    assign _145 = imem_data[7:0];
-    assign _140 = _85[6:0];
-    assign _142 = { _140,
+    assign _186 = imem_data[7:0];
+    assign _181 = _85[6:0];
+    assign _183 = { _181,
                     _64 };
-    assign _138 = _85[7:1];
-    assign _139 = { _64,
-                    _138 };
-    assign _143 = _120 ? _142 : _139;
-    assign _133 = _85[6:0];
-    assign _134 = { _133,
-                    _130 };
-    assign _131 = _85[7:1];
-    assign _132 = { _130,
-                    _131 };
-    assign _135 = _120 ? _134 : _132;
-    assign _118 = host_in_valid ? host_in : _85;
-    assign _117 = _54 == _55;
-    assign _119 = _117 ? _118 : _85;
-    assign _116 = _54 == _115;
-    assign _136 = _116 ? _135 : _119;
-    assign _114 = _54 == _113;
-    assign _144 = _114 ? _143 : _136;
-    assign _111 = 4'b0100;
-    assign _112 = _54 == _111;
-    assign _146 = _112 ? _145 : _144;
-    assign _14 = _146;
-    assign _149 = _148 ? _14 : _75;
-    assign _15 = _149;
+    assign _179 = _85[7:1];
+    assign _180 = { _64,
+                    _179 };
+    assign _184 = _99 ? _183 : _180;
+    assign _174 = _85[6:0];
+    assign _175 = { _174,
+                    _171 };
+    assign _172 = _85[7:1];
+    assign _173 = { _171,
+                    _172 };
+    assign _176 = _99 ? _175 : _173;
+    assign _161 = host_in_valid ? host_in : _85;
+    assign _160 = _54 == _55;
+    assign _162 = _160 ? _161 : _85;
+    assign _159 = _54 == _158;
+    assign _177 = _159 ? _176 : _162;
+    assign _157 = _54 == _89;
+    assign _185 = _157 ? _184 : _177;
+    assign _155 = 4'b0100;
+    assign _156 = _54 == _155;
+    assign _187 = _156 ? _186 : _185;
+    assign _14 = _187;
+    assign _190 = _189 ? _14 : _75;
+    assign _15 = _190;
     always @(posedge clock) begin
         if (clear)
             _75 <= _68;
@@ -426,209 +551,210 @@ module deadline_sequencer (
             _85 <= _84;
         endcase
     end
-    assign _158 = _85[0:0];
-    assign _160 = _120 ? _159 : _158;
-    assign _157 = _154[7:7];
-    assign _155 = 3'b111;
-    assign _156 = _121 == _155;
-    assign _161 = _156 ? _160 : _157;
-    assign _190 = { _161,
-                    _165,
-                    _169,
-                    _173,
-                    _177,
-                    _181,
-                    _185,
-                    _189 };
-    assign _151 = _54 == _113;
-    assign _191 = _151 ? _190 : _154;
+    assign _100 = _85[0:0];
+    assign _102 = _99 ? _101 : _100;
+    assign _198 = _195[7:7];
+    assign _197 = _95 == _96;
+    assign _199 = _197 ? _102 : _198;
+    assign _228 = { _199,
+                    _203,
+                    _207,
+                    _211,
+                    _215,
+                    _219,
+                    _223,
+                    _227 };
+    assign _94 = imem_data[7:7];
+    assign _262 = _94 ? _261 : _228;
+    assign _192 = _54 == _89;
+    assign _263 = _192 ? _262 : _195;
     assign _87 = 4'b0001;
-    assign _150 = _54 == _87;
-    assign _200 = _150 ? _199 : _191;
-    assign _16 = _200;
+    assign _191 = _54 == _87;
+    assign _272 = _191 ? _271 : _263;
+    assign _16 = _272;
     always @(posedge clock) begin
         if (clear)
-            _154 <= _68;
+            _195 <= _68;
         else
-            _154 <= _16;
+            _195 <= _16;
     end
     assign _51 = 6'b000000;
-    assign _287 = 12'b000000000000;
-    assign _288 = _218 == _287;
-    assign _289 = _288 ? _278 : _269;
-    assign _120 = imem_data[8:8];
-    assign _129 = pin_in[7:7];
-    assign _128 = pin_in[6:6];
-    assign _127 = pin_in[5:5];
-    assign _126 = pin_in[4:4];
-    assign _125 = pin_in[3:3];
-    assign _124 = pin_in[2:2];
-    assign _123 = pin_in[1:1];
-    assign _122 = pin_in[0:0];
-    assign _121 = imem_data[11:9];
+    assign _359 = 12'b000000000000;
+    assign _360 = _290 == _359;
+    assign _361 = _360 ? _350 : _341;
+    assign _99 = imem_data[8:8];
+    assign _170 = pin_in[7:7];
+    assign _169 = pin_in[6:6];
+    assign _168 = pin_in[5:5];
+    assign _167 = pin_in[4:4];
+    assign _166 = pin_in[3:3];
+    assign _165 = pin_in[2:2];
+    assign _164 = pin_in[1:1];
+    assign _163 = pin_in[0:0];
+    assign _95 = imem_data[11:9];
     always @* begin
-        case (_121)
+        case (_95)
         0:
-            _130 <= _122;
+            _171 <= _163;
         1:
-            _130 <= _123;
+            _171 <= _164;
         2:
-            _130 <= _124;
+            _171 <= _165;
         3:
-            _130 <= _125;
+            _171 <= _166;
         4:
-            _130 <= _126;
+            _171 <= _167;
         5:
-            _130 <= _127;
+            _171 <= _168;
         6:
-            _130 <= _128;
+            _171 <= _169;
         default:
-            _130 <= _129;
+            _171 <= _170;
         endcase
     end
-    assign _286 = _130 == _120;
-    assign _290 = _286 ? _271 : _289;
-    assign _204 = _103 ? _22 : _203;
-    assign _19 = _204;
+    assign _358 = _171 == _99;
+    assign _362 = _358 ? _343 : _361;
+    assign _276 = _147 ? _22 : _275;
+    assign _19 = _276;
     always @(posedge clock) begin
         if (clear)
-            _203 <= _287;
+            _275 <= _359;
         else
-            _203 <= _19;
+            _275 <= _19;
     end
-    assign _208 = _106 ? _22 : _207;
-    assign _20 = _208;
+    assign _280 = _150 ? _22 : _279;
+    assign _20 = _280;
     always @(posedge clock) begin
         if (clear)
-            _207 <= _287;
+            _279 <= _359;
         else
-            _207 <= _20;
+            _279 <= _20;
     end
-    assign _212 = _109 ? _22 : _211;
-    assign _21 = _212;
+    assign _284 = _153 ? _22 : _283;
+    assign _21 = _284;
     always @(posedge clock) begin
         if (clear)
-            _211 <= _287;
+            _283 <= _359;
         else
-            _211 <= _21;
+            _283 <= _21;
     end
-    assign _221 = 12'b000000000001;
-    assign _222 = _218 - _221;
-    assign _220 = _218 == _287;
-    assign _223 = _220 ? _218 : _222;
-    assign _213 = 4'b0011;
-    assign _214 = _54 == _213;
-    assign _225 = _214 ? _224 : _223;
-    assign _22 = _225;
-    assign _226 = _148 ? _22 : _217;
-    assign _23 = _226;
+    assign _293 = 12'b000000000001;
+    assign _294 = _290 - _293;
+    assign _292 = _290 == _359;
+    assign _295 = _292 ? _290 : _294;
+    assign _285 = 4'b0011;
+    assign _286 = _54 == _285;
+    assign _297 = _286 ? _296 : _295;
+    assign _22 = _297;
+    assign _298 = _189 ? _22 : _289;
+    assign _23 = _298;
     always @(posedge clock) begin
         if (clear)
-            _217 <= _287;
+            _289 <= _359;
         else
-            _217 <= _23;
+            _289 <= _23;
     end
     always @* begin
         case (_72)
         0:
-            _218 <= _217;
+            _290 <= _289;
         1:
-            _218 <= _211;
+            _290 <= _283;
         2:
-            _218 <= _207;
+            _290 <= _279;
         default:
-            _218 <= _203;
+            _290 <= _275;
         endcase
     end
-    assign _283 = _218 == _287;
-    assign _284 = _283 ? _271 : _269;
-    assign _278 = imem_data[5:0];
-    assign _230 = _103 ? _27 : _229;
-    assign _24 = _230;
+    assign _355 = _290 == _359;
+    assign _356 = _355 ? _343 : _341;
+    assign _350 = imem_data[5:0];
+    assign _302 = _147 ? _27 : _301;
+    assign _24 = _302;
     always @(posedge clock) begin
         if (clear)
-            _229 <= _287;
+            _301 <= _359;
         else
-            _229 <= _24;
+            _301 <= _24;
     end
-    assign _234 = _106 ? _27 : _233;
-    assign _25 = _234;
+    assign _306 = _150 ? _27 : _305;
+    assign _25 = _306;
     always @(posedge clock) begin
         if (clear)
-            _233 <= _287;
+            _305 <= _359;
         else
-            _233 <= _25;
+            _305 <= _25;
     end
-    assign _238 = _109 ? _27 : _237;
-    assign _26 = _238;
+    assign _310 = _153 ? _27 : _309;
+    assign _26 = _310;
     always @(posedge clock) begin
         if (clear)
-            _237 <= _287;
+            _309 <= _359;
         else
-            _237 <= _26;
+            _309 <= _26;
     end
-    assign _224 = imem_data[11:0];
-    assign _251 = _246 - _221;
-    assign _248 = _246 - _221;
-    assign _115 = 4'b1000;
-    assign _242 = _54 == _115;
-    assign _249 = _242 ? _248 : _246;
-    assign _113 = 4'b0111;
-    assign _241 = _54 == _113;
-    assign _252 = _241 ? _251 : _249;
-    assign _239 = 4'b0010;
-    assign _240 = _54 == _239;
-    assign _253 = _240 ? _224 : _252;
-    assign _27 = _253;
-    assign _254 = _148 ? _27 : _245;
-    assign _28 = _254;
+    assign _296 = imem_data[11:0];
+    assign _323 = _318 - _293;
+    assign _320 = _318 - _293;
+    assign _158 = 4'b1000;
+    assign _314 = _54 == _158;
+    assign _321 = _314 ? _320 : _318;
+    assign _89 = 4'b0111;
+    assign _313 = _54 == _89;
+    assign _324 = _313 ? _323 : _321;
+    assign _311 = 4'b0010;
+    assign _312 = _54 == _311;
+    assign _325 = _312 ? _296 : _324;
+    assign _27 = _325;
+    assign _326 = _189 ? _27 : _317;
+    assign _28 = _326;
     always @(posedge clock) begin
         if (clear)
-            _245 <= _287;
+            _317 <= _359;
         else
-            _245 <= _28;
+            _317 <= _28;
     end
     always @* begin
         case (_72)
         0:
-            _246 <= _245;
+            _318 <= _317;
         1:
-            _246 <= _237;
+            _318 <= _309;
         2:
-            _246 <= _233;
+            _318 <= _305;
         default:
-            _246 <= _229;
+            _318 <= _301;
         endcase
     end
-    assign _276 = _246 == _287;
-    assign _277 = ~ _276;
-    assign _279 = _277 ? _278 : _271;
-    assign _273 = host_in_valid ? _271 : _269;
-    assign _270 = 6'b000001;
-    assign _102 = 2'b11;
-    assign _103 = _72 == _102;
-    assign _255 = _103 ? _34 : _43;
-    assign _30 = _255;
+    assign _348 = _318 == _359;
+    assign _349 = ~ _348;
+    assign _351 = _349 ? _350 : _343;
+    assign _345 = host_in_valid ? _343 : _341;
+    assign _342 = 6'b000001;
+    assign _146 = 2'b11;
+    assign _147 = _72 == _146;
+    assign _327 = _147 ? _34 : _43;
+    assign _30 = _327;
     always @(posedge clock) begin
         if (clear)
             _43 <= _51;
         else
             _43 <= _30;
     end
-    assign _105 = 2'b10;
-    assign _106 = _72 == _105;
-    assign _256 = _106 ? _34 : _46;
-    assign _31 = _256;
+    assign _149 = 2'b10;
+    assign _150 = _72 == _149;
+    assign _328 = _150 ? _34 : _46;
+    assign _31 = _328;
     always @(posedge clock) begin
         if (clear)
             _46 <= _51;
         else
             _46 <= _31;
     end
-    assign _108 = 2'b01;
-    assign _109 = _72 == _108;
-    assign _257 = _109 ? _34 : _49;
-    assign _32 = _257;
+    assign _152 = 2'b01;
+    assign _153 = _72 == _152;
+    assign _329 = _153 ? _34 : _49;
+    assign _32 = _329;
     always @(posedge clock) begin
         if (clear)
             _49 <= _51;
@@ -638,40 +764,40 @@ module deadline_sequencer (
     always @* begin
         case (_72)
         0:
-            _269 <= _52;
+            _341 <= _52;
         1:
-            _269 <= _49;
+            _341 <= _49;
         2:
-            _269 <= _46;
+            _341 <= _46;
         default:
-            _269 <= _43;
+            _341 <= _43;
         endcase
     end
-    assign _271 = _269 + _270;
-    assign _267 = 4'b1101;
-    assign _268 = _54 == _267;
-    assign _272 = _268 ? _269 : _271;
+    assign _343 = _341 + _342;
+    assign _339 = 4'b1101;
+    assign _340 = _54 == _339;
+    assign _344 = _340 ? _341 : _343;
     assign _55 = 4'b1100;
-    assign _266 = _54 == _55;
-    assign _274 = _266 ? _273 : _272;
-    assign _264 = 4'b1010;
-    assign _265 = _54 == _264;
-    assign _280 = _265 ? _279 : _274;
-    assign _262 = 4'b1001;
-    assign _263 = _54 == _262;
-    assign _281 = _263 ? _278 : _280;
-    assign _260 = 4'b0110;
-    assign _261 = _54 == _260;
-    assign _285 = _261 ? _284 : _281;
-    assign _258 = 4'b0101;
+    assign _338 = _54 == _55;
+    assign _346 = _338 ? _345 : _344;
+    assign _336 = 4'b1010;
+    assign _337 = _54 == _336;
+    assign _352 = _337 ? _351 : _346;
+    assign _334 = 4'b1001;
+    assign _335 = _54 == _334;
+    assign _353 = _335 ? _350 : _352;
+    assign _332 = 4'b0110;
+    assign _333 = _54 == _332;
+    assign _357 = _333 ? _356 : _353;
+    assign _330 = 4'b0101;
     assign _54 = imem_data[15:12];
-    assign _259 = _54 == _258;
-    assign _291 = _259 ? _290 : _285;
-    assign _34 = _291;
-    assign _147 = 2'b00;
-    assign _148 = _72 == _147;
-    assign _292 = _148 ? _34 : _52;
-    assign _35 = _292;
+    assign _331 = _54 == _330;
+    assign _363 = _331 ? _362 : _357;
+    assign _34 = _363;
+    assign _188 = 2'b00;
+    assign _189 = _72 == _188;
+    assign _364 = _189 ? _34 : _52;
+    assign _35 = _364;
     always @(posedge clock) begin
         if (clear)
             _52 <= _51;
@@ -679,32 +805,32 @@ module deadline_sequencer (
             _52 <= _35;
     end
     always @* begin
-        case (_296)
+        case (_368)
         0:
-            _297 <= _52;
+            _369 <= _52;
         1:
-            _297 <= _49;
+            _369 <= _49;
         2:
-            _297 <= _46;
+            _369 <= _46;
         default:
-            _297 <= _43;
+            _369 <= _43;
         endcase
     end
     assign vdd = 1'b1;
-    assign _294 = _72 + _108;
-    assign _38 = _294;
+    assign _366 = _72 + _152;
+    assign _38 = _366;
     always @(posedge clock) begin
         if (clear)
-            _72 <= _147;
+            _72 <= _188;
         else
             _72 <= _38;
     end
-    assign _296 = _72 + _108;
-    assign _298 = { _296,
-                    _297 };
-    assign imem_addr = _298;
-    assign pin_out = _154;
-    assign pin_oe = _91;
+    assign _368 = _72 + _152;
+    assign _370 = { _368,
+                    _369 };
+    assign imem_addr = _370;
+    assign pin_out = _195;
+    assign pin_oe = _93;
     assign host_out = _69;
     assign host_out_valid = _65;
     assign host_in_ready = _2;

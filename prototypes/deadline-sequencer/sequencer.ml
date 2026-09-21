@@ -26,6 +26,7 @@ let create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
   let imm12 = select instr 11 0 and imm8 = select instr 7 0 in
   let pin_idx = select instr 11 9 and pin_val = bit instr 8 in
   let addr6 = select instr 5 0 in
+  let od = bit instr 7 in
   let mask8 = select instr 11 4 and setv = bit instr 3 and seto = bit instr 2 in
   let pin_bit = mux pin_idx (List.init 8 (fun i -> bit pin_in i)) in
   let pc_next = Variable.wire ~default:(pc +:. 1) in
@@ -34,6 +35,7 @@ let create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
   let dl_next = Variable.wire ~default:(mux2 (dl ==:. 0) dl (dl -:. 1)) in
   let stay = [ pc_next <-- pc ] in
   let with_pin_bit v = concat_lsb (List.init 8 (fun i -> mux2 (pin_idx ==:. i) v (bit pin_out.value i))) in
+  let with_oe_bit v = concat_lsb (List.init 8 (fun i -> mux2 (pin_idx ==:. i) v (bit pin_oe.value i))) in
   let sho_bit = mux2 pin_val (bit acc 7) (bit acc 0) in
   let opc o = of_int ~width:4 (Isa.code_of_op o) in
   compile
@@ -47,7 +49,8 @@ let create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
         ; opc LDA, [ acc_next <-- imm8 ]
         ; opc WAITP, [ if_ (pin_bit ==: pin_val) [] [ if_ (dl ==:. 0) [ pc_next <-- addr6 ] stay ] ]
         ; opc WAITD, [ if_ (dl ==:. 0) [] stay ]
-        ; opc SHO, [ pin_out <-- with_pin_bit sho_bit
+        ; opc SHO, [ if_ od [ pin_out <-- with_pin_bit gnd; pin_oe <-- with_oe_bit (~:sho_bit) ]
+                       [ pin_out <-- with_pin_bit sho_bit ]
                    ; acc_next <-- mux2 pin_val (sll acc 1) (srl acc 1)
                    ; cnt_next <-- cnt -:. 1 ]
         ; opc SHI, [ acc_next <-- mux2 pin_val (concat_msb [ select acc 6 0; pin_bit ])

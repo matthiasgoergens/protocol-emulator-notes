@@ -17,8 +17,9 @@
      5 WAITP pin[11:9] val[8] fail[5:0]
               proceed when pin_in[pin] = val; else if dl = 0 jump to fail; else stay
      6 WAITD                           proceed when dl = 0, else stay
-     7 SHO   pin[11:9] msb[8]          pin_out[pin] <- acc bit (msb ? bit 7 : bit 0); acc shifts;
-                                       cnt <- cnt - 1
+     7 SHO   pin[11:9] msb[8] od[7]    pin_out[pin] <- acc bit (msb ? bit 7 : bit 0); acc shifts;
+                                       cnt <- cnt - 1. With od set (open drain): pin_out[pin] <- 0
+                                       and pin_oe[pin] <- not bit, i.e. drive low for 0, release for 1
      8 SHI   pin[11:9] msb[8]          pin_in[pin] shifts into acc (msb ? at bit 0 : at bit 7);
                                        cnt <- cnt - 1
      9 JMP   addr[5:0]
@@ -52,7 +53,7 @@ let ldd n = enc LDD n
 let lda n = enc LDA (n land 0xFF)
 let waitp ~pin ~value ~fail = enc WAITP ((pin lsl 9) lor (value lsl 8) lor (fail land 0x3F))
 let waitd = enc WAITD 0
-let sho ~pin ~msb = enc SHO ((pin lsl 9) lor (msb lsl 8))
+let sho ?(od = 0) ~pin ~msb () = enc SHO ((pin lsl 9) lor (msb lsl 8) lor (od lsl 7))
 let shi ~pin ~msb = enc SHI ((pin lsl 9) lor (msb lsl 8))
 let jmp a = enc JMP (a land 0x3F)
 let jnz a = enc JNZ (a land 0x3F)
@@ -82,6 +83,7 @@ let step st ~(mem : int array array) ~pin_in ~host_in ~host_in_valid =
   let imm12 = instr land 0xFFF and imm8 = instr land 0xFF in
   let pin = (instr lsr 9) land 7 and pin_val = (instr lsr 8) land 1 in
   let addr6 = instr land 0x3F in
+  let od = (instr lsr 7) land 1 in
   let mask8 = (instr lsr 4) land 0xFF and setv = (instr lsr 3) land 1 and seto = (instr lsr 2) land 1 in
   let pin_bit = (pin_in lsr pin) land 1 in
   let pc_next = ref ((pc + 1) land (prog_len - 1)) in
@@ -101,7 +103,11 @@ let step st ~(mem : int array array) ~pin_in ~host_in ~host_in_valid =
    | WAITP -> if pin_bit <> pin_val then (if dl = 0 then pc_next := addr6 else stay ())
    | WAITD -> if dl <> 0 then stay ()
    | SHO ->
-     set_pin_bit (if pin_val = 1 then (acc lsr 7) land 1 else acc land 1);
+     let b = if pin_val = 1 then (acc lsr 7) land 1 else acc land 1 in
+     if od = 1 then begin
+       set_pin_bit 0;
+       st.pin_oe <- (st.pin_oe land lnot (1 lsl pin)) lor ((1 - b) lsl pin)
+     end else set_pin_bit b;
      acc_next := (if pin_val = 1 then (acc lsl 1) land 0xFF else acc lsr 1);
      cnt_next := (cnt - 1) land 0xFFF
    | SHI ->

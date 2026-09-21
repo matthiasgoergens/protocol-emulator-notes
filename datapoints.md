@@ -171,3 +171,14 @@ Place and route at 5 ns: die 31,488 um2, zero routing violations, setup
 slack +2.7 / +2.2 / +0.9 ns at fast / typical / slow corners, so the array
 runs at 200 MHz at the slow corner. 241 hold buffers were needed after
 clock-tree synthesis, which is the price of an all-register design.
+
+## 2026-09-22: protocol compiler demo on the deadline sequencer
+
+Three protocols compiled onto three threads (38, 27, 63 words), run on the
+RTL with an I2C slave model; interpreter and RTL agree on every cycle;
+independent decoders recover all payload bytes; edge spacings equal the
+closed forms with zero deviation. Fault injection: a stretched data bit
+breaks a mid-bit-sampling receiver at exactly half a bit of cumulative
+shift. Baud sweep: +-3.1 % decodes, +-6.2 % fails. The ISA gained an
+open-drain shift-out mode for I2C. Details in
+`prototypes/deadline-sequencer/README.md`.
