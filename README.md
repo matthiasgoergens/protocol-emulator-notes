@@ -8,6 +8,7 @@ I2C, to be fabricated on IHP's 130 nm process through a Tiny Tapeout shuttle.
 Nothing here is a finished design. It is the record of the brainstorming and
 of the measurements that followed, kept so that every number in the notes
 can be traced to the run that produced it.
+`PLAN.md` says where the measurements point and what comes next.
 
 ## Contents
 
@@ -21,6 +22,13 @@ can be traced to the run that produced it.
   under `hardware-2026-08/`), which is not included here.
 - `datapoints.md`: the running list of measured facts, each with a pointer
   to its raw run.
+- `prototypes/deadline-sequencer/`: a four-thread deterministic sequencer
+  in Hardcaml with an OCaml interpreter as its specification, a lockstep
+  test, a protocol compiler for UART, SPI and I2C, independent decoders,
+  fault injection and a baud sweep, plus area and place-and-route results.
+- `prototypes/systolic-matcher/`: a sixteen-cell systolic pattern
+  correlator in Hardcaml with a closed-form specification, lockstep and
+  directed tests, area and place-and-route results.
 - `measurements/pio-area/`: standard-cell area of an open-source RP2040
   PIO clone on IHP sg13g2, synthesised with Yosys, including two variants
   of its shift register with fixed shift widths.
@@ -44,6 +52,8 @@ file unless stated; details, caveats and logs sit next to each number.
 | Sparse variant without length-4 and length-6 wires | 19 % smaller; routes the same four protocol designs as the stock fabric at up to 83 % utilisation |
 | Hardened blocks as tiles | about 20K um2 of through-routing per tile regardless of content; about 160 um2 per extra block port |
 | Stock tile through place and route | routes with zero DRC violations at 77 % utilisation; die 72K to 84K um2; worst path about 32 ns at the typical corner before timing optimisation |
+| Deadline sequencer, four threads | 1,052 cells, 17.3K um2; closes 66 MHz at every corner with 7 ns slack on a 36.7K um2 die |
+| Systolic correlator, sixteen cells | 458 cells, 10.0K um2; closes 200 MHz at the slow corner on a 31.5K um2 die |
 
 ## Reproducing
 
