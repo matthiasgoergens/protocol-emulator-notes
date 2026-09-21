@@ -24,16 +24,18 @@ margin on IHP sg13g2; the reconfigurable fabric, which does not, did not.
 - **Proof-checked loading** (not proof-carrying: the chip cannot check a
   proof). The loader on the host consumes the compiler's proof and the
   chip trusts what it is handed, so bounds, ownership and timing checks
-  are software. The one thing that reaches the chip is provenance: a
-  readable hash or version of the loaded programme, so the host can
-  confirm that what runs is what it proved.
+  are software. Nothing needs to reach the chip, not even provenance:
+  the host knows what it loaded, and if it is ever unsure, reloading is
+  cheaper and more certain than reading anything back. Corruption after
+  loading is handled the same way, by reloading at every session start
+  and whenever in doubt.
 - **Health checks off the chip too.** An on-chip pin-ownership check
   costs about a tenth of the sequencer and prevents a drive fight that,
   on chip, warms a spot rather than killing the die; the fatal case is an
   external device driving a pad the chip also drives, which no on-chip
   check can see and a series resistor on the breakout board absorbs for
-  free. Keep the programme hash, move the watchdog to the RP2040 on the
-  demo board, and accept the residual risk.
+  free. Move the watchdog to the RP2040 on the demo board and accept the
+  residual risk.
 
 ## Move the function into data
 
