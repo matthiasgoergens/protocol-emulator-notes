@@ -16,7 +16,9 @@ can be traced to the run that produced it.
   that compares them and a `brainstorm-wild.md` that deliberately ignores
   where they agree. `second-layer/` pushes further into unusual execution
   models. Not every idea in them is original to this repository; some arrived
-  from outside and are recorded without attribution.
+  from outside and are recorded without attribution. They also refer to an
+  earlier, separate body of work on a chip reverse-engineering puzzle (paths
+  under `hardware-2026-08/`), which is not included here.
 - `datapoints.md`: the running list of measured facts, each with a pointer
   to its raw run.
 - `measurements/pio-area/`: standard-cell area of an open-source RP2040

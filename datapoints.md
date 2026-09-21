@@ -20,7 +20,7 @@ instruction.
 
 Measured 2026-09-16 with Yosys 0.68 against the IHP sg13g2 liberty file
 (area-oriented abc, no clock constraint, no place and route). Full notes,
-script and logs in `../pio-area-notes/`.
+script and logs in `measurements/pio-area/`.
 
 | Design | Cells | Area um2 | DFFs |
 | --- | --- | --- | --- |
