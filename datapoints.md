@@ -44,3 +44,24 @@ budget".
 Neywiny's 1.4K LUTs is most likely one effective machine: the uart_rx top's
 machine index is a constant, so synthesis removes machines 1 to 3. Ratio
 about 4 cells per LUT for the top, 2.5 for the shifter.
+
+## 2026-09-21: FABulous eFPGA tile and fabric area on sg13g2
+
+Measured with fabulous-fpga 2.2.0 and Yosys 0.68 against the IHP sg13g2
+liberty file, one latch plus inverter per configuration bit, area-mode abc,
+no place and route. Notes, scripts and logs in `../fabulous-notes/`.
+
+| Design | Area um2 | Of which config latches | Of which switch muxes |
+| --- | --- | --- | --- |
+| one LUT4AB tile (8 LUT4, 616 config bits), hierarchical | 39,039 | 22.4K (57 %) | 13.6K (35 %) |
+| same, flattened | 36,322 | 19.0K (52 %) | 13.6K (37 %) |
+| 4x4 LUT4AB fabric with IO, terminators and config controller, flattened | 607,704 | 306K (50 %) | 169K (28 %) |
+
+462 of the 616 tile config bits belong to the switch matrix, so routing
+plus its configuration is 77 to 78 % of a tile. This reproduces the
+"almost 80 %" figure from the collaboration mail on the stock fabric. Per
+LUT4 all-in about 4,750 um2, so the 6x4 allocation holds roughly 90 LUT4s
+at realistic utilisation with nothing else on the die. A hardened PIO
+machine (61.6K) is 1.7 CLB tiles, and a UART receiver in LUTs does not fit
+at all: the fabric can only be glue around hardened blocks. Largest lever
+is the configuration latch count, i.e. a sparser switch matrix.
