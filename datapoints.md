@@ -65,3 +65,19 @@ at realistic utilisation with nothing else on the die. A hardened PIO
 machine (61.6K) is 1.7 CLB tiles, and a UART receiver in LUTs does not fit
 at all: the fabric can only be glue around hardened blocks. Largest lever
 is the configuration latch count, i.e. a sparser switch matrix.
+
+## 2026-09-21, later: FABulous levers measured
+
+Same flow as above (details and logs in `../fabulous-notes/NOTES.md`).
+
+| Experiment | Result |
+| --- | --- |
+| Sparse routing: drop length-4 and length-6 wires | LUT4AB tile 616 to 514 config bits, 36,322 to 29,378 um2 (19 % smaller); routability not yet measured |
+| Hardened 8-bit shifter as a tile (13 ports) | tile 22,779 um2, block alone 1,281 (5.6 %) |
+| Hardened 32-bit PIO-style shifter as a tile (80 ports) | tile 33,558 um2, block alone 4,962 (14.8 %) |
+
+Reading: every tile carries about 20K um2 of through-routing and its
+latches regardless of content, and each extra block port costs only about
+160 um2. Tile count, not port count, is what a hardened-block fabric pays
+for; blocks worth hardening must be large enough to amortise the tile tax,
+or live outside the fabric with fixed wiring.
