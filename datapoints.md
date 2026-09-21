@@ -81,3 +81,22 @@ latches regardless of content, and each extra block port costs only about
 160 um2. Tile count, not port count, is what a hardened-block fabric pays
 for; blocks worth hardening must be large enough to amortise the tile tax,
 or live outside the fabric with fixed wiring.
+
+## 2026-09-21, later: FABulous LUT4AB tile through place and route
+
+LibreLane 3.0.14 in its container on IHP sg13g2, 20 ns clock, defaults
+otherwise; logs and metrics under `../fabulous-notes/synth/runs/`.
+
+| Target util | Die um2 | Final util | DRC violations | Setup worst slack |
+| --- | --- | --- | --- | --- |
+| 55 % | 83,772 | 65.5 % | 0 | -11.9 ns |
+| 65 % | 71,766 | 77.0 % | 0 | -13.0 ns |
+| FABulous's shipped 246 x 245 um floorplan | 60,270 | 91 % at CTS | placement failed | |
+
+Routing closes with room to spare at 77 % utilisation, so the routing
+share is an area fact, not a congestion problem. Timing repair adds about
+18 % to the synthesised cell area. A stock tile really costs 2.3 to 2.6
+Tiny Tapeout tiles, so the 6x4 allocation holds 75 to 85 LUT4s. Worst
+tile-crossing path is about 32 ns at the typical corner before any
+timing optimisation, so a fabric clock near 66 MHz is not available
+without pipelining; fast protocols must be hardened.
