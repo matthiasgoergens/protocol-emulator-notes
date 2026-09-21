@@ -137,3 +137,21 @@ on the stock tile. The sparse tile's 19 % saving holds after place and
 route. The LUT tile's worst path is about 32 ns typical and 45 ns at the
 slow corner; both hardened tiles close at 20 ns at every corner, so the
 LUT tile's slow paths are in the LUT input muxes, not the wire switching.
+
+## 2026-09-21, later: deadline sequencer prototype
+
+Four-thread deterministic sequencer in Hardcaml (`prototypes/deadline-sequencer/`),
+lockstep-tested against its OCaml interpreter on 300 random programmes x
+2000 cycles with zero mismatches, mutation-checked (inverted branch:
+514,694 mismatches), UART transmitter and deadline programmes passing.
+
+| Design | Cells | Area um2 | Flip-flops |
+| --- | --- | --- | --- |
+| deadline sequencer, 4 threads, instruction memory external | 1,052 | 17,300 | 179 |
+| one fpga_pio state machine (same flow) | 4,713 | 61,638 | 193 |
+| one FABulous LUT4AB tile (same flow) | 2,828 | 36,322 | 8 + 616 latches |
+
+Place and route at 15 ns: die 36,663 um2, zero routing violations, setup
+slack +8.2 / +7.8 / +7.3 ns at fast / typical / slow corners. The core
+runs at the competition clock at every corner where the LUT fabric does
+not reach it at any.
