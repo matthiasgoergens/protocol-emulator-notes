@@ -10,6 +10,7 @@ of the measurements that followed, kept so that every number in the notes
 can be traced to the run that produced it.
 `PLAN.md` says where the measurements point and what comes next;
 `techniques.md` lists the ways a big host can do the work a tiny chip cannot.
+`demos/` holds demonstration plans.
 
 ## Contents
 
