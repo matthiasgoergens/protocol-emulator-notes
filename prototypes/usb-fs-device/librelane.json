@@ -1,0 +1,14 @@
+{
+  "DESIGN_NAME": "usb_fs_device",
+  "VERILOG_FILES": ["dir::usb_fs_device.v"],
+  "CLOCK_PORT": "clock",
+  "CLOCK_PERIOD": 20.8,
+  "FP_SIZING": "relative",
+  "FP_CORE_UTIL": 55,
+  "PL_TARGET_DENSITY_PCT": 62,
+  "RUN_KLAYOUT_XOR": false,
+  "RUN_MAGIC_DRC": false,
+  "RUN_KLAYOUT_DRC": false,
+  "RUN_LVS": false,
+  "RUN_IRDROP_REPORT": false
+}

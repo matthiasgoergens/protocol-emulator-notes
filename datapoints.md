@@ -182,3 +182,16 @@ breaks a mid-bit-sampling receiver at exactly half a bit of cumulative
 shift. Baud sweep: +-3.1 % decodes, +-6.2 % fails. The ISA gained an
 open-drain shift-out mode for I2C. Details in
 `prototypes/deadline-sequencer/README.md`.
+
+## 2026-09-22: USB full-speed device prototype
+
+Receiver, transmitter and protocol engine in Hardcaml
+(`prototypes/usb-fs-device/`), enumerated in simulation by a bit-level host
+model written from the specification: device and configuration
+descriptors, SET_ADDRESS, SET_CONFIGURATION, bulk loopback, NAK on empty,
+rejection of a corrupted packet, silence to a wrong address, every reply
+within the 2 to 6.5 bit-time window. Two planted bugs caught.
+
+| Design | Cells | Area um2 | Flip-flops | Place and route |
+| --- | --- | --- | --- | --- |
+| USB full-speed device, 48 MHz | 1,917 | 29,669 | 305 | die 67,671 um2, slack +11.7 ns at the slow corner, 0 violations |
