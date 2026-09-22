@@ -1,0 +1,14 @@
+{
+  "DESIGN_NAME": "eth_10base_t",
+  "VERILOG_FILES": ["dir::eth_10base_t.v"],
+  "CLOCK_PORT": "clock",
+  "CLOCK_PERIOD": 16.67,
+  "FP_SIZING": "relative",
+  "FP_CORE_UTIL": 55,
+  "PL_TARGET_DENSITY_PCT": 62,
+  "RUN_KLAYOUT_XOR": false,
+  "RUN_MAGIC_DRC": false,
+  "RUN_KLAYOUT_DRC": false,
+  "RUN_LVS": false,
+  "RUN_IRDROP_REPORT": false
+}

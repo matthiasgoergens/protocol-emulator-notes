@@ -204,3 +204,14 @@ the raw one-bit stream: 1 kHz tone at exactly the expected -12.0 dB,
 harmonics below -100 dB, in-band signal-to-noise 68.0 dB at a 3 MHz bit
 rate. 1,136 cells, 14,779 um2 synthesised; place and route at 48 MHz:
 die 37285 um2, utilisation 68 %, routing violations 0, setup slack +14.5 / +13.5 / +11.4 ns at fast / typical / slow.
+
+## 2026-09-22: 10BASE-T Ethernet, digital side
+
+Transmitter and receiver in Hardcaml (`prototypes/ethernet-10base-t/`),
+checked against a host model that builds a UDP/IPv4 frame and encodes and
+decodes the line independently: transmitter frame decoded with correct
+FCS, transition spacings exact, link pulses at the configured period,
+receiver accepts the model's frame and the transmitter's own and rejects
+a corrupted one. At 60 MHz a half bit is exactly three cycles, so no
+fractional timing is needed. 1,002 cells, 16,347 um2 synthesised; place
+and route at 60 MHz: die 41154 um2, utilisation 78 %, routing violations 0, setup slack +11.2 / +10.1 / +8.3 ns at fast / typical / slow.
