@@ -195,3 +195,12 @@ within the 2 to 6.5 bit-time window. Two planted bugs caught.
 | Design | Cells | Area um2 | Flip-flops | Place and route |
 | --- | --- | --- | --- | --- |
 | USB full-speed device, 48 MHz | 1,917 | 29,669 | 305 | die 67,671 um2, slack +11.7 ns at the slow corner, 0 violations |
+
+## 2026-09-22: one-bit synthesiser prototype
+
+Phase accumulator, sine table, note sequencer and second-order sigma-delta
+modulator (`prototypes/one-bit-synth/`), verified by a windowed spectrum of
+the raw one-bit stream: 1 kHz tone at exactly the expected -12.0 dB,
+harmonics below -100 dB, in-band signal-to-noise 68.0 dB at a 3 MHz bit
+rate. 1,136 cells, 14,779 um2 synthesised; place and route at 48 MHz:
+die 37285 um2, utilisation 68 %, routing violations 0, setup slack +14.5 / +13.5 / +11.4 ns at fast / typical / slow.
