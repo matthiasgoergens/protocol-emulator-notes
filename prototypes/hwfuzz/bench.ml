@@ -152,10 +152,77 @@ let usb_session =
   ^ pkt [ 0x2D; 0; 0 ] ^ pkt ~gap:2 [ 0xC3; 0x00; 0x05; 0x05; 0x00; 0x00; 0x00; 0x00; 0x00 ]
   ^ pkt ~gap:3 [ 0x69; 0; 0 ] ^ pkt ~gap:1 [ 0xD2 ]
 
+
+(* ---- the 10BASE-T receiver against the independent model decoder, with ground truth ---- *)
+
+let eth_h = 3   (* 60 MHz: three cycles per half bit *)
+
+(* what the transducer sent, for the observer of the same execution (same domain) *)
+let eth_truth : (int list * int array) ref Domain.DLS.key = Domain.DLS.new_key (fun () -> ref ([], [||]))
+
+(* Input after byte 0: a length byte (payload 1..64 bytes), the payload, then perturbation records
+   of 3 bytes: a position (16 bits, modulo the frame's length) and a kind: 0 an edge one cycle
+   late, 1 one cycle early, 2 a one-cycle glitch, 3 activity lost for 1..4 cycles with the line
+   near zero, 4..7 activity lost for 1..4 cycles while the line keeps its level (squelch off,
+   polarity still visible). The comparator is modelled with hysteresis: near zero it keeps its
+   last output, as a real line comparator does, rather than reading low. The frame is
+   the payload plus its FCS, line-coded by the model (preamble, SFD, Manchester, TP_IDL). *)
+let eth_stream (s : string) =
+  let n = String.length s in
+  let len = if n > 1 then 1 + Char.code s.[1] mod 64 else 1 in
+  let payload = List.init len (fun k -> if 2 + k < n then Char.code s.[2 + k] else 0) in
+  let smp = Array.of_list (Eth.Eth_model.encode_frame ~h:eth_h payload) in
+  let m = Array.length smp in
+  let act = Array.map (fun v -> v <> 0) smp in
+  let i = ref (2 + len) in
+  while !i + 2 < n do
+    let pos = ((Char.code s.[!i] lsl 8) lor Char.code s.[!i + 1]) mod m and kind = Char.code s.[!i + 2] in
+    (match kind land 7 with
+     | 0 -> if pos > 0 then smp.(pos) <- smp.(pos - 1)
+     | 1 -> if pos + 1 < m then smp.(pos) <- smp.(pos + 1)
+     | 2 -> smp.(pos) <- - smp.(pos)
+     | 3 -> for k = pos to min (m - 1) (pos + (kind lsr 3) land 3) do smp.(k) <- 0; act.(k) <- false done
+     | _ -> for k = pos to min (m - 1) (pos + (kind lsr 3) land 3) do act.(k) <- false done);
+    i := !i + 3
+  done;
+  (* the model sees a sample of 0 wherever activity is lost; the RTL sees the comparator and flag *)
+  let model_smp = Array.mapi (fun k v -> if act.(k) then v else 0) smp in
+  let pad a z = Array.concat [ Array.make 20 z; a; Array.make 60 z ] in
+  let smp = pad smp 0 and act = pad act false in
+  (Domain.DLS.get eth_truth) := (payload @ Eth.Eth_model.fcs_bytes payload, pad model_smp 0);
+  let last = ref 0 in
+  Array.mapi (fun k v ->
+    if v > 0 then last := 1 else if v < 0 then last := 0;
+    [ ("rx", !last); ("rx_active", if act.(k) then 1 else 0) ]) smp
+
+(* Verdicts, as observed features: 1 the RTL accepts (good CRC) bytes that were not sent;
+   2 the model decodes the sent frame but the RTL does not accept it; 3 the RTL accepts it but the
+   model does not; 20 the RTL accepts the frame, 21 the model decodes it. *)
+let eth_observer () =
+  let cur = ref [] and frames = ref [] in
+  { Hwfuzz.observe = (fun ~cycle:_ get ->
+      if get "byte_valid" = 1 then cur := get "rx_byte" :: !cur;
+      if get "frame_end" = 1 then (frames := (List.rev !cur, get "crc_ok" = 1) :: !frames; cur := []));
+    finish = (fun () ->
+      let truth, smp = !(Domain.DLS.get eth_truth) in
+      let model_ok = List.mem truth (Eth.Eth_model.decode ~h:eth_h smp) in
+      let rtl_ok = List.exists (fun (bs, ok) -> ok && bs = truth) !frames in
+      let false_accept = List.exists (fun (bs, ok) -> ok && bs <> truth) !frames in
+      List.filter_map Fun.id
+        [ (if false_accept then Some 1 else None); (if model_ok && not rtl_ok then Some 2 else None);
+          (if rtl_ok && not model_ok then Some 3 else None); (if rtl_ok then Some 20 else None);
+          (if model_ok then Some 21 else None) ]) }
+
+let eth_target =
+  { Hwfuzz.name = "eth"; circuit = (fun () -> Eth.Eth_rx.circuit ~h:eth_h); clock = "clock"; clear = Some "clear";
+    max_cycles = 20_000; observer = Some eth_observer; stream = Some eth_stream }
+
 let target name =
   let circuit, max_cycles = match name with
     | "lock4" -> lock 4, 256 | "lock8" -> lock 8, 256 | "packet" -> packet, 512
-    | "usb" | "usb-raw" | "usb-faulty" -> Usb.Usb_dev.circuit, 0 | _ -> failwith ("unknown target " ^ name) in
+    | "usb" | "usb-raw" | "usb-faulty" -> Usb.Usb_dev.circuit, 0
+    | "eth" -> (fun () -> Eth.Eth_rx.circuit ~h:eth_h), 0 | _ -> failwith ("unknown target " ^ name) in
+  if name = "eth" then eth_target else
   if name = "usb" then usb_target ~repair:true () else
   if name = "usb-raw" then usb_target ~repair:false () else
   if name = "usb-faulty" then usb_target ~faulty:true ~repair:true () else
@@ -317,4 +384,121 @@ let () =
       end) rows;
     if !seg <> [] then Printf.printf "input ends at cycle %d while the device is still transmitting (%d cycles in, started %d)\n"
         (Array.length rows) (List.length !seg) !start
+  | _ -> ()
+
+(* Ethernet: check the target on unperturbed frames, then fuzz and save each kind of disagreement *)
+let () =
+  match Array.to_list Sys.argv with
+  | [ _; "ethcheck" ] ->
+    let inst = Hwfuzz.instrument eth_target in
+    List.iter (fun (name, s) ->
+      let r = Hwfuzz.execute eth_target inst s in
+      Printf.printf "%s: observed %s\n" name (String.concat "," (List.map string_of_int (List.sort compare r.observed))))
+      [ ("clean 20-byte frame", "\000\019" ^ String.init 20 (fun i -> Char.chr (i * 37 land 255)));
+        ("clean 64-byte frame", "\000\063" ^ String.init 64 (fun i -> Char.chr (i * 11 land 255)));
+        ("glitch mid-frame", "\000\019" ^ String.init 20 (fun i -> Char.chr (i * 37 land 255)) ^ "\003\000\002") ]
+  | [ _; "ethfuzz"; budget; seed ] ->
+    let r = Hwfuzz.campaign ~budget:(int_of_string budget) ~fresh:false ~seed:(int_of_string seed) eth_target in
+    List.iter (fun (f, e) -> Printf.printf "verdict %d first at %d executions\n" f e) (List.sort compare r.first_hit);
+    let inst = Hwfuzz.instrument eth_target in
+    let saved = Hashtbl.create 4 in
+    Array.iter (fun (s, _) ->
+      let res = Hwfuzz.execute eth_target inst s in
+      List.iter (fun v -> if v < 10 && not (Hashtbl.mem saved v) then begin
+        Hashtbl.replace saved v ();
+        let path = Printf.sprintf "results-eth/verdict%d_seed%s.bin" v seed in
+        Out_channel.with_open_bin path (fun oc -> output_string oc s);
+        Printf.printf "saved %s (%d bytes)\n" path (String.length s) end) res.observed) r.queue;
+    Printf.printf "coverage %d queue %d\n" r.coverage (Array.length r.queue)
+  | _ -> ()
+
+(* minimise an Ethernet reproducer for one verdict, then explain it *)
+let () =
+  match Array.to_list Sys.argv with
+  | [ _; "ethshow"; path; verdict ] ->
+    let v = int_of_string verdict in
+    let inst = Hwfuzz.instrument eth_target in
+    let holds s = List.mem v (Hwfuzz.execute eth_target inst s).observed in
+    let s0 = In_channel.with_open_bin path In_channel.input_all in
+    assert (holds s0);
+    let parse s =
+      let n = String.length s in
+      let len = 1 + Char.code s.[1] mod 64 in
+      let payload = String.sub s 2 (min len (n - 2)) in
+      let recs = List.init (max 0 ((n - 2 - len) / 3)) (fun k -> String.sub s (2 + len + 3 * k) 3) in
+      (len, payload, recs) in
+    let build (len, payload, recs) = "\000" ^ String.make 1 (Char.chr (len - 1)) ^ payload ^ String.concat "" recs in
+    (* drop perturbations one at a time, then shorten the payload, while the verdict holds *)
+    let cur = ref (parse s0) in
+    let changed = ref true in
+    while !changed do
+      changed := false;
+      let (len, payload, recs) = !cur in
+      List.iteri (fun k _ ->
+        if not !changed then begin
+          let c = (len, payload, List.filteri (fun j _ -> j <> k) recs) in
+          if holds (build c) then (cur := c; changed := true)
+        end) recs;
+      if not !changed && len > 1 then begin
+        let c = (len - 1, String.sub payload 0 (len - 1), recs) in
+        if holds (build c) then (cur := c; changed := true)
+      end
+    done;
+    let (len, payload, recs) = !cur in
+    let s = build !cur in
+    Out_channel.with_open_bin (Filename.remove_extension path ^ "_min.bin") (fun oc -> output_string oc s);
+    let sent = List.init len (fun k -> Char.code payload.[k]) in
+    let m = List.length (Eth.Eth_model.encode_frame ~h:eth_h sent) in
+    Printf.printf "verdict %d, minimised: payload %d bytes, %d perturbation(s)\n" v len (List.length recs);
+    List.iter (fun r ->
+      let pos = ((Char.code r.[0] lsl 8) lor Char.code r.[1]) mod m and kind = Char.code r.[2] in
+      let bit = pos / (2 * eth_h) and within = pos mod (2 * eth_h) in
+      Printf.printf "  %s at sample %d = bit %d (%s), cycle %d of the bit\n"
+        (match kind land 7 with 0 -> "edge one cycle late" | 1 -> "edge one cycle early" | 2 -> "one-cycle glitch"
+                          | 3 -> Printf.sprintf "line near zero (comparator holds) for %d cycles" (1 + (kind lsr 3) land 3)
+                          | _ -> Printf.sprintf "squelch off (polarity visible) for %d cycles" (1 + (kind lsr 3) land 3))
+        pos bit (if bit < 64 then "preamble/SFD" else Printf.sprintf "frame byte %d" ((bit - 64) / 8)) within) recs;
+    let res = Hwfuzz.execute eth_target inst s in
+    let _, smp = !(Domain.DLS.get eth_truth) in
+    let model = Eth.Eth_model.decode ~h:eth_h smp in
+    Printf.printf "  model decodes %d frame(s): %s\n" (List.length model)
+      (String.concat "; " (List.map (fun f -> Printf.sprintf "%d bytes%s" (List.length f)
+                                        (if f = sent @ Eth.Eth_model.fcs_bytes sent then " (the sent frame)" else "")) model));
+    Printf.printf "  observed verdicts %s\n" (String.concat "," (List.map string_of_int (List.sort compare res.observed)))
+  | _ -> ()
+
+(* the receiver's recovered bits, against the bits sent, for one reproducer *)
+let () =
+  match Array.to_list Sys.argv with
+  | [ _; "ethtrace"; path ] ->
+    let s = In_channel.with_open_bin path In_channel.input_all in
+    let rows = eth_stream s in
+    let truth, _ = !(Domain.DLS.get eth_truth) in
+    let sent_bits = List.concat_map Eth.Eth_model.bits_of_byte (List.init 7 (fun _ -> 0x55) @ [ 0xD5 ] @ truth) in
+    let c =
+      let open Signal in
+      let clock = input "clock" 1 and clear = input "clear" 1 and rx = input "rx" 1 and rx_active = input "rx_active" 1 in
+      let _, bv, fe, ok, bit, bitv = Eth.Eth_rx.create ~clock ~clear ~h:eth_h ~rx ~rx_active in
+      Circuit.create_exn ~name:"eth_rx_trace" [ output "bv" bv; output "fe" fe; output "ok" ok; output "bit" bit; output "bitv" bitv ] in
+    let sim = Cyclesim.create c in
+    let ip n = Cyclesim.in_port sim n and op n = Bits.to_int !(Cyclesim.out_port sim n) in
+    ip "clear" := Bits.vdd; Cyclesim.cycle sim; ip "clear" := Bits.gnd;
+    let got = Buffer.create 256 in
+    Array.iteri (fun cyc ch ->
+      List.iter (fun (nm, v) -> ip nm := Bits.of_int ~width:1 v) ch;
+      Cyclesim.cycle sim;
+      if op "bitv" = 1 then Buffer.add_char got (if op "bit" = 1 then '1' else '0');
+      if op "fe" = 1 then Buffer.add_string got (Printf.sprintf " |end at cycle %d crc_ok=%d| " cyc (op "ok"))) rows;
+    Printf.printf "sent: %s\n" (String.concat "" (List.map string_of_int (List.filteri (fun i _ -> i < 96) sent_bits)));
+    Printf.printf "rtl:  %s\n" (Buffer.contents got)
+  | _ -> ()
+
+let () =
+  match Array.to_list Sys.argv with
+  | "ethverdict" :: _ :: files | _ :: "ethverdict" :: files ->
+    let inst = Hwfuzz.instrument eth_target in
+    List.iter (fun f ->
+      let s = In_channel.with_open_bin f In_channel.input_all in
+      let r = Hwfuzz.execute eth_target inst s in
+      Printf.printf "%s: verdicts %s\n" f (String.concat "," (List.map string_of_int (List.sort compare r.observed)))) files
   | _ -> ()

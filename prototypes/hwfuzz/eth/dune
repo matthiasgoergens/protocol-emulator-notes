@@ -1,0 +1,4 @@
+; the 10BASE-T prototype's sources, via symlinks
+(library
+ (name eth)
+ (libraries hardcaml))

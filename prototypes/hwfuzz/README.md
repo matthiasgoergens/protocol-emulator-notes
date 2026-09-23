@@ -52,6 +52,8 @@ Each entry records what a heuristic was measured on and what it did. Hypothesis 
 
    Operator yield on the lock, wins per use: input-to-state about 1 in 18, the dictionary as a havoc operator about 1 in 2,000.
 
+4. **Held inputs hide one-cycle events.** A value held across several cycles, read by a level-sensitive strobe, advances a state machine and then resets it on the next cycle. Input-to-state on its own then oscillates. The pulse variants in 3 are the generic fix, since strobes and valids are common.
+
 5. **The ladder at 10 seeds** (`sweep.sh`, commit 90c4795, results in `results/`). Each rung is a configuration switch.
 
    | Target | Configuration | Opened (of 10 seeds) | Median executions to open |
@@ -70,10 +72,27 @@ Each entry records what a heuristic was measured on and what it did. Hypothesis 
    - Once input-to-state chains, each extra key costs a handful of executions, so twice the keys costs about a third more work.
    - The locks are too easy to separate restarts from islands; the packet benchmark has to answer that.
 
-4. **Held inputs hide one-cycle events.** A value held across several cycles, read by a level-sensitive strobe, advances a state machine and then resets it on the next cycle. Input-to-state on its own then oscillates. The pulse variants in 3 are the generic fix, since strobes and valids are common.
+6. **The first violation tests the oracle.** The first long USB campaign reported a malformed transmission from the unmodified device. Reproduced and minimised to 19 bytes, it turned out to be an oracle bug. The input ended 51 cycles into the device's reply, and the observer judged the cut-off reply. With the reply allowed to finish, it is a correct STALL. An observation cut off by the end of a run must stay unjudged, and a transducer should leave time for the design to answer. Keep the reproducer: `results-usb/violation_usb_0.*`.
+
+7. **Differential fuzzing with ground truth finds real disagreements, and the ranking matters.** Target: the 10BASE-T receiver against the prototype's own model decoder. The transducer sends a known frame through the model's encoder and adds timing faults; the fuzzer drives only the faults. Verdicts:
+   - the RTL accepts wrong bytes (a false accept): never seen, in 9 campaigns of 20,000 executions;
+   - the RTL drops a frame the model decodes;
+   - the model drops a frame the RTL accepts.
+
+   Both drop directions appear within about 1,000 executions, and each reproducer minimises to a single perturbation (`bench ethshow`).
+   - **Fixed in the RTL.** A 2-cycle activity dropout mid-frame ended the frame, because one inactive cycle ended it. Now the frame ends after a full bit time of inactivity.
+   - **Not fixed: a front-end question.** Other disagreements depend on what the comparator does while the squelch is off.
+     - If it reads low: holding the last level fixes four cases and loses one.
+     - If it keeps the polarity or has hysteresis: the RTL should not mask in-frame transitions with activity. But that change fails the prototype's own harness, which models a comparator without hysteresis.
+     - Each design is robust under one front-end model. Which is right is a property of the board, so the transducer now models the comparator with hysteresis and the question is recorded in `../ethernet-10base-t/README.md`.
+   - The lesson for the tool: a transducer's physical assumptions are part of the oracle, and a disagreement can indict them rather than either decoder.
+
+8. **Speed is part of the method.** On the USB device, per-cycle coverage extraction initially made simulation 6 times slower than plain Hardcaml simulation. Three changes brought instrumented simulation from 17,000 to 99,000 cycles per second on one core:
+   - reusing a simulator per worker when every register has a clear (checked against rebuilt simulators);
+   - reading probes in 62-bit chunks;
+   - logging comparison operands only when they change.
 
 ## Next
 
-- Differential fuzzing against models: the prototypes' lockstep checks become oracles.
-- Fuzzing the USB and Ethernet receivers.
+- More differential targets: the deadline sequencer against its ISA model, the systolic matcher.
 - A snapshot-and-restore for speed on large designs.

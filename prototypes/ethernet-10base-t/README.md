@@ -60,3 +60,12 @@ that happens.
 One tooling note: an output port named `byte` passed Yosys but failed
 LibreLane's Verilator lint, since it is a SystemVerilog keyword; it is
 now `rx_byte`.
+
+## Found by differential fuzzing (2026-09-24)
+
+`../hwfuzz` fuzzes this receiver against `eth_model.ml`'s decoder, with the frame actually sent as ground truth. `bench.ml` has the `eth` target, and the reproducers are in `../hwfuzz/results-eth/`. No false accept was ever seen: the receiver never passed a CRC with wrong bytes. Two things came out.
+
+- **Fixed.** A 2-cycle loss of the activity flag mid-frame truncated the frame, because one inactive cycle ended it. The frame now ends after a full bit time (2h - 1 cycles) without activity, or two bit times without a transition, as before.
+- **Open, a board question.** The receiver ignores comparator transitions while activity is low. It is right to if the comparator reads low when the squelch is off: the test harness in `main.ml` models it that way, and then the idle after TP_IDL would otherwise add a spurious bit. It is wrong to if the comparator keeps showing the line's polarity, or holds its output by hysteresis, during a short squelch dropout. Then a mid-bit transition inside a 2- to 4-cycle dropout is lost and the frame fails its CRC, while the model decodes it.
+
+  Letting in-frame transitions through fixes that case and breaks the harness's idle case. The right choice depends on the comparator and squelch circuit on the board. Measure the front end, then pick one, and update the harness to model the same comparator.

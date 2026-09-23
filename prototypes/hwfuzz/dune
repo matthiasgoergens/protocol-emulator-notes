@@ -6,4 +6,4 @@
 (executable
  (name bench)
  (modules bench)
- (libraries hwfuzz hardcaml usb unix))
+ (libraries hwfuzz hardcaml usb eth unix))
