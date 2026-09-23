@@ -52,6 +52,24 @@ Each entry records what a heuristic was measured on and what it did. Hypothesis 
 
    Operator yield on the lock, wins per use: input-to-state about 1 in 18, the dictionary as a havoc operator about 1 in 2,000.
 
+5. **The ladder at 10 seeds** (`sweep.sh`, commit 90c4795, results in `results/`). Each rung is a configuration switch.
+
+   | Target | Configuration | Opened (of 10 seeds) | Median executions to open |
+   |---|---|---|---|
+   | 4-key lock, 50,000 per seed | random inputs | 0 | – |
+   | | coverage only | 0 | – |
+   | | + dictionary | 0 | – |
+   | | + input-to-state | 0 | – |
+   | | + one-cycle pulse | 0 | – |
+   | | + next pulse (full) | 10 | 1,504 |
+   | 8-key lock, 200,000 per seed | full | 10 | 1,991 |
+   | | 4 independent restarts | 10 | 1,994 |
+   | | 4 islands with sync | 10 | 1,994 |
+
+   - The next-pulse variant is the whole difference on the lock.
+   - Once input-to-state chains, each extra key costs a handful of executions, so twice the keys costs about a third more work.
+   - The locks are too easy to separate restarts from islands; the packet benchmark has to answer that.
+
 4. **Held inputs hide one-cycle events.** A value held across several cycles, read by a level-sensitive strobe, advances a state machine and then resets it on the next cycle. Input-to-state on its own then oscillates. The pulse variants in 3 are the generic fix, since strobes and valids are common.
 
 ## Next
