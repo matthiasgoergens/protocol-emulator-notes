@@ -243,3 +243,14 @@ off. A second background accumulator XORed with the first gives a
 rotozoomer. Lockstep on the PAL build: 720 random lines, 0 mismatches.
 540-field demo reel (copper bars and sine scroller, rotozoomer, 3D star
 field) and 120-field game rendered through the software TV.
+
+## 2026-09-23: the crazy network
+
+A ring of 64 cells with 37 randomly drawn sparse links (`prototypes/crazy-network/`),
+explored by random sampling (2,000 programs: 80 % noise), single-objective
+evolution (gamed into boring stripes, after first breeding noise through a
+precedence bug in its score), MAP-Elites (56 of 100 descriptor cells
+filled) and judged evolution. RTL against the model: 368,640 pixel samples,
+0 mismatches; planted bug caught. 14,412 cells, 218,616 um2 synthesised,
+mostly program storage in flip-flops. Through the software TV, the coarse
+finds survive composite video and the fine ones become colour noise.
