@@ -151,3 +151,90 @@ And treat failure as information: a failed search points at the link or
 table entry that would have made it possible, which is how the hardware
 should grow. Keep long wires few and visible to the router early; they
 are what made an eFPGA tile 78 % routing.
+
+## Topology once, programs forever
+
+The wiring is fixed at tapeout; schedules, routes and programs stay
+software for the life of the chip. So choose the topology for the unknown:
+hold back some target programs as a test set, weigh general quality (the
+expander eigenvalue gap) alongside today's workloads, keep a handful of
+switchable links (a configuration bit picks one of two or three endpoints)
+for demos nobody has thought of yet, and let the host route around dead
+cells or links on each die after fabrication. A random, well-connected
+wiring is good at everything and best at nothing: an arbitrary
+communication pattern costs a small factor over its ideal wiring, an FFT
+about a log factor, while a specialised wiring can be useless outside its
+target. That is the right trade when the workload is unknown; a mixed
+design (nearest neighbours, a few structured links for known algorithms,
+random shortcuts for everything else) takes both.
+
+## Expanders
+
+A sparse graph in which every group of nodes has many links leaving it.
+Random sparse graphs are expanders with high probability, which is why a
+few random shortcuts work. Uses here: a selection metric (the gap between
+the first two eigenvalues of the adjacency matrix, milliseconds to compute
+per candidate wiring); fault tolerance (removing a few links barely hurts);
+error correction (LDPC and expander codes are sparse graphs of parity
+checks decoded by local message passing, the shape of a sparse systolic
+array); cheap randomness (walks on expanders stretch a few random bits);
+low-congestion routing. The best expanders, Ramanujan graphs, have
+explicit constructions from primes, so primes and randomness are two
+routes to the same property. The famous theoretical uses (AKS sorting)
+have impractical constants.
+
+## Weights from wiring
+
+Moving data can be equivalent to weighting it:
+- **Delay as weight.** In bit-serial arithmetic (least significant bit
+  first) a stream delayed by k clocks is multiplied by 2^k; summing several
+  delayed paths from one input builds any integer weight from powers of
+  two, and the host picks which paths to enable.
+- **Path counts as weights.** Feeding a counter or majority vote, a signal
+  wired to three inputs has weight three. In a network of delays feeding a
+  sum, a filter's impulse response is the histogram of path delays, shaped
+  by choosing which links to enable; inverting links give negative weights.
+  On a one-bit PDM stream this is the noise-cancelling FIR.
+- **Random paths as independence.** Stochastic computing multiplies with an
+  AND gate but needs independent streams; a copy routed along a different
+  random path is nearly independent.
+- **Distributed arithmetic.** Route the bits of the inputs to address a
+  table of precomputed coefficient sums: multiplier-free filters, standard
+  in FPGAs.
+Limits: resolution is set by the paths and delays available, every enabled
+path counts (so unintended ones must be ruled out), and delays add latency.
+
+## Hard workloads, restricted
+
+Dense run-time arithmetic is the one thing this architecture is poor at,
+and most applications have a restricted form that avoids it:
+- **3D.** Fixed camera paths rendered entirely on the host; rigid objects
+  with precomputed rotation tables; flat-shaded polygons as per-line span
+  lists computed by the CPU and filled by the chip (one new primitive);
+  planes by additions, as the rotozoomer and perspective ground already do.
+- **Adaptive filters.** Sign-sign LMS (updates are adds and subtracts),
+  power-of-two coefficients (shifts), the one-bit PDM domain, and slow
+  adaptation done by the microcontroller.
+- **Neural networks.** Binary weights and activations make a
+  multiply-accumulate an XNOR and a bit count, which is the systolic
+  correlator; lookup-table networks make each neuron a truth table and the
+  network wiring. Training is on the host.
+Pick demos whose inputs are known in advance or few, whose work is moving
+and matching bits, whose arithmetic is additions or small lookups, and
+where timing matters more than throughput; and name the limit in the
+write-up before a judge does.
+
+## Rings and self-running displays
+
+Closing an array into a ring turns it into a delay-line memory. A ring of
+line packets recirculates the display list, so a static scene costs the CPU
+nothing; a ring length different from the field length scrolls the picture
+for free; one update stage at a fixed point on the ring serves every record
+as it passes (a velocity field makes a thousand objects move with one
+adder), and with neighbour-based rules the display list becomes a cellular
+automaton that draws itself. Programming it means choosing initial contents
+and rules whose natural motion is the wanted animation (periods from small
+coprime ring lengths via the Chinese remainder theorem), the drum-memory
+art. In the per-pixel sprite pipeline a ring gives each pixel ten passes
+through sixteen cells, 160 operation slots, a per-pixel program scheduled
+by the compiler.
