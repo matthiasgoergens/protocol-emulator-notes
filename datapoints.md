@@ -254,3 +254,11 @@ filled) and judged evolution. RTL against the model: 368,640 pixel samples,
 0 mismatches; planted bug caught. 14,412 cells, 218,616 um2 synthesised,
 mostly program storage in flip-flops. Through the software TV, the coarse
 finds survive composite video and the fine ones become colour noise.
+
+## 2026-09-23: wave engine and "Interference"
+
+Up to ten plane waves summed per pixel by a ten-record ring rotating once per
+clock (one sine table, one phase adder), PAL (`prototypes/wave-engine/`).
+Lockstep: 480 random lines, 0 mismatches; planted phase drift: 1,466
+mismatches. 6,388 cells, 112,258 um2. An original game where invaders are
+waves and the player cancels them by destructive interference.
