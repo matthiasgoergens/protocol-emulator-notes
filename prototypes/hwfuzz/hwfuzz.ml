@@ -33,22 +33,36 @@ type target = {
   clear : string option;
   max_cycles : int;
   observer : (unit -> observer) option;
+  stream : (string -> (string * int) list array) option;
+  (* Optional transducer from the fuzz input to per-cycle port changes, replacing the generic
+     record decoding: the hardware fuzzer's version of an AFL++ custom post-processor, for
+     inputs with framing, line coding or checksums the design checks. *)
 }
 
 type instrumented = {
+  id : int;
   circuit : Circuit.t;
+  resettable : bool;   (* every register has a clear and there are no memories: a simulator can be
+                          reused, reset by one cycle of clear, instead of rebuilt per execution *)
   dec_widths : int array;
   reg_widths : int array;
   cmp_widths : int array;
+  (* each probe family is read through outputs of at most 62 bits, so one Bits.to_int per chunk per
+     cycle: (output name, (probe index, bit offset, width) array) *)
+  dec_layout : (string * (int * int * int) array) array;
+  reg_layout : (string * (int * int * int) array) array;
+  cmp_layout : (string * (int * int * int) array) array;
   data_ports : (string * int) list;   (* inputs other than clock and clear *)
   out_ports : (string * int) list;    (* the original outputs, at most 62 bits wide *)
 }
+
+let next_id = ref 0
 
 let instrument (t : target) =
   let c = t.circuit () in
   let g = Circuit.signal_graph c in
   let seen = Hashtbl.create 1024 in
-  let decs = ref [] and regs = ref [] and cmps = ref [] in
+  let decs = ref [] and regs = ref [] and cmps = ref [] and resettable = ref (t.clear <> None) in
   let add_dec s =
     let u = Signal.uid s in
     let is_const = match s with Signal.Type.Const _ -> true | _ -> false in
@@ -60,24 +74,38 @@ let instrument (t : target) =
       add_dec s;
       (* CmpLog, as in AFL++: the operands of comparisons are the magic values inputs need *)
       if Signal.width arg_a <= 32 then cmps := arg_b :: arg_a :: !cmps
-    | Reg _ -> regs := s :: !regs
+    | Reg { register; _ } ->
+      if Signal.is_empty register.reg_clear then resettable := false;
+      regs := s :: !regs
+    | Multiport_mem _ -> resettable := false
     | _ -> ());
-  let decs = List.rev !decs and regs = List.rev !regs and cmps = List.rev !cmps in
+  let trunc s = if Signal.width s > 62 then Signal.select s 61 0 else s in
+  let decs = List.map trunc (List.rev !decs) and regs = List.map trunc (List.rev !regs) and cmps = List.rev !cmps in
+  let chunk prefix sigs =
+    let groups = ref [] and cur = ref [] and curw = ref 0 in
+    List.iteri (fun j s ->
+      let w = Signal.width s in
+      if !curw + w > 62 then (groups := List.rev !cur :: !groups; cur := []; curw := 0);
+      cur := (j, !curw, w, s) :: !cur; curw := !curw + w) sigs;
+    if !cur <> [] then groups := List.rev !cur :: !groups;
+    let groups = List.rev !groups in
+    let name k = Printf.sprintf "%s%d" prefix k in
+    List.mapi (fun k g -> Signal.output (name k) (Signal.concat_lsb (List.map (fun (_, _, _, s) -> s) g))) groups,
+    Array.of_list (List.mapi (fun k g -> (name k, Array.of_list (List.map (fun (j, o, w, _) -> (j, o, w)) g))) groups) in
+  let dec_outs, dec_layout = chunk "__dec" decs and reg_outs, reg_layout = chunk "__reg" regs
+  and cmp_outs, cmp_layout = chunk "__cmp" cmps in
   let outs = Circuit.outputs c in
-  let extra =
-    (if decs = [] then [] else [ Signal.output "__dec" (Signal.concat_lsb decs) ])
-    @ (if regs = [] then [] else [ Signal.output "__reg" (Signal.concat_lsb regs) ])
-    @ if cmps = [] then [] else [ Signal.output "__cmp" (Signal.concat_lsb cmps) ] in
-  let circuit = Circuit.create_exn ~name:(t.name ^ "_cov") (outs @ extra) in
+  let circuit = Circuit.create_exn ~name:(t.name ^ "_cov") (outs @ dec_outs @ reg_outs @ cmp_outs) in
   let data_ports =
     List.filter_map (fun s ->
       let n = List.hd (Signal.names s) in
       if n = t.clock || Some n = t.clear then None else Some (n, Signal.width s)) (Circuit.inputs c) in
   let out_ports = List.filter_map (fun s ->
     let n = List.hd (Signal.names s) in if Signal.width s <= 62 then Some (n, Signal.width s) else None) outs in
-  { circuit; dec_widths = Array.of_list (List.map Signal.width decs);
+  incr next_id;
+  { id = !next_id; circuit; resettable = !resettable; dec_widths = Array.of_list (List.map Signal.width decs);
     reg_widths = Array.of_list (List.map Signal.width regs);
-    cmp_widths = Array.of_list (List.map Signal.width cmps); data_ports; out_ports }
+    cmp_widths = Array.of_list (List.map Signal.width cmps); dec_layout; reg_layout; cmp_layout; data_ports; out_ports }
 
 (* read a field of [w] bits at [off] from an int64 array *)
 let field (a : int64 array) off w =
@@ -97,24 +125,40 @@ let record_bytes inst = 1 + List.fold_left (fun a (_, w) -> a + (w + 7) / 8) 0 i
 type run_result = {
   features : int list; cycles : int; observed : int list;
   cmp_values : (int * int) list;
+  cmp_pairs : (int * int * int) list;   (* width, one operand, the other: for byte-pattern input-to-state *)
   i2s : (int * int * int) list;   (* input-to-state candidates: record, port index, value to write *)
 }
 
+(* one simulator per worker domain and instrumented circuit *)
+let sim_cache = Domain.DLS.new_key (fun () -> Hashtbl.create 4)
+
 let execute (t : target) inst (input : string) =
-  let sim = Cyclesim.create inst.circuit in
+  let sim =
+    if not inst.resettable then Cyclesim.create inst.circuit
+    else begin
+      let tbl = Domain.DLS.get sim_cache in
+      match Hashtbl.find_opt tbl inst.id with
+      | Some s -> s
+      | None -> let s = Cyclesim.create inst.circuit in Hashtbl.replace tbl inst.id s; s
+    end in
   let inp n = Cyclesim.in_port sim n and out n = Cyclesim.out_port sim n in
   let ports = List.map (fun (n, w) -> (inp n, w)) inst.data_ports in
   let clear = Option.map inp t.clear in
-  let dec = if Array.length inst.dec_widths > 0 then Some (out "__dec") else None in
-  let reg = if Array.length inst.reg_widths > 0 then Some (out "__reg") else None in
+  let chunks layout = Array.map (fun (n, ps) -> (out n, ps)) layout in
+  let decc = chunks inst.dec_layout and regc = chunks inst.reg_layout and cmpc = chunks inst.cmp_layout in
+  let vs = Array.make (Array.length inst.cmp_widths) 0 in
+  let vprev = Array.make (Array.length inst.cmp_layout) (-1) and last_rec = ref (-2) in
+  let oport = Hashtbl.create 8 in
+  let get n = match Hashtbl.find_opt oport n with
+    | Some r -> Bits.to_int !r
+    | None -> let r = out n in Hashtbl.add oport n r; Bits.to_int !r in
   let outs = Array.of_list (List.map (fun (n, w) -> (n, out n, w)) inst.out_ports) in
   let nd = Array.length inst.dec_widths and nr = Array.length inst.reg_widths and no = Array.length outs in
   let dcnt = Array.make (nd * 16) 0 and dhist = Array.make nd 0 in
   let rchg = Array.make nr 0 and rprev = Array.make nr (-1) and rvals = Hashtbl.create 256 in
   let ochg = Array.make no 0 and oprev = Array.make no (-1) and oring = Array.make_matrix no 256 0 in
   let obs = Option.map (fun f -> f ()) t.observer in
-  let cmp = if Array.length inst.cmp_widths > 0 then Some (out "__cmp") else None in
-  let cvals = Hashtbl.create 64 and i2s = Hashtbl.create 64 in
+  let cvals = Hashtbl.create 64 and i2s = Hashtbl.create 64 and pairs = Hashtbl.create 64 in
   let cur_rec = ref (-1) and cur_vals = ref [||] in
   let mask = if String.length input > 0 then Char.code input.[0] else 0 in
   let rb = record_bytes inst in
@@ -122,52 +166,71 @@ let execute (t : target) inst (input : string) =
   let cycles = ref 0 in
   let step () =
     Cyclesim.cycle sim;
-    (match dec with
-     | None -> ()
-     | Some d ->
-       let a = Constant.to_int64_array (Bits.to_constant !d) in
-       let off = ref 0 in
-       Array.iteri (fun j w ->
-         let v = field a !off w in off := !off + w;
-         let h = if w = 1 then ((dhist.(j) lsl 1) lor v) land 15 else ((dhist.(j) * 7) + v) land 15 in
-         dhist.(j) <- (if w = 1 then h else v);
-         dcnt.(j * 16 + h) <- dcnt.(j * 16 + h) + 1) inst.dec_widths);
-    (match reg with
-     | None -> ()
-     | Some r ->
-       let a = Constant.to_int64_array (Bits.to_constant !r) in
-       let off = ref 0 in
-       Array.iteri (fun j w ->
-         let v = if w <= 62 then field a !off w else (* wide: hash of its words *) Hashtbl.hash (field a !off 62, w) in
-         off := !off + w;
-         if v <> rprev.(j) then (rchg.(j) <- rchg.(j) + 1; rprev.(j) <- v);
-         if w <= 8 then Hashtbl.replace rvals (j, v) ()) inst.reg_widths);
-    (match cmp with
-     | Some c when Hashtbl.length cvals < 256 ->
-       let a = Constant.to_int64_array (Bits.to_constant !c) in
-       let off = ref 0 in
-       let vs = Array.map (fun w -> let v = field a !off w in off := !off + w; Hashtbl.replace cvals (w, v) (); v) inst.cmp_widths in
-       (* input-to-state: an operand equal to a value this record drives, the other operand differing *)
-       if !cur_rec >= 0 && Hashtbl.length i2s < 64 then
-         for c = 0 to Array.length vs / 2 - 1 do
-           let x = vs.(2 * c) and y = vs.(2 * c + 1) in
-           if x <> y then
-             Array.iteri (fun pi pv ->
-               if pv = x then Hashtbl.replace i2s (!cur_rec, pi, y) ()
-               else if pv = y then Hashtbl.replace i2s (!cur_rec, pi, x) ()) !cur_vals
-         done
-     | _ -> ());
+    Array.iter (fun (o, ps) ->
+      let v = Bits.to_int !o in
+      Array.iter (fun (j, off, w) ->
+        let x = (v lsr off) land ((1 lsl w) - 1) in
+        let h = if w = 1 then ((dhist.(j) lsl 1) lor x) land 15 else ((dhist.(j) * 7) + x) land 15 in
+        dhist.(j) <- (if w = 1 then h else x);
+        dcnt.(j * 16 + h) <- dcnt.(j * 16 + h) + 1) ps) decc;
+    Array.iter (fun (o, ps) ->
+      let v = Bits.to_int !o in
+      Array.iter (fun (j, off, w) ->
+        let x = (v lsr off) land ((1 lsl w) - 1) in
+        if x <> rprev.(j) then (rchg.(j) <- rchg.(j) + 1; rprev.(j) <- x);
+        if w <= 8 then Hashtbl.replace rvals (j, x) ()) ps) regc;
+    if Array.length vs > 0 && Hashtbl.length cvals < 256 then begin
+      (* operands rarely change from one cycle to the next: only do the logging work on a change *)
+      let changed = ref false in
+      Array.iteri (fun k (o, ps) ->
+        let v = Bits.to_int !o in
+        if v <> vprev.(k) then begin
+          vprev.(k) <- v;
+          Array.iter (fun (j, off, w) ->
+            let x = (v lsr off) land ((1 lsl w) - 1) in
+            if x <> vs.(j) || !cycles = 0 then (vs.(j) <- x; changed := true; Hashtbl.replace cvals (w, x) ())) ps
+        end) cmpc;
+      if !changed || !cur_rec <> !last_rec then begin
+      last_rec := !cur_rec;
+      for c = 0 to Array.length vs / 2 - 1 do
+        let x = vs.(2 * c) and y = vs.(2 * c + 1) in
+        if x <> y && Hashtbl.length pairs < 256 then Hashtbl.replace pairs (inst.cmp_widths.(2 * c), x, y) ()
+      done;
+      (* input-to-state: an operand equal to a value this record drives, the other operand differing *)
+      if !cur_rec >= 0 && Hashtbl.length i2s < 64 then
+        for c = 0 to Array.length vs / 2 - 1 do
+          let x = vs.(2 * c) and y = vs.(2 * c + 1) in
+          if x <> y then
+            Array.iteri (fun pi pv ->
+              if pv = x then Hashtbl.replace i2s (!cur_rec, pi, y) ()
+              else if pv = y then Hashtbl.replace i2s (!cur_rec, pi, x) ()) !cur_vals
+        done
+      end
+    end;
     Array.iteri (fun k (_, o, _) ->
       let v = Bits.to_int !o in
       if v <> oprev.(k) then (ochg.(k) <- ochg.(k) + 1; oprev.(k) <- v);
       oring.(k).(!cycles land 255) <- v) outs;
     (match obs with
      | None -> ()
-     | Some ob -> ob.observe ~cycle:!cycles (fun n -> Bits.to_int !(Cyclesim.out_port sim n)));
+     | Some ob -> ob.observe ~cycle:!cycles get);
     incr cycles in
+  List.iter (fun (p, w) -> p := Bits.zero w) ports;
   Option.iter (fun c -> c := Bits.vdd) clear;
   step ();
   Option.iter (fun c -> c := Bits.gnd) clear;
+  (match t.stream with
+   | Some f ->
+     let rows = f input in
+     let byname = List.map2 (fun (n, _) (p, w) -> (n, (p, w))) inst.data_ports ports in
+     (try
+        Array.iter (fun changes ->
+          if !cycles >= t.max_cycles then raise Exit;
+          List.iter (fun (n, v) -> match List.assoc_opt n byname with
+            | Some (p, w) -> p := Bits.of_int ~width:w (v land ((1 lsl w) - 1)) | None -> ()) changes;
+          step ()) rows
+      with Exit -> ())
+   | None ->
   (try
      for r = 0 to nrec - 1 do
        let base = 1 + r * rb in
@@ -188,7 +251,7 @@ let execute (t : target) inst (input : string) =
          step ()
        done
      done
-   with Exit -> ());
+   with Exit -> ()));
   let n = !cycles in
   let fs = ref [] in
   let add x = fs := Hashtbl.hash x :: !fs in
@@ -211,7 +274,8 @@ let execute (t : target) inst (input : string) =
   let observed = match obs with None -> [] | Some ob -> ob.finish () in
   List.iter (fun f -> add ('X', f)) observed;
   { features = !fs; cycles = n; observed; cmp_values = Hashtbl.fold (fun k () acc -> k :: acc) cvals [];
-    i2s = Hashtbl.fold (fun k () acc -> k :: acc) i2s [] }
+    i2s = Hashtbl.fold (fun k () acc -> k :: acc) i2s [];
+    cmp_pairs = Hashtbl.fold (fun k () acc -> k :: acc) pairs [] }
 
 (* ---- the fuzzing engine ---- *)
 
@@ -277,6 +341,13 @@ let mutate ?(dict = [||]) ?(ports = []) st rb queue (s : string) =
          for b = 0 to (pw + 7) / 8 - 1 do Bytes.set bs (a + 1 + off + b) (Char.chr ((v lsr (8 * b)) land 255)) done;
          set (Bytes.to_string bs)
        end
+     | 10 when len > 1 && Array.length dict > 0 ->
+       (* no port layout (a transducer target): write the value's bytes anywhere in the input *)
+       let (w, v) = dict.(ri (Array.length dict)) in
+       let nb = max 1 ((w + 7) / 8) in
+       let p = pos () in
+       for b = 0 to nb - 1 do if p + b < len then Bytes.set bs (p + b) (Char.chr ((v lsr (8 * b)) land 255)) done;
+       set (Bytes.to_string bs)
      | 9 when len > 1 + rb -> (* change a record's hold *)
        let r = (len - 1) / rb in let a = 1 + ri r * rb in
        Bytes.set bs a (Char.chr (if ri 2 = 0 then ri 192 else 192 + ri 16)); set (Bytes.to_string bs)
@@ -293,11 +364,14 @@ type config = {
   dict : bool;          (* comparison operands as a havoc dictionary *)
   i2s : bool;           (* the deterministic input-to-state stage *)
   pulses : int;         (* input-to-state variants: 0 plain, 1 + one-cycle pulse, 2 + next pulse *)
+  i2s_bytes : bool;     (* input-to-state by byte pattern (AFL++ CmpLog): find one operand's bytes in
+                           the input, write the other's; works through a transducer *)
   shrink_budget : int;
   batch : int;
   workers : int;
 }
-let default_config = { dict = true; i2s = true; pulses = 2; shrink_budget = 32; batch = 32; workers = 16 }
+let default_config = { dict = true; i2s = true; pulses = 2; i2s_bytes = true; shrink_budget = 32; batch = 32;
+    workers = (match Sys.getenv_opt "HWFUZZ_WORKERS" with Some w -> int_of_string w | None -> 4) }
 
 let random_input st rb =
   let n = 1 + Random.State.int st 64 in
@@ -397,6 +471,25 @@ let queue_i2s e s' (r : run_result) =
       end
     end) r.i2s
 
+(* byte-pattern input-to-state: for a logged comparison (x, y), every place the input holds x's
+   little-endian bytes gets y's instead, and the other way round *)
+let queue_i2s_bytes e s (r : run_result) =
+  let n = ref 0 in
+  let le w v = String.init (max 1 ((w + 7) / 8)) (fun b -> Char.chr ((v lsr (8 * b)) land 255)) in
+  List.iter (fun (w, x, y) ->
+    if w >= 8 && w <= 32 then
+      List.iter (fun (a, b) ->
+        let pa = le w a and pb = le w b in
+        let la = String.length pa in
+        let i = ref 1 in
+        while !n < 32 && !i + la <= String.length s do
+          if String.sub s !i la = pa then begin
+            Queue.push (String.sub s 0 !i ^ pb ^ String.sub s (!i + la) (String.length s - !i - la)) e.pending;
+            incr n
+          end;
+          incr i
+        done) [ (x, y); (y, x) ]) r.cmp_pairs
+
 (* keep [s] if it has new features; [ops] are the operators that produced it *)
 let consider e ~shrink_it (s, ops, (r : run_result)) =
   List.iter (fun f -> if not (Hashtbl.mem e.first f) then Hashtbl.replace e.first f e.execs) r.observed;
@@ -408,6 +501,7 @@ let consider e ~shrink_it (s, ops, (r : run_result)) =
     let s' = if shrink_it then shrink e s nf else s in
     let r' = if s' == s then r else (e.execs <- e.execs + 1; exec e s') in
     if e.cfg.i2s && not e.fresh then queue_i2s e s' r';
+    if e.cfg.i2s_bytes && not e.fresh then queue_i2s_bytes e s' r';
     List.iter (fun f -> Hashtbl.replace e.virgin f ()) (r.features @ r'.features);
     add_entry e s' r'.features
   end

@@ -1,0 +1,4 @@
+; the USB device prototype's sources, via symlinks, so the fuzzer tests exactly those files
+(library
+ (name usb)
+ (libraries hardcaml))

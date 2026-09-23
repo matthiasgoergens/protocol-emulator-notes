@@ -11,7 +11,7 @@ jobs=(
 for j in "${jobs[@]}"; do
   set -- $j
   nice ionice $B sweep "$1" "$2" "$3" 10 > "results/$1_$2.txt" 2>&1 &
-  while [ "$(jobs -r | wc -l)" -ge 2 ]; do sleep 5; done
+  while [ "$(jobs -r | wc -l)" -ge 1 ]; do sleep 5; done
 done
 wait
 grep --no-filename SUMMARY results/*.txt > results/summary.txt

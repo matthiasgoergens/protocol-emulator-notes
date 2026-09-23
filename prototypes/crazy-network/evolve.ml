@@ -52,7 +52,7 @@ let mutate st p =
   done; !q
 
 let parallel_map f xs =
-  let workers = 16 in
+  let workers = match Sys.getenv_opt "FUZZ_WORKERS" with Some w -> int_of_string w | None -> 4 in
   let arr = Array.of_list xs in
   let res = Array.make (Array.length arr) None in
   let doms = List.init workers (fun w -> Domain.spawn (fun () ->
