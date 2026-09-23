@@ -505,7 +505,7 @@ let queue_i2s_bytes e s (r : run_result) =
   let n = ref 0 in
   let le w v = String.init (max 1 ((w + 7) / 8)) (fun b -> Char.chr ((v lsr (8 * b)) land 255)) in
   List.iter (fun (w, x, y) ->
-    if w >= 8 && w <= 32 then
+    if w >= 4 && w <= 32 then   (* narrow fields too: a 7-bit USB address fits one byte *)
       List.iter (fun (a, b) ->
         let pa = le w a and pb = le w b in
         let la = String.length pa in
@@ -523,7 +523,7 @@ let queue_i2s_bytes e s (r : run_result) =
   if e.cfg.multi_i2s then begin
     let by_src = Hashtbl.create 16 in
     List.iter (fun (w, x, y) ->
-      if w >= 8 && w <= 16 then List.iter (fun (a, b) -> Hashtbl.replace by_src (w, a) (b :: Option.value ~default:[] (Hashtbl.find_opt by_src (w, a)))) [ (x, y); (y, x) ]) r.cmp_pairs;
+      if w >= 4 && w <= 16 then List.iter (fun (a, b) -> Hashtbl.replace by_src (w, a) (b :: Option.value ~default:[] (Hashtbl.find_opt by_src (w, a)))) [ (x, y); (y, x) ]) r.cmp_pairs;
     let srcs = Hashtbl.fold (fun k v acc -> (k, Array.of_list v) :: acc) by_src [] in
     let present = List.filter (fun ((w, a), _) ->
       let pa = le w a in let la = String.length pa in
