@@ -85,3 +85,18 @@ Kanerva, "Hyperdimensional Computing: An Introduction to Computing in Distribute
 5. **Persistent, resumable archive (Picbreeder-style).** Store every MAP-Elites elite in a searchable, taggable archive keyed by behaviour descriptor, and always seed new evolutionary runs from the archive rather than from scratch. *Measure:* rate of new distinct effects found per compute-hour before vs after switching to warm starts. *Success* = a measurable increase in the discovery rate of "striking effects worth curating" per unit of host compute.
 
 Everything above is reported prior art, not measured on our hardware — items 6 (Thompson) and 7 (Koopman) carry the most uncertainty in fit; validate any hardware-adjacent claim (control-kernel size, λ correlation) against our own simulator before relying on it.
+
+---
+
+## Measured on our network, 2026-09-23: a lambda-style pre-filter
+
+Per-program features for the 2,000 random programs of the first search
+(`prototypes/crazy-network`, `main.exe progstats`), against the label
+"noise" (zlib compressibility above 0.45, 80 % of programs). AUC for
+predicting noise: operation-mix fractions 0.46 to 0.53 (no signal); per-line
+reset 0.35 and share of zero constants 0.38 (both predict non-noise); a
+cross-validated logistic model over all features 0.68. At 95 % recall of
+non-noise programs it rejects 21 % of noise programs, saving 18 % of
+evaluations. Verdict: not worth it as a pre-filter. What decides chaos here
+is resetting and constant injection, not the operation mix; a short
+simulation is the better pre-screen.
