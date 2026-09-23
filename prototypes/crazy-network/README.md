@@ -113,3 +113,37 @@ Build and run (Hardcaml v0.17, Python via uv):
     ./_build/default/main.exe rtlcheck out/judge.txt 141.0,312.0,241.1 2
     ./_build/default/main.exe rtldump out/judge.txt 141.0 100 reel_141.0
     uv run ../retro-console/console_tv.py frames reel_141.0
+
+## Coverage-guided fuzzing (2026-09-23)
+
+`fuzz.ml` is the first fuzzer: hand-instrumented against the model, and the precursor of `../hwfuzz`. Coverage families:
+
+- per cell, 4-grams of its data-dependent decisions (which operand won a `max`, whether an add, subtract or XOR wrapped);
+- recurring pixel motifs;
+- how much of the picture moves between fields.
+
+The engine borrows from AFL (favoured entries, havoc, splicing) and from Hypothesis (swarm testing, shrinking). The comparison is against random programs put through the same coverage filter. Queues were judged with `sheet.py`'s filter (`queue_eval.py`, `queue_breakdown.py`); each run is 20,000 executions.
+
+**Version 1: motifs on raw pixels.**
+
+| | Coverage | Queue | In between | Too simple | Noise |
+|---|---|---|---|---|---|
+| Random, seed 11 | 4,433 | 720 | 191 | 411 | 53 |
+| Random, seed 12 | 4,266 | 734 | 165 | 430 | 67 |
+| Fuzzing, seed 11 | 5,835 | 946 | 71 | 802 | 14 |
+| Fuzzing, seed 12 | 6,083 | 1,141 | 308 | 699 | 20 |
+
+Most of the fuzzers' "too simple" entries were fine periodic textures that a TV turns into colour mush (`out/fuzz_v1/`).
+
+**Version 2: motifs on 4-pixel symbols**, what composite colour can resolve.
+
+| | Coverage | Queue | In between | Too simple |
+|---|---|---|---|---|
+| Random, seed 21 | 1,773 | 195 | 40 | 96 |
+| Random, seed 22 | 1,751 | 175 | 41 | 90 |
+| Fuzzing, seed 21 | 3,607 | 994 | 255 | 626 |
+| Fuzzing, seed 22 | 3,932 | 999 | 19 | 931 |
+
+**Reading.** Fuzzing reliably reaches about twice the coverage and keeps far less noise. But its useful output varies wildly with the seed. Seed 22 spent 93 % of its queue on too-simple pictures, which suggests the search latches onto one family of cheap novelty. That is not yet a reliable win.
+
+The decision coverage also counts cells whose decisions never reach the picture. That is the next suspect.

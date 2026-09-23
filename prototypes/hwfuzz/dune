@@ -1,0 +1,9 @@
+(library
+ (name hwfuzz)
+ (modules hwfuzz)
+ (libraries hardcaml))
+
+(executable
+ (name bench)
+ (modules bench)
+ (libraries hwfuzz hardcaml))

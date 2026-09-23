@@ -102,6 +102,27 @@ let () =
       let d = ref 0 in
       Array.iteri (fun r row -> Array.iteri (fun c v -> if v <> y.(r).(c) then incr d) row) x;
       Printf.printf "field %d: %d pixels differ\n" fr !d) a b
+  | [ _; "fuzzcheck" ] ->
+    (* the instrumented copy must draw exactly what the model draws *)
+    List.iter (fun id ->
+      let p = Model.random_prog id in
+      let _, img = Fuzz.execute p in
+      let r = match Model.render p ~frames:2 ~keep:(fun f -> f = 1) with [ (_, i) ] -> i | _ -> assert false in
+      Printf.printf "program %d: %s\n%!" id (if img = r then "same" else "DIFFERENT")) [ 0; 1; 2; 3; 40; 141 ]
+  | [ _; "fuzz"; budget; mode; seed ] ->
+    let fresh = mode = "random" in
+    let r = Fuzz.run ~budget:(int_of_string budget) ~fresh ~seed:(int_of_string seed) in
+    let dir = Printf.sprintf "out/fuzz_%s_%s" mode seed in
+    (try Sys.mkdir dir 0o755 with Sys_error _ -> ());
+    let oc = open_out (dir ^ "/curve.txt") in
+    List.iter (fun (e, c) -> Printf.fprintf oc "%d %d\n" e c) r.curve; close_out oc;
+    let oc = open_out (dir ^ "/queue.txt") in
+    Array.iteri (fun i (p, fs) -> Printf.fprintf oc "%05d features=%d size=%d %s\n" i (List.length fs) (Fuzz.size p) (Evolve.to_string p)) r.queue;
+    close_out oc;
+    ignore (Evolve.parallel_map (fun (i, (p, _)) ->
+      List.iter (fun (f, img) -> Model.write_pgm (Printf.sprintf "%s/%05d_f%d.pgm" dir i f) img)
+        (Model.render p ~frames:3 ~keep:(fun f -> f = 0 || f = 2))) (List.mapi (fun i e -> (i, e)) (Array.to_list r.queue)));
+    Printf.printf "%s: %d execs, coverage %d, queue %d\n" mode r.execs r.coverage (Array.length r.queue)
   | [ _; "pyragas"; ids ] ->
     (* For each program, with its own seeds and autonomously (seeds all zero), and each (k, gain):
        fraction of pixels equal to the pixel k rows above (fields 1 and 2), and the entropy of the
