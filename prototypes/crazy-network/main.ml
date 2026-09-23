@@ -83,4 +83,46 @@ let () =
   | [ _; "rtldump"; src; key; fields; name ] -> Tb.dump (prog_from src key) ~fields:(int_of_string fields) ~name
   | [ _; "verilog" ] ->
     let oc = open_out "crazy_network.v" in Hardcaml.Rtl.output ~output_mode:(To_channel oc) Verilog (Crazy_rtl.circuit ()); close_out oc
+  | [ _; "progstats"; a; b ] ->
+    (* dump per-program features for the lambda-style predictor experiment *)
+    for id = int_of_string a to int_of_string b - 1 do
+      let p = Model.random_prog id in
+      let cnt o = Array.fold_left (fun c x -> if x = o then c + 1 else c) 0 p.ops in
+      let linked = Array.to_list (Array.mapi (fun i q -> q <> i) Model.partner) in
+      let lk o = List.length (List.filter (fun x -> x) (List.mapi (fun i l -> l && p.ops.(i) = o) linked)) in
+      let kz = Array.fold_left (fun c x -> if x = 0 then c + 1 else c) 0 p.ks in
+      Printf.printf "%d %d %d %d %d %d %d %d %d %b %d %d\n" id (cnt 0) (cnt 1) (cnt 2) (cnt 3) (lk 0) (lk 1) (lk 2) (lk 3) p.reset p.p kz
+    done
+  | [ _; "fbdiff"; id; k; g ] ->
+    (* pixels that differ between the program with and without feedback, per field *)
+    let prog = Model.random_prog (int_of_string id) in
+    let go ctl = Model.set_feedback ctl; Model.render prog ~frames:3 ~keep:(fun _ -> true) in
+    let a = go None and b = go (Some (int_of_string k, int_of_string g)) in
+    List.iter2 (fun (fr, x) (_, y) ->
+      let d = ref 0 in
+      Array.iteri (fun r row -> Array.iteri (fun c v -> if v <> y.(r).(c) then incr d) row) x;
+      Printf.printf "field %d: %d pixels differ\n" fr !d) a b
+  | [ _; "pyragas"; ids ] ->
+    (* For each program, with its own seeds and autonomously (seeds all zero), and each (k, gain):
+       fraction of pixels equal to the pixel k rows above (fields 1 and 2), and the entropy of the
+       palette indices, so that collapsing to a flat field does not count as locking. *)
+    let ids = List.map int_of_string (String.split_on_char ',' ids) in
+    let settings = List.concat_map (fun k -> List.map (fun g -> (k, g)) [ 0; 1; 2; 4; 8; 32; 128 ]) [ 4; 8; 16 ] in
+    let jobs = List.concat_map (fun id -> List.concat_map (fun auto -> List.map (fun s -> (id, auto, s)) settings) [ false; true ]) ids in
+    let res = Evolve.parallel_map (fun (id, auto, (k, g)) ->
+      Model.set_feedback (if g = 0 then None else Some (k, g));
+      let prog = Model.random_prog id in
+      let prog = if auto then { prog with scheme = 3 } else prog in
+      let imgs = Model.render prog ~frames:3 ~keep:(fun f -> f >= 1) in
+      let same = ref 0 and tot = ref 0 and hist = Array.make 16 0 in
+      List.iter (fun (_, img) ->
+        Array.iter (Array.iter (fun v -> hist.(v) <- hist.(v) + 1)) img;
+        for y = k to Model.nvis - 1 do for x = 0 to Model.npix - 1 do
+          incr tot; if img.(y).(x) = img.(y - k).(x) then incr same done done) imgs;
+      let npx = float (Array.fold_left ( + ) 0 hist) in
+      let ent = Array.fold_left (fun acc c -> if c = 0 then acc else
+        let q = float c /. npx in acc -. q *. Float.log2 q) 0. hist in
+      (id, auto, k, g, float !same /. float !tot, ent)) jobs in
+    List.iter (fun (id, auto, k, g, per, ent) ->
+      Printf.printf "%d %s %d %d %.3f %.2f\n" id (if auto then "auto" else "seeded") k g per ent) res
   | _ -> prerr_endline "usage: main (topology | search A B | anim ID FRAMES DIR)"; exit 2

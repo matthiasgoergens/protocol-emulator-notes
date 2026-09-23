@@ -100,3 +100,26 @@ non-noise programs it rejects 21 % of noise programs, saving 18 % of
 evaluations. Verdict: not worth it as a pre-filter. What decides chaos here
 is resetting and constant injection, not the operation mix; a short
 simulation is the better pre-screen.
+
+## Measured on our network, 2026-09-23: Pyragas delayed-feedback seeding (shortlist item 2)
+
+**Result: no locking at any gain or lag. Delayed feedback through the per-line seed cannot tame these programs.**
+
+*Set-up.* `Model.set_feedback (Some (k, gain))` adds `gain * (x(L-1-k) - x(L-1))` (mod 256) to all four seed bytes at the start of line L, where x is the tap cell's value at the end of a line. This needs only the CPU and the existing seed path, no extra silicon. The sweep (`main.exe pyragas 0,...,99`) ran 100 random programs, each two ways: with its own seed scheme, and autonomously with all seeds zero. It covered k ∈ {4, 8, 16} and gain ∈ {0, 1, 2, 4, 8, 32, 128}. For each run it measured two fields for:
+
+- periodicity: the fraction of pixels equal to the pixel k rows above;
+- palette-index entropy, so that a collapse to a flat field does not count as locking.
+
+Raw data, script and summary are in `notes/pyragas-2026-09-23/`: `sweep.txt`, `analyse.py`, `analysis.txt`. Everything was measured on commit 98336d2 plus this change.
+
+*Numbers.* With their own seeds, 11 of 100 programs are locked (periodicity ≥ 0.9 and entropy ≥ 1 bit), and 3 are flat. The median periodicity is 0.063, which is 1/16, chance level. These counts are the same at every gain and every k, and no unlocked program became locked. Autonomously, 51 are locked at gain 0 and at every gain. These are the line-reset programs, whose lines are all identical, so the feedback term is zero and does nothing. That is the non-invasiveness Pyragas designed for, not control.
+
+*The feedback is connected: it just scrambles.* `main.exe fbdiff 0 8 1` shows that gain 1 changes 57,134 of 61,440 pixels in a field (93 %). That is the 15/16 you get from two unrelated images.
+
+*Why.* Pyragas control needs small, proportional corrections applied on the timescale of the instability. Here the correction arrives once per line, and between corrections the network takes 340 to 3,405 steps (p = 10 down to p = 1). A one-unit nudge at the start of a line therefore reaches the end of the line fully amplified. Wraparound mod 256 also removes any notion of "small". Over one line, the line map of a chaotic program behaves like a hash, and you cannot steer a hash with proportional feedback.
+
+*What this rules out, and what it leaves.*
+
+- **Ruled out:** CPU-side delayed feedback as a way to lock chaotic programs.
+- **Also ruled out:** the "nudge instead of reset" idea in §2 above, for per-line nudges. This matches the lambda result: the controllable programs are the ones that reset each line, and the chaotic ones are not controllable through the seed.
+- **What could still work:** control would have to act inside the instability horizon. That means hardware that re-injects a seed or feedback term every few steps rather than every line. That is a hardware change, and another reason the 23 September plan parks the chaotic network.

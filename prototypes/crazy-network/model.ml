@@ -43,10 +43,20 @@ let random_prog id =
     tap = ri n; p = [| 1; 2; 5; 10 |].(ri 4); reset = ri 2 = 0; scheme = ri n_schemes;
     pal = Array.init 16 (fun i -> ((1 + i mod 12) lsl 4) lor (1 + i * 9 / 15)) }
 
+(* Delayed-feedback control (Pyragas style), off unless set: the seed for a line gets
+   gain * (x(L - 1 - k) - x(L - 1)) added, where x(L) is the tap cell's value at the end of line L.
+   The history persists across fields and is per domain; [set_feedback] sets (k, gain) and clears it. *)
+type fb = { mutable ctl : (int * int) option; hist : int array; mutable len : int }
+let fb_key = Domain.DLS.new_key (fun () -> { ctl = None; hist = Array.make 4096 0; len = 0 })
+let set_feedback ctl =
+  let st = Domain.DLS.get fb_key in
+  st.ctl <- ctl; Array.fill st.hist 0 4096 0; st.len <- 0
+
 (* Run one field from [s] (updated in place). [f line h idx] is called for every visible pixel
    sample with the palette index (top nibble of the tap cell). *)
 let run_field prog s ~frame ~(f : int -> int -> int -> unit) =
   let t = Array.make n 0 in
+  let fb = Domain.DLS.get fb_key in
   for line = 0 to lpf - 1 do
     for h = 0 to cpl - 1 do
       let visible = line >= first_vis && line < first_vis + nvis && h >= vis_start && h < vis_start + npix * pixc
@@ -55,7 +65,13 @@ let run_field prog s ~frame ~(f : int -> int -> int -> unit) =
       if h = 0 then begin
         if prog.reset then Array.fill s 0 n 0;
         let sd = seeds prog ~line ~frame in
-        for j = 0 to 3 do s.(j) <- s.(j) lxor sd.(j) done
+        let u = match fb.ctl with
+          | Some (k, gain) when fb.len > k ->
+            gain * (fb.hist.((fb.len - 1 - k) land 4095) - fb.hist.((fb.len - 1) land 4095))
+          | _ -> 0 in
+        for j = 0 to 3 do s.(j) <- s.(j) lxor ((sd.(j) + u) land 255) done
+      end else if h = cpl - 1 then begin
+        fb.hist.(fb.len land 4095) <- s.(prog.tap); fb.len <- fb.len + 1
       end else if h mod prog.p = 0 then begin
         for i = 0 to n - 1 do
           let a = s.(left.(i)) and b = s.(partner.(i)) in
