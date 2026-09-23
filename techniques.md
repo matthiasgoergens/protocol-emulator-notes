@@ -126,6 +126,17 @@ Interconnect options, cheapest to most general:
 - **Random, then chosen.** Draw many random sparse link sets, compile and
   simulate the target programs on each, keep the best, and compare
   against structured baselines rather than assuming randomness wins.
+- **Compose the distribution.** The random part need not come from one
+  simple distribution. Build it as a union of layers, each with its own
+  job: all nearest neighbours (the systolic basics), a few medium-range
+  random links (most of the small-world benefit at modest wire cost), a
+  very few long links, structured links for known algorithms, delayed
+  links across time, and a handful of switchable links for flexibility
+  after tapeout. Draws can also be correlated (links in pairs or motifs a
+  program uses) or layout-aware (only endpoints close on the folded die),
+  and a total wire budget can be split across layers. The search then
+  tunes each layer's weight and parameters; the small-world model itself
+  is such a union, a regular lattice plus a few long links.
 - **A Benes network** where arbitrary rearrangement is needed: every
   permutation in about 2 log n stages, with switch settings computed
   offline.
