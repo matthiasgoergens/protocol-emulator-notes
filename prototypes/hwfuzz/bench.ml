@@ -82,6 +82,8 @@ let usb_stream ~repair (s : string) =
     if bytes <> [] then List.iter put (Usb.Host.to_samples (Usb.Host.encode bytes));
     for _ = 1 to 4 * 16 * (1 + (c lsr 5)) do put J done
   done;
+  (* trailing idle, so a reply to the last packet completes and gets checked *)
+  for _ = 1 to 4 * 64 do put J done;
   Array.of_list (List.rev !rows)
 
 (* The oracle: whatever the device transmits must decode (valid stuffing, ends in SE0), carry a
@@ -115,7 +117,9 @@ let usb_observer () =
       end else if !in_tx then (in_tx := false; check ());
       let a = get "addr" in if a <> 0 then Hashtbl.replace fs (500 + a) ();
       if get "configured" = 1 then Hashtbl.replace fs 700 ());
-    finish = (fun () -> if !in_tx then check (); Hashtbl.fold (fun k () acc -> k :: acc) fs []) }
+    (* a transmission still running when the input ends cannot be judged: it was cut off, not
+       malformed (this was a false positive, found by the first long campaign) *)
+    finish = (fun () -> Hashtbl.fold (fun k () acc -> k :: acc) fs []) }
 
 (* A planted defect for checking the oracle and measuring depth: once the device has an address,
    the 30th cycle of every transmission is forced to SE0. Reaching it needs a complete
@@ -254,4 +258,63 @@ let () =
     let t2 = Unix.gettimeofday () in
     let cyc = float (reps * Array.length rows) in
     Printf.printf "plain simulation %.0f cycles/s; instrumented execute %.0f cycles/s (one core)\n" (cyc /. (t1 -. t0)) (cyc /. (t2 -. t1))
+  | _ -> ()
+
+(* reproduce oracle violations: rerun a campaign, save queue entries whose run violates, and show
+   what the device transmitted *)
+let () =
+  match Array.to_list Sys.argv with
+  | [ _; "usbviol"; tname; budget; seed ] ->
+    let t = target tname in
+    let r = Hwfuzz.campaign ~budget:(int_of_string budget) ~fresh:false ~seed:(int_of_string seed) t in
+    let inst = Hwfuzz.instrument t in
+    let n = ref 0 in
+    Array.iter (fun (s, _) ->
+      let res = Hwfuzz.execute t inst s in
+      if List.mem 1 res.observed && !n < 5 then begin
+        let path = Printf.sprintf "results-usb/violation_%s_%d.bin" tname !n in
+        let oc = open_out_bin path in output_string oc s; close_out oc;
+        Printf.printf "%s: %d bytes, %d cycles\n" path (String.length s) res.cycles;
+        incr n
+      end) r.queue;
+    Printf.printf "%d violating queue entries saved\n" !n
+  | _ -> ()
+
+(* show an input as host packets, and every device transmission with its decoding *)
+let () =
+  match Array.to_list Sys.argv with
+  | [ _; "usbshow"; path ] ->
+    let s = In_channel.with_open_bin path In_channel.input_all in
+    let i = ref 1 and n = String.length s in
+    while !i < n do
+      let c = Char.code s.[!i] in
+      let len = min (1 + (c land 15)) (n - !i - 1) in
+      let bytes = List.init len (fun k -> Char.code s.[!i + 1 + k]) in
+      i := !i + 1 + len;
+      Printf.printf "host packet (repair %b, gap %d bits): %s\n" (c land 16 <> 0) (16 * (1 + (c lsr 5)))
+        (String.concat " " (List.map (Printf.sprintf "%02x") bytes))
+    done;
+    let rows = usb_stream ~repair:true s in
+    let sim = Cyclesim.create (Usb.Usb_dev.circuit ()) in
+    let ip n = Cyclesim.in_port sim n and op n = Cyclesim.out_port sim n in
+    ip "clear" := Bits.vdd; Cyclesim.cycle sim; ip "clear" := Bits.gnd;
+    let seg = ref [] and start = ref 0 in
+    Array.iteri (fun cyc ch ->
+      List.iter (fun (nm, v) -> ip nm := Bits.of_int ~width:1 v) ch;
+      Cyclesim.cycle sim;
+      let oe = Bits.to_int !(op "oe") = 1 in
+      if oe then begin
+        if !seg = [] then start := cyc;
+        seg := (match Bits.to_int !(op "dp_out"), Bits.to_int !(op "dm_out") with 1, 0 -> Usb.Host.J | 0, 1 -> K | _ -> SE0) :: !seg
+      end else if !seg <> [] then begin
+        let arr = Array.of_list (List.rev !seg) in
+        seg := [];
+        let line = String.concat "" (Array.to_list (Array.mapi (fun k l -> if k mod 4 = 2 then (match l with Usb.Host.J -> "J" | K -> "K" | SE0 -> "0") else "") arr)) in
+        let first_k = let rec f i = if i >= Array.length arr then -1 else if arr.(i) = Usb.Host.K then i else f (i + 1) in f 0 in
+        Printf.printf "device transmits at cycle %d for %d cycles: %s\n  decoded: %s\n" !start (Array.length arr) line
+          (match (if first_k < 0 then None else Usb.Host.decode arr first_k) with
+           | None -> "UNDECODABLE" | Some b -> String.concat " " (List.map (Printf.sprintf "%02x") b))
+      end) rows;
+    if !seg <> [] then Printf.printf "input ends at cycle %d while the device is still transmitting (%d cycles in, started %d)\n"
+        (Array.length rows) (List.length !seg) !start
   | _ -> ()
