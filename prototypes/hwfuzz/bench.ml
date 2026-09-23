@@ -136,9 +136,17 @@ let usb_faulty () =
     [ output "dp_out" (dp &: ~:hit); output "dm_out" (dm &: ~:hit); output "oe" oe; output "addr" addr;
       output "configured" configured ]
 
-let usb_target ?(faulty = false) ~repair () =
+(* the packets of a USB input: each is a control byte and its bytes *)
+let usb_units (s : string) =
+  let n = String.length s in
+  let rec go i acc = if i >= n then List.rev acc
+    else let l = min (2 + (Char.code s.[i] land 15)) (n - i) in go (i + l) ((i, l) :: acc) in
+  go 1 []
+
+let usb_target ?(faulty = false) ?(units = false) ~repair () =
   { Hwfuzz.name = "usb"; circuit = (if faulty then usb_faulty else Usb.Usb_dev.circuit); clock = "clock"; clear = Some "clear";
-    max_cycles = 16_000; observer = Some usb_observer; stream = Some (usb_stream ~repair) }
+    max_cycles = 16_000; observer = Some usb_observer; stream = Some (usb_stream ~repair);
+    units = (if units then Some usb_units else None) }
 
 (* A known-good session from the prototype's own test: SETUP GET_DESCRIPTOR(device), IN, then
    SET_ADDRESS 5 and its status stage. Used to check the transducer and oracle before fuzzing. *)
@@ -215,18 +223,20 @@ let eth_observer () =
 
 let eth_target =
   { Hwfuzz.name = "eth"; circuit = (fun () -> Eth.Eth_rx.circuit ~h:eth_h); clock = "clock"; clear = Some "clear";
-    max_cycles = 20_000; observer = Some eth_observer; stream = Some eth_stream }
+    max_cycles = 20_000; observer = Some eth_observer; stream = Some eth_stream; units = None }
 
 let target name =
   let circuit, max_cycles = match name with
     | "lock4" -> lock 4, 256 | "lock8" -> lock 8, 256 | "packet" -> packet, 512
-    | "usb" | "usb-raw" | "usb-faulty" -> Usb.Usb_dev.circuit, 0
+    | "usb" | "usb-raw" | "usb-faulty" | "usb-units" | "usb-faulty-units" -> Usb.Usb_dev.circuit, 0
     | "eth" -> (fun () -> Eth.Eth_rx.circuit ~h:eth_h), 0 | _ -> failwith ("unknown target " ^ name) in
   if name = "eth" then eth_target else
   if name = "usb" then usb_target ~repair:true () else
   if name = "usb-raw" then usb_target ~repair:false () else
   if name = "usb-faulty" then usb_target ~faulty:true ~repair:true () else
-  { Hwfuzz.name; circuit; clock = "clock"; clear = Some "clear"; max_cycles; observer = Some goal; stream = None }
+  if name = "usb-units" then usb_target ~units:true ~repair:true () else
+  if name = "usb-faulty-units" then usb_target ~faulty:true ~units:true ~repair:true () else
+  { Hwfuzz.name; circuit; clock = "clock"; clear = Some "clear"; max_cycles; observer = Some goal; stream = None; units = None }
 
 (* configuration name -> (config, engines, sync, fresh) *)
 let config name =

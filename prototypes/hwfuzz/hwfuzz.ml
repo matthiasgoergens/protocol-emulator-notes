@@ -34,6 +34,9 @@ type target = {
   max_cycles : int;
   observer : (unit -> observer) option;
   stream : (string -> (string * int) list array) option;
+  units : (string -> (int * int) list) option;
+  (* Optional structure for mutation: the (start, length) spans of the input's units, e.g. packets.
+     Enables unit-level mutation: insert a unit from another entry, duplicate, delete, swap. *)
   (* Optional transducer from the fuzz input to per-cycle port changes, replacing the generic
      record decoding: the hardware fuzzer's version of an AFL++ custom post-processor, for
      inputs with framing, line coding or checksums the design checks. *)
@@ -287,11 +290,33 @@ let parallel_map ~workers f xs =
   List.iter Domain.join doms;
   Array.to_list (Array.map Option.get res)
 
-let op_names = [| "flip"; "byte"; "interesting"; "arith"; "delete"; "duplicate"; "overwrite"; "splice"; "swarm"; "hold"; "dictionary"; "i2s" |]
-let op_i2s = 11
+let op_names = [| "flip"; "byte"; "interesting"; "arith"; "delete"; "duplicate"; "overwrite"; "splice"; "swarm"; "hold"; "dictionary"; "i2s"; "unit" |]
+let op_i2s = 11 and op_unit = 12
+
+(* unit-level mutation on the spans a target reports *)
+let mutate_units st units queue (s : string) =
+  let ri m = Random.State.int st (max 1 m) in
+  let us = Array.of_list (units s) in
+  let n = Array.length us and len = String.length s in
+  let cut a b = String.sub s 0 a ^ String.sub s b (len - b) in
+  let insert_at at piece = String.sub s 0 at ^ piece ^ String.sub s at (len - at) in
+  let boundary () = if n = 0 then len else if ri (n + 1) = n then len else fst us.(ri n) in
+  match ri 4 with
+  | 0 -> (* a unit from another entry, at a unit boundary here *)
+    let o = queue.(ri (Array.length queue)) in
+    let uo = Array.of_list (units o) in
+    if Array.length uo = 0 then s
+    else let (a, l) = uo.(ri (Array.length uo)) in insert_at (boundary ()) (String.sub o a l)
+  | 1 when n > 0 -> let (a, l) = us.(ri n) in insert_at (a + l) (String.sub s a l)
+  | 2 when n > 0 -> let (a, l) = us.(ri n) in cut a (a + l)
+  | 3 when n > 1 ->
+    let k = ri (n - 1) in
+    let (a, l) = us.(k) and (b, m) = us.(k + 1) in
+    String.sub s 0 a ^ String.sub s b m ^ String.sub s a l ^ String.sub s (b + m) (len - b - m)
+  | _ -> s
 let interesting = [| 0; 1; 2; 16; 32; 64; 127; 128; 255 |]
 
-let mutate ?(dict = [||]) ?(ports = []) st rb queue (s : string) =
+let mutate ?(dict = [||]) ?(ports = []) ?units st rb queue (s : string) =
   let b = Buffer.create (String.length s + 64) in
   Buffer.add_string b s;
   let get () = Buffer.contents b in
@@ -302,7 +327,8 @@ let mutate ?(dict = [||]) ?(ports = []) st rb queue (s : string) =
   for _ = 1 to stack do
     let s = get () in
     let len = String.length s in
-    let op = ri op_i2s in   (* the havoc operators; input-to-state is a separate stage *)
+    (* the havoc operators; input-to-state is a separate stage; unit mutations when available *)
+    let op = if units <> None && ri 3 = 0 then op_unit else ri op_i2s in
     ops := op :: !ops;
     let bs = Bytes.of_string s in
     let pos () = 1 + ri (len - 1) in
@@ -331,6 +357,7 @@ let mutate ?(dict = [||]) ?(ports = []) st rb queue (s : string) =
          set (String.sub s 0 at ^ String.sub o a k ^ String.sub s at (len - at))
        end
      | 8 when len > 0 -> Bytes.set bs 0 (Char.chr (ri 256)); set (Bytes.to_string bs)
+     | 12 -> (match units with Some u -> set (mutate_units st u queue s) | None -> ())
      | 10 when len > 1 + rb && Array.length dict > 0 && ports <> [] ->
        (* write a logged comparison operand into one port field of one record *)
        let (w, v) = dict.(ri (Array.length dict)) in
@@ -535,7 +562,7 @@ let step e n =
     let cands = List.init e.cfg.batch (fun _ ->
       if (not e.fresh) && not (Queue.is_empty e.pending) then (Queue.pop e.pending, [ op_i2s ])
       else if e.fresh then (random_input e.st e.rb, [])
-      else mutate ~dict ~ports:e.ports e.st e.rb (Array.map fst e.queue) (pick ())) in
+      else mutate ~dict ~ports:e.ports ?units:e.t.units e.st e.rb (Array.map fst e.queue) (pick ())) in
     let res = parallel_map ~workers:e.cfg.workers (fun (s, ops) -> (s, ops, exec e s)) cands in
     e.execs <- e.execs + e.cfg.batch;
     List.iter (consider e ~shrink_it:(not e.fresh)) res;
