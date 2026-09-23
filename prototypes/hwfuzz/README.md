@@ -92,7 +92,22 @@ Each entry records what a heuristic was measured on and what it did. Hypothesis 
    - reading probes in 62-bit chunks;
    - logging comparison operands only when they change.
 
+9. **How deep byte-level mutation gets into a protocol.** On the USB device (with checksum repair, 200,000 executions, 4 workers, `results-usb/long2.txt`), the milestones first reached were:
+
+   | Milestone | Real device (executions) | Planted fault (executions) |
+   |---|---|---|
+   | Any response | 2,325 | 2,345 |
+   | NAK | 5,247 | 5,318 |
+   | ACK | 31,030 | 21,581 |
+   | Descriptor data: a full SETUP, DATA0, IN control transfer assembled unaided | 108,773 | 107,751 |
+   | SET_ADDRESS | – | – |
+
+   Neither campaign reached SET_ADDRESS, so the planted fault behind it was not found. Without checksum repair, the device never answered at all in 5,000 executions (earlier short runs).
+
+   The gap is sequence structure: SET_ADDRESS needs four packets in order, while mutation works on bytes and fixed-size records. Next experiment: packet-aware splicing and whole-packet dictionary entries, supplied by the target alongside its transducer.
+
 ## Next
 
+- Target-supplied structure for mutation (packet-aware splice and dictionary), measured on SET_ADDRESS.
 - More differential targets: the deadline sequencer against its ISA model, the systolic matcher.
 - A snapshot-and-restore for speed on large designs.
