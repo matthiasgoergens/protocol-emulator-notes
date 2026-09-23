@@ -1,0 +1,14 @@
+  19 cells in clk=\clock, en={ }, arst={ }, srst=$auto$simple.cc:234:combine_resets$1466
+  21 cells in clk=\clock, en={ }, arst={ }, srst=$auto$simple.cc:234:combine_resets$1503
+  240 cells in clk=\clock, en={ }, arst={ }, srst=\clear
+  154 cells in clk=\clock, en={ }, arst={ }, srst=$auto$simple.cc:234:combine_resets$1471
+  102 cells in clk=\clock, en=\_1480, arst={ }, srst=\clear
+  6 cells in clk=\clock, en={ }, arst={ }, srst=$auto$simple.cc:234:combine_resets$1463
+  18786 cells in clk=\clock, en=$auto$simple.cc:193:make_patterns_logic$1401, arst={ }, srst=\clear
+  3631 cells in clk=\clock, en=\cfg_strobe, arst={ }, srst={ }
+  33 cells in clk=\clock, en={ }, arst={ }, srst=$auto$simple.cc:234:combine_resets$1377
+    20867 cells
+  22537 cells in clk={ }, en={ }, arst={ }, srst={ }
+   Chip area for module '\semiring_ring': 203611.438800
+../retro-console/synth_sg13g2.log:   Chip area for module '\retro_console': 94318.786800
+../crazy-network/synth_sg13g2.log:   Chip area for module '\crazy_network': 218616.451200

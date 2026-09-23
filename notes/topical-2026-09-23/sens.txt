@@ -1,0 +1,10 @@
+saturate max/min        cells differing (last 50 steps): 0.00  median max|diff|:     0  worst:   1  cells still moving: 0.12  cells on a rail: 0.27
+saturate max/min/copy   cells differing (last 50 steps): 0.00  median max|diff|:     0  worst:   0  cells still moving: 0.17  cells on a rail: 0.25
+saturate max/min + sub  cells differing (last 50 steps): 0.01  median max|diff|:     0  worst:  64  cells still moving: 0.22  cells on a rail: 0.38
+saturate max/min + add  cells differing (last 50 steps): 0.00  median max|diff|:     0  worst:   0  cells still moving: 0.01  cells on a rail: 0.60
+saturate sub/add        cells differing (last 50 steps): 0.02  median max|diff|:     0  worst: 255  cells still moving: 0.37  cells on a rail: 0.57
+wrap     max/min        cells differing (last 50 steps): 0.04  median max|diff|:     0  worst: 128  cells still moving: 0.98  cells on a rail: 0.03
+wrap     max/min/copy   cells differing (last 50 steps): 0.05  median max|diff|:     0  worst: 128  cells still moving: 0.99  cells on a rail: 0.03
+wrap     max/min + sub  cells differing (last 50 steps): 0.58  median max|diff|:   128  worst: 128  cells still moving: 0.99  cells on a rail: 0.01
+wrap     max/min + add  cells differing (last 50 steps): 0.56  median max|diff|:   128  worst: 128  cells still moving: 1.00  cells on a rail: 0.01
+wrap     sub/add        cells differing (last 50 steps): 0.98  median max|diff|:   128  worst: 128  cells still moving: 0.99  cells on a rail: 0.01
