@@ -544,3 +544,16 @@ let () =
         ("same plus IN to address 5, real device", usb_target ~repair:true (), then_in);
         ("same plus IN to address 5, planted fault", usb_target ~faulty:true ~repair:true (), then_in) ]
   | _ -> ()
+
+let () =
+  match Array.to_list Sys.argv with
+  | [ _; "usbpairs" ] ->
+    let t = usb_target ~repair:true () in
+    let inst = Hwfuzz.instrument t in
+    let r = Hwfuzz.execute t inst usb_get_descriptor in
+    let want = [ (0x06, 0x05); (0x80, 0x00); (0x06, 0x09) ] in
+    Printf.printf "logged comparison values %d, pairs %d\n" (List.length r.cmp_values) (List.length r.cmp_pairs);
+    List.iter (fun (a, b) ->
+      Printf.printf "  pair %02x/%02x logged: %b\n" a b
+        (List.exists (fun (w, x, y) -> w = 8 && ((x = a && y = b) || (x = b && y = a))) r.cmp_pairs)) want
+  | _ -> ()

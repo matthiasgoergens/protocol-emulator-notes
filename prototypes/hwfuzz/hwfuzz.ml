@@ -529,16 +529,21 @@ let queue_i2s_bytes e s (r : run_result) =
       let pa = le w a in let la = String.length pa in
       let rec f i = i + la <= String.length s && (String.sub s i la = pa || f (i + 1)) in f 1) srcs in
     if List.length present >= 2 then
-      for _ = 1 to 8 do
+      for _ = 1 to 16 do
         let b = Bytes.of_string s in
+        (* two or three sources per mutant: replacing half of everything logged almost always
+           breaks something vital as well (measured on USB: no SET_ADDRESS that way) *)
+        let arr = Array.of_list present in
+        let k = 2 + Random.State.int e.st 2 in
+        let chosen = List.init k (fun _ -> arr.(Random.State.int e.st (Array.length arr))) in
         List.iter (fun ((w, a), targets) ->
-          if Random.State.bool e.st then begin
+          begin
             let pa = le w a and pb = le w targets.(Random.State.int e.st (Array.length targets)) in
             let la = String.length pa in
             for i = 1 to Bytes.length b - la do
               if Bytes.sub_string b i la = pa then Bytes.blit_string pb 0 b i la
             done
-          end) present;
+          end) chosen;
         Queue.push (Bytes.to_string b) e.pending
       done
   end
