@@ -288,117 +288,218 @@ let mutate ?(dict = [||]) ?(ports = []) st rb queue (s : string) =
 
 type stats = { mutable uses : int array; mutable wins : int array }
 
-type result = {
-  execs : int;
-  coverage : int;
-  queue : (string * int list) array;
-  curve : (int * int) list;
-  stats : stats;
-  first_hit : (int * int) list;   (* observed feature -> execs when first seen *)
+(* Switches for the ablation ladder and the search strategy. *)
+type config = {
+  dict : bool;          (* comparison operands as a havoc dictionary *)
+  i2s : bool;           (* the deterministic input-to-state stage *)
+  pulses : int;         (* input-to-state variants: 0 plain, 1 + one-cycle pulse, 2 + next pulse *)
+  shrink_budget : int;
+  batch : int;
+  workers : int;
 }
+let default_config = { dict = true; i2s = true; pulses = 2; shrink_budget = 32; batch = 32; workers = 16 }
 
 let random_input st rb =
   let n = 1 + Random.State.int st 64 in
   String.init (1 + n * rb) (fun i -> if i = 0 then '\000' else Char.chr (Random.State.int st 256))
 
-let fuzz ?(workers = 16) ?(batch = 32) ?(shrink_budget = 32) ~budget ~fresh ~seed (t : target) =
+type result = {
+  execs : int;                    (* total over all engines *)
+  coverage : int;                 (* distinct features over all engines *)
+  queue : (string * int list) array;
+  stats : stats;
+  first_hit : (int * int) list;   (* observed feature -> total executions when first seen *)
+}
+
+(* One campaign's state. Several engines can run as independent restarts or as islands that
+   exchange new queue entries, as AFL's -M/-S instances do. *)
+type engine = {
+  t : target;
+  inst : instrumented;
+  cfg : config;
+  fresh : bool;             (* the random baseline: every candidate a new random input *)
+  rb : int;
+  st : Random.State.t;
+  virgin : (int, unit) Hashtbl.t;
+  mutable queue : (string * int list) array;
+  top : (int, int * int) Hashtbl.t;   (* feature -> (input length, queue index) *)
+  stats : stats;
+  mutable execs : int;
+  mutable curve : (int * int) list;
+  first : (int, int) Hashtbl.t;       (* observed feature -> execs of this engine when first seen *)
+  pending : string Queue.t;
+  dict : (int * int, unit) Hashtbl.t;
+  ports : (int * int) list;           (* byte offset within a record's value bytes, and width *)
+}
+
+let exec e s = execute e.t e.inst s
+
+let add_entry e s fs =
+  let idx = Array.length e.queue in
+  e.queue <- Array.append e.queue [| (s, fs) |];
+  List.iter (fun f -> match Hashtbl.find_opt e.top f with
+    | Some (l, _) when l <= String.length s -> () | _ -> Hashtbl.replace e.top f (String.length s, idx)) fs
+
+let fresh_feats e fs = List.filter (fun f -> not (Hashtbl.mem e.virgin f)) fs
+
+(* Hypothesis-style shrinking: delete blocks of records, halving the block size, while every new
+   feature survives *)
+let shrink e s nf =
+  let rb = e.rb in
+  let best = ref s and tries = ref 0 in
+  let k = ref (((String.length s - 1) / rb) / 2) in
+  while !k >= 1 && !tries < e.cfg.shrink_budget do
+    let r = (String.length !best - 1) / rb in
+    let cands = List.filter_map (fun a ->
+      if a + !k > r then None
+      else Some (String.sub !best 0 (1 + a * rb) ^ String.sub !best (1 + (a + !k) * rb) (String.length !best - 1 - (a + !k) * rb)))
+      (List.init (max 0 (r - !k + 1)) (fun a -> a) |> List.filter (fun a -> a mod !k = 0)) in
+    let cands = List.filteri (fun i _ -> i < 16) cands in
+    tries := !tries + List.length cands;
+    let res = parallel_map ~workers:e.cfg.workers (fun c -> (c, (exec e c).features)) cands in
+    e.execs <- e.execs + List.length cands;
+    (match List.find_opt (fun (_, fs) -> List.for_all (fun f -> List.mem f fs) nf) res with
+     | Some (c, _) -> best := c
+     | None -> k := !k / 2)
+  done;
+  !best
+
+(* the deterministic input-to-state stage for a new entry, as AFL++ runs cmplog on new entries *)
+let queue_i2s e s' (r : run_result) =
+  let rb = e.rb in
+  List.iteri (fun k (rec_, pi, v) ->
+    if k < 24 then begin
+      let (off, w) = List.nth e.ports pi in
+      let bs = Bytes.of_string s' in
+      let a = 1 + rec_ * rb + 1 + off in
+      if a + (w + 7) / 8 <= Bytes.length bs then begin
+        for b = 0 to (w + 7) / 8 - 1 do Bytes.set bs (a + b) (Char.chr ((v lsr (8 * b)) land 255)) done;
+        Queue.push (Bytes.to_string bs) e.pending;
+        if e.cfg.pulses >= 1 then begin
+          (* the same, as a one-cycle pulse: strobes and valids are often read on a level *)
+          Bytes.set bs (1 + rec_ * rb) '\000';
+          Queue.push (Bytes.to_string bs) e.pending
+        end;
+        if e.cfg.pulses >= 2 then begin
+          (* and as the next pulse: the original record shortened to one cycle, followed by a
+             one-cycle copy driving the logged value. A value compared right after a match is
+             often the next thing the design wants. *)
+          let orig = Bytes.of_string s' in
+          let rs = 1 + rec_ * rb in
+          if rs + rb <= Bytes.length orig then begin
+            Bytes.set orig rs '\000';
+            let nxt = Bytes.sub bs rs rb in
+            Bytes.set nxt 0 '\000';
+            let o = Bytes.to_string orig in
+            Queue.push (String.sub o 0 (rs + rb) ^ Bytes.to_string nxt ^ String.sub o (rs + rb) (String.length o - rs - rb)) e.pending
+          end
+        end
+      end
+    end) r.i2s
+
+(* keep [s] if it has new features; [ops] are the operators that produced it *)
+let consider e ~shrink_it (s, ops, (r : run_result)) =
+  List.iter (fun f -> if not (Hashtbl.mem e.first f) then Hashtbl.replace e.first f e.execs) r.observed;
+  if e.cfg.dict then List.iter (fun v -> if Hashtbl.length e.dict < 4096 then Hashtbl.replace e.dict v ()) r.cmp_values;
+  List.iter (fun o -> e.stats.uses.(o) <- e.stats.uses.(o) + 1) ops;
+  let nf = fresh_feats e r.features in
+  if nf <> [] then begin
+    List.iter (fun o -> e.stats.wins.(o) <- e.stats.wins.(o) + 1) (List.sort_uniq compare ops);
+    let s' = if shrink_it then shrink e s nf else s in
+    let r' = if s' == s then r else (e.execs <- e.execs + 1; exec e s') in
+    if e.cfg.i2s && not e.fresh then queue_i2s e s' r';
+    List.iter (fun f -> Hashtbl.replace e.virgin f ()) (r.features @ r'.features);
+    add_entry e s' r'.features
+  end
+
+let create ?(cfg = default_config) ~fresh ~seed (t : target) =
   let inst = instrument t in
   let rb = record_bytes inst in
-  let st = Random.State.make [| seed |] in
-  let virgin = Hashtbl.create 100_000 in
-  let queue = ref [||] and top = Hashtbl.create 100_000 in
-  let stats = { uses = Array.make (Array.length op_names) 0; wins = Array.make (Array.length op_names) 0 } in
-  let execs = ref 0 and curve = ref [] and first = Hashtbl.create 16 in
-  let exec s = execute t inst s in
-  let dict = Hashtbl.create 1024 in
-  let ports = (* byte offset within a record's value bytes, and width *)
-    let off = ref 0 in List.map (fun (_, w) -> let o = !off in off := !off + (w + 7) / 8; (o, w)) inst.data_ports in
-  let note_observed (r : run_result) =
-    List.iter (fun f -> if not (Hashtbl.mem first f) then Hashtbl.replace first f !execs) r.observed in
-  let pending = Queue.create () in
-  let add_entry s fs =
-    let idx = Array.length !queue in
-    queue := Array.append !queue [| (s, fs) |];
-    List.iter (fun f -> match Hashtbl.find_opt top f with
-      | Some (l, _) when l <= String.length s -> () | _ -> Hashtbl.replace top f (String.length s, idx)) fs in
-  let fresh_feats fs = List.filter (fun f -> not (Hashtbl.mem virgin f)) fs in
-  (* Hypothesis-style shrinking: delete blocks of records, halving the block size, while every
-     new feature survives *)
-  let shrink s nf =
-    let best = ref s and tries = ref 0 in
-    let k = ref (((String.length s - 1) / rb) / 2) in
-    while !k >= 1 && !tries < shrink_budget do
-      let r = (String.length !best - 1) / rb in
-      let cands = List.filter_map (fun a ->
-        if a + !k > r then None
-        else Some (String.sub !best 0 (1 + a * rb) ^ String.sub !best (1 + (a + !k) * rb) (String.length !best - 1 - (a + !k) * rb)))
-        (List.init (max 0 (r - !k + 1)) (fun a -> a) |> List.filter (fun a -> a mod !k = 0)) in
-      let cands = List.filteri (fun i _ -> i < 16) cands in
-      tries := !tries + List.length cands;
-      let res = parallel_map ~workers (fun c -> (c, (exec c).features)) cands in
-      execs := !execs + List.length cands;
-      (match List.find_opt (fun (_, fs) -> List.for_all (fun f -> List.mem f fs) nf) res with
-       | Some (c, _) -> best := c
-       | None -> k := !k / 2)
-    done;
-    !best in
-  let s0 = random_input st rb in
-  let r0 = exec s0 in
-  incr execs;
-  List.iter (fun f -> Hashtbl.replace virgin f ()) r0.features;
-  add_entry s0 r0.features;
-  while !execs < budget do
-    let favoured = Hashtbl.fold (fun _ (_, i) acc -> i :: acc) top [] |> List.sort_uniq compare |> Array.of_list in
+  let e = {
+    t; inst; cfg; fresh; rb; st = Random.State.make [| seed |];
+    virgin = Hashtbl.create 100_000; queue = [||]; top = Hashtbl.create 100_000;
+    stats = { uses = Array.make (Array.length op_names) 0; wins = Array.make (Array.length op_names) 0 };
+    execs = 0; curve = []; first = Hashtbl.create 16; pending = Queue.create (); dict = Hashtbl.create 1024;
+    ports = (let off = ref 0 in List.map (fun (_, w) -> let o = !off in off := !off + (w + 7) / 8; (o, w)) inst.data_ports) } in
+  let s0 = random_input e.st rb in
+  let r0 = exec e s0 in
+  e.execs <- 1;
+  consider e ~shrink_it:false (s0, [], r0);
+  if Array.length e.queue = 0 then add_entry e s0 r0.features;
+  e
+
+(* run [n] more executions *)
+let step e n =
+  let stop = e.execs + n in
+  while e.execs < stop do
+    let favoured = Hashtbl.fold (fun _ (_, i) acc -> i :: acc) e.top [] |> List.sort_uniq compare |> Array.of_list in
     let pick () =
-      let q = !queue in
-      if Array.length favoured > 0 && Random.State.int st 10 < 8 then fst q.(favoured.(Random.State.int st (Array.length favoured)))
-      else fst q.(Random.State.int st (Array.length q)) in
-    let cands = List.init batch (fun _ ->
-      if (not fresh) && not (Queue.is_empty pending) then (Queue.pop pending, [ op_i2s ])
-      else if fresh then (random_input st rb, [])
-      else mutate ~dict:(Array.of_seq (Hashtbl.to_seq_keys dict)) ~ports st rb (Array.map fst !queue) (pick ())) in
-    let res = parallel_map ~workers (fun (s, ops) -> (s, ops, exec s)) cands in
-    execs := !execs + batch;
-    List.iter (fun (s, ops, r) ->
-      note_observed r;
-      List.iter (fun v -> if Hashtbl.length dict < 4096 then Hashtbl.replace dict v ()) r.cmp_values;
-      List.iter (fun o -> stats.uses.(o) <- stats.uses.(o) + 1) ops;
-      let nf = fresh_feats r.features in
-      if nf <> [] then begin
-        List.iter (fun o -> stats.wins.(o) <- stats.wins.(o) + 1) (List.sort_uniq compare ops);
-        let s' = if fresh then s else shrink s nf in
-        let r' = if s' == s then r else exec s' in
-        let fs = r'.features in
-        (* the deterministic input-to-state stage for the new entry, as AFL++ runs cmplog on new entries *)
-        if not fresh then
-          List.iteri (fun k (rec_, pi, v) ->
-            if k < 24 then begin
-              let (off, w) = List.nth ports pi in
-              let bs = Bytes.of_string s' in
-              let a = 1 + rec_ * rb + 1 + off in
-              if a + (w + 7) / 8 <= Bytes.length bs then begin
-                for b = 0 to (w + 7) / 8 - 1 do Bytes.set bs (a + b) (Char.chr ((v lsr (8 * b)) land 255)) done;
-                Queue.push (Bytes.to_string bs) pending;
-                (* the same, as a one-cycle pulse: strobes and valids are often read on a level *)
-                Bytes.set bs (1 + rec_ * rb) '\000';
-                Queue.push (Bytes.to_string bs) pending;
-                (* and as the next pulse: the original record shortened to one cycle, followed by a
-                   one-cycle copy driving the logged value. A value compared right after a match is
-                   often the next thing the design wants. *)
-                let orig = Bytes.of_string s' in
-                let rs = 1 + rec_ * rb in
-                if rs + rb <= Bytes.length orig then begin
-                  Bytes.set orig rs '\000';
-                  let nxt = Bytes.sub bs rs rb in
-                  let o = Bytes.to_string orig in
-                  Queue.push (String.sub o 0 (rs + rb) ^ Bytes.to_string nxt ^ String.sub o (rs + rb) (String.length o - rs - rb)) pending
-                end
-              end
-            end) r'.i2s;
-        List.iter (fun f -> Hashtbl.replace virgin f ()) (r.features @ fs);
-        add_entry s' fs
-      end) res;
-    curve := (!execs, Hashtbl.length virgin) :: !curve
+      let q = e.queue in
+      if Array.length favoured > 0 && Random.State.int e.st 10 < 8 then fst q.(favoured.(Random.State.int e.st (Array.length favoured)))
+      else fst q.(Random.State.int e.st (Array.length q)) in
+    let dict = if e.cfg.dict then Array.of_seq (Hashtbl.to_seq_keys e.dict) else [||] in
+    let cands = List.init e.cfg.batch (fun _ ->
+      if (not e.fresh) && not (Queue.is_empty e.pending) then (Queue.pop e.pending, [ op_i2s ])
+      else if e.fresh then (random_input e.st e.rb, [])
+      else mutate ~dict ~ports:e.ports e.st e.rb (Array.map fst e.queue) (pick ())) in
+    let res = parallel_map ~workers:e.cfg.workers (fun (s, ops) -> (s, ops, exec e s)) cands in
+    e.execs <- e.execs + e.cfg.batch;
+    List.iter (consider e ~shrink_it:(not e.fresh)) res;
+    e.curve <- (e.execs, Hashtbl.length e.virgin) :: e.curve
+  done
+
+(* offer inputs found elsewhere (island sync): executed here, kept only if new to this engine *)
+let import e inputs =
+  let res = parallel_map ~workers:e.cfg.workers (fun s -> (s, [], exec e s)) inputs in
+  e.execs <- e.execs + List.length inputs;
+  List.iter (consider e ~shrink_it:false) res
+
+(* afl-cmin: a small set of entries covering every feature the queue covers (greedy set cover) *)
+let cmin (queue : (string * int list) array) =
+  let uncovered = Hashtbl.create 10_000 in
+  Array.iter (fun (_, fs) -> List.iter (fun f -> Hashtbl.replace uncovered f ()) fs) queue;
+  let chosen = ref [] in
+  while Hashtbl.length uncovered > 0 do
+    let best = ref (-1) and gain = ref 0 in
+    Array.iteri (fun i (s, fs) ->
+      let g = List.length (List.filter (Hashtbl.mem uncovered) fs) in
+      if g > !gain || (g = !gain && g > 0 && String.length s < String.length (fst queue.(!best))) then (best := i; gain := g)) queue;
+    List.iter (Hashtbl.remove uncovered) (snd queue.(!best));
+    chosen := !best :: !chosen
   done;
-  { execs = !execs; coverage = Hashtbl.length virgin; queue = !queue; curve = List.rev !curve; stats;
-    first_hit = Hashtbl.fold (fun f e acc -> (f, e) :: acc) first [] }
+  List.rev !chosen
+
+(* [k] engines, round-robin in slices of [slice] executions each. With [sync], each engine imports
+   the entries the others found since the last round (islands); without, they are independent
+   restarts merged at the end. A single campaign is k = 1. Total executions ~ budget. *)
+let campaign ?(cfg = default_config) ?(k = 1) ?(slice = 2000) ?(sync = true) ~budget ~fresh ~seed t =
+  let es : engine array = Array.init k (fun i -> create ~cfg ~fresh ~seed:(seed * 1009 + i) t) in
+  let exported = Array.make k 1 in
+  let total () = Array.fold_left (fun a (e : engine) -> a + e.execs) 0 es in
+  let first = Hashtbl.create 16 in
+  (* a hit at engine i's own count x happened when the others stood where they are now, since the
+     engines run one at a time *)
+  let note i =
+    let others = total () - es.(i).execs in
+    Hashtbl.iter (fun f x -> match Hashtbl.find_opt first f with
+      | Some y when y <= x + others -> () | _ -> Hashtbl.replace first f (x + others)) es.(i).first in
+  while total () < budget do
+    Array.iteri (fun i e -> step e (min slice (max cfg.batch ((budget - total ()) / k))); note i) es;
+    if sync && k > 1 then begin
+      let fresh_entries = Array.mapi (fun i e ->
+        let l = Array.to_list (Array.sub e.queue exported.(i) (Array.length e.queue - exported.(i))) in
+        exported.(i) <- Array.length e.queue; List.map fst l) es in
+      Array.iteri (fun i e ->
+        let others = List.concat (List.filteri (fun j _ -> j <> i) (Array.to_list fresh_entries)) in
+        if others <> [] then import e others;
+        exported.(i) <- Array.length e.queue; note i) es
+    end
+  done;
+  let feats = Hashtbl.create 100_000 in
+  Array.iter (fun e -> Hashtbl.iter (fun f () -> Hashtbl.replace feats f ()) e.virgin) es;
+  let stats = { uses = Array.make (Array.length op_names) 0; wins = Array.make (Array.length op_names) 0 } in
+  Array.iter (fun e -> Array.iteri (fun i u -> stats.uses.(i) <- stats.uses.(i) + u; stats.wins.(i) <- stats.wins.(i) + e.stats.wins.(i)) e.stats.uses) es;
+  ({ execs = total (); coverage = Hashtbl.length feats; queue = Array.concat (Array.to_list (Array.map (fun e -> e.queue) es));
+    stats; first_hit = Hashtbl.fold (fun f e acc -> (f, e) :: acc) first [] } : result)
+
+let fuzz ?cfg ~budget ~fresh ~seed t = campaign ?cfg ~k:1 ~budget ~fresh ~seed t
