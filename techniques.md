@@ -101,3 +101,42 @@ analyser mode almost for free; noise-shaped timing plus the delay line is
 the exact answer to Ethernet's fractional ratio; reservoir computing is
 the one that would make a judge sit up, with a real risk of not working,
 which the spare chips are for.
+
+## The principle underneath: specialised hardware, general software
+
+Build hardware that does not look general purpose: sparse links, a ring
+here, a few random shortcuts there, fixed tables. Then spend the smarts
+offline, in search and compilation, to make it do what is wanted anyway.
+Precedents: compressed sensing (random measurements, clever recovery),
+reservoir computing (random network, trained readout), superoptimisation
+(fixed instruction set, exhaustive search for the program), and the
+drum-memory programmers who placed each instruction to arrive just in
+time.
+
+Interconnect options, cheapest to most general:
+- **Sparse shortcuts.** A few long links turn a ring's n-hop paths into
+  about log n (the small-world effect); because routes are computed
+  offline, any sparse set works, including random ones, with no need for
+  the special distributions that on-the-fly routing requires.
+- **Designed link sets for specific algorithms.** Coprime lengths for
+  prime-factor FFTs (a GPS C/A code is 1023 = 3 x 11 x 31 chips); prime
+  lengths with a closed ring for Rader's transform; Golomb rulers and
+  difference sets so that every lag appears exactly once, as in
+  minimum-redundancy antenna arrays.
+- **Random, then chosen.** Draw many random sparse link sets, compile and
+  simulate the target programs on each, keep the best, and compare
+  against structured baselines rather than assuming randomness wins.
+- **A Benes network** where arbitrary rearrangement is needed: every
+  permutation in about 2 log n stages, with switch settings computed
+  offline.
+- **Links between levels** (pixel, line, frame, and delayed links across
+  time): stencils and shadows from a skip link to the background stage,
+  frame-rate automata driving per-pixel operations.
+
+Two disciplines keep this honest. Measure expressiveness: for each target
+program the compiler either finds a schedule on the sparse hardware or
+says it cannot, and the success rate is counted against a dense baseline.
+And treat failure as information: a failed search points at the link or
+table entry that would have made it possible, which is how the hardware
+should grow. Keep long wires few and visible to the router early; they
+are what made an eFPGA tile 78 % routing.
