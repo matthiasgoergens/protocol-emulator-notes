@@ -225,3 +225,12 @@ Host-precomputed composite fields, sigma-delta reduced to 1, 2 or 3 pins at
 two, 49 dB with three. The ideal composite itself is 25 to 27 dB from the
 source picture, so two pins are visually lossless. One PAL field at one pin
 is 165 KB; the stream's transition rate is inside the pad limit.
+
+## 2026-09-23: systolic retro console, video chip
+
+NTSC racing-the-beam video chip in Hardcaml (`prototypes/retro-console/`):
+per-line 54-byte packets through a systolic byte chain, 16 systolic sprite
+cells, a multiplier-free perspective ground, subcarrier-phase colour at 16x
+fsc. Lockstep against a reference on 172,032 random pixels: 0 mismatches
+(planted one-pixel bug: 4,105). 120 fields of an original demo game
+decoded through the software TV. 5,255 cells, 94,319 um2 synthesised.

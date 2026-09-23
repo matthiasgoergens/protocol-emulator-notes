@@ -1,0 +1,10 @@
+_build/
+out/*.bin
+out/*.log
+out/frame_*.png
+!out/frame_000.png
+!out/frame_060.png
+!out/frame_110.png
+build.log
+emit.log
+synth_sg13g2.log
