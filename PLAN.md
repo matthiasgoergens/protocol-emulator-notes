@@ -104,3 +104,23 @@ calibration-by-search and portability experiments are for.
 - A straight PIO clone: four machines fit but take 16 to 18 of 24 tiles.
 - The reconfigurable fabric as the engine: 78 % routing by area, 45 ns
   worst path at the slow corner, about 90 LUT4s in the whole allocation.
+
+## Decision, 23 September 2026: plain systolic arrays; the chaotic network is parked
+
+Direction: a plain systolic array (a pipeline of identical cells with
+nearest-neighbour links, as in the sprite pipeline, the correlator and the
+wave ring), optionally closed into a loop with conditional back links, so a
+value can take another pass through the cells when a condition holds.
+
+Reason: these structures have exact reference models, lockstep tests,
+working PAL output, and a programming model a compiler can target: each
+pass through the cells is a stage of a program, and the loop count and back
+links are scheduled offline.
+
+Parked: the "crazy network" (random sparse links, byte cells, add/XOR/sub/max).
+Its search produced a few good finds, but we have no good handle on how to
+program it deliberately: most programs are chaotic, objectives get gamed,
+and GF(2) linearity gives little useful structure. Revisit only when there
+is an algebra to design with (max-plus with a Kleene closure, composable
+blocks with contracts), not by more random search. The prototype and its
+findings stay in `prototypes/crazy-network/`.
