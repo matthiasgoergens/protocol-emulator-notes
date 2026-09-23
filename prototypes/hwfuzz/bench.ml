@@ -148,6 +148,14 @@ let usb_target ?(faulty = false) ?(units = false) ~repair () =
     max_cycles = 16_000; observer = Some usb_observer; stream = Some (usb_stream ~repair);
     units = (if units then Some usb_units else None) }
 
+(* one GET_DESCRIPTOR(device) control transfer: SETUP, DATA0, IN, ACK *)
+let usb_get_descriptor =
+  let pkt ?(gap = 1) bytes =
+    String.make 1 (Char.chr (((List.length bytes - 1) land 15) lor 16 lor (gap lsl 5)))
+    ^ String.concat "" (List.map (fun b -> String.make 1 (Char.chr b)) bytes) in
+  "\000" ^ pkt [ 0x2D; 0; 0 ] ^ pkt ~gap:2 [ 0xC3; 0x80; 0x06; 0x00; 0x01; 0x00; 0x00; 0x40; 0x00 ]
+  ^ pkt ~gap:3 [ 0x69; 0; 0 ] ^ pkt ~gap:1 [ 0xD2 ]
+
 (* A known-good session from the prototype's own test: SETUP GET_DESCRIPTOR(device), IN, then
    SET_ADDRESS 5 and its status stage. Used to check the transducer and oracle before fuzzing. *)
 let usb_session =
@@ -277,11 +285,13 @@ let () =
       (String.concat " " (List.map (fun f -> if f >= 700 then "configured" else if f >= 500 then Printf.sprintf "addr=%d" (f - 500)
                                               else if f >= 200 then Printf.sprintf "pid=%02x" (f - 200) else "VIOLATION")
                             (List.sort compare r.observed)))) [ ("device", usb_target ~repair:true ()); ("planted fault", usb_target ~faulty:true ~repair:true ()) ]
-  | [ _; "usbfuzz"; tname; cname; budget; seeds ] ->
-    (* when each USB milestone first appeared, in total executions *)
+  | _ :: "usbfuzz" :: tname :: cname :: budget :: seeds :: rest ->
+    (* when each USB milestone first appeared, in total executions; "seeded" starts the corpus from
+       one GET_DESCRIPTOR control transfer (no SET_ADDRESS in it) *)
     let t = target tname and (cfg, k, sync, fresh) = config cname in
+    let corpus = if rest = [ "seeded" ] then [ usb_get_descriptor ] else [] in
     List.iter (fun seed ->
-      let r = Hwfuzz.campaign ~cfg ~k ~sync ~budget:(int_of_string budget) ~fresh ~seed:(int_of_string seed) t in
+      let r = Hwfuzz.campaign ~cfg ~corpus ~k ~sync ~budget:(int_of_string budget) ~fresh ~seed:(int_of_string seed) t in
       let first p = List.fold_left (fun m (f, e) -> if p f then (match m with None -> Some e | Some x -> Some (min x e)) else m) None r.first_hit in
       let show = function None -> "-" | Some e -> string_of_int e in
       Printf.printf "%s %s seed %s: response %s ack %s nak %s stall %s data %s address %s configured %s VIOLATION %s | coverage %d queue %d\n%!"

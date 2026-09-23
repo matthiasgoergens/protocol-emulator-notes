@@ -533,7 +533,7 @@ let consider e ~shrink_it (s, ops, (r : run_result)) =
     add_entry e s' r'.features
   end
 
-let create ?(cfg = default_config) ~fresh ~seed (t : target) =
+let create ?(cfg = default_config) ?(corpus = []) ~fresh ~seed (t : target) =
   let inst = instrument t in
   let rb = record_bytes inst in
   let e = {
@@ -547,6 +547,8 @@ let create ?(cfg = default_config) ~fresh ~seed (t : target) =
   e.execs <- 1;
   consider e ~shrink_it:false (s0, [], r0);
   if Array.length e.queue = 0 then add_entry e s0 r0.features;
+  (* a seed corpus, as AFL campaigns start from example inputs *)
+  List.iter (fun s -> e.execs <- e.execs + 1; consider e ~shrink_it:false (s, [], exec e s)) corpus;
   e
 
 (* run [n] more executions *)
@@ -593,8 +595,8 @@ let cmin (queue : (string * int list) array) =
 (* [k] engines, round-robin in slices of [slice] executions each. With [sync], each engine imports
    the entries the others found since the last round (islands); without, they are independent
    restarts merged at the end. A single campaign is k = 1. Total executions ~ budget. *)
-let campaign ?(cfg = default_config) ?(k = 1) ?(slice = 2000) ?(sync = true) ~budget ~fresh ~seed t =
-  let es : engine array = Array.init k (fun i -> create ~cfg ~fresh ~seed:(seed * 1009 + i) t) in
+let campaign ?(cfg = default_config) ?(corpus = []) ?(k = 1) ?(slice = 2000) ?(sync = true) ~budget ~fresh ~seed t =
+  let es : engine array = Array.init k (fun i -> create ~cfg ~corpus ~fresh ~seed:(seed * 1009 + i) t) in
   let exported = Array.make k 1 in
   let total () = Array.fold_left (fun a (e : engine) -> a + e.execs) 0 es in
   let first = Hashtbl.create 16 in
