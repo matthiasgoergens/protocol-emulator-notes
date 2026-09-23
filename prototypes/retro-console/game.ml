@@ -92,15 +92,15 @@ let sprites line =
       let h = List.length art * rep in
       let r = line - (y - h + 1) in
       if r >= 0 && r < h then begin
-        let c = if e.boom > 0 then (if e.boom mod 4 < 2 then col 15 10 else col 14 8)
-          else if r / rep = 3 && rep = 2 then col 0 10 else col 13 (if e.ez > 120.0 then 5 else 7) in
+        let c = if e.boom > 0 then (if e.boom mod 4 < 2 then col 6 10 else col 5 8)
+          else if r / rep = 3 && rep = 2 then col 0 10 else col 4 (if e.ez > 120.0 then 5 else 7) in
         let bmp = if e.boom > 0 then List.nth art (r / rep) lxor (if e.boom mod 2 = 0 then 0x5A else 0xA5) else List.nth art (r / rep) in
         add (px - 8) bmp c
       end
     | `S s ->
       let y, px = screen ~x:s.sx ~z:s.sz in
       let h = if s.sz < 30.0 then 4 else 2 in
-      if line > y - h && line <= y then add (px - 8) (if s.sz < 60.0 then 0x18 else 0x10) (col 12 10)) objs;
+      if line > y - h && line <= y then add (px - 8) (if s.sz < 60.0 then 0x18 else 0x10) (col 3 10)) objs;
   (* the ship: two mirrored halves, cockpit and engine flame on top *)
   let top = last - 27 in
   let r = (line - top) / 2 in
@@ -108,9 +108,9 @@ let sprites line =
   if line >= top && r < 12 then begin
     add sx (List.nth ship_left r) (col 0 8);
     add (sx + 16) (List.nth ship_right r) (col 0 8);
-    if r >= 4 && r <= 7 then add (sx + 8) 0x3C (col 6 (if r = 4 then 9 else 6))
+    if r >= 4 && r <= 7 then add (sx + 8) 0x3C (col 11 (if r = 4 then 9 else 6))
   end;
-  if line >= top + 24 && line < top + 28 then add (sx + 8) (if !frame mod 4 < 2 then 0x18 else 0x3C) (col 14 (if !frame mod 3 = 0 then 10 else 8));
+  if line >= top + 24 && line < top + 28 then add (sx + 8) (if !frame mod 4 < 2 then 0x18 else 0x3C) (col 5 (if !frame mod 3 = 0 then 10 else 8));
   let l = List.rev !out in
   let n = List.length l in
   if n > Console.nspr then List.filteri (fun i _ -> i >= n - Console.nspr) l else l
@@ -126,9 +126,9 @@ let packet ~field ~line =
     if line < horizon - 1 then
       let t = line - first in
       let lum = 1 + t * 4 / (horizon - first) in
-      let hue = if t < 30 then 8 else 7 in
-      [| col hue lum; col hue lum; 0; 0; 0; 0 |]
-    else if line = horizon - 1 then [| col 14 6; col 14 6; 0; 0; 0; 0 |]
+      let hue = if t < 30 then 1 else 12 in
+      [| col hue lum; col hue lum; 0; 0; 0; 0; 0; 0; 0; 0 |]
+    else if line = horizon - 1 then [| col 5 6; col 5 6; 0; 0; 0; 0; 0; 0; 0; 0 |]
     else begin
       let z = depth line in
       let st = step_of z in
@@ -136,9 +136,9 @@ let packet ~field ~line =
       let u0 = int_of_float ((!cam -. 128.0 *. st) *. 256.0) land 0xFFFF in
       let fog = min 7 (2 + (line - horizon) / 18) in
       let checker = int_of_float (Float.floor ((z +. !scroll) /. 20.0)) land 1 in
-      let a = col 2 fog and b = col 3 (max 1 (fog - 2)) in
+      let a = col 8 fog and b = col 9 (max 1 (fog - 2)) in
       let a, b = if checker = 1 then b, a else a, b in
-      [| a; b; u0 land 0xFF; u0 lsr 8; stepi land 0xFF; stepi lsr 8 |]
+      [| a; b; u0 land 0xFF; u0 lsr 8; stepi land 0xFF; stepi lsr 8; 0; 0; 0; 0 |]
     end in
   let spr = List.filter_map clip (sprites line) in
   let spr = Array.of_list spr in

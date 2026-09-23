@@ -234,3 +234,12 @@ cells, a multiplier-free perspective ground, subcarrier-phase colour at 16x
 fsc. Lockstep against a reference on 172,032 random pixels: 0 mismatches
 (planted one-pixel bug: 4,105). 120 fields of an original demo game
 decoded through the software TV. 5,255 cells, 94,319 um2 synthesised.
+
+## 2026-09-23: retro console moved to PAL, demo reel
+
+The console now runs at 12 x the PAL subcarrier (53.20 MHz), the clock the
+RP2040 can make to within 64 ppm; its best NTSC colour clock is 1,058 ppm
+off. A second background accumulator XORed with the first gives a
+rotozoomer. Lockstep on the PAL build: 720 random lines, 0 mismatches.
+540-field demo reel (copper bars and sine scroller, rotozoomer, 3D star
+field) and 120-field game rendered through the software TV.

@@ -42,10 +42,11 @@ let run s ~fields ~(packet : field:int -> line:int -> int array) ~on_cycle =
 let reference p =
   Array.init 256 (fun px ->
     let u0 = p.(2) lor (p.(3) lsl 8) and step = p.(4) lor (p.(5) lsl 8) in
-    let u = (u0 + px * step) land 0xFFFF in
-    let c = ref (if (u lsr 12) land 1 = 1 then p.(1) else p.(0)) in
+    let v0 = p.(6) lor (p.(7) lsl 8) and vstep = p.(8) lor (p.(9) lsl 8) in
+    let u = (u0 + px * step) land 0xFFFF and v = (v0 + px * vstep) land 0xFFFF in
+    let c = ref (if ((u lsr 12) lxor (v lsr 12)) land 1 = 1 then p.(1) else p.(0)) in
     for i = 0 to nspr - 1 do
-      let sx = p.(6 + 3 * i) and bmp = p.(7 + 3 * i) and col = p.(8 + 3 * i) in
+      let sx = p.(10 + 3 * i) and bmp = p.(11 + 3 * i) and col = p.(12 + 3 * i) in
       let d = px - sx in
       if d >= 0 && d < 16 && (bmp lsr (7 - d / 2)) land 1 = 1 then c := col
     done; !c)
@@ -89,7 +90,7 @@ let dump s ~fields ~packet ~name =
 
 let palette_packet ~field:_ ~line =
   let row = (line - Console.first_vis) * 11 / Console.nvis in
-  Array.concat [ [| 0; 0; 0; 0; 0; 0 |];
+  Array.concat [ [| 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 |];
                  Array.concat (List.init nspr (fun i -> [| i * 16; 0xFF; (i lsl 4) lor row |])) ]
 
 let () =
@@ -99,4 +100,5 @@ let () =
   | [ _; "verilog" ] -> let oc = open_out "retro_console.v" in Rtl.output ~output_mode:(To_channel oc) Verilog circuit; close_out oc
   | [ _; "palette" ] -> dump (make ()) ~fields:1 ~packet:palette_packet ~name:"palette"
   | [ _; "game"; n ] -> dump (make ()) ~fields:(int_of_string n) ~packet:Game.packet ~name:"frame"
+  | [ _; "demo"; n ] -> dump (make ()) ~fields:(int_of_string n) ~packet:Demo.packet ~name:"demo"
   | _ -> prerr_endline "usage: main (check | palette | game N)"; exit 2
