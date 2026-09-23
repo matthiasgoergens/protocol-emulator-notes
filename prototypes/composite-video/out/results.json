@@ -1,0 +1,54 @@
+{
+  "PAL": {
+    "samples_per_field": 1317888,
+    "psnr_ideal_vs_source_dB": 26.9,
+    "L2": {
+      "pins": 1,
+      "inband_snr_dB": 12.6,
+      "psnr_vs_ideal_dB": 24.2,
+      "toggle_rate_MHz": 43.4,
+      "bytes_per_field": 164736
+    },
+    "L4": {
+      "pins": 2,
+      "inband_snr_dB": 28.8,
+      "psnr_vs_ideal_dB": 40.4,
+      "toggle_rate_MHz": 45.7,
+      "bytes_per_field": 329472
+    },
+    "L8": {
+      "pins": 3,
+      "inband_snr_dB": 37.5,
+      "psnr_vs_ideal_dB": 48.8,
+      "toggle_rate_MHz": 46.8,
+      "bytes_per_field": 494208
+    },
+    "seconds": 3.5
+  },
+  "NTSC": {
+    "samples_per_field": 1099003,
+    "psnr_ideal_vs_source_dB": 25.2,
+    "L2": {
+      "pins": 1,
+      "inband_snr_dB": 18.1,
+      "psnr_vs_ideal_dB": 25.3,
+      "toggle_rate_MHz": 43.5,
+      "bytes_per_field": 137375
+    },
+    "L4": {
+      "pins": 2,
+      "inband_snr_dB": 33.7,
+      "psnr_vs_ideal_dB": 40.7,
+      "toggle_rate_MHz": 45.8,
+      "bytes_per_field": 274750
+    },
+    "L8": {
+      "pins": 3,
+      "inband_snr_dB": 42.3,
+      "psnr_vs_ideal_dB": 49.1,
+      "toggle_rate_MHz": 46.6,
+      "bytes_per_field": 412126
+    },
+    "seconds": 2.8
+  }
+}

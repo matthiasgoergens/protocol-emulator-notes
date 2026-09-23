@@ -215,3 +215,13 @@ receiver accepts the model's frame and the transmitter's own and rejects
 a corrupted one. At 60 MHz a half bit is exactly three cycles, so no
 fractional timing is needed. 1,002 cells, 16,347 um2 synthesised; place
 and route at 60 MHz: die 41154 um2, utilisation 78 %, routing violations 0, setup slack +11.2 / +10.1 / +8.3 ns at fast / typical / slow.
+
+## 2026-09-23: PAL and NTSC composite colour video from digital pins
+
+Host-precomputed composite fields, sigma-delta reduced to 1, 2 or 3 pins at
+66 Msps, decoded by an independent software TV
+(`prototypes/composite-video/`). Picture PSNR against the ideal composite:
+24 to 25 dB with one pin (recognisable colour, visible noise), 40 dB with
+two, 49 dB with three. The ideal composite itself is 25 to 27 dB from the
+source picture, so two pins are visually lossless. One PAL field at one pin
+is 165 KB; the stream's transition rate is inside the pad limit.
