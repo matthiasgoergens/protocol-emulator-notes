@@ -517,6 +517,30 @@ let queue_i2s_bytes e s (r : run_result) =
           end;
           incr i
         done) [ (x, y); (y, x) ]) r.cmp_pairs;
+  (* the next unit: a value the design compares against once the input has run out belongs in a
+     new unit at the end (the unit-level form of the "next pulse" variant). Append a copy of a
+     unit holding one operand, with the other substituted. USB: after SET_ADDRESS the device
+     compares token addresses with its new address, and only a new IN token can use that. *)
+  (match e.t.units with
+   | Some units ->
+     let us = Array.of_list (units s) in
+     let pairs = Array.of_list (List.filter (fun (w, _, _) -> w >= 4 && w <= 16) r.cmp_pairs) in
+     for _ = 1 to min 12 (Array.length pairs) do
+       let (w, x, y) = pairs.(Random.State.int e.st (Array.length pairs)) in
+       let (a, b) = if Random.State.bool e.st then (x, y) else (y, x) in
+       let pa = le w a and pb = le w b in
+       let la = String.length pa in
+       let holding = List.filter (fun (st, l) ->
+         let u = String.sub s st l in
+         let rec f i = i + la <= l && (String.sub u i la = pa || f (i + 1)) in f 1) (Array.to_list us) in
+       match List.rev holding with
+       | (st, l) :: _ ->
+         let u = Bytes.of_string (String.sub s st l) in
+         let rec f i = if i + la <= l then (if Bytes.sub_string u i la = pa then Bytes.blit_string pb 0 u i la else f (i + 1)) in f 1;
+         Queue.push (s ^ Bytes.to_string u) e.pending
+       | [] -> ()
+     done
+   | None -> ());
   (* multi-replacement: conditions often need several comparisons true at once (a request type and
      a request code), and one replacement alone changes nothing the design reacts to. A few
      mutants apply a random, consistent subset of all logged replacements together. *)
