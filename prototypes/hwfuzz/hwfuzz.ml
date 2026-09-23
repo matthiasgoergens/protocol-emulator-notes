@@ -393,11 +393,12 @@ type config = {
   pulses : int;         (* input-to-state variants: 0 plain, 1 + one-cycle pulse, 2 + next pulse *)
   i2s_bytes : bool;     (* input-to-state by byte pattern (AFL++ CmpLog): find one operand's bytes in
                            the input, write the other's; works through a transducer *)
+  multi_i2s : bool;     (* also mutants applying several logged replacements at once *)
   shrink_budget : int;
   batch : int;
   workers : int;
 }
-let default_config = { dict = true; i2s = true; pulses = 2; i2s_bytes = true; shrink_budget = 32; batch = 32;
+let default_config = { dict = true; i2s = true; pulses = 2; i2s_bytes = true; multi_i2s = true; shrink_budget = 32; batch = 32;
     workers = (match Sys.getenv_opt "HWFUZZ_WORKERS" with Some w -> int_of_string w | None -> 4) }
 
 let random_input st rb =
@@ -515,7 +516,32 @@ let queue_i2s_bytes e s (r : run_result) =
             incr n
           end;
           incr i
-        done) [ (x, y); (y, x) ]) r.cmp_pairs
+        done) [ (x, y); (y, x) ]) r.cmp_pairs;
+  (* multi-replacement: conditions often need several comparisons true at once (a request type and
+     a request code), and one replacement alone changes nothing the design reacts to. A few
+     mutants apply a random, consistent subset of all logged replacements together. *)
+  if e.cfg.multi_i2s then begin
+    let by_src = Hashtbl.create 16 in
+    List.iter (fun (w, x, y) ->
+      if w >= 8 && w <= 16 then List.iter (fun (a, b) -> Hashtbl.replace by_src (w, a) (b :: Option.value ~default:[] (Hashtbl.find_opt by_src (w, a)))) [ (x, y); (y, x) ]) r.cmp_pairs;
+    let srcs = Hashtbl.fold (fun k v acc -> (k, Array.of_list v) :: acc) by_src [] in
+    let present = List.filter (fun ((w, a), _) ->
+      let pa = le w a in let la = String.length pa in
+      let rec f i = i + la <= String.length s && (String.sub s i la = pa || f (i + 1)) in f 1) srcs in
+    if List.length present >= 2 then
+      for _ = 1 to 8 do
+        let b = Bytes.of_string s in
+        List.iter (fun ((w, a), targets) ->
+          if Random.State.bool e.st then begin
+            let pa = le w a and pb = le w targets.(Random.State.int e.st (Array.length targets)) in
+            let la = String.length pa in
+            for i = 1 to Bytes.length b - la do
+              if Bytes.sub_string b i la = pa then Bytes.blit_string pb 0 b i la
+            done
+          end) present;
+        Queue.push (Bytes.to_string b) e.pending
+      done
+  end
 
 (* keep [s] if it has new features; [ops] are the operators that produced it *)
 let consider e ~shrink_it (s, ops, (r : run_result)) =

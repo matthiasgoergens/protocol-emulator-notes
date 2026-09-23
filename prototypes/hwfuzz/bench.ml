@@ -256,6 +256,7 @@ let config name =
   | "i2s" -> { d with pulses = 0 }, 1, false, false
   | "i2s+pulse" -> { d with pulses = 1 }, 1, false, false
   | "full" -> d, 1, false, false
+  | "single-i2s" -> { d with multi_i2s = false }, 1, false, false
   | "restarts4" -> d, 4, false, false
   | "islands4" -> d, 4, true, false
   | _ -> failwith ("unknown config " ^ name)
@@ -521,4 +522,25 @@ let () =
       let s = In_channel.with_open_bin f In_channel.input_all in
       let r = Hwfuzz.execute eth_target inst s in
       Printf.printf "%s: verdicts %s\n" f (String.concat "," (List.map string_of_int (List.sort compare r.observed)))) files
+  | _ -> ()
+
+(* is SET_ADDRESS reachable from the seed by editing only the setup bytes? *)
+let () =
+  match Array.to_list Sys.argv with
+  | [ _; "usbsetaddr" ] ->
+    let pkt ?(gap = 1) bytes =
+      String.make 1 (Char.chr (((List.length bytes - 1) land 15) lor 16 lor (gap lsl 5)))
+      ^ String.concat "" (List.map (fun b -> String.make 1 (Char.chr b)) bytes) in
+    let set_addr = "\000" ^ pkt [ 0x2D; 0; 0 ] ^ pkt ~gap:2 [ 0xC3; 0x00; 0x05; 0x05; 0x00; 0x00; 0x00; 0x00; 0x00 ]
+                   ^ pkt ~gap:3 [ 0x69; 0; 0 ] ^ pkt ~gap:1 [ 0xD2 ] in
+    let then_in = set_addr ^ pkt ~gap:3 [ 0x69; 5; 0 ] in
+    List.iter (fun (name, t, s) ->
+      let inst = Hwfuzz.instrument t in
+      let r = Hwfuzz.execute t inst s in
+      Printf.printf "%s: observed %s\n" name
+        (String.concat " " (List.map (fun f -> if f >= 700 then "configured" else if f >= 500 then Printf.sprintf "addr=%d" (f - 500)
+                                                else if f >= 200 then Printf.sprintf "pid=%02x" (f - 200) else "VIOLATION") (List.sort compare r.observed))))
+      [ ("SET_ADDRESS(5) as edited seed, real device", usb_target ~repair:true (), set_addr);
+        ("same plus IN to address 5, real device", usb_target ~repair:true (), then_in);
+        ("same plus IN to address 5, planted fault", usb_target ~faulty:true ~repair:true (), then_in) ]
   | _ -> ()
