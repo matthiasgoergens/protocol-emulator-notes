@@ -31,6 +31,16 @@ Hardware has no instruction pointer. These decisions are the closest thing to br
 
 The simulator is recreated for every execution, because `Cyclesim.reset` only restores registers that have an asynchronous reset. On small circuits it still runs thousands of executions per second. A snapshot-and-restore would be this tool's version of AFL's fork server.
 
+## Design principle: hardware patience
+
+Hypothesis declines some combinatorial searches, for example correlating edits position by position in `lower_duplicated_characters`, because it has to finish inside a CI run. hwfuzz's users are hardware teams, and as Dan Luu puts it in ["Given that we spend little on testing, how should we test software?"](https://danluu.com/testing/): "It's not unusual for a 'short' hardware test to take minutes, and for a long test to take hours or days." Hardware companies "dedicate thousands of machines to generating and running tests".
+
+So hwfuzz should not inherit CI-sized trade-offs. It should offer two profiles, and the ledger should judge heuristics per profile:
+- **quick**, for CI: yield per execution matters;
+- **thorough**, for overnight and multi-day runs: what is reached by the end matters. That means exhaustive pairs and triples of logged replacements, deterministic stages, and several islands, possibly across machines.
+
+The campaigns measured here (200,000 executions, about 20 minutes at 4 workers) are small by that standard. The limit on this machine is a shared host, not patience.
+
 ## Heuristics ledger
 
 Each entry records what a heuristic was measured on and what it did. Hypothesis and AFL++ grew their heuristics by accumulating exactly this kind of experience.
