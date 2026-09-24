@@ -1,0 +1,7 @@
+FROM docker.io/library/debian:trixie-slim
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -qq && apt-get install -y -qq ngspice libllvm18 gcc binutils curl ca-certificates jq python3 python3-pip klayout >/dev/null && rm -rf /var/lib/apt/lists/*
+RUN url=$(curl -s https://api.github.com/repos/OpenVAF/OpenVAF-Reloaded/releases/latest | jq -r ".assets[].browser_download_url" | grep -i linux | head -n 1) \
+ && curl -sL "$url" -o /tmp/ov.tgz && mkdir -p /opt/ov && tar -xzf /tmp/ov.tgz -C /opt/ov \
+ && ln -s $(find /opt/ov -type f -name openvaf-r | head -n 1) /usr/local/bin/openvaf-r && rm /tmp/ov.tgz
+RUN pip install --break-system-packages --quiet klayout
