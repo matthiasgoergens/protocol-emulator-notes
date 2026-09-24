@@ -1,3 +1,4 @@
-(executable
- (name main)
+(executables
+ (names main emit)
+ (modules main emit model streamer eth_model)
  (libraries hardcaml))

@@ -2,22 +2,26 @@
 open Hardcaml
 open Signal
 
-let create ?(fault = false) ~clock ~clear ~period ~width ~od_mask ~idle_out ~idle_oe ~host_data ~host_push () =
+let create ?(fault = false) ~clock ~clear ~period ~width ~od_mask ~idle_out ~idle_oe ~host_data ~host_count ~host_push () =
   let spec = Reg_spec.create ~clock ~clear () in
   let depth = Model.depth in
   (* FIFO: four words, read and write pointers, count *)
   let rd = wire 2 and wr = wire 2 and fcount = wire 3 in
   let full = fcount ==:. depth and empty = fcount ==:. 0 in
   let push = host_push &: ~:full in
-  let slots = List.init depth (fun i -> reg spec ~enable:(push &: (wr ==:. i)) host_data) in
-  let head = mux rd slots in
+  let slots = List.init depth (fun i -> reg spec ~enable:(push &: (wr ==:. i)) (concat_msb [ host_count; host_data ])) in
+  let head_entry = mux rd slots in
+  let head = select head_entry 15 0 and head_count = select head_entry 19 16 in
   let cnt = wire 12 and left = wire 5 and word = wire 16 in
   let tick = cnt ==:. 0 in
   let need = tick &: (left ==:. 0) in
   let pop = need &: ~:empty in
   let word_src = mux2 pop head word in
   let per_word = mux2 (width ==:. 1) (of_int ~width:5 16) (mux2 (width ==:. 2) (of_int ~width:5 (if fault then 7 else 8)) (of_int ~width:5 4)) in
-  let left_eff = mux2 pop per_word left in
+  (* a count of 0, or more than a word holds, means a full word *)
+  let count5 = uresize head_count 5 in
+  let n = mux2 ((head_count ==:. 0) |: (count5 >: per_word)) per_word count5 in
+  let left_eff = mux2 pop n left in
   let emit = tick &: (left_eff <>:. 0) in
   let go_idle = need &: empty in
   let shifted = mux2 (width ==:. 1) (srl word_src 1) (mux2 (width ==:. 2) (srl word_src 2) (srl word_src 4)) in
@@ -44,6 +48,6 @@ let circuit ?fault () =
   let clock = input "clock" 1 and clear = input "clear" 1 in
   let period = input "period" 12 and width = input "width" 3 and od_mask = input "od_mask" 4 in
   let idle_out = input "idle_out" 4 and idle_oe = input "idle_oe" 4 in
-  let host_data = input "host_data" 16 and host_push = input "host_push" 1 in
-  let pin_out, pin_oe, full = create ?fault ~clock ~clear ~period ~width ~od_mask ~idle_out ~idle_oe ~host_data ~host_push () in
+  let host_data = input "host_data" 16 and host_count = input "host_count" 4 and host_push = input "host_push" 1 in
+  let pin_out, pin_oe, full = create ?fault ~clock ~clear ~period ~width ~od_mask ~idle_out ~idle_oe ~host_data ~host_count ~host_push () in
   Circuit.create_exn ~name:"pin_streamer" [ output "pin_out" pin_out; output "pin_oe" pin_oe; output "full" full ]

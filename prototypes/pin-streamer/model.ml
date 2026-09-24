@@ -6,6 +6,11 @@
    SNES's HDMA in spirit). Protocol knowledge lives in precomputation: framing bits, clock phases and
    line codes are already in the words.
 
+   Each FIFO entry is a 16-bit word plus a 4-bit vector count (0 = the full 16 / width vectors), so
+   a stream need not end on a word boundary. Without it the last word had to be padded, and the
+   padding is visible on the pins: for UART a phantom start bit, and for 10BASE-T no level can
+   stand in for "output disabled".
+
    Pins: out and oe, 4 bits each. A pin in [od_mask] is open drain: a 1 releases it (oe 0), a 0 drives
    it low. When the FIFO runs dry at a word boundary the streamer goes idle: pins take [idle_out] /
    [idle_oe] until a word arrives.
@@ -20,7 +25,7 @@ type cfg = { period : int; width : int; od_mask : int; idle_out : int; idle_oe :
 
 type t = {
   cfg : cfg;
-  fifo : int Queue.t;
+  fifo : (int * int) Queue.t;   (* word, vector count (0 = full) *)
   mutable word : int;        (* current word, remaining vectors in its low bits *)
   mutable left : int;        (* vectors left in the current word; 0 = need a word *)
   mutable count : int;       (* clocks until the next vector *)
@@ -34,7 +39,7 @@ let create cfg = { cfg; fifo = Queue.create (); word = 0; left = 0; count = 0; a
                    out = cfg.idle_out; oe = cfg.idle_oe; underflows = 0 }
 
 let full s = Queue.length s.fifo >= depth
-let push s w = if not (full s) then Queue.push (w land 0xFFFF) s.fifo
+let push ?(count = 0) s w = if not (full s) then Queue.push (w land 0xFFFF, count land 15) s.fifo
 
 let mask w = (1 lsl w) - 1
 
@@ -55,7 +60,8 @@ let step s =
         if s.active then s.underflows <- s.underflows + 1;
         s.active <- false; s.out <- s.cfg.idle_out; s.oe <- s.cfg.idle_oe
       end else begin
-        s.word <- Queue.pop s.fifo; s.left <- 16 / s.cfg.width
+        let (w, n) = Queue.pop s.fifo in
+        s.word <- w; s.left <- (if n = 0 || n > 16 / s.cfg.width then 16 / s.cfg.width else n)
       end
     end;
     if s.left > 0 then begin
