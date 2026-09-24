@@ -30,6 +30,24 @@ The test generates the line in continuous time: 10 Mbit/s, a transmitter clock o
 
 Both are receiver design for the array, not blockers. I have not yet checked what edge jitter real 10BASE-T links deliver; that decides how much margin is needed.
 
+## Step 1b: NTSC clocks (`jitter-ntsc.txt`, `rp2040-clocks.txt`)
+
+Same test at NTSC multiples of the subcarrier, fsc = 315/88 MHz:
+
+| Clock | Ethernet receive, all jitter up to ±5 ns | RP2040's closest (12 MHz crystal, PLL search) |
+|---|---|---|
+| PAL 12 × fsc = 53.20 MHz | fails from ±4 ns (above) | 53.200000 MHz, −64 ppm |
+| NTSC 16 × fsc = 57.27 MHz | 300 of 300 | 57.250000 MHz, −397 ppm |
+| **NTSC 17 × fsc = 60.85 MHz** | **300 of 300** | **60.857143 MHz, +80 ppm** |
+| Ethernet 60 MHz | 300 of 300 | exact |
+
+**17 × fsc gives one clock for NTSC colour and Ethernet receive with full margin,** within 80 ppm from the RP2040, similar to PAL's 64 ppm. Its costs:
+- **Line length.** An NTSC line is 227.5 subcarrier cycles, which is 3,867.5 clocks, so lines alternate 3,867 and 3,868 clocks. Every pair of lines is exact.
+- **Hue steps.** There are 17 per cycle, an odd number, so there is no exact 180° burst. That is harmless, because hues decode relative to the burst.
+- **Receive only.** A transmitted 10BASE-T signal at this clock would be 1.4 % off, far outside ±100 ppm. The display demo only receives.
+
+The search assumes the RP2040's PLL reference must stay at or above 5 MHz (a divider of at most 2 from a 12 MHz crystal). That is from memory of the datasheet; the rows relied on use a divider of 1 or 2. An earlier note gave 1,058 ppm for 16 × fsc; this search found −397.
+
 ## Next
 
 - A line buffer, because packets arrive asynchronously to the beam.
