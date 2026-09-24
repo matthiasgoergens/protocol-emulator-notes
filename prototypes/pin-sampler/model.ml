@@ -25,6 +25,9 @@ type t = {
   cfg : cfg;
   fifo : (int * int) Queue.t;
   mutable prev : int;         (* pins on the previous clock *)
+  mutable primed : bool;      (* prev holds a real sample: no edge is seen on the first clock, so a
+                                 line idling at trig_val is not mistaken for an edge after reset
+                                 (found by the I2C check: SCL idles high) *)
   mutable armed : bool;       (* timed mode: waiting for the trigger *)
   mutable cnt : int;
   mutable word : int;
@@ -33,7 +36,7 @@ type t = {
   mutable overflows : int;
 }
 
-let create cfg = { cfg; fifo = Queue.create (); prev = 0; armed = true; cnt = 0; word = 0; n = 0; taken = 0; overflows = 0 }
+let create cfg = { cfg; fifo = Queue.create (); prev = 0; primed = false; armed = true; cnt = 0; word = 0; n = 0; taken = 0; overflows = 0 }
 
 let per s = 16 / s.cfg.width
 
@@ -55,10 +58,11 @@ let take s pins =
 let step s ~pins ~pop =
   let head = if pop && not (Queue.is_empty s.fifo) then Some (Queue.pop s.fifo) else None in
   let bit v = (v lsr s.cfg.trig_pin) land 1 in
-  let edge = bit pins = s.cfg.trig_val && bit s.prev <> s.cfg.trig_val in
+  let edge = s.primed && bit pins = s.cfg.trig_val && bit s.prev <> s.cfg.trig_val in
   (if s.cfg.clocked then (if edge then take s pins)
    else if s.armed then (if edge then begin s.armed <- false; s.cnt <- s.cfg.offset end)
    else if s.cnt = 0 then begin take s pins; if not s.armed then s.cnt <- s.cfg.period - 1 end
    else s.cnt <- s.cnt - 1);
   s.prev <- pins;
+  s.primed <- true;
   head

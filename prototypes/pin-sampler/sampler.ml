@@ -8,7 +8,9 @@ let create ?(fault = false) ~clock ~clear ~pins ~clocked ~period ~width ~trig_pi
   let spec = Reg_spec.create ~clock ~clear () in
   let prev = reg spec pins in
   let bit v = mux trig_pin (bits_lsb v) in
-  let edge = (bit pins ==: trig_val) &: (bit prev <>: trig_val) in
+  (* no edge on the first clock after reset, when prev is not yet a sample (see model.ml) *)
+  let primed = reg spec vdd in
+  let edge = primed &: (bit pins ==: trig_val) &: (bit prev <>: trig_val) in
   (* [running] is "not armed": registers clear to 0, and the sampler starts armed *)
   let running = wire 1 and cnt = wire 12 and word = wire 16 and n = wire 5 and taken = wire 8 in
   let per = mux2 (width ==:. 1) (of_int ~width:5 16) (mux2 (width ==:. 2) (of_int ~width:5 8) (of_int ~width:5 4)) in

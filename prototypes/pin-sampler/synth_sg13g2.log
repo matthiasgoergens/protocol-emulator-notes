@@ -1,0 +1,1629 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69+77 (git sha1 9ff27d29c-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+-- Running command `read_verilog pin_sampler.v; hierarchy -check -top pin_sampler; synth -top pin_sampler -flatten; dfflibmap -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; stat -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Verilog-2005 frontend: pin_sampler.v
+Parsing Verilog input from `pin_sampler.v' to AST representation.
+Generating RTLIL representation for module `\pin_sampler'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \pin_sampler
+
+2.2. Analyzing design hierarchy..
+Top module:  \pin_sampler
+Removed 0 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \pin_sampler
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \pin_sampler
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:498$103 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:491$102 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:480$97 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:463$88 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:448$79 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:432$69 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:419$67 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:401$64 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:394$63 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:382$61 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:364$50 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:338$39 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:325$35 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:264$17 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:254$14 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:242$11 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:230$8 in module pin_sampler.
+Marked 1 switch rules as full_case in process $proc$pin_sampler.v:217$5 in module pin_sampler.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 14 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~22 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:498$103'.
+     1/1: $0\_173[19:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:491$102'.
+     1/1: $0\_236[1:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:480$97'.
+     1/1: $0\_230[2:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:463$88'.
+     1/1: $0\_221[0:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:448$79'.
+     1/1: $0\_214[7:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:432$69'.
+     1/1: $0\_33[0:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:419$67'.
+     1/1: $0\_38[0:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:401$64'.
+     1/1: $0\_48[0:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:394$63'.
+     1/1: $0\_43[3:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:382$61'.
+     1/1: $0\_208[11:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:364$50'.
+     1/1: $0\_192[4:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:338$39'.
+     1/1: $0\_151[19:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:325$35'.
+     1/1: $0\_186[15:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:264$17'.
+     1/1: $0\_180[1:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:254$14'.
+     1/1: $0\_158[19:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:242$11'.
+     1/1: $0\_165[19:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:230$8'.
+     1/1: $0\_172[19:0]
+Creating decoders for process `\pin_sampler.$proc$pin_sampler.v:217$5'.
+     1/1: $0\_89[7:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\pin_sampler.\_173' from process `\pin_sampler.$proc$pin_sampler.v:498$103'.
+No latch inferred for signal `\pin_sampler.\_38' from process `\pin_sampler.$proc$pin_sampler.v:419$67'.
+No latch inferred for signal `\pin_sampler.\_48' from process `\pin_sampler.$proc$pin_sampler.v:401$64'.
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\pin_sampler.\_236' using process `\pin_sampler.$proc$pin_sampler.v:491$102'.
+  created $dff cell `$procdff$172' with positive edge clock.
+Creating register for signal `\pin_sampler.\_230' using process `\pin_sampler.$proc$pin_sampler.v:480$97'.
+  created $dff cell `$procdff$173' with positive edge clock.
+Creating register for signal `\pin_sampler.\_221' using process `\pin_sampler.$proc$pin_sampler.v:463$88'.
+  created $dff cell `$procdff$174' with positive edge clock.
+Creating register for signal `\pin_sampler.\_214' using process `\pin_sampler.$proc$pin_sampler.v:448$79'.
+  created $dff cell `$procdff$175' with positive edge clock.
+Creating register for signal `\pin_sampler.\_33' using process `\pin_sampler.$proc$pin_sampler.v:432$69'.
+  created $dff cell `$procdff$176' with positive edge clock.
+Creating register for signal `\pin_sampler.\_43' using process `\pin_sampler.$proc$pin_sampler.v:394$63'.
+  created $dff cell `$procdff$177' with positive edge clock.
+Creating register for signal `\pin_sampler.\_208' using process `\pin_sampler.$proc$pin_sampler.v:382$61'.
+  created $dff cell `$procdff$178' with positive edge clock.
+Creating register for signal `\pin_sampler.\_192' using process `\pin_sampler.$proc$pin_sampler.v:364$50'.
+  created $dff cell `$procdff$179' with positive edge clock.
+Creating register for signal `\pin_sampler.\_151' using process `\pin_sampler.$proc$pin_sampler.v:338$39'.
+  created $dff cell `$procdff$180' with positive edge clock.
+Creating register for signal `\pin_sampler.\_186' using process `\pin_sampler.$proc$pin_sampler.v:325$35'.
+  created $dff cell `$procdff$181' with positive edge clock.
+Creating register for signal `\pin_sampler.\_180' using process `\pin_sampler.$proc$pin_sampler.v:264$17'.
+  created $dff cell `$procdff$182' with positive edge clock.
+Creating register for signal `\pin_sampler.\_158' using process `\pin_sampler.$proc$pin_sampler.v:254$14'.
+  created $dff cell `$procdff$183' with positive edge clock.
+Creating register for signal `\pin_sampler.\_165' using process `\pin_sampler.$proc$pin_sampler.v:242$11'.
+  created $dff cell `$procdff$184' with positive edge clock.
+Creating register for signal `\pin_sampler.\_172' using process `\pin_sampler.$proc$pin_sampler.v:230$8'.
+  created $dff cell `$procdff$185' with positive edge clock.
+Creating register for signal `\pin_sampler.\_89' using process `\pin_sampler.$proc$pin_sampler.v:217$5'.
+  created $dff cell `$procdff$186' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:498$103'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:498$103'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:491$102'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:491$102'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:480$97'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:480$97'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:463$88'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:463$88'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:448$79'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:448$79'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:432$69'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:432$69'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:419$67'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:419$67'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:401$64'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:401$64'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:394$63'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:394$63'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:382$61'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:382$61'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:364$50'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:364$50'.
+Found and cleaned up 2 empty switches in `\pin_sampler.$proc$pin_sampler.v:338$39'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:338$39'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:325$35'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:325$35'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:264$17'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:264$17'.
+Found and cleaned up 2 empty switches in `\pin_sampler.$proc$pin_sampler.v:254$14'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:254$14'.
+Found and cleaned up 2 empty switches in `\pin_sampler.$proc$pin_sampler.v:242$11'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:242$11'.
+Found and cleaned up 2 empty switches in `\pin_sampler.$proc$pin_sampler.v:230$8'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:230$8'.
+Found and cleaned up 1 empty switch in `\pin_sampler.$proc$pin_sampler.v:217$5'.
+Removing empty process `pin_sampler.$proc$pin_sampler.v:217$5'.
+Cleaned up 22 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+<suppressed ~8 debug messages>
+
+3.3. Executing CHECK pass (checking for obvious problems).
+Checking module pin_sampler...
+Found and reported 0 problems.
+
+3.4. Executing FLATTEN pass (flatten design).
+
+3.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module pin_sampler...
+Found and reported 0 problems.
+
+3.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 0 unused cells and 125 unused wires.
+<suppressed ~1 debug messages>
+
+3.8. Executing OPT pass (performing simple optimizations).
+
+3.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 131 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Computing hashes of 120 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+<suppressed ~33 debug messages>
+Removed a total of 11 cells.
+
+3.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pin_sampler..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~101 debug messages>
+
+3.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pin_sampler.
+Performed a total of 0 changes.
+
+3.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 120 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.8.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+3.8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.8.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.8.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pin_sampler..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~101 debug messages>
+
+3.8.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pin_sampler.
+Performed a total of 0 changes.
+
+3.8.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 120 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.8.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.8.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+
+3.8.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.8.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.9. Executing FSM pass (extract and optimize FSM).
+
+3.9.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.9.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.9.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.9.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+
+3.9.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.9.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.9.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.9.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.10. Executing OPT pass (performing simple optimizations).
+
+3.10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 120 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pin_sampler..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~101 debug messages>
+
+3.10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pin_sampler.
+Performed a total of 0 changes.
+
+3.10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 120 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.10.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$177 ($dff) from module pin_sampler (D = \pins, Q = \_43, rval = 4'0000).
+Adding SRST signal on $procdff$178 ($dff) from module pin_sampler (D = \_205, Q = \_208, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$188 ($sdff) from module pin_sampler (D = \_205, Q = \_208).
+Adding SRST signal on $procdff$179 ($dff) from module pin_sampler (D = \_187, Q = \_192, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$192 ($sdff) from module pin_sampler (D = \_54, Q = \_192).
+Adding SRST signal on $procdff$180 ($dff) from module pin_sampler (D = $procmux$143_Y, Q = \_151, rval = 20'00000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$196 ($sdff) from module pin_sampler (D = { \_96 \_144 }, Q = \_151).
+Adding SRST signal on $procdff$181 ($dff) from module pin_sampler (D = \_181, Q = \_186, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$198 ($sdff) from module pin_sampler (D = \_144, Q = \_186).
+Adding SRST signal on $procdff$182 ($dff) from module pin_sampler (D = \_177, Q = \_180, rval = 2'00).
+Adding EN signal on $auto$ff.cc:337:slice$202 ($sdff) from module pin_sampler (D = \_176, Q = \_180).
+Adding SRST signal on $procdff$183 ($dff) from module pin_sampler (D = $procmux$154_Y, Q = \_158, rval = 20'00000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$204 ($sdff) from module pin_sampler (D = { \_96 \_144 }, Q = \_158).
+Adding SRST signal on $procdff$184 ($dff) from module pin_sampler (D = $procmux$159_Y, Q = \_165, rval = 20'00000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$206 ($sdff) from module pin_sampler (D = { \_96 \_144 }, Q = \_165).
+Adding SRST signal on $procdff$185 ($dff) from module pin_sampler (D = $procmux$164_Y, Q = \_172, rval = 20'00000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$208 ($sdff) from module pin_sampler (D = { \_96 \_144 }, Q = \_172).
+Adding SRST signal on $procdff$186 ($dff) from module pin_sampler (D = \_1, Q = \_89, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$210 ($sdff) from module pin_sampler (D = \_91, Q = \_89).
+Adding SRST signal on $procdff$172 ($dff) from module pin_sampler (D = \_233, Q = \_236, rval = 2'00).
+Adding EN signal on $auto$ff.cc:337:slice$212 ($sdff) from module pin_sampler (D = \_232, Q = \_236).
+Adding SRST signal on $procdff$173 ($dff) from module pin_sampler (D = \_227, Q = \_230, rval = 3'000).
+Adding SRST signal on $procdff$174 ($dff) from module pin_sampler (D = \_216, Q = \_221, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$215 ($sdff) from module pin_sampler (D = 1'1, Q = \_221).
+Adding SRST signal on $procdff$175 ($dff) from module pin_sampler (D = \_209, Q = \_214, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$219 ($sdff) from module pin_sampler (D = \_70, Q = \_214).
+
+3.10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 29 unused cells and 30 unused wires.
+<suppressed ~42 debug messages>
+
+3.10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+<suppressed ~1 debug messages>
+
+3.10.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.10.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pin_sampler..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~55 debug messages>
+
+3.10.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pin_sampler.
+Performed a total of 0 changes.
+
+3.10.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 96 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Computing hashes of 94 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+<suppressed ~6 debug messages>
+Removed a total of 2 cells.
+
+3.10.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.10.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+3.10.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.10.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.10.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pin_sampler..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~55 debug messages>
+
+3.10.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pin_sampler.
+Performed a total of 0 changes.
+
+3.10.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 94 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.10.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.10.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+
+3.10.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.10.23. Finished fast OPT passes. (There is nothing left to do.)
+
+3.11. Executing WREDUCE pass (reducing word size of cells).
+Removed top 7 bits (of 8) from port B of cell pin_sampler.$add$pin_sampler.v:212$1 ($add).
+Removed top 1 bits (of 2) from port B of cell pin_sampler.$eq$pin_sampler.v:250$12 ($eq).
+Removed top 1 bits (of 2) from port B of cell pin_sampler.$add$pin_sampler.v:262$15 ($add).
+Removed top 12 bits (of 16) from mux cell pin_sampler.$ternary$pin_sampler.v:292$21 ($mux).
+Removed top 12 bits (of 16) from mux cell pin_sampler.$ternary$pin_sampler.v:295$23 ($mux).
+Removed top 12 bits (of 16) from port A of cell pin_sampler.$and$pin_sampler.v:299$24 ($and).
+Removed top 12 bits (of 16) from port B of cell pin_sampler.$and$pin_sampler.v:299$24 ($and).
+Removed top 12 bits (of 16) from port Y of cell pin_sampler.$and$pin_sampler.v:299$24 ($and).
+Removed top 11 bits (of 16) from mux cell pin_sampler.$ternary$pin_sampler.v:301$25 ($mux).
+Removed top 9 bits (of 16) from mux cell pin_sampler.$ternary$pin_sampler.v:303$26 ($mux).
+Removed top 5 bits (of 16) from mux cell pin_sampler.$ternary$pin_sampler.v:305$27 ($mux).
+Removed top 9 bits (of 16) from mux cell pin_sampler.$ternary$pin_sampler.v:316$29 ($mux).
+Removed top 12 bits (of 16) from mux cell pin_sampler.$ternary$pin_sampler.v:318$31 ($mux).
+Removed top 1 bits (of 2) from port B of cell pin_sampler.$add$pin_sampler.v:345$40 ($add).
+Removed top 1 bits (of 3) from port B of cell pin_sampler.$eq$pin_sampler.v:356$44 ($eq).
+Removed top 1 bits (of 5) from mux cell pin_sampler.$ternary$pin_sampler.v:357$45 ($mux).
+Removed top 2 bits (of 3) from port B of cell pin_sampler.$eq$pin_sampler.v:358$46 ($eq).
+Removed top 4 bits (of 5) from port B of cell pin_sampler.$add$pin_sampler.v:371$51 ($add).
+Removed top 11 bits (of 12) from port B of cell pin_sampler.$sub$pin_sampler.v:375$54 ($sub).
+Removed top 11 bits (of 12) from port B of cell pin_sampler.$sub$pin_sampler.v:376$55 ($sub).
+Removed top 7 bits (of 8) from port B of cell pin_sampler.$add$pin_sampler.v:455$80 ($add).
+Removed top 2 bits (of 3) from port B of cell pin_sampler.$add$pin_sampler.v:478$95 ($add).
+Removed top 2 bits (of 3) from port B of cell pin_sampler.$sub$pin_sampler.v:479$96 ($sub).
+Removed top 1 bits (of 2) from port B of cell pin_sampler.$procmux$107_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell pin_sampler.$procmux$132_CMP0 ($eq).
+Removed top 3 bits (of 7) from mux cell pin_sampler.$ternary$pin_sampler.v:316$29 ($mux).
+Removed top 1 bits (of 5) from wire pin_sampler._61.
+Removed top 12 bits (of 16) from wire pin_sampler._109.
+Removed top 9 bits (of 16) from wire pin_sampler._105.
+Removed top 10 bits (of 16) from wire pin_sampler._108.
+Removed top 5 bits (of 16) from wire pin_sampler._139.
+Removed top 9 bits (of 16) from wire pin_sampler._135.
+Removed top 11 bits (of 16) from wire pin_sampler._131.
+Removed top 12 bits (of 16) from wire pin_sampler._127.
+Removed top 12 bits (of 16) from wire pin_sampler._126.
+Removed top 12 bits (of 16) from wire pin_sampler._124.
+Removed top 11 bits (of 16) from wire pin_sampler._130.
+Removed top 11 bits (of 15) from wire pin_sampler._128.
+Removed top 9 bits (of 16) from wire pin_sampler._134.
+Removed top 9 bits (of 14) from wire pin_sampler._132.
+Removed top 5 bits (of 16) from wire pin_sampler._138.
+Removed top 5 bits (of 12) from wire pin_sampler._136.
+
+3.12. Executing PEEPOPT pass (run peephole optimizers).
+
+3.13. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 0 unused cells and 16 unused wires.
+<suppressed ~1 debug messages>
+
+3.14. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module pin_sampler:
+  creating $macc model for $sub$pin_sampler.v:479$96 ($sub).
+  creating $macc model for $add$pin_sampler.v:478$95 ($add).
+  creating $macc model for $add$pin_sampler.v:455$80 ($add).
+  creating $macc model for $sub$pin_sampler.v:376$55 ($sub).
+  creating $macc model for $sub$pin_sampler.v:375$54 ($sub).
+  creating $macc model for $add$pin_sampler.v:371$51 ($add).
+  creating $macc model for $add$pin_sampler.v:345$40 ($add).
+  creating $macc model for $add$pin_sampler.v:262$15 ($add).
+  creating $macc model for $add$pin_sampler.v:212$1 ($add).
+  merging $macc model for $add$pin_sampler.v:478$95 into $sub$pin_sampler.v:479$96.
+  creating $alu model for $macc $add$pin_sampler.v:262$15.
+  creating $alu model for $macc $add$pin_sampler.v:345$40.
+  creating $alu model for $macc $add$pin_sampler.v:371$51.
+  creating $alu model for $macc $sub$pin_sampler.v:375$54.
+  creating $alu model for $macc $sub$pin_sampler.v:376$55.
+  creating $alu model for $macc $add$pin_sampler.v:455$80.
+  creating $alu model for $macc $add$pin_sampler.v:212$1.
+  creating $macc cell for $sub$pin_sampler.v:479$96: $auto$alumacc.cc:399:replace_macc$239
+  creating $alu model for $lt$pin_sampler.v:456$81 ($lt): new $alu
+  creating $alu cell for $lt$pin_sampler.v:456$81: $auto$alumacc.cc:548:replace_alu$241
+  creating $alu cell for $add$pin_sampler.v:212$1: $auto$alumacc.cc:548:replace_alu$246
+  creating $alu cell for $add$pin_sampler.v:455$80: $auto$alumacc.cc:548:replace_alu$249
+  creating $alu cell for $sub$pin_sampler.v:376$55: $auto$alumacc.cc:548:replace_alu$252
+  creating $alu cell for $sub$pin_sampler.v:375$54: $auto$alumacc.cc:548:replace_alu$255
+  creating $alu cell for $add$pin_sampler.v:371$51: $auto$alumacc.cc:548:replace_alu$258
+  creating $alu cell for $add$pin_sampler.v:345$40: $auto$alumacc.cc:548:replace_alu$261
+  creating $alu cell for $add$pin_sampler.v:262$15: $auto$alumacc.cc:548:replace_alu$264
+  created 8 $alu and 1 $macc cells.
+
+3.15. Executing SHARE pass (SAT-based resource sharing).
+
+3.16. Executing OPT pass (performing simple optimizations).
+
+3.16.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+<suppressed ~1 debug messages>
+
+3.16.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 94 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.16.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pin_sampler..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~55 debug messages>
+
+3.16.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pin_sampler.
+Performed a total of 0 changes.
+
+3.16.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 94 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.16.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.16.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 2 unused cells and 3 unused wires.
+<suppressed ~5 debug messages>
+
+3.16.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.16.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.16.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pin_sampler..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~55 debug messages>
+
+3.16.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pin_sampler.
+Performed a total of 0 changes.
+
+3.16.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 92 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.16.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.16.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+
+3.16.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.16.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.17. Executing MEMORY pass.
+
+3.17.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.17.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.17.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.17.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.17.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+3.17.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+
+3.17.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.17.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.17.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+
+3.17.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.18. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+
+3.19. Executing OPT pass (performing simple optimizations).
+
+3.19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+<suppressed ~2 debug messages>
+
+3.19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 91 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.19.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.19.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+
+3.19.5. Finished fast OPT passes.
+
+3.20. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.21. Executing OPT pass (performing simple optimizations).
+
+3.21.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.21.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 91 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.21.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pin_sampler..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~52 debug messages>
+
+3.21.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pin_sampler.
+    Consolidated identical input bits for $mux cell $ternary$pin_sampler.v:357$45:
+      Old ports: A=4'0100, B=4'1000, Y=\_61
+      New ports: A=2'01, B=2'10, Y=\_61 [3:2]
+      New connections: \_61 [1:0] = 2'00
+    Consolidated identical input bits for $mux cell $ternary$pin_sampler.v:316$29:
+      Old ports: A={ \_192 [1:0] 2'00 }, B={ \_192 [2:0] 1'0 }, Y=\_109
+      New ports: A={ \_192 [1:0] 1'0 }, B=\_192 [2:0], Y=\_109 [3:1]
+      New connections: \_109 [0] = 1'0
+    Consolidated identical input bits for $mux cell $ternary$pin_sampler.v:292$21:
+      Old ports: A=4'1111, B=4'0011, Y=\_124
+      New ports: A=1'1, B=1'0, Y=\_124 [2]
+      New connections: { \_124 [3] \_124 [1:0] } = { \_124 [2] 2'11 }
+  Optimizing cells in module \pin_sampler.
+    Consolidated identical input bits for $mux cell $ternary$pin_sampler.v:359$47:
+      Old ports: A={ 1'0 \_61 }, B=5'10000, Y=\_63
+      New ports: A={ 1'0 \_61 [3:2] }, B=3'100, Y=\_63 [4:2]
+      New connections: \_63 [1:0] = 2'00
+    Consolidated identical input bits for $mux cell $ternary$pin_sampler.v:295$23:
+      Old ports: A=\_124, B=4'0001, Y=\_126
+      New ports: A={ \_124 [2] 1'1 }, B=2'00, Y=\_126 [2:1]
+      New connections: { \_126 [3] \_126 [0] } = { \_126 [2] 1'1 }
+  Optimizing cells in module \pin_sampler.
+Performed a total of 5 changes.
+
+3.21.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 91 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.21.6. Executing OPT_SHARE pass.
+    Found cells that share an operand and can be merged by moving the $mux $ternary$pin_sampler.v:378$57 in front of them:
+        $auto$alumacc.cc:548:replace_alu$255
+        $auto$alumacc.cc:548:replace_alu$252
+
+3.21.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.21.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 0 unused cells and 6 unused wires.
+<suppressed ~3 debug messages>
+
+3.21.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+<suppressed ~7 debug messages>
+
+3.21.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.21.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pin_sampler..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~52 debug messages>
+
+3.21.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pin_sampler.
+Performed a total of 0 changes.
+
+3.21.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 90 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.21.14. Executing OPT_SHARE pass.
+
+3.21.15. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.21.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+3.21.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.21.18. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.21.19. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pin_sampler..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~52 debug messages>
+
+3.21.20. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pin_sampler.
+Performed a total of 0 changes.
+
+3.21.21. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 90 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.21.22. Executing OPT_SHARE pass.
+
+3.21.23. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.21.24. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+
+3.21.25. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+
+3.21.26. Finished fast OPT passes. (There is nothing left to do.)
+
+3.22. Executing TECHMAP pass (map to technology primitives).
+
+3.22.1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/techmap.v
+Parsing Verilog input from `/home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.22.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $mux.
+Using template $paramod$175e67c02b86e96b1288b9dc100122520d7240d8\_90_alu for cells of type $alu.
+Using template $paramod$672a140277c71df8314410f22acc08d55222c3c7\_90_alu for cells of type $alu.
+Using template $paramod$6831557730818fb92b11a295f9eb33ff8fa62af1\_90_alu for cells of type $alu.
+Using template $paramod$c3cd1564c35d873179656addd6052d7ea8b6d991\_90_alu for cells of type $alu.
+Using template $paramod$a1bc51c02ce12ac21eb18988e83292af48ed7d72\_90_alu for cells of type $alu.
+Using extmapper maccmap for cells of type $macc_v2.
+  add \_230 (3 bits, unsigned)
+  sub \_82 (1 bits, unsigned)
+  add \_84 (1 bits, unsigned)
+  packed 1 (1) bits / 1 words into adder tree
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $pmux.
+Using extmapper simplemap for cells of type $dff.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000011 for cells of type $fa.
+Using template $paramod$78e969f2586efcf3a5b0b0440bcca0db83d5cca2\_90_alu for cells of type $alu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000010 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000010 for cells of type $lcu.
+Using extmapper simplemap for cells of type $xor.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000101 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000101 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001100 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001100 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001000 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001000 for cells of type $lcu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~1034 debug messages>
+
+3.23. Executing OPT pass (performing simple optimizations).
+
+3.23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+<suppressed ~424 debug messages>
+
+3.23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 704 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Computing hashes of 685 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Computing hashes of 684 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+<suppressed ~60 debug messages>
+Removed a total of 20 cells.
+
+3.23.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 59 unused cells and 457 unused wires.
+<suppressed ~64 debug messages>
+
+3.23.5. Finished fast OPT passes.
+
+3.24. Executing ABC pass (technology mapping using ABC).
+
+3.24.1. Summary of detected clock domains:
+  11 cells in clk=\clock, en={ }, arst={ }, srst={ }
+  8 cells in clk=\clock, en=\_196, arst={ }, srst=$auto$simple.cc:234:combine_resets$216
+  77 cells in clk=\clock, en=\_52, arst={ }, srst=$auto$simple.cc:234:combine_resets$216
+  9 cells in clk=\clock, en=\_82, arst={ }, srst=\clear
+  29 cells in clk=\clock, en=\_86, arst={ }, srst=\clear
+  154 cells in clk=\clock, en=\_171, arst={ }, srst=\clear
+  44 cells in clk=\clock, en=\_164, arst={ }, srst=\clear
+  43 cells in clk=\clock, en=\_157, arst={ }, srst=\clear
+  11 cells in clk=\clock, en=\_84, arst={ }, srst=\clear
+  43 cells in clk=\clock, en=\_150, arst={ }, srst=\clear
+  50 cells in clk=\clock, en=\_52, arst={ }, srst=$auto$simple.cc:234:combine_resets$193
+  106 cells in clk=\clock, en=$auto$simple.cc:193:make_patterns_logic$190, arst={ }, srst=\clear
+  40 cells in clk=\clock, en={ }, arst={ }, srst=\clear
+
+3.24.2. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock
+
+3.24.3. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_196, synchronously reset by $auto$simple.cc:234:combine_resets$216
+
+3.24.4. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_52, synchronously reset by $auto$simple.cc:234:combine_resets$216
+
+3.24.5. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_82, synchronously reset by \clear
+
+3.24.6. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_86, synchronously reset by \clear
+
+3.24.7. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_171, synchronously reset by \clear
+
+3.24.8. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_164, synchronously reset by \clear
+
+3.24.9. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_157, synchronously reset by \clear
+
+3.24.10. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_84, synchronously reset by \clear
+
+3.24.11. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_150, synchronously reset by \clear
+
+3.24.12. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_52, synchronously reset by $auto$simple.cc:234:combine_resets$193
+
+3.24.13. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:193:make_patterns_logic$190, synchronously reset by \clear
+
+3.24.14. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, synchronously reset by \clear
+
+3.24.14.1. Executed ABC.
+Extracted 10 gates and 21 wires to a netlist network with 11 inputs and 2 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        4
+ABC RESULTS:              NAND cells:        6
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        2
+ABC RESULTS:        internal signals:        8
+ABC RESULTS:           input signals:       11
+ABC RESULTS:          output signals:        2
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 7 gates and 12 wires to a netlist network with 5 inputs and 3 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        2
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               XOR cells:        1
+ABC RESULTS:        internal signals:        4
+ABC RESULTS:           input signals:        5
+ABC RESULTS:          output signals:        3
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 69 gates and 87 wires to a netlist network with 18 inputs and 10 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       17
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:              NAND cells:       14
+ABC RESULTS:               NOR cells:        3
+ABC RESULTS:               NOT cells:        7
+ABC RESULTS:                OR cells:       10
+ABC RESULTS:             ORNOT cells:        1
+ABC RESULTS:              XNOR cells:        6
+ABC RESULTS:               XOR cells:        1
+ABC RESULTS:        internal signals:       59
+ABC RESULTS:           input signals:       18
+ABC RESULTS:          output signals:       10
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 7 gates and 11 wires to a netlist network with 4 inputs and 6 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:             ORNOT cells:        2
+ABC RESULTS:               XOR cells:        1
+ABC RESULTS:        internal signals:        1
+ABC RESULTS:           input signals:        4
+ABC RESULTS:          output signals:        6
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 21 gates and 33 wires to a netlist network with 12 inputs and 10 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        6
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:              NAND cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:             ORNOT cells:        1
+ABC RESULTS:              XNOR cells:        1
+ABC RESULTS:               XOR cells:        6
+ABC RESULTS:        internal signals:       11
+ABC RESULTS:           input signals:       12
+ABC RESULTS:          output signals:       10
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 134 gates and 252 wires to a netlist network with 117 inputs and 41 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       20
+ABC RESULTS:            ANDNOT cells:       13
+ABC RESULTS:               BUF cells:        2
+ABC RESULTS:               MUX cells:       30
+ABC RESULTS:              NAND cells:       12
+ABC RESULTS:               NOR cells:        6
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:       54
+ABC RESULTS:             ORNOT cells:        6
+ABC RESULTS:        internal signals:       94
+ABC RESULTS:           input signals:      117
+ABC RESULTS:          output signals:       41
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 24 gates and 50 wires to a netlist network with 25 inputs and 23 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:            ANDNOT cells:       21
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:        2
+ABC RESULTS:           input signals:       25
+ABC RESULTS:          output signals:       23
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 23 gates and 46 wires to a netlist network with 23 inputs and 22 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:            ANDNOT cells:       21
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:        1
+ABC RESULTS:           input signals:       23
+ABC RESULTS:          output signals:       22
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 9 gates and 15 wires to a netlist network with 6 inputs and 7 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:              NAND cells:        1
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:        3
+ABC RESULTS:             ORNOT cells:        2
+ABC RESULTS:        internal signals:        2
+ABC RESULTS:           input signals:        6
+ABC RESULTS:          output signals:        7
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 23 gates and 46 wires to a netlist network with 23 inputs and 22 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:            ANDNOT cells:       21
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:        1
+ABC RESULTS:           input signals:       23
+ABC RESULTS:          output signals:       22
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 29 gates and 46 wires to a netlist network with 16 inputs and 15 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        6
+ABC RESULTS:            ANDNOT cells:        3
+ABC RESULTS:               MUX cells:        5
+ABC RESULTS:              NAND cells:        1
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:        4
+ABC RESULTS:             ORNOT cells:        1
+ABC RESULTS:              XNOR cells:        1
+ABC RESULTS:               XOR cells:        3
+ABC RESULTS:        internal signals:       15
+ABC RESULTS:           input signals:       16
+ABC RESULTS:          output signals:       15
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 94 gates and 132 wires to a netlist network with 38 inputs and 14 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       27
+ABC RESULTS:               MUX cells:       12
+ABC RESULTS:               NOR cells:       18
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:              XNOR cells:       11
+ABC RESULTS:        internal signals:       80
+ABC RESULTS:           input signals:       38
+ABC RESULTS:          output signals:       14
+Removing temp directory.
+
+3.24.14.1. Executed ABC.
+Extracted 33 gates and 44 wires to a netlist network with 11 inputs and 11 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.14.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        4
+ABC RESULTS:            ANDNOT cells:        3
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:        5
+ABC RESULTS:               NOR cells:        2
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:        3
+ABC RESULTS:             ORNOT cells:        1
+ABC RESULTS:              XNOR cells:        2
+ABC RESULTS:               XOR cells:        2
+ABC RESULTS:        internal signals:       22
+ABC RESULTS:           input signals:       11
+ABC RESULTS:          output signals:       11
+Removing temp directory.
+Removing global temp directory.
+
+3.25. Executing OPT pass (performing simple optimizations).
+
+3.25.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pin_sampler.
+<suppressed ~6 debug messages>
+
+3.25.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pin_sampler'.
+Computing hashes of 584 cells of `\pin_sampler'.
+Finding duplicate cells in `\pin_sampler'.
+Removed a total of 0 cells.
+
+3.25.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.25.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 0 unused cells and 664 unused wires.
+<suppressed ~35 debug messages>
+
+3.25.5. Finished fast OPT passes.
+
+3.26. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `pin_sampler'. Setting top module to pin_sampler.
+
+3.26.1. Analyzing design hierarchy..
+Top module:  \pin_sampler
+
+3.26.2. Analyzing design hierarchy..
+Top module:  \pin_sampler
+Removed 0 unused modules.
+
+3.27. Printing statistics.
+
+=== pin_sampler ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      476 wires
+     1209 wire bits
+      136 public wires
+      867 public wire bits
+       15 ports
+       75 port bits
+      584 cells
+       85   $_ANDNOT_
+       89   $_AND_
+        1   $_DFF_P_
+       48   $_MUX_
+       40   $_NAND_
+       31   $_NOR_
+       22   $_NOT_
+       14   $_ORNOT_
+       78   $_OR_
+      134   $_SDFFE_PP0P_
+        7   $_SDFF_PP0_
+       21   $_XNOR_
+       14   $_XOR_
+
+3.28. Executing CHECK pass (checking for obvious problems).
+Checking module pin_sampler...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF/DLATCH cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  cell sg13g2_dlhq_1 (noninv, pins=3, area=30.84) is a direct match for cell type $_DLATCH_P_.
+  cell sg13g2_dllrq_1 (noninv, pins=4, area=29.03) is a direct match for cell type $_DLATCH_NN0_.
+  cell sg13g2_dlhrq_1 (noninv, pins=4, area=27.22) is a direct match for cell type $_DLATCH_PN0_.
+  final dff/dlatch cell mappings:
+    unmapped dff/dlatch cell: $_DFF_N_
+    unmapped dff/dlatch cell: $_DFF_P_
+    unmapped dff/dlatch cell: $_DFF_NN0_
+    unmapped dff/dlatch cell: $_DFF_NN1_
+    unmapped dff/dlatch cell: $_DFF_NP0_
+    unmapped dff/dlatch cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DFF_PN1_
+    unmapped dff/dlatch cell: $_DFF_PP0_
+    unmapped dff/dlatch cell: $_DFF_PP1_
+    unmapped dff/dlatch cell: $_DFFE_NN_
+    unmapped dff/dlatch cell: $_DFFE_NP_
+    unmapped dff/dlatch cell: $_DFFE_PN_
+    unmapped dff/dlatch cell: $_DFFE_PP_
+    unmapped dff/dlatch cell: $_DFFSR_NNN_
+    unmapped dff/dlatch cell: $_DFFSR_NNP_
+    unmapped dff/dlatch cell: $_DFFSR_NPN_
+    unmapped dff/dlatch cell: $_DFFSR_NPP_
+    unmapped dff/dlatch cell: $_DFFSR_PNN_
+    unmapped dff/dlatch cell: $_DFFSR_PNP_
+    unmapped dff/dlatch cell: $_DFFSR_PPN_
+    unmapped dff/dlatch cell: $_DFFSR_PPP_
+    unmapped dff/dlatch cell: $_DLATCH_N_
+    \sg13g2_dlhq_1 _DLATCH_P_ (.D( D), .GATE( E), .Q( Q));
+    \sg13g2_dllrq_1 _DLATCH_NN0_ (.D( D), .GATE_N( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_NN1_
+    unmapped dff/dlatch cell: $_DLATCH_NP0_
+    unmapped dff/dlatch cell: $_DLATCH_NP1_
+    \sg13g2_dlhrq_1 _DLATCH_PN0_ (.D( D), .GATE( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_PN1_
+    unmapped dff/dlatch cell: $_DLATCH_PP0_
+    unmapped dff/dlatch cell: $_DLATCH_PP1_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs and LATCHes to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF/DLATCH cells in module `\pin_sampler':
+  mapped 142 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Summary of detected clock domains:
+  859 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+5.2. Extracting gate netlist of module `\pin_sampler' to `<abc-temp-dir>/input.blif'..
+ABC: using cached merged SCL: /tmp/yosys-liberty-scl-cache-1000/yosys_merged_a6013080.scl (1 files)
+No matching clock domain found. Not extracting any FF cells.
+
+5.2.1. Executed ABC.
+Extracted 717 gates and 906 wires to a netlist network with 187 inputs and 163 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_scl /tmp/yosys-liberty-scl-cache-1000/yosys_merged_a6013080.scl 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+5.2.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:       14
+ABC RESULTS:    sg13g2_a21oi_1 cells:      112
+ABC RESULTS:   sg13g2_a221oi_1 cells:        4
+ABC RESULTS:    sg13g2_a22oi_1 cells:       45
+ABC RESULTS:     sg13g2_and2_1 cells:        8
+ABC RESULTS:     sg13g2_and3_1 cells:        3
+ABC RESULTS:     sg13g2_and4_1 cells:        1
+ABC RESULTS:      sg13g2_inv_1 cells:       28
+ABC RESULTS:     sg13g2_mux2_1 cells:        3
+ABC RESULTS:     sg13g2_mux4_1 cells:        2
+ABC RESULTS:    sg13g2_nand2_1 cells:       62
+ABC RESULTS:   sg13g2_nand2b_1 cells:        8
+ABC RESULTS:    sg13g2_nand3_1 cells:       12
+ABC RESULTS:    sg13g2_nand4_1 cells:       10
+ABC RESULTS:     sg13g2_nor2_1 cells:      140
+ABC RESULTS:    sg13g2_nor2b_1 cells:       13
+ABC RESULTS:     sg13g2_nor3_1 cells:       20
+ABC RESULTS:     sg13g2_nor4_1 cells:        6
+ABC RESULTS:    sg13g2_o21ai_1 cells:      109
+ABC RESULTS:      sg13g2_or2_1 cells:        7
+ABC RESULTS:      sg13g2_or3_1 cells:        1
+ABC RESULTS:      sg13g2_or4_1 cells:        1
+ABC RESULTS:    sg13g2_xnor2_1 cells:        9
+ABC RESULTS:     sg13g2_xor2_1 cells:       14
+ABC RESULTS:        internal signals:      556
+ABC RESULTS:           input signals:      187
+ABC RESULTS:          output signals:      163
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pin_sampler..
+Removed 0 unused cells and 855 unused wires.
+<suppressed ~33 debug messages>
+
+7. Printing statistics.
+
+=== pin_sampler ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      715        - wires
+     1287        - wire bits
+      104        - public wires
+      676        - public wire bits
+       15        - ports
+       75        - port bits
+      774 1.26E+04 cells
+       14  177.811   sg13g2_a21o_1
+      112 1.02E+03   sg13g2_a21oi_1
+        4   58.061   sg13g2_a221oi_1
+       45  488.187   sg13g2_a22oi_1
+        8   72.576   sg13g2_and2_1
+        3   38.102   sg13g2_and3_1
+        1   14.515   sg13g2_and4_1
+      142  6956.41   sg13g2_dfrbpq_1
+       28   152.41   sg13g2_inv_1
+        3   54.432   sg13g2_mux2_1
+        2   76.205   sg13g2_mux4_1
+       62  449.971   sg13g2_nand2_1
+        8   72.576   sg13g2_nand2b_1
+       12  108.864   sg13g2_nand3_1
+       10  108.864   sg13g2_nand4_1
+      140 1.02E+03   sg13g2_nor2_1
+       13  117.936   sg13g2_nor2b_1
+       20   181.44   sg13g2_nor3_1
+        6   65.318   sg13g2_nor4_1
+      109  988.848   sg13g2_o21ai_1
+        7   63.504   sg13g2_or2_1
+        1   12.701   sg13g2_or3_1
+        1   14.515   sg13g2_or4_1
+        9  130.637   sg13g2_xnor2_1
+       14  203.213   sg13g2_xor2_1
+
+   Chip area for module '\pin_sampler': 12639.223800
+     of which used for sequential elements: 6956.409600 (55.04%)
+
+End of script. Logfile hash: ac011f1704, time: 0.36s, user: 0.09s, system: 0.04s, MEM: 24.99 MB peak
+Yosys 0.69+77 (git sha1 9ff27d29c-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 86% 2x abc (0 sec), 2% 25x opt_clean (0 sec), ...

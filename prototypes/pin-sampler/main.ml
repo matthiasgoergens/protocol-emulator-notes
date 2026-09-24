@@ -134,3 +134,76 @@ let () =
   verdict "SPI RX" (got = reply && slave_saw = sent)
     (Printf.sprintf "master sent %d bytes, slave saw them %b; slave replied %d bytes, sampler captured %s"
        (List.length sent) (slave_saw = sent) (List.length reply) (String.concat " " (List.map (Printf.sprintf "%02x") got)))
+
+(* I2C ACK readback: the streamer RTL drives an open-drain write (SCL = streamer pin 0, SDA = pin 1,
+   ACK slots released); a reference slave counts bits on SCL rising edges and pulls SDA low through
+   each ACK slot, except that it NACKs the byte at index [nack]; lines are wired-AND with pull-ups.
+   The sampler (pins: 0 = SDA line, 1 = SCL line) clocks on SCL rising in 9-bit frames *)
+let () =
+  let data = [ 0xA0; 0x12; 0x34; 0x56; 0x78 ] and nack = 3 in
+  let v ~scl ~sda = scl lor (sda lsl 1) in
+  let bit d = [ v ~scl:0 ~sda:d; v ~scl:1 ~sda:d; v ~scl:1 ~sda:d; v ~scl:0 ~sda:d ] in
+  let start = [ v ~scl:1 ~sda:1; v ~scl:1 ~sda:0; v ~scl:0 ~sda:0 ] and stop = [ v ~scl:0 ~sda:0; v ~scl:1 ~sda:0; v ~scl:1 ~sda:1 ] in
+  let vecs = start @ List.concat_map (fun b -> List.concat (List.init 8 (fun i -> bit ((b lsr (7 - i)) land 1))) @ bit 1) data @ stop in
+  let words =
+    let rec go acc l = match l with [] -> List.rev acc | _ ->
+      let ch = List.filteri (fun i _ -> i < 8) l and rest = List.filteri (fun i _ -> i >= 8) l in
+      let w = List.fold_left (fun (w, k) v -> (w lor (v lsl (2 * k)), k + 1)) (0, 0) ch |> fst in
+      go ((w, if List.length ch = 8 then 0 else List.length ch) :: acc) rest in go [] vecs in
+  let st = Cyclesim.create (Streamer.circuit ()) in
+  let si n = Cyclesim.in_port st n and so n = Cyclesim.out_port st n in
+  si "clear" := Bits.vdd; Cyclesim.cycle st; si "clear" := Bits.gnd;
+  si "period" := Bits.of_int ~width:12 5; si "width" := Bits.of_int ~width:3 2; si "od_mask" := Bits.of_int ~width:4 3;
+  si "idle_out" := Bits.of_int ~width:4 0; si "idle_oe" := Bits.of_int ~width:4 0;
+  let r = make { Model.clocked = true; period = 1; width = 1; trig_pin = 1; trig_val = 1; offset = 0; frame_len = 9 } in
+  let q = ref words and prev_scl = ref 1 and bitcount = ref 0 and byte_index = ref 0 and pull = ref false in
+  let got = ref [] in
+  for _ = 0 to 5 * List.length vecs + 60 do
+    let push = !q <> [] && Bits.to_int !(so "full") = 0 in
+    si "host_push" := Bits.of_int ~width:1 (if push then 1 else 0);
+    let (w, n) = match !q with e :: _ -> e | [] -> (0, 0) in
+    si "host_data" := Bits.of_int ~width:16 w; si "host_count" := Bits.of_int ~width:4 n;
+    Cyclesim.cycle st;
+    if push then q := List.tl !q;
+    let out = Bits.to_int !(so "pin_out") and oe = Bits.to_int !(so "pin_oe") in
+    let master pin = if (oe lsr pin) land 1 = 1 then (out lsr pin) land 1 else 1 in
+    let scl = master 0 in
+    let sda = if !pull then 0 else master 1 in
+    (* the slave *)
+    if !prev_scl = 0 && scl = 1 then incr bitcount;
+    if !prev_scl = 1 && scl = 0 then begin
+      if !bitcount = 8 then pull := !byte_index <> nack
+      else if !bitcount = 9 then begin pull := false; bitcount := 0; incr byte_index end
+    end;
+    prev_scl := scl;
+    (match rtl_step r ~pins:(sda lor (scl lsl 1)) ~pop:true with Some e -> got := e :: !got | None -> ())
+  done;
+  if Sys.getenv_opt "I2C_DEBUG" <> None then
+    List.iter (fun e -> Printf.printf "  entry %s\n" (String.concat "" (List.map string_of_int (vectors ~width:1 e)))) (List.rev !got);
+  let frames = List.filter (fun e -> List.length (vectors ~width:1 e) = 9) (List.rev !got) in
+  let bytes = List.map (fun e -> List.fold_left (fun a b -> (a lsl 1) lor b) 0 (List.filteri (fun i _ -> i < 8) (vectors ~width:1 e))) frames in
+  let acks = List.map (fun e -> List.nth (vectors ~width:1 e) 8) frames in
+  let want_acks = List.mapi (fun i _ -> if i = nack then 1 else 0) data in
+  verdict "I2C ACK" (bytes = data && acks = want_acks)
+    (Printf.sprintf "bytes read back equal %b; ACK bits %s (expected %s: the slave NACKs byte %d)" (bytes = data)
+       (String.concat "" (List.map string_of_int acks)) (String.concat "" (List.map string_of_int want_acks)) nack)
+
+(* 10BASE-T capture: the Ethernet model's waveform on the comparator (pin 0) and activity (pin 1);
+   timed mode triggers on activity and captures both pins every clock; the host decodes the capture
+   with the model's decoder. This checks capture fidelity; decoding on chip is for the array *)
+let () =
+  let h = 3 in
+  let frame = Eth_model.udp_frame ~dst_mac:[ 0xFF; 0xFF; 0xFF; 0xFF; 0xFF; 0xFF ] ~src_mac:[ 0x02; 0; 0; 0x12; 0x34; 0x56 ]
+      ~src_ip:[ 192; 168; 1; 200 ] ~dst_ip:[ 192; 168; 1; 255 ] ~src_port:4096 ~dst_port:4096
+      ~payload:(List.map Char.code [ 's'; 'a'; 'm'; 'p'; 'l'; 'e'; 'r' ]) in
+  let wave = Array.of_list (List.init 30 (fun _ -> 0) @ Eth_model.encode_frame ~h frame) in
+  let r = make { Model.clocked = false; period = 1; width = 2; trig_pin = 1; trig_val = 1; offset = 0; frame_len = 0 } in
+  let pins c = let s = wave.(c) in (if s > 0 then 1 else 0) lor (if s <> 0 then 2 else 0) in
+  let entries = capture r ~pins_at:pins ~cycles:(Array.length wave) in
+  let samples = Array.of_list (List.concat_map (fun e ->
+      List.map (fun v -> if v land 2 = 0 then 0 else if v land 1 = 1 then 1 else -1) (vectors ~width:2 e)) entries) in
+  let frames = Eth_model.decode ~h samples in
+  let want = frame @ Eth_model.fcs_bytes frame in
+  verdict "10BASE-T" (frames = [ want ])
+    (Printf.sprintf "%d clocks captured in %d words, host decoded %d frame(s), equal to the sent frame %b"
+       (Array.length samples) (List.length entries) (List.length frames) (frames = [ want ]))
