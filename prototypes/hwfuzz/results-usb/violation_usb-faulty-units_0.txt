@@ -1,0 +1,11 @@
+host packet (repair true, gap 32 bits): 2d 00 00
+host packet (repair true, gap 48 bits): c3 00 05 08 ff 00 00 40 00
+host packet (repair true, gap 64 bits): 69 00 00
+host packet (repair true, gap 32 bits): d2
+host packet (repair true, gap 64 bits): 69 08 00
+device transmits at cycle 721 for 76 cycles: KJKJKJKKJJKJJKKK00J
+  decoded: d2
+device transmits at cycle 1053 for 140 cycles: KJKJKJKKKKJJKJJKJKJKJKJKJKJKJKJK00J
+  decoded: 4b 00 00
+device transmits at cycle 1653 for 76 cycles: KJKJKJKKJJKKKJJK00J
+  decoded: 5a

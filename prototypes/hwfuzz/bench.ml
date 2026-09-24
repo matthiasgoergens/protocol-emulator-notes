@@ -352,9 +352,10 @@ let () =
    what the device transmitted *)
 let () =
   match Array.to_list Sys.argv with
-  | [ _; "usbviol"; tname; budget; seed ] ->
+  | _ :: "usbviol" :: tname :: budget :: seed :: rest ->
     let t = target tname in
-    let r = Hwfuzz.campaign ~budget:(int_of_string budget) ~fresh:false ~seed:(int_of_string seed) t in
+    let corpus = if rest = [ "seeded" ] then [ usb_get_descriptor ] else [] in
+    let r = Hwfuzz.campaign ~corpus ~budget:(int_of_string budget) ~fresh:false ~seed:(int_of_string seed) t in
     let inst = Hwfuzz.instrument t in
     let n = ref 0 in
     Array.iter (fun (s, _) ->
@@ -556,4 +557,19 @@ let () =
     List.iter (fun (a, b) ->
       Printf.printf "  pair %02x/%02x logged: %b\n" a b
         (List.exists (fun (w, x, y) -> w = 8 && ((x = a && y = b) || (x = b && y = a))) r.cmp_pairs)) want
+  | _ -> ()
+
+(* run saved inputs against the real device and the planted fault *)
+let () =
+  match Array.to_list Sys.argv with
+  | _ :: "usbreplay" :: files ->
+    List.iter (fun f ->
+      let s = In_channel.with_open_bin f In_channel.input_all in
+      List.iter (fun (name, t) ->
+        let inst = Hwfuzz.instrument t in
+        let r = Hwfuzz.execute t inst s in
+        Printf.printf "%s on %s: %s\n" f name
+          (String.concat " " (List.map (fun f -> if f >= 700 then "configured" else if f >= 500 then Printf.sprintf "addr=%d" (f - 500)
+                                                  else if f >= 200 then Printf.sprintf "pid=%02x" (f - 200) else "VIOLATION") (List.sort compare r.observed))))
+        [ ("real device", usb_target ~repair:true ()); ("planted fault", usb_target ~faulty:true ~repair:true ()) ]) files
   | _ -> ()

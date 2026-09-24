@@ -106,8 +106,36 @@ Each entry records what a heuristic was measured on and what it did. Hypothesis 
 
    The gap is sequence structure: SET_ADDRESS needs four packets in order, while mutation works on bytes and fixed-size records. Next experiment: packet-aware splicing and whole-packet dictionary entries, supplied by the target alongside its transducer.
 
+10. **From one example transfer to a bug behind SET_ADDRESS, and the heuristics each step needed.** Target: the USB device with the planted fault (after an address is set, every transmission gets a stray SE0). The corpus was seeded with one GET_DESCRIPTOR control transfer, containing no SET_ADDRESS. Each run was 200,000 executions at 4 workers, seed 1, with packets as units (`results-usb/`, commits in the `*_commit.txt` files).
+
+    | Configuration | SET_CONFIGURATION | SET_ADDRESS | Planted bug |
+    |---|---|---|---|
+    | Packet mutation + seed | 117,335 | – | – |
+    | + multi-replacement, each logged value replaced with probability ½ | 73,984 | – | – |
+    | + multi-replacement on 2–3 values per mutant | 8,257 | 26,407 | – |
+    | + input-to-state on operands from 4 bits (not 8) | 54,452 | 24,482 | – |
+    | + next-unit: append a copy of a unit with a logged operand substituted | 11,062 | 26,971 | **79,848** |
+
+    The diagnosis behind each row:
+    - A request decodes only when two comparisons match at once, and a single replacement changes nothing the device reacts to. Replacing half of everything logged also breaks a PID or an address.
+    - The token-address comparison is 7 bits wide, so byte-pattern input-to-state never saw it.
+    - After the address changes, only a *new* IN token to that address can reach the device, which needs an insertion and a substitution together.
+
+    The input the fuzzer built (`violation_usb-faulty-units_0.*`, 25 bytes) is:
+    - SETUP to address 0;
+    - DATA0 `00 05 08 ff 00 00 40 00`, which is SET_ADDRESS(8);
+    - IN, for the status stage;
+    - the host's ACK;
+    - an IN to address 8.
+
+    It was derived from the seed by changing four setup bytes and appending that last IN. Replayed on the real device it is clean: ACK, the empty DATA1, address 8, then NAK.
+
+    Control: the real device under the full configuration reached SET_ADDRESS at 37,679 executions and ran all 200,000 without a violation (`results-usb/control.txt`).
+
+    Caveat: one seed per row. The step-by-step ordering is suggestive, not a measured distribution.
+
 ## Next
 
-- Target-supplied structure for mutation (packet-aware splice and dictionary), measured on SET_ADDRESS.
+- Seed sweeps for ledger entry 10, and the same heuristics against the lock and packet benchmarks.
 - More differential targets: the deadline sequencer against its ISA model, the systolic matcher.
 - A snapshot-and-restore for speed on large designs.
