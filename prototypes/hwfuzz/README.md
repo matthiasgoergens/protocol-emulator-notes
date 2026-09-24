@@ -143,6 +143,22 @@ Each entry records what a heuristic was measured on and what it did. Hypothesis 
 
     Caveat: one seed per row. Multi-replacement is therefore occasional by default (2 mutants per new entry); it is the `multi` configuration (`bench usbfuzz <target> multi ...`), uses 16, as these runs did; the default follows the sweep. The step-by-step ordering is suggestive, not a measured distribution.
 
+11. **Seed sweep: which mechanism gets the seeded USB campaign deep** (`results-sweep/usb.txt`, commit 007f2fb). Planted-fault device, seeded with one GET_DESCRIPTOR transfer, packet units, 200,000 executions per campaign, 3 seeds per configuration. Entries give first executions reaching each milestone:
+
+    | Configuration | SET_CONFIGURATION | SET_ADDRESS | Planted bug |
+    |---|---|---|---|
+    | single replacements only | 2 of 3 (134k, 160k) | 0 of 3 | 0 of 3 |
+    | occasional multi-replacement (2 per entry) | 1 of 3 (43k) | 0 of 3 | 0 of 3 |
+    | multi-replacement (16 per entry) | 3 of 3 (11k, 9k, 8k) | 1 of 3 (27k) | 1 of 3 (80k) |
+    | value profile + AND-tree distance and condition coverage | 2 of 3 (107k, 62k) | 0 of 3 | 0 of 3 |
+    | the same, sampled in context (gated) | 3 of 3 (18k, 18k, 16k) | 2 of 3 (136k, 162k) | 0 of 3 |
+
+    Reading:
+    - Two mechanisms help, and they help differently. Full multi-replacement is fastest to SET_CONFIGURATION and made the only bug find. In-context sampling is the most reliable route to SET_ADDRESS.
+    - Occasional multi-replacement and ungated distances do not beat single replacement here.
+    - The one bug find (multi, seed 1) repeats the earlier run exactly, being the same seed and code, so it is one event, not two.
+    - Three seeds give trends, not settled differences. SET_ADDRESS and beyond need longer campaigns (see the design principle on hardware patience), and combining gating with multi-replacement is untested.
+
 ## Next
 
 - Seed sweeps for ledger entry 10, and the same heuristics against the lock and packet benchmarks.

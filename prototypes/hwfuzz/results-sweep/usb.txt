@@ -1,0 +1,15 @@
+usb-faulty-units single seed 1: response 2 ack 2 nak 844 stall 836 data 2 address - configured 133889 VIOLATION - | coverage 8382 queue 3307
+usb-faulty-units full seed 1: response 2 ack 2 nak 892 stall 884 data 2 address - configured - VIOLATION - | coverage 8361 queue 3318
+usb-faulty-units multi seed 1: response 2 ack 2 nak 1295 stall 1287 data 2 address 26971 configured 11062 VIOLATION 79848 | coverage 8299 queue 3123
+usb-faulty-units vp+conj seed 1: response 2 ack 2 nak 989 stall 981 data 2 address - configured 106678 VIOLATION - | coverage 10228 queue 3342
+usb-faulty-units vp+conj+gated seed 1: response 2 ack 2 nak 892 stall 884 data 2 address 136380 configured 17761 VIOLATION - | coverage 9611 queue 3378
+usb-faulty-units single seed 2: response 2 ack 2 nak 1025 stall 1017 data 2 address - configured 159925 VIOLATION - | coverage 8423 queue 3490
+usb-faulty-units full seed 2: response 2 ack 2 nak 1088 stall 1080 data 2 address - configured 43194 VIOLATION - | coverage 8342 queue 3505
+usb-faulty-units multi seed 2: response 2 ack 2 nak 1512 stall 1504 data 2 address - configured 9023 VIOLATION - | coverage 8374 queue 3422
+usb-faulty-units vp+conj seed 2: response 2 ack 2 nak 1151 stall 1143 data 2 address - configured 62140 VIOLATION - | coverage 10229 queue 3699
+usb-faulty-units vp+conj+gated seed 2: response 2 ack 2 nak 1088 stall 1080 data 2 address 162019 configured 17717 VIOLATION - | coverage 9573 queue 3573
+usb-faulty-units single seed 3: response 2 ack 2 nak 653 stall 645 data 2 address - configured - VIOLATION - | coverage 8325 queue 3695
+usb-faulty-units full seed 3: response 2 ack 2 nak 692 stall 684 data 2 address - configured - VIOLATION - | coverage 8476 queue 3686
+usb-faulty-units multi seed 3: response 2 ack 2 nak 946 stall 938 data 2 address - configured 8070 VIOLATION - | coverage 8240 queue 3563
+usb-faulty-units vp+conj seed 3: response 2 ack 2 nak 699 stall 691 data 2 address - configured - VIOLATION - | coverage 9991 queue 3665
+usb-faulty-units vp+conj+gated seed 3: response 2 ack 2 nak 692 stall 684 data 2 address - configured 16159 VIOLATION - | coverage 9582 queue 3758
