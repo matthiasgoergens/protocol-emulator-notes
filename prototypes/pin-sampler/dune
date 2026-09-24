@@ -1,0 +1,4 @@
+(executables
+ (names main emit)
+ (modules main emit model sampler streamer eth_model)
+ (libraries hardcaml))

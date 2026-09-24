@@ -4,7 +4,7 @@ open Signal
 
 let create ?(fault = false) ~clock ~clear ~period ~width ~od_mask ~idle_out ~idle_oe ~host_data ~host_count ~host_push () =
   let spec = Reg_spec.create ~clock ~clear () in
-  let depth = Model.depth in
+  let depth = 4 in   (* = Model.depth; a constant so the RTL can be reused beside other models *)
   (* FIFO: four words, read and write pointers, count *)
   let rd = wire 2 and wr = wire 2 and fcount = wire 3 in
   let full = fcount ==:. depth and empty = fcount ==:. 0 in
