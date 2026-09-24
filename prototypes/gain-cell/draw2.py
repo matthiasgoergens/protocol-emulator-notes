@@ -34,14 +34,22 @@ LY = {"Activ": (1, 0), "GatPoly": (5, 0), "Cont": (6, 0), "Metal1": (8, 0), "Via
       "Metal2": (10, 0), "ThickGateOx": (44, 0), "pSD": (14, 0)}
 PX = 1.03
 
+# The write transistor: gate length LMW (0.45 is the thick-oxide minimum), and, if NARROW, a
+# channel width of 0.15 instead of the strip's 0.30 (a dogbone: the strip narrows under the
+# gate only). Both cut its leakage; see retention/.
+LMW, NARROW = 0.45, False
+
 def geometry(kind):
-    g = dict(b_top=0.98, sn_c=(0.75, 0.91), wwl=(0.19, 0.64), tgo_top=1.25, bar=(1.52, 1.82),
-             ms=(1.89, 2.02), pad=(1.89, 2.19), pad_c=(1.96, 2.12))
+    n = 0.03 if NARROW else 0         # the dogbone's width steps keep 0.07 from the gate (Gat.d)
+    d = round(LMW - 0.45 + 2 * n, 3)  # everything above the write gate moves up by this
+    up = lambda p: tuple(round(v + d, 3) for v in p)
+    g = dict(b_top=0.98 + d, sn_c=up((0.75, 0.91)), wwl=(0.19 + n, 0.64 + d - n), tgo_top=1.25 + d,
+             bar=up((1.52, 1.82)), ms=up((1.89, 2.02)), pad=up((1.89, 2.19)), pad_c=up((1.96, 2.12)))
     if kind == "3T":
-        g["rwl"] = (2.37, 2.50)
-        g["H"] = 2.69
+        g["rwl"] = up((2.37, 2.50))
+        g["H"] = round(2.69 + d, 3)
     else:
-        g["H"] = 2.38
+        g["H"] = round(2.38 + d, 3)
     return g
 
 def R(cell, layer, x0, y0, x1, y1):
@@ -56,7 +64,12 @@ def tile(lib, kind):
         def r(layer, x0, y0, x1, y1):
             a, b = sorted((s * y0, s * y1))
             R(c, layer, x0, a, x1, b)
-        r("Activ", 0.18, 0, 0.48, g["b_top"])                       # strip B
+        if NARROW:                                                   # strip B, a dogbone
+            r("Activ", 0.18, 0, 0.48, 0.15)
+            r("Activ", 0.255, 0.15, 0.405, g["sn_c"][0] - 0.07)
+            r("Activ", 0.18, g["sn_c"][0] - 0.07, 0.48, g["b_top"])
+        else:
+            r("Activ", 0.18, 0, 0.48, g["b_top"])                   # strip B
         r("GatPoly", 0, g["wwl"][0], PX, g["wwl"][1])                # WWL
         r("Cont", 0.25, g["sn_c"][0], 0.41, g["sn_c"][1])            # SN on strip B
         r("ThickGateOx", 0, 0, PX, g["tgo_top"])
@@ -148,6 +161,9 @@ def array(lib, kind, cols, pairs, every):
 
 lib = gdstk.Library(unit=1e-6, precision=5e-9)
 cols, pairs, every = (int(v) for v in sys.argv[1:4]) if len(sys.argv) > 3 else (8, 2, 4)
+if len(sys.argv) > 4:
+    LMW, NARROW = float(sys.argv[4]), sys.argv[5] == "narrow"
+    print(f"write transistor L {LMW}, W {0.15 if NARROW else 0.30}")
 for kind in ("3T", "2T"):
     a, w, h = array(lib, kind, cols, pairs, every)
     H = geometry(kind)["H"]
