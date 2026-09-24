@@ -143,7 +143,7 @@ Each entry records what a heuristic was measured on and what it did. Hypothesis 
 
     Caveat: one seed per row. Multi-replacement is therefore occasional by default (2 mutants per new entry); it is the `multi` configuration (`bench usbfuzz <target> multi ...`), uses 16, as these runs did; the default follows the sweep. The step-by-step ordering is suggestive, not a measured distribution.
 
-11. **Seed sweep: which mechanism gets the seeded USB campaign deep** (`results-sweep/usb.txt`, commit 007f2fb). Planted-fault device, seeded with one GET_DESCRIPTOR transfer, packet units, 200,000 executions per campaign, 3 seeds per configuration. Entries give first executions reaching each milestone:
+11. **Seed sweep: which mechanism gets the seeded USB campaign deep** (`results-sweep/usb.txt`, measured at commit 007f2fb, rebased as a52c0ed with identical code). Planted-fault device, seeded with one GET_DESCRIPTOR transfer, packet units, 200,000 executions per campaign, 3 seeds per configuration. Entries give first executions reaching each milestone:
 
     | Configuration | SET_CONFIGURATION | SET_ADDRESS | Planted bug |
     |---|---|---|---|
