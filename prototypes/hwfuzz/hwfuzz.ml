@@ -393,12 +393,14 @@ type config = {
   pulses : int;         (* input-to-state variants: 0 plain, 1 + one-cycle pulse, 2 + next pulse *)
   i2s_bytes : bool;     (* input-to-state by byte pattern (AFL++ CmpLog): find one operand's bytes in
                            the input, write the other's; works through a transducer *)
-  multi_i2s : bool;     (* also mutants applying several logged replacements at once *)
+  multi_i2s : bool;     (* also mutants applying 2-3 logged replacements at once; off by default:
+                           one seed on one design (USB) so far, and it costs up to 16 executions
+                           per new entry *)
   shrink_budget : int;
   batch : int;
   workers : int;
 }
-let default_config = { dict = true; i2s = true; pulses = 2; i2s_bytes = true; multi_i2s = true; shrink_budget = 32; batch = 32;
+let default_config = { dict = true; i2s = true; pulses = 2; i2s_bytes = true; multi_i2s = false; shrink_budget = 32; batch = 32;
     workers = (match Sys.getenv_opt "HWFUZZ_WORKERS" with Some w -> int_of_string w | None -> 4) }
 
 let random_input st rb =

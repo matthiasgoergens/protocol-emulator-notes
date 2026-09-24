@@ -132,7 +132,7 @@ Each entry records what a heuristic was measured on and what it did. Hypothesis 
 
     Control: the real device under the full configuration reached SET_ADDRESS at 37,679 executions and ran all 200,000 without a violation (`results-usb/control.txt`).
 
-    Caveat: one seed per row. The step-by-step ordering is suggestive, not a measured distribution.
+    Caveat: one seed per row. Multi-replacement is therefore off by default: it is the `multi` configuration (`bench usbfuzz <target> multi ...`), which these runs used, until a sweep across the benchmarks earns it a default. The step-by-step ordering is suggestive, not a measured distribution.
 
 ## Next
 

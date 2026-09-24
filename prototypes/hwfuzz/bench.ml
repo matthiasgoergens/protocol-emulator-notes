@@ -256,7 +256,7 @@ let config name =
   | "i2s" -> { d with pulses = 0 }, 1, false, false
   | "i2s+pulse" -> { d with pulses = 1 }, 1, false, false
   | "full" -> d, 1, false, false
-  | "single-i2s" -> { d with multi_i2s = false }, 1, false, false
+  | "multi" -> { d with multi_i2s = true }, 1, false, false
   | "restarts4" -> d, 4, false, false
   | "islands4" -> d, 4, true, false
   | _ -> failwith ("unknown config " ^ name)
