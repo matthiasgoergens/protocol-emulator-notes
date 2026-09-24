@@ -256,7 +256,12 @@ let config name =
   | "i2s" -> { d with pulses = 0 }, 1, false, false
   | "i2s+pulse" -> { d with pulses = 1 }, 1, false, false
   | "full" -> d, 1, false, false
-  | "multi" -> { d with multi_i2s = true }, 1, false, false
+  | "multi" -> { d with multi_i2s = true; multi_count = 16 }, 1, false, false
+  | "single" -> { d with multi_i2s = false }, 1, false, false
+  | "vp" -> { d with vp = true }, 1, false, false
+  | "conj" -> { d with conj = true }, 1, false, false
+  | "vp+conj" -> { d with vp = true; conj = true }, 1, false, false
+  | "vp+conj+gated" -> { d with vp = true; conj = true; gated = true }, 1, false, false
   | "restarts4" -> d, 4, false, false
   | "islands4" -> d, 4, true, false
   | _ -> failwith ("unknown config " ^ name)
@@ -572,4 +577,42 @@ let () =
           (String.concat " " (List.map (fun f -> if f >= 700 then "configured" else if f >= 500 then Printf.sprintf "addr=%d" (f - 500)
                                                   else if f >= 200 then Printf.sprintf "pid=%02x" (f - 200) else "VIOLATION") (List.sort compare r.observed))))
         [ ("real device", usb_target ~repair:true ()); ("planted fault", usb_target ~faulty:true ~repair:true ()) ]) files
+  | _ -> ()
+
+(* the new structures on USB: AND-trees found, and the SET_ADDRESS conjunction among them *)
+let () =
+  match Array.to_list Sys.argv with
+  | [ _; "usbtrees" ] ->
+    let t = usb_target ~repair:true () in
+    let inst = Hwfuzz.instrument t in
+    let with_deps a = Array.fold_left (fun n l -> if Array.length l > 0 then n + 1 else n) 0 a in
+    Printf.printf "comparison sites %d, AND-trees %d, registers with dependent sites %d, with dependent trees %d\n"
+      (Array.length inst.site_lt) (Array.length inst.trees) (with_deps inst.reg_sites) (with_deps inst.reg_trees);
+    Array.iteri (fun k leaves -> Printf.printf "  tree %d: %d leaves (%s)\n" k (Array.length leaves)
+      (String.concat "," (Array.to_list (Array.map (fun c -> if inst.site_lt.(c) then "lt" else "eq") leaves)))) inst.trees;
+    List.iter (fun (name, vp, conj, gated) ->
+      let r = Hwfuzz.execute ~vp ~conj ~gated t inst usb_get_descriptor in
+      Printf.printf "%s: %d features\n" name (List.length r.features))
+      [ ("plain", false, false, false); ("vp", true, false, false); ("vp+conj", true, true, false); ("vp+conj+gated", true, true, true) ]
+  | _ -> ()
+
+(* the stepping stone: does one of the two SET_ADDRESS edits alone give new features? *)
+let () =
+  match Array.to_list Sys.argv with
+  | [ _; "usbstone" ] ->
+    let t = usb_target ~repair:true () in
+    let inst = Hwfuzz.instrument t in
+    let edit a b = String.map (fun c -> if Char.code c = a then Char.chr b else c) usb_get_descriptor in
+    let one_code = edit 0x06 0x05 and one_type = edit 0x80 0x00 in
+    List.iter (fun (name, vp, conj, gated) ->
+      let fs s = List.sort_uniq compare (Hwfuzz.execute ~vp ~conj ~gated t inst s).features in
+      (* background: the seed and the same transfer with other, invalid request codes and types *)
+      let others = List.map (fun v -> edit 0x06 v) [ 0x01; 0x02; 0x03; 0x04; 0x07; 0x0A; 0x0B; 0x0C; 0x20; 0x7F ]
+                   @ List.map (fun v -> edit 0x80 v) [ 0x01; 0x21; 0x40; 0xC0; 0x81; 0xA1 ] in
+      let base = List.sort_uniq compare (List.concat_map fs (usb_get_descriptor :: others)) in
+      let fresh s = List.length (List.filter (fun f -> not (List.mem f base)) (fs s)) in
+      Printf.printf "%-15s new over 16 invalid requests: bRequest 06->05 alone %3d, bmRequestType 80->00 alone %3d, both %3d\n"
+        name (fresh one_code) (fresh one_type) (fresh (edit 0x80 0x00 |> fun s -> String.map (fun c -> if Char.code c = 0x06 then Char.chr 0x05 else c) s)))
+      [ ("plain", false, false, false); ("vp", true, false, false); ("conj", false, true, false);
+        ("vp+conj", true, true, false); ("vp+conj+gated", true, true, true); ("conj+gated", false, true, true) ]
   | _ -> ()

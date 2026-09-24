@@ -116,10 +116,9 @@ Each entry records what a heuristic was measured on and what it did. Hypothesis 
     | + input-to-state on operands from 4 bits (not 8) | 54,452 | 24,482 | – |
     | + next-unit: append a copy of a unit with a logged operand substituted | 11,062 | 26,971 | **79,848** |
 
-    The diagnosis behind each row:
-    - A request decodes only when two comparisons match at once, and a single replacement changes nothing the device reacts to. Replacing half of everything logged also breaks a PID or an address.
-    - The token-address comparison is 7 bits wide, so byte-pattern input-to-state never saw it.
-    - After the address changes, only a *new* IN token to that address can reach the device, which needs an insertion and a substitution together.
+    **Correction (measured later, `bench usbstone`):** the diagnosis first recorded here was wrong. It said a request decodes only when two comparisons match at once, so a single replacement gives no new coverage. In fact each single edit gives new features even under plain coverage, measured against a background of 16 other invalid requests: 17 for bRequest `06` to `05` alone, 8 for bmRequestType `80` to `00` alone. So a stepping stone existed. Why the single-replacement runs stalled is open. With one seed per row, the improvement that coincided with multi-replacement may be luck; the seed sweep in entry 11 is meant to tell.
+
+    Also measured: the token-address comparison is 7 bits wide, so byte-pattern input-to-state did not see it until operands from 4 bits were allowed. And after the address changes, only a *new* IN token can reach the device, which needs an insertion and a substitution together.
 
     The input the fuzzer built (`violation_usb-faulty-units_0.*`, 25 bytes) is:
     - SETUP to address 0;
@@ -132,7 +131,7 @@ Each entry records what a heuristic was measured on and what it did. Hypothesis 
 
     Control: the real device under the full configuration reached SET_ADDRESS at 37,679 executions and ran all 200,000 without a violation (`results-usb/control.txt`).
 
-    Caveat: one seed per row. Multi-replacement is therefore off by default: it is the `multi` configuration (`bench usbfuzz <target> multi ...`), which these runs used, until a sweep across the benchmarks earns it a default. The step-by-step ordering is suggestive, not a measured distribution.
+    Caveat: one seed per row. Multi-replacement is therefore occasional by default (2 mutants per new entry); it is the `multi` configuration (`bench usbfuzz <target> multi ...`), uses 16, as these runs did; the default follows the sweep. The step-by-step ordering is suggestive, not a measured distribution.
 
 ## Next
 

@@ -57,6 +57,13 @@ type instrumented = {
   cmp_layout : (string * (int * int * int) array) array;
   data_ports : (string * int) list;   (* inputs other than clock and clear *)
   out_ports : (string * int) list;    (* the original outputs, at most 62 bits wide *)
+  (* distance coverage (prior art: libFuzzer's value profile; branch distance from search-based
+     testing, Tracey 1998, where a conjunction's distance is the sum of its conjuncts'). Comparison
+     site c has operands at cmp positions 2c, 2c+1. *)
+  site_lt : bool array;               (* true for a less-than site, false for equality *)
+  trees : int array array;            (* AND-trees of 1-bit ANDs with at least two comparison leaves *)
+  reg_sites : int array array;        (* register -> sites whose result it can load (combinational fan-out) *)
+  reg_trees : int array array;        (* register -> trees it can load *)
 }
 
 let next_id = ref 0
@@ -65,7 +72,7 @@ let instrument (t : target) =
   let c = t.circuit () in
   let g = Circuit.signal_graph c in
   let seen = Hashtbl.create 1024 in
-  let decs = ref [] and regs = ref [] and cmps = ref [] and resettable = ref (t.clear <> None) in
+  let decs = ref [] and regs = ref [] and cmps = ref [] and sites = ref [] and resettable = ref (t.clear <> None) in
   let add_dec s =
     let u = Signal.uid s in
     let is_const = match s with Signal.Type.Const _ -> true | _ -> false in
@@ -76,12 +83,66 @@ let instrument (t : target) =
     | Op2 { op = Signal_lt | Signal_eq; arg_a; arg_b; _ } ->
       add_dec s;
       (* CmpLog, as in AFL++: the operands of comparisons are the magic values inputs need *)
-      if Signal.width arg_a <= 32 then cmps := arg_b :: arg_a :: !cmps
+      if Signal.width arg_a <= 32 then begin
+        cmps := arg_b :: arg_a :: !cmps;
+        sites := (Signal.uid s, (match s with Op2 { op = Signal_lt; _ } -> true | _ -> false)) :: !sites
+      end
     | Reg { register; _ } ->
       if Signal.is_empty register.reg_clear then resettable := false;
       regs := s :: !regs
     | Multiport_mem _ -> resettable := false
     | _ -> ());
+  let sites = List.rev !sites in
+  let site_of = Hashtbl.create 256 in
+  List.iteri (fun c (u, _) -> Hashtbl.replace site_of u c) sites;
+  let reg_of = Hashtbl.create 256 in
+  List.iteri (fun j s -> Hashtbl.replace reg_of (Signal.uid s) j) (List.rev !regs);
+  let by_uid = Hashtbl.create 4096 in
+  Signal_graph.iter g ~f:(fun s -> Hashtbl.replace by_uid (Signal.uid s) s);
+  (* AND-trees: descend through 1-bit ANDs and wires, collecting comparison leaves; keep roots only *)
+  let rec strip s = match s with Signal.Type.Wire { driver; _ } when not (Signal.is_empty !driver) -> strip !driver | _ -> s in
+  let is_and s = match strip s with Op2 { op = Signal_and; _ } when Signal.width s = 1 -> true | _ -> false in
+  let rec leaves s = match strip s with
+    | Op2 { op = Signal_and; arg_a; arg_b; _ } when Signal.width s = 1 -> leaves arg_a @ leaves arg_b
+    | s' -> (match Hashtbl.find_opt site_of (Signal.uid s') with Some c -> [ c ] | None -> []) in
+  let children = Hashtbl.create 256 in
+  Signal_graph.iter g ~f:(fun s -> match strip s with
+    | Op2 { op = Signal_and; arg_a; arg_b; _ } when Signal.width s = 1 ->
+      List.iter (fun a -> if is_and a then Hashtbl.replace children (Signal.uid (strip a)) ()) [ arg_a; arg_b ]
+    | _ -> ());
+  let tree_roots = ref [] in
+  Signal_graph.iter g ~f:(fun s -> match s with
+    | Op2 { op = Signal_and; _ } when Signal.width s = 1 && not (Hashtbl.mem children (Signal.uid s)) ->
+      let l = List.sort_uniq compare (leaves s) in
+      if List.length l >= 2 then tree_roots := (Signal.uid s, Array.of_list l) :: !tree_roots
+    | _ -> ());
+  let tree_roots = List.rev !tree_roots in
+  (* registers in a node's combinational fan-out: the registers its value can reach this cycle *)
+  let fan_out = Signal_graph.fan_out_map g in
+  let regs_reached u =
+    let seen = Hashtbl.create 64 and found = ref [] and q = Queue.create () in
+    Queue.push u q; Hashtbl.replace seen u ();
+    while not (Queue.is_empty q) && Hashtbl.length seen < 4000 do
+      let v = Queue.pop q in
+      match Base.Map.find fan_out v with
+      | None -> ()
+      | Some set ->
+        Base.Set.iter set ~f:(fun w ->
+          if not (Hashtbl.mem seen w) then begin
+            Hashtbl.replace seen w ();
+            match Hashtbl.find_opt reg_of w with
+            | Some j -> found := j :: !found
+            | None -> (match Hashtbl.find_opt by_uid w with Some (Reg _) -> () | _ -> Queue.push w q)
+          end)
+    done;
+    !found in
+  let nregs = List.length !regs in
+  let invert pairs = (* (item, regs) list -> reg -> items *)
+    let a = Array.make nregs [] in
+    List.iteri (fun i rs -> List.iter (fun j -> a.(j) <- i :: a.(j)) rs) pairs;
+    Array.map (fun l -> Array.of_list (List.sort_uniq compare l)) a in
+  let reg_sites = invert (List.map (fun (u, _) -> regs_reached u) sites) in
+  let reg_trees = invert (List.map (fun (u, _) -> regs_reached u) tree_roots) in
   let trunc s = if Signal.width s > 62 then Signal.select s 61 0 else s in
   let decs = List.map trunc (List.rev !decs) and regs = List.map trunc (List.rev !regs) and cmps = List.rev !cmps in
   let chunk prefix sigs =
@@ -108,7 +169,8 @@ let instrument (t : target) =
   incr next_id;
   { id = !next_id; circuit; resettable = !resettable; dec_widths = Array.of_list (List.map Signal.width decs);
     reg_widths = Array.of_list (List.map Signal.width regs);
-    cmp_widths = Array.of_list (List.map Signal.width cmps); dec_layout; reg_layout; cmp_layout; data_ports; out_ports }
+    cmp_widths = Array.of_list (List.map Signal.width cmps); dec_layout; reg_layout; cmp_layout; data_ports; out_ports;
+    site_lt = Array.of_list (List.map snd sites); trees = Array.of_list (List.map snd tree_roots); reg_sites; reg_trees }
 
 (* read a field of [w] bits at [off] from an int64 array *)
 let field (a : int64 array) off w =
@@ -135,7 +197,15 @@ type run_result = {
 (* one simulator per worker domain and instrumented circuit *)
 let sim_cache = Domain.DLS.new_key (fun () -> Hashtbl.create 4)
 
-let execute (t : target) inst (input : string) =
+let popcount x = let rec f x n = if x = 0 then n else f (x land (x - 1)) (n + 1) in f x 0
+let bitlen x = let rec f x n = if x = 0 then n else f (x lsr 1) (n + 1) in f x 0
+
+(* [vp]: per comparison site, the Hamming and magnitude distances of its operands (libFuzzer's value
+   profile); [conj]: per AND-tree, the sum of its leaves' distances (branch distance); [gated]:
+   sample only on cycles where a register in the site's or tree's fan-out loads a new value, using
+   the operands from the cycle before (the ones that caused it), so a comparison that is trivially
+   true at reset but consumed by nothing does not use up its coverage *)
+let execute ?(vp = false) ?(conj = false) ?(gated = false) (t : target) inst (input : string) =
   let sim =
     if not inst.resettable then Cyclesim.create inst.circuit
     else begin
@@ -150,6 +220,7 @@ let execute (t : target) inst (input : string) =
   let chunks layout = Array.map (fun (n, ps) -> (out n, ps)) layout in
   let decc = chunks inst.dec_layout and regc = chunks inst.reg_layout and cmpc = chunks inst.cmp_layout in
   let vs = Array.make (Array.length inst.cmp_widths) 0 in
+  let vs_get i = vs.(i) in
   let vprev = Array.make (Array.length inst.cmp_layout) (-1) and last_rec = ref (-2) in
   let oport = Hashtbl.create 8 in
   let get n = match Hashtbl.find_opt oport n with
@@ -159,6 +230,32 @@ let execute (t : target) inst (input : string) =
   let nd = Array.length inst.dec_widths and nr = Array.length inst.reg_widths and no = Array.length outs in
   let dcnt = Array.make (nd * 16) 0 and dhist = Array.make nd 0 in
   let rchg = Array.make nr 0 and rprev = Array.make nr (-1) and rvals = Hashtbl.create 256 in
+  let cycles = ref 0 in
+  let rstamp = Array.make nr (-1) and changed_regs = ref [] in
+  let nsites = Array.length inst.site_lt in
+  let site_stamp = Array.make nsites (-1) and tree_stamp = Array.make (Array.length inst.trees) (-1) in
+  let dist = Hashtbl.create 256 in
+  let leaf_dist c =
+    let x = vs_get (2 * c) and y = vs_get (2 * c + 1) in
+    if inst.site_lt.(c) then (if x < y then 0 else bitlen (x - y + 1)) else popcount (x lxor y) in
+  let sample_site c =
+    if site_stamp.(c) <> !cycles then begin
+      site_stamp.(c) <- !cycles;
+      let x = vs_get (2 * c) and y = vs_get (2 * c + 1) in
+      Hashtbl.replace dist ('h', c, popcount (x lxor y)) ();
+      Hashtbl.replace dist ('m', c, if x = y then 0 else bitlen (abs (x - y))) ()
+    end in
+  let sample_tree k =
+    if tree_stamp.(k) <> !cycles then begin
+      tree_stamp.(k) <- !cycles;
+      let d = Array.fold_left (fun a c -> a + leaf_dist c) 0 inst.trees.(k) in
+      Hashtbl.replace dist ('t', k, bitlen d) ();
+      (* condition coverage: the tuple of which conjuncts hold, so one of two becoming true is a
+         new state (prior art: condition coverage and MC/DC in hardware and avionics testing) *)
+      let mask = ref 0 in
+      Array.iteri (fun i c -> if i < 30 && leaf_dist c = 0 then mask := !mask lor (1 lsl i)) inst.trees.(k);
+      Hashtbl.replace dist ('c', k, !mask) ()
+    end in
   let ochg = Array.make no 0 and oprev = Array.make no (-1) and oring = Array.make_matrix no 256 0 in
   let obs = Option.map (fun f -> f ()) t.observer in
   let cvals = Hashtbl.create 64 and i2s = Hashtbl.create 64 and pairs = Hashtbl.create 64 in
@@ -166,7 +263,6 @@ let execute (t : target) inst (input : string) =
   let mask = if String.length input > 0 then Char.code input.[0] else 0 in
   let rb = record_bytes inst in
   let nrec = (String.length input - 1) / rb in
-  let cycles = ref 0 in
   let step () =
     Cyclesim.cycle sim;
     Array.iter (fun (o, ps) ->
@@ -180,20 +276,40 @@ let execute (t : target) inst (input : string) =
       let v = Bits.to_int !o in
       Array.iter (fun (j, off, w) ->
         let x = (v lsr off) land ((1 lsl w) - 1) in
-        if x <> rprev.(j) then (rchg.(j) <- rchg.(j) + 1; rprev.(j) <- x);
+        if x <> rprev.(j) then begin
+          rchg.(j) <- rchg.(j) + 1; rprev.(j) <- x;
+          if gated && rstamp.(j) <> !cycles then (rstamp.(j) <- !cycles; changed_regs := j :: !changed_regs)
+        end;
         if w <= 8 then Hashtbl.replace rvals (j, x) ()) ps) regc;
-    if Array.length vs > 0 && Hashtbl.length cvals < 256 then begin
+    (* gated distance sampling: registers that changed now were loaded from last cycle's values,
+       which vs still holds *)
+    if gated then begin
+      List.iter (fun j ->
+        if vp then Array.iter sample_site inst.reg_sites.(j);
+        if conj then Array.iter sample_tree inst.reg_trees.(j)) !changed_regs;
+      changed_regs := []
+    end;
+    let logging = Hashtbl.length cvals < 256 in
+    if Array.length vs > 0 && (logging || vp || conj) then begin
       (* operands rarely change from one cycle to the next: only do the logging work on a change *)
-      let changed = ref false in
+      let changed = ref false and csites = ref [] in
       Array.iteri (fun k (o, ps) ->
         let v = Bits.to_int !o in
         if v <> vprev.(k) then begin
           vprev.(k) <- v;
           Array.iter (fun (j, off, w) ->
             let x = (v lsr off) land ((1 lsl w) - 1) in
-            if x <> vs.(j) || !cycles = 0 then (vs.(j) <- x; changed := true; Hashtbl.replace cvals (w, x) ())) ps
+            if x <> vs.(j) || !cycles = 0 then begin
+              vs.(j) <- x; changed := true; csites := j / 2 :: !csites;
+              if logging then Hashtbl.replace cvals (w, x) ()
+            end) ps
         end) cmpc;
-      if !changed || !cur_rec <> !last_rec then begin
+      (* ungated distance sampling: whenever a site's operands change *)
+      if not gated && (vp || conj) then begin
+        List.iter (fun c -> if c < nsites && vp then sample_site c) !csites;
+        if conj && !csites <> [] then Array.iteri (fun k _ -> sample_tree k) inst.trees
+      end;
+      if logging && (!changed || !cur_rec <> !last_rec) then begin
       last_rec := !cur_rec;
       for c = 0 to Array.length vs / 2 - 1 do
         let x = vs.(2 * c) and y = vs.(2 * c + 1) in
@@ -276,6 +392,7 @@ let execute (t : target) inst (input : string) =
     end) ochg;
   let observed = match obs with None -> [] | Some ob -> ob.finish () in
   List.iter (fun f -> add ('X', f)) observed;
+  Hashtbl.iter (fun k () -> add ('Q', k)) dist;
   { features = !fs; cycles = n; observed; cmp_values = Hashtbl.fold (fun k () acc -> k :: acc) cvals [];
     i2s = Hashtbl.fold (fun k () acc -> k :: acc) i2s [];
     cmp_pairs = Hashtbl.fold (fun k () acc -> k :: acc) pairs [] }
@@ -393,14 +510,17 @@ type config = {
   pulses : int;         (* input-to-state variants: 0 plain, 1 + one-cycle pulse, 2 + next pulse *)
   i2s_bytes : bool;     (* input-to-state by byte pattern (AFL++ CmpLog): find one operand's bytes in
                            the input, write the other's; works through a transducer *)
-  multi_i2s : bool;     (* also mutants applying 2-3 logged replacements at once; off by default:
-                           one seed on one design (USB) so far, and it costs up to 16 executions
-                           per new entry *)
+  multi_i2s : bool;     (* also mutants applying 2-3 logged replacements at once *)
+  multi_count : int;    (* multi-replacement mutants per new entry: occasional by default (2, against
+                           dozens of single replacements); the "multi" config uses 16 *)
+  vp : bool;            (* value-profile distances per comparison site *)
+  conj : bool;          (* branch distance and condition coverage per AND-tree *)
+  gated : bool;         (* sample those only when a register in the fan-out loads *)
   shrink_budget : int;
   batch : int;
   workers : int;
 }
-let default_config = { dict = true; i2s = true; pulses = 2; i2s_bytes = true; multi_i2s = false; shrink_budget = 32; batch = 32;
+let default_config = { dict = true; i2s = true; pulses = 2; i2s_bytes = true; multi_i2s = true; multi_count = 2; vp = false; conj = false; gated = false; shrink_budget = 32; batch = 32;
     workers = (match Sys.getenv_opt "HWFUZZ_WORKERS" with Some w -> int_of_string w | None -> 4) }
 
 let random_input st rb =
@@ -436,7 +556,7 @@ type engine = {
   ports : (int * int) list;           (* byte offset within a record's value bytes, and width *)
 }
 
-let exec e s = execute e.t e.inst s
+let exec e s = execute ~vp:e.cfg.vp ~conj:e.cfg.conj ~gated:e.cfg.gated e.t e.inst s
 
 let add_entry e s fs =
   let idx = Array.length e.queue in
@@ -555,7 +675,7 @@ let queue_i2s_bytes e s (r : run_result) =
       let pa = le w a in let la = String.length pa in
       let rec f i = i + la <= String.length s && (String.sub s i la = pa || f (i + 1)) in f 1) srcs in
     if List.length present >= 2 then
-      for _ = 1 to 16 do
+      for _ = 1 to e.cfg.multi_count do
         let b = Bytes.of_string s in
         (* two or three sources per mutant: replacing half of everything logged almost always
            breaks something vital as well (measured on USB: no SET_ADDRESS that way) *)
