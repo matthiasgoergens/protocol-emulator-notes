@@ -1,0 +1,12 @@
+Ethernet receiver RTL (h = 3) sampled at the PAL clock 53.203425 MHz; 20 random frames per cell
+  transmitter clock offset | jitter 0 ns | 2 ns | 3 ns | 4 ns | 5 ns
+    -100 ppm               | 20/20 | 20/20 | 20/20 |  8/20 |  1/20 |
+      +0 ppm               | 20/20 | 20/20 | 20/20 |  5/20 |  0/20 |
+    +100 ppm               | 20/20 | 20/20 | 20/20 | 10/20 |  0/20 |
+total 204 of 300 frames received intact with a good CRC
+Ethernet receiver RTL (h = 3) sampled at the PAL clock 60.000000 MHz; 20 random frames per cell
+  transmitter clock offset | jitter 0 ns | 2 ns | 3 ns | 4 ns | 5 ns
+    -100 ppm               | 20/20 | 20/20 | 20/20 | 20/20 | 20/20 |
+      +0 ppm               | 20/20 | 20/20 | 20/20 | 20/20 | 20/20 |
+    +100 ppm               | 20/20 | 20/20 | 20/20 | 20/20 | 20/20 |
+total 300 of 300 frames received intact with a good CRC
