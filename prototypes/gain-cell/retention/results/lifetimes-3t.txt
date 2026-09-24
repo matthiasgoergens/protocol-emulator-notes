@@ -1,0 +1,47 @@
+lowest readable 1 (RBL < 0.5 V) and highest readable 0 (RBL > 0.7 V), by sense time
+  mos_ff   27C  1 needs >= 0.215 V at 10 ns, 0.200 V at 20 ns; 0 reads up to   -   V at 10 ns (sweep floor 0.20)
+  mos_ff   85C  1 needs >= 0.200 V at 10 ns, 0.200 V at 20 ns; 0 reads up to   -   V at 10 ns (sweep floor 0.20)
+  mos_ss   27C  1 needs >= 0.393 V at 10 ns, 0.344 V at 20 ns; 0 reads up to 0.350 V at 10 ns (sweep floor 0.20)
+  mos_ss   85C  1 needs >= 0.349 V at 10 ns, 0.297 V at 20 ns; 0 reads up to 0.300 V at 10 ns (sweep floor 0.20)
+  mos_tt   27C  1 needs >= 0.301 V at 10 ns, 0.252 V at 20 ns; 0 reads up to 0.250 V at 10 ns (sweep floor 0.20)
+  mos_tt   85C  1 needs >= 0.257 V at 10 ns, 0.205 V at 20 ns; 0 reads up to 0.200 V at 10 ns (sweep floor 0.20)
+
+runs/v5-3T-w0.15-l0.45-tw100.txt
+  mos_tt   27C  written 0.513 V   lifetime of a 1 read at 10 ns: 13.37 ms (to 0.301 V);  20 ns: 20.65 ms (to 0.252 V)
+  mos_tt   85C  written 0.601 V   lifetime of a 1 read at 10 ns: 12.65 ms (to 0.257 V);  20 ns: > 13.22 ms (needs a level below 0.25 V) (to 0.205 V)
+  mos_ff   27C  written 0.597 V   lifetime of a 1 read at 10 ns: > 5.09 ms (needs a level below 0.25 V) (to 0.215 V);  20 ns: > 5.09 ms (needs a level below 0.25 V) (to 0.200 V)
+  mos_ff   85C  written 0.683 V   lifetime of a 1 read at 10 ns: > 3.15 ms (needs a level below 0.25 V) (to 0.200 V);  20 ns: > 3.15 ms (needs a level below 0.25 V) (to 0.200 V)
+  mos_ss   27C  written 0.418 V   lifetime of a 1 read at 10 ns: 6.01 ms (to 0.393 V);  20 ns: 20.33 ms (to 0.344 V)
+  mos_ss   85C  written 0.517 V   lifetime of a 1 read at 10 ns: 19.06 ms (to 0.349 V);  20 ns: 30.19 ms (to 0.297 V)
+
+runs/v5-3T-w0.15-l0.45.txt
+  mos_tt   27C  written 0.468 V   lifetime of a 1 read at 10 ns: 12.06 ms (to 0.301 V);  20 ns: 19.33 ms (to 0.252 V)
+  mos_tt   85C  written 0.551 V   lifetime of a 1 read at 10 ns: 12.21 ms (to 0.257 V);  20 ns: > 12.78 ms (needs a level below 0.25 V) (to 0.205 V)
+  mos_ff   27C  written 0.554 V   lifetime of a 1 read at 10 ns: > 4.95 ms (needs a level below 0.25 V) (to 0.215 V);  20 ns: > 4.95 ms (needs a level below 0.25 V) (to 0.200 V)
+  mos_ff   85C  written 0.632 V   lifetime of a 1 read at 10 ns: > 3.10 ms (needs a level below 0.25 V) (to 0.200 V);  20 ns: > 3.10 ms (needs a level below 0.25 V) (to 0.200 V)
+  mos_ss   27C  written 0.366 V   lifetime of a 1 read at 10 ns: unreadable at once (written 0.366 < 0.393);  20 ns: 8.26 ms (to 0.344 V)
+  mos_ss   85C  written 0.462 V   lifetime of a 1 read at 10 ns: 14.88 ms (to 0.349 V);  20 ns: 26.01 ms (to 0.297 V)
+
+runs/v5-3T-w0.15-l0.60.txt
+  mos_tt   27C  written 0.437 V   lifetime of a 1 read at 10 ns: 9.42 ms (to 0.301 V);  20 ns: 15.24 ms (to 0.252 V)
+  mos_tt   85C  written 0.521 V   lifetime of a 1 read at 10 ns: 0.80 ms (to 0.257 V);  20 ns: > 0.82 ms (needs a level below 0.25 V) (to 0.205 V)
+  mos_ff   27C  written 0.505 V   lifetime of a 1 read at 10 ns: > 3.68 ms (needs a level below 0.25 V) (to 0.215 V);  20 ns: > 3.68 ms (needs a level below 0.25 V) (to 0.200 V)
+  mos_ff   85C  written 0.584 V   lifetime of a 1 read at 10 ns: > 0.19 ms (needs a level below 0.25 V) (to 0.200 V);  20 ns: > 0.19 ms (needs a level below 0.25 V) (to 0.200 V)
+  mos_ss   27C  written 0.356 V   lifetime of a 1 read at 10 ns: unreadable at once (written 0.356 < 0.393);  20 ns: 5.37 ms (to 0.344 V)
+  mos_ss   85C  written 0.453 V   lifetime of a 1 read at 10 ns: 1.55 ms (to 0.349 V);  20 ns: 2.38 ms (to 0.297 V)
+
+runs/v5-3T-w0.15-l0.80.txt
+  mos_tt   27C  written 0.431 V   lifetime of a 1 read at 10 ns: 10.07 ms (to 0.301 V);  20 ns: 16.86 ms (to 0.252 V)
+  mos_tt   85C  written 0.515 V   lifetime of a 1 read at 10 ns: 1.76 ms (to 0.257 V);  20 ns: > 1.81 ms (needs a level below 0.25 V) (to 0.205 V)
+  mos_ff   27C  written 0.489 V   lifetime of a 1 read at 10 ns: > 4.38 ms (needs a level below 0.25 V) (to 0.215 V);  20 ns: > 4.38 ms (needs a level below 0.25 V) (to 0.200 V)
+  mos_ff   85C  written 0.569 V   lifetime of a 1 read at 10 ns: > 0.53 ms (needs a level below 0.25 V) (to 0.200 V);  20 ns: > 0.53 ms (needs a level below 0.25 V) (to 0.200 V)
+  mos_ss   27C  written 0.362 V   lifetime of a 1 read at 10 ns: unreadable at once (written 0.362 < 0.393);  20 ns: 7.20 ms (to 0.344 V)
+  mos_ss   85C  written 0.458 V   lifetime of a 1 read at 10 ns: 2.69 ms (to 0.349 V);  20 ns: 4.09 ms (to 0.297 V)
+
+runs/v5-3T-w0.30-l0.45.txt
+  mos_tt   27C  written 0.424 V   lifetime of a 1 read at 10 ns: 4.90 ms (to 0.301 V);  20 ns: 7.36 ms (to 0.252 V)
+  mos_tt   85C  written 0.489 V   lifetime of a 1 read at 10 ns: 0.21 ms (to 0.257 V);  20 ns: > 0.21 ms (needs a level below 0.25 V) (to 0.205 V)
+  mos_ff   27C  written 0.501 V   lifetime of a 1 read at 10 ns: > 1.39 ms (needs a level below 0.25 V) (to 0.215 V);  20 ns: > 1.39 ms (needs a level below 0.25 V) (to 0.200 V)
+  mos_ff   85C  written 0.560 V   lifetime of a 1 read at 10 ns: > 0.05 ms (needs a level below 0.25 V) (to 0.200 V);  20 ns: > 0.05 ms (needs a level below 0.25 V) (to 0.200 V)
+  mos_ss   27C  written 0.331 V   lifetime of a 1 read at 10 ns: unreadable at once (written 0.331 < 0.393);  20 ns: unreadable at once (written 0.331 < 0.344)
+  mos_ss   85C  written 0.411 V   lifetime of a 1 read at 10 ns: 0.32 ms (to 0.349 V);  20 ns: 0.61 ms (to 0.297 V)
