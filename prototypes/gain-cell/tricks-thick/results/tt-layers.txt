@@ -6,4 +6,4 @@
       2 LAYER Metal5
      10 LAYER TopMetal1
       2 LAYER TopMetal2
-# magic_init_project.tcl in the same directory paints power stripes on met6 (TopMetal1 in the IHP Magic tech), min width 2.1 um, min spacing 1.64 um
+# magic_init_project.tcl in the same directory paints the power stripes on the Magic layer "met6" (min width 2.1 um, spacing 1.64 um); that spacing equals TopMetal1 rule TM1.b, so met6 is most likely TopMetal1 (not verified against the Magic tech file)
