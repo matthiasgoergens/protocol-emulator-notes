@@ -1,0 +1,3 @@
+pin loopback (base ISA and RTL, 3 pins, 15 + 13 words): 256 bytes in order true, 14334 cycles, 56.0 cycles/byte = 1.07 MB/s at 60 MHz; RTL mismatches 0; both threads busy for the whole transfer, no buffering
+mailbox (variant, 0 pins, 3 + 3 words): 256 bytes in order true, 3070 cycles, 12.0 cycles/byte = 5.00 MB/s at 60 MHz; RTL mismatches 0; each side spends 2 of every 3 of its slots and the inbox buffers 2 bytes
+control: pin loopback with the sender one slot early (the NOP removed): 0 of 256 bytes correct

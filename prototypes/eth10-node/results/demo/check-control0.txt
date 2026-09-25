@@ -1,0 +1,22 @@
+5 of 29 expected replies correct; 10 requests correctly unanswered: 10
+  FAIL ping-0: ICMP checksum wrong
+  FAIL ping-1: ICMP checksum wrong
+  FAIL ping-18: ICMP checksum wrong
+  FAIL ping-56: ICMP checksum wrong
+  FAIL ping-100: ICMP checksum wrong
+  FAIL ping-200: ICMP checksum wrong
+  FAIL ping-df: ICMP checksum wrong
+  FAIL rand-ping-0-86: ICMP checksum wrong
+  FAIL rand-ping-2-174: ICMP checksum wrong
+  FAIL rand-ping-3-49: ICMP checksum wrong
+  FAIL rand-ping-5-149: ICMP checksum wrong
+  FAIL rand-ping-6-125: ICMP checksum wrong
+  FAIL rand-ping-7-23: ICMP checksum wrong
+  FAIL rand-ping-9-139: ICMP checksum wrong
+  FAIL rand-ping-10-185: ICMP checksum wrong
+  FAIL rand-ping-11-149: ICMP checksum wrong
+  FAIL rand-ping-12-155: ICMP checksum wrong
+  FAIL rand-ping-13-160: ICMP checksum wrong
+  FAIL rand-ping-14-165: ICMP checksum wrong
+  FAIL rand-ping-15-75: ICMP checksum wrong
+host stack verdict: FAIL

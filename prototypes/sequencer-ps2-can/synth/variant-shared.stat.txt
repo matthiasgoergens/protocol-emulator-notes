@@ -1,0 +1,45 @@
+
+7. Printing statistics.
+
+=== deadline_sequencer_vs ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1720        - wires
+     2443        - wire bits
+      176        - public wires
+      899        - public wire bits
+       14        - ports
+      106        - port bits
+     1845 2.94E+04 cells
+       22  279.418   sg13g2_a21o_1
+      388 3.52E+03   sg13g2_a21oi_1
+       27   391.91   sg13g2_a221oi_1
+       95 1.03E+03   sg13g2_a22oi_1
+       24  217.728   sg13g2_and2_1
+        1   12.701   sg13g2_and3_1
+        5   72.576   sg13g2_and4_1
+      290 1.42E+04   sg13g2_dfrbpq_1
+      195 1.06E+03   sg13g2_inv_1
+        3   54.432   sg13g2_mux2_1
+       52 1.98E+03   sg13g2_mux4_1
+      133  965.261   sg13g2_nand2_1
+       20   181.44   sg13g2_nand2b_1
+       48  435.456   sg13g2_nand3_1
+        2   25.402   sg13g2_nand3b_1
+        2   21.773   sg13g2_nand4_1
+       67  486.259   sg13g2_nor2_1
+       14  127.008   sg13g2_nor2b_1
+       25    226.8   sg13g2_nor3_1
+        4   43.546   sg13g2_nor4_1
+      369 3.35E+03   sg13g2_o21ai_1
+       20   181.44   sg13g2_or2_1
+        5   63.504   sg13g2_or3_1
+        2    29.03   sg13g2_or4_1
+       20  290.304   sg13g2_xnor2_1
+       12  174.182   sg13g2_xor2_1
+
+   Chip area for module '\deadline_sequencer_vs': 29427.791400
+     of which used for sequential elements: 14206.752000 (48.28%)
+

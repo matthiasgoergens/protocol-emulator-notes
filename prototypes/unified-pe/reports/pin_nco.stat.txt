@@ -1,0 +1,41 @@
+
+7. Printing statistics.
+
+=== pin_nco ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      436        - wires
+      568        - wire bits
+       12        - public wires
+      144        - public wire bits
+        7        - ports
+       24        - port bits
+      475 6.68E+03 cells
+        6   76.205   sg13g2_a21o_1
+       44  399.168   sg13g2_a21oi_1
+        8  116.122   sg13g2_a221oi_1
+       14   151.88   sg13g2_a22oi_1
+       22  199.584   sg13g2_and2_1
+        4   50.803   sg13g2_and3_1
+       48 2.35E+03   sg13g2_dfrbpq_1
+       12   65.318   sg13g2_inv_1
+       22  399.168   sg13g2_mux2_1
+       56  406.426   sg13g2_nand2_1
+       10    90.72   sg13g2_nand2b_1
+       13  117.936   sg13g2_nand3_1
+        1   12.701   sg13g2_nand3b_1
+       47  341.107   sg13g2_nor2_1
+        4   36.288   sg13g2_nor2b_1
+       16  145.152   sg13g2_nor3_1
+        3   32.659   sg13g2_nor4_1
+       58  526.176   sg13g2_o21ai_1
+       17  154.224   sg13g2_or2_1
+        6   76.205   sg13g2_or3_1
+       39  566.093   sg13g2_xnor2_1
+       25   362.88   sg13g2_xor2_1
+
+   Chip area for module '\pin_nco': 6678.277200
+     of which used for sequential elements: 2351.462400 (35.21%)
+

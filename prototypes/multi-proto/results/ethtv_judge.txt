@@ -1,0 +1,32 @@
+== main
+decoded 240 lines; blocks correct 1920 of 1920; source lines with an error: [] (0)
+  line periods (clocks: count): 3868:258
+  picture: out/ethtv_main.png
+== life8
+decoded 240 lines; blocks correct 172 of 1920; source lines with an error: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] ... (118)
+  most frequent confusions (sent -> decoded): 1->0 x146, 2->0 x140, 6->0 x140, 4->0 x138, 5->0 x134, 3->0 x124
+  line periods (clocks: count): 3868:258
+  picture: out/ethtv_life8.png
+== norefresh
+decoded 240 lines; blocks correct 1088 of 1920; source lines with an error: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] ... (118)
+  most frequent confusions (sent -> decoded): 1->0 x67, 4->0 x64, 2->0 x64, 5->0 x62, 6->0 x59, 12->0 x58
+  line periods (clocks: count): 3868:258
+  picture: out/ethtv_norefresh.png
+== extraslot
+decoded 240 lines; blocks correct 1920 of 1920; source lines with an error: [] (0)
+  line periods (clocks: count): 3868:18, 3872:240
+  picture: out/ethtv_extraslot.png
+== rxshared
+decoded 240 lines; blocks correct 1904 of 1920; source lines with an error: [113] (1)
+  most frequent confusions (sent -> decoded): 12->0 x4, 7->0 x2, 1->0 x2, 15->0 x2, 10->0 x2, 4->0 x2
+  line periods (clocks: count): 3868:258
+  picture: out/ethtv_rxshared.png
+== reorder_thin
+decoded 240 lines; blocks correct 1904 of 1920; source lines with an error: [91] (1)
+  most frequent confusions (sent -> decoded): 11->0 x4, 2->0 x4, 7->0 x4, 5->0 x2, 12->0 x2
+  line periods (clocks: count): 3868:258
+  picture: out/ethtv_reorder_thin.png
+== reorder_thick
+decoded 240 lines; blocks correct 1920 of 1920; source lines with an error: [] (0)
+  line periods (clocks: count): 3868:258
+  picture: out/ethtv_reorder_thick.png

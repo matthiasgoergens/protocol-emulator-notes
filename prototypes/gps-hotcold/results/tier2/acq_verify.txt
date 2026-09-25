@@ -1,0 +1,14 @@
+PE row (clock by clock) vs closed form vs FFT search: 0 mismatches in total
+  trial 0 arm I: 300 samples, K=16, f_bin -4000 Hz, pass offset 1199: PE row vs closed form mismatches 0; first sums [12, 20, 18, 12]
+  trial 0 arm Q: 300 samples, K=16, f_bin -4000 Hz, pass offset 1199: PE row vs closed form mismatches 0; first sums [-10, -26, -28, -22]
+  trial 1 arm I: 300 samples, K=16, f_bin -3500 Hz, pass offset 1222: PE row vs closed form mismatches 0; first sums [-30, -36, -30, -30]
+  trial 1 arm Q: 300 samples, K=16, f_bin -3500 Hz, pass offset 1222: PE row vs closed form mismatches 0; first sums [6, 12, -6, -6]
+  trial 2 arm I: 300 samples, K=16, f_bin +500 Hz, pass offset 2390: PE row vs closed form mismatches 0; first sums [6, 8, 8, -20]
+  trial 2 arm Q: 300 samples, K=16, f_bin +500 Hz, pass offset 2390: PE row vs closed form mismatches 0; first sums [-10, -4, -8, -8]
+  trial 3 arm I: 300 samples, K=16, f_bin -1000 Hz, pass offset 51: PE row vs closed form mismatches 0; first sums [6, 10, -6, -26]
+  trial 3 arm Q: 300 samples, K=16, f_bin -1000 Hz, pass offset 51: PE row vs closed form mismatches 0; first sums [22, 6, 10, -14]
+  trial 4 arm I: 300 samples, K=16, f_bin +4500 Hz, pass offset 1237: PE row vs closed form mismatches 0; first sums [6, -24, -10, 14]
+  trial 4 arm Q: 300 samples, K=16, f_bin +4500 Hz, pass offset 1237: PE row vs closed form mismatches 0; first sums [6, 28, 42, 30]
+  trial 5 arm I: 3274 samples, K=16, f_bin -3500 Hz, pass offset 318: PE row vs closed form and vs FFT search mismatches 0; first sums [-54, -18, -26, -66]
+  trial 5 arm Q: 3274 samples, K=16, f_bin -3500 Hz, pass offset 318: PE row vs closed form and vs FFT search mismatches 0; first sums [-74, -58, -58, -66]
+  control: correlator tag negation disconnected -> 7/8 sums differ

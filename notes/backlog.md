@@ -57,6 +57,17 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
 ## Pins and timing
 
+- **Receiving beyond Nyquist** (the user's insight: real protocols suit compressed-sensing ideas).
+  The framework is sampling at the finite rate of innovation (Vetterli, Marziliano, Blu 2002).
+  The floor is the entropy rate of the unknown content, not twice a bandwidth. Uses:
+  - once locked, one sample per bit at bit centres instead of 4× oversampling;
+  - sampling only unpredictable fields;
+  - telling which of a few candidate frames is present from a handful of samples (the matcher);
+  - super-resolution of edge times;
+  - protocols faster than our clock where their new content per second is low enough.
+
+  Being modelled in the scope study.
+
 - Merged: the four-phase stage, with FM transmit, jittery 10BASE-T receive and the shmoo demo.
 - To do:
   - a FINE instruction for per-edge programmable delay, and the exact-edge NCO;
@@ -134,6 +145,31 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
   Each needs its fence written down: which interfaces re-synchronise, what the verifier may
   assume, and how a run is still replayed.
+- **Copying from other entries: the policy.** Ideas may be copied from anyone, with attribution.
+  Code only under a compatible open-source licence, with attribution. Of the repositories studied
+  on 2026-09-25, 11 are Apache-2.0 and 2 are MIT; 3 have no licence (fjpolo/ProtocolEmulatorr,
+  LeEmperor/hardcaml_protemu, DanielMBouyou/protocol-emulator-asic), so they are ideas only.
+  Apache-2.0 files keep their licence, notice and a record of our changes, with a per-file
+  `SPDX-License-Identifier`. Our repository moved from MIT to Apache-2.0 on 2026-09-25 (see `NOTICE`),
+  matching most of the code we may borrow and adding a patent grant.
+- **Learn from other public entries' verification** (study of 15 repositories on 2026-09-25,
+  private notes in `~/prog/janestreet/competitor-notes/`). Adopt, with credit:
+  - **Mutation against formal proofs:** plant a broken deadline arm and require the BMC proof to
+    reject it. At least six entries do some form of this; examples are MarcosAsh's SVA "teeth",
+    WilliamZhang20's named RTL mutants, and fjpolo's equivalence-checking miter.
+  - **A programme verifier by abstract interpretation:** MarcosAsh/protocol-emulator
+    `src/analyser.ml` (OCaml, intervals over phase, period and cycles since an edge). It refuses
+    firmware that could miss a deadline. Read it before building ours.
+  - **A non-interference miter for pin and port arbitration between threads**, after
+    umerimran-10xe's `protoemu_arb_miter.v`: assume equal inputs for the owner, assert equal
+    outputs. It is the formal form of "ports never double-booked" and of the isolation proof in
+    the bridges work.
+  - **A verification-record format:** hash-pinned inputs, a "what this is NOT" section and honest
+    non-closure reports (2AMLogic).
+  - **A cocotb layer against the hardened netlist**, as Tiny Tapeout's own CI expects; several
+    entries have one.
+  - **An audit of our specification by formal methods,** as TejasDasa's `docs/formal.md`
+    documents: five specification gaps found that 100 %-coverage random testing had missed.
 - **A programme verifier**, built before the showpieces: deadlines met, every read inside its
   row's lifetime at the chosen temperature bin, ports never double-booked.
 - **A pessimising scheduler** as a test oracle (after Knuth's SHOAP).
@@ -161,6 +197,19 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
 
 ## hwfuzz and testing research
 
+- **Ideas from Antithesis**, which Jane Street uses and led a funding round for ("now leading their
+  next funding round", blog.janestreet.com/getting-from-tested-to-battle-tested/, 2025-12-03).
+  Research notes are in `/var/tmp/js-network/report.md`.
+  - Snapshot and branch exploration: save simulator state at interesting moments and explore
+    from there. hwfuzz currently rebuilds the simulator on every run.
+  - "Sometimes" assertions and tuple coverage (SOMETIMES_EACH/ALL, EVER_SINCE) as observer
+    features.
+  - Metastability injection for clock-domain crossings, which already has hardware precedent
+    (Kumar, Khan and Mittra, DVCon Europe 2023, arXiv:2406.06533). Apply it to the four-phase
+    stage.
+  - Fault injection of rare interleavings across sequencer threads and bridges.
+  - Heat maps of explored state.
+
 - Hardcaml assertions as oracles; automatic mutants and a mutation score.
 - LLM-island experiments: the checksum ladder, including random networks.
 - `~/prog/testing`: hill-climbing experiments on how to test, measured by mutation score.
@@ -168,6 +217,31 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
   plus simulators are what make "the demoscene tail as baseline" viable in 2026.
 
 ## Research threads
+
+- **Framing for the write-up: "software-defined hardware".** The term is Groq's (their ISCA papers;
+  see `notes/prior-art-systolic-uses.md`), and it fits Jane Street's ask ("reprogrammable enough to
+  support new protocols after fabrication"). Our version: deterministic, compiler-scheduled
+  hardware where protocols are programmes, and where hardware quirks (expiring memory,
+  quarter-clock edges) are compiler constraints. Credit Groq for the phrase.
+- **Lead the write-up with determinism.** Jane Street visibly values it: their taste notes,
+  leading Antithesis's round, Hardcaml's cycle-exact expect tests, predictable latency in
+  trading. Present:
+  - timing exact by construction;
+  - programmes whose timing a verifier can prove;
+  - silicon runs that replay in simulation.
+
+  The deliberate nondeterminism (random source, equivalent-time sampling, expiring memory) then
+  appears as fenced and named, while everything else stays exactly reproducible.
+- **...and with compilers.** Jane Street is an OCaml shop with its own compiler work (OxCaml
+  and the OCaml compiler team), and Hardcaml is itself a compiler of sorts. Our design puts the
+  compiler at the centre:
+  - protocol compilers produce sequencer programmes;
+  - the scheduler handles memory lifetimes, as rows with deadlines;
+  - programmes are placed on array segments;
+  - the verifier proves deadlines;
+  - agents write code that the exact interpreter judges.
+
+  Show the compiler stack as a first-class part of the entry, in OCaml.
 
 - Jane Street's hardware taste; tools to port (**running**).
 - Public competitors and the winners of Jane Street's recent challenges (**running**).
@@ -183,6 +257,15 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
 - Whether 8×4 tiles will become available.
 
 ## Housekeeping
+
+- **Prefer OCaml** (Hardcaml for hardware) for new models, simulations and tools: Matthias,
+  2026-09-25, "Let's do more OCaml." Python only where an existing Python tool is the point
+  (independent references such as scapy or pynmea2, plotting). Port core Python models to OCaml
+  when they are touched again.
+  Each Python tool we lean on is also an impetus to write an OCaml equivalent: packet
+  building and parsing like scapy, NMEA parsing, plotting to PNG and SVG, sigrok-style decoders.
+  Keep the Python original as an independent cross-check. Two independent implementations
+  agreeing is the point.
 
 - Codex reviews run on `codex-luna` (the cheap model) unless a decision warrants more. DeepSeek
   runs off-peak, and MiMo Flash stands in for it.

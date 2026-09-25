@@ -1,0 +1,7 @@
+== host_echo (simulation)
+  replay through interpreter   PASS  3200 cycles, every output equal
+  prediction (whole trace)     PASS  3200 cycles identical to the OCaml board model
+  host bytes                   PASS  got [12 34 56 a5] expected [12 34 56 a5]
+  uart decode pin 0            PASS  got [12 34 56 a5] expected [12 34 56 a5]
+RESULT host_echo PASS
+  (74 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.10 s)

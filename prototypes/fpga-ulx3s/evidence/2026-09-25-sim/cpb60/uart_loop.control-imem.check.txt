@@ -1,0 +1,8 @@
+== uart_loop (simulation)
+  replay through interpreter   FAIL  76 mismatching cycles, first at 73: pin_out fpga 00 interp 01
+  prediction (whole trace)     FAIL  cycle 73: captured in=7e out=00 oe=01 fl=00, predicted in=7e out=01 oe=01 fl=00
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  uart decode pin 7            PASS  got [4f 4b 21] expected [4f 4b 21]
+  host bytes                   PASS  got [4f 4b 21] expected [4f 4b 21]
+RESULT uart_loop FAIL
+  (48 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.10 s)

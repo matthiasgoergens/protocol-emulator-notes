@@ -1,0 +1,22 @@
+[
+ {
+  "test": "uart_loop",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "uart_jumper",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "rtc_ack",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "flash_id",
+  "result": "ok",
+  "checker_pass": true
+ }
+]

@@ -1,0 +1,167 @@
+== uart_loop (simulation)
+  replay through interpreter   PASS  2600 cycles, every output equal
+  prediction (whole trace)     PASS  2600 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  uart decode pin 7            PASS  got [4f 4b 21] expected [4f 4b 21]
+  host bytes                   PASS  got [4f 4b 21] expected [4f 4b 21]
+RESULT uart_loop PASS
+  (48 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.06 s)
+OK   uart_loop: PASS
+
+== uart_jumper (simulation)
+  replay through interpreter   PASS  2600 cycles, every output equal
+  prediction (whole trace)     PASS  2600 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  uart decode pin 7            PASS  got [4f 4b 21] expected [4f 4b 21]
+  host bytes                   PASS  got [4f 4b 21] expected [4f 4b 21]
+RESULT uart_jumper PASS
+  (48 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.06 s)
+OK   uart_jumper: PASS
+
+== demo3_noslave (simulation)
+  replay through interpreter   PASS  6000 cycles, every output equal
+  prediction (whole trace)     PASS  6000 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  spi decode (mosi)            PASS  got [a5 3c] expected prefix [a5 3c]
+  i2c decode                   PASS  got [a0 5a] acks NN stop=true expected [a0 5a]
+RESULT demo3_noslave PASS
+  (248 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.32 s)
+OK   demo3_noslave: PASS
+
+== demo3 (simulation)
+  replay through interpreter   PASS  6000 cycles, every output equal
+  prediction (whole trace)     PASS  6000 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  spi decode (mosi)            PASS  got [a5 3c] expected prefix [a5 3c]
+  i2c decode                   PASS  got [a0 5a] acks AA stop=true expected [a0 5a] acks AA
+  host bytes                   PASS  got [00 00] expected [00 00]
+RESULT demo3 PASS
+  (248 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.33 s)
+OK   demo3: PASS
+
+== rtc_ack (simulation)
+  replay through interpreter   PASS  15220 cycles, every output equal
+  prediction (whole trace)     PASS  15220 cycles identical to the OCaml board model
+  i2c decode                   PASS  got [de 00] acks AA stop=true expected [de 00] acks AA
+  host bytes                   PASS  got [00 00] expected [00 00]
+RESULT rtc_ack PASS
+  (101 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.14 s)
+OK   rtc_ack: PASS
+
+== rtc_ack_pcf8523 (simulation)
+  replay through interpreter   PASS  15220 cycles, every output equal
+  prediction (whole trace)     PASS  15220 cycles identical to the OCaml board model
+  i2c decode                   PASS  got [d0 00] acks AA stop=true expected [d0 00] acks AA
+  host bytes                   PASS  got [00 00] expected [00 00]
+RESULT rtc_ack_pcf8523 PASS
+  (101 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.14 s)
+OK   rtc_ack_pcf8523: PASS
+
+== rtc_nack (simulation)
+  replay through interpreter   PASS  9460 cycles, every output equal
+  prediction (whole trace)     PASS  9460 cycles identical to the OCaml board model
+  i2c decode                   PASS  got [90] acks N stop=true expected [90] acks N
+  host bytes                   PASS  got [01] expected [01]
+RESULT rtc_nack PASS
+  (59 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.08 s)
+OK   rtc_nack: PASS
+
+== flash_id (simulation)
+  replay through interpreter   PASS  3472 cycles, every output equal
+  prediction (whole trace)     PASS  3472 cycles identical to the OCaml board model
+  spi decode (mosi)            PASS  got [9f ff ff ff] expected prefix [9f]
+  host bytes (known ids)       PASS  got [ef 40 18]; known: [9d 60 18], [9d 60 16], [ef 40 18], [ef 70 18], [01 60 18]
+  flash commands (model)       PASS  9f
+RESULT flash_id PASS
+  (148 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.18 s)
+OK   flash_id: PASS
+
+== stream_loop (simulation)
+  replay through interpreter   PASS  3784 cycles, every output equal
+  prediction (whole trace)     PASS  3784 cycles identical to the OCaml board model
+  sampler capture decode       PASS  3 words, got [48 69 21] expected [48 69 21]
+RESULT stream_loop PASS
+  (1 trace entries, 3 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.01 s)
+OK   stream_loop: PASS
+
+== stream_jumper (simulation)
+  replay through interpreter   PASS  3784 cycles, every output equal
+  prediction (whole trace)     PASS  3784 cycles identical to the OCaml board model
+  sampler capture decode       PASS  3 words, got [48 69 21] expected [48 69 21]
+RESULT stream_jumper PASS
+  (1 trace entries, 3 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.00 s)
+OK   stream_jumper: PASS
+
+== trace_overflow (simulation)
+  trace buffer overflowed: checking cycles 0..6144 only
+  replay through interpreter   PASS  6145 cycles, every output equal
+  prediction (whole trace)     PASS  6145 cycles identical to the OCaml board model
+  trace overflow reported      PASS  overflow true, cycles checked 6145 of 20000
+RESULT trace_overflow PASS
+  (2048 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 1}, 2.65 s)
+OK   trace_overflow: PASS
+
+== host_echo (simulation)
+  replay through interpreter   PASS  3200 cycles, every output equal
+  prediction (whole trace)     PASS  3200 cycles identical to the OCaml board model
+  host bytes                   PASS  got [12 34 56 a5] expected [12 34 56 a5]
+  uart decode pin 0            PASS  got [12 34 56 a5] expected [12 34 56 a5]
+RESULT host_echo PASS
+  (74 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.10 s)
+OK   host_echo: PASS
+
+== eeprom_ack (simulation)
+  replay through interpreter   PASS  15220 cycles, every output equal
+  prediction (whole trace)     PASS  15220 cycles identical to the OCaml board model
+  i2c decode                   PASS  got [a0 00] acks AA stop=true expected [a0 00] acks AA
+  host bytes                   PASS  got [00 00] expected [00 00]
+RESULT eeprom_ack PASS
+  (101 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.12 s)
+OK   eeprom_ack: PASS
+
+== spi_flash_header (simulation)
+  replay through interpreter   PASS  3472 cycles, every output equal
+  prediction (whole trace)     PASS  3472 cycles identical to the OCaml board model
+  spi decode (mosi)            PASS  got [9f ff ff ff] expected prefix [9f]
+  host bytes (known ids)       PASS  got [ef 40 17]; known: [ef 40 17], [ef 70 17], [ef 40 18]
+RESULT spi_flash_header PASS
+  (148 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.20 s)
+OK   spi_flash_header: PASS
+
+== uart_adapter (simulation)
+  replay through interpreter   PASS  27440 cycles, every output equal
+  prediction (whole trace)     PASS  27440 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21 0d 0a] expected [4f 4b 21 0d 0a]
+RESULT uart_adapter PASS
+  (66 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.10 s)
+OK   uart_adapter: PASS
+
+== flash_interlock (simulation)
+  replay through interpreter   PASS  1168 cycles, every output equal
+  prediction (whole trace)     PASS  1168 cycles identical to the OCaml board model
+RESULT flash_interlock PASS
+  (44 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.06 s)
+  interlock (sim flash log)    PASS  flash saw: no complete command byte
+OK   flash_interlock: PASS
+
+== uart_loop (simulation)
+  replay through interpreter   FAIL  2 mismatching cycles, first at 969: pin_out fpga 01 interp 00
+  prediction (whole trace)     FAIL  cycle 969: captured in=ff out=01 oe=01 fl=00, predicted in=ff out=00 oe=01 fl=00
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  uart decode pin 7            PASS  got [4f 4b 21] expected [4f 4b 21]
+  host bytes                   PASS  got [4f 4b 21] expected [4f 4b 21]
+RESULT uart_loop FAIL
+  (48 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.07 s)
+OK   uart_loop [control: trace]: control failed as it must
+
+== uart_loop (simulation)
+  replay through interpreter   FAIL  76 mismatching cycles, first at 73: pin_out fpga 00 interp 01
+  prediction (whole trace)     FAIL  cycle 73: captured in=7e out=00 oe=01 fl=00, predicted in=7e out=01 oe=01 fl=00
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  uart decode pin 7            PASS  got [4f 4b 21] expected [4f 4b 21]
+  host bytes                   PASS  got [4f 4b 21] expected [4f 4b 21]
+RESULT uart_loop FAIL
+  (48 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.07 s)
+OK   uart_loop [control: imem]: control failed as it must
+
+18 of 18 as expected (0 skipped); results in evidence/2026-09-25-sim-after-master/cpb60

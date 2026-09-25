@@ -1,0 +1,19 @@
+== transmit firmware (tx_fw.ml): program sizes 33, 33, 33, 33 of 64 words
+  idle 70 ms: 4 link pulses (width 100.0..100.0 ns), gaps after activity 15.976..15.976 ms; 0 frames, TP_IDL inf..-inf ns, max crossing deviation 0.00 ns; 0 violations
+  four frames in 80 ms: 3 link pulses (width 100.0..100.0 ns), gaps after activity 15.985..15.985 ms; 4 frames, TP_IDL 297.9..347.9 ns, max crossing deviation 0.00 ns; 0 violations
+  decoded frames equal the frames sent (with FCS): true
+  frames queued back to back (the feeder raises start as soon as it can): gaps 9.74, 9.74, 9.74 us; violations 0
+  RTL (sequencer.ml) against interpreter over 20 ms, 2 frames: 0 diverging clocks; checker violations 0
+  40 random frames: 1 link pulses (width 100.0..100.0 ns), gaps after activity 15.985..15.985 ms; 40 frames, TP_IDL 297.9..347.9 ns, max crossing deviation 0.00 ns; 0 violations
+  random frames decoded equal to those sent: true
+transmit: PASS
+controls (each must fail):
+  TD+ and TD- swapped in the streams                         caught (frame at 3.000 ms: a crossing interval is 25.00 ns off 50/100 ns)
+  inter-packet wait 110 slots instead of 113                 caught (frame at 3.068 ms: gap 9.54 us after the previous frame)
+  thread 1 one slot late                                     caught (frame at 3.000 ms: a crossing interval is 100.00 ns off 50/100 ns)
+  one TD+ bit flipped in thread 2's stream                   caught (frame at 3.000 ms: a crossing interval is 50.00 ns off 50/100 ns)
+  link pulse lowered 3 slots late (14 clocks, 233 ns)        caught (link pulse at 19.044 ms is 233.3 ns wide)
+  link-pulse period 6 ms (nlp_outer 22)                      caught (link pulse at 8.926 ms follows activity by 5.867 ms)
+  link-pulse period 30 ms (nlp_outer 113)                    caught (frame at 30.000 ms follows 26.941 ms of silence without a link pulse)
+  TP_IDL of 4 half-bits instead of 6                         caught (frame at 3.000 ms: TP_IDL 197.9 ns after the last positive crossing)
+controls: 8 of 8 caught

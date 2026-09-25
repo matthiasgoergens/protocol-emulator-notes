@@ -1,0 +1,9 @@
+$ fpga_tests.exe check rtc_ack_pcf8523 --trace cpb60/rtc_ack.trace --mode board   (control: must FAIL)
+== rtc_ack_pcf8523 (board)
+  replay through interpreter   FAIL  1920 mismatching cycles, first at 2739: pin_oe fpga 20 interp 30
+  prediction (outputs)         FAIL  cycle 2739: captured in=df out=00 oe=20 fl=00, predicted in=df out=00 oe=30 fl=00
+  inputs first differ from the board model at cycle 2739: captured in=df out=00 oe=20 fl=00, predicted in=df out=00 oe=30 fl=00
+  i2c decode                   FAIL  got [de 00] acks AA stop=true expected [d0 00] acks AA
+  host bytes                   PASS  got [00 00] expected [00 00]
+RESULT rtc_ack_pcf8523 FAIL
+exit 1

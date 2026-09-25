@@ -1,0 +1,22 @@
+0 of 29 expected replies correct; 10 requests correctly unanswered: 10
+  FAIL arp-bcast: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not ARP
+  FAIL arp-unicast: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not ARP
+  FAIL ping-0: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL ping-1: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL ping-18: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL ping-56: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL ping-100: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL ping-200: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL ping-df: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL rand-ping-0-86: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL rand-arp-1: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not ARP
+  FAIL rand-ping-2-174: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL rand-ping-3-49: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL rand-arp-4: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not ARP
+  FAIL rand-ping-5-149: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL rand-ping-6-125: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL rand-ping-7-23: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL rand-arp-8: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not ARP
+  FAIL rand-ping-9-139: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+  FAIL rand-ping-10-185: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+host stack verdict: FAIL

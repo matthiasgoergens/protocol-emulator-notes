@@ -1,0 +1,35 @@
+
+8. Printing statistics.
+
+=== crc_unit ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      180        - wires
+      263        - wire bits
+       13        - public wires
+       96        - public wire bits
+       10        - ports
+       32        - port bits
+      200 3.39E+03 cells
+       45   408.24   sg13g2_a21oi_1
+       15  162.729   sg13g2_a22oi_1
+       28  355.622   sg13g2_and3_1
+       32 1.57E+03   sg13g2_dfrbpq_1
+        1    5.443   sg13g2_inv_1
+       16  290.304   sg13g2_mux2_1
+        3   21.773   sg13g2_nand2_1
+        2   18.144   sg13g2_nand3_1
+        2   14.515   sg13g2_nor2_1
+        3   27.216   sg13g2_nor2b_1
+       29  263.088   sg13g2_nor3_1
+        4   43.546   sg13g2_nor4_1
+       15   136.08   sg13g2_o21ai_1
+        1   14.515   sg13g2_or4_1
+        2    29.03   sg13g2_xnor2_1
+        2    29.03   sg13g2_xor2_1
+
+   Chip area for module '\crc_unit': 3386.917800
+     of which used for sequential elements: 1567.641600 (46.29%)
+

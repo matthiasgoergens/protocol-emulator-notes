@@ -1,0 +1,316 @@
+Independent JTAG (IEEE 1149.1) and SWD (ADIv5.2) reference target models
+==========================================================================
+
+These notes record every place my reading of the two specifications had
+to fill in a gap, choose between two defensible interpretations, or make
+a deliberate simplification for a model of this scope. Written from my
+own reading of IEEE Std 1149.1 (the JTAG TAP state machine and
+shift/capture/update semantics) and ARM IHI 0031 (ADIv5.2, SW-DP and
+MEM-AP). I did not look at, and have not been shown, any existing host
+implementation of either protocol.
+
+
+JTAG TAP (jtag_tap.ml)
+-----------------------
+
+1. Edge conventions (the one place the task explicitly asked for a
+   precise statement).
+   - TMS and TDI are sampled by the TAP on the RISING edge of TCK.
+   - The 16-state controller also advances on the rising edge, as a
+     function of the state it was in immediately before that edge (the
+     "old state") and the TMS value sampled at that same edge.
+   - Register actions (capture, shift) are keyed on the *old* state,
+     at the same rising edge that also computes the new state. So: the
+     edge that takes the controller from Select-DR-Scan into
+     Capture-DR does nothing to the shift register (old state was
+     Select-DR-Scan); the *next* edge, which has old state = Capture-DR
+     and moves on to Shift-DR (or Exit1-DR), is the edge that performs
+     the parallel capture. Likewise, the edge that eventually leaves
+     Shift-DR still performs one last shift, because its old state is
+     still Shift-DR regardless of where TMS sends it next. This
+     mirrors the way real TAP RTL is written: a single
+     `always @(posedge tck) case (state) ...` block reads register
+     values before they, and the state register, are updated by that
+     same edge.
+   - Update (Update-DR/Update-IR) and the TDO output register both
+     change on the FALLING edge of TCK, not the rising edge. This is
+     stated in the standard for TDO ("changes on the falling edge") and
+     I apply the same falling-edge timing to Update, since IEEE 1149.1
+     describes the update register as being loaded "as TCK goes low"
+     while in Update-DR/Update-IR -- using the falling edge keeps the
+     update, which downstream logic may read combinationally, cleanly
+     separated in time from the rising-edge-triggered shift register.
+   - TDO is gated on *which register was captured/shifted at the most
+     recently processed rising edge* (a field I call `last_shift`),
+     not on the TAP's current state at the time of the falling edge.
+     This matters for exactly one case: the edge that shifts out the
+     final bit of a Shift-DR/Shift-IR scan is the *same* edge that
+     leaves Shift-DR/Shift-IR (e.g. for Exit1-DR). If TDO's falling-edge
+     update were instead gated on "is the *current* state Shift-DR",
+     that final bit would never be exposed, because by the falling
+     edge the state has already advanced past Shift-DR. Gating on "what
+     did the rising edge we just processed do" fixes this and is, I
+     believe, how real silicon must behave too (the last shifted bit is
+     exactly the bit the next device in the chain needs to capture).
+
+2. IR capture pattern: the mandated two LSBs are "01"; I set all higher
+   bits to 0 (the standard leaves the rest implementation-defined).
+
+3. Instruction opcodes (`code_bypass`/`code_idcode`/`code_sample_preload`/
+   `code_extest`), since there is no host to match against and the task
+   asks the model to define these itself:
+   - BYPASS = all-1s. This is the one opcode IEEE 1149.1 actually
+     mandates.
+   - EXTEST = all-0s. Also mandated by the standard.
+   - IDCODE = 1 (0...01), when the device has an IDCODE register.
+   - SAMPLE/PRELOAD = 2 (0...10).
+   These four are guaranteed distinct for ir_len >= 2 (the config's
+   minimum). Any opcode that doesn't match one of these four "selects
+   BYPASS", per the task text and matching very common real-world TAP
+   design practice for reserved/private opcodes.
+
+4. Boundary register: EXTEST and SAMPLE/PRELOAD both select the same
+   boundary-scan register (same capture/shift/update behaviour); the
+   model does not attempt to distinguish EXTEST's "drive the pins"
+   semantics from SAMPLE/PRELOAD's "don't disturb the pins" semantics,
+   since nothing outside the model observes a real pin difference here.
+   `pins_in.(0)` is bit 0 of the register (nearest TDO, shifted out
+   first); `pins_out.(0)` likewise is bit 0 of the latched value.
+
+5. Test-Logic-Reset re-asserts the power-up instruction (IDCODE if
+   configured, else BYPASS) on every rising edge for which TLR is the
+   old state -- i.e. every edge taken while resting in TLR (TMS=1) and
+   the edge that finally leaves it (TMS=0) -- so that if a test
+   somehow left another instruction loaded and then returns to TLR
+   (e.g. via 5 TMS=1 clocks), IR is correctly forced back to
+   IDCODE-or-BYPASS, per the standard's description of TLR.
+
+6. `errors` is populated in exactly one situation: `set_pins_in` called
+   with an array whose length doesn't match `bsr_len`. The array is
+   still accepted (truncated/zero-padded) so a test can see how the
+   model degrades, but the mismatch is recorded.
+
+
+SWD target (swd_target.ml)
+---------------------------
+
+1. Edge convention: unlike JTAG, SWD samples and drives on the SAME
+   edge (the rising edge of SWCLK) for both directions -- there is no
+   analogous falling-edge step in this model. A value returned by
+   `drive` is valid for the *entire* period following the edge that
+   produced it (i.e. until the next rising edge), which is what gives
+   the turnaround cycles their meaning: whichever side is about to
+   drive next needs one full clear period before the other side
+   samples it.
+
+2. A consequence of "drive is immediate, sample needs a settled period"
+   that is easy to get backwards (and did, in my own bit-banging test,
+   before I fixed it): entering a phase where the target *drives*
+   (ACK, or the data phase of a read) exposes bit 0 of that phase on
+   the very same edge that transitions into it, because driving a
+   value takes no extra time in this model. Entering a phase where the
+   target (or on a write, the host) *samples* cannot do so on the
+   transition edge, because the sampling code is keyed on the state
+   already being that phase *before* the edge; the transition edge
+   only sets the state, so genuine sampling starts one edge later.
+   This is why a write's data phase needs a bus turnaround (1 dead
+   edge, host and target both released) *and then* one more dead edge
+   before the first real data bit is sampled, while a read's data
+   phase needs neither: ACK's last bit and the read data's first bit
+   are produced back-to-back by the same target, with no turnaround
+   and no extra settle edge, exactly as ADIv5 specifies (no turnaround
+   between ACK and the read data phase, because the direction does not
+   change).
+
+3. JTAG-to-SWD switch sequence, since `start_in_swd = false`: I
+   implemented exactly what the task describes -- at least 50 SWCLK
+   cycles with SWDIO high, the 16-bit 0xE79E select sequence (sent LSB
+   first, i.e. bit i of the transmitted sequence is
+   `(0xE79E >> i) & 1`), then a line reset (another >=50 high cycles).
+   A byte mismatch anywhere in the 16-bit sequence restarts detection
+   from scratch (back to counting a fresh run of highs), rather than
+   trying to resynchronise mid-sequence; I did not find this case
+   specified precisely and chose the simplest safe behaviour.
+
+4. Line reset in general (not just the initial switch): I treat any
+   run of >=50 consecutive SWCLK cycles with the resolved SWDIO level
+   high as a line reset, *whenever the target itself is not driving
+   the bus* (see point 6). This applies uniformly whether the target is
+   in "jtag" mode (as part of the switch sequence), "swd-reset", or
+   fully operational "swd" mode: a line reset can always interrupt an
+   in-progress request and force the DP back into its post-reset state.
+   A line reset clears DP-side state (CTRL/STAT, SELECT, the posted-AP
+   read buffer) but deliberately does *not* touch the AP's own
+   registers (CSW, TAR) or the backing memory: ADIv5 describes the line
+   reset as resetting the debug port's protocol state machine, not the
+   memory system an AP happens to be attached to, and a real MEM-AP's
+   CSW/TAR survive a bare SWD line reset in practice.
+
+5. Post-reset DPIDR gating: after any line reset, the model refuses
+   ("does not honour") any request other than a DPIDR read, per
+   ADIv5.2's requirement that a DPIDR read follow a line reset before
+   other transactions are meaningful. "Does not honour" is modelled as
+   *no response at all* -- the target never enters the ACK phase, so
+   the host sees nothing driven for the whole would-be transaction --
+   rather than an explicit FAULT. I chose silence because the task's
+   own wording ("must see a DPIDR read before other accesses are
+   honoured") reads to me as "the DP isn't listening yet", which is a
+   no-response condition, not a fault response from a listening DP;
+   a FAULT would also incorrectly imply STICKYERR should be set (see
+   point 9), which does not seem right for a DP that hasn't been
+   through its post-reset handshake yet. This is a genuine judgement
+   call; a FAULT-based reading is equally defensible and would only
+   need decode_and_act's `need_dpidr` branch changed.
+   `start_in_swd = true` skips this entirely: the model starts directly
+   in fully-operational "swd" mode with no DPIDR gate, on the reading
+   that no reset has (yet) been modelled to have happened, so the
+   post-reset requirement has nothing to attach to. A real chip's
+   power-on state likely also wants a DPIDR read, but nothing in the
+   task's config gives this model a way to represent "freshly
+   powered on but never reset", so I picked the simpler of the two
+   available starting states.
+
+6. Line-reset detection and the target's own driven bits: while the
+   target itself is driving (during ACK or the read data phase), the
+   resolved SWDIO level it sees at each rising edge is its own output,
+   not a host assertion of anything -- so the run-length counter used
+   for line-reset detection is simply not updated during those cycles
+   (it holds whatever value it had going into the driving phase, which
+   is always small since a well-formed request's last bits cannot be a
+   long run of 1s -- Stop must be 0). This means a line reset that
+   starts exactly while the target is mid-ACK/mid-data would be
+   detected a few cycles later than in a fully general concurrent
+   decoder; I judged this an acceptable, clearly-documented
+   simplification rather than something worth a fully concurrent
+   bit-level reset/request decoder.
+
+7. Malformed requests (bad Start/Stop/Park framing, or bad request
+   parity): the target does not respond at all -- no ACK phase is
+   entered, `drive` stays `None` throughout, and the model goes
+   straight back to listening for the next candidate Start bit. I
+   distinguish "bad stop/park bit" (counted as `bad_frame` and also
+   folded into `no_response`) from "bad parity" (counted as
+   `parity_errors` and also folded into `no_response`) in the log and
+   stats, since a real host's diagnostics would want to tell these
+   apart even though the target's on-the-wire behaviour is identical
+   (silence) for both.
+
+8. Posted AP reads: every AP register read (CSW, TAR, DRW, and IDR --
+   not just DRW) goes through the same one-deep posted-read buffer,
+   since ADIv5 describes posting as a property of AP accesses in
+   general, not of the DRW register specifically. A read returns
+   whatever was posted by the *previous* AP read (0 if there hasn't
+   been one since the last line reset/creation), and only then performs
+   the requested register's real read, latching that value into the
+   buffer for the next AP read or RDBUFF to collect. RDBUFF itself
+   (DP read 0xC) just returns the buffer's current contents and has no
+   side effects of its own -- it does not trigger a further posted
+   read.
+
+9. FAULT and STICKYERR: an AP access that FAULTs (unimplemented APSEL,
+   unimplemented AP register/bank, or an out-of-range TAR on a DRW
+   access) sets STICKYERR, since that is a real AP-transaction error in
+   the sense ADIv5 means by the bit. A DP-level FAULT from an
+   unimplemented DP register slot (I only implement the DP registers
+   the task lists: DPIDR, ABORT, CTRL/STAT bank 0, SELECT, RDBUFF --
+   reading address 0x8 (RESEND) or writing address 0xC, and any
+   CTRL/STAT access with a non-zero DPBANKSEL, all FAULT) does *not*
+   set STICKYERR, since that is a limitation of this model rather than
+   a real AP transaction failing. Once STICKYERR is set, every further
+   AP access (read or write) FAULTs without being attempted at all,
+   until cleared by ABORT.STKERRCLR; DP-level accesses (DPIDR, RDBUFF,
+   CTRL/STAT, SELECT, ABORT) are never blocked by STICKYERR, since
+   ABORT in particular must stay reachable to clear it.
+   STICKYORUN exists as a storage bit (settable only by hand were code
+   ever added to set it) but nothing in this model ever sets it: a
+   real overrun is a clock-domain/turnaround-speed mismatch between
+   host and target, which has no counterpart in a fully synchronous,
+   cycle-accurate model where every bit is explicitly clocked.
+
+10. Write-data parity: exactly as the task specifies, a bad parity bit
+    on the write-data phase sets WDATAERR and the write itself is
+    discarded, but note that ACK was already sent as OK *before* the
+    data phase (parity can only be checked once all 32 data bits plus
+    the parity bit have arrived), so the transaction is still counted
+    as `ok` in `stats` in addition to being counted as a
+    `parity_errors` event -- the ACK genuinely was OK; only the write's
+    effect was discarded.
+
+11. CTRL/STAT semantics implemented: CSYSPWRUPREQ (bit 30) /
+    CSYSPWRUPACK (bit 31) and CDBGPWRUPREQ (bit 28) / CDBGPWRUPACK
+    (bit 29) track each other instantly on a CTRL/STAT write -- there
+    is no real power-sequencing model, and a power-up acknowledgement
+    that lagged its request by some number of cycles would need a
+    config knob the task doesn't provide, so "instant" is the simplest
+    reading that still lets a host observe the ACK bits mirroring what
+    it asked for. A CTRL/STAT write can never directly set or clear the
+    sticky bits (STICKYORUN bit 1, STICKYCMP bit 4, STICKYERR bit 5,
+    WDATAERR bit 7) -- those pass through unchanged from whatever the
+    hardware state already was; only ABORT can clear them. Other
+    written fields (TRNMODE, MASKLANE, TRNCNT, ORUNDETECT) are simply
+    stored and read back verbatim; nothing in this model gives them
+    behaviour, since none of the task's required scenarios exercise
+    them.
+
+12. SELECT fields, per ADIv5.2: APSEL = bits 31:24, APBANKSEL =
+    bits 7:4, DPBANKSEL = bits 3:0. Only APSEL = 0 (the single modelled
+    MEM-AP) and DPBANKSEL = 0 (for CTRL/STAT) are implemented; any
+    other value FAULTs the relevant access, as noted in point 9.
+
+13. MEM-AP address decode: AP register address = APBANKSEL*16 +
+    A[3:2]*4. Bank 0 implements CSW (0x00), TAR (0x04), and DRW (0x0C)
+    (offset 0x08 in bank 0 is reserved in the base MEM-AP and FAULTs
+    here); bank 0xF implements only IDR (0xFC) (other bank-0xF offsets,
+    e.g. CFG/BASE on a real MEM-AP, are out of this model's scope and
+    FAULT). CSW's auto-increment field is read from bits 5:4 of CSW;
+    a value of 1 ("single increment") advances TAR by 4 bytes after
+    each DRW access (read or write) that actually happens (not after
+    one that WAITs or FAULTs).
+
+14. `mode` naming: I use `"jtag"`, `"swd-reset"`, and `"swd"` -- three
+    states, not the four the task's own example list suggested
+    (`"jtag"`, `"swd-reset"`, `"swd"`, `"lockout"`). I did not add a
+    distinct `"lockout"` state because I could not find a trigger for
+    it that wasn't already exactly what `"swd-reset"` (the post-line-
+    reset, pre-DPIDR state) covers: this model does not implement
+    ADIv5.2's dormant-state/multidrop selection-alert mechanism, which
+    is the other place a real SW-DP can become unresponsive until an
+    explicit wake sequence, so there was nothing left for a fourth
+    state to represent. The task explicitly says "your naming, document
+    it", so I read this as intentionally open.
+
+15. `stats` counters: `ok`, `wait`, `fault`, `no_response`,
+    `parity_errors` (covers both request-parity and write-data-parity
+    errors), plus two I added because the model's own log needed them
+    to be checkable from a test without string-matching the log:
+    `line_resets` and `bad_frame` (malformed Stop/Park framing,
+    distinct from a parity failure on an otherwise well-framed
+    request).
+
+
+Self-test (selftest.ml)
+------------------------
+
+Two independent bit-banging drivers (`jtick`/`stick`) turn TMS/TDI or
+SWCLK/SWDIO sequences into calls against the models above; neither
+driver, nor anything else in this file, has been shared with or seen by
+any other implementation.
+
+The JTAG driver represents one TCK period as a rising-edge step
+followed immediately by a falling-edge step, and samples `tdo` right
+after that pair -- consistent with note 1 above, this gives exactly the
+bit that period settled onto TDO. The two-TAP chain test wires TAP B's
+TDI, each tick, to TAP A's TDO *as it stood before that tick* (i.e. one
+full period of propagation delay), which is what a real board-level
+TDO-changes-on-the-falling-edge chain guarantees and is what makes the
+classic "N+1 bit" BYPASS padding come out right.
+
+The SWD driver represents one SWCLK period the same way (rising then
+falling, though the model itself only acts on the rising edge) and
+reads `drive` immediately after. Getting the exact tick counts right
+for each phase (in particular, the two "dead" ticks a write's data
+phase needs that a read's does not, per note 2 above) took a couple of
+iterations against the model's own behaviour before the counts in
+`do_txn` were right; this is recorded here because it is exactly the
+kind of off-by-one a host implementation could get wrong in the same
+way, for the same reason.
