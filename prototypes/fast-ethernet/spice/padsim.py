@@ -150,7 +150,7 @@ def netlist(case, corner, temp):
                  # series resistors at the chip, 50 ohm lines (8 cm), SFP: AC caps then 100 ohm diff
                  "rsp op lp 150\nrsn on ln 150\n"
                  "tlp lp 0 sp0 0 z0=50 td=0.5n\ntln ln 0 sn0 0 z0=50 td=0.5n\n"
-                 "cap sp0 sp 100n\ncan sn0 sn 100n\nrt sp sn 100\nrbp sp 0 10k\nrbn sn 0 10k\n"
+                 "cap sp0 sp 100n\ncan sn0 sn 100n\nrt sp sn 100\nrbiasp sp 0 10k\nrbiasn sn 0 10k\n"
                  "cs sp0 0 1p\ncsn sn0 0 1p\n")
         save += ["op", "on", "sp", "sn"]
     elif case == "eye_tx":

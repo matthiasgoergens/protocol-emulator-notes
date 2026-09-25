@@ -135,7 +135,7 @@ let rx ~media ~clock ~clear ~count ~levels =
                       (finish gnd) ] ]
               @@ elif (valid &: (id ==:. Block_4b5b.sym_t)) [ tp <-- vdd ]
               (finish gnd) ] ] ];
-  byte, byte_valid.value, frame_end.value, crc_ok.value, locked
+  byte, byte_valid.value, frame_end.value, crc_ok.value, locked, (id, gv, found)
 
 let tx_circuit media =
   let clock = input "clock" 1 and clear = input "clear" 1 in
@@ -147,6 +147,6 @@ let tx_circuit media =
 let rx_circuit media =
   let clock = input "clock" 1 and clear = input "clear" 1 in
   let count = input "count" 2 and levels = input "levels" (match media with Fx -> rk | Tx -> 2 * rk) in
-  let byte, bv, fe, ok, locked = rx ~media ~clock ~clear ~count ~levels in
+  let byte, bv, fe, ok, locked, (id, gv, found) = rx ~media ~clock ~clear ~count ~levels in
   Circuit.create_exn ~name:(match media with Fx -> "fx_rx" | Tx -> "tx_rx")
-    [ output "rx_byte" byte; output "byte_valid" bv; output "frame_end" fe; output "crc_ok" ok; output "locked" locked ]
+    [ output "rx_byte" byte; output "byte_valid" bv; output "frame_end" fe; output "crc_ok" ok; output "locked" locked; output "dbg_id" id; output "dbg_gv" gv; output "dbg_found" found ]
