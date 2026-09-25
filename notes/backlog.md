@@ -218,6 +218,12 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
 
 ## Research threads
 
+- **Framing for the write-up: "software-defined hardware".** The term is Groq's (their ISCA papers;
+  see `notes/prior-art-systolic-uses.md`), and it fits Jane Street's ask ("reprogrammable enough to
+  support new protocols after fabrication"). Our version: deterministic, compiler-scheduled
+  hardware where protocols are programmes, and where hardware quirks (expiring memory,
+  quarter-clock edges) are compiler constraints. Credit Groq for the phrase.
+
 - Jane Street's hardware taste; tools to port (**running**).
 - Public competitors and the winners of Jane Street's recent challenges (**running**).
 - The codex brainstorm on everything since 23 September (**running**; triage it when it lands).
