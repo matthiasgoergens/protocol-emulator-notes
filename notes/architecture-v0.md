@@ -28,7 +28,7 @@ and what the array buys (the premise check); 5 gaps; 6 area budget; 7 determinis
    | segments 2|2|4|8, loop-backs,     complementary pairs, streamer, sampler,      |
    | feed/tap per segment  <------->   pin NCO, fine delay (2 pins)                 |
    |    ^                               ^  assists on the bit path: edge-tracking    |
-   |    | fixed ports                   |  sampler, stuff tracker, line coder,       |
+   |    | fixed ports                   |  sampler, stuff tracker, line coder, CRC,  |
    | gain-cell banks 2 x 4 kbit (Berger, allocator)   systolic matcher with enable |
    +--------------------------------------------------------------------------------+
             one clock, 60.000 MHz, four phases derived on chip
