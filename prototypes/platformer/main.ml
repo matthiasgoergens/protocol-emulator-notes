@@ -3,5 +3,7 @@ let () =
   match Array.to_list Sys.argv with
   | [ _; "pecheck" ] -> exit (if Pecheck.main () then 0 else 1)
   | [ _; "check" ] -> exit (if Check.main () then 0 else 1)
+  | [ _; "rtltiming" ] -> print_string (Pins.timing ())
+  | [ _; "palette" ] -> print_string (Sim.print_stats (Pins.palette ()))
   | [ _; "timing" ] -> print_string (Vprog.check ())
   | _ -> prerr_endline "usage: main (pecheck | ...)"; exit 2

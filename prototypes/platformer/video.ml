@@ -21,7 +21,7 @@ let nspr = Scene.nspr
 let npe = kcells + nspr
 let bank_bits = 8                 (* 256 entries per bank *)
 let entry_bits = 19
-let start = 626                   (* feeder: first step this many clocks after line_go falls *)
+let start = 641                   (* feeder: first step this many clocks after line_go falls *)
 
 (* NCO: 12 clocks per subcarrier cycle; acc starts half a clock in so that no sample sits on a
    phase boundary. Phase in 1/256 cycle; the V-switch reflects the phase about [reflect]. *)
@@ -83,8 +83,10 @@ let outport ~clock ~spec ~tag ~data ~seq_pins =
        ~write_ports:[| { write_clock = clock; write_address = waddr.value; write_enable = lut_we;
                          write_data = select data 13 0 } |]
        ~read_addresses:[| raddr |]).(0) in
-  let use = (hold.value <>:. 0) |: burst in
-  let luma = mux2 use (select entry 3 0) (select seq_pins 3 0) in
+  let showing = hold.value <>:. 0 in
+  let use = showing |: burst in
+  (* blanking and sync levels always come from the sequencer; the burst only adds chroma *)
+  let luma = mux2 showing (select entry 3 0) (select seq_pins 3 0) in
   let phase = select entry 11 4 in
   let phase = mux2 vs (of_int ~width:8 reflect -: phase) phase in
   let acc = reg_fb spec ~width:32 ~f:(fun a -> a +:. nco_inc) in
