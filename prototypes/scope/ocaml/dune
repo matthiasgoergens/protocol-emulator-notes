@@ -1,8 +1,9 @@
 (library
  (name chain)
+ (wrapped false)
  (modules chain linalg))
 
 (executables
- (names padcheck)
- (modules padcheck)
+ (names padcheck cs)
+ (modules padcheck cs)
  (libraries chain))
