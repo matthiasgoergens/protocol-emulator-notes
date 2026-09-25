@@ -216,8 +216,12 @@ def strap(lib, v):
             r("GatPoly", 0, g["rwl"][0], SW, g["rwl"][1])
             ym = (g["bar"][0] + g["bar"][1]) / 2
             if g.get("allthick"):     # pSD.j1: 0.40 from thick-oxide NMOS gates
-                r("pSD", -0.12 if XS0 >= 0.18 else -0.17, g["bar"][0] - 0.12,
-                  min(0.36, round(SW + XS0 - 0.42 - DX, 3)), g["bar"][1] + 0.12)   # pSD.k: area >= 0.25
+                # pSD.j1 0.40 from the thick NFET gates of the tiles on either side (the left one ends
+                # PX - XS0 - SWA before the strap), pSD.k area >= 0.25
+                lft = -0.12 if XS0 >= 0.18 else max(-0.17, round(0.405 - (PX - XS0 - SWA) - DX, 3))
+                rgt = min(0.36, round(SW + XS0 - 0.42 - DX, 3))
+                ext = 0.12 if (rgt - lft) * 0.54 >= 0.25 else 0.14
+                r("pSD", lft, g["bar"][0] - ext, rgt, g["bar"][1] + ext)
             else:
                 r("pSD", -0.20, g["bar"][0] - 0.10, round(0.26 + XS0, 3), g["bar"][1] + 0.10)   # abutted tie
             r("Cont", 0.04, ym - 0.08, 0.20, ym + 0.08)

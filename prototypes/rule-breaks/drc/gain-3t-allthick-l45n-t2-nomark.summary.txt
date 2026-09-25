@@ -1,7 +1,7 @@
 == main (deck: stock, options: --disable_extra_rules): Violated rules are : {'Cnt.c'}
 304 violations
   Cnt.c                      304  min measured 0.020 um
-== full (deck: stock, options: none): Violated rules are : {'Cnt.f', 'Cnt.c', 'Gat.c'}
+== full (deck: stock, options: none): Violated rules are : {'Cnt.c', 'Gat.c', 'Cnt.f'}
 440 violations
   Cnt.c                      304  min measured 0.020 um
   Cnt.f                       96  min measured 0.070 um
