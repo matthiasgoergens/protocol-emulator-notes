@@ -64,9 +64,44 @@ let assembler () =
 type req = { t : int; write : bool; addr : int; reg : int; value : int; bad : bool }
 
 type res = { responses : int list list; expected : int list list; mism : int; starts : int; expected_starts : int;
-             bus_ok : bool; regs_ok : bool; neigh_hash : int; bridge_hash : int; cycles : int }
+             bus_ok : bool; regs_ok : bool; neigh_hash : int; bridge_hash : int; cycles : int; times : int list }
 
-let run ?(fault = Isa_mb.No_fault) ?(rtl = true) ?(neigh = `Compiled) ?(seed = 1) ?(n = 30) () =
+(* Master's CAN RX firmware as the source (the log from can_bridge_events.exe rx): requests from
+   the R lines; per frame the RX thread's reports, turned into the in-port's byte-aligned form.
+   The thread packs data as 7 bits and then 8-bit chunks after the three header chunks (the
+   branch's decode_bytes); on chip that realignment is the change this plan asks of the RX thread.
+   Times: the branch's femtoseconds at its 60 MHz clock, converted to cycles. *)
+let cyc_of_fs t = int_of_float (float t *. 60e6 /. 1e15)
+let fs_of_cyc c = int_of_float (float c /. 60e6 *. 1e15)
+
+let load_rx_log path =
+  let ic = open_in path in
+  let reqs = ref [] and events = ref [] and bytes = ref [] and in_frame = ref false in
+  (try while true do
+      match String.split_on_char ' ' (String.trim (input_line ic)) with
+      | [ "R"; t; w; a; r; v ] ->
+        reqs := { t = cyc_of_fs (int_of_string t); write = w = "1"; addr = int_of_string a; reg = int_of_string r;
+                  value = int_of_string v; bad = false } :: !reqs
+      | [ "F"; t; tag; v ] ->
+        let t = cyc_of_fs (int_of_string t) and tag = int_of_string tag and v = int_of_string v in
+        if tag = 1 then (bytes := []; in_frame := true)
+        else if tag = 0 && !in_frame then bytes := !bytes @ [ v ]
+        else if tag = 4 && !in_frame then begin
+          in_frame := false;
+          let b = Array.of_list (!bytes @ [ 0; 0; 0; 0; 0; 0 ]) in
+          let c1 = b.(0) land 7 and c2 = b.(1) and c3 = b.(2) in
+          let rest = List.filteri (fun i _ -> i >= 3) (Array.to_list b) in
+          let bits = List.concat (List.mapi (fun i x -> List.init (if i = 0 then 7 else 8) (fun k -> (x lsr ((if i = 0 then 6 else 7) - k)) land 1)) rest) in
+          let byte i = List.fold_left (fun a k -> (a lsl 1) lor (try List.nth bits ((8 * i) + k) with _ -> 0)) 0 [ 0; 1; 2; 3; 4; 5; 6; 7 ] in
+          let msg = [ 0xA1; c1; c2; c3; byte 0; byte 1; byte 2; 0xA2; v ] in
+          events := !events @ List.mapi (fun j x -> (t + j, x)) msg
+        end
+      | _ -> ()
+    done with End_of_file -> ());
+  close_in ic;
+  !events, List.rev !reqs
+
+let run ?source ?(fault = Isa_mb.No_fault) ?(rtl = true) ?(neigh = `Compiled) ?(seed = 1) ?(n = 30) () =
   let c = Isa_mb.cfg ~pc_bits:7 ~depth:4 ~fault () in
   let (t0, _, _) = translator () and (t1, _, _) = i2c_master ~sda:3 ~scl:4 ~own:1 ~reply:2 () and (t2, _, _) = assembler () in
   let t3 = match neigh with
@@ -86,6 +121,7 @@ let run ?(fault = Isa_mb.No_fault) ?(rtl = true) ?(neigh = `Compiled) ?(seed = 1
     let data = if r.write then [ r.addr lsl 1; r.reg; r.value ] else [ r.addr lsl 1; r.reg; (r.addr lsl 1) lor 1 ] in
     let bytes = [ 0xA1 ] @ hdr id 3 @ data @ [ 0xA2; (if r.bad then 2 else 0) ] in
     List.mapi (fun j x -> (r.t + (j * 960), x)) bytes) reqs in
+  let events, reqs = match source with Some (ev, rq) -> ev, rq | None -> events, reqs in
   let good = List.filter (fun r -> not r.bad) reqs in
   let txs = List.map (fun r -> if r.write then Wr (r.addr, r.reg, [ r.value ]) else Rd (r.addr, r.reg, 1)) good in
   let answers, expect_bus, ref_regs = i2c_reference ~addr:dev txs in
@@ -99,7 +135,7 @@ let run ?(fault = Isa_mb.No_fault) ?(rtl = true) ?(neigh = `Compiled) ?(seed = 1
   let slave = new_i2c_slave ~max_stretch:600 ~bit_stretch:0.02 ~seed:(seed + 3) dev in
   let port = Queue.create () in
   let evq = ref events in
-  let out = ref [] and cur = ref [] in
+  let out = ref [] and cur = ref [] and times = ref [] in
   let tr = ref [] in
   let neigh_hash = ref 0 and bridge_hash = ref 0 in
   let last_t = (List.fold_left (fun m (t, _) -> max m t) 0 events) + 400_000 in
@@ -120,7 +156,7 @@ let run ?(fault = Isa_mb.No_fault) ?(rtl = true) ?(neigh = `Compiled) ?(seed = 1
     (match e.port_push with
      | Some (0, v) ->
        cur := !cur @ [ v ];
-       (match !cur with _ :: _ :: c3 :: rest when List.length rest = c3 land 15 -> out := !out @ [ !cur ]; cur := [] | _ -> ())
+       (match !cur with _ :: _ :: c3 :: rest when List.length rest = c3 land 15 -> out := !out @ [ !cur ]; times := !times @ [ now ]; cur := [] | _ -> ())
      | _ -> ())
   done;
   let trace = List.rev !tr in
@@ -128,9 +164,24 @@ let run ?(fault = Isa_mb.No_fault) ?(rtl = true) ?(neigh = `Compiled) ?(seed = 1
   let starts = List.length (List.filter (fun (_, _) -> true) got_bus) in
   let expected_starts = List.length expect_bus in
   { responses = !out; expected; mism = d.mismatches; starts; expected_starts; bus_ok = got_bus = expect_bus;
-    regs_ok = slave.regs = ref_regs; neigh_hash = !neigh_hash; bridge_hash = !bridge_hash; cycles = last_t }
+    regs_ok = slave.regs = ref_regs; neigh_hash = !neigh_hash; bridge_hash = !bridge_hash; cycles = last_t; times = !times }
 
 let () =
+  if Array.length Sys.argv > 3 && Sys.argv.(1) = "firmware" then begin
+    (* pass 2 of can_bridge.sh: requests as master's CAN RX firmware reported them; the
+       responses, with their times, go to the TX pass *)
+    let ev, rq = load_rx_log Sys.argv.(2) in
+    let r = run ~source:(ev, rq) () in
+    let ok = r.responses = r.expected && r.bus_ok && r.regs_ok && r.mism = 0 in
+    Printf.printf "firmware requests: %d requests, %d response frames (%d expected), equal %b, I2C bus bytes as expected %b, device registers %s, \
+                   RTL mismatches %d -> %s\n"
+      (List.length rq) (List.length r.responses) (List.length r.expected) (r.responses = r.expected) r.bus_ok
+      (if r.regs_ok then "ok" else "WRONG") r.mism (if ok then "PASS" else "FAIL");
+    let oc = open_out Sys.argv.(3) in
+    List.iter2 (fun t fr -> Printf.fprintf oc "T %d %s\n" (fs_of_cyc t) (String.concat " " (List.map string_of_int fr))) r.times r.responses;
+    close_out oc;
+    exit (if ok then 0 else 1)
+  end;
   let t0 = Unix.gettimeofday () in
   let (_, l0, _) = translator () and (_, l2, _) = assembler () in
   Printf.printf "programmes: T0 translator %d words, T1 I2C master (bridges.ml) %d, T2 assembler %d\n" l0
