@@ -1,0 +1,1643 @@
+OpenSTA 2.7.0 GITDIR-NOT Copyright (c) 2025, Parallax Software, Inc.
+License GPLv3: GNU GPL version 3 <http://gnu.org/licenses/gpl.html>
+
+This is free software, and you are free to change and redistribute it
+under certain conditions; type `show_copying' for details. 
+This program comes with ABSOLUTELY NO WARRANTY; for details type `show_warranty'.
+===================================================================
+CORNER=fast PERIOD=18p8
+===================================================================
+
+--- report_checks -path_delay max (worst setup path, top 3) ---
+Warning: sta_fast_18p8.tcl line 1, report_checks -group_count is deprecated. Use -group_path_count instead.
+Startpoint: _311_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _311_/CLK (sg13g2_dfrbpq_1)
+   0.1189   14.2189 v _311_/Q (sg13g2_dfrbpq_1)
+   0.0686   14.2875 v _289_/Y (sg13g2_xnor2_1)
+   0.0683   14.3558 v _290_/Y (sg13g2_xnor2_1)
+   0.0000   14.3558 v pin[0] (out)
+            14.3558   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+           -14.3558   data arrival time
+-------------------------------------------------------------
+             4.4442   slack (MET)
+
+
+Startpoint: _319_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _319_/CLK (sg13g2_dfrbpq_1)
+   0.1189   14.2189 v _319_/Q (sg13g2_dfrbpq_1)
+   0.0686   14.2875 v _292_/Y (sg13g2_xnor2_1)
+   0.0683   14.3558 v _293_/Y (sg13g2_xnor2_1)
+   0.0000   14.3558 v pin[1] (out)
+            14.3558   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+           -14.3558   data arrival time
+-------------------------------------------------------------
+             4.4442   slack (MET)
+
+
+Startpoint: _298_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: _299_ (rising edge-triggered flip-flop clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _298_/CLK (sg13g2_dfrbpq_1)
+   0.1016   14.2016 ^ _298_/Q (sg13g2_dfrbpq_1)
+   0.0510   14.2526 ^ _241_/Y (sg13g2_nor2b_1)
+   0.0000   14.2526 ^ _299_/D (sg13g2_dfrbpq_1)
+            14.2526   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+            18.8000 ^ _299_/CLK (sg13g2_dfrbpq_1)
+  -0.0822   18.7178   library setup time
+            18.7178   data required time
+-------------------------------------------------------------
+            18.7178   data required time
+           -14.2526   data arrival time
+-------------------------------------------------------------
+             4.4652   slack (MET)
+
+
+Startpoint: clear (input port clocked by ph0)
+Endpoint: _315_ (rising edge-triggered flip-flop clocked by ph1)
+Path Group: ph1
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   1.0000    1.0000 v input external delay
+   0.0000    1.0000 v clear (in)
+   0.1451    1.1451 ^ _237_/Y (sg13g2_inv_1)
+   0.0503    1.1955 v _263_/Y (sg13g2_o21ai_1)
+   0.0387    1.2342 ^ _264_/Y (sg13g2_a21oi_1)
+   0.0000    1.2342 ^ _315_/D (sg13g2_dfrbpq_1)
+             1.2342   data arrival time
+
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000   clock reconvergence pessimism
+             4.7000 ^ _315_/CLK (sg13g2_dfrbpq_1)
+  -0.0809    4.6191   library setup time
+             4.6191   data required time
+-------------------------------------------------------------
+             4.6191   data required time
+            -1.2342   data arrival time
+-------------------------------------------------------------
+             3.3849   slack (MET)
+
+
+Startpoint: clear (input port clocked by ph0)
+Endpoint: _323_ (rising edge-triggered flip-flop clocked by ph1)
+Path Group: ph1
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   1.0000    1.0000 v input external delay
+   0.0000    1.0000 v clear (in)
+   0.1451    1.1451 ^ _237_/Y (sg13g2_inv_1)
+   0.0503    1.1955 v _278_/Y (sg13g2_o21ai_1)
+   0.0387    1.2342 ^ _279_/Y (sg13g2_a21oi_1)
+   0.0000    1.2342 ^ _323_/D (sg13g2_dfrbpq_1)
+             1.2342   data arrival time
+
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000   clock reconvergence pessimism
+             4.7000 ^ _323_/CLK (sg13g2_dfrbpq_1)
+  -0.0809    4.6191   library setup time
+             4.6191   data required time
+-------------------------------------------------------------
+             4.6191   data required time
+            -1.2342   data arrival time
+-------------------------------------------------------------
+             3.3849   slack (MET)
+
+
+Startpoint: pads[1] (input port clocked by ph0)
+Endpoint: _332_ (rising edge-triggered flip-flop clocked by ph1)
+Path Group: ph1
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   1.0000    1.0000 ^ input external delay
+   0.0000    1.0000 ^ pads[1] (in)
+   0.0943    1.0943 ^ _294_/Y (sg13g2_nor2b_1)
+   0.0000    1.0943 ^ _332_/D (sg13g2_dfrbpq_1)
+             1.0943   data arrival time
+
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000   clock reconvergence pessimism
+             4.7000 ^ _332_/CLK (sg13g2_dfrbpq_1)
+  -0.0874    4.6126   library setup time
+             4.6126   data required time
+-------------------------------------------------------------
+             4.6126   data required time
+            -1.0943   data arrival time
+-------------------------------------------------------------
+             3.5183   slack (MET)
+
+
+Startpoint: clear (input port clocked by ph0)
+Endpoint: _313_ (rising edge-triggered flip-flop clocked by ph2)
+Path Group: ph2
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   1.0000    1.0000 v input external delay
+   0.0000    1.0000 v clear (in)
+   0.1451    1.1451 ^ _237_/Y (sg13g2_inv_1)
+   0.0503    1.1955 v _259_/Y (sg13g2_o21ai_1)
+   0.0387    1.2342 ^ _260_/Y (sg13g2_a21oi_1)
+   0.0000    1.2342 ^ _313_/D (sg13g2_dfrbpq_1)
+             1.2342   data arrival time
+
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000   clock reconvergence pessimism
+             9.4000 ^ _313_/CLK (sg13g2_dfrbpq_1)
+  -0.0809    9.3191   library setup time
+             9.3191   data required time
+-------------------------------------------------------------
+             9.3191   data required time
+            -1.2342   data arrival time
+-------------------------------------------------------------
+             8.0849   slack (MET)
+
+
+Startpoint: clear (input port clocked by ph0)
+Endpoint: _321_ (rising edge-triggered flip-flop clocked by ph2)
+Path Group: ph2
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   1.0000    1.0000 v input external delay
+   0.0000    1.0000 v clear (in)
+   0.1451    1.1451 ^ _237_/Y (sg13g2_inv_1)
+   0.0503    1.1955 v _274_/Y (sg13g2_o21ai_1)
+   0.0387    1.2342 ^ _275_/Y (sg13g2_a21oi_1)
+   0.0000    1.2342 ^ _321_/D (sg13g2_dfrbpq_1)
+             1.2342   data arrival time
+
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000   clock reconvergence pessimism
+             9.4000 ^ _321_/CLK (sg13g2_dfrbpq_1)
+  -0.0809    9.3191   library setup time
+             9.3191   data required time
+-------------------------------------------------------------
+             9.3191   data required time
+            -1.2342   data arrival time
+-------------------------------------------------------------
+             8.0849   slack (MET)
+
+
+Startpoint: pads[1] (input port clocked by ph0)
+Endpoint: _331_ (rising edge-triggered flip-flop clocked by ph2)
+Path Group: ph2
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   1.0000    1.0000 ^ input external delay
+   0.0000    1.0000 ^ pads[1] (in)
+   0.0943    1.0943 ^ _294_/Y (sg13g2_nor2b_1)
+   0.0000    1.0943 ^ _331_/D (sg13g2_dfrbpq_1)
+             1.0943   data arrival time
+
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000   clock reconvergence pessimism
+             9.4000 ^ _331_/CLK (sg13g2_dfrbpq_1)
+  -0.0874    9.3126   library setup time
+             9.3126   data required time
+-------------------------------------------------------------
+             9.3126   data required time
+            -1.0943   data arrival time
+-------------------------------------------------------------
+             8.2183   slack (MET)
+
+
+Startpoint: clear (input port clocked by ph0)
+Endpoint: _311_ (rising edge-triggered flip-flop clocked by ph3)
+Path Group: ph3
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   1.0000    1.0000 v input external delay
+   0.0000    1.0000 v clear (in)
+   0.1451    1.1451 ^ _237_/Y (sg13g2_inv_1)
+   0.0503    1.1955 v _255_/Y (sg13g2_o21ai_1)
+   0.0387    1.2342 ^ _256_/Y (sg13g2_a21oi_1)
+   0.0000    1.2342 ^ _311_/D (sg13g2_dfrbpq_1)
+             1.2342   data arrival time
+
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000   clock reconvergence pessimism
+            14.1000 ^ _311_/CLK (sg13g2_dfrbpq_1)
+  -0.0809   14.0191   library setup time
+            14.0191   data required time
+-------------------------------------------------------------
+            14.0191   data required time
+            -1.2342   data arrival time
+-------------------------------------------------------------
+            12.7849   slack (MET)
+
+
+Startpoint: clear (input port clocked by ph0)
+Endpoint: _319_ (rising edge-triggered flip-flop clocked by ph3)
+Path Group: ph3
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   1.0000    1.0000 v input external delay
+   0.0000    1.0000 v clear (in)
+   0.1451    1.1451 ^ _237_/Y (sg13g2_inv_1)
+   0.0503    1.1955 v _270_/Y (sg13g2_o21ai_1)
+   0.0387    1.2342 ^ _271_/Y (sg13g2_a21oi_1)
+   0.0000    1.2342 ^ _319_/D (sg13g2_dfrbpq_1)
+             1.2342   data arrival time
+
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000   clock reconvergence pessimism
+            14.1000 ^ _319_/CLK (sg13g2_dfrbpq_1)
+  -0.0809   14.0191   library setup time
+            14.0191   data required time
+-------------------------------------------------------------
+            14.0191   data required time
+            -1.2342   data arrival time
+-------------------------------------------------------------
+            12.7849   slack (MET)
+
+
+Startpoint: pads[1] (input port clocked by ph0)
+Endpoint: _330_ (rising edge-triggered flip-flop clocked by ph3)
+Path Group: ph3
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   1.0000    1.0000 ^ input external delay
+   0.0000    1.0000 ^ pads[1] (in)
+   0.0943    1.0943 ^ _294_/Y (sg13g2_nor2b_1)
+   0.0000    1.0943 ^ _330_/D (sg13g2_dfrbpq_1)
+             1.0943   data arrival time
+
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000   clock reconvergence pessimism
+            14.1000 ^ _330_/CLK (sg13g2_dfrbpq_1)
+  -0.0874   14.0126   library setup time
+            14.0126   data required time
+-------------------------------------------------------------
+            14.0126   data required time
+            -1.0943   data arrival time
+-------------------------------------------------------------
+            12.9183   slack (MET)
+
+
+
+--- report_checks -path_delay min (worst hold path, top 3) ---
+Warning: sta_fast_18p8.tcl line 1, report_checks -group_count is deprecated. Use -group_path_count instead.
+Startpoint: _327_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: samples[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _327_/CLK (sg13g2_dfrbpq_1)
+   0.1007    0.1007 ^ _327_/Q (sg13g2_dfrbpq_1)
+   0.0000    0.1007 ^ samples[0] (out)
+             0.1007   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -0.1007   data arrival time
+-------------------------------------------------------------
+             0.1007   slack (MET)
+
+
+Startpoint: _329_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: samples[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _329_/CLK (sg13g2_dfrbpq_1)
+   0.1007    0.1007 ^ _329_/Q (sg13g2_dfrbpq_1)
+   0.0000    0.1007 ^ samples[1] (out)
+             0.1007   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -0.1007   data arrival time
+-------------------------------------------------------------
+             0.1007   slack (MET)
+
+
+Startpoint: _297_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: samples[2] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _297_/CLK (sg13g2_dfrbpq_1)
+   0.1007    0.1007 ^ _297_/Q (sg13g2_dfrbpq_1)
+   0.0000    0.1007 ^ samples[2] (out)
+             0.1007   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -0.1007   data arrival time
+-------------------------------------------------------------
+             0.1007   slack (MET)
+
+
+Startpoint: _332_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: _302_ (rising edge-triggered flip-flop clocked by ph1)
+Path Group: ph1
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _332_/CLK (sg13g2_dfrbpq_1)
+   0.1014    4.8014 v _332_/Q (sg13g2_dfrbpq_1)
+   0.0406    4.8420 v _244_/Y (sg13g2_nor2b_1)
+   0.0000    4.8420 v _302_/D (sg13g2_dfrbpq_1)
+             4.8420   data arrival time
+
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000   clock reconvergence pessimism
+             4.7000 ^ _302_/CLK (sg13g2_dfrbpq_1)
+  -0.0238    4.6762   library hold time
+             4.6762   data required time
+-------------------------------------------------------------
+             4.6762   data required time
+            -4.8420   data arrival time
+-------------------------------------------------------------
+             0.1658   slack (MET)
+
+
+Startpoint: _336_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: _328_ (rising edge-triggered flip-flop clocked by ph1)
+Path Group: ph1
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _336_/CLK (sg13g2_dfrbpq_1)
+   0.1014    4.8014 v _336_/Q (sg13g2_dfrbpq_1)
+   0.0406    4.8420 v _286_/Y (sg13g2_nor2b_1)
+   0.0000    4.8420 v _328_/D (sg13g2_dfrbpq_1)
+             4.8420   data arrival time
+
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000   clock reconvergence pessimism
+             4.7000 ^ _328_/CLK (sg13g2_dfrbpq_1)
+  -0.0238    4.6762   library hold time
+             4.6762   data required time
+-------------------------------------------------------------
+             4.6762   data required time
+            -4.8420   data arrival time
+-------------------------------------------------------------
+             0.1658   slack (MET)
+
+
+Startpoint: _315_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: _315_ (rising edge-triggered flip-flop clocked by ph1)
+Path Group: ph1
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _315_/CLK (sg13g2_dfrbpq_1)
+   0.1218    4.8218 ^ _315_/Q (sg13g2_dfrbpq_1)
+   0.0377    4.8595 v _264_/Y (sg13g2_a21oi_1)
+   0.0000    4.8595 v _315_/D (sg13g2_dfrbpq_1)
+             4.8595   data arrival time
+
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000   clock reconvergence pessimism
+             4.7000 ^ _315_/CLK (sg13g2_dfrbpq_1)
+  -0.0237    4.6763   library hold time
+             4.6763   data required time
+-------------------------------------------------------------
+             4.6763   data required time
+            -4.8595   data arrival time
+-------------------------------------------------------------
+             0.1832   slack (MET)
+
+
+Startpoint: _335_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: _296_ (rising edge-triggered flip-flop clocked by ph2)
+Path Group: ph2
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _335_/CLK (sg13g2_dfrbpq_1)
+   0.1014    9.5014 v _335_/Q (sg13g2_dfrbpq_1)
+   0.0406    9.5420 v _238_/Y (sg13g2_nor2b_1)
+   0.0000    9.5420 v _296_/D (sg13g2_dfrbpq_1)
+             9.5420   data arrival time
+
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000   clock reconvergence pessimism
+             9.4000 ^ _296_/CLK (sg13g2_dfrbpq_1)
+  -0.0238    9.3762   library hold time
+             9.3762   data required time
+-------------------------------------------------------------
+             9.3762   data required time
+            -9.5420   data arrival time
+-------------------------------------------------------------
+             0.1658   slack (MET)
+
+
+Startpoint: _331_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: _304_ (rising edge-triggered flip-flop clocked by ph2)
+Path Group: ph2
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _331_/CLK (sg13g2_dfrbpq_1)
+   0.1014    9.5014 v _331_/Q (sg13g2_dfrbpq_1)
+   0.0406    9.5420 v _246_/Y (sg13g2_nor2b_1)
+   0.0000    9.5420 v _304_/D (sg13g2_dfrbpq_1)
+             9.5420   data arrival time
+
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000   clock reconvergence pessimism
+             9.4000 ^ _304_/CLK (sg13g2_dfrbpq_1)
+  -0.0238    9.3762   library hold time
+             9.3762   data required time
+-------------------------------------------------------------
+             9.3762   data required time
+            -9.5420   data arrival time
+-------------------------------------------------------------
+             0.1658   slack (MET)
+
+
+Startpoint: _313_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: _313_ (rising edge-triggered flip-flop clocked by ph2)
+Path Group: ph2
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _313_/CLK (sg13g2_dfrbpq_1)
+   0.1203    9.5203 ^ _313_/Q (sg13g2_dfrbpq_1)
+   0.0371    9.5574 v _260_/Y (sg13g2_a21oi_1)
+   0.0000    9.5574 v _313_/D (sg13g2_dfrbpq_1)
+             9.5574   data arrival time
+
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000   clock reconvergence pessimism
+             9.4000 ^ _313_/CLK (sg13g2_dfrbpq_1)
+  -0.0237    9.3763   library hold time
+             9.3763   data required time
+-------------------------------------------------------------
+             9.3763   data required time
+            -9.5574   data arrival time
+-------------------------------------------------------------
+             0.1811   slack (MET)
+
+
+Startpoint: _334_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: _298_ (rising edge-triggered flip-flop clocked by ph3)
+Path Group: ph3
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _334_/CLK (sg13g2_dfrbpq_1)
+   0.1014   14.2014 v _334_/Q (sg13g2_dfrbpq_1)
+   0.0406   14.2420 v _240_/Y (sg13g2_nor2b_1)
+   0.0000   14.2420 v _298_/D (sg13g2_dfrbpq_1)
+            14.2420   data arrival time
+
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000   clock reconvergence pessimism
+            14.1000 ^ _298_/CLK (sg13g2_dfrbpq_1)
+  -0.0238   14.0762   library hold time
+            14.0762   data required time
+-------------------------------------------------------------
+            14.0762   data required time
+           -14.2420   data arrival time
+-------------------------------------------------------------
+             0.1658   slack (MET)
+
+
+Startpoint: _330_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: _306_ (rising edge-triggered flip-flop clocked by ph3)
+Path Group: ph3
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _330_/CLK (sg13g2_dfrbpq_1)
+   0.1014   14.2014 v _330_/Q (sg13g2_dfrbpq_1)
+   0.0406   14.2420 v _248_/Y (sg13g2_nor2b_1)
+   0.0000   14.2420 v _306_/D (sg13g2_dfrbpq_1)
+            14.2420   data arrival time
+
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000   clock reconvergence pessimism
+            14.1000 ^ _306_/CLK (sg13g2_dfrbpq_1)
+  -0.0238   14.0762   library hold time
+            14.0762   data required time
+-------------------------------------------------------------
+            14.0762   data required time
+           -14.2420   data arrival time
+-------------------------------------------------------------
+             0.1658   slack (MET)
+
+
+Startpoint: _311_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: _311_ (rising edge-triggered flip-flop clocked by ph3)
+Path Group: ph3
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _311_/CLK (sg13g2_dfrbpq_1)
+   0.1215   14.2215 ^ _311_/Q (sg13g2_dfrbpq_1)
+   0.0376   14.2592 v _256_/Y (sg13g2_a21oi_1)
+   0.0000   14.2592 v _311_/D (sg13g2_dfrbpq_1)
+            14.2592   data arrival time
+
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000   clock reconvergence pessimism
+            14.1000 ^ _311_/CLK (sg13g2_dfrbpq_1)
+  -0.0237   14.0763   library hold time
+            14.0763   data required time
+-------------------------------------------------------------
+            14.0763   data required time
+           -14.2592   data arrival time
+-------------------------------------------------------------
+             0.1829   slack (MET)
+
+
+
+--- worst slacks ---
+WORST_SETUP_SLACK 3.3849
+WORST_HOLD_SLACK 0.1007
+
+--- per-lane clock-to-pin delays (clock-to-Q + XOR tree) ---
+
+LANE net=_144 phase=ph0 port=pin[0] inst=_317_
+  MAXRISE:
+Startpoint: _317_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _317_/CLK (sg13g2_dfrbpq_1)
+   0.1179    0.1179 ^ _317_/Q (sg13g2_dfrbpq_1)
+   0.0758    0.1937 ^ _288_/X (sg13g2_xor2_1)
+   0.0694    0.2631 ^ _290_/Y (sg13g2_xnor2_1)
+   0.0000    0.2631 ^ pin[0] (out)
+             0.2631   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -0.2631   data arrival time
+-------------------------------------------------------------
+            18.5369   slack (MET)
+
+
+  MAXFALL:
+Startpoint: _317_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _317_/CLK (sg13g2_dfrbpq_1)
+   0.1153    0.1153 v _317_/Q (sg13g2_dfrbpq_1)
+   0.0670    0.1824 v _288_/X (sg13g2_xor2_1)
+   0.0708    0.2532 v _290_/Y (sg13g2_xnor2_1)
+   0.0000    0.2532 v pin[0] (out)
+             0.2532   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -0.2532   data arrival time
+-------------------------------------------------------------
+            18.5468   slack (MET)
+
+
+  MINRISE:
+Startpoint: _317_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _317_/CLK (sg13g2_dfrbpq_1)
+   0.1153    0.1153 v _317_/Q (sg13g2_dfrbpq_1)
+   0.0478    0.1632 v _288_/X (sg13g2_xor2_1)
+   0.0536    0.2168 ^ _290_/Y (sg13g2_xnor2_1)
+   0.0000    0.2168 ^ pin[0] (out)
+             0.2168   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -0.2168   data arrival time
+-------------------------------------------------------------
+             0.2168   slack (MET)
+
+
+  MINFALL:
+Startpoint: _317_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _317_/CLK (sg13g2_dfrbpq_1)
+   0.1153    0.1153 v _317_/Q (sg13g2_dfrbpq_1)
+   0.0478    0.1632 v _288_/X (sg13g2_xor2_1)
+   0.0489    0.2121 v _290_/Y (sg13g2_xnor2_1)
+   0.0000    0.2121 v pin[0] (out)
+             0.2121   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -0.2121   data arrival time
+-------------------------------------------------------------
+             0.2121   slack (MET)
+
+
+
+LANE net=_134 phase=ph1 port=pin[0] inst=_315_
+  MAXRISE:
+Startpoint: _315_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _315_/CLK (sg13g2_dfrbpq_1)
+   0.1218    4.8218 ^ _315_/Q (sg13g2_dfrbpq_1)
+   0.0781    4.8999 ^ _288_/X (sg13g2_xor2_1)
+   0.0694    4.9694 ^ _290_/Y (sg13g2_xnor2_1)
+   0.0000    4.9694 ^ pin[0] (out)
+             4.9694   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -4.9694   data arrival time
+-------------------------------------------------------------
+            13.8306   slack (MET)
+
+
+  MAXFALL:
+Startpoint: _315_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _315_/CLK (sg13g2_dfrbpq_1)
+   0.1191    4.8191 v _315_/Q (sg13g2_dfrbpq_1)
+   0.0721    4.8912 v _288_/X (sg13g2_xor2_1)
+   0.0708    4.9620 v _290_/Y (sg13g2_xnor2_1)
+   0.0000    4.9620 v pin[0] (out)
+             4.9620   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -4.9620   data arrival time
+-------------------------------------------------------------
+            13.8380   slack (MET)
+
+
+  MINRISE:
+Startpoint: _315_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _315_/CLK (sg13g2_dfrbpq_1)
+   0.1191    4.8191 v _315_/Q (sg13g2_dfrbpq_1)
+   0.0521    4.8712 v _288_/X (sg13g2_xor2_1)
+   0.0536    4.9248 ^ _290_/Y (sg13g2_xnor2_1)
+   0.0000    4.9248 ^ pin[0] (out)
+             4.9248   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -4.9248   data arrival time
+-------------------------------------------------------------
+             4.9248   slack (MET)
+
+
+  MINFALL:
+Startpoint: _315_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _315_/CLK (sg13g2_dfrbpq_1)
+   0.1191    4.8191 v _315_/Q (sg13g2_dfrbpq_1)
+   0.0521    4.8712 v _288_/X (sg13g2_xor2_1)
+   0.0489    4.9201 v _290_/Y (sg13g2_xnor2_1)
+   0.0000    4.9201 v pin[0] (out)
+             4.9201   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -4.9201   data arrival time
+-------------------------------------------------------------
+             4.9201   slack (MET)
+
+
+
+LANE net=_124 phase=ph2 port=pin[0] inst=_313_
+  MAXRISE:
+Startpoint: _313_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _313_/CLK (sg13g2_dfrbpq_1)
+   0.1203    9.5203 ^ _313_/Q (sg13g2_dfrbpq_1)
+   0.0637    9.5840 ^ _289_/Y (sg13g2_xnor2_1)
+   0.0671    9.6511 ^ _290_/Y (sg13g2_xnor2_1)
+   0.0000    9.6511 ^ pin[0] (out)
+             9.6511   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -9.6511   data arrival time
+-------------------------------------------------------------
+             9.1489   slack (MET)
+
+
+  MAXFALL:
+Startpoint: _313_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _313_/CLK (sg13g2_dfrbpq_1)
+   0.1178    9.5178 v _313_/Q (sg13g2_dfrbpq_1)
+   0.0673    9.5850 v _289_/Y (sg13g2_xnor2_1)
+   0.0683    9.6534 v _290_/Y (sg13g2_xnor2_1)
+   0.0000    9.6534 v pin[0] (out)
+             9.6534   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -9.6534   data arrival time
+-------------------------------------------------------------
+             9.1466   slack (MET)
+
+
+  MINRISE:
+Startpoint: _313_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _313_/CLK (sg13g2_dfrbpq_1)
+   0.1178    9.5178 v _313_/Q (sg13g2_dfrbpq_1)
+   0.0466    9.5643 v _289_/Y (sg13g2_xnor2_1)
+   0.0518    9.6161 ^ _290_/Y (sg13g2_xnor2_1)
+   0.0000    9.6161 ^ pin[0] (out)
+             9.6161   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -9.6161   data arrival time
+-------------------------------------------------------------
+             9.6161   slack (MET)
+
+
+  MINFALL:
+Startpoint: _313_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _313_/CLK (sg13g2_dfrbpq_1)
+   0.1178    9.5178 v _313_/Q (sg13g2_dfrbpq_1)
+   0.0466    9.5643 v _289_/Y (sg13g2_xnor2_1)
+   0.0455    9.6098 v _290_/Y (sg13g2_xnor2_1)
+   0.0000    9.6098 v pin[0] (out)
+             9.6098   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -9.6098   data arrival time
+-------------------------------------------------------------
+             9.6098   slack (MET)
+
+
+
+LANE net=_114 phase=ph3 port=pin[0] inst=_311_
+  MAXRISE:
+Startpoint: _311_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _311_/CLK (sg13g2_dfrbpq_1)
+   0.1215   14.2215 ^ _311_/Q (sg13g2_dfrbpq_1)
+   0.0668   14.2883 ^ _289_/Y (sg13g2_xnor2_1)
+   0.0671   14.3555 ^ _290_/Y (sg13g2_xnor2_1)
+   0.0000   14.3555 ^ pin[0] (out)
+            14.3555   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+           -14.3555   data arrival time
+-------------------------------------------------------------
+             4.4445   slack (MET)
+
+
+  MAXFALL:
+Startpoint: _311_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _311_/CLK (sg13g2_dfrbpq_1)
+   0.1189   14.2189 v _311_/Q (sg13g2_dfrbpq_1)
+   0.0686   14.2875 v _289_/Y (sg13g2_xnor2_1)
+   0.0683   14.3558 v _290_/Y (sg13g2_xnor2_1)
+   0.0000   14.3558 v pin[0] (out)
+            14.3558   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+           -14.3558   data arrival time
+-------------------------------------------------------------
+             4.4442   slack (MET)
+
+
+  MINRISE:
+Startpoint: _311_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _311_/CLK (sg13g2_dfrbpq_1)
+   0.1189   14.2189 v _311_/Q (sg13g2_dfrbpq_1)
+   0.0526   14.2715 v _289_/Y (sg13g2_xnor2_1)
+   0.0518   14.3233 ^ _290_/Y (sg13g2_xnor2_1)
+   0.0000   14.3233 ^ pin[0] (out)
+            14.3233   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+           -14.3233   data arrival time
+-------------------------------------------------------------
+            14.3233   slack (MET)
+
+
+  MINFALL:
+Startpoint: _311_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: pin[0] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _311_/CLK (sg13g2_dfrbpq_1)
+   0.1189   14.2189 v _311_/Q (sg13g2_dfrbpq_1)
+   0.0526   14.2715 v _289_/Y (sg13g2_xnor2_1)
+   0.0455   14.3170 v _290_/Y (sg13g2_xnor2_1)
+   0.0000   14.3170 v pin[0] (out)
+            14.3170   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+           -14.3170   data arrival time
+-------------------------------------------------------------
+            14.3170   slack (MET)
+
+
+
+LANE net=_18 phase=ph0 port=pin[1] inst=_325_
+  MAXRISE:
+Startpoint: _325_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _325_/CLK (sg13g2_dfrbpq_1)
+   0.1179    0.1179 ^ _325_/Q (sg13g2_dfrbpq_1)
+   0.0758    0.1937 ^ _291_/X (sg13g2_xor2_1)
+   0.0694    0.2631 ^ _293_/Y (sg13g2_xnor2_1)
+   0.0000    0.2631 ^ pin[1] (out)
+             0.2631   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -0.2631   data arrival time
+-------------------------------------------------------------
+            18.5369   slack (MET)
+
+
+  MAXFALL:
+Startpoint: _325_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _325_/CLK (sg13g2_dfrbpq_1)
+   0.1153    0.1153 v _325_/Q (sg13g2_dfrbpq_1)
+   0.0670    0.1824 v _291_/X (sg13g2_xor2_1)
+   0.0708    0.2532 v _293_/Y (sg13g2_xnor2_1)
+   0.0000    0.2532 v pin[1] (out)
+             0.2532   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -0.2532   data arrival time
+-------------------------------------------------------------
+            18.5468   slack (MET)
+
+
+  MINRISE:
+Startpoint: _325_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _325_/CLK (sg13g2_dfrbpq_1)
+   0.1153    0.1153 v _325_/Q (sg13g2_dfrbpq_1)
+   0.0478    0.1632 v _291_/X (sg13g2_xor2_1)
+   0.0536    0.2168 ^ _293_/Y (sg13g2_xnor2_1)
+   0.0000    0.2168 ^ pin[1] (out)
+             0.2168   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -0.2168   data arrival time
+-------------------------------------------------------------
+             0.2168   slack (MET)
+
+
+  MINFALL:
+Startpoint: _325_ (rising edge-triggered flip-flop clocked by ph0)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _325_/CLK (sg13g2_dfrbpq_1)
+   0.1153    0.1153 v _325_/Q (sg13g2_dfrbpq_1)
+   0.0478    0.1632 v _291_/X (sg13g2_xor2_1)
+   0.0489    0.2121 v _293_/Y (sg13g2_xnor2_1)
+   0.0000    0.2121 v pin[1] (out)
+             0.2121   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -0.2121   data arrival time
+-------------------------------------------------------------
+             0.2121   slack (MET)
+
+
+
+LANE net=_14 phase=ph1 port=pin[1] inst=_323_
+  MAXRISE:
+Startpoint: _323_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _323_/CLK (sg13g2_dfrbpq_1)
+   0.1218    4.8218 ^ _323_/Q (sg13g2_dfrbpq_1)
+   0.0781    4.8999 ^ _291_/X (sg13g2_xor2_1)
+   0.0694    4.9694 ^ _293_/Y (sg13g2_xnor2_1)
+   0.0000    4.9694 ^ pin[1] (out)
+             4.9694   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -4.9694   data arrival time
+-------------------------------------------------------------
+            13.8306   slack (MET)
+
+
+  MAXFALL:
+Startpoint: _323_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _323_/CLK (sg13g2_dfrbpq_1)
+   0.1191    4.8191 v _323_/Q (sg13g2_dfrbpq_1)
+   0.0721    4.8912 v _291_/X (sg13g2_xor2_1)
+   0.0708    4.9620 v _293_/Y (sg13g2_xnor2_1)
+   0.0000    4.9620 v pin[1] (out)
+             4.9620   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -4.9620   data arrival time
+-------------------------------------------------------------
+            13.8380   slack (MET)
+
+
+  MINRISE:
+Startpoint: _323_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _323_/CLK (sg13g2_dfrbpq_1)
+   0.1191    4.8191 v _323_/Q (sg13g2_dfrbpq_1)
+   0.0521    4.8712 v _291_/X (sg13g2_xor2_1)
+   0.0536    4.9248 ^ _293_/Y (sg13g2_xnor2_1)
+   0.0000    4.9248 ^ pin[1] (out)
+             4.9248   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -4.9248   data arrival time
+-------------------------------------------------------------
+             4.9248   slack (MET)
+
+
+  MINFALL:
+Startpoint: _323_ (rising edge-triggered flip-flop clocked by ph1)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   4.7000    4.7000   clock ph1 (rise edge)
+   0.0000    4.7000   clock network delay (ideal)
+   0.0000    4.7000 ^ _323_/CLK (sg13g2_dfrbpq_1)
+   0.1191    4.8191 v _323_/Q (sg13g2_dfrbpq_1)
+   0.0521    4.8712 v _291_/X (sg13g2_xor2_1)
+   0.0489    4.9201 v _293_/Y (sg13g2_xnor2_1)
+   0.0000    4.9201 v pin[1] (out)
+             4.9201   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -4.9201   data arrival time
+-------------------------------------------------------------
+             4.9201   slack (MET)
+
+
+
+LANE net=_12 phase=ph2 port=pin[1] inst=_321_
+  MAXRISE:
+Startpoint: _321_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _321_/CLK (sg13g2_dfrbpq_1)
+   0.1203    9.5203 ^ _321_/Q (sg13g2_dfrbpq_1)
+   0.0637    9.5840 ^ _292_/Y (sg13g2_xnor2_1)
+   0.0671    9.6511 ^ _293_/Y (sg13g2_xnor2_1)
+   0.0000    9.6511 ^ pin[1] (out)
+             9.6511   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -9.6511   data arrival time
+-------------------------------------------------------------
+             9.1489   slack (MET)
+
+
+  MAXFALL:
+Startpoint: _321_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _321_/CLK (sg13g2_dfrbpq_1)
+   0.1178    9.5178 v _321_/Q (sg13g2_dfrbpq_1)
+   0.0673    9.5850 v _292_/Y (sg13g2_xnor2_1)
+   0.0683    9.6534 v _293_/Y (sg13g2_xnor2_1)
+   0.0000    9.6534 v pin[1] (out)
+             9.6534   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+            -9.6534   data arrival time
+-------------------------------------------------------------
+             9.1466   slack (MET)
+
+
+  MINRISE:
+Startpoint: _321_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _321_/CLK (sg13g2_dfrbpq_1)
+   0.1178    9.5178 v _321_/Q (sg13g2_dfrbpq_1)
+   0.0466    9.5643 v _292_/Y (sg13g2_xnor2_1)
+   0.0518    9.6161 ^ _293_/Y (sg13g2_xnor2_1)
+   0.0000    9.6161 ^ pin[1] (out)
+             9.6161   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -9.6161   data arrival time
+-------------------------------------------------------------
+             9.6161   slack (MET)
+
+
+  MINFALL:
+Startpoint: _321_ (rising edge-triggered flip-flop clocked by ph2)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   9.4000    9.4000   clock ph2 (rise edge)
+   0.0000    9.4000   clock network delay (ideal)
+   0.0000    9.4000 ^ _321_/CLK (sg13g2_dfrbpq_1)
+   0.1178    9.5178 v _321_/Q (sg13g2_dfrbpq_1)
+   0.0466    9.5643 v _292_/Y (sg13g2_xnor2_1)
+   0.0455    9.6098 v _293_/Y (sg13g2_xnor2_1)
+   0.0000    9.6098 v pin[1] (out)
+             9.6098   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+            -9.6098   data arrival time
+-------------------------------------------------------------
+             9.6098   slack (MET)
+
+
+
+LANE net=_10 phase=ph3 port=pin[1] inst=_319_
+  MAXRISE:
+Startpoint: _319_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _319_/CLK (sg13g2_dfrbpq_1)
+   0.1215   14.2215 ^ _319_/Q (sg13g2_dfrbpq_1)
+   0.0668   14.2883 ^ _292_/Y (sg13g2_xnor2_1)
+   0.0671   14.3555 ^ _293_/Y (sg13g2_xnor2_1)
+   0.0000   14.3555 ^ pin[1] (out)
+            14.3555   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+           -14.3555   data arrival time
+-------------------------------------------------------------
+             4.4445   slack (MET)
+
+
+  MAXFALL:
+Startpoint: _319_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _319_/CLK (sg13g2_dfrbpq_1)
+   0.1189   14.2189 v _319_/Q (sg13g2_dfrbpq_1)
+   0.0686   14.2875 v _292_/Y (sg13g2_xnor2_1)
+   0.0683   14.3558 v _293_/Y (sg13g2_xnor2_1)
+   0.0000   14.3558 v pin[1] (out)
+            14.3558   data arrival time
+
+  18.8000   18.8000   clock ph0 (rise edge)
+   0.0000   18.8000   clock network delay (ideal)
+   0.0000   18.8000   clock reconvergence pessimism
+   0.0000   18.8000   output external delay
+            18.8000   data required time
+-------------------------------------------------------------
+            18.8000   data required time
+           -14.3558   data arrival time
+-------------------------------------------------------------
+             4.4442   slack (MET)
+
+
+  MINRISE:
+Startpoint: _319_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _319_/CLK (sg13g2_dfrbpq_1)
+   0.1189   14.2189 v _319_/Q (sg13g2_dfrbpq_1)
+   0.0526   14.2715 v _292_/Y (sg13g2_xnor2_1)
+   0.0518   14.3233 ^ _293_/Y (sg13g2_xnor2_1)
+   0.0000   14.3233 ^ pin[1] (out)
+            14.3233   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+           -14.3233   data arrival time
+-------------------------------------------------------------
+            14.3233   slack (MET)
+
+
+  MINFALL:
+Startpoint: _319_ (rising edge-triggered flip-flop clocked by ph3)
+Endpoint: pin[1] (output port clocked by ph0)
+Path Group: ph0
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+  14.1000   14.1000   clock ph3 (rise edge)
+   0.0000   14.1000   clock network delay (ideal)
+   0.0000   14.1000 ^ _319_/CLK (sg13g2_dfrbpq_1)
+   0.1189   14.2189 v _319_/Q (sg13g2_dfrbpq_1)
+   0.0526   14.2715 v _292_/Y (sg13g2_xnor2_1)
+   0.0455   14.3170 v _293_/Y (sg13g2_xnor2_1)
+   0.0000   14.3170 v pin[1] (out)
+            14.3170   data arrival time
+
+   0.0000    0.0000   clock ph0 (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000   clock reconvergence pessimism
+   0.0000    0.0000   output external delay
+             0.0000   data required time
+-------------------------------------------------------------
+             0.0000   data required time
+           -14.3170   data arrival time
+-------------------------------------------------------------
+            14.3170   slack (MET)
+
+
