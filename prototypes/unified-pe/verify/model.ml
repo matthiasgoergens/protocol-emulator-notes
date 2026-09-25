@@ -19,6 +19,11 @@ let create () =
     seg = Array.init 4 (fun _ -> { flo = 0; fhi = 0; fv = false; ctrl = 0 });
     cov = Hashtbl.create 64 }
 
+(* shared-specification faults: set together with the same-named Upe_rtl.bug, lockstep cannot
+   see them, and only the cells' independent references can *)
+let bug = ref ""
+let is b = !bug = b
+
 let hit t name = Hashtbl.replace t.cov name (1 + Option.value ~default:0 (Hashtbl.find_opt t.cov name))
 let bit v i = (v lsr i) land 1 = 1
 let signed v = if v >= 0x8000 then v - 0x10000 else v
@@ -40,7 +45,7 @@ let pe_comb t (e : pe) ~run ~a ~av ~alane ~bcast ~s15_in ~cb_in ~g_in ~lstep_in 
   let lane_in = if o.lane_bc then bcast else alane in
   let window =
     let d = ((a lsr 8) - (o.k lsr 8)) land 0xff in
-    d < 16 && bit e.s (15 - d)
+    d < 16 && bit e.s (if is "window_bit_order" then d else 15 - d)
   in
   let g =
     match o.gsel with
@@ -53,7 +58,7 @@ let pe_comb t (e : pe) ~run ~a ~av ~alane ~bcast ~s15_in ~cb_in ~g_in ~lstep_in 
     | 6 -> window
     | _ -> g_in
   in
-  let sin = match o.sinsel with 0 -> g | 1 -> lane_in | 2 -> s15_in | _ -> bit a 0 in
+  let sin = match o.sinsel with 0 -> g | 1 -> lane_in | 2 -> (if is "sin_s15_uses_own" then bit e.s 15 else s15_in) | _ -> bit a 0 in
   let sinv = if sin then 1 else 0 in
   let x =
     match o.xsel with
@@ -66,15 +71,15 @@ let pe_comb t (e : pe) ~run ~a ~av ~alane ~bcast ~s15_in ~cb_in ~g_in ~lstep_in 
   let yv = if o.ymod = 1 && not g then 0 else yraw in
   let n = o.ymod = 3 || (o.ymod = 2 && g) in
   let yn = if n then u16 (lnot yv) else yv in
-  let c = if o.cin_lane then (if lane_in then 1 else 0) else if n then 1 else 0 in
+  let c = if o.cin_lane then (if lane_in then 1 else 0) else if n && not (is "neg_no_plus1") then 1 else 0 in
   let usum = x + yn + c in
-  let cout = usum > 0xffff in
+  let cout = if is "carry_bit15" then usum land 0x8000 <> 0 else usum > 0xffff in
   let ssum = signed x + signed yn + c in
   let result, loser =
     match o.alu with
     | 0 -> (u16 (max (-0x8000) (min 0x7fff ssum)), x)
     | 1 -> (u16 usum, x)
-    | 2 -> if signed x >= signed yn then (x, yn) else (yn, x)
+    | 2 -> if (if is "max_unsigned" then x >= yn else signed x >= signed yn) then (x, yn) else (yn, x)
     | 3 -> if signed x <= signed yn then (x, yn) else (yn, x)
     | 4 -> (x lxor yn, x)
     | 5 -> (x land yn, x)
@@ -88,7 +93,7 @@ let pe_comb t (e : pe) ~run ~a ~av ~alane ~bcast ~s15_in ~cb_in ~g_in ~lstep_in 
     | 0 -> a
     | 1 -> result
     | 2 -> loser
-    | _ -> if g then (a land 0xff00) lor (o.k land 0xff) else a
+    | _ -> if g then (a land 0xff00) lor (if is "merge_colour_hi" then o.k lsr 8 else o.k land 0xff) else a
   in
   let f' = match o.fwb with 1 -> g | 2 -> result = 0 | _ -> e.f in
   let l' = match o.lout with 0 -> lane_in | 1 -> bit s' 15 | 2 -> cout | _ -> g in
@@ -123,6 +128,11 @@ let src_of ctrl = ctrl land 7
 let bcast_of ctrl = bit ctrl 3
 let run_of ctrl = bit ctrl 4
 
+(* the effective broadcast bit: control bit 5 (proposed) takes the previous segment's *)
+let rec bcast_eff t sg =
+  let c = t.seg.(sg).ctrl in
+  if sg > 0 && bit c 5 then bcast_eff t (sg - 1) else bcast_of c
+
 let cycle t (inp : inputs) =
   let pe = t.pe in
   let g = Array.make n_pe false and step = Array.make n_pe false in
@@ -139,14 +149,14 @@ let cycle t (inp : inputs) =
         | 2 ->
           let s = t.seg.(sg) in
           if s.fv then hit t "feed_valid";
-          ((s.fhi lsl 8) lor s.flo, s.fv, bcast_of ctrl)
+          ((s.fhi lsl 8) lor s.flo, s.fv, bcast_eff t sg)
         | 3 -> hit t "fixed"; (inp.fixed_d.(sg), inp.fixed_v.(sg), false)
         | _ -> (0, false, false)
       end
       else (pe.(i - 1).p, pe.(i - 1).pv, pe.(i - 1).l)
     in
     let c =
-      pe_comb t pe.(i) ~run:(run_of ctrl) ~a ~av ~alane ~bcast:(bcast_of ctrl)
+      pe_comb t pe.(i) ~run:(run_of ctrl) ~a ~av ~alane ~bcast:(bcast_eff t sg)
         ~s15_in:(i > 0 && bit pe.(i - 1).s 15)
         ~cb_in:(i < n_pe - 1 && bit pe.(i + 1).s 15)
         ~g_in:(i > 0 && g.(i - 1))
@@ -188,7 +198,7 @@ let cycle t (inp : inputs) =
         match inp.mbx_sel with
         | 0 -> s.flo <- inp.mbx_byte
         | 1 -> s.fhi <- inp.mbx_byte
-        | 2 -> s.ctrl <- inp.mbx_byte land 0x1f
+        | 2 -> s.ctrl <- inp.mbx_byte land 0x3f
         | _ -> ())
     t.seg
 

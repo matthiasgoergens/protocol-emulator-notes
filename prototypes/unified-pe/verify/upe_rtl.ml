@@ -44,6 +44,7 @@ let bugs =
     "cfg_chain_order", "configuration bytes 2 and 3 swapped in the chain";
     "init_no_shift", "init chain overwrites S instead of shifting";
     "tap_always_s", "tap ignores tap_p";
+    "bc_chain_ignored", "control bit 5 (broadcast from the previous segment) ignored";
     "pv_hold_on_stop", "valid clears when the segment stops";
     "yone_is_two", "Y = 1 gives 2";
     "xsel_a_is_s", "X = A gives S when the op is XOR" ]
@@ -197,10 +198,15 @@ let array_circuit ?(state_ports = true) () =
         let fhi = reg spec ~enable:(mine &: (mbx_sel ==:. 1)) mbx_byte in
         let fv0 = reg spec (mine &: (mbx_sel ==:. 1)) in
         let fv = if is "feed_valid_sticky" then fv0 |: reg spec fv0 else fv0 in
-        let ctrl = reg spec ~enable:(mine &: (mbx_sel ==:. 2)) (select mbx_byte 4 0) in
+        let ctrl = reg spec ~enable:(mine &: (mbx_sel ==:. 2)) (select mbx_byte 5 0) in
         (flo, fhi, fv, fv0, ctrl))
   in
   let ctrl j = let _, _, _, _, c = segregs.(j) in c in
+  (* effective broadcast: control bit 5 (proposed) chains the previous segment's *)
+  let bc = Array.make 4 gnd in
+  for j = 0 to 3 do
+    bc.(j) <- (if j = 0 || is "bc_chain_ignored" then bit (ctrl j) 3 else mux2 (bit (ctrl j) 5) bc.(j - 1) (bit (ctrl j) 3))
+  done;
   let wires () : pe_out =
     { s = wire 16; p = wire 16; pv = wire 1; f = wire 1; l = wire 1; g = wire 1; step = wire 1;
       cfg = wire 64; cfg_out = wire 8; init_out = wire 8; tap = wire 16 }
@@ -225,14 +231,14 @@ let array_circuit ?(state_ports = true) () =
         let pick f0 f1 f2 f3 z = mux src [ f0; f1; f2; f3; z; z; z; z ] in
         ( pick jd e_own.p (concat_msb [ fhi; flo ]) fixed_d.(fx) (zero 16),
           pick jv e_own.pv fv fixed_v.(fx) gnd,
-          pick jl e_own.l (bit c 3) gnd gnd )
+          pick jl e_own.l bc.(sg) gnd gnd )
       end
       else (w.(i - 1).p, w.(i - 1).pv, w.(i - 1).l)
     in
     let bseg = if is "lane_bc_wrong_seg" && sg = 3 then 2 else sg in
     let o =
       pe ~pe_index:i spec
-        { run = bit c 4; a; av; alane; bcast = bit (ctrl bseg) 3;
+        { run = bit c 4; a; av; alane; bcast = bc.(bseg);
           s15_in = (if i > 0 then msb w.(i - 1).s else gnd);
           cb_in = (if i < n_pe - 1 then msb w.(i + 1).s else gnd);
           g_in = (if i > 0 then w.(i - 1).g else gnd);

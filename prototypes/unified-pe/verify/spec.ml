@@ -101,7 +101,8 @@ let op_of_bytes b =
    bytes; writing the high byte presents the word as valid for exactly one clock), a control
    register (bits 2:0 the first PE's source: 0 join (the previous segment's end; zero for
    segment 0), 1 loop (own segment's end), 2 feed, 3 fixed neighbour (an external port: a bank
-   read port or the recovered-bit stream), 4-7 zero; bit 3 the broadcast lane bit; bit 4 run),
+   read port or the recovered-bit stream), 4-7 zero; bit 3 the broadcast lane bit; bit 4 run; bit 5 (PROPOSED) take the broadcast from the
+   previous segment instead, so joined segments share one broadcast),
    a configuration chain and an init chain (both byte-wide, through the segment's PEs in
    order), and a tap (the end PE's S or P, its valid and its flag).
    The feed and control registers are written through the mailbox byte path: sel 0 feed low

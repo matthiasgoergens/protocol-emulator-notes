@@ -68,4 +68,14 @@ let () =
   | [ _; "controls"; n; c ] -> controls (int_of_string n) (int_of_string c)
   | [ _; "coverage"; n; c ] -> coverage (int_of_string n) (int_of_string c)
   | [ _; "cells" ] -> Cells.run_all ()
+  | [ _; "shared-bugs" ] ->
+    (* each fault planted in the model AND the RTL: lockstep agrees, the references must not *)
+    List.iter
+      (fun b ->
+        Model.bug := b;
+        Upe_rtl.bug := b;
+        pr "=== shared fault: %s\n" b;
+        Cells.results := [];
+        Cells.run_all ~keep_bug:true ())
+      [ "window_bit_order"; "carry_bit15"; "neg_no_plus1"; "sin_s15_uses_own"; "merge_colour_hi"; "max_unsigned" ]
   | _ -> prerr_endline "usage: main.exe verilog-pe | verilog-array | lockstep N C | controls N C | coverage N C | cells"
