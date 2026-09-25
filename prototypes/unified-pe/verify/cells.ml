@@ -75,6 +75,7 @@ let report cell ~checks ~bad ~mism note =
 
 let rng = Random.State.make [| 2026 |]
 let ri n = Random.State.int rng n
+let pick_one a = a.(ri (Array.length a))
 
 (* ---------------------------------------------------------------- sprites *)
 (* Segments 2 and 3 joined (PEs 4..15): PE 4 counts pixels ({x, background} + 0x0100 on every
@@ -320,11 +321,11 @@ let nco_mixer_test () =
 (* 12 correlators in segments 2+3 joined: S <- S + (g ? -A : A), g = the broadcast code chip,
    P <- A, so PE 4 + j integrates code offset j. Samples: the C/A code delayed by tau chips,
    +-3 plus noise, on segment 2's fixed port; the chip through the mailbox control byte. *)
-let gps_test () =
-  let catalogue_ok = List.for_all (fun (prn, oct) -> Refs.first10_octal (Refs.ca_code prn) = oct) [ (1, 1440); (2, 1620); (3, 1710); (4, 1744) ] in
-  let prn = 3 in
+let catalogue_ok = lazy (List.for_all (fun (prn, oct) -> Refs.first10_octal (Refs.ca_code prn) = oct) [ (1, 1440); (2, 1620); (3, 1710); (4, 1744) ])
+
+let gps_one prn tau =
+  let catalogue_ok = Lazy.force catalogue_ok in
   let code = Refs.ca_code prn in
-  let tau = 5 in
   let corr i = { nop with xsel = 0; ysel = 1; ymod = 2; gsel = 2; lane_bc = true; alu = 0; swb = 1; pwb = 0; tap_p = i = 7 } in
   let stim = ref [] in
   let add l = stim := !stim @ l in
@@ -369,10 +370,17 @@ let gps_test () =
   if not catalogue_ok then incr bad;
   incr checks;
   if !peak <> tau || got.(tau) < 2500 then incr bad;
-  report "GPS C/A correlator (12 offsets, 2 segments)" ~checks:!checks ~bad:!bad ~mism
-    (Printf.sprintf "PRN %d delayed by %d chips, first-10-chip catalogue check (PRN 1-4) %s; peak at PE offset %d (sums %s)" prn tau
-       (if catalogue_ok then "ok" else "FAILED") !peak
-       (String.concat " " (Array.to_list (Array.map string_of_int got))))
+  (!checks, !bad, mism, Printf.sprintf "PRN %d tau %d: peak %d at %d" prn tau got.(!peak) !peak)
+
+let repeated name note runs =
+  let c = ref 0 and b = ref 0 and m = ref 0 and notes = ref [] in
+  List.iter (fun (c1, b1, m1, n1) -> c := !c + c1; b := !b + b1; m := !m + m1; if n1 <> "" then notes := n1 :: !notes) runs;
+  report name ~checks:!c ~bad:!b ~mism:!m (String.concat "; " (note :: List.rev !notes))
+
+let gps_test () =
+  repeated "GPS C/A correlator (12 offsets, 2 segments)"
+    (Printf.sprintf "first-10-chip catalogue check (PRN 1-4) %s" (if Lazy.force catalogue_ok then "ok" else "FAILED"))
+    (List.map (fun (prn, tau) -> gps_one prn tau) [ (1, 0); (2, 11); (3, 5); (4, 7) ])
 
 (* ---------------------------------------------------------------- sync words *)
 (* (a) exact 16-bit match in segment 0: PE 0 deserialises the broadcast bit (S <- S << 1 | lane),
@@ -436,8 +444,10 @@ let sync_test () =
 (* Relaxation along a path v0 -> v1 -> v2 -> v3 in segment 3: per edge two PEs, P <- A + w
    (saturating) and S <- min(S, A), P <- the new minimum. Candidate distances of v0 stream in
    on the fixed port; 0x7fff is infinity. *)
-let minplus_test () =
-  let w = [| ri 3000; ri 3000; 20000 + ri 5000; ri 3000 |] in
+let minplus_one inst =
+  (* instances 0-4 small weights; 5-9 large, so sums reach infinity; odd instances also stream
+     infinity itself and values just below it *)
+  let w = if inst < 5 then Array.init 4 (fun _ -> ri 3000) else Array.init 4 (fun _ -> ri 20000) in
   let add_op k = { nop with xsel = 1; ysel = 0; k; alu = 0; pwb = 1; stream = true } in
   let min_op = { nop with xsel = 0; ysel = 1; alu = 3; swb = 1; pwb = 1; stream = true } in
   let ops = Array.init 8 (fun i -> if i mod 2 = 0 then add_op w.(i / 2) else min_op) in
@@ -448,7 +458,10 @@ let minplus_test () =
   add (cfg_seq 3 ops);
   add (init_seq 3 (Array.make 8 0x7fff));
   add [ ctrl 3 ~src:3 ~run:true () ];
-  let cands = Array.init 30 (fun _ -> 2000 + ri 20000) in
+  let cands =
+    Array.init 30 (fun _ ->
+        if inst mod 2 = 1 && ri 3 = 0 then pick_one [| 0x7fff; 0x7ffe; 0x7f00 |] else ri 20000)
+  in
   Array.iter (fun v -> add [ with_fixed 3 v true idle ]; if ri 2 = 0 then add [ idle ]) cands;
   add (idles 12);
   let states, mism = run !stim in
@@ -462,13 +475,16 @@ let minplus_test () =
     incr checks;
     if final.pes.(8 + (2 * j) + 1).s <> !d then incr bad
   done;
-  report "min-plus relaxation (2 PEs per edge)" ~checks:!checks ~bad:!bad ~mism
-    (Printf.sprintf "weights %d %d %d %d; one PE would need a fused add-then-min" w.(0) w.(1) w.(2) w.(3))
+  (!checks, !bad, mism, if !d = 0x7fff then Printf.sprintf "inst %d reaches infinity" inst else "")
+
+let minplus_test () =
+  repeated "min-plus relaxation (2 PEs per edge)" "10 instances, 4 edges each; one PE would need a fused add-then-min"
+    (List.init 10 minplus_one)
 
 (* ---------------------------------------------------------------- sorting *)
 (* Systolic insertion sort in segment 3: S <- max(S, A), P <- the loser; S starts at -32768.
    20 values stream in (8 stay, sorted, 12 plus the 8 sentinels leave through the tap). *)
-let sort_test () =
+let sort_one inst =
   let op = { nop with xsel = 0; ysel = 1; alu = 2; swb = 1; pwb = 2; stream = true } in
   let stim = ref [] in
   let add l = stim := !stim @ l in
@@ -477,7 +493,11 @@ let sort_test () =
   add (init_seq 3 (Array.make 8 0x8000));
   add [ ctrl 3 ~src:3 ~run:true () ];
   let start = List.length !stim in
-  let vals = Array.init 20 (fun _ -> ri 0x10000) in
+  (* odd instances: few distinct values (duplicates) and the extremes *)
+  let vals =
+    Array.init 20 (fun _ ->
+        if inst mod 2 = 1 then pick_one [| 0x8000; 0x7fff; 0; 1; 0xffff; 5; 5 |] else ri 0x10000)
+  in
   Array.iter (fun v -> add [ with_fixed 3 v true idle ]; if ri 3 = 0 then add [ idle ]) vals;
   add (idles 12);
   let states, mism = run !stim in
@@ -494,7 +514,11 @@ let sort_test () =
   let rest = List.filteri (fun i _ -> i >= 8) sorted @ List.init 8 (fun _ -> -0x8000) in
   incr checks;
   if List.sort compare !out <> List.sort compare rest then incr bad;
-  report "sorting (insertion, 8 PEs, 20 values)" ~checks:!checks ~bad:!bad ~mism "S holds the top 8 in order; the rest leave through the tap"
+  (!checks, !bad, mism, "")
+
+let sort_test () =
+  repeated "sorting (insertion, 8 PEs, 20 values)" "10 instances; S holds the top 8 in order; the rest leave through the tap"
+    (List.init 10 sort_one)
 
 (* ---------------------------------------------------------------- CRCs *)
 let bits_of_msg (c : Refs.crc) msg =
