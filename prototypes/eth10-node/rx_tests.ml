@@ -282,7 +282,7 @@ let rx () =
       let row = List.map (fun p -> let g, t, _ = cell ~n ~clock_hz ~ppm:[ -.p; p ] () in (p, g, t)) [ 100.0; 1000.0; 10000.0; 60000.0; 100000.0; 150000.0 ] in
       pr "    receiver %.2f MHz, n = %d: %s" (clock_hz /. 1e6) n
         (String.concat "  " (List.map (fun (p, g, t) -> Printf.sprintf "+-%g ppm %d/%d" p g t) row));
-      List.iter (fun (p, g, t) -> if p <= 10000.0 && g <> t then all_ok := false) row)
+      List.iter (fun (_, g, t) -> if g <> t then all_ok := false) row)
     [ (60e6, 1); (60.857143e6, 1); (60e6, 4); (60.857143e6, 4); (53.2e6, 4) ];
   (* jitter *)
   pr "  edge jitter, uniform +-j ns on every edge, +-100 ppm (20 frames per cell):";
@@ -290,7 +290,10 @@ let rx () =
       let row = List.map (fun j -> let g, t, fa = cell ~n ~clock_hz ~jitter_ns:j () in (j, g, t, fa)) [ 0.0; 4.0; 6.0; 8.0; 10.0; 12.0; 14.0 ] in
       pr "    %.2f MHz n = %d: %s" (clock_hz /. 1e6) n
         (String.concat " " (List.map (fun (j, g, t, _) -> Printf.sprintf "%g:%d/%d" j g t) row));
-      if List.exists (fun (_, _, _, fa) -> fa > 0) row then (pr "      FALSE ACCEPT"; all_ok := false))
+      if List.exists (fun (_, _, _, fa) -> fa > 0) row then (pr "      FALSE ACCEPT"; all_ok := false);
+      (* required recovery: up to +-8 ns with one sample per clock, +-10 ns with four *)
+      let need = if n = 4 then 10.0 else 8.0 in
+      if List.exists (fun (j, g, t, _) -> j <= need && g <> t) row then all_ok := false)
     [ (60e6, 1); (60.857143e6, 1); (60e6, 4); (60.857143e6, 4) ];
   (* preamble loss *)
   pr "  preamble truncated to p bits before the SFD (60 MHz, n = 1, 4 frames each):";
@@ -298,7 +301,7 @@ let rx () =
       let frames = List.init 4 (fun _ -> random_frame ()) in
       let r = run_rx ~n:1 ~clock_hz:60e6 (train ~preamble_bits:p frames) in (p, intact r frames)) [ 56; 32; 16; 12; 10; 9; 8; 6; 4; 0 ] in
   pr "    %s" (String.concat "  " (List.map (fun (p, g) -> Printf.sprintf "%d:%d/4" p g) pre_row));
-  if List.exists (fun (p, g) -> p >= 10 && g <> 4) pre_row then all_ok := false;
+  if List.exists (fun (p, g) -> p >= 9 && g <> 4) pre_row then all_ok := false;
   (* runts: short frames come through with a good CRC and their length; the node drops them *)
   let runts = List.init 8 (fun k -> let f = List.init (10 + (6 * k)) (fun _ -> Random.int 256) in f @ Eth_model.fcs_bytes f) in
   let r = run_rx ~n:1 ~clock_hz:60e6 (train runts) in

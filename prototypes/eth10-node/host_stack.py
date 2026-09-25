@@ -118,6 +118,10 @@ def check(req_path, rep_path):
                 ip, ic = r[IP], r[ICMP]
                 if ip.src != NODE_IP or ip.dst != q[IP].src:
                     errs.append(f"IPs {ip.src}->{ip.dst}")
+                qi = q[IP]
+                for fld in ("version", "ihl", "tos", "len", "id", "flags", "frag", "ttl", "proto"):
+                    if getattr(ip, fld) != getattr(qi, fld):
+                        errs.append(f"IP {fld} changed")
                 if ic.type != 0 or ic.code != 0:
                     errs.append(f"ICMP type {ic.type}")
                 if ic.id != q[ICMP].id or ic.seq != q[ICMP].seq:

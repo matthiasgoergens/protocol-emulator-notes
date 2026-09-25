@@ -127,7 +127,9 @@ let check ?(lim = clause14) ~tick_ns (runs : (int * int) list) =
                 preamble_bits = pre; max_dev_ns = dev; tp_idl_ns = tp }
       end) bursts in
   (* per-event checks *)
-  let last_activity_end = ref 0.0 and have_prev = ref false in
+  (* the start of the trace counts as activity, so the first link pulse is held to the same
+     8..24 ms window (review finding: it was unchecked) *)
+  let last_activity_end = ref 0.0 and have_prev = ref true in
   let gaps = ref [] and widths = ref [] and tps = ref [] and maxdev = ref 0.0 in
   let prev_frame_end = ref neg_infinity in
   List.iter (function
