@@ -68,6 +68,7 @@ let diff_effects (e : Isa2.effects) (o : Harness2.observed) (st : Isa2.state) =
   if e.port_pop <> o.port_pop then d := "port_pop" :: !d;
   if e.port_push <> o.port_push then d := "port_push" :: !d;
   if e.bank_write <> o.bank_write then d := "bank_write" :: !d;
+  if e.bank_read <> o.bank_read then d := "bank_read" :: !d;
   if e.fine_out <> o.fine_out then d := "fine_out" :: !d;
   let cfg_model = Array.fold_left (fun (acc, i) c -> (acc lor (c lsl (8 * i)), i + 1)) (0, 0) st.cfgs |> fst in
   if cfg_model <> o.cfg_out then d := "cfg_out" :: !d;

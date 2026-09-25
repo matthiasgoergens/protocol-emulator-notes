@@ -54,7 +54,7 @@ type observed = {
   pin_out : int; pin_oe : int; pin_sub : int;
   host_out : (int * int) option; host_in_ready : bool;
   port_pop : int option; port_push : (int * int) option;
-  bank_write : (int * int) option; fine_out : int option; cfg_out : int;
+  bank_write : (int * int) option; bank_read : int option; fine_out : int option; cfg_out : int;
 }
 
 let onehot_index v = let rec f i = if i >= 4 then None else if (v lsr i) land 1 = 1 then Some i else f (i + 1) in f 0
@@ -96,6 +96,7 @@ let cycle s (io : Isa2.io) =
     host_in_ready; port_pop;
     port_push = (match onehot_index pov with Some p -> Some (p, g (s.after "port_out_data")) | None -> None);
     bank_write = (if we then Some (baddr, bw) else None);
+    bank_read = (if re then Some baddr else None);
     fine_out = (if g (s.after "fine_valid") = 1 then Some (g (s.after "fine_out")) else None);
     cfg_out = g (s.after "cfg_out") }
 

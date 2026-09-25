@@ -180,6 +180,7 @@ type effects = {
   port_pop : int option;                (* in-port popped *)
   port_push : (int * int) option;       (* (out-port, byte) *)
   bank_write : (int * int) option;      (* (address, byte) *)
+  bank_read : int option;               (* address read by LDB *)
   fine_out : int option;
 }
 
@@ -210,7 +211,7 @@ and step_f st ~(fetch : int -> int) (io : io) =
   let acc_next = ref acc and cnt_next = ref cnt in
   let dl_next = ref (if dl = 0 then 0 else dl - 1) in
   let host_out = ref None and host_in_ready = ref false and port_pop = ref None
-  and port_push = ref None and bank_write = ref None and fine_out = ref None in
+  and port_push = ref None and bank_write = ref None and bank_read = ref None and fine_out = ref None in
   let stay () = pc_next := pc in
   let fail_or_stay () = if dl = 0 then pc_next := addr else stay () in
   let pin_write () =
@@ -294,7 +295,9 @@ and step_f st ~(fetch : int -> int) (io : io) =
      else if sub = x_skeq then (if acc = imm8 then pc_next := (pc + 2) land 0xFF)
      else if sub = x_fine then (st.fines.(t) <- imm8; st.armed.(t) <- 1)
      else if sub = x_cnta then cnt_next := acc
-     else if sub = x_ldb then (acc_next := st.bankmem.(bp); st.bps.(t) <- (bp + 1) land (bank_len - 1))
+     else if sub = x_ldb then begin
+       acc_next := st.bankmem.(bp); bank_read := Some bp; st.bps.(t) <- (bp + 1) land (bank_len - 1)
+     end
      else if sub = x_stb then begin
        st.bankmem.(bp) <- acc; bank_write := Some (bp, acc);
        st.bps.(t) <- (bp + 1) land (bank_len - 1)
@@ -309,7 +312,7 @@ and step_f st ~(fetch : int -> int) (io : io) =
    | None -> ());
   st.thread <- (t + 1) mod n_threads;
   { host_out = !host_out; host_in_ready = !host_in_ready; port_pop = !port_pop;
-    port_push = !port_push; bank_write = !bank_write; fine_out = !fine_out }
+    port_push = !port_push; bank_write = !bank_write; bank_read = !bank_read; fine_out = !fine_out }
 
 (* ---- disassembler (for traces and the README) ---- *)
 let disasm w =

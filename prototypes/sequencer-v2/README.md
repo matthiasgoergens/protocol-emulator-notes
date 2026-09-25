@@ -50,7 +50,8 @@ round latch. The core fetches `{page, pc}` from one external store (the 512 × 1
   thread's next instruction already comes from there. *Fix:* the programme-store paragraph should
   say "the host writes each thread's page and start pc (at reset, or at run time to restart a
   thread)".
-- **D2 BANK.** The table's "set the bank pointer's high byte" leaves no way to set the low byte.
+- **D2 BANK, a deliberate deviation from the table's wording.** The table's "set the bank
+  pointer's high byte" (keeping the low byte) leaves no way to set the low byte.
   The two 4-kbit gain-cell banks hold 1,024 bytes, so the pointer is 10 bits. Here BANK loads
   `bp ← {imm[1:0], acc}`: any address in two words (LDA, BANK). imm[7:2] are reserved, for a bank
   select if there are more banks. LDB and STB post-increment, wrapping at 1,024. *Fix:* "6 BANK
@@ -58,8 +59,10 @@ round latch. The core fetches `{page, pc}` from one external store (the 512 × 1
 - **D3 WAITC 11 needs state.** "The last SEND target has space" requires remembering that
   target. Each thread gets a 3-bit `lsend`, set by every SEND whether or not it succeeds, so a
   SEND that gave up at dl = 0 can be followed by a WAITC 11 that waits for space in the same
-  target. Channel 0–3 means the inbox is empty; channel 4–7 means the out-port is ready. *Fix:*
-  name the register in the table.
+  target. Channel 0–3 means the inbox is empty; channel 4–7 means the out-port is ready. `lsend`
+  resets to 0, so a WAITC 11 before any SEND tests inbox 0. Counting failed SENDs is a choice,
+  not something the table forces. *Fix:* name the register, its reset value and "every SEND,
+  completed or not" in the table.
 - **D4 FINE.** A per-thread offset and armed bit. The thread's next SETP or SHO carries the
   offset out (`fine_out`, `fine_valid`, registered with the pins) and disarms it.
 - **D5 CFG.** Bit 7 is the round-latch mode, the only bit the core itself uses. Bits 6..0 are
@@ -117,11 +120,19 @@ Results:
   biased. SKEQ is the weakest catch even when biased (6 of 30), because it needs acc equal to a
   random immediate.
 
-A bug in my own harness was found this way. A planted STB bug first "passed" because of a real
-mismatch with the same first failing clock. The mismatch was the bank read data being set
-between clock edges, which Cyclesim does not propagate. The harness now shows the in-flight byte
-itself (D9). A bug that was declared but never wired in was found by checking that every
-constructor is used.
+What the lockstep cannot show: that interpreter and RTL both follow the table. Both were written
+from one reading of it, so a shared misreading passes. An independent review (codex, Luna model)
+of isa2.ml against the table found no field or semantic deviation beyond D2, which is deliberate,
+and two readings the table leaves open (D3). It also pointed out that LDB's read address was not
+compared directly; it now is (`bank_read`). The ported suites are independent evidence, but only
+for the instructions their firmware uses (below).
+
+The controls found two mistakes of mine. Three different planted bugs first failed at the same
+clock of the same programme, which pointed to a real mismatch rather than to the bugs. It was
+the harness: it set the bank's read data between clock edges, which Cyclesim does not
+propagate. The harness now shows the in-flight byte itself (D9). And the STB bug counted as
+"caught" only because of that mismatch: it had been declared but never wired into the RTL. A
+check that every declared bug is used found it.
 
 ## The landed firmware on v2 (`ports/`, `results/ports/`)
 
@@ -129,8 +140,8 @@ Each port runs the prototype's own firmware and its own checks, with the prototy
 linked in, not copied. Only the ISA and RTL modules are replaced. `ports/shim/isa.ml` keeps the
 variant's own assembler (cut from its file by a dune rule) and swaps the interpreter for v2's.
 `ports/shim/harness.ml` swaps the RTL. Each word is translated as it is fetched (`compat.ml`),
-so firmware that patches its own words at run time still works (usb-ls's controller patches 88
-words). The translation, per variant:
+so firmware that patches its own words at run time still works (usb-ls's controller makes 88
+patches in the directed run). The translation, per variant:
 - base: HALT becomes `JMP self`; opcodes E and F (NOP in the base) become NOP; operand bits the
   base ignores are cleared, because v2 gives some of them a meaning;
 - usb-ls: in addition, SKNE becomes EXT SKNE or SKEQ, the pair bit becomes pair + psel, and
@@ -147,7 +158,7 @@ the OCaml one.
 | 10BASE-T TX (`sequencer-ethernet`) | all 4 threads, pin against the Ethernet model's encoder, 3 controls, RTL | PASS, **identical** | `results/ports/sequencer-ethernet.txt` |
 | JTAG and SWD (`proto-jtag-swd/wide`) | directed and 60 + 40 random sessions, controls, TCK/SWCLK characterisation, the variant's own random lockstep | ALL PASS, **identical** to `proto-jtag-swd/results/wide-all.txt` | `results/ports/jtag-swd.txt` |
 | low-speed USB (`usb-ls`) | T0 on the base ISA (13 clock offsets), the whole device T0–T2 with CRC assist and controller: enumeration, 8 random sessions, 4 controls; random-programme lockstep of the variant | FIRMWARE LS DEVICE PASS, **identical** to `usb-ls/run-fw-8seeds.log` | `results/ports/usb-ls.txt` |
-| PS/2 device and host (`sequencer-ps2-can`) | 3 scenarios, 6 controls, 16 random runs, 18.6 M clocks in lockstep | ALL PASS, **identical** to `logs/2026-09-25/ps2.txt` | `results/ports/ps2.txt` |
+| PS/2 device and host (`sequencer-ps2-can`) | 3 scenarios, 6 controls, 16 random runs (18.6 M clocks in lockstep) | ALL PASS, **identical** to `logs/2026-09-25/ps2.txt` | `results/ports/ps2.txt` |
 | UART ↔ I2C bridge (`multi-proto`, bridge A) | re-assembled for v2 (below): main run with RTL, 12 random seeds, isolation, controls, budget edges, backpressure | BRIDGES PASS | `results/ports/multi-proto-bridge_a.txt` |
 | CAN (`sequencer-ps2-can`) | TX thread re-assembled; RX thread not ported (below) | see below | `results/ports/can-tx.txt` |
 
@@ -222,4 +233,8 @@ A like-for-like budget line for section 6 of the note is **41.3k, not 30.6k**.
 - The table fixes proposed under D1, D2, D3 and D5 should go into `notes/architecture-v0.md`.
 - SKEQ's planted bug is caught in only 6 of 30 random programmes. A generator that loads the
   compared value just before would raise that.
+- Several new instructions have no evidence beyond the lockstep, i.e. beyond my reading of the
+  table: FINE, LDB, STB, BANK, CFG and the round latch, the ports (MBX 4–7), SHO's complement
+  pair (psel 0) and its capture. No ported firmware uses them. The first independent use should
+  be eth10-node's transmitter with the complementary pair, and a bank-streaming demo.
 - No place and route or timing yet; the base core closed 66 MHz with 7 ns to spare.
