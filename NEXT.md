@@ -13,7 +13,7 @@ permission to push master fast-forward).
 - `notes/backlog.md`: everything agreed, including framing, policies and tools to port.
 - `notes/jane-street-alignment.md`: their asks, quoted.
 
-## Done (on master, pushed unless noted; HEAD bad8787, local)
+## Done (on master, pushed unless noted; latest c3c1602)
 - **Protocols in simulation:** UART, SPI, I2C; JTAG and SWD (`prototypes/proto-jtag-swd`);
   PS/2 and CAN (`prototypes/sequencer-ps2-can`); low-speed USB as firmware and as a block
   (`prototypes/usb-ls`); 10BASE-T node with ARP and ping (`prototypes/eth10-node`); bridges and
@@ -26,8 +26,7 @@ permission to push master fast-forward).
   rule breaks (`prototypes/rule-breaks`: TT's precheck runs only IHP's main DRC table, so run the
   maximal deck ourselves).
 - **Notes:** Jane Street taste; hard-to-program history; systolic prior art (Groq, TPU, Eyeriss).
-- **Fix:** 10BASE-T receiver shift-register clear (74562bf); its regenerated Verilog is bad8787
-  (local, not pushed).
+- **Fix:** 10BASE-T receiver shift-register clear (74562bf); its regenerated Verilog is bad8787.
 
 ## In flight: agent worktrees (each on its own branch; merge when a report lands)
 All agents were killed by the restart at about 15:05, or later by the usage limit. Status per
@@ -57,8 +56,8 @@ worktree (commits ahead of master / uncommitted files):
    within 1 s: `prototypes/gain-cell/tricks-thick/README.md`). A mixed-direction control
    already escapes it (`prototypes/systolic-storage/README.md`). Fix the design, for example
    with a two-sided check or refresh bounds, before presenting it.
-2. **Untriaged:** the codex brainstorm's answer, `notes/codex-brainstorm-2026-09-25.md`, not
-   committed yet. Headline: "silicon laboratory" (learn an unknown peripheral, perturb it,
+2. **Untriaged:** the codex brainstorm's answer, `notes/codex-brainstorm-2026-09-25.md`
+   (committed with this handoff, but not yet triaged). Headline: "silicon laboratory" (learn an unknown peripheral, perturb it,
    emulate it). It recommends an SRAM programme store and an agents-programming-the-chip
    experiment with eight unseen tasks.
 3. **Gaps from architecture-v0 still open:**
