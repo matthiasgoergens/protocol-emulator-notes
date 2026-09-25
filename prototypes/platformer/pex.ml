@@ -28,13 +28,17 @@ let alu op x y =
 
 type out = { tag : Signal.t; data : Signal.t; s : Signal.t; cfg_out : Signal.t }
 
-let create ?(fault = 0) ~clock ~clear ~cfg_in ~cfg_strobe ~tag ~data () =
+let create ?(fault = 0) ?(lean = false) ~clock ~clear ~cfg_in ~cfg_strobe ~tag ~data () =
   let spec = Reg_spec.create ~clock ~clear () in
   let cfg, cfg_out = chain (Reg_spec.create ~clock ()) ~enable:cfg_strobe ~din:cfg_in 5 in
   let c0 = cfg 0 and k = concat_msb [ cfg 1; cfg 2 ] and c3 = cfg 3 and c4 = cfg 4 in
   let op = select c0 1 0 and ysel_k = bit c0 2 and xsel_s = bit c0 3 and s_en = bit c0 4 in
   let load_en = bit c0 5 and cls = bit c0 6 and rot = bit c0 7 in
   let lb = select c3 1 0 and w = select c3 5 2 and rel_win = bit c3 6 and rel_eol = bit c3 7 in
+  (* lean: only what the video configurations use (2 bits per step, window above bit 4, no
+     rotate); those configuration bits are then ignored *)
+  let lb = if lean then of_int ~width:2 1 else lb and w = if lean then of_int ~width:4 4 else w in
+  let rot = if lean then gnd else rot in
   let n = select c4 3 0 and write_en = bit c4 4 in
   let open Always in
   let s = Variable.reg spec ~width:16 and a = Variable.reg spec ~width:32 in
@@ -48,7 +52,7 @@ let create ?(fault = 0) ~clock ~clear ~cfg_in ~cfg_strobe ~tag ~data () =
   let consume = is_rec &: load_en &: ~:(loaded.value) in
   (* window predicate *)
   let mask = mux n (List.init 16 (fun i -> of_int ~width:16 ((1 lsl i) - 1))) in
-  let p = (log_shift srl s.value w &: mask) ==:. 0 in
+  let p = ((if lean then srl s.value 4 else log_shift srl s.value w) &: mask) ==:. 0 in
   (* field and shift, b = 1 lsl lb *)
   let dir = if fault = 1 then gnd else bit attr2.value 8 in
   let av = a.value in
@@ -88,12 +92,12 @@ let create ?(fault = 0) ~clock ~clear ~cfg_in ~cfg_strobe ~tag ~data () =
   { tag = otag.value; data = odata.value; s = s.value; cfg_out }
 
 (* a row of n PE-Xs, the link and the configuration chain running through them *)
-let row ?(fault = 0) n () =
+let row ?(fault = 0) ?(lean = false) n () =
   let clock = input "clock" 1 and clear = input "clear" 1 in
   let cfg_in = input "cfg_in" 8 and cfg_strobe = input "cfg_strobe" 1 in
   let tag = ref (input "tag_in" 3) and data = ref (input "data_in" 16) and cfg = ref cfg_in in
   let outs = List.concat (List.init n (fun i ->
-    let o = create ~fault ~clock ~clear ~cfg_in:!cfg ~cfg_strobe ~tag:!tag ~data:!data () in
+    let o = create ~fault ~lean ~clock ~clear ~cfg_in:!cfg ~cfg_strobe ~tag:!tag ~data:!data () in
     tag := o.tag; data := o.data; cfg := o.cfg_out;
     [ output (Printf.sprintf "s%d" i) o.s ])) in
   Circuit.create_exn ~name:(Printf.sprintf "pex_row%d" n)

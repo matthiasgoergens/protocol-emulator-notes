@@ -33,17 +33,37 @@ let timing () =
   Printf.sprintf "RTL pins, one field: sync-fall spacing (clocks):%s\nfirst pixel, clocks after the sync fall:%s\npixel clocks per line:%s\n"
     (show spacing) (show first_px) (show px_clocks)
 
-(* Dump [fields] fields of pins, one file per field, starting each at line 0's sync. *)
-let dump ~fields ~lut ~packet ~name =
+(* Dump [fields] fields of pins, one file per field, starting each at line 0's sync. With [desc],
+   also compare every step reaching the output port with the reference renderer. *)
+let dump ?desc ~fields ~lut ~packet ~name () =
   let s = Sim.make () in
   let bufs = Array.init (fields + 1) (fun _ -> Buffer.create (Sim.cpl * Sim.lpf)) in
-  let st = Sim.run s ~fields ~lut ~packet ~on_cycle:(fun s ~field ~line:_ ->
-    if field < fields then Buffer.add_char bufs.(field) (Char.chr (pins_byte s))) in
+  let got = Hashtbl.create 4096 and wanted = Hashtbl.create 4096 in
+  let packet ~field ~line =
+    (match desc with
+     | Some d -> (match d ~field ~line with Some l -> Hashtbl.replace wanted (field, line) l | None -> ())
+     | None -> ());
+    packet ~field ~line in
+  let st = Sim.run s ~fields ~lut ~packet ~on_cycle:(fun s ~field ~line ->
+    if field < fields then Buffer.add_char bufs.(field) (Char.chr (pins_byte s));
+    if desc <> None && Bits.to_int !(s.Sim.arr_tag) = 1 then begin
+      let key = (field, line) in
+      Hashtbl.replace got key ((Bits.to_int !(s.arr_data) land 63) :: (try Hashtbl.find got key with Not_found -> []))
+    end) in
   for i = 0 to fields - 1 do
     let oc = open_out_bin (Printf.sprintf "out/%s_%03d.bin" name i) in
     Buffer.output_buffer oc bufs.(i); close_out oc
   done;
-  st
+  let lines = ref 0 and bad = ref 0 in
+  Hashtbl.iter (fun (f, ln) l ->
+    if f < fields then begin
+      incr lines;
+      let r = Scene.reference l in
+      let g = Array.of_list (List.rev (try Hashtbl.find got (f, ln) with Not_found -> [])) in
+      if Array.length g <> Scene.npix then bad := !bad + Scene.npix
+      else Array.iteri (fun i c -> if g.(i) <> c then incr bad) r
+    end) wanted;
+  st, !lines, !bad
 
 (* The palette field: 13 columns of hue (0 = grey), 11 bands of luma, as ../retro-console's. *)
 let hue_index = [| 1; 2; 3; 5; 6; 7; 9; 10; 11; 13; 14; 15; 17 |]
@@ -63,4 +83,4 @@ let palette () =
                     @ Scene.lut_record ~addr:32 [ 4 ] in
       Scene.encode ~lut:lut_upd l
     end else Scene.encode_blank () in
-  dump ~fields:1 ~lut:(fun () -> lut) ~packet ~name:"palette"
+  let st, _, _ = dump ~fields:1 ~lut:(fun () -> lut) ~packet ~name:"palette" () in st

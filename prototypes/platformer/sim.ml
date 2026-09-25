@@ -18,8 +18,8 @@ type t = {
   lut_we : Bits.t ref; lut_waddr : Bits.t ref;
 }
 
-let make ?fault () =
-  let sim = Cyclesim.create (Video.circuit ?fault ()) in
+let make ?fault ?lean () =
+  let sim = Cyclesim.create (Video.circuit ?fault ?lean ()) in
   let i = Cyclesim.in_port sim and o = Cyclesim.out_port sim in
   let s = { sim; clear = i "clear"; cfg_in = i "cfg_in"; cfg_strobe = i "cfg_strobe"; hw_en = i "hw_en";
             hw_data = i "hw_data"; pins = o "pins"; seq = o "seq_pins"; arr_tag = o "arr_tag";

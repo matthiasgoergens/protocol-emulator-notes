@@ -1,5 +1,6 @@
-chip lockstep: 240 random lines x 256 pixels against the reference: 0 lines, 0 pixels differ (30 s)
-line packets: 312 sent, mean 97.6 entries, max 157 (visible lines max 157); oldest lookup-table entry read: 54235 clocks = 1.019 ms
+chip lockstep: 240 random lines x 256 pixels against the reference: 0 lines, 0 pixels differ (18 s)
+line packets: 312 sent, mean 97.6 entries, max 157 (visible lines max 157); oldest lookup-table entry read: 54250 clocks = 1.020 ms
+  the same with the lean PE-X (2 bits per step, window above bit 4, no rotate): 0 of 240 lines, 0 pixels differ
   planted fault 1 (no horizontal flip): 217 of 240 lines, 7788 pixels differ
   planted fault 2 (flag block ignored): 218 of 240 lines, 2999 pixels differ
   planted fault 3 (release at window start): 240 of 240 lines, 27423 pixels differ

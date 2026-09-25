@@ -1,0 +1,828 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Running command `read_verilog -sv rtl/outport.v; hierarchy -check -top outport; synth -top outport -flatten ; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/outport.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; write_verilog -noattr /var/tmp/platformer/netlists/outport.v' --
+
+1. Executing Verilog-2005 frontend: rtl/outport.v
+Parsing SystemVerilog input from `rtl/outport.v' to AST representation.
+Generating RTLIL representation for module `\outport'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \outport
+
+2.2. Analyzing design hierarchy..
+Top module:  \outport
+Removed 0 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \outport
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \outport
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$rtl/outport.v:203$36 in module outport.
+Marked 1 switch rules as full_case in process $proc$rtl/outport.v:189$31 in module outport.
+Marked 1 switch rules as full_case in process $proc$rtl/outport.v:162$20 in module outport.
+Marked 1 switch rules as full_case in process $proc$rtl/outport.v:138$14 in module outport.
+Marked 1 switch rules as full_case in process $proc$rtl/outport.v:128$12 in module outport.
+Marked 1 switch rules as full_case in process $proc$rtl/outport.v:116$8 in module outport.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 6 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~6 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\outport.$proc$rtl/outport.v:203$36'.
+     1/1: $0\_94[6:0]
+Creating decoders for process `\outport.$proc$rtl/outport.v:189$31'.
+     1/1: $0\_59[3:0]
+Creating decoders for process `\outport.$proc$rtl/outport.v:162$20'.
+     1/1: $0\_54[31:0]
+Creating decoders for process `\outport.$proc$rtl/outport.v:138$14'.
+     1/1: $0\_46[5:0]
+Creating decoders for process `\outport.$proc$rtl/outport.v:128$12'.
+     1/1: $0\_36[5:0]
+Creating decoders for process `\outport.$proc$rtl/outport.v:116$8'.
+     1/1: $0\_25[0:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\outport.\_94' using process `\outport.$proc$rtl/outport.v:203$36'.
+  created $dff cell `$procdff$55' with positive edge clock.
+Creating register for signal `\outport.\_59' using process `\outport.$proc$rtl/outport.v:189$31'.
+  created $dff cell `$procdff$56' with positive edge clock.
+Creating register for signal `\outport.\_54' using process `\outport.$proc$rtl/outport.v:162$20'.
+  created $dff cell `$procdff$57' with positive edge clock.
+Creating register for signal `\outport.\_46' using process `\outport.$proc$rtl/outport.v:138$14'.
+  created $dff cell `$procdff$58' with positive edge clock.
+Creating register for signal `\outport.\_36' using process `\outport.$proc$rtl/outport.v:128$12'.
+  created $dff cell `$procdff$59' with positive edge clock.
+Creating register for signal `\outport.\_25' using process `\outport.$proc$rtl/outport.v:116$8'.
+  created $dff cell `$procdff$60' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\outport.$proc$rtl/outport.v:203$36'.
+Removing empty process `outport.$proc$rtl/outport.v:203$36'.
+Found and cleaned up 1 empty switch in `\outport.$proc$rtl/outport.v:189$31'.
+Removing empty process `outport.$proc$rtl/outport.v:189$31'.
+Found and cleaned up 1 empty switch in `\outport.$proc$rtl/outport.v:162$20'.
+Removing empty process `outport.$proc$rtl/outport.v:162$20'.
+Found and cleaned up 1 empty switch in `\outport.$proc$rtl/outport.v:138$14'.
+Removing empty process `outport.$proc$rtl/outport.v:138$14'.
+Found and cleaned up 1 empty switch in `\outport.$proc$rtl/outport.v:128$12'.
+Removing empty process `outport.$proc$rtl/outport.v:128$12'.
+Found and cleaned up 1 empty switch in `\outport.$proc$rtl/outport.v:116$8'.
+Removing empty process `outport.$proc$rtl/outport.v:116$8'.
+Cleaned up 6 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+<suppressed ~4 debug messages>
+
+3.3. Executing FLATTEN pass (flatten design).
+
+3.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+
+3.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+Removed 1 unused cells and 43 unused wires.
+<suppressed ~3 debug messages>
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module outport...
+Found and reported 0 problems.
+
+3.7. Executing OPT pass (performing simple optimizations).
+
+3.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+
+3.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 41 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Computing hashes of 40 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+3.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \outport..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+      Replacing known input bits on port A of cell $ternary$rtl/outport.v:109$3: \_25 -> 1'1
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~25 debug messages>
+
+3.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \outport.
+Performed a total of 0 changes.
+
+3.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 40 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Removed a total of 0 cells.
+
+3.7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+
+3.7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+
+3.7.9. Finished fast OPT passes. (There is nothing left to do.)
+
+3.8. Executing FSM pass (extract and optimize FSM).
+
+3.8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+
+3.8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.9. Executing OPT pass (performing simple optimizations).
+
+3.9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+
+3.9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 40 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Removed a total of 0 cells.
+
+3.9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \outport..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~25 debug messages>
+
+3.9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \outport.
+Performed a total of 0 changes.
+
+3.9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 40 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Removed a total of 0 cells.
+
+3.9.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$60 ($dff) from module outport (D = \_3, Q = \_25, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$61 ($sdff) from module outport (D = \_32, Q = \_25).
+Adding SRST signal on $procdff$59 ($dff) from module outport (D = \_4, Q = \_36, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$63 ($sdff) from module outport (D = \_40, Q = \_36).
+Adding SRST signal on $procdff$58 ($dff) from module outport (D = \_48, Q = \_46, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$65 ($sdff) from module outport (D = \data [5:0], Q = \_46).
+Adding SRST signal on $procdff$57 ($dff) from module outport (D = \_56, Q = \_54, rval = 0).
+Adding SRST signal on $procdff$56 ($dff) from module outport (D = { \_15 [3] \_15 [1] }, Q = { \_59 [3] \_59 [1] }, rval = 2'00).
+Adding SRST signal on $procdff$56 ($dff) from module outport (D = { \_65 [2] \_65 [0] }, Q = { \_59 [2] \_59 [0] }, rval = 2'00).
+Adding EN signal on $auto$ff.cc:337:slice$69 ($sdff) from module outport (D = { \_64 [2] \_64 [0] }, Q = { \_59 [2] \_59 [0] }).
+Adding EN signal on $auto$ff.cc:337:slice$68 ($sdff) from module outport (D = { \_15 [3] \_15 [1] }, Q = { \_59 [3] \_59 [1] }).
+Adding SRST signal on $procdff$55 ($dff) from module outport (D = { \_73 \_75 \_87 \_90 }, Q = \_94, rval = 7'0000000).
+
+3.9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+Removed 9 unused cells and 12 unused wires.
+<suppressed ~16 debug messages>
+
+3.9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+
+3.9.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \outport..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~14 debug messages>
+
+3.9.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \outport.
+Performed a total of 0 changes.
+
+3.9.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 34 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Removed a total of 0 cells.
+
+3.9.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+
+3.9.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+
+3.9.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.10. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 2) from port B of cell outport.$auto$opt_dff.cc:235:make_patterns_logic$75 ($ne).
+Removed top 5 bits (of 6) from port B of cell outport.$add$rtl/outport.v:105$2 ($add).
+Removed top 3 bits (of 32) from port B of cell outport.$add$rtl/outport.v:160$19 ($add).
+Removed top 4 bits (of 32) from port B of cell outport.$add$rtl/outport.v:168$21 ($add).
+Removed top 3 bits (of 4) from port B of cell outport.$sub$rtl/outport.v:180$25 ($sub).
+Removed top 1 bits (of 2) from port B of cell outport.$eq$rtl/outport.v:186$29 ($eq).
+
+3.11. Executing PEEPOPT pass (run peephole optimizers).
+
+3.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+
+3.13. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module outport:
+  creating $macc model for $add$rtl/outport.v:105$2 ($add).
+  creating $macc model for $add$rtl/outport.v:160$19 ($add).
+  creating $macc model for $add$rtl/outport.v:168$21 ($add).
+  creating $macc model for $add$rtl/outport.v:169$22 ($add).
+  creating $macc model for $sub$rtl/outport.v:151$17 ($sub).
+  creating $macc model for $sub$rtl/outport.v:180$25 ($sub).
+  merging $macc model for $add$rtl/outport.v:168$21 into $add$rtl/outport.v:169$22.
+  creating $alu model for $macc $sub$rtl/outport.v:151$17.
+  creating $alu model for $macc $sub$rtl/outport.v:180$25.
+  creating $alu model for $macc $add$rtl/outport.v:160$19.
+  creating $alu model for $macc $add$rtl/outport.v:105$2.
+  creating $macc cell for $add$rtl/outport.v:169$22: $auto$alumacc.cc:382:replace_macc$77
+  creating $alu cell for $add$rtl/outport.v:105$2: $auto$alumacc.cc:512:replace_alu$78
+  creating $alu cell for $add$rtl/outport.v:160$19: $auto$alumacc.cc:512:replace_alu$81
+  creating $alu cell for $sub$rtl/outport.v:180$25: $auto$alumacc.cc:512:replace_alu$84
+  creating $alu cell for $sub$rtl/outport.v:151$17: $auto$alumacc.cc:512:replace_alu$87
+  created 4 $alu and 1 $macc cells.
+
+3.14. Executing SHARE pass (SAT-based resource sharing).
+
+3.15. Executing OPT pass (performing simple optimizations).
+
+3.15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+
+3.15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 34 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Removed a total of 0 cells.
+
+3.15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \outport..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~14 debug messages>
+
+3.15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \outport.
+Performed a total of 0 changes.
+
+3.15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 34 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Removed a total of 0 cells.
+
+3.15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+Removed 1 unused cells and 1 unused wires.
+<suppressed ~2 debug messages>
+
+3.15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+
+3.15.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.15.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \outport..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~14 debug messages>
+
+3.15.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \outport.
+Performed a total of 0 changes.
+
+3.15.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 33 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Removed a total of 0 cells.
+
+3.15.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+
+3.15.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+
+3.15.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.16. Executing MEMORY pass.
+
+3.16.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.16.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.16.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.16.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.16.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+3.16.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+
+3.16.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.16.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.16.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+
+3.16.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+
+3.18. Executing OPT pass (performing simple optimizations).
+
+3.18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+<suppressed ~2 debug messages>
+
+3.18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 35 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Computing hashes of 34 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+3.18.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.18.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+3.18.5. Finished fast OPT passes.
+
+3.19. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.20. Executing OPT pass (performing simple optimizations).
+
+3.20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+<suppressed ~1 debug messages>
+
+3.20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 33 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Removed a total of 0 cells.
+
+3.20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \outport..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~11 debug messages>
+
+3.20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \outport.
+Performed a total of 0 changes.
+
+3.20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 33 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Removed a total of 0 cells.
+
+3.20.6. Executing OPT_SHARE pass.
+
+3.20.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+
+3.20.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+
+3.20.10. Finished fast OPT passes. (There is nothing left to do.)
+
+3.21. Executing TECHMAP pass (map to technology primitives).
+
+3.21.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.21.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $not.
+Using template $paramod$00298f3f8094950cb9a5ff2fda48d0d8bde8806c\_90_alu for cells of type $alu.
+Using template $paramod$8742280fdebca84e1c87f2a86ed84f62d558f4cc\_90_alu for cells of type $alu.
+Using template $paramod$165fdf60338663c1b1095d1639bc2761df5db061\_90_alu for cells of type $alu.
+Using template $paramod$32efbfac1c4dc57230cf86180788fdfd12e3b511\_90_alu for cells of type $alu.
+Using extmapper maccmap for cells of type $macc_v2.
+  add \_54 (32 bits, unsigned)
+  add { \_82 24'000000000000000000000000 } (32 bits, unsigned)
+  add 178956971 (32 bits, unsigned)
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $ne.
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $or.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000100000 for cells of type $fa.
+Using template $paramod$fbc7873bff55778c0b3173955b7e4bce1d9d6834\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000110 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000110 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000100 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000100 for cells of type $lcu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000100000 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~999 debug messages>
+
+3.22. Executing OPT pass (performing simple optimizations).
+
+3.22.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+<suppressed ~698 debug messages>
+
+3.22.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 616 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Computing hashes of 573 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+<suppressed ~129 debug messages>
+Removed a total of 43 cells.
+
+3.22.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.22.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+Removed 137 unused cells and 363 unused wires.
+<suppressed ~141 debug messages>
+
+3.22.5. Finished fast OPT passes.
+
+3.23. Executing ABC pass (technology mapping using ABC).
+
+3.23.1. Extracting gate netlist of module `\outport' to `<abc-temp-dir>/input.blif'..
+Replacing 2 occurrences of constant undef bits with constant zero bits
+
+3.23.1.1. Executed ABC.
+Extracted 380 gates and 461 wires to a netlist network with 79 inputs and 62 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library /tmp/yosys-abc-3b9VWO/stdcells.genlib 
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+3.23.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       21
+ABC RESULTS:            ANDNOT cells:       94
+ABC RESULTS:               MUX cells:       16
+ABC RESULTS:              NAND cells:       19
+ABC RESULTS:               NOR cells:        8
+ABC RESULTS:               NOT cells:       18
+ABC RESULTS:                OR cells:       66
+ABC RESULTS:             ORNOT cells:       18
+ABC RESULTS:              XNOR cells:       26
+ABC RESULTS:               XOR cells:       47
+ABC RESULTS:        internal signals:      320
+ABC RESULTS:           input signals:       79
+ABC RESULTS:          output signals:       62
+Removing temp directory.
+Removing global temp directory.
+
+3.24. Executing OPT pass (performing simple optimizations).
+
+3.24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module outport.
+<suppressed ~18 debug messages>
+
+3.24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\outport'.
+Computing hashes of 389 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+Computing hashes of 388 cells of `\outport'.
+Finding duplicate cells in `\outport'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+3.24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+Removed 1 unused cells and 313 unused wires.
+<suppressed ~6 debug messages>
+
+3.24.5. Finished fast OPT passes.
+
+3.25. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `outport'. Setting top module to outport.
+
+3.25.1. Analyzing design hierarchy..
+Top module:  \outport
+
+3.25.2. Analyzing design hierarchy..
+Top module:  \outport
+Removed 0 unused modules.
+
+3.26. Printing statistics.
+
+=== outport ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      342 wires
+      816 wire bits
+       70 public wires
+      544 public wire bits
+       11 ports
+       77 port bits
+      387 cells
+       94   $_ANDNOT_
+       21   $_AND_
+       16   $_MUX_
+       19   $_NAND_
+        7   $_NOR_
+       17   $_NOT_
+       18   $_ORNOT_
+       66   $_OR_
+        2   $_SDFFE_PP0N_
+       15   $_SDFFE_PP0P_
+       39   $_SDFF_PP0_
+       26   $_XNOR_
+       47   $_XOR_
+
+3.27. Executing CHECK pass (checking for obvious problems).
+Checking module outport...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\outport':
+  mapped 56 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Extracting gate netlist of module `\outport' to `<abc-temp-dir>/input.blif'..
+
+5.1.1. Executed ABC.
+Extracted 404 gates and 484 wires to a netlist network with 79 inputs and 63 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.02 sec
+ABC: Memory =    2.85 MB. Time =     0.02 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+5.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:        9
+ABC RESULTS:    sg13g2_a21oi_1 cells:       52
+ABC RESULTS:   sg13g2_a221oi_1 cells:        3
+ABC RESULTS:    sg13g2_a22oi_1 cells:        1
+ABC RESULTS:     sg13g2_and2_1 cells:        3
+ABC RESULTS:     sg13g2_and3_1 cells:        5
+ABC RESULTS:      sg13g2_inv_1 cells:       26
+ABC RESULTS:    sg13g2_nand2_1 cells:       15
+ABC RESULTS:   sg13g2_nand2b_1 cells:        9
+ABC RESULTS:    sg13g2_nand3_1 cells:       10
+ABC RESULTS:   sg13g2_nand3b_1 cells:        4
+ABC RESULTS:    sg13g2_nand4_1 cells:        3
+ABC RESULTS:     sg13g2_nor2_1 cells:       34
+ABC RESULTS:    sg13g2_nor2b_1 cells:        9
+ABC RESULTS:     sg13g2_nor3_1 cells:       14
+ABC RESULTS:     sg13g2_nor4_1 cells:        3
+ABC RESULTS:    sg13g2_o21ai_1 cells:       38
+ABC RESULTS:      sg13g2_or2_1 cells:       16
+ABC RESULTS:      sg13g2_or3_1 cells:        1
+ABC RESULTS:    sg13g2_xnor2_1 cells:       14
+ABC RESULTS:     sg13g2_xor2_1 cells:        9
+ABC RESULTS:        internal signals:      342
+ABC RESULTS:           input signals:       79
+ABC RESULTS:          output signals:       63
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \outport..
+Removed 0 unused cells and 449 unused wires.
+<suppressed ~19 debug messages>
+
+7. Printing statistics.
+
+=== outport ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      323        - wires
+      681        - wire bits
+       52        - public wires
+      410        - public wire bits
+       11        - ports
+       77        - port bits
+      334 5.31E+03 cells
+        9  114.307   sg13g2_a21o_1
+       52  471.744   sg13g2_a21oi_1
+        3   43.546   sg13g2_a221oi_1
+        1   10.849   sg13g2_a22oi_1
+        3   27.216   sg13g2_and2_1
+        5   63.504   sg13g2_and3_1
+       56 2.74E+03   sg13g2_dfrbpq_1
+       26  141.523   sg13g2_inv_1
+       15  108.864   sg13g2_nand2_1
+        9   81.648   sg13g2_nand2b_1
+       10    90.72   sg13g2_nand3_1
+        4   50.803   sg13g2_nand3b_1
+        3   32.659   sg13g2_nand4_1
+       34  246.758   sg13g2_nor2_1
+        9   81.648   sg13g2_nor2b_1
+       14  127.008   sg13g2_nor3_1
+        3   32.659   sg13g2_nor4_1
+       38  344.736   sg13g2_o21ai_1
+       16  145.152   sg13g2_or2_1
+        1   12.701   sg13g2_or3_1
+       14  203.213   sg13g2_xnor2_1
+        9  130.637   sg13g2_xor2_1
+
+   Chip area for module '\outport': 5305.267800
+     of which used for sequential elements: 2743.372800 (51.71%)
+
+8. Executing Verilog backend.
+
+8.1. Executing BMUXMAP pass.
+
+8.2. Executing DEMUXMAP pass.
+Dumping module `\outport'.
+
+End of script. Logfile hash: 577b24ce42, CPU: user 0.19s system 0.05s, MEM: 30.38 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 52% 2x abc (0 sec), 8% 19x opt_clean (0 sec), ...

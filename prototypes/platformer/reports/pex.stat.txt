@@ -1,0 +1,41 @@
+
+7. Printing statistics.
+
+=== pex ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1252        - wires
+     3399        - wire bits
+      165        - public wires
+     2298        - public wire bits
+       10        - ports
+       73        - port bits
+     1239 1.81E+04 cells
+       10  127.008   sg13g2_a21o_1
+      178 1.61E+03   sg13g2_a21oi_1
+       68  987.034   sg13g2_a221oi_1
+       79  857.039   sg13g2_a22oi_1
+       30   272.16   sg13g2_and2_1
+        5   63.504   sg13g2_and3_1
+      152 7.45E+03   sg13g2_dfrbpq_1
+       89  484.445   sg13g2_inv_1
+       70  1270.08   sg13g2_mux2_1
+       78  566.093   sg13g2_nand2_1
+       18  163.296   sg13g2_nand2b_1
+       18  163.296   sg13g2_nand3_1
+        6   65.318   sg13g2_nand4_1
+       95  689.472   sg13g2_nor2_1
+       17  154.224   sg13g2_nor2b_1
+       13  117.936   sg13g2_nor3_1
+        3   32.659   sg13g2_nor4_1
+      260  2358.72   sg13g2_o21ai_1
+        8   72.576   sg13g2_or2_1
+        3   38.102   sg13g2_or3_1
+       29  420.941   sg13g2_xnor2_1
+       10  145.152   sg13g2_xor2_1
+
+   Chip area for module '\pex': 18110.169000
+     of which used for sequential elements: 7446.297600 (41.12%)
+
