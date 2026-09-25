@@ -121,8 +121,10 @@ let rx ?(faults = no_faults) ?(raw = false) (p : pins) (t : timing) =
   let n6 = 6 * n in
   let items =
     [ W (Isa_v.poly_lo (poly land 0xFF)); W (Isa_v.poly_hi (poly lsr 8)); txe 1 ]
-    (* bus integration: 11 recessive bit times *)
-    @ [ L "rec"; W (Isa_v.ldd (11 * n)); waitp ~pin:p.rx ~value:0 "idle"; L "rec_w"; waitp ~pin:p.rx ~value:1 "rec_w"; jmp "rec" ]
+    (* bus idle: ten recessive bit times (after an error flag: seven of the delimiter and two of
+       intermission; a SOF may come in the third). Eleven would miss the next frame whenever our
+       clock is slower than the transmitter's. *)
+    @ [ L "rec"; W (Isa_v.ldd (10 * n)); waitp ~pin:p.rx ~value:0 "idle"; L "rec_w"; waitp ~pin:p.rx ~value:1 "rec_w"; jmp "rec" ]
     @ [ L "idle"; W (Isa_v.crc_clear ~last:1 ~mode:0 ~limit:5 ()); W (Isa_v.ldc 19); W (Isa_v.ldd 0);
         L "iw"; waitp ~pin:p.rx ~value:0 "iw";
         (* hard sync: this slot is the bit start *)
