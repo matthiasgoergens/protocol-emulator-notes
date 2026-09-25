@@ -4,8 +4,8 @@ Our chip deliberately trades ease of programming for capability. It pairs a smal
 systolic array and gain-cell memory whose stored 1s leak away (`gain-cell-compiler.md`,
 `../prototypes/gain-cell/`, `../prototypes/systolic-storage/`), and it expects demoscene-level
 programming. This note collects what happened to earlier machines that made the same trade. Part
-1 covers designs that failed or struggled, part 2 Chuck Moore's Forth chips, and part 3 the
-lessons for us.
+1 covers designs that failed or struggled and a section on game consoles, part 2 Chuck Moore's
+Forth chips, and part 3 the lessons for us.
 
 The goal is inspiration, not a verified history, so sources are mixed. Each claim carries a label.
 - **[P]** primary: the designer's or vendor's own document, a paper, a manual, an SEC filing.
@@ -13,10 +13,16 @@ The goal is inspiration, not a verified history, so sources are mixed. Each clai
 - **[F]** folklore: a forum post, an anecdote, or a claim repeated widely without a source found.
 - **[inference]** my own reasoning, not a sourced claim.
 
-The sources I relied on were downloaded to `/var/tmp/hard-to-program/{A,B,C,D,E1,E2}/`, each
-directory with a `findings.md` that has fuller quotes. The load-bearing quotes and numbers below
-were grep-checked against those saved files. The main exception is the Tera DTIC report, a
-fax scan without a text layer, whose quotes were transcribed by eye.
+The sources for Part 1 and Part 2 were downloaded to `/var/tmp/hard-to-program/{A,B,C,D,E1,E2}/`,
+each directory with a `findings.md` that has fuller quotes. The load-bearing quotes and numbers
+there were grep-checked against those saved files. The main exception is the Tera DTIC report, a
+fax scan without a text layer, whose quotes were transcribed by eye. The game-console section was
+added afterwards, in a separate session whose web-search budget was exhausted before it could
+search; its sourcing (Wikipedia pages fetched directly, plus clearly labelled folklore) is
+recorded in `/var/tmp/hard-to-program-2/sources-log.md`, and it is held to the same per-claim
+labels but not to the same grep-checking discipline — treat [S] claims in that section as
+"Wikipedia attributes this to a named source" rather than "verified against the primary source
+itself".
 
 ---
 
@@ -24,37 +30,59 @@ fax scan without a text layer, whose quotes were transcribed by eye.
 
 ### The honest headline
 
-**"Too hard to program" was rarely the whole story.** Most of these machines died of money,
-timing or a commodity curve they could not ride. Where programming difficulty did bite, it
-usually showed as a tax rather than a death sentence: the customer quietly used a fraction of the
-machine, or only a few studios mastered it. The cleanest cases where the programming model was
-the problem are Itanium, the i860, Raw's general-purpose ambitions and TRIPS. In each of those the
-*compiler* could not do what the hardware assumed.
+**"Too hard to program" was rarely the *whole* story, but it was rarely *innocent* either.**
+Most of these machines died of money, timing or a commodity curve they could not ride — and
+programming difficulty is exactly the kind of thing that turns into a money problem and a timing
+problem once a business has to ship on a schedule. A post-mortem records the balance sheet, not
+the mechanism underneath it, so "died of economics" and "difficulty caused the economics to fail"
+are not competing explanations; the second is usually invisible inside the first. Where programming
+difficulty did bite, it usually showed as a tax rather than a death sentence on its own: the
+customer quietly used a fraction of the machine, or only a few studios mastered it, or software
+arrived late and thin. The cleanest cases where the programming model was *directly and admittedly*
+the problem — the sources say so, not just an inference — are Itanium, the i860, Raw's
+general-purpose ambitions and TRIPS. In each of those the *compiler* could not do what the
+hardware assumed. Everywhere else, the honest reading is indirect: see the causal chain below and
+the revised table column.
+
+**The causal chain, where it plausibly applies:** hard hardware → few programmers reach fluency
+in the time available → software ships late, thin, or uses only part of the machine → buyers,
+reviewers and other developers compare that software (not the silicon) to a rival's → a sales,
+funding or timing verdict follows, and the verdict is what the post-mortem records. Any failed
+design in the table below can be read for whether this chain plausibly ran, even where the
+sources report only its last link. This is why the table's causation column now distinguishes
+**direct** (a primary source blames the programming model itself), **indirect** (difficulty
+plausibly fed a market failure through late software, a thin developer base, or porting cost, but
+did not alone determine it), and **no** (the sources point elsewhere and difficulty is not a
+plausible contributor) [inference throughout this paragraph and the column below, since none of
+the cited sources quantify the chain directly — they report the end state, and the chain
+connecting it to difficulty is my reconstruction, not theirs]. The game-console section further
+down is a cleaner test of the same chain, because a console's market is mostly fixed in advance,
+which removes some of the confounding a general-purpose machine's market has.
 
 ### Summary table
 
-| machine | what was crazy | what happened | was programming THE cause? | what made it work, if anything |
+| machine | what was crazy | what happened | direct or indirect cause? | what made it work, if anything |
 |---|---|---|---|---|
-| Intel iAPX 432 (1981) | hardware objects and capabilities, hardware GC, 5 associative caches | slow; abandoned | no: the object model itself was slow ("1/4 to 1×" contemporaries even if redone) [P] | "composites" to batch small objects [P] |
-| Intel i860 (1989) | exposed FP pipelines, no interlocks, dual-instruction mode with 9 rules | shipped in 2 generations; niche | largely yes: Intel said ordinary compilers could use it only "as a scalar machine" [P] | hand-scheduled assembly kernels [P, manual examples] |
-| Itanium / EPIC (2001) | bundles, predication, compiler speculation | niche; HP took 95% of shipments by 2008; dead 2021 | partly: Knuth said the compilers were "basically impossible to write" [P]; x86-64 and delays also [S] | Intel's icc; hand-tuned enterprise code [F] |
-| Multiflow TRACE (1987) | VLIW, 7–28 ops/instr, trace scheduling | ~140 sold; folded 1990 [P, memoir] | no: "killer micros" and business [P, memoir] | the compiler worked, was licensed widely, and fed into IA-64 [S] |
-| Cydrome Cydra 5 (~1987) | rotating registers, predication, modulo scheduling | a handful built; folded ~1988 [F] | not shown; the minisupercomputer market collapsed [S] | its ideas became IA-64's software pipelining [S] |
-| Transputer / occam (1985) | CSP in silicon, links, no shared memory, `PLACED PAR` | sold well in niches; T9000 late; Inmos sold 1989 | mixed; business and T9000 delays at least as much [S] | the occam discipline itself |
-| Thinking Machines CM-1/2 (1985–) | 64K 1-bit PEs, *Lisp, hypercube | 7 CM-1 sold, DARPA-subsidised; Chapter 11 in 1994 [S] | no, but users "ignor[ed] the 64,000 single-bit processors" [S] | CM-2's floating-point units |
-| MasPar MP-1/2 (1990) | 16K-PE SIMD, cheaper CM | ~200 systems; left hardware 1996 [S] | no: the MPP market collapsed [S] | — |
-| Cell BE / PS3 (2006) | 8 SPEs, 256 KB local stores, explicit DMA, no cache [P] | sold in the hundreds of millions; Roadrunner hit 1 PF [S] | directly blamed for costs ("a total disaster", Newell) [S], but not fatal | data-oriented design, double-buffered DMA, first-party heroes [P, Acton] |
-| MIT Raw (2002) | on-chip networks routed by the compiler, cycle by cycle [P] | research chip; spun off Tilera | yes for sequential code; the team pivoted to StreamIt [P] | a stream DSL; Tilera "de-crazed" to coherent SMP [S] |
-| UT TRIPS (2006) | EDGE: 128-instruction dataflow blocks placed on a grid | silicon worked; 60% of a Core 2 on SPEC [P] | yes, the compiler could not form big blocks in control-heavy code [P] | hand-coded kernels ran 3× a Core 2 [P] |
-| Stanford Imagine / SPI Storm-1 | StreamC + KernelC, no memory access inside kernels [P] | SPI shut 2009 [S] | mostly economics; the model "somewhat specific to media processing" [P] | the ideas went into GPUs [S] |
-| Ambric Am2045 (2007) | 336 cores; Kahn process network with self-synchronising FIFOs | IP sold in the 2008 crash [S] | no: praised as easy to program; died of the credit crunch [S] | the programming model |
-| MathStar FPOA | 400 coarse "silicon objects" | $588K revenue in 2007 against a $126.5M deficit; closed 2008 [P, 10-K] | market, plus tool immaturity it admitted [P] | — |
+| Intel iAPX 432 (1981) | hardware objects and capabilities, hardware GC, 5 associative caches | slow; abandoned | no, not even indirectly: the object model itself was slow ("1/4 to 1×" contemporaries even if redone perfectly), so better software could not have saved it [P] | "composites" to batch small objects [P] |
+| Intel i860 (1989) | exposed FP pipelines, no interlocks, dual-instruction mode with 9 rules | shipped in 2 generations; niche | direct: Intel itself said ordinary compilers could use it only "as a scalar machine" [P], so most software never reached the advertised speed | hand-scheduled assembly kernels [P, manual examples] |
+| Itanium / EPIC (2001) | bundles, predication, compiler speculation | niche; HP took 95% of shipments by 2008; dead 2021 | direct + indirect: Knuth said the compilers were "basically impossible to write" [P] (direct), which left it with nothing to answer AMD's binary-compatible x86-64 and years of delay with [S] (indirect: the software gap compounded a market threat) | Intel's icc; hand-tuned enterprise code [F] |
+| Multiflow TRACE (1987) | VLIW, 7–28 ops/instr, trace scheduling | ~140 sold; folded 1990 [P, memoir] | no: the compiler worked; "killer micros" and business ended it [P, memoir] | the compiler worked, was licensed widely, and fed into IA-64 [S] |
+| Cydrome Cydra 5 (~1987) | rotating registers, predication, modulo scheduling | a handful built; folded ~1988 [F] | not shown either way; the minisupercomputer market collapsed under it before its programming model was tested at scale [S] | its ideas became IA-64's software pipelining [S] |
+| Transputer / occam (1985) | CSP in silicon, links, no shared memory, `PLACED PAR` | sold well in niches; T9000 late; Inmos sold 1989 | indirect at most: occam's discipline kept the customer base to programmers willing to learn CSP, but the T9000's delay and Inmos's business troubles did the visible damage [S] | the occam discipline itself |
+| Thinking Machines CM-1/2 (1985–) | 64K 1-bit PEs, *Lisp, hypercube | 7 CM-1 sold, DARPA-subsidised; Chapter 11 in 1994 [S] | indirect: users "ignor[ed] the 64,000 single-bit processors" [S] and ran ordinary code on the FPUs instead, so the machine's distinguishing capability went largely unsold even to people who had bought it; the company itself died of DARPA dependence and management [S] | CM-2's floating-point units |
+| MasPar MP-1/2 (1990) | 16K-PE SIMD, cheaper CM | ~200 systems; left hardware 1996 [S] | no: the MPP market collapsed under everyone in it [S] | — |
+| Cell BE / PS3 (2006) | 8 SPEs, 256 KB local stores, explicit DMA, no cache [P] | sold in the hundreds of millions; Roadrunner hit 1 PF [S] | indirect, and survivable: directly blamed for extra engineering cost ("a total disaster", Newell) [S], which is real money, but the platform still shipped ~87M PS3 units [S below] — a rare case of the tax being paid rather than fatal | data-oriented design, double-buffered DMA, first-party heroes [P, Acton] |
+| MIT Raw (2002) | on-chip networks routed by the compiler, cycle by cycle [P] | research chip; spun off Tilera | direct for sequential code: the ILP-from-sequential-code bet did not pay off, so the team pivoted to StreamIt [P] | a stream DSL; Tilera "de-crazed" to coherent SMP [S] |
+| UT TRIPS (2006) | EDGE: 128-instruction dataflow blocks placed on a grid | silicon worked; 60% of a Core 2 on SPEC [P] | direct: the compiler could not form big blocks in control-heavy code, and the paper says so plainly [P] | hand-coded kernels ran 3× a Core 2 [P] |
+| Stanford Imagine / SPI Storm-1 | StreamC + KernelC, no memory access inside kernels [P] | SPI shut 2009 [S] | indirect at best: mostly economics, and the model itself was admitted to be "somewhat specific to media processing" [P] — a market-fit problem more than a programmability one | the ideas went into GPUs [S] |
+| Ambric Am2045 (2007) | 336 cores; Kahn process network with self-synchronising FIFOs | IP sold in the 2008 crash [S] | no, and this is the clean counter-example: praised as easy to program, died of the credit crunch regardless [S] | the programming model |
+| MathStar FPOA | 400 coarse "silicon objects" | $588K revenue in 2007 against a $126.5M deficit; closed 2008 [P, 10-K] | indirect: mainly no customers found it worth the market risk, but the company's own 10-K admits tool immaturity as a contributing factor [P] | — |
 | picoChip picoArray | ~250–300 tiny VLIW DSPs, network fixed at compile time | ~70% of HSPA femtocells (claimed); bought 2012, then by Intel 2013 [S] | a success | deterministic, cycle-accurate simulator; a narrow niche [S] |
 | Tabula (2010s) | FPGA fabric reconfigured up to 8× per user clock | shut 2015 after $215M raised [S] | unknown [F] | — |
-| Tera MTA (1997) | 128 hardware threads per CPU, full/empty bit on every word | first system late 1997; bought Cray 2000 [P] | no: GaAs yield [P, 10-K]; Tera sold it as *easier* to program | the compiler auto-parallelised; futures [P] |
-| Adapteva Epiphany / Parallella | mesh of tiny RISC cores, 1024 in Epiphany-V [P] | Kickstarter raised $898,921 but cost >$1.5M to deliver [P] | no: pricing and volume [P] | — |
-| Intel Larrabee (2009) | x86 cores rendering graphics in software | GPU cancelled Dec 2009; became Xeon Phi [P] | no: "time and politics" (Forsyth) [P] | ran 300+ Steam titles; its ISA became AVX-512 [P] |
-| The Mill | belt instead of registers, 30-wide static issue | no silicon after 20+ years [P] | no: money and headcount [P] | LLVM toolchain; CoreMark per MHz "on par" in simulation [P] |
+| Tera MTA (1997) | 128 hardware threads per CPU, full/empty bit on every word | first system late 1997; bought Cray 2000 [P] | no: GaAs yield [P, 10-K]; Tera sold it as *easier* to program, and nothing here contradicts that | the compiler auto-parallelised; futures [P] |
+| Adapteva Epiphany / Parallella | mesh of tiny RISC cores, 1024 in Epiphany-V [P] | Kickstarter raised $898,921 but cost >$1.5M to deliver [P] | no: pricing and volume killed the delivery, before programmability was the question [P] | — |
+| Intel Larrabee (2009) | x86 cores rendering graphics in software | GPU cancelled Dec 2009; became Xeon Phi [P] | no: "time and politics" (Forsyth) [P], and the software side actually worked (300+ titles) | ran 300+ Steam titles; its ISA became AVX-512 [P] |
+| The Mill | belt instead of registers, 30-wide static issue | no silicon after 20+ years [P] | no: money and headcount, not the design [P] | LLVM toolchain; CoreMark per MHz "on par" in simulation [P] |
 
 ### Notes per machine (only what the table cannot carry)
 
@@ -215,6 +243,169 @@ to see this since the 1960s** [inference]. Our chip reopens it on purpose.
 
 ---
 
+## Game consoles: hard hardware under a fixed target
+
+The designs above mostly had to attract an unknown, general-purpose market: whoever might have
+bought a Multiflow or a Cydra 5 also had to *choose* to write for it, and could walk away. A game
+console removes that choice for one side of the market: a fixed body of studios, already
+committed to shipping a title on this box by this date, for a fixed retail public. That is closer
+to our own situation than anything above — a fixed target (the tapeout), a fixed occasion (one
+competition's judges, plus us), and a small number of programmers who cannot simply go and write
+for a different chip instead. Consoles are therefore a useful check on the causal chain proposed
+above: with the demand side mostly fixed in advance, does hardware that is hard to program still
+cost the platform, and through what mechanism?
+
+Across the nine cases below, the answer is: yes, but almost always as a **multiplier on an
+existing weakness**, never as an independent cause on its own. Difficulty shows up as late or
+thin launch software, as third parties quietly using less of the machine than advertised, as a
+real but rarely decisive porting tax, or as a narrowed developer base — each of which then
+interacts with a platform's price, timing and first-party support. The cleanest test pair is
+Sega's own Saturn and Dreamcast: one notoriously hard, one praised as easy, and both died. The
+difficulty changed *how* each died, not *whether*.
+
+Sourcing note: this section is built mostly from Wikipedia's own citations (fetched directly, not
+via search, since the session's web-search budget was exhausted before this note; see
+`/var/tmp/hard-to-program-2/sources-log.md` for the exact pages and what came from each). Quotes
+below carry [S] where Wikipedia attributes them to a named person or document, and [F] where a
+claim is common retrospective folklore I could not trace to a fetched primary source this
+session — the console record is exactly the kind of area where folklore is often right but rarely
+citable, so both are kept, labelled.
+
+### Summary table
+
+| console | what was hard | time to mastery | effect on launch/software/sales | direct or indirect cause of the platform's fate? | what made the difference |
+|---|---|---|---|---|---|
+| Sega Saturn (1994) | dual SH-2s sharing one memory bus, so parallelism needed deliberate partitioning; VDP1 draws quadrilaterals, not triangles, so naïve 3D warped; a third, separate SCU DSP [S] | years: Yu Suzuki said "only 1 in 100 programmers are good enough" to get double-CPU speed [S] | many launch/mid-life 3D titles ran on a single CPU and looked worse than PlayStation's; late titles (Panzer Dragoon Saga, Radiant Silvergun, Dragon Force) are the folklore examples of the hardware finally used well [F] | indirect: it thinned and slowed third-party 3D output against PlayStation, compounding Sega's pricing, licensing terms and 1995 surprise-launch decision [S + inference] | none found in time on Saturn itself; PlayStation's triangle pipeline, $10 licence fee and 7–10-day CD reorder cycle (vs. cartridge's 10–12 weeks) won developers directly instead [S] |
+| Atari Jaguar (1993) | Tom/Jerry co-processor pair with a memory-controller bug that broke inter-chip synchronisation [S] | never solved; the bug was structural, not a skill gap | developers routed logic through the slow 68000 against Atari's own advice, capping real performance below the advertised spec [S] | direct: the software many titles shipped could not use the chip's advertised path, because that path was broken, not merely hard [S] | partial workarounds in a few first-party titles; no general fix |
+| Nintendo 64 (1996) | SGI's Reality Coprocessor microcode, plus a 4 KB texture cache that forced texture-stretching on small cartridges [S] | months to years: Factor 5 and Rare wrote custom microcode to beat SGI's stock code [S] | most third parties shipped on stock microcode with stretched textures; Factor 5/Rare titles (Rogue Squadron, GoldenEye, Banjo-Kazooie) are cited as using more of the hardware [S] | indirect: cartridge cost and a thin third-party library did more visible damage than the RCP alone, but the RCP raised the entry cost for any studio without SGI-calibre graphics staff [S + inference] | custom microcode, plus first-party/SGI support reaching only a handful of studios |
+| Sega 32X (1994) | a dual-SH-2 add-on whose RAM-access contention meant most games used only one CPU; no texture mapping [S] | not enough runway to find out | most of roughly 40 games were rushed Genesis ports that never touched the extra hardware [S] | indirect, nearly moot: Sega's own timeline — rushed out, then abandoned within a year for Saturn — made difficulty almost irrelevant to the outcome [S] | none; the platform was orphaned by its own maker before mastery could matter |
+| 3DO (1993) | not a hard instruction set, but hardware still changing under developers up to launch [S] | launch titles slipped to mid-1994 for lack of a stable target to test against [S] | a thin launch line-up (effectively one real game, *Crash 'N Burn*) [S] | indirect: the moving target delayed software, but the fatal wound was the licensing model itself — nobody profited from hardware, so manufacturer support collapsed [S] | — |
+| PlayStation 2 (2000) | Emotion Engine's VU0/VU1 vector units plus a microcode-driven Graphics Synthesizer: an asymmetric, multi-language pipeline, not a normal CPU+GPU split [S] | roughly a console generation; many studios never touched VU1 microcode directly | despite the difficulty, PS2 became the best-selling console ever at ~155–160M units [S] | **the clean counter-example**: not a cause of anything, because the platform succeeded overwhelmingly regardless | Sony's installed base and backwards compatibility bought time; middleware absorbed VU complexity for most studios [inference] |
+| PlayStation 3 (2006) | Cell's 8 SPEs, 256 KB local stores, explicit DMA, no cache, plus an RSX GPU added late after Sony's own graphics team found Cell-only rendering short of Xbox 360's [S] | widely reported as 1–2 years per studio; early multiplatform ports were "generally considered inferior" to Xbox 360 through 2006–2008, reaching parity or surpassing only later [S] | early multiplatform titles ran worse on PS3 than 360; late-generation first-party work (Naughty Dog's Uncharted/*The Last of Us* line) is the standard example of eventual SPU mastery, though I could not trace a primary source for it this session [F] | direct, but survivable: extra porting cost and worse early third-party performance are attributed specifically to the Cell, yet PS3 still sold ~87M units [S] | first-party tooling and studio time; SPU technique amortised once a studio had paid the cost once |
+| Sega Dreamcast (1998) | almost nothing: PowerVR2 was well liked, and an optional Windows CE/DirectX path made PC ports nearly free [S] | fast; developers were productive quickly | a strong launch library by contemporary standards; the console still lost | **no — the control case.** Business timing killed it: Sony's PS2 pre-announcement, Sega's own financial state, a GD-ROM with less capacity than DVD, and an installed base too small to hold third parties, per Peter Moore's own account ("The PlayStation 2 effect that we were relying upon did not work for us") [S] | — (there was nothing to fix; ease of programming was never the constraint) |
+| Atari 2600 (1977) and the C64/Amiga demoscene | 2600: no frame buffer, video generated live by racing the scanning beam [S]; C64/Amiga: fixed, idiosyncratic silicon with no upgrade path across a machine's whole commercial life | years, across a console's life and a whole subculture that outlived the hardware's market relevance | the *positive* tail: mastery kept extending what an unchanging box could do, long after launch (*Pitfall!*, *Yars' Revenge*; the demoscene's "bobs"-per-frame and scroller records) [S] | not applicable — no platform failure here; the difficulty became a creative genre in its own right | a target that never changed under the programmer, and (for the demoscene) no shipping deadline at all [inference] |
+
+### What the console record adds to Part 1
+
+**Fixing the market does not remove the tax, but it does cap the damage.** PS2 and Dreamcast
+sit at the two ends: PS2 was hard and thrived because the studio base had no real alternative to
+wait for (backwards compatibility, an existing DVD-drive cost advantage, and no rival with
+comparable install base); Dreamcast was easy and still died because nothing about programming
+difficulty was the actual constraint on its business. Saturn sits in the middle and is the most
+informative case precisely because it is not extreme in either direction: hard *and* commercially
+mediocre *and* not a total failure (9.26M units, real games, a devoted library) — a graded
+outcome that a simple "hard hardware kills platforms" story does not predict, but that the causal
+chain (hard hardware → thin/late third-party software → unfavourable comparison to a rival →
+weaker sales, on top of Sega's own business mistakes) predicts correctly [inference].
+
+**The Saturn/PS1 contrast is the sharpest natural experiment in this whole note.** Both launched
+within months of each other, aimed at the same market, sold through the same retailers, at
+similar prices. The Saturn's dual-CPU, quad-based pipeline needed real expertise before it beat a
+PlayStation game built on a single CPU and triangles; Sony additionally undercut Sega on developer
+economics directly (cheap dev kits, a $10 licence fee, days not weeks to reorder discs). Saturn's
+9.26M units against PlayStation's 102.49M [S] is not proof that programming difficulty alone
+produced an 11× gap — Sega's pricing, timing and licensing mistakes are real and independently
+documented — but it is hard to read the gap as *uncorrelated* with which machine third parties
+could ship good-looking games for fastest.
+
+**A fixed target changes who pays the tax, not whether it exists.** In Part 1, a hard
+general-purpose machine mostly taxed *itself* (fewer sales, because buyers had an easy
+alternative). In a console generation, the hardware is chosen once by the platform holder and then
+the tax is paid by third-party *studios*, repeatedly, per title — which is why the visible symptom
+is "most games use less of the machine" (Saturn, N64, 32X) rather than "nobody bought the
+machine". Our situation is closer to the studio's position than the platform holder's: we are the
+one shipping a demo on fixed, already-chosen silicon, so the console record's lesson is about
+*our* development cost, not about whether the chip finds a market.
+
+**Time-to-mastery is consistently longer than a launch window and shorter than a platform's
+life.** Saturn (years), N64 custom microcode (months to years), and PS3 SPUs (1–2 years per
+studio, by the widely repeated but not this-session-verified account) all cluster in the same
+band: too slow to save a launch, fast enough that a platform with enough runway (PS2, PS3, and
+Saturn's own late-life titles) sees its best software only well after release. This matches
+Part 1's Multiflow/Cydra 5 compiler timelines and the GA144's "a graduate student managed two
+benchmarks in a summer" [P, Chlorophyll] far better than it matches an assumption that mastery is
+either instant or never happens.
+
+### The 8-bit baseline machines: built to be easy, mastered into insanity
+
+Five machines make the point sharpest because they were not consoles chasing the crazy edge —
+they were designed to be programmable by an ordinary assembly programmer of their era, sold in
+the millions on that basis, and only *afterwards*, years into each machine's commercial life,
+did a self-selected group of virtuosi find tricks nobody designed in. That gap — ordinary at
+launch, extraordinary a decade later — is the cleanest evidence in this whole note that a fixed
+target rewards patience, because none of what follows was needed to ship a single title.
+
+- **Atari 2600 (1977).** Baseline: no frame buffer; the whole point of "racing the beam"
+  (Part 1's drum-machine section) already applies here, but the tail goes further. `HMOVE`, the
+  instruction that repositions sprites and the playfield, has an undocumented side effect: firing
+  it mid-scanline "combs" extra colour clocks onto the left edge of the *next* line, visible as a
+  ragged strip. Most launch-era games simply hid it behind a black border. Homebrew and late
+  commercial developers instead learned to fire `HMOVE` at a controlled moment and use the comb
+  deliberately, and to rewrite colour and position registers within single scanlines to fake more
+  objects than the TIA has hardware for. None of this shows up in *Combat* or *Pong*; all of it
+  shows up a decade later in the demoscene-era homebrew catalogue [F, extending *Racing the Beam*'s own
+  account of the machine's later life].
+- **Commodore 64 (1982).** Baseline: 8 hardware sprites, one character/bitmap mode, and a VIC-II
+  chip that steals CPU cycles on every eighth raster line to refetch character data — a "bad
+  line", an intentional but unglamorous hardware detail. The tail turned the bad line itself into
+  raw material: **FLI** (Flexible Line Interpretation) retimes writes to the video/colour-RAM
+  pointers on every single bad line to get far more colours per row than the mode nominally
+  allows; **sprite multiplexing** repositions the 8 hardware sprites mid-frame, faster than the
+  eye or the display resolves it, to show dozens of "sprites" from 8 pieces of hardware; **VSP**
+  (Vertical Sprite Positioning) and **FLD** (Flexible Line Distance) abuse the sprite
+  Y-expansion register to shift exactly when a bad line falls, letting FLI-like effects run down
+  the *whole* screen instead of the usual restricted band; and "opening the borders" toggles the
+  38/40-column or 24/25-row select registers at the precise raster line the hardware's border
+  comparator fires, tricking the chip into never drawing a border that frame at all. Every one of
+  these is a documented VIC-II side effect turned into a named, teachable technique [F, standard
+  demoscene technical lore, e.g. as catalogued by the C64 scene's own technical wikis].
+- **Nintendo Entertainment System / Famicom (1983).** Baseline: a fixed PPU, cartridge ROM mapped
+  straight into address space, extended only by mapper chips for bank switching. The tail uses two
+  hardware side effects as free interrupt sources for raster effects the PPU was never given a
+  register for: the **MMC3 mapper's scanline counter**, which counts PPU-driven address-line
+  toggles rather than time, fires an IRQ at a chosen scanline so a game can change scroll position
+  or palette partway down the screen (split-screen status bars, parallax); and **sprite-0 hit**, a
+  flag meant only to say "sprite 0 has just overlapped an opaque background pixel", gets polled
+  or timed instead as a *raster position sensor* on carts whose mapper has no IRQ at all. A few
+  games are reported to have (ab)used the DMC audio channel's IRQ purely for its precise timing,
+  never for sound [F].
+- **ZX Spectrum (1982).** Baseline: one 8×8 colour-attribute pair per character cell (the source
+  of "colour clash"), and a ULA that generates video from the same RAM the CPU uses, delaying CPU
+  accesses to that RAM in a fixed, hardware-determined pattern ("contended memory"). The tail
+  rewrites the colour attribute on *every* raster line, timed against that fixed contention
+  pattern rather than against any documented raster register, to fake smoothly multicoloured
+  graphics the mode was never meant to have ("multicolour" effects); times `OUT` instructions to
+  the border colour port to draw stripes or crude images in what is normally a plain border strip;
+  and reads back the "floating bus" — what the ULA itself is about to display — as a free,
+  hardware-synchronised clock with no raster-counter register to consult [F].
+- **Commodore Amiga (1985).** The interesting counter-case. Its designers gave programmers a
+  small coprocessor, the **Copper**, built for exactly the job the other four machines' tricks
+  fake against a side channel: changing a hardware register synchronised to the video beam. Even
+  with a *sanctioned* mechanism, demosceners still pushed well past its intended use — "copper
+  bars" chain `WAIT`/`MOVE` pairs to rewrite the palette every raster line for smooth colour
+  gradients, and other copper lists repoint bitplane addresses mid-frame to fake more resolution
+  or more simultaneous colours than any single display mode supports [F].
+
+**The lesson these five machines teach together, and it is the whole point of this section**
+[inference]: every one of them shipped tens of millions of units on hardware an *ordinary*
+assembly programmer of the day could use competently from day one. The insane tricks above —
+a bad line turned into a feature, register writes timed to a single clock cycle, a floating bus
+read as a clock, a copper list gymnastics routine — were found years into each machine's life,
+by a self-selected few, and were never a precondition for a single title shipping. If any of
+these five machines had *needed* FLI, sprite multiplexing, an HMOVE comb or a copper-bar routine
+just to draw a title screen, none of them would have sold as they did. **That is the test our
+chip fails on purpose.** We are deliberately building a machine whose *baseline* is what these
+five treat as their demoscene tail: an ordinary program on our chip already requires the kind of
+timing discipline that the 2600, C64, NES, Spectrum and Amiga only ever demanded from their most
+obsessive virtuosi, decades after launch. That trade is survivable for us for two reasons neither
+of those machines had: our market is not "tens of millions of ordinary programmers" but one
+competition's judges plus us, and our programmers are not limited to the Nathers, Tings and
+1985-vintage Amiga democoders who could give it a summer or a career — they include tireless
+agents for whom exhaustive, superoptimising, cycle-exact work is routine rather than exceptional
+(see below).
+
+---
+
 ## Part 2: the Forth chip lineage
 
 ### Summary table
@@ -343,6 +534,51 @@ margin set by a clock period to absorb it. That is our gain-cell problem in anot
   to hand scheduling. That is acceptable if it is *safe*.
 - **Yes: exposed-pipeline tooling cost.** The Mill had trouble even building a simulator for
   in-flight state. Our array plus expiring rows has the same shape.
+- **Confirmed by the console record: a fixed target changes who pays the difficulty tax, not
+  whether it exists.** Saturn/PlayStation and PS3/Xbox 360 both show a real cost from difficulty
+  even where the platform survived it (PS3, handsomely) or only partly failed from it (Saturn,
+  9.26M units, not zero). For us, with no rival platform for a demo author to defect to, the same
+  tax lands entirely on us — there is no competitor quietly picking up the games we didn't finish.
+
+### One more difference from every case above: tireless agents instead of scarce experts
+
+Every mitigation catalogued in this note so far was rate-limited by scarce human expert time.
+Saturn and PS3 mastery took years because only a handful of programmers per studio ever reached
+fluency, and a studio could spare only a few of them for it. Knuth's SuperSoap was one person's
+project, not a search over the space of schedules. The GA144's own evaluation is explicit about
+the same limit: a graduate student "spent one summer" on arrayForth and shipped two working
+benchmarks, and a synthesising compiler with no human hint still lost to the experts by 44-70%
+on single-core kernels [P, Chlorophyll, cited above]. In every case above, the bottleneck was
+never insight in the abstract — it was calendar time against a small number of people able to
+supply it.
+
+We do not have that bottleneck in the same way [inference]. An agent can run exhaustive or
+superoptimising search over schedules, hand-place every value the way Mel hand-placed code, run
+a worst-case-corner pessimiser (recommendation 5) as a matter of routine rather than as a special
+one-off project, and try many candidate schedules in parallel instead of the one a human has time
+to write before a deadline. That plausibly shrinks three of the failure modes this note keeps
+finding: **slow mastery** (an agent does not need a year of exposure before it is useful, and
+does not forget what it learned between projects); **a small developer base** (the chip only
+needs to be legible to whichever agents and humans are actually asked to program it, not to a
+market of freelance experts who might or might not bother); and **porting cost** (the tax PS3 and
+N64 both paid once per studio, an agent can in principle pay once and generalise from).
+
+It does **not** remove the failure modes that are dangerous rather than merely slow. A
+silent-wrong-value hazard — an expired row reading back as 0 — is exactly as silent to an agent
+as it was to Mel or to Knuth's SOAP; nothing about "the agent tried harder" makes a schedule
+self-report a violation, so recommendations 1 and 2 below (a verifier that re-derives intervals
+and deadlines, and a hardware flag on a late read) matter *more*, not less, once the thing
+proposing schedules is fast enough to generate many of them without a human reviewing each one by
+hand. Agents also confabulate: a fluent, confident, wrong claim that a schedule is safe is a
+known failure mode of the tool doing the work here, not a hypothetical risk borrowed from
+elsewhere, so a cycle-exact simulator that agents cannot argue their way around and can only be
+measured against (recommendation 8) is load-bearing in a way it would not need to be if a single
+careful senior engineer were the only source of proposed schedules. And two constraints sit
+entirely outside software, agent or human: the hardware still has to be physically buildable
+within a Tiny Tapeout-scale budget, and the design still has to be *explained* — in the demo and
+the write-up — to judges who will not run their own search over our schedules. That is the same
+explainability job the simulator does for one schedule (recommendation 8), now asked of the whole
+design [inference throughout this subsection].
 
 ### What worked historically
 
@@ -397,12 +633,32 @@ margin set by a clock period to absorb it. That is our gain-cell problem in anot
    networks (a video line flows through; values have lifetimes by construction). Keep placement
    onto PEs and rows as a separate pass, like `PLACED PAR`. Raw's authors found the DSL made
    scheduling *easier*, and our workload (PAL video racing the beam) is already a stream.
-8. **Invest in the simulator before the compiler.** It must be deterministic and cycle-exact, and
-   it must model decay per row and per corner. Every success above (picoChip, S21, softsim,
-   Acton's profiling) had one. The Mill shows it is harder than it looks when state is in flight.
-9. **Treat expiry as a feature too.** Mel used rotation as a free delay and never wrote delay
-   loops. A value that is *meant* to vanish (a timeout, a self-clearing flag, a per-frame scratch
-   that needs no clearing) costs nothing on our memory. Name that idiom in the tools.
+8. **Invest in the simulator before the compiler — it is also what makes the magic explainable.**
+   It must be deterministic and cycle-exact, and it must model decay per row and per corner. Every
+   success above (picoChip, S21, softsim, Acton's profiling) had one. The Mill shows it is harder
+   than it looks when state is in flight. A good simulator does a second job that is easy to
+   undervalue: it is what turns a trick into something a sceptical outsider can verify rather than
+   take on faith. The 8-bit demoscene tricks above only became legible to people who did not
+   discover them personally once cycle-exact emulators and visualisers existed for each machine —
+   VICE for the C64, Stella for the 2600, Mesen for the NES, visual6502's transistor-level
+   simulation for the 6502 itself — all of which let a viewer step through *why* a bad-line
+   exploit or a copper trick works, not just watch the result. Our judges are in the position of
+   that viewer, not the position of whoever wrote the trick. A visualiser that shows row
+   lifetimes, corner margins and near-expiry flags alongside the running program, the same way a
+   VICE raster-time view lets someone see a bad line happen, is the difference between "trust us,
+   it's correct" and a judge seeing the deadline the schedule is riding.
+9. **Treat expiry as a feature too — hazards become idioms once they are named.** Mel used
+   rotation as a free delay and never wrote delay loops. Demosceners did the same with quirks
+   nobody designed in: the VIC-II's bad-line cycle-steal became FLI and sprite multiplexing; the
+   2600's HMOVE comb and mid-scanline register writes became deliberate raster effects; the
+   Spectrum's contended-memory floating bus became a free, hardware-synchronised clock. None of
+   these started as features — each was a side effect of a real constraint, exactly like our
+   decaying rows — and each ended up as something a competent programmer, not only its
+   discoverer, could reach for on purpose once it had a name. Ours: a value that is *meant* to
+   vanish (a timeout, a self-clearing flag, a per-frame scratch that needs no clearing) costs
+   nothing on our memory, and a Berger-flagged near-expiry read is a free "how close to the edge
+   am I running" signal, not only a bug detector. Name both idioms in the tools, the way FLI and
+   sprite multiplexing now have names.
 10. **Borrow from the F18A where it is cheap:**
     - 18-bit words with 5+5+5+3 slots, the short slot holding return, micro-loop, literal, add or
       nop;
