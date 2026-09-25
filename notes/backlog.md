@@ -233,6 +233,11 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
 
 ## Housekeeping
 
+- **Prefer OCaml** (Hardcaml for hardware) for new models, simulations and tools: Matthias,
+  2026-09-25, "Let's do more OCaml." Python only where an existing Python tool is the point
+  (independent references such as scapy or pynmea2, plotting). Port core Python models to OCaml
+  when they are touched again.
+
 - Codex reviews run on `codex-luna` (the cheap model) unless a decision warrants more. DeepSeek
   runs off-peak, and MiMo Flash stands in for it.
 - Every number keeps its raw run in the repository; every agent's claims are checked against its
