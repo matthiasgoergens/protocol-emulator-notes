@@ -1,0 +1,4 @@
+; isa.ml and compiler.ml are verbatim copies of ../../deadline-sequencer/ (check.sh verifies it)
+(executable
+ (name trace)
+ (modules isa compiler trace))

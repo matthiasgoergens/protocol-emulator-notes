@@ -1,0 +1,13 @@
+# resident data: refresh bandwidth of a bank holding it forever, guard 0.8, 2 port cycles per row refresh
+  sequencer imem 4x64x16 bit           thick tt27:    0.106% of port cycles
+  sequencer imem 4x64x16 bit           thick tt85:    0.105% of port cycles
+  sequencer imem 4x64x16 bit           thick ff85:    0.413% of port cycles
+  sequencer imem 4x64x16 bit           thin  tt27:   10.774% of port cycles
+  sequencer imem 4x64x16 bit           thin  tt85:  160.000% of port cycles
+  sequencer imem 4x64x16 bit           thin  ff85: 1066.667% of port cycles
+  semiring ring config 848 bit / 32    thick tt27:    0.011% of port cycles
+  semiring ring config 848 bit / 32    thick tt85:    0.011% of port cycles
+  semiring ring config 848 bit / 32    thick ff85:    0.044% of port cycles
+  semiring ring config 848 bit / 32    thin  tt27:    1.136% of port cycles
+  semiring ring config 848 bit / 32    thin  tt85:   16.875% of port cycles
+  semiring ring config 848 bit / 32    thin  ff85:  112.500% of port cycles

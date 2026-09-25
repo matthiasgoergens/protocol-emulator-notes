@@ -1,0 +1,100 @@
+# best thick/thin row mix per trace and condition; guard 0.8, one bank, refresh = read+write = 2 port cycles; bandwidth = 2*ops/span
+# columns: area um2 (Berger columns included), rows thick+thin, refresh+migration ops, bandwidth fraction
+
+## seq-regs: 24242 values, width 12, peak live 13, span 348.9 us; flops for peak live: 7642 um2
+  tt27: lower bound ops (unlimited thick rows) 0
+    all thick           :     2338 um2   13+  0 rows       0 ops    0.00%  (liveness-blind: 0 ops)
+    cheapest, no refresh:     2194 um2    0+ 13 rows       0 ops    0.00%  (liveness-blind: 48 ops)
+    cheapest, bw<=10%  :     2194 um2    0+ 13 rows       0 ops    0.00%  (liveness-blind: 48 ops)
+  tt85: lower bound ops (unlimited thick rows) 0
+    all thick           :     2338 um2   13+  0 rows       0 ops    0.00%  (liveness-blind: 0 ops)
+    cheapest, no refresh:     2238 um2    4+  9 rows       0 ops    0.00%  (liveness-blind: 491 ops)
+    cheapest, bw<=10%  :     2194 um2    0+ 13 rows     100 ops    1.15%  (liveness-blind: 709 ops)
+  ff85: lower bound ops (unlimited thick rows) 0
+    all thick           :     2338 um2   13+  0 rows       0 ops    0.00%  (liveness-blind: 2 ops)
+    cheapest, no refresh:     2238 um2    4+  9 rows       0 ops    0.00%  (liveness-blind: 3272 ops)
+    cheapest, bw<=10%  :     2205 um2    1+ 12 rows     587 ops    6.73%  (liveness-blind: 4361 ops)
+
+## seq-imem: 165 values, width 16, peak live 165, span 348.9 us; flops for peak live: 129330 um2
+  tt27: lower bound ops (unlimited thick rows) 0
+    all thick           :    16711 um2  165+  0 rows       0 ops    0.00%  (liveness-blind: 6 ops)
+    cheapest, no refresh:    15407 um2   75+ 90 rows       0 ops    0.00%  (liveness-blind: 333 ops)
+    cheapest, bw<=10%  :    14320 um2    0+165 rows     101 ops    1.16%  (liveness-blind: 606 ops)
+  tt85: lower bound ops (unlimited thick rows) 0
+    all thick           :    16711 um2  165+  0 rows       0 ops    0.00%  (liveness-blind: 6 ops)
+    cheapest, no refresh:    16566 um2  155+ 10 rows       0 ops    0.00%  (liveness-blind: 551 ops)
+    cheapest, bw<=10%  :    15262 um2   65+100 rows     658 ops    7.54%  (liveness-blind: 5454 ops)
+  ff85: lower bound ops (unlimited thick rows) 0
+    all thick           :    16711 um2  165+  0 rows       0 ops    0.00%  (liveness-blind: 23 ops)
+    cheapest, no refresh:    16566 um2  155+ 10 rows       0 ops    0.00%  (liveness-blind: 3656 ops)
+    cheapest, bw<=10%  :    15841 um2  105+ 60 rows     842 ops    9.65%  (liveness-blind: 21821 ops)
+
+## linebuf-P3: 5760 values, width 32, peak live 84, span 35515.7 us; flops for peak live: 131682 um2
+  tt27: lower bound ops (unlimited thick rows) 0
+    all thick           :    14349 um2   84+  0 rows       0 ops    0.00%  (liveness-blind: 309 ops)
+    cheapest, no refresh:    14349 um2   84+  0 rows       0 ops    0.00%  (liveness-blind: 309 ops)
+    cheapest, bw<=10%  :    12146 um2    0+ 84 rows   15623 ops    1.76%  (liveness-blind: 31390 ops)
+  tt85: lower bound ops (unlimited thick rows) 0
+    all thick           :    14349 um2   84+  0 rows       0 ops    0.00%  (liveness-blind: 305 ops)
+    cheapest, no refresh:    14349 um2   84+  0 rows       0 ops    0.00%  (liveness-blind: 305 ops)
+    cheapest, bw<=10%  :    13300 um2   44+ 40 rows   65831 ops    7.41%  (liveness-blind: 222133 ops)
+  ff85: lower bound ops (unlimited thick rows) 0
+    all thick           :    14349 um2   84+  0 rows       0 ops    0.00%  (liveness-blind: 1203 ops)
+    cheapest, no refresh:    14349 um2   84+  0 rows       0 ops    0.00%  (liveness-blind: 1203 ops)
+    cheapest, bw<=10%  :    13693 um2   59+ 25 rows   80783 ops    9.10%  (liveness-blind: 925733 ops)
+
+## linebuf-P5: 5760 values, width 32, peak live 117, span 35592.5 us; flops for peak live: 183414 um2
+  tt27: lower bound ops (unlimited thick rows) 0
+    all thick           :    18991 um2  117+  0 rows       0 ops    0.00%  (liveness-blind: 432 ops)
+    cheapest, no refresh:    18991 um2  117+  0 rows       0 ops    0.00%  (liveness-blind: 432 ops)
+    cheapest, bw<=10%  :    15923 um2    0+117 rows   23067 ops    2.59%  (liveness-blind: 43817 ops)
+  tt85: lower bound ops (unlimited thick rows) 0
+    all thick           :    18991 um2  117+  0 rows       0 ops    0.00%  (liveness-blind: 426 ops)
+    cheapest, no refresh:    18991 um2  117+  0 rows       0 ops    0.00%  (liveness-blind: 426 ops)
+    cheapest, bw<=10%  :    17706 um2   68+ 49 rows   66050 ops    7.42%  (liveness-blind: 272753 ops)
+  ff85: lower bound ops (unlimited thick rows) 0
+    all thick           :    18991 um2  117+  0 rows       0 ops    0.00%  (liveness-blind: 1679 ops)
+    cheapest, no refresh:    18991 um2  117+  0 rows       0 ops    0.00%  (liveness-blind: 1679 ops)
+    cheapest, bw<=10%  :    18257 um2   89+ 28 rows   65367 ops    7.35%  (liveness-blind: 1039392 ops)
+
+## linebuf-P20: 5760 values, width 32, peak live 296, span 36168.5 us; flops for peak live: 464022 um2
+  tt27: lower bound ops (unlimited thick rows) 0
+    all thick           :    44170 um2  296+  0 rows       0 ops    0.00%  (liveness-blind: 1110 ops)
+    cheapest, no refresh:    44170 um2  296+  0 rows       0 ops    0.00%  (liveness-blind: 1110 ops)
+    cheapest, bw<=10%  :    36409 um2    0+296 rows   69889 ops    7.73%  (liveness-blind: 112646 ops)
+  tt85: lower bound ops (unlimited thick rows) 0
+    all thick           :    44170 um2  296+  0 rows       0 ops    0.00%  (liveness-blind: 1096 ops)
+    cheapest, no refresh:    44170 um2  296+  0 rows       0 ops    0.00%  (liveness-blind: 1096 ops)
+    cheapest, bw<=10%  :    42282 um2  224+ 72 rows   64181 ops    7.10%  (liveness-blind: 407725 ops)
+  ff85: lower bound ops (unlimited thick rows) 0
+    all thick           :    44170 um2  296+  0 rows       0 ops    0.00%  (liveness-blind: 4317 ops)
+    cheapest, no refresh:    44170 um2  296+  0 rows       0 ops    0.00%  (liveness-blind: 4317 ops)
+    cheapest, bw<=10%  :    43226 um2  260+ 36 rows   53860 ops    5.96%  (liveness-blind: 1360111 ops)
+
+## vfir2: 30592 values, width 32, peak live 64, span 35313.8 us; flops for peak live: 100329 um2
+  tt27: lower bound ops (unlimited thick rows) 0
+    all thick           :    11535 um2   64+  0 rows       0 ops    0.00%  (liveness-blind: 234 ops)
+    cheapest, no refresh:     9857 um2    0+ 64 rows       0 ops    0.00%  (liveness-blind: 23780 ops)
+    cheapest, bw<=10%  :     9857 um2    0+ 64 rows       0 ops    0.00%  (liveness-blind: 23780 ops)
+  tt85: lower bound ops (unlimited thick rows) 0
+    all thick           :    11535 um2   64+  0 rows       0 ops    0.00%  (liveness-blind: 231 ops)
+    cheapest, no refresh:    11535 um2   64+  0 rows       0 ops    0.00%  (liveness-blind: 231 ops)
+    cheapest, bw<=10%  :    11011 um2   44+ 20 rows   85864 ops    9.73%  (liveness-blind: 110515 ops)
+  ff85: lower bound ops (unlimited thick rows) 0
+    all thick           :    11535 um2   64+  0 rows       0 ops    0.00%  (liveness-blind: 911 ops)
+    cheapest, no refresh:    11535 um2   64+  0 rows       0 ops    0.00%  (liveness-blind: 911 ops)
+    cheapest, bw<=10%  :    11535 um2   64+  0 rows       0 ops    0.00%  (liveness-blind: 911 ops)
+
+## vfir3: 30464 values, width 32, peak live 128, span 35313.8 us; flops for peak live: 200658 um2
+  tt27: lower bound ops (unlimited thick rows) 0
+    all thick           :    20538 um2  128+  0 rows       0 ops    0.00%  (liveness-blind: 469 ops)
+    cheapest, no refresh:    20538 um2  128+  0 rows       0 ops    0.00%  (liveness-blind: 469 ops)
+    cheapest, bw<=10%  :    17182 um2    0+128 rows   30464 ops    3.45%  (liveness-blind: 47561 ops)
+  tt85: lower bound ops (unlimited thick rows) 0
+    all thick           :    20538 um2  128+  0 rows       0 ops    0.00%  (liveness-blind: 463 ops)
+    cheapest, no refresh:    20538 um2  128+  0 rows       0 ops    0.00%  (liveness-blind: 463 ops)
+    cheapest, bw<=10%  :    20118 um2  112+ 16 rows   71872 ops    8.14%  (liveness-blind: 88689 ops)
+  ff85: lower bound ops (unlimited thick rows) 0
+    all thick           :    20538 um2  128+  0 rows       0 ops    0.00%  (liveness-blind: 1823 ops)
+    cheapest, no refresh:    20538 um2  128+  0 rows       0 ops    0.00%  (liveness-blind: 1823 ops)
+    cheapest, bw<=10%  :    20538 um2  128+  0 rows       0 ops    0.00%  (liveness-blind: 1823 ops)
