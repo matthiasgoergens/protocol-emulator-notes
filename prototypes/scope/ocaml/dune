@@ -1,0 +1,8 @@
+(library
+ (name chain)
+ (modules chain linalg))
+
+(executables
+ (names padcheck)
+ (modules padcheck)
+ (libraries chain))
