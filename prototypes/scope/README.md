@@ -9,6 +9,14 @@ with PSP 103. A comparator model fitted to that SPICE run drives every study. Th
 architecture v0's fine-delay option. Numbers marked ASSUMPTION in the code are not measured.
 Every number below comes from a file in `results/` or `plots/`.
 
+**How far to trust it.** An adversarial review (codex, `gpt-6-luna`; findings in "Review" at the
+end) called these plausible exploratory simulations, not established chip capabilities. That is
+right, and it applies to every row of the table below. In particular:
+
+- the demonstrations use the same pad model to make the readings and to invert them, so their
+  errors measure noise and calibration under a matched model, not model error;
+- the 0.79 GHz aperture comes from the fitted model; SPICE checked it only for a 200 ps kick.
+
 ## Summary
 
 | | naive | this design | limited by |
@@ -66,7 +74,11 @@ thick-oxide inverter and a thin-oxide inverter, both on the 1.2 V core supply
   static pin) turns delay into voltage. It gives several bits per shot.
   - **Aperture:** with the liberty's 500 ps kick (the 16 mA pad into 1 pF), the centroid is 610 ps
     after the kick starts, 165 ps rms wide, **0.79 GHz** at -3 dB. With a 200 ps kick it is
-    0.88 GHz. The integral is 1.03, so it is linear (`results/kick.txt`, `pad_kick.py`).
+    0.88 GHz. The integral is 1.03: linear for small static offsets. Source: `results/kick.txt`,
+    `pad_kick.py`.
+  - **What SPICE checked:** the 200 ps case, where the model's delays follow SPICE's across bump
+    positions to within 2 ps, after a constant 36 ps offset (`results/padmodel-validate.txt`, aper
+    rows). The 500 ps figure is the model's alone.
   - **Usable range:** a 210 mV window at the pin (the steep part, above 2.5 ps/mV). Signals larger
     than that at the pin are covered by a few DAC "tiles".
   - **Per-kick scatter:** 5.5 mV rms at the pin. Threshold noise, launch jitter (ASSUMPTION
@@ -112,7 +124,9 @@ The probe has k_s = 0.1 and a 5 % compensation error.
 +-0.5 V on one leg, 3.5 ns edges, 30 ps RJ, 50 ppm off the chip's clock.
 
 - **Trigger:** the systolic matcher fires on the pattern -1, 0, +1 and the TDC timestamps that
-  +1 crossing. Threshold noise adds 15.5 ps there.
+  +1 crossing. Threshold noise adds 15.5 ps there. The model idealises the matcher: it finds the
+  pattern from the true symbols, never missing or false-firing. The crossing itself is the true
+  waveform's, plus pad noise and the TDC.
 - **Symbol period:** fitted from 12,649 trigger timestamps; exact to 0.00 ppm.
 - **Kicks:** from a plain four-phase lane on a random quarter, 8 per trigger after a 4-clock
   matcher latency, 4 DAC tiles, k_s = 0.4. The samples are folded over two symbols.
@@ -212,6 +226,10 @@ The line is NRZ with +100 ppm, 0.2 UI of wander at 100 kHz and random jitter.
   timestamp of every edge, runs a PI loop, and places one sample per bit per lane through the
   DTC. That takes it to 240 Mbit/s at 4 bits per clock, storing a quarter of the samples. Error
   rates against jitter are in `results/rx.txt`.
+- **What the 1x model knows that a chip would not:** the TDC sees every true edge, which is
+  realistic. When the receiver's own bit count since the last edge disagrees with the true index,
+  the model counts a slip, charges it 8 bit errors and re-synchronises it from the truth; the slip
+  total is printed. A real receiver would need a framing check to recover from a slip.
 - **Skip predictable fields.** For a known frame format, read only the open bits:
   - Ethernet/IPv4/UDP with a 16-byte payload from a known peer: 208 of 560 bits (37 %), keeping
     the FCS as the integrity check;
@@ -240,6 +258,12 @@ observations are drawn from fresh simulations of the true candidate, not from th
 | which protocol (UART, I2C, SPI, CAN, WS2812, PWM, ...) | 2 / 4 / 8 | | | ~4,000 |
 | is the I2C rise within 300 ns (250 against 350 ns) | 2 | | | 1.8 M (demo c) |
 
+- **Caveats:**
+  - the tables come from finite Monte Carlo (150-4,000 draws per entry, clamped to
+    [0.001, 0.999]), and the posterior treats them as exact;
+  - "0 errors in N trials" bounds the error rate only to about 3/N, not to the 1e-3 target;
+  - only "which frame" has a simulated baseline (in-order reading with the same stopping rule);
+    the other decode figures are capture-size estimates.
 - **CRC consistency has no such shortcut.** Every covered bit can flip the answer, so it is a
   decode question, and the CRC unit on the bit path answers it at line rate.
 - **Hardware mapping:**
@@ -283,6 +307,27 @@ capacitor, and the DAC's RC.
 clock and bin, DAC tile. It drains TDC words or PE histograms over the 4-bit host link. It
 applies the calibration tables (code density, the V-to-T table, DAC levels) and ships waveforms or
 answers to a PC over USB, where a small tool plots them (the plots here come from the Python demos).
+
+## Review
+
+`codex-luna` (gpt-6-luna) was asked to refute this study. Its findings, and what was done:
+
+1. **The 0.79 GHz aperture is a model result.** Agreed. SPICE checked only the 200 ps kick; this
+   is now stated in section 2.
+2. **Device and host share the pad tables.** Agreed, and stated at the top. Model error would
+   show up only against SPICE or silicon.
+3. **The eye trigger uses the true symbols.** Agreed. Matcher misses and false fires are not
+   modelled (section 4b). The dead expression it found is removed; the per-sample truth
+   deliberately uses the physical kick instant.
+4. **The receiver knows the true bit index.** Partly: the TDC seeing true edges is realistic. The
+   re-synchronisation to the true index is now counted and reported as slips (section 7).
+5. **Finite tables make the inference overconfident.** Agreed, stated in section 8; the full runs
+   use more draws and trials than the quick ones it read.
+6. **Decode baselines.** Agreed, stated in section 8.
+7. **The random demodulator's front end is idealised.** Agreed; the dither is an ASSUMPTION
+   (section 5).
+8. **The full result files were missing.** At review time they were; they are now committed
+   (`results/rx.txt`, `results/infer.txt`).
 
 ## Files
 
