@@ -14,6 +14,11 @@ from collections import defaultdict
 args = [a for a in sys.argv[1:] if not a.startswith("--")]
 sense = {"5": 0, "10": 1, "20": 2}[next((a.split("=")[1] for a in sys.argv if a.startswith("--sense=")), "10")]
 plv = "--plv" in sys.argv
+# sense thresholds on RBL: a 1 (NMOS storage) needs RBL < TH1, a 0 needs RBL > TH0; the default
+# is an inverter tripping at 0.6 V with 0.1 V margin each way; a latch sense amplifier with a
+# reference would allow e.g. --th1=0.8 --th0=1.0
+TH1 = float(next((a.split("=")[1] for a in sys.argv if a.startswith("--th1=")), "0.5"))
+TH0 = float(next((a.split("=")[1] for a in sys.argv if a.startswith("--th0=")), "0.7"))
 readf, holdfs = args[0], args[1:]
 
 pts = defaultdict(list)
@@ -33,15 +38,15 @@ def thresholds(p):
                 return s0 + (s1 - s0) * (r0 - limit) / (r0 - r1)
         return None
     if not plv:
-        l1 = cross(0.5, True)       # SN above which RBL < 0.5
-        h0 = cross(0.7, True)       # SN below which RBL > 0.7
-        if l1 is None and p and p[0][1] < 0.5: l1 = p[0][0]
-        if h0 is None and p and p[-1][1] > 0.7: h0 = p[-1][0]
+        l1 = cross(TH1, True)       # SN above which RBL < TH1
+        h0 = cross(TH0, True)       # SN below which RBL > TH0
+        if l1 is None and p and p[0][1] < TH1: l1 = p[0][0]
+        if h0 is None and p and p[-1][1] > TH0: h0 = p[-1][0]
         return l1, h0
     # plv: conducting value is a low SN. H0' = highest SN that still reads as a (conducting) 0:
     # RBL > 0.7; L1' = lowest SN that reads as 1: RBL < 0.5
-    h0 = cross(0.7, False)
-    l1 = cross(0.5, False)
+    h0 = cross(TH0, False)
+    l1 = cross(TH1, False)
     return l1, h0
 
 def parse_hold(f):
@@ -83,7 +88,7 @@ def fmt(t, tstop):
             return f"{t / u:.3g} {s}"
     return f"{t:.2g} s"
 
-print(f"read thresholds from {readf}, sense at {['5', '10', '20'][sense]} ns"
+print(f"read thresholds from {readf}, sense at {['5', '10', '20'][sense]} ns, RBL < {TH1} reads 1, > {TH0} reads 0"
       f" ({'PMOS storage, a stored 0 conducts' if plv else 'NMOS storage'})")
 th = {k: thresholds(v) for k, v in pts.items()}
 for k in sorted(th):

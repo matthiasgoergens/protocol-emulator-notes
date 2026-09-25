@@ -1,0 +1,3 @@
+# 2026-09-25T11:17:44+08:00 run hold-fb-vlo0.3-bar0.2-park: cell.py  --env MW=fb --env VLO=0.3 --env VBAR=0.2 --env WBLH=0.3   (commit 162c494)
+hold: MW=fb MS=nlv VLO=0.3 VHI=1.2 VBAR=0.2 WBLH=0.3 VWWL=0.0 TWRITE=20.0ns TSTOP=50m
+mos_tt   27C stored 1  vw  0.643  v1u  0.662  v10u  0.671  v100u  0.676  v1m  0.650  v10m  0.566  vend  0.560  crossings 0.575@0.006964 0.600@0.003653 0.625@0.00206 0.650@2.094e-08 0.675@2.081e-08 0.700@2.068e-08 0.725@2.055e-08 0.750@2.041e-08 0.775@2.028e-08 0.800@2.014e-08 0.825@2.001e-08

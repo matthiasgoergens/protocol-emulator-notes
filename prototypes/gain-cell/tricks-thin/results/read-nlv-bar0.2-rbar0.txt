@@ -1,0 +1,20 @@
+# 2026-09-25T11:15:18+08:00 run read-nlv-bar0.2-rbar0: cell.py  --env MODE=read --env VBAR=0.2 --env VLO=0.3 --env RBAR=0   (commit 162c494)
+read: MW=lv MS=nlv VLO=0.3 VBAR=0.2 RBAR=0 N=32 CBL=10f SN1=0.85; RBL at 5/10/20 ns after RWL rises; SN before/during/after
+mos_tt   27C SN 0.000: RBL  1.205  1.204  1.203   SN  0.000  0.135  0.084
+mos_tt   27C SN 0.025: RBL  1.204  1.204  1.203   SN  0.025  0.161  0.109
+mos_tt   27C SN 0.050: RBL  1.204  1.204  1.203   SN  0.050  0.187  0.134
+mos_tt   27C SN 0.075: RBL  1.204  1.203  1.202   SN  0.075  0.212  0.157
+mos_tt   27C SN 0.100: RBL  1.204  1.203  1.201   SN  0.100  0.236  0.179
+mos_tt   27C SN 0.125: RBL  1.204  1.202  1.200   SN  0.125  0.258  0.200
+mos_tt   27C SN 0.150: RBL  1.203  1.201  1.196   SN  0.150  0.279  0.220
+mos_tt   27C SN 0.175: RBL  1.202  1.198  1.190   SN  0.175  0.299  0.240
+mos_tt   27C SN 0.200: RBL  1.199  1.193  1.180   SN  0.200  0.319  0.260
+mos_tt   27C SN 0.225: RBL  1.195  1.184  1.162   SN  0.225  0.339  0.280
+mos_tt   27C SN 0.250: RBL  1.188  1.169  1.132   SN  0.250  0.359  0.299
+mos_tt   27C SN 0.275: RBL  1.177  1.146  1.085   SN  0.275  0.379  0.318
+mos_tt   27C SN 0.300: RBL  1.158  1.109  1.014   SN  0.300  0.398  0.336
+mos_tt   27C SN 0.325: RBL  1.132  1.056  0.913   SN  0.325  0.417  0.354
+mos_tt   27C SN 0.350: RBL  1.094  0.982  0.778   SN  0.350  0.435  0.370
+mos_tt   27C SN 0.375: RBL  1.044  0.886  0.618   SN  0.375  0.452  0.375
+mos_tt   27C SN 0.400: RBL  0.980  0.767  0.493   SN  0.400  0.469  0.377
+mos_tt   27C SN 0.425: RBL  0.902  0.628  0.400   SN  0.425  0.480  0.401

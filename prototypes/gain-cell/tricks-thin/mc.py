@@ -13,6 +13,7 @@
 # Environment: CORNER (mos_tt, mos_ff, ...), TEMP, VLO, VBAR, MW (lv only here), N0 (first
 # seed), NS (samples), JOBS (parallel ngspice processes), TSTOP, SCAN "lo:hi:step" for reads,
 # SENSE (ns after RWL rises, default 10), NOMISMATCH=1 runs the nominal corner as a check.
+# A read run stops 2 ns after the sense time.
 import math, os, re, subprocess, sys
 from concurrent.futures import ThreadPoolExecutor
 E = os.environ.get
@@ -33,16 +34,18 @@ GRID = [round(0.9 - 0.0125 * k, 4) for k in range(72) if 0.9 - 0.0125 * k > -0.0
 LV = "w=0.15u l=0.13u"
 
 def netlist(seed):
-    cells = "\n".join(
-        f"XMW{i} wbl 0 sn{i} 0 sg13_lv_nmos {LV}\n"
-        f"XMS{i} mid{i} sn{i} bar 0 sg13_lv_nmos w=0.30u l=0.13u\n"
-        f"XMR{i} rbl 0 mid{i} 0 sg13_lv_nmos w=0.30u l=0.13u\n.ic v(sn{i})=0.85" for i in range(1, N))
+    # the 31 unselected cells of the column, lumped into one instance of multiplicity 31 (they all
+    # hold the same worst-case 1 and only leak into RBL through their MR); the PDK scales their
+    # mismatch by 1/sqrt(m), which is the spread of their summed leakage
+    cells = (f"XMW1 wbl 0 sn1 0 sg13_lv_nmos {LV} m={N - 1}\n"
+             f"XMS1 mid1 sn1 bar 0 sg13_lv_nmos w=0.30u l=0.13u m={N - 1}\n"
+             f"XMR1 rbl 0 mid1 0 sg13_lv_nmos w=0.30u l=0.13u m={N - 1}\n.ic v(sn1)=0.85")
     m1 = "\n".join(f"meas tran a{k} when v(sn0)={lv} fall=1 from=25n" for k, lv in enumerate(GRID))
     m0 = "\n".join(f"meas tran b{k} when v(sn0)={lv} rise=1 from=25n" for k, lv in enumerate(GRID))
     p1 = " ".join(f"a{k}" for k in range(len(GRID)))
     p0 = " ".join(f"b{k}" for k in range(len(GRID)))
     reads = "\n".join(f"""alter vlev dc={lv}
-tran 20p 80n
+tran 40p {42 + SENSE:g}n
 meas tran r{k} find v(rbl) at={40 + SENSE}n
 print r{k}""" for k, lv in enumerate(SCAN))
     return f"""* mc {CORNER} {TEMP} seed {seed}

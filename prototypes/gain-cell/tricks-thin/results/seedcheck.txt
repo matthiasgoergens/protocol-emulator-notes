@@ -1,0 +1,15 @@
+# Seed check for mc.py (2026-09-25). Seeds 1-4 at ff/85 C from two runs: the first with all 31
+# unselected column cells explicit (mc-base-ff85-aborted-slow.txt, stopped for speed), the second with
+# them lumped into one m=31 instance (mc-base-ff85.txt). Same seed -> identical draws of the selected cell
+# (vw1, vw0 identical to 4 digits); different seeds -> different draws; lumping moves L1/H0 by <= 1.3 mV.
+mc-base-ff85-aborted-slow.txt:seed     1 vw1 0.8216 vw0 -0.0399 L1 0.1818 H0 0.1327 t1 2.3919e-06 t0 3.2553e-06 life 2.3919e-06  rbl 0.859 0.616 0.434
+mc-base-ff85-aborted-slow.txt:seed     2 vw1 0.8178 vw0 -0.0403 L1 0.2159 H0 0.1675 t1 2.0093e-06 t0 7.9325e-06 life 2.0093e-06  rbl 1.016 0.780 0.552
+mc-base-ff85-aborted-slow.txt:seed     3 vw1 0.8519 vw0 -0.0315 L1 0.2081 H0 0.1581 t1 1.0766e-06 t0 3.1547e-06 life 1.0766e-06  rbl 0.988 0.734 0.525
+mc-base-ff85-aborted-slow.txt:seed     4 vw1 0.8346 vw0 -0.0372 L1 0.1867 H0 0.1357 t1 1.4085e-06 t0 2.0035e-06 life 1.4085e-06  rbl 0.873 0.630 0.453
+mc-base-ff85.txt:seed     1 vw1 0.8216 vw0 -0.0399 L1 0.1806 H0 0.1321 t1 2.3532e-06 t0 3.1992e-06 life 2.3532e-06  rbl 1.044 0.968 0.860 0.733 0.616 
+mc-base-ff85.txt:seed     2 vw1 0.8178 vw0 -0.0403 L1 0.2149 H0 0.1653 t1 2.0091e-06 t0 7.4915e-06 life 2.0091e-06  rbl 1.118 1.079 1.016 0.917 0.779 
+mc-base-ff85.txt:seed     3 vw1 0.8519 vw0 -0.0315 L1 0.2078 H0 0.1573 t1 1.0800e-06 t0 3.0834e-06 life 1.0800e-06  rbl 1.107 1.061 0.989 0.877 0.734 
+mc-base-ff85.txt:seed     4 vw1 0.8346 vw0 -0.0372 L1 0.1859 H0 0.1348 t1 1.4546e-06 t0 1.9633e-06 life 1.4546e-06  rbl 1.053 0.980 0.874 0.745 0.631 
+# Also smoke-test 2026-09-25 (seedtest in /var/tmp): .options seed=1 twice gave i = -6.27685e-12 both times,
+# seed=2 gave -3.44206e-12, no seed gave -8.04708e-12 and -5.38499e-12 (time-seeded); three instances in one
+# netlist drew 5.39e-10, 3.57e-10, 3.21e-10 A (ff/85 Ioff), unchanged by a second op in the same session.

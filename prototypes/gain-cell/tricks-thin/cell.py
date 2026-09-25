@@ -19,6 +19,10 @@
 #         fb   Giterman-style internal feedback, NMOS version: MW1 WBL-X, MW2 X-SN (both WWL),
 #              MF (thin NMOS, gate SN) from FBD to X, so X follows a stored 1 and MW2 sees a
 #              raised source; FBD is VDD (a supply strap) unless FBD=rbl
+#         plvw thin PMOS write transistor (W 0.15 L 0.13) in an n-well at VDD; WWL active low
+#              (on at 0, idle at VDD, or VWWL if given); it writes a strong 1 and a weak 0
+#   GD    1 adds a gated diode (Luk et al., 2T1D): a thin NMOS W 0.30 L GDL (default 0.30) with
+#         its gate on SN and source and drain on RWL, which boosts a stored 1 during a read
 #   MS    storage device: nlv (thin NMOS, source on the row bar), nhv (thick), plv (thin PMOS in
 #         an n-well at VDD, source on a bar at VBAR, read into an RBL precharged low; MR is then
 #         a thin PMOS gated by RWL active low)
@@ -46,6 +50,9 @@ WBLH = E("WBLH", "opp")
 VWWL = float(E("VWWL", "0"))
 VWEN = float(E("VWEN", "0"))
 FBD = E("FBD", "vdd")
+PW = MW.startswith("p")
+GD = E("GD") == "1"
+GDL = E("GDL", "0.30")
 WMS = E("WMS", "0.30")
 TWRITE = float(E("TWRITE", "20"))
 TSTOP = E("TSTOP", "50m")
@@ -63,6 +70,8 @@ def write_dev(i, wbl, wwl, sn):
     b = "0"
     if MW == "lv":
         return f"XMW{i} {wbl} {wwl} {sn} {b} sg13_lv_nmos {LV}"
+    if MW == "plvw":
+        return f"XMW{i} {wbl} {wwl} {sn} vdd sg13_lv_pmos {LV}"
     if MW == "hv":
         return f"XMW{i} {wbl} {wwl} {sn} {b} sg13_hv_nmos {HV}"
     if MW == "lv2":
@@ -91,8 +100,9 @@ def read_devs(i, sn, bar, rwl):
                 f"XMR{i} rbl {rwl} mid{i} vdd sg13_lv_pmos w=0.30u l=0.13u")
     ms = "sg13_hv_nmos" if MS == "nhv" else "sg13_lv_nmos"
     l = "0.45" if MS == "nhv" else "0.13"
+    gd = f"\nXMD{i} {rwl} {sn} {rwl} 0 sg13_lv_nmos w=0.30u l={GDL}u" if GD else ""
     return (f"XMS{i} mid{i} {sn} {bar} 0 {ms} w={WMS}u l={l}u\n"
-            f"XMR{i} rbl {rwl} mid{i} 0 sg13_lv_nmos w=0.30u l=0.13u")
+            f"XMR{i} rbl {rwl} mid{i} 0 sg13_lv_nmos w=0.30u l=0.13u" + gd)
 
 def header(corner, temp):
     seed = f".options seed={SEED}\n" if SEED else ""
@@ -115,6 +125,12 @@ def hold_netlist(corner, temp, bit):
         vh = float(WBLH)
     # the cell held the opposite value before the write
     ic = VLO if bit else 0.8
+    if PW:
+        idle = float(E("VWWL", str(VDD)))
+        wwl_pwl = f"pwl(0 0 {TWRITE}n 0 {TWRITE + 1}n {idle})"
+        ic = 0.4 if bit else VHI     # the opposite value: a weak 0 or a strong 1
+    else:
+        wwl_pwl = f"pwl(0 {VDD} {TWRITE}n {VDD} {TWRITE + 1}n {VWWL})"
     rwl_idle = VDD if PM else 0
     rbl_idle = 0 if PM else VDD
     grid = [lv for lv in L1GRID if (lv < 1.0 if bit else lv > VLO)]
@@ -123,7 +139,7 @@ def hold_netlist(corner, temp, bit):
     return header(corner, temp) + f"""
 .options reltol=1e-4 abstol=1e-18 vntol=1e-7
 vwbl wbl 0 pwl(0 {vw} {TWRITE + 10}n {vw} {TWRITE + 11}n {vh})
-vwwl wwl 0 pwl(0 {VDD} {TWRITE}n {VDD} {TWRITE + 1}n {VWWL})
+vwwl wwl 0 {wwl_pwl}
 vrwl rwl 0 {rwl_idle}
 vrbl rbl 0 {rbl_idle}
 .ic v(sn)={ic}
@@ -190,14 +206,14 @@ def read_netlist(corner, temp, sn):
         bar = "rbar"
         rbar = f"vrbar rbar 0 pwl(0 {VBAR} 40n {VBAR} 40.1n {RBAR} 60n {RBAR} 60.1n {VBAR})"
     cells = "\n".join(
-        f"{write_dev(i, 'wbl', '0', f'sn{i}')}\n{read_devs(i, f'sn{i}', 'bar', unsel_rwl)}\n.ic v(sn{i})={sn_unsel}"
+        f"{write_dev(i, 'wbl', 'vdd' if PW else '0', f'sn{i}')}\n{read_devs(i, f'sn{i}', 'bar', unsel_rwl)}\n.ic v(sn{i})={sn_unsel}"
         for i in range(1, N))
     return header(corner, temp) + f"""
 .options reltol=1e-4 abstol=1e-15 vntol=1e-6
 vwbl wbl 0 {wblh}
 {rbar}
 .ic v(sn0)={sn}
-{write_dev(0, 'wbl', '0', 'sn0')}
+{write_dev(0, 'wbl', 'vdd' if PW else '0', 'sn0')}
 {read_devs(0, 'sn0', bar, 'rwl')}
 vrwl rwl 0 {rwl}
 vpre pre 0 pwl(0 {VDD} 39n {VDD} 39.1n 0)

@@ -1,0 +1,4 @@
+# 2026-09-25T10:53:49+08:00 run smoke-read: cell.py  --env MODE=read --env CORNERS=mos_ff --env TEMPS=85 --env SNSWEEP=0.2:0.3:0.1   (commit 2b09a94)
+read: MW=lv MS=nlv VLO=0.0 VBAR=0.0 RBAR=None N=32 CBL=10f SN1=0.85; RBL at 5/10/20 ns after RWL rises; SN before/during/after
+mos_ff   85C SN 0.200: RBL  0.774  0.521  0.367   SN  0.183  0.344  0.165
+mos_ff   85C SN 0.300: RBL  0.405  0.223  0.104   SN  0.281  0.348  0.264

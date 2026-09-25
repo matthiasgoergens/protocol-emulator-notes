@@ -1,0 +1,10 @@
+mc-base-ff85.txt: 200 samples (0 infinite or zero)
+  median 1.16 us, min 0.217 us, 1st percentile 0.268 us (sample 2 of 200), max 4.66 us
+  the stored 0 fails first in 43 of 200; written 1: 0.785..0.928 V; L1 0.134..0.244 V; H0 0.084..0.192 V
+  lognormal, all samples: median 1.22 us, sigma(ln t) 0.563 (x1.76 per sigma); 64 kbit worst cell (z -4.25) 0.111 us; 90 % array yield (z -4.66) 0.0886 us
+  lognormal, lower-half probit fit: median 1.23 us, sigma 0.568; 64 kbit worst cell 0.11 us; 90 % array yield 0.0872 us
+mc-base-tt85.txt: 200 samples (0 infinite or zero)
+  median 7.69 us, min 1.21 us, 1st percentile 1.72 us (sample 2 of 200), max 28.7 us
+  the stored 0 fails first in 0 of 200; written 1: 0.712..0.854 V; L1 0.217..0.321 V; H0 0.172..0.278 V
+  lognormal, all samples: median 7.83 us, sigma(ln t) 0.563 (x1.76 per sigma); 64 kbit worst cell (z -4.25) 0.714 us; 90 % array yield (z -4.66) 0.568 us
+  lognormal, lower-half probit fit: median 8.08 us, sigma 0.600; 64 kbit worst cell 0.63 us; 90 % array yield 0.495 us
