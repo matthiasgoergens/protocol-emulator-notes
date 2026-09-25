@@ -1,0 +1,5 @@
+lockstep: 300 programmes x 2000 cycles, 0 mismatching cycles
+uart: sampled 0110100101 expected 0110100101 -> PASS
+deadline: rise_at=30 -> seen=true timeout=false
+deadline: rise_at=never -> seen=false timeout=true
+ALL PASS

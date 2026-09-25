@@ -1,0 +1,7 @@
+== rtc_nack (simulation)
+  replay through interpreter   PASS  9460 cycles, every output equal
+  prediction (whole trace)     PASS  9460 cycles identical to the OCaml board model
+  i2c decode                   PASS  got [90] acks N stop=true expected [90] acks N
+  host bytes                   PASS  got [01] expected [01]
+RESULT rtc_nack PASS
+  (59 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.01 s)

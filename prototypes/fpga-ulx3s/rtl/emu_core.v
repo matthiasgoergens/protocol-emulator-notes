@@ -126,8 +126,8 @@ module emu_core #(
   output wire flash_blocked_o,
   output wire host_activity
 `ifdef EMU_MULTIPHASE
-  // four-phase variant (ulx3s_top_multiphase.v): needs the sequencer with the sub-slot ISA
-  // extension (master after the multiphase merge), which has pin_sub and pin_in4
+  // four-phase variant (ulx3s_top.v with EMU_MULTIPHASE): pin_sub to the stage, quad samples
+  // from it
   , output wire [31:0] seq_pin_sub
   , input wire [7:0] quad_pins            // which pins take their samples from quad_samples
   , input wire [31:0] quad_samples        // bit 4i+p: pin i at quarter p, already retimed to clk
@@ -283,18 +283,27 @@ module emu_core #(
 
   // ---------------------------------------------------------------- the sequencer
   wire [7:0] host_out; wire host_out_valid; wire [23:0] pcs;
-`ifdef EMU_MULTIPHASE
-  // pins without a quad sampler see their one sample in all four quarters
+  // The sub-slot sequencer (deadline-sequencer after the multiphase merge) also takes pin_in4,
+  // four samples per pin and clock, for SHI's quad mode. Pins without a quad sampler present
+  // their one synchronised sample in all four quarters, which is what Isa.step assumes when
+  // called without ?pin_in4, so the replay stays exact. pin_sub (each pin's level per quarter)
+  // only matters to the four-phase stage; the plain build leaves it unconnected and drives the
+  // pads from pin_out, which equals quarter 3 of pin_sub.
   wire [31:0] pin_in4;
+  wire [31:0] pin_sub_w;
   genvar qi;
   generate for (qi = 0; qi < 8; qi = qi + 1) begin : quad
+`ifdef EMU_MULTIPHASE
     assign pin_in4[4*qi+3:4*qi] = quad_pins[qi] ? quad_samples[4*qi+3:4*qi] : {4{pin_s2[qi]}};
+`else
+    assign pin_in4[4*qi+3:4*qi] = {4{pin_s2[qi]}};
+`endif
   end endgenerate
+`ifdef EMU_MULTIPHASE
+  assign seq_pin_sub = pin_sub_w;
 `endif
   deadline_sequencer seq (
-`ifdef EMU_MULTIPHASE
-    .pin_in4(pin_in4), .pin_sub(seq_pin_sub),
-`endif
+    .pin_in4(pin_in4), .pin_sub(pin_sub_w),
     .clock(clk), .clear(in_clear),
     .imem_data(imem_q), .imem_addr(core_imem_addr),
     .pin_in(pin_s2), .pin_out(core_pin_out), .pin_oe(core_pin_oe),

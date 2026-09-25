@@ -1,8 +1,8 @@
 Info: constraining clock net 'clk_25mhz' to 25.00 MHz
 
 Info: Logic utilisation before packing:
-Info:     Total LUT4s:      2779/83640     3%
-Info:         logic LUTs:   2197/83640     2%
+Info:     Total LUT4s:      2776/83640     3%
+Info:         logic LUTs:   2194/83640     2%
 Info:         carry LUTs:    402/83640     0%
 Info:           RAM LUTs:    120/10455     1%
 Info:          RAMW LUTs:     60/20910     0%
@@ -34,13 +34,13 @@ Info: $gp[1]$iobuf_i: gp_$_TBUF__Y_1.Y
 Info: pin 'gp[1]$tr_io' constrained to Bel 'X63/Y0/PIOA'.
 Info: $gp[0]$iobuf_i: gp_$_TBUF__Y.Y
 Info: pin 'gp[0]$tr_io' constrained to Bel 'X65/Y0/PIOA'.
-Info: $gn[7]$iobuf_i: gn[7]$const$GND$4269.Y
+Info: $gn[7]$iobuf_i: gn[7]$const$GND$4239.Y
 Info: pin 'gn[7]$tr_io' constrained to Bel 'X4/Y0/PIOB'.
-Info: $gn[6]$iobuf_i: gn[6]$const$GND$4268.Y
+Info: $gn[6]$iobuf_i: gn[6]$const$GND$4238.Y
 Info: pin 'gn[6]$tr_io' constrained to Bel 'X11/Y0/PIOB'.
-Info: $gn[5]$iobuf_i: gn[5]$const$GND$4267.Y
+Info: $gn[5]$iobuf_i: gn[5]$const$GND$4237.Y
 Info: pin 'gn[5]$tr_io' constrained to Bel 'X15/Y0/PIOB'.
-Info: $gn[4]$iobuf_i: gn[4]$const$GND$4266.Y
+Info: $gn[4]$iobuf_i: gn[4]$const$GND$4236.Y
 Info: pin 'gn[4]$tr_io' constrained to Bel 'X18/Y0/PIOB'.
 Info: $gn[3]$iobuf_i: gn_$_TBUF__Y_3.Y
 Info: pin 'gn[3]$tr_io' constrained to Bel 'X58/Y0/PIOB'.
@@ -82,7 +82,7 @@ Info: Packing carries...
 Info: Packing LUTs...
 Info: Packing LUT5-7s...
 Info: Packing FFs...
-Info:     564 FFs paired with LUTs.
+Info:     545 FFs paired with LUTs.
 Info: Generating derived timing constraints...
 Info:     Input frequency of PLL 'pll.pll_i' is constrained to 25.0 MHz
 Info:     Derived frequency constraint of 60.0 MHz for net clk60
@@ -90,7 +90,7 @@ Info:     Derived frequency constraint of 48.0 MHz for net clk48
 Info: Promoting globals...
 Info:     promoting clock net clk60 to global network
 Info:     promoting clock net clk48 to global network
-Info: Checksum: 0x1685199d
+Info: Checksum: 0x34309d06
 
 Info: Device utilisation:
 Info: 	          TRELLIS_IO:      46/    365    12%
@@ -119,347 +119,334 @@ Info: 	     TRELLIS_ECLKBUF:       0/      8     0%
 Info: 	        ECLKBRIDGECS:       0/      2     0%
 Info: 	                DCSC:       0/      2     0%
 Info: 	          TRELLIS_FF:    1706/  83640     2%
-Info: 	        TRELLIS_COMB:    2958/  83640     3%
+Info: 	        TRELLIS_COMB:    2955/  83640     3%
 Info: 	        TRELLIS_RAMW:      30/  10455     0%
 
 Info: Placed 47 cells based on constraints.
-Info: Creating initial analytic placement for 3025 cells, random placement wirelen = 346208.
-Info:     at initial placer iter 0, wirelen = 4869
-Info:     at initial placer iter 1, wirelen = 4039
-Info:     at initial placer iter 2, wirelen = 3790
-Info:     at initial placer iter 3, wirelen = 3939
-Info: Running main analytical placer, max placement attempts per cell = 2826253.
-Info:     at iteration #1, type ALL: wirelen solved = 3914, spread = 28999, legal = 34244; time = 0.14s
-Info:     at iteration #2, type ALL: wirelen solved = 5212, spread = 21308, legal = 25367; time = 0.23s
-Info:     at iteration #3, type ALL: wirelen solved = 6561, spread = 20292, legal = 25099; time = 0.83s
-Info:     at iteration #4, type ALL: wirelen solved = 7177, spread = 20507, legal = 24315; time = 0.13s
-Info:     at iteration #5, type ALL: wirelen solved = 8215, spread = 19901, legal = 22818; time = 0.12s
-Info:     at iteration #6, type ALL: wirelen solved = 9153, spread = 19434, legal = 22386; time = 0.09s
-Info:     at iteration #7, type ALL: wirelen solved = 9792, spread = 18903, legal = 22390; time = 0.09s
-Info:     at iteration #8, type ALL: wirelen solved = 10069, spread = 18548, legal = 21854; time = 0.18s
-Info:     at iteration #9, type ALL: wirelen solved = 10283, spread = 19117, legal = 21251; time = 0.24s
-Info:     at iteration #10, type ALL: wirelen solved = 10713, spread = 19357, legal = 22793; time = 0.18s
-Info:     at iteration #11, type ALL: wirelen solved = 11170, spread = 21022, legal = 23620; time = 0.10s
-Info:     at iteration #12, type ALL: wirelen solved = 12633, spread = 19979, legal = 23308; time = 0.16s
-Info:     at iteration #13, type ALL: wirelen solved = 12771, spread = 20214, legal = 22829; time = 0.13s
-Info:     at iteration #14, type ALL: wirelen solved = 13205, spread = 18564, legal = 22573; time = 0.62s
-Info: HeAP Placer Time: 4.86s
-Info:   of which solving equations: 3.07s
-Info:   of which spreading cells: 0.41s
-Info:   of which strict legalisation: 0.13s
+Info: Creating initial analytic placement for 3037 cells, random placement wirelen = 350520.
+Info:     at initial placer iter 0, wirelen = 5154
+Info:     at initial placer iter 1, wirelen = 4083
+Info:     at initial placer iter 2, wirelen = 3947
+Info:     at initial placer iter 3, wirelen = 3718
+Info: Running main analytical placer, max placement attempts per cell = 2822688.
+Info:     at iteration #1, type ALL: wirelen solved = 4054, spread = 27195, legal = 29695; time = 0.11s
+Info:     at iteration #2, type ALL: wirelen solved = 5281, spread = 20675, legal = 23519; time = 0.09s
+Info:     at iteration #3, type ALL: wirelen solved = 6296, spread = 20533, legal = 24290; time = 0.09s
+Info:     at iteration #4, type ALL: wirelen solved = 7428, spread = 17596, legal = 21522; time = 0.09s
+Info:     at iteration #5, type ALL: wirelen solved = 7693, spread = 17405, legal = 21472; time = 0.09s
+Info:     at iteration #6, type ALL: wirelen solved = 8490, spread = 16260, legal = 21442; time = 0.09s
+Info:     at iteration #7, type ALL: wirelen solved = 8620, spread = 15842, legal = 19524; time = 0.07s
+Info:     at iteration #8, type ALL: wirelen solved = 9101, spread = 16325, legal = 20208; time = 0.09s
+Info:     at iteration #9, type ALL: wirelen solved = 9309, spread = 16240, legal = 20680; time = 0.08s
+Info:     at iteration #10, type ALL: wirelen solved = 9601, spread = 16018, legal = 21146; time = 0.07s
+Info:     at iteration #11, type ALL: wirelen solved = 9545, spread = 15873, legal = 21041; time = 0.09s
+Info:     at iteration #12, type ALL: wirelen solved = 9789, spread = 16472, legal = 21034; time = 0.08s
+Info: HeAP Placer Time: 1.83s
+Info:   of which solving equations: 1.00s
+Info:   of which spreading cells: 0.17s
+Info:   of which strict legalisation: 0.10s
 
 Info: Running simulated annealing placer for refinement.
-Info:   at iteration #1: temp = 0.000000, timing cost = 826, wirelen = 21251
-Info:   at iteration #5: temp = 0.000000, timing cost = 481, wirelen = 18170
-Info:   at iteration #10: temp = 0.000000, timing cost = 484, wirelen = 17174
-Info:   at iteration #15: temp = 0.000000, timing cost = 472, wirelen = 16756
-Info:   at iteration #20: temp = 0.000000, timing cost = 496, wirelen = 16504
-Info:   at iteration #22: temp = 0.000000, timing cost = 452, wirelen = 16452 
-Info: SA placement time 29.85s
+Info:   at iteration #1: temp = 0.000000, timing cost = 552, wirelen = 19524
+Info:   at iteration #5: temp = 0.000000, timing cost = 528, wirelen = 17377
+Info:   at iteration #10: temp = 0.000000, timing cost = 490, wirelen = 16826
+Info:   at iteration #15: temp = 0.000000, timing cost = 520, wirelen = 16512
+Info:   at iteration #20: temp = 0.000000, timing cost = 525, wirelen = 16422
+Info:   at iteration #22: temp = 0.000000, timing cost = 496, wirelen = 16397 
+Info: SA placement time 6.23s
 
-Info: Max frequency for clock '$glbnet$clk48': 80.89 MHz (PASS at 48.00 MHz)
-Info: Max frequency for clock '$glbnet$clk60': 68.45 MHz (PASS at 60.00 MHz)
+Info: Max frequency for clock '$glbnet$clk48': 89.74 MHz (PASS at 48.00 MHz)
+Info: Max frequency for clock '$glbnet$clk60': 68.32 MHz (PASS at 60.00 MHz)
 
-Info: Max delay <async>               -> posedge $glbnet$clk48: 12.26 ns
-Info: Max delay <async>               -> posedge $glbnet$clk60: 11.14 ns
-Info: Max delay posedge $glbnet$clk48 -> <async>              : 7.32 ns
-Info: Max delay posedge $glbnet$clk48 -> posedge $glbnet$clk60: 1.16 ns
-Info: Max delay posedge $glbnet$clk60 -> <async>              : 18.99 ns
+Info: Max delay <async>               -> posedge $glbnet$clk48: 13.06 ns
+Info: Max delay <async>               -> posedge $glbnet$clk60: 11.94 ns
+Info: Max delay posedge $glbnet$clk48 -> <async>              : 6.84 ns
+Info: Max delay posedge $glbnet$clk48 -> posedge $glbnet$clk60: 1.33 ns
+Info: Max delay posedge $glbnet$clk60 -> <async>              : 18.65 ns
 
 Info: Slack histogram:
-Info:  legend: * represents 12 endpoint(s)
-Info:          + represents [1,12) endpoint(s)
-Info: [  2056,   2957) |*****+
-Info: [  2957,   3858) |***+
-Info: [  3858,   4759) |*********+
-Info: [  4759,   5660) |********+
-Info: [  5660,   6561) |*****+
-Info: [  6561,   7462) |***********+
-Info: [  7462,   8363) |********************+
-Info: [  8363,   9264) |***********+
-Info: [  9264,  10165) |*********+
-Info: [ 10165,  11066) |************************+
-Info: [ 11066,  11967) |****************************************************+
-Info: [ 11967,  12868) |***********************************+
-Info: [ 12868,  13769) |*********************************************+
-Info: [ 13769,  14670) |************************************************************ 
-Info: [ 14670,  15571) |*********************************************+
-Info: [ 15571,  16472) |*******+
-Info: [ 16472,  17373) |********+
-Info: [ 17373,  18274) |***********+
-Info: [ 18274,  19175) |*****+
-Info: [ 19175,  20076) |*****+
-Info: Checksum: 0xc4273488
+Info:  legend: * represents 13 endpoint(s)
+Info:          + represents [1,13) endpoint(s)
+Info: [  2030,   2933) |***+
+Info: [  2933,   3836) |***+
+Info: [  3836,   4739) |******+
+Info: [  4739,   5642) |**********+
+Info: [  5642,   6545) |********+
+Info: [  6545,   7448) |****+
+Info: [  7448,   8351) |****************+
+Info: [  8351,   9254) |****************+
+Info: [  9254,  10157) |*******+
+Info: [ 10157,  11060) |*************+
+Info: [ 11060,  11963) |*********************************+
+Info: [ 11963,  12866) |******************************************+
+Info: [ 12866,  13769) |************************************************************ 
+Info: [ 13769,  14672) |************************************************************ 
+Info: [ 14672,  15575) |*********************************************+
+Info: [ 15575,  16478) |******+
+Info: [ 16478,  17381) |***+
+Info: [ 17381,  18284) |*************+
+Info: [ 18284,  19187) |*******+
+Info: [ 19187,  20090) |*****+
+Info: Checksum: 0xc381ed6e
 Info: Routing globals...
 Info:     routing clock net $glbnet$clk48 using global 0
 Info:     routing clock net $glbnet$clk60 using global 1
 
 Info: Routing..
 Info: Setting up routing queue.
-Info: Routing 13757 arcs.
+Info: Routing 13696 arcs.
 Info:            |   (re-)routed arcs  |   delta    | remaining|       time spent     |
 Info:    IterCnt |  w/ripup   wo/ripup |  w/r  wo/r |      arcs| batch(sec) total(sec)|
-Info:       1000 |      122        877 |  122   877 |     12899|       2.43       2.43|
-Info:       2000 |      252       1747 |  130   870 |     12049|       1.93       4.36|
-Info:       3000 |      414       2585 |  162   838 |     11242|       0.46       4.82|
-Info:       4000 |      668       3331 |  254   746 |     10571|       0.76       5.58|
-Info:       5000 |      899       4100 |  231   769 |      9841|       0.39       5.97|
-Info:       6000 |     1133       4846 |  234   746 |      9089|       0.71       6.68|
-Info:       7000 |     1382       5551 |  249   705 |      8354|       0.35       7.03|
-Info:       8000 |     1642       6268 |  260   717 |      7656|       0.28       7.31|
-Info:       9000 |     1864       7017 |  222   749 |      6920|       0.34       7.65|
-Info:      10000 |     2081       7739 |  217   722 |      6167|       1.22       8.86|
-Info:      11000 |     2270       8507 |  189   768 |      5382|       0.42       9.29|
-Info:      12000 |     2452       9264 |  182   757 |      4579|       0.87      10.16|
-Info:      13000 |     2646      10035 |  194   771 |      3788|       2.40      12.56|
-Info:      14000 |     2787      10851 |  141   816 |      2938|       0.47      13.03|
-Info:      15000 |     2947      11626 |  160   775 |      2176|       0.44      13.47|
-Info:      16000 |     3049      12442 |  102   816 |      1319|       1.04      14.51|
-Info:      17000 |     3218      13270 |  169   828 |       538|       0.70      15.21|
-Info:      17538 |     3219      13666 |    1   396 |         0|       0.34      15.55|
+Info:       1000 |      141        858 |  141   858 |     12858|       0.44       0.44|
+Info:       2000 |      342       1657 |  201   799 |     12114|       0.27       0.72|
+Info:       3000 |      609       2390 |  267   733 |     11425|       0.21       0.93|
+Info:       4000 |      863       3136 |  254   746 |     10778|       0.25       1.18|
+Info:       5000 |     1126       3873 |  263   737 |     10116|       0.27       1.44|
+Info:       6000 |     1384       4605 |  258   732 |      9467|       0.30       1.75|
+Info:       7000 |     1593       5357 |  209   752 |      8753|       0.26       2.00|
+Info:       8000 |     1890       6027 |  297   670 |      8081|       0.19       2.19|
+Info:       9000 |     2108       6780 |  218   753 |      7322|       0.18       2.37|
+Info:      10000 |     2344       7502 |  236   722 |      6599|       0.18       2.55|
+Info:      11000 |     2561       8235 |  217   733 |      5866|       0.18       2.73|
+Info:      12000 |     2815       8941 |  254   706 |      5187|       0.23       2.96|
+Info:      13000 |     2963       9715 |  148   774 |      4367|       0.20       3.16|
+Info:      14000 |     3167      10492 |  204   777 |      3612|       0.33       3.49|
+Info:      15000 |     3329      11274 |  162   782 |      2810|       0.29       3.78|
+Info:      16000 |     3510      12032 |  181   758 |      2046|       0.37       4.15|
+Info:      17000 |     3695      12780 |  185   748 |      1275|       0.27       4.42|
+Info:      18000 |     3930      13545 |  235   765 |       559|       0.28       4.70|
+Info:      18565 |     3937      13969 |    7   424 |         0|       0.42       5.12|
 Info: Routing complete.
-Info: Router1 time 15.55s
-Info: Checksum: 0x8219c767
+Info: Router1 time 5.12s
+Info: Checksum: 0xd6b65527
 
 Info: Critical path report for clock '$glbnet$clk48' (posedge -> posedge):
 Info:       type curr  total name
 Info:   clk-to-q  0.52  0.52 Source usb._437_TRELLIS_FF_Q.Q
-Info:    routing  1.10  1.62 Net usb._437[0] (62,18) -> (64,18)
-Info:                          Sink usb._477_LUT4_B_D_CCU2C_S0_CIN_CCU2C_COUT_S0_CCU2C_S1$CCU2_COMB0.A
+Info:    routing  1.11  1.63 Net usb._437[0] (63,11) -> (63,12)
+Info:                          Sink usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT$CCU2_COMB0.B
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.45  2.07 Source usb._477_LUT4_B_D_CCU2C_S0_CIN_CCU2C_COUT_S0_CCU2C_S1$CCU2_COMB0.FCO
-Info:    routing  0.00  2.07 Net usb._477_LUT4_B_D_CCU2C_S0_CIN_CCU2C_COUT_S0_CCU2C_S1$CCU2_FCI_INT (64,18) -> (64,18)
-Info:                          Sink usb._477_LUT4_B_D_CCU2C_S0_CIN_CCU2C_COUT_S0_CCU2C_S1$CCU2_COMB1.FCI
-Info:      logic  0.40  2.47 Source usb._477_LUT4_B_D_CCU2C_S0_CIN_CCU2C_COUT_S0_CCU2C_S1$CCU2_COMB1.F
-Info:    routing  0.75  3.23 Net usb._477_LUT4_B_D_CCU2C_S0_CIN_CCU2C_COUT_S0[4] (64,18) -> (63,18)
-Info:                          Sink usb._477_LUT4_B_Z_CCU2C_A0_S0_CCU2C_S1_1_A1_LUT4_Z.D
+Info:      logic  0.45  2.08 Source usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT$CCU2_COMB0.FCO
+Info:    routing  0.00  2.08 Net usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT$CCU2_FCI_INT (63,12) -> (63,12)
+Info:                          Sink usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT$CCU2_COMB1.FCI
+Info:      logic  0.40  2.48 Source usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT$CCU2_COMB1.F
+Info:    routing  0.74  3.22 Net usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1[5] (63,12) -> (62,12)
+Info:                          Sink usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1_B0_LUT4_Z.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  3.46 Source usb._477_LUT4_B_Z_CCU2C_A0_S0_CCU2C_S1_1_A1_LUT4_Z.F
-Info:    routing  0.91  4.37 Net usb._477_LUT4_B_Z_CCU2C_A0_S0_CCU2C_S1_1_A1 (63,18) -> (63,16)
-Info:                          Sink usb._477_LUT4_B_Z_CCU2C_A0_S0_CCU2C_S1_1$CCU2_COMB1.A
-Info:      logic  0.45  4.82 Source usb._477_LUT4_B_Z_CCU2C_A0_S0_CCU2C_S1_1$CCU2_COMB1.FCO
-Info:    routing  0.00  4.82 Net usb._477_LUT4_B_Z_CCU2C_A0_S0_CCU2C_S1_1_COUT (63,16) -> (63,16)
-Info:                          Sink usb._477_LUT4_B_Z_CCU2C_A0_S0_CCU2C_S1$CCU2_COMB0.FCI
+Info:      logic  0.24  3.46 Source usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1_B0_LUT4_Z.F
+Info:    routing  1.39  4.84 Net usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1_B0 (62,12) -> (60,11)
+Info:                          Sink usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1$CCU2_COMB0.B
+Info:      logic  0.45  5.29 Source usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1$CCU2_COMB0.FCO
+Info:    routing  0.00  5.29 Net usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1$CCU2_FCI_INT (60,11) -> (60,11)
+Info:                          Sink usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1$CCU2_COMB1.FCI
+Info:      logic  0.00  5.29 Source usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1$CCU2_COMB1.FCO
+Info:    routing  0.00  5.29 Net usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1_COUT (60,11) -> (60,11)
+Info:                          Sink usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1_S1_CCU2C_S1$CCU2_COMB0.FCI
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/arith_map_ccu2c.v:74.7-80.4
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/ccu2c_sim.vh:9.9-9.13
-Info:      logic  0.44  5.26 Source usb._477_LUT4_B_Z_CCU2C_A0_S0_CCU2C_S1$CCU2_COMB0.F
-Info:    routing  0.71  5.98 Net usb._477_LUT4_B_Z_CCU2C_A0_S0[2] (63,16) -> (62,16)
-Info:                          Sink usb._545_LUT4_C_Z_PFUMX_BLUT_Z_L6MUX21_D0_Z_LUT4_D_Z_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_BLUT_LUT4_Z.D
+Info:      logic  0.44  5.73 Source usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1_S1_CCU2C_S1$CCU2_COMB0.F
+Info:    routing  0.86  6.59 Net usb._437_TRELLIS_FF_Q_3_DI_LUT4_Z_C_CCU2C_S1_CIN_CCU2C_COUT_S1_CCU2C_S0_S1_LUT4_D_Z_CCU2C_A1_S1[5] (60,11) -> (61,12)
+Info:                          Sink usb._548_LUT4_B_Z_PFUMX_BLUT_Z_LUT4_D_Z_PFUMX_Z_BLUT_LUT4_Z.M
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.40  6.38 Source usb._545_LUT4_C_Z_PFUMX_BLUT_Z_L6MUX21_D0_Z_LUT4_D_Z_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_BLUT_LUT4_Z.OFX
-Info:    routing  0.00  6.38 Net usb._545_LUT4_C_Z_PFUMX_BLUT_Z_L6MUX21_D0_Z_LUT4_D_Z_L6MUX21_Z_D1_L6MUX21_Z_D0 (62,16) -> (62,16)
-Info:                          Sink usb._545_LUT4_C_Z_PFUMX_BLUT_Z_L6MUX21_D0_Z_LUT4_D_Z_L6MUX21_Z_D1_L6MUX21_Z_D1_PFUMX_Z_ALUT_LUT4_Z.FXA
-Info:                          Defined in:
-Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:157.58-157.60
-Info:      logic  0.24  6.62 Source usb._545_LUT4_C_Z_PFUMX_BLUT_Z_L6MUX21_D0_Z_LUT4_D_Z_L6MUX21_Z_D1_L6MUX21_Z_D1_PFUMX_Z_ALUT_LUT4_Z.OFX
-Info:    routing  0.00  6.62 Net usb._545_LUT4_C_Z_PFUMX_BLUT_Z_L6MUX21_D0_Z_LUT4_D_Z_L6MUX21_Z_D1 (62,16) -> (62,16)
-Info:                          Sink usb._545_LUT4_C_Z_PFUMX_BLUT_Z_L6MUX21_D0_Z_LUT4_D_Z_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_ALUT_LUT4_Z.FXB
-Info:                          Defined in:
-Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:157.70-157.72
-Info:      logic  0.24  6.86 Source usb._545_LUT4_C_Z_PFUMX_BLUT_Z_L6MUX21_D0_Z_LUT4_D_Z_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_ALUT_LUT4_Z.OFX
-Info:    routing  0.71  7.57 Net usb._428_TRELLIS_FF_Q_DI_LUT4_Z_D_LUT4_Z_D_LUT4_D_Z_PFUMX_Z_C0_LUT4_Z_D_LUT4_D_3_Z_LUT4_D_Z_PFUMX_ALUT_Z[4] (62,16) -> (62,15)
-Info:                          Sink usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_ALUT_LUT4_Z.A
+Info:      logic  0.26  6.85 Source usb._548_LUT4_B_Z_PFUMX_BLUT_Z_LUT4_D_Z_PFUMX_Z_BLUT_LUT4_Z.OFX
+Info:    routing  1.21  8.06 Net usb._434_LUT4_A_D_CCU2C_S0_CIN_CCU2C_COUT_CIN_CCU2C_COUT_S1_CCU2C_S0_1_COUT_CCU2C_CIN_COUT_LUT4_C_Z_LUT4_Z_D[2] (61,12) -> (60,7)
+Info:                          Sink usb._466_TRELLIS_FF_Q_10_DI_LUT4_Z_C_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_ALUT_LUT4_Z.M
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  7.80 Source usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_ALUT_LUT4_Z.F
-Info:    routing  0.00  7.80 Net usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_ALUT (62,15) -> (62,15)
-Info:                          Sink usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_BLUT_LUT4_Z.F1
-Info:                          Defined in:
-Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:141.30-141.32
-Info:      logic  0.17  7.97 Source usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_BLUT_LUT4_Z.OFX
-Info:    routing  0.00  7.97 Net usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_Z_D1 (62,15) -> (62,15)
-Info:                          Sink usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_ALUT_LUT4_Z.FXB
-Info:                          Defined in:
-Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:141.38-141.40
-Info:      logic  0.24  8.21 Source usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_ALUT_LUT4_Z.OFX
-Info:    routing  0.63  8.84 Net usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z[2] (62,15) -> (60,15)
-Info:                          Sink usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_SD_D1_L6MUX21_Z_D0_PFUMX_Z_ALUT_LUT4_Z.M
+Info:      logic  0.26  8.32 Source usb._466_TRELLIS_FF_Q_10_DI_LUT4_Z_C_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_ALUT_LUT4_Z.OFX
+Info:    routing  0.89  9.21 Net usb._466_TRELLIS_FF_Q_10_DI_LUT4_Z_C[1] (60,7) -> (59,8)
+Info:                          Sink usb._466_TRELLIS_FF_Q_7_DI_LUT4_Z_D_LUT4_D.B
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.26  9.09 Source usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_SD_D1_L6MUX21_Z_D0_PFUMX_Z_ALUT_LUT4_Z.OFX
-Info:    routing  0.67  9.76 Net usb._425_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_D_Z_L6MUX21_SD_Z[2] (60,15) -> (60,14)
-Info:                          Sink usb._466_TRELLIS_FF_Q_14_DI_LUT4_Z_D_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_ALUT_LUT4_Z.M
+Info:      logic  0.24  9.44 Source usb._466_TRELLIS_FF_Q_7_DI_LUT4_Z_D_LUT4_D.F
+Info:    routing  0.75  10.20 Net usb._466_TRELLIS_FF_Q_13_DI_LUT4_Z_A[3] (59,8) -> (57,9)
+Info:                          Sink usb._813_TRELLIS_FF_Q_DI_L6MUX21_Z_D1_PFUMX_Z_ALUT_LUT4_Z.M
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.26  10.01 Source usb._466_TRELLIS_FF_Q_14_DI_LUT4_Z_D_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_ALUT_LUT4_Z.OFX
-Info:    routing  0.73  10.74 Net usb._466_TRELLIS_FF_Q_14_DI_LUT4_Z_D[3] (60,14) -> (62,13)
-Info:                          Sink usb._813_TRELLIS_FF_Q_DI_LUT4_Z.D
-Info:                          Defined in:
-Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  10.98 Source usb._813_TRELLIS_FF_Q_DI_LUT4_Z.F
-Info:    routing  0.13  11.11 Net usb._813_TRELLIS_FF_Q_DI (62,13) -> (62,13)
-Info:                          Sink usb._813_TRELLIS_FF_Q.DI
-Info:      setup  0.00  11.11 Source usb._813_TRELLIS_FF_Q.DI
-Info: 4.77 ns logic, 6.34 ns routing
+Info:      logic  0.26  10.45 Source usb._813_TRELLIS_FF_Q_DI_L6MUX21_Z_D1_PFUMX_Z_ALUT_LUT4_Z.OFX
+Info:    routing  0.46  10.92 Net usb._813_TRELLIS_FF_Q_DI (57,9) -> (57,9)
+Info:                          Sink usb._813_TRELLIS_FF_Q.M
+Info:      setup  0.00  10.92 Source usb._813_TRELLIS_FF_Q.M
+Info: 3.51 ns logic, 7.41 ns routing
 
 Info: Critical path report for clock '$glbnet$clk60' (posedge -> posedge):
 Info:       type curr  total name
-Info:   clk-to-q  5.83  5.83 Source core.imem.0.0.DOB9
-Info:    routing  1.89  7.72 Net core.imem.0.0_DOB9[1] (37,22) -> (36,4)
-Info:                          Sink core.cap.0.0_DOA17_LUT4_D_Z_LUT4_B_Z_LUT4_Z.C
+Info:   clk-to-q  5.83  5.83 Source core.imem.0.0.DOB15
+Info:    routing  2.00  7.83 Net core.imem.0.0_DOB15[1] (42,22) -> (41,5)
+Info:                          Sink core.imem.0.0_DOB15_LUT4_C.C
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  7.95 Source core.cap.0.0_DOA17_LUT4_D_Z_LUT4_B_Z_LUT4_Z.F
-Info:    routing  0.64  8.59 Net core.seq._289_TRELLIS_FF_Q_9_DI_LUT4_Z_C_CCU2C_S0_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1[0] (36,4) -> (36,4)
-Info:                          Sink core.seq._222_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_Z_1.D
+Info:      logic  0.24  8.07 Source core.imem.0.0_DOB15_LUT4_C.F
+Info:    routing  0.71  8.78 Net core.imem.0.0_DOB14_LUT4_C_Z[1] (41,5) -> (40,5)
+Info:                          Sink core.imem.0.0_DOB0_LUT4_C_Z_LUT4_Z_D_LUT4_Z.C
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  8.83 Source core.seq._222_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_Z_1.F
-Info:    routing  0.69  9.51 Net core.seq._222_TRELLIS_FF_Q_CE_LUT4_Z_B[2] (36,4) -> (35,4)
-Info:                          Sink core.seq._218_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_D_Z_LUT4_Z_2.C
+Info:      logic  0.24  9.01 Source core.imem.0.0_DOB0_LUT4_C_Z_LUT4_Z_D_LUT4_Z.F
+Info:    routing  0.64  9.65 Net core.imem.0.0_DOB0_LUT4_C_Z_LUT4_Z_D[2] (40,5) -> (40,5)
+Info:                          Sink core.imem.0.0_DOB0_LUT4_C_Z_LUT4_Z.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  9.75 Source core.seq._218_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_D_Z_LUT4_Z_2.F
-Info:    routing  1.04  10.79 Net core.seq._218_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_D_Z[1] (35,4) -> (36,5)
-Info:                          Sink core.imem.0.0_DOB3_LUT4_C_Z_CCU2C_S1_COUT_CCU2C_CIN_S1_LUT4_Z_1_D_LUT4_D_Z_LUT4_Z.B
+Info:      logic  0.24  9.89 Source core.imem.0.0_DOB0_LUT4_C_Z_LUT4_Z.F
+Info:    routing  0.43  10.32 Net core.tr_fields_TRELLIS_FF_Q_5_DI[2] (40,5) -> (40,5)
+Info:                          Sink core.imem.0.0_DOB7_LUT4_C_Z_LUT4_Z_3_D_LUT4_D_Z_LUT4_D.C
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  11.03 Source core.imem.0.0_DOB3_LUT4_C_Z_CCU2C_S1_COUT_CCU2C_CIN_S1_LUT4_Z_1_D_LUT4_D_Z_LUT4_Z.F
-Info:    routing  0.64  11.67 Net core.imem.0.0_DOB3_LUT4_C_Z_CCU2C_S1_COUT_CCU2C_CIN_S1_LUT4_Z_1_D_LUT4_D_Z[4] (36,5) -> (39,5)
-Info:                          Sink core.imem.0.0_DOB3_LUT4_C_Z_CCU2C_S1_COUT_CCU2C_CIN_S1_LUT4_Z_1_D_LUT4_D_2_Z_LUT4_Z.D
+Info:      logic  0.24  10.56 Source core.imem.0.0_DOB7_LUT4_C_Z_LUT4_Z_3_D_LUT4_D_Z_LUT4_D.F
+Info:    routing  0.90  11.45 Net core.seq._510_TRELLIS_FF_Q_1_DI_PFUMX_Z_BLUT_LUT4_Z_D[4] (40,5) -> (40,7)
+Info:                          Sink core.tr_fields_TRELLIS_FF_Q_DI_LUT4_Z.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  11.90 Source core.imem.0.0_DOB3_LUT4_C_Z_CCU2C_S1_COUT_CCU2C_CIN_S1_LUT4_Z_1_D_LUT4_D_2_Z_LUT4_Z.F
-Info:    routing  1.03  12.94 Net core.pcs_TRELLIS_FF_Q_1_DI_PFUMX_Z_C0[0] (39,5) -> (39,9)
-Info:                          Sink core.pcs_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_Z_3.D
+Info:      logic  0.24  11.69 Source core.tr_fields_TRELLIS_FF_Q_DI_LUT4_Z.F
+Info:    routing  0.49  12.18 Net core.tr_fields_TRELLIS_FF_Q_DI[2] (40,7) -> (40,7)
+Info:                          Sink core.imem.0.0_DOB8_LUT4_C_Z_LUT4_Z_3.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  13.17 Source core.pcs_TRELLIS_FF_Q_DI_PFUMX_Z_C0_LUT4_Z_3.F
-Info:    routing  0.61  13.79 Net core.pcs_TRELLIS_FF_Q_DI_PFUMX_Z_C0[3] (39,9) -> (39,9)
-Info:                          Sink core.pcs_TRELLIS_FF_Q_DI_PFUMX_Z_BLUT_LUT4_Z.D
+Info:      logic  0.24  12.41 Source core.imem.0.0_DOB8_LUT4_C_Z_LUT4_Z_3.F
+Info:    routing  0.73  13.15 Net core.imem.0.0_DOB8_LUT4_C_Z[4] (40,7) -> (41,7)
+Info:                          Sink core.imem.0.0_DOB0_LUT4_C_Z_PFUMX_Z_BLUT_LUT4_Z.M
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.40  14.19 Source core.pcs_TRELLIS_FF_Q_DI_PFUMX_Z_BLUT_LUT4_Z.OFX
-Info:    routing  0.46  14.65 Net core.pcs_TRELLIS_FF_Q_DI (39,9) -> (39,9)
-Info:                          Sink core.pcs_TRELLIS_FF_Q_5.M
-Info:      setup  0.00  14.65 Source core.pcs_TRELLIS_FF_Q_5.M
-Info: 7.65 ns logic, 7.00 ns routing
+Info:      logic  0.26  13.40 Source core.imem.0.0_DOB0_LUT4_C_Z_PFUMX_Z_BLUT_LUT4_Z.OFX
+Info:    routing  0.38  13.78 Net core.imem.0.0_DOB0_LUT4_C_Z[4] (41,7) -> (41,7)
+Info:                          Sink core.seq._270_TRELLIS_FF_Q_7_DI_PFUMX_Z_BLUT_LUT4_Z.M
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:      logic  0.26  14.04 Source core.seq._270_TRELLIS_FF_Q_7_DI_PFUMX_Z_BLUT_LUT4_Z.OFX
+Info:    routing  0.46  14.50 Net core.seq._270_TRELLIS_FF_Q_7_DI (41,7) -> (41,7)
+Info:                          Sink core.seq._264_TRELLIS_FF_Q_7.M
+Info:      setup  0.00  14.50 Source core.seq._264_TRELLIS_FF_Q_7.M
+Info: 7.76 ns logic, 6.74 ns routing
 
 Info: Critical path report for cross-domain path '<async>' -> 'posedge $glbnet$clk48':
 Info:       type curr  total name
 Info:     source  0.00  0.00 Source btn[1]$tr_io.O
-Info:    routing  3.51  3.51 Net btn[1]$TRELLIS_IO_IN (4,95) -> (4,43)
+Info:    routing  3.94  3.94 Net btn[1]$TRELLIS_IO_IN (4,95) -> (4,41)
 Info:                          Sink btn_LUT4_D.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/emulator-wt-fpga-ulx3s/prototypes/fpga-ulx3s/rtl/ulx3s_top.v:30.21-30.24
-Info:      logic  0.24  3.74 Source btn_LUT4_D.F
-Info:    routing  3.89  7.64 Net btn_LUT4_D_Z (4,43) -> (51,24)
-Info:                          Sink usb._383_LUT4_D_Z_TRELLIS_FF_Q_DI_TRELLIS_FF_Q_DI_TRELLIS_FF_Q_DI_TRELLIS_FF_Q.LSR
-Info:      setup  0.42  8.06 Source usb._383_LUT4_D_Z_TRELLIS_FF_Q_DI_TRELLIS_FF_Q_DI_TRELLIS_FF_Q_DI_TRELLIS_FF_Q.LSR
-Info: 0.66 ns logic, 7.40 ns routing
+Info:      logic  0.24  4.17 Source btn_LUT4_D.F
+Info:    routing  4.45  8.62 Net btn_LUT4_D_Z (4,41) -> (55,18)
+Info:                          Sink usb._383_LUT4_D_Z_TRELLIS_FF_Q_DI_TRELLIS_FF_Q_DI_TRELLIS_FF_Q.LSR
+Info:      setup  0.42  9.04 Source usb._383_LUT4_D_Z_TRELLIS_FF_Q_DI_TRELLIS_FF_Q_DI_TRELLIS_FF_Q.LSR
+Info: 0.66 ns logic, 8.38 ns routing
 
 Info: Critical path report for cross-domain path '<async>' -> 'posedge $glbnet$clk60':
 Info:       type curr  total name
 Info:     source  0.00  0.00 Source btn[1]$tr_io.O
-Info:    routing  3.51  3.51 Net btn[1]$TRELLIS_IO_IN (4,95) -> (4,43)
+Info:    routing  3.94  3.94 Net btn[1]$TRELLIS_IO_IN (4,95) -> (4,41)
 Info:                          Sink btn_LUT4_D.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/emulator-wt-fpga-ulx3s/prototypes/fpga-ulx3s/rtl/ulx3s_top.v:30.21-30.24
-Info:      logic  0.24  3.74 Source btn_LUT4_D.F
-Info:    routing  3.06  6.80 Net btn_LUT4_D_Z (4,43) -> (38,25)
-Info:                          Sink btn_LUT4_D_Z_TRELLIS_FF_LSR_Q_TRELLIS_FF_DI_Q_TRELLIS_FF_DI.LSR
-Info:      setup  0.42  7.23 Source btn_LUT4_D_Z_TRELLIS_FF_LSR_Q_TRELLIS_FF_DI_Q_TRELLIS_FF_DI.LSR
-Info: 0.66 ns logic, 6.57 ns routing
+Info:      logic  0.24  4.17 Source btn_LUT4_D.F
+Info:    routing  3.64  7.81 Net btn_LUT4_D_Z (4,41) -> (41,18)
+Info:                          Sink btn_LUT4_D_Z_TRELLIS_FF_LSR_Q_TRELLIS_FF_DI.LSR
+Info:      setup  0.42  8.24 Source btn_LUT4_D_Z_TRELLIS_FF_LSR_Q_TRELLIS_FF_DI.LSR
+Info: 0.66 ns logic, 7.58 ns routing
 
 Info: Critical path report for cross-domain path 'posedge $glbnet$clk48' -> '<async>':
 Info:       type curr  total name
 Info:   clk-to-q  0.52  0.52 Source usb._396_TRELLIS_FF_Q.Q
-Info:    routing  3.03  3.56 Net usb._396 (68,13) -> (99,2)
-Info:                          Sink usb_fpga_bd_dp_$_TBUF__Y_A_LUT4_Z.C
+Info:    routing  2.98  3.51 Net usb._396 (64,6) -> (103,2)
+Info:                          Sink usb_fpga_bd_dp_$_TBUF__Y_A_LUT4_Z.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  3.80 Source usb_fpga_bd_dp_$_TBUF__Y_A_LUT4_Z.F
-Info:    routing  1.28  5.08 Net usb_fpga_bd_dp_$_TBUF__Y_A (99,2) -> (107,0)
+Info:      logic  0.24  3.74 Source usb_fpga_bd_dp_$_TBUF__Y_A_LUT4_Z.F
+Info:    routing  1.13  4.87 Net usb_fpga_bd_dp_$_TBUF__Y_A (103,2) -> (107,0)
 Info:                          Sink usb_fpga_bd_dp$tr_io.I
-Info: 0.76 ns logic, 4.32 ns routing
+Info: 0.76 ns logic, 4.11 ns routing
 
 Info: Critical path report for cross-domain path 'posedge $glbnet$clk48' -> 'posedge $glbnet$clk60':
 Info:       type curr  total name
-Info:   clk-to-q  0.52  0.52 Source usb._307_TRELLIS_FF_Q_5.Q
-Info:    routing  0.81  1.34 Net usb._307[5] (53,19) -> (52,19)
-Info:                          Sink usb_status_s1_TRELLIS_FF_Q_6.M
+Info:   clk-to-q  0.52  0.52 Source usb._307_TRELLIS_FF_Q_4.Q
+Info:    routing  0.74  1.26 Net usb._307[4] (55,12) -> (54,11)
+Info:                          Sink usb_status_s1_TRELLIS_FF_Q_5.M
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/emulator-wt-fpga-ulx3s/prototypes/fpga-ulx3s/rtl/gen/usb_fs_device.v:956.15-956.19
-Info:      setup  0.00  1.34 Source usb_status_s1_TRELLIS_FF_Q_6.M
-Info: 0.52 ns logic, 0.81 ns routing
+Info:      setup  0.00  1.26 Source usb_status_s1_TRELLIS_FF_Q_5.M
+Info: 0.52 ns logic, 0.74 ns routing
 
 Info: Critical path report for cross-domain path 'posedge $glbnet$clk60' -> '<async>':
 Info:       type curr  total name
-Info:   clk-to-q  0.52  0.52 Source core.seq._123_TRELLIS_FF_Q.Q
-Info:    routing  1.91  2.44 Net core.core_pin_oe[2] (34,5) -> (33,21)
-Info:                          Sink core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_D_Z_LUT4_Z.C
+Info:   clk-to-q  0.52  0.52 Source core.seq._169_TRELLIS_FF_Q.Q
+Info:    routing  1.64  2.16 Net core.seq_pad_out[2] (42,4) -> (36,16)
+Info:                          Sink core.seq._306_LUT4_D.C
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/emulator-wt-fpga-ulx3s/prototypes/fpga-ulx3s/rtl/emu_core.v:315.15-315.24
+Info:      logic  0.24  2.40 Source core.seq._306_LUT4_D.F
+Info:    routing  0.74  3.14 Net core.seq._306_LUT4_D_Z[3] (36,16) -> (35,17)
+Info:                          Sink core.f_nbits_TRELLIS_FF_Q_1_DI_LUT4_Z_D_LUT4_D_Z_LUT4_B_D_LUT4_Z_D_LUT4_Z_1.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  2.67 Source core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_D_Z_LUT4_Z.F
-Info:    routing  1.49  4.16 Net core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_D_Z[3] (33,21) -> (32,23)
-Info:                          Sink core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_D_1_Z_LUT4_Z_2_C_LUT4_Z.D
+Info:      logic  0.24  3.38 Source core.f_nbits_TRELLIS_FF_Q_1_DI_LUT4_Z_D_LUT4_D_Z_LUT4_B_D_LUT4_Z_D_LUT4_Z_1.F
+Info:    routing  0.61  3.99 Net core.f_nbits_TRELLIS_FF_Q_1_DI_LUT4_Z_D_LUT4_D_Z_LUT4_B_D_LUT4_Z_D[1] (35,17) -> (35,17)
+Info:                          Sink core.f_nbits_TRELLIS_FF_Q_1_DI_LUT4_Z_D_LUT4_D_Z_LUT4_B_D_LUT4_Z.B
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  4.40 Source core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_D_1_Z_LUT4_Z_2_C_LUT4_Z.F
-Info:    routing  0.62  5.02 Net core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_D_1_Z_LUT4_Z_2_C[1] (32,23) -> (32,23)
-Info:                          Sink core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_D_1_Z_LUT4_Z_2.C
+Info:      logic  0.24  4.23 Source core.f_nbits_TRELLIS_FF_Q_1_DI_LUT4_Z_D_LUT4_D_Z_LUT4_B_D_LUT4_Z.F
+Info:    routing  0.75  4.98 Net core.f_nbits_TRELLIS_FF_Q_1_DI_LUT4_Z_D_LUT4_D_Z_LUT4_B_D[2] (35,17) -> (35,16)
+Info:                          Sink core.f_nbits_TRELLIS_FF_Q_1_DI_LUT4_Z_D_LUT4_D_Z_LUT4_B.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  5.26 Source core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_D_1_Z_LUT4_Z_2.F
-Info:    routing  0.42  5.67 Net core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_D_1_Z[4] (32,23) -> (32,23)
-Info:                          Sink core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_C_Z_PFUMX_Z_1_BLUT_LUT4_Z.M
+Info:      logic  0.24  5.21 Source core.f_nbits_TRELLIS_FF_Q_1_DI_LUT4_Z_D_LUT4_D_Z_LUT4_B.F
+Info:    routing  0.68  5.89 Net core.f_nbits_TRELLIS_FF_Q_1_DI_LUT4_Z_D_LUT4_D_Z_LUT4_B_Z[3] (35,16) -> (34,16)
+Info:                          Sink core.f_sclk_q_LUT4_C_Z_LUT4_Z.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.26  5.93 Source core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_C_Z_PFUMX_Z_1_BLUT_LUT4_Z.OFX
-Info:    routing  1.11  7.04 Net core.f_nbits_TRELLIS_FF_Q_3_DI_LUT4_Z_D_LUT4_C_Z[2] (32,23) -> (32,24)
-Info:                          Sink core.f_blocked_LUT4_C_D_LUT4_Z.C
+Info:      logic  0.24  6.13 Source core.f_sclk_q_LUT4_C_Z_LUT4_Z.F
+Info:    routing  0.21  6.34 Net core.f_sclk_q_LUT4_C_Z[3] (34,16) -> (34,16)
+Info:                          Sink core.f_blocked_LUT4_C_D_LUT4_Z.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  7.28 Source core.f_blocked_LUT4_C_D_LUT4_Z.F
-Info:    routing  0.50  7.77 Net core.f_blocked_LUT4_C_D[1] (32,24) -> (32,24)
+Info:      logic  0.24  6.58 Source core.f_blocked_LUT4_C_D_LUT4_Z.F
+Info:    routing  0.68  7.26 Net core.f_blocked_LUT4_C_D[1] (34,16) -> (33,16)
 Info:                          Sink core.f_blocked_LUT4_C.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  8.01 Source core.f_blocked_LUT4_C.F
-Info:    routing  0.65  8.66 Net core.f_blocked_LUT4_C_Z[1] (32,24) -> (33,25)
+Info:      logic  0.24  7.49 Source core.f_blocked_LUT4_C.F
+Info:    routing  0.86  8.35 Net core.f_blocked_LUT4_C_Z[1] (33,16) -> (33,17)
 Info:                          Sink usrmclk_USRMCLKI_LUT4_Z.D
 Info:                          Defined in:
 Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
-Info:      logic  0.24  8.90 Source usrmclk_USRMCLKI_LUT4_Z.F
-Info:    routing  6.01  14.90 Net usrmclk_USRMCLKI (33,25) -> (0,95)
+Info:      logic  0.24  8.59 Source usrmclk_USRMCLKI_LUT4_Z.F
+Info:    routing  6.61  15.20 Net usrmclk_USRMCLKI (33,17) -> (0,95)
 Info:                          Sink usrmclk.PADDO
-Info: 2.20 ns logic, 12.71 ns routing
+Info: 2.41 ns logic, 12.78 ns routing
 
-Info: Max frequency for clock '$glbnet$clk48': 90.02 MHz (PASS at 48.00 MHz)
-Info: Max frequency for clock '$glbnet$clk60': 68.27 MHz (PASS at 60.00 MHz)
+Info: Max frequency for clock '$glbnet$clk48': 91.60 MHz (PASS at 48.00 MHz)
+Info: Max frequency for clock '$glbnet$clk60': 68.98 MHz (PASS at 60.00 MHz)
 
-Info: Max delay <async>               -> posedge $glbnet$clk48: 8.06 ns
-Info: Max delay <async>               -> posedge $glbnet$clk60: 7.23 ns
-Info: Max delay posedge $glbnet$clk48 -> <async>              : 5.08 ns
-Info: Max delay posedge $glbnet$clk48 -> posedge $glbnet$clk60: 1.34 ns
-Info: Max delay posedge $glbnet$clk60 -> <async>              : 14.90 ns
+Info: Max delay <async>               -> posedge $glbnet$clk48: 9.04 ns
+Info: Max delay <async>               -> posedge $glbnet$clk60: 8.24 ns
+Info: Max delay posedge $glbnet$clk48 -> <async>              : 4.87 ns
+Info: Max delay posedge $glbnet$clk48 -> posedge $glbnet$clk60: 1.26 ns
+Info: Max delay posedge $glbnet$clk60 -> <async>              : 15.20 ns
 
 Info: Slack histogram:
-Info:  legend: * represents 15 endpoint(s)
-Info:          + represents [1,15) endpoint(s)
-Info: [  2017,   2911) |*+
-Info: [  2911,   3805) |***+
-Info: [  3805,   4699) |*+
-Info: [  4699,   5593) |******+
-Info: [  5593,   6487) |***+
-Info: [  6487,   7381) |*******+
-Info: [  7381,   8275) |*************+
-Info: [  8275,   9169) |************+
-Info: [  9169,  10063) |**************+
-Info: [ 10063,  10957) |****************+
-Info: [ 10957,  11851) |*************+
-Info: [ 11851,  12745) |****************************+
-Info: [ 12745,  13639) |***********************************************+
-Info: [ 13639,  14533) |******************************************************+
-Info: [ 14533,  15427) |************************************************************ 
-Info: [ 15427,  16321) |*******+
-Info: [ 16321,  17215) |*+
-Info: [ 17215,  18109) |****+
-Info: [ 18109,  19003) |****************+
-Info: [ 19003,  19897) |****+
+Info:  legend: * represents 16 endpoint(s)
+Info:          + represents [1,16) endpoint(s)
+Info: [  2169,   3055) |*+
+Info: [  3055,   3941) |***+
+Info: [  3941,   4827) |****+
+Info: [  4827,   5713) |****+
+Info: [  5713,   6599) |***+
+Info: [  6599,   7485) |******+
+Info: [  7485,   8371) |************+
+Info: [  8371,   9257) |****+
+Info: [  9257,  10143) |*****************+
+Info: [ 10143,  11029) |*************+
+Info: [ 11029,  11915) |*******************+
+Info: [ 11915,  12801) |************************+
+Info: [ 12801,  13687) |*******************************************+
+Info: [ 13687,  14573) |************************************************************ 
+Info: [ 14573,  15459) |******************************************************+
+Info: [ 15459,  16345) |******+
+Info: [ 16345,  17231) |+
+Info: [ 17231,  18117) |**+
+Info: [ 18117,  19003) |*****************+
+Info: [ 19003,  19889) |*****+
 
 Info: Program finished normally.

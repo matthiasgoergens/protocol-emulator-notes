@@ -175,9 +175,9 @@ Three ways, from most to least exact:
 When everything above passes: `openFPGALoader --board ulx3s --write-flash --verify
 bitstream/ulx3s_85f.bit`, power-cycle, repeat step 5.
 
-## 10. Four-phase variant (after merging master)
+## 10. Four-phase variant
 
-`./build_multiphase.sh` builds sequencer pins 0 and 1 through `prototypes/multiphase`'s stage. It
-needs the sub-slot sequencer, which is on master. Load it like the base bitstream. The quarter-clock
+`./build_multiphase.sh` builds sequencer pins 0 and 1 through `prototypes/multiphase`'s stage
+(to `/var/tmp/fpga-ulx3s/build-mp/ulx3s_mp.bit`). Load it like the base bitstream. The quarter-clock
 edges (4.17 ns apart at 60 MHz) need an oscilloscope of at least 350 MHz; a 24 MS/s logic analyser
 cannot see them. See README, "Four-phase output stage on the ECP5".

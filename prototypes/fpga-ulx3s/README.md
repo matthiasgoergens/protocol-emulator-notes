@@ -80,13 +80,16 @@ cheap header parts. `fpga_tests.exe list` prints them all.
 | --- | --- |
 | Device | LFE5U-85F, CABGA381, speed 6 |
 | Flip-flops | 1,706 of 83,640 (2 %) |
-| LUT4 and carry (comb) | 2,958 of 83,640 (3 %) |
+| LUT4 and carry (comb) | 2,955 of 83,640 (3 %) |
 | Block RAM (DP16KD) | 11 of 208: instruction memory, trace (80 x 2,048), sampler capture |
 | Distributed RAM | 30 RAMW |
 | I/O | 46 of 365; PLLs 1 of 4; USRMCLK 1 |
-| 60 MHz domain | fmax 68.27 MHz, **passes at 60 MHz** with 2.0 ns slack |
-| 48 MHz domain (USB) | fmax 90.02 MHz, **passes at 48 MHz** |
-| Bitstream | `bitstream/ulx3s_85f.bit`, 358 KB compressed, sha256 c00e0287... |
+| 60 MHz domain | fmax 68.98 MHz, **passes at 60 MHz** with 2.2 ns slack |
+| 48 MHz domain (USB) | fmax 91.60 MHz, **passes at 48 MHz** |
+| Bitstream | `bitstream/ulx3s_85f.bit`, 355 KB compressed, sha256 60cad045... |
+
+These figures are after merging master (the sub-slot sequencer). Before the merge the same
+design gave 68.27 and 90.02 MHz, 2,958 LUT/carry cells, sha256 c00e0287...
 
 The 60 MHz critical path is the instruction fetch: block-RAM clock-to-output (5.83 ns, since the
 DP16KD has no output register, as the chip's one-cycle SRAM read requires) into the sequencer's
@@ -96,9 +99,12 @@ shorter, so the FPGA is the harsher case here. Both PLL outputs come out exactly
 that arithmetic.
 
 **Simulated end to end** (`uv run host/emu_runner.py --sim --cpb 60 --controls`, with the
-board's real UART divider; evidence in `evidence/2026-09-25-sim/`): 16 tests pass, and the 2
+board's real UART divider; evidence in `evidence/2026-09-25-sim-after-master/`, and
+`evidence/2026-09-25-sim/` from before the merge): 16 tests pass, and the 2
 negative controls fail as they must. In every test, the trace is identical to the OCaml
-prediction on every cycle. The same holds with the fast divider (8 clocks per bit). The controls:
+prediction on every cycle. The same holds with the fast divider (8 clocks per bit). Merging the
+sub-slot sequencer changed no behaviour: all 36 trace and capture files per divider are
+byte-identical to the pre-merge runs. The controls:
 
 - one output bit flipped in one recorded entry: the replay and the prediction fail;
 - a programme one bit different from the one the checker replays (a delay one count longer):
@@ -141,11 +147,10 @@ sampler per phase. The ECP5 can prototype this directly:
   one edge against another in 208 ps steps.
 - **Build variant (`build_multiphase.sh`, `-DEMU_MULTIPHASE`).** Sequencer pins 0 and 1 go through
   the stage. A second EHXPLLL makes the four phases, and the core runs on phase 0. Trial-built
-  against master's sequencer and stage, extracted with `git show` (commit in
-  `reports/multiphase/`), since this branch predates them. Results: 1,752 flip-flops, 2 PLLs,
-  5 global clocks; the core domain meets 60 MHz (67.5 MHz). The quarter-period transfers are
-  inside budget: phase 0 to phases 1/2/3 at most 2.58 ns against 4.17 ns, and phases 1/2/3 back
-  to phase 0 at most 1.24 ns. nextpnr treats the phases as unrelated clocks, so that budget check
+  from `rtl/gen` after merging master (commit in `reports/multiphase/`). Results: 1,752
+  flip-flops, 2,961 LUT/carry cells, 2 PLLs, 5 global clocks; the core domain meets 60 MHz
+  (69.75 MHz), USB 97.70 MHz. The quarter-period transfers are inside budget: phase 0 to phases
+  1/2/3 at most 2.51 ns against 4.17 ns, and phases 1/2/3 back to phase 0 at most 1.55 ns. nextpnr treats the phases as unrelated clocks, so that budget check
   is by hand, and it does not include skew between the PLL outputs' clock trees.
 - **What it will not show faithfully.** The XOR is a LUT, and each lane has its own route to the
   pad, so quarter edges will sit a few hundred picoseconds off the ideal grid.
@@ -154,8 +159,8 @@ sampler per phase. The ECP5 can prototype this directly:
   ECP5 input gearbox (IDDRX2F, four samples per clock). That gearbox, with ODDRX2F on the output
   side, is also the FPGA-native way to make the same quarter-clock waveform, a second
   implementation to compare the lane-XOR stage against.
-- Replay does not cover the variant yet. The trace records the core's clock-grid pins, not
-  `pin_sub` or `pin_in4`.
+- Replay does not cover the variant's quarter edges yet. The trace records the core's clock-grid
+  pins, not `pin_sub` or `pin_in4`.
 
 ## Limits of the trace
 
@@ -182,18 +187,22 @@ host sends while a run is in progress are discarded, except `X` (abort): the run
 - **The Tiny Tapeout environment**: the mux, the I/O ring, the shared clock pin, the pin count.
 - **Silicon variation**: the calibration-by-search and portability experiments exist for that.
 
-## After merging master
+## Merged with master
 
-- `rtl/gen/deadline_sequencer.v` (a symlink) will then be the sub-slot sequencer, with a new
-  `pin_in4` input and a new `pin_sub` output. Old programmes behave identically. The base build's
-  `emu_core` leaves `pin_in4` unconnected. Before relying on it, connect it (four copies of each
-  pin's sample; the `EMU_MULTIPHASE` branch of `emu_core.v` shows how) and re-run the
-  simulated suite.
-- `rtl/gen/multiphase_stage.v` is already a symlink to `../multiphase/multiphase_stage.v`, which
-  resolves after the merge. `build_multiphase.sh` then needs no `GEN=`.
-- `ocaml/isa.ml` is a symlink too. Master's `Isa.step` gains only an optional `?pin_in4`
-  argument, and `compiler.ml` and `decoders.ml` are unchanged, so the checker should build as it
-  is. Re-run it to confirm.
+This branch has master merged in (the sub-slot ISA and `prototypes/multiphase`). Every generated
+file was regenerated from master's sources in a scratch copy (each prototype's own tests pass
+there: `evidence/2026-09-25-sim-after-master/regen/`) and is byte-identical to what master
+commits, so the `rtl/gen` symlinks need nothing more.
+
+- `emu_core.v` connects the sequencer's new `pin_in4` in both builds. The plain build feeds each
+  pin's one synchronised sample into all four quarters, which is what `Isa.step` assumes without
+  `?pin_in4`, so the replay stays exact. The plain build leaves `pin_sub` unconnected: the pads
+  come from `pin_out`, which is quarter 3 of `pin_sub`. The four-phase build takes `pin_sub` to
+  the stage and the stage's samples to `pin_in4` for pins 0 and 1.
+- The checker builds unchanged against master's `isa.ml`: master's `compiler.ml` and
+  `decoders.ml` are unchanged, and `Isa.step` gained only an optional argument.
+- Not yet covered: programmes that use sub-slots (q > 0) or quad SHI. The trace records the core's
+  clock-grid pins, not `pin_sub`, so replay cannot judge them yet.
 
 ## Files
 
@@ -207,7 +216,8 @@ host sends while a run is in progress are discarded, except `X` (abort): the run
 | `ocaml/` | tests, board model, checker (`isa.ml`, `compiler.ml`, `decoders.ml` symlinked) |
 | `host/emu_runner.py`, `host/usb_check.py` | runner for board and simulator; USB enumeration and loopback check |
 | `BRINGUP.md` | the checklist |
-| `evidence/2026-09-25-sim/` | the simulated runs quoted above: 60 and 8 clocks per UART bit, the board-mode rehearsal, the interlock mutation |
+| `evidence/2026-09-25-sim/` | the simulated runs before the merge: 60 and 8 clocks per UART bit, the board-mode rehearsal, the interlock mutation |
+| `evidence/2026-09-25-sim-after-master/` | the same suite after merging master, and the regeneration logs |
 
 ## Review
 

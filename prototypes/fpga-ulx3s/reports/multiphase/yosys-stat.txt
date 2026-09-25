@@ -5,20 +5,20 @@
 
         +----------Local Count, excluding submodules.
         | 
-     3717 wires
-     7812 wire bits
-     3717 public wires
-     7812 public wire bits
+     3586 wires
+     7662 wire bits
+     3586 public wires
+     7662 public wire bits
        19 ports
        46 port bits
-     4748 cells
+     4597 cells
        17   $_TBUF_
       201   CCU2C
        11   DP16KD
         2   EHXPLLL
-       54   L6MUX21
-     2278   LUT4
-      402   PFUMX
+       33   L6MUX21
+     2200   LUT4
+      350   PFUMX
        30   TRELLIS_DPR16X4
      1752   TRELLIS_FF
         1   USRMCLK
