@@ -37,5 +37,6 @@ RC=$?
 echo "librelane exit $RC $(date --iso-8601=seconds)" >> "$RUN/librelane.log"
 cp "$RUN/config.json" "$HERE/pnr-metrics/$TAG/"
 cp "$RUN/librelane.log" "$HERE/pnr-metrics/$TAG/"
+cp "$RUN/runs/$TAG/06-yosys-synthesis/reports/stat.rpt" "$HERE/pnr-metrics/$TAG/librelane-synth-stat.rpt" 2>/dev/null || true
 cp "$RUN/runs/$TAG/final/metrics.json" "$HERE/pnr-metrics/$TAG/final-metrics.json" 2>/dev/null || true
 exit $RC

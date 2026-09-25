@@ -18,4 +18,8 @@ for f in sorted(glob.glob(os.path.join(here, "..", "pnr-metrics", "*", "final-me
     period = float(tag.split("_")[-2].rstrip("ns"))
     vals = [d.get(k) for _, k in KEYS]
     fmax = 1e3 / (period - d["timing__setup__ws__corner:nom_slow_1p08V_125C"])
-    print(tag.ljust(28) + "".join((f"{v:11.3f}" if isinstance(v, float) and abs(v) < 10 else f"{v:11.0f}") if v is not None else "        n/a" for v in vals) + f"  {fmax:8.1f}")
+    def fmt(name, v):
+        if v is None:
+            return "n/a".rjust(11)
+        return f"{v:11.3f}" if name in ("util", "hold worst") else f"{v:11.2f}" if name.startswith("setup") else f"{v:11.0f}"
+    print(tag.ljust(28) + "".join(fmt(n, v) for (n, _), v in zip(KEYS, vals)) + f"  {fmax:8.1f}")

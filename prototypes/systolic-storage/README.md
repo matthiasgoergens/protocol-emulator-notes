@@ -11,7 +11,9 @@ Source: `storage_options.py` → `results/storage_options.txt`, with LEF areas i
 `results/lef_areas.txt`. Flop, latch and SRAM areas come from the PDK LEF. Gain-cell bit cells
 are the drawn, DRC-clean ones. **Their periphery is an estimate from standard cells, not a
 drawing:** per row, two word-line buffers and a decode gate; per column, a write driver, a sense
-inverter and a latch.
+inverter and a latch. `../pe-synth` has since synthesised this periphery. For the two banks used in
+§3 it comes out 17 % and 29 % larger than the estimate (3,028 and 8,363 µm²). The table below
+still uses the estimate; §3 gives both.
 
 | option | µm²/bit | lifetime of a stored 1 | fits which values |
 |---|---|---|---|
@@ -28,8 +30,8 @@ the level reached at the 10 ns sense threshold. The thick-oxide ones come from
 readable level there lies below the sweep's floor.
 
 **The main result of the table:** per-PE storage in standard cells costs 46–80 µm²/bit. A
-16-bit PE is about 5,000 µm² (estimate, below), so an 8-word register file costs more than the
-PE. Gain-cell banks are 5–13× denser at the sizes a PE wants. Unlike SRAM they come in any size,
+16-bit PE synthesises to 6,559 µm² (`../pe-synth`; the original estimate was 5,000). An 8-word latch
+register file synthesises to 5,343 µm², so it costs about as much as the PE. Gain-cell banks are 5–13× denser at the sizes a PE wants. Unlike SRAM they come in any size,
 with no 2 kbit, 17.5k µm² minimum. At 4 kbit and above, a gain-cell bank beats the SRAM macro
 only by 1.3–1.9×, or 1.4× once it carries Berger columns (`results/candidates.txt`).
 
@@ -50,8 +52,27 @@ packet cannot keep up, since 116 or 164 bytes are on the wire per 64 or 128 µs 
 
 ## 3. Candidate arrays at 200k µm² (PEs + storage)
 
-Source: `candidates.py` → `results/candidates.txt`. **The PE area is an estimate:** 5,000 µm²
-for a 16-bit PE, scaled from the semiring ring's measured 10,603 µm² per 24-bit cell.
+Source: `candidates.py [estimate|synth|placed]` → `results/candidates.txt`,
+`results/candidates-synth.txt` and `results/candidates-placed.txt`. There are three area bases:
+
+- **estimate** (the original): a 5,000 µm² PE, scaled from the semiring ring's 10,603 µm² per
+  24-bit cell. Storage is summed from LEF cell areas.
+  - The 10,603 turned out to be the whole ring, 169,641 µm², divided by 16. That includes the
+    ring's shared video logic and palette configuration. One ring cell on its own is
+    8,762–9,339 µm² (`../pe-synth/README.md`).
+- **synth:** Yosys cell areas from `../pe-synth/results/areas.txt`.
+  - The PE is 6,559 µm²: a row of eight of the PE described in `candidates.py`, divided by 8.
+  - The latch file and the bank periphery are synthesised (5,343; 8,363 for 128×38; 3,028 for
+    32×21).
+  - The same kind of number as the old estimate, so the table compares like with like.
+- **placed:** floor area. The PE is 9,852 µm² of core per PE, from LibreLane place and route of the
+  row of eight at 90 % final utilisation (`../pe-synth/results/pnr.txt`).
+  - Standard-cell storage (latch file, periphery) is scaled by the same 1.50. This part is an
+    assumption: it was synthesised, not placed.
+  - Drawn gain cells and SRAM macros are taken at their drawn size, with no halo.
+
+If 200k µm² is a floor-area budget, **placed** is the honest basis. The old estimate was
+optimistic by a factor of two in PEs.
 
 Each design gets one port per storage block, one access of the block's width per cycle.
 - **Traffic:** workload traffic is spread over the blocks, and refresh adds to it on the same
@@ -59,18 +80,38 @@ Each design gets one port per storage block, one access of the block's width per
 - **Reach:** storage beside other PEs is reachable through the array at 16 bits per cycle.
   Above that rate, a workload can use only the storage beside its own PEs.
 
+PEs per design under each basis (estimate / synth / placed). The rest of the row describes the
+estimate basis. The changes under the other two follow the table.
+
 | design | PEs | storage | what it enables that D0 cannot |
 |---|---|---|---|
-| D0 uniform, no storage | 40 | 32 flop bits per PE | streaming kernels only |
-| D1 8×16 latch RF in every PE | 18 | 2,304 bits, 18 × 16-bit ports | **the only design that feeds weights to 8 PEs every cycle** (8×8 product, 128 bits per cycle). Too small for any line buffer or the programme |
-| **D2** edge column, 2 thick banks of 128×32 | **31** | 8,192 bits, 2 × 32-bit ports | line filters, Ethernet line buffer up to 5 lines per packet, USB packets, programme store (0.1 % refresh), a 16-PE merge at 64 bits per cycle (its ports at 100 %, no headroom) |
-| D2s the same bits in 2 SRAM `1P_256x16` | 28 | 8,192 bits, 2 × 16-bit ports | the same without refresh, but half the port width, so no merge; 3 fewer PEs |
-| **D3** graded: thin 32×16 bank per 4 PEs, 2 thick banks at the edge | 26 | 11,776 bits, 7 × 16 + 2 × 32-bit ports | as D2, plus the 20-lines-per-packet buffer: the thin banks take the overflow, with refresh at 1.3 % of the busiest bank's port at tt/27 °C, 20 % at tt/85 °C, and not at all at ff/85 °C |
-| D4 the array as its own delay line | 40 | 32 bits per PE given up | short buffers (a 64-byte packet costs 16 PEs) |
+| D0 uniform, no storage | 40 / 30 / 20 | 32 flop bits per PE | streaming kernels only |
+| D1 8×16 latch RF in every PE | 18 / 16 / 11 | 2,304 bits, 18 × 16-bit ports | **the only design that feeds weights to 8 PEs every cycle** (8×8 product, 128 bits per cycle). Too small for any line buffer or the programme |
+| **D2** edge column, 2 thick banks of 128×32 | **31 / 23 / 14** | 8,192 bits, 2 × 32-bit ports | line filters, Ethernet line buffer up to 5 lines per packet, USB packets, programme store (0.1 % refresh), a 16-PE merge at 64 bits per cycle (its ports at 100 %, no headroom) |
+| D2s the same bits in 2 SRAM `1P_256x16` | 28 / 21 / 14 | 8,192 bits, 2 × 16-bit ports | the same without refresh, but half the port width, so no merge; 3 fewer PEs |
+| **D3** graded: thin 32×16 bank per 4 PEs, 2 thick banks at the edge | 26 / 20 / 12 | 11,776 bits, 7 × 16 + 2 × 32-bit ports | as D2, plus the 20-lines-per-packet buffer: the thin banks take the overflow, with refresh at 1.3 % of the busiest bank's port at tt/27 °C, 20 % at tt/85 °C, and not at all at ff/85 °C |
+| D4 the array as its own delay line | 40 / 30 / 20 | 32 bits per PE given up | short buffers (a 64-byte packet costs 16 PEs) |
 
-The honest reading:
-- **D2 against D2s:** the gain-cell edge column buys 3 more PEs (31 against 28) and twice the port
-  width for the same bits. It costs refresh logic that only resident data uses.
+**What changes with synthesised and placed areas** (diff the three result files):
+- **Synth:** designs lose 23–26 % of their PEs (D1 only 11 %). Only two verdicts change:
+  - D1 now has 2,048 bits instead of 2,304; it still fits the 2-tap filter.
+  - D4 can no longer do the 8×8 corner turn, which needs 32 PEs as delay plus 8.
+  - The ranking is unchanged: D2 has 2 more PEs than D2s, down from 3.
+- **Placed:** every design has 11–14 PEs, except D0 and D4 with 20.
+  - All three 16-PE workloads now fail for want of PEs: the next-frame ring config, the systolic
+    matcher and the 16-PE merge. D0 and D4 still run the matcher.
+  - D1's 1,408 bits no longer hold the 2-tap filter.
+  - **D2 and D2s tie at 14 PEs.** The gain-cell bank's periphery grows with placement (by the
+    assumed 1.50) and the macro does not, and the bank's advantage shrinks to 26,618 against 28,127 µm² per 4 kbit.
+    D2 keeps twice the port width.
+- **Other PE kinds** (`../pe-synth`), per 200k µm²:
+  - min-plus, 4,443 synthesised / 7,679 placed: about 45 / 26 PEs;
+  - a 16×16 MAC, 17,004 synthesised with Booth / 36,197 placed without: about 11 / 5 PEs.
+
+The honest reading (written for the estimate basis; the synth basis keeps every conclusion):
+- **D2 against D2s:** the gain-cell edge column buys 3 more PEs (31 against 28; 23 against 21
+  synthesised; none placed) and twice the port width for the same bits. It costs refresh logic
+  that only resident data uses.
 - **D3's thin banks do not earn their area** on these workloads. The only thing D3 does that D2
   cannot is the 20-line buffer, and there only at 27 °C or with heavy refresh. Local bandwidth
   would matter for a kernel needing more than the edge's 64 bits per cycle across more than
@@ -78,8 +119,9 @@ The honest reading:
   32 bits per cycle, not the 128 needed.
 - **D1 is not dominated.** It is the only design for weight-stationary products, at a cost of
   22 PEs. A cheaper version would put an 8-word gain-cell bank with Berger columns in each PE:
-  about 2,340 µm² (18.3 µm²/bit, periphery estimated) against 5,835 µm² of latches. It is not
-  evaluated here.
+  about 2,340 µm² (18.3 µm²/bit, periphery estimated) against 5,835 µm² of latches. Synthesised,
+  the figures are 2,270 µm² (486 of thick cells plus 1,784 of periphery,
+  `../pe-synth/reports/gc_periph_8x21.stat.txt`) against 5,343. It is not evaluated here.
 - **Refresh helps only where D3's thin banks overflow.** No workload needs refresh of a thick
   bank except resident data.
 
@@ -162,8 +204,11 @@ An adversarial review by codex found ten problems, and the numbers above are aft
 
 ## Open questions
 
-- **The PE area** (5,000 µm²) and **the gain-cell periphery** are estimates. Synthesise a 16-bit
-  PE and draw a sense and driver column.
+- **The PE area and the gain-cell periphery are now synthesised** (`../pe-synth`), and the PE is
+  placed and routed. Still open:
+  - the periphery's placed area (scaled by the PE's ratio here);
+  - a drawn sense and driver column;
+  - the halo a drawn gain-cell array or an SRAM macro needs among standard cells.
 - **Can a Tiny Tapeout digital tile take small hand-drawn macros** placed among the PEs? D3
   depends on it.
 - **Thin-oxide Monte Carlo:** a 4σ cell leaks one to two decades more (`../gain-cell` notes).
@@ -214,4 +259,6 @@ which is scratch and not in the repository.
     nice ionice uv run allocator.py mixes > results/mixes.txt     # about 70 s
     uv run allocator.py resident > results/resident.txt
     uv run candidates.py > results/candidates.txt
+    uv run candidates.py synth > results/candidates-synth.txt
+    uv run candidates.py placed > results/candidates-placed.txt
     uv run --with pytest pytest -q -s test_allocator.py
