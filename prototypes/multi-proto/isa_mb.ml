@@ -43,16 +43,25 @@
        through pins it reads. A thread that names no shared channel is timing-identical whatever
        its neighbours do; the isolation tests check this.
 
+   One more addition, for full-duplex shifting (SPI, JTAG): SHO gains a capture option in bits
+   that are unused in the base ISA and on master:
+     7 SHO   pin[11:9] msb[8] od[7] cap[6] cpin[5:3]
+             as before, and with cap set the pin cpin is sampled in the same slot and enters the
+             bit the shift vacates (msb: bit 0; lsb: bit 7). One shift per bit, out and in, so a
+             byte exchange is SHO then seven SHO-with-capture then SHI. Without it the two shifts
+             lose a bit, and full duplex needs the pin sampler.
+
    Ports: in-port k presents (valid, data); a RECV pops it with a one-cycle ready pulse, like IN.
    Out-port k presents ready; a SEND pushes acc, visible as (valid one-hot, data) registered, like
    OUT. Flags are four level inputs from generic blocks.
 
    Faults for testing the checkers (interpreter only): Drop_push n silently loses the n-th
-   successful push into any inbox (the SEND still proceeds); Lifo pops the newest entry. *)
+   successful push into any inbox (the SEND still proceeds); Lifo pops the newest entry;
+   Swap_pair n holds the n-th push back and delivers it after the next push to the same inbox. *)
 
 let n_threads = 4
 
-type fault = No_fault | Drop_push of int | Lifo
+type fault = No_fault | Drop_push of int | Lifo | Swap_pair of int
 type cfg = { pc_bits : int; depth : int; fault : fault }
 
 let cfg ?(pc_bits = 7) ?(depth = 2) ?(fault = No_fault) () = { pc_bits; depth; fault }
@@ -72,6 +81,8 @@ let cond_flag i = 12 + i
 let jmp a = (9 lsl 12) lor a7 a
 let jnz a = (10 lsl 12) lor a7 a
 let waitp ~pin ~value ~fail = (5 lsl 12) lor ((pin land 7) lsl 9) lor ((value land 1) lsl 8) lor a7 fail
+(* SHO with capture: out on [pin], in from [cpin], msb first by default *)
+let shx ?(msb = 1) ~pin ~cpin () = (7 lsl 12) lor ((pin land 7) lsl 9) lor (msb lsl 8) lor (1 lsl 6) lor ((cpin land 7) lsl 3)
 
 type state = {
   c : cfg;
@@ -79,12 +90,14 @@ type state = {
   mutable pin_out : int; mutable pin_oe : int; mutable thread : int;
   inbox : int list array;          (* oldest first *)
   mutable pushes : int;            (* successful inbox pushes so far, for Drop_push *)
+  mutable held : (int * int) option;   (* Swap_pair: the push held back *)
+  mutable swapped : (int * int) option;   (* Swap_pair: the two bytes that were exchanged *)
 }
 
 let init c = {
   c; pcs = Array.make n_threads 0; accs = Array.make n_threads 0; cnts = Array.make n_threads 0;
   dls = Array.make n_threads 0; pin_out = 0; pin_oe = 0; thread = 0;
-  inbox = Array.make n_threads []; pushes = 0;
+  inbox = Array.make n_threads []; pushes = 0; held = None; swapped = None;
 }
 
 type io = {
@@ -143,7 +156,8 @@ let step st ~(mem : int array array) (io : io) =
        set_pin_bit 0;
        st.pin_oe <- (st.pin_oe land lnot (1 lsl pin)) lor ((1 - b) lsl pin)
      end else set_pin_bit b;
-     acc_next := (if pin_val = 1 then (acc lsl 1) land 0xFF else acc lsr 1);
+     let cap = (instr lsr 6) land 1 and cbit = (io.pin_in lsr ((instr lsr 3) land 7)) land 1 in
+     acc_next := (if pin_val = 1 then ((acc lsl 1) land 0xFF) lor (cap land cbit) else (acc lsr 1) lor ((cap land cbit) lsl 7));
      cnt_next := (cnt - 1) land 0xFFF
    | 8 ->
      acc_next := (if pin_val = 1 then ((acc lsl 1) land 0xFF) lor pin_bit else (acc lsr 1) lor (pin_bit lsl 7));
@@ -161,7 +175,10 @@ let step st ~(mem : int array array) (io : io) =
        end else if not (full ch) then begin
          st.pushes <- st.pushes + 1;
          let dropped = (match c.fault with Drop_push n -> st.pushes = n | _ -> false) in
-         if not dropped then st.inbox.(ch) <- st.inbox.(ch) @ [ acc ];
+         (match c.fault, st.held with
+          | Swap_pair n, _ when st.pushes = n -> st.held <- Some (ch, acc)
+          | Swap_pair _, Some (hc, hv) when hc = ch -> st.inbox.(ch) <- st.inbox.(ch) @ [ acc; hv ]; st.held <- None; st.swapped <- Some (hv, acc)
+          | _ -> if not dropped then st.inbox.(ch) <- st.inbox.(ch) @ [ acc ]);
          mb := `Push (ch, acc)
        end else fail_or_stay ()
      end else begin

@@ -1,7 +1,7 @@
-lockstep pc_bits=6 depth=1: 300 programmes x 2000 cycles, 0 mismatching cycles (coverage: 1264 inbox pushes, 962 pops, 376345 cycles with a full inbox, 2787 port pushes, 3078 port pops)
-lockstep pc_bits=6 depth=2: 300 programmes x 2000 cycles, 0 mismatching cycles (coverage: 1742 inbox pushes, 1244 pops, 220826 cycles with a full inbox, 2785 port pushes, 3003 port pops)
-lockstep pc_bits=6 depth=4: 300 programmes x 2000 cycles, 0 mismatching cycles (coverage: 1974 inbox pushes, 1204 pops, 139191 cycles with a full inbox, 2819 port pushes, 2804 port pops)
-lockstep pc_bits=7 depth=2: 300 programmes x 2000 cycles, 0 mismatching cycles (coverage: 1529 inbox pushes, 1057 pops, 207629 cycles with a full inbox, 2874 port pushes, 2005 port pops)
+lockstep pc_bits=6 depth=1: 300 programmes x 2000 cycles, 0 mismatching cycles (coverage: 1286 inbox pushes, 980 pops, 375689 cycles with a full inbox, 2878 port pushes, 3062 port pops)
+lockstep pc_bits=6 depth=2: 300 programmes x 2000 cycles, 0 mismatching cycles (coverage: 1757 inbox pushes, 1257 pops, 220880 cycles with a full inbox, 2879 port pushes, 2987 port pops)
+lockstep pc_bits=6 depth=4: 300 programmes x 2000 cycles, 0 mismatching cycles (coverage: 1987 inbox pushes, 1218 pops, 138555 cycles with a full inbox, 2890 port pushes, 2818 port pops)
+lockstep pc_bits=7 depth=2: 300 programmes x 2000 cycles, 0 mismatching cycles (coverage: 1539 inbox pushes, 1069 pops, 207767 cycles with a full inbox, 2881 port pushes, 1997 port pops)
 strict extension (variant RTL, pc_bits=6, vs the BASE interpreter on programmes without E/F): 0 mismatching cycles
 control (inbox never reports full, RTL only): caught in 14 of 50 programmes, 22534 mismatching cycles
 LOCKSTEP PASS

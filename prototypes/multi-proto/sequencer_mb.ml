@@ -48,6 +48,7 @@ let create ?(mutant = `None) ~(c : Isa_mb.cfg) ~clock ~clear ~imem_data ~pin_in 
   let is_recv = bit instr 11 and ch_port = bit instr 10 and ch_lo = select instr 9 8 in
   let cval = bit instr 11 and cond = select instr 10 7 in
   let pin_bit = mux pin_idx (List.init 8 (fun i -> bit pin_in i)) in
+  let cap_bit = bit instr 6 &: mux (select instr 5 3) (List.init 8 (fun i -> bit pin_in i)) in
   let pc_next = Variable.wire ~default:(pc +:. 1) in
   let acc_next = Variable.wire ~default:acc in
   let cnt_next = Variable.wire ~default:cnt in
@@ -78,7 +79,7 @@ let create ?(mutant = `None) ~(c : Isa_mb.cfg) ~clock ~clear ~imem_data ~pin_in 
         ; opc 6, [ if_ (dl ==:. 0) [] stay ]
         ; opc 7, [ if_ od [ pin_out <-- with_pin_bit gnd; pin_oe <-- with_oe_bit (~:sho_bit) ]
                      [ pin_out <-- with_pin_bit sho_bit ]
-                 ; acc_next <-- mux2 pin_val (sll acc 1) (srl acc 1)
+                 ; acc_next <-- mux2 pin_val (sll acc 1 |: uresize cap_bit 8) (srl acc 1 |: concat_msb [ cap_bit; zero 7 ])
                  ; cnt_next <-- cnt -:. 1 ]
         ; opc 8, [ acc_next <-- mux2 pin_val (concat_msb [ select acc 6 0; pin_bit ])
                                             (concat_msb [ pin_bit; select acc 7 1 ])

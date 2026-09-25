@@ -227,12 +227,12 @@ module deadline_sequencer_mb_p6_d1 (
     wire [7:0] _17;
     reg [7:0] _250;
     wire [5:0] _168;
-    wire [5:0] _606;
-    wire _605;
-    wire [5:0] _607;
-    wire [11:0] _601;
-    wire _602;
-    wire [5:0] _603;
+    wire [5:0] _624;
+    wire _623;
+    wire [5:0] _625;
+    wire [11:0] _619;
+    wire _620;
+    wire [5:0] _621;
     wire [11:0] _333;
     wire [11:0] _19;
     reg [11:0] _332;
@@ -257,27 +257,27 @@ module deadline_sequencer_mb_p6_d1 (
     wire [11:0] _23;
     reg [11:0] _353;
     reg [11:0] _354;
-    wire _596;
-    wire _597;
-    wire [5:0] _598;
-    wire [5:0] _593;
-    wire [5:0] _587;
-    wire [5:0] _588;
-    wire [5:0] _585;
-    wire [5:0] _586;
-    wire [5:0] _589;
-    wire [5:0] _582;
+    wire _614;
+    wire _615;
+    wire [5:0] _616;
+    wire [5:0] _611;
+    wire [5:0] _605;
+    wire [5:0] _606;
+    wire [5:0] _603;
+    wire [5:0] _604;
+    wire [5:0] _607;
+    wire [5:0] _600;
     wire _116;
     wire _115;
     wire _114;
     wire _113;
     reg _117;
-    wire [5:0] _583;
-    wire [5:0] _580;
-    wire [5:0] _581;
-    wire [5:0] _584;
-    wire [5:0] _590;
-    wire [5:0] _576;
+    wire [5:0] _601;
+    wire [5:0] _598;
+    wire [5:0] _599;
+    wire [5:0] _602;
+    wire [5:0] _608;
+    wire [5:0] _594;
     wire [11:0] _369;
     wire [11:0] _25;
     reg [11:0] _368;
@@ -299,24 +299,24 @@ module deadline_sequencer_mb_p6_d1 (
     wire [11:0] _29;
     reg [11:0] _382;
     reg [11:0] _383;
+    wire _593;
+    wire [5:0] _595;
+    wire _590;
+    wire _588;
+    wire _587;
+    wire _586;
+    wire _585;
+    wire _584;
+    wire _583;
+    wire _582;
+    wire _581;
+    wire _580;
+    wire _579;
+    wire _578;
+    wire _577;
+    wire _576;
     wire _575;
-    wire [5:0] _577;
-    wire _572;
-    wire _570;
-    wire _569;
-    wire _568;
-    wire _567;
-    wire _566;
-    wire _565;
-    wire _564;
-    wire _563;
-    wire _562;
-    wire _561;
-    wire _560;
-    wire _559;
-    wire _558;
-    wire _557;
-    wire _556;
+    wire _574;
     wire [7:0] _391;
     wire [7:0] _31;
     reg [7:0] _152;
@@ -326,12 +326,29 @@ module deadline_sequencer_mb_p6_d1 (
     wire [7:0] _393;
     wire [7:0] _33;
     reg [7:0] _146;
-    wire [7:0] _531;
-    wire [6:0] _526;
-    wire [7:0] _528;
+    wire [7:0] _549;
+    wire [6:0] _544;
+    wire [7:0] _545;
+    wire [6:0] _541;
+    wire [7:0] _543;
+    wire [7:0] _546;
+    wire _535;
+    wire _534;
+    wire _533;
+    wire _532;
+    wire _531;
+    wire _530;
+    wire _529;
+    wire _528;
+    wire [2:0] _527;
+    reg _536;
+    wire _526;
+    wire _537;
+    wire [7:0] _539;
     wire [6:0] _524;
     wire [7:0] _525;
-    wire [7:0] _529;
+    wire [7:0] _540;
+    wire [7:0] _547;
     wire [6:0] _519;
     wire [7:0] _520;
     wire [6:0] _517;
@@ -459,72 +476,72 @@ module deadline_sequencer_mb_p6_d1 (
     wire [7:0] _522;
     wire [3:0] _189;
     wire _495;
-    wire [7:0] _530;
+    wire [7:0] _548;
     wire [3:0] _493;
     wire _494;
-    wire [7:0] _532;
+    wire [7:0] _550;
     wire [7:0] _52;
-    wire [7:0] _533;
+    wire [7:0] _551;
     wire [7:0] _53;
     reg [7:0] _143;
     reg [7:0] _153;
-    wire _555;
-    wire [3:0] _554;
-    reg _571;
     wire _573;
-    wire [5:0] _578;
-    wire [5:0] _552;
+    wire [3:0] _572;
+    reg _589;
+    wire _591;
+    wire [5:0] _596;
+    wire [5:0] _570;
     wire _329;
-    wire [5:0] _534;
+    wire [5:0] _552;
     wire [5:0] _54;
     reg [5:0] _160;
     wire _335;
-    wire [5:0] _535;
+    wire [5:0] _553;
     wire [5:0] _55;
     reg [5:0] _163;
     wire _341;
-    wire [5:0] _536;
+    wire [5:0] _554;
     wire [5:0] _56;
     reg [5:0] _166;
-    reg [5:0] _551;
-    wire [5:0] _553;
-    wire [3:0] _549;
-    wire _550;
-    wire [5:0] _579;
+    reg [5:0] _569;
+    wire [5:0] _571;
+    wire [3:0] _567;
+    wire _568;
+    wire [5:0] _597;
     wire [3:0] _87;
-    wire _548;
-    wire [5:0] _591;
-    wire [3:0] _546;
-    wire _547;
-    wire [5:0] _592;
+    wire _566;
+    wire [5:0] _609;
+    wire [3:0] _564;
+    wire _565;
+    wire [5:0] _610;
     wire [3:0] _171;
-    wire _545;
-    wire [5:0] _594;
-    wire [3:0] _543;
-    wire _544;
-    wire [5:0] _599;
-    wire [3:0] _541;
-    wire _542;
-    wire [5:0] _600;
-    wire [3:0] _539;
-    wire _540;
-    wire [5:0] _604;
-    wire [3:0] _537;
+    wire _563;
+    wire [5:0] _612;
+    wire [3:0] _561;
+    wire _562;
+    wire [5:0] _617;
+    wire [3:0] _559;
+    wire _560;
+    wire [5:0] _618;
+    wire [3:0] _557;
+    wire _558;
+    wire [5:0] _622;
+    wire [3:0] _555;
     wire [3:0] _86;
-    wire _538;
-    wire [5:0] _608;
+    wire _556;
+    wire [5:0] _626;
     wire [5:0] _58;
     wire _364;
-    wire [5:0] _609;
+    wire [5:0] _627;
     wire [5:0] _59;
     reg [5:0] _169;
-    reg [5:0] _614;
+    reg [5:0] _632;
     wire vdd;
-    wire [1:0] _611;
+    wire [1:0] _629;
     wire [1:0] _62;
     reg [1:0] _140;
-    wire [1:0] _613;
-    wire [7:0] _615;
+    wire [1:0] _631;
+    wire [7:0] _633;
     assign _80 = 2'b00;
     assign _84 = { _80,
                    _83 };
@@ -775,17 +792,17 @@ module deadline_sequencer_mb_p6_d1 (
             _250 <= _17;
     end
     assign _168 = 6'b000000;
-    assign _606 = _575 ? _576 : _551;
-    assign _605 = _516 == _199;
-    assign _607 = _605 ? _553 : _606;
-    assign _601 = 12'b000000000000;
-    assign _602 = _383 == _601;
-    assign _603 = _602 ? _553 : _551;
+    assign _624 = _593 ? _594 : _569;
+    assign _623 = _516 == _199;
+    assign _625 = _623 ? _571 : _624;
+    assign _619 = 12'b000000000000;
+    assign _620 = _383 == _619;
+    assign _621 = _620 ? _571 : _569;
     assign _333 = _329 ? _22 : _332;
     assign _19 = _333;
     always @(posedge clock) begin
         if (clear)
-            _332 <= _601;
+            _332 <= _619;
         else
             _332 <= _19;
     end
@@ -793,7 +810,7 @@ module deadline_sequencer_mb_p6_d1 (
     assign _20 = _339;
     always @(posedge clock) begin
         if (clear)
-            _338 <= _601;
+            _338 <= _619;
         else
             _338 <= _20;
     end
@@ -801,7 +818,7 @@ module deadline_sequencer_mb_p6_d1 (
     assign _21 = _345;
     always @(posedge clock) begin
         if (clear)
-            _344 <= _601;
+            _344 <= _619;
         else
             _344 <= _21;
     end
@@ -820,7 +837,7 @@ module deadline_sequencer_mb_p6_d1 (
     assign _23 = _365;
     always @(posedge clock) begin
         if (clear)
-            _353 <= _601;
+            _353 <= _619;
         else
             _353 <= _23;
     end
@@ -836,16 +853,16 @@ module deadline_sequencer_mb_p6_d1 (
             _354 <= _332;
         endcase
     end
-    assign _596 = _354 == _601;
-    assign _597 = ~ _596;
-    assign _598 = _597 ? _576 : _553;
-    assign _593 = host_in_valid ? _553 : _551;
-    assign _587 = _575 ? _576 : _551;
-    assign _588 = _97 ? _553 : _587;
-    assign _585 = _575 ? _576 : _551;
-    assign _586 = _481 ? _553 : _585;
-    assign _589 = _91 ? _588 : _586;
-    assign _582 = _575 ? _576 : _551;
+    assign _614 = _354 == _619;
+    assign _615 = ~ _614;
+    assign _616 = _615 ? _594 : _571;
+    assign _611 = host_in_valid ? _571 : _569;
+    assign _605 = _593 ? _594 : _569;
+    assign _606 = _97 ? _571 : _605;
+    assign _603 = _593 ? _594 : _569;
+    assign _604 = _481 ? _571 : _603;
+    assign _607 = _91 ? _606 : _604;
+    assign _600 = _593 ? _594 : _569;
     assign _116 = port_out_ready[3:3];
     assign _115 = port_out_ready[2:2];
     assign _114 = port_out_ready[1:1];
@@ -862,17 +879,17 @@ module deadline_sequencer_mb_p6_d1 (
             _117 <= _116;
         endcase
     end
-    assign _583 = _117 ? _553 : _582;
-    assign _580 = _575 ? _576 : _551;
-    assign _581 = _458 ? _553 : _580;
-    assign _584 = _91 ? _583 : _581;
-    assign _590 = _90 ? _589 : _584;
-    assign _576 = imem_data[5:0];
+    assign _601 = _117 ? _571 : _600;
+    assign _598 = _593 ? _594 : _569;
+    assign _599 = _458 ? _571 : _598;
+    assign _602 = _91 ? _601 : _599;
+    assign _608 = _90 ? _607 : _602;
+    assign _594 = imem_data[5:0];
     assign _369 = _329 ? _28 : _368;
     assign _25 = _369;
     always @(posedge clock) begin
         if (clear)
-            _368 <= _601;
+            _368 <= _619;
         else
             _368 <= _25;
     end
@@ -880,7 +897,7 @@ module deadline_sequencer_mb_p6_d1 (
     assign _26 = _373;
     always @(posedge clock) begin
         if (clear)
-            _372 <= _601;
+            _372 <= _619;
         else
             _372 <= _26;
     end
@@ -888,13 +905,13 @@ module deadline_sequencer_mb_p6_d1 (
     assign _27 = _377;
     always @(posedge clock) begin
         if (clear)
-            _376 <= _601;
+            _376 <= _619;
         else
             _376 <= _27;
     end
     assign _361 = imem_data[11:0];
     assign _387 = _383 - _358;
-    assign _385 = _383 == _601;
+    assign _385 = _383 == _619;
     assign _388 = _385 ? _383 : _387;
     assign _378 = 4'b0011;
     assign _379 = _86 == _378;
@@ -904,7 +921,7 @@ module deadline_sequencer_mb_p6_d1 (
     assign _29 = _390;
     always @(posedge clock) begin
         if (clear)
-            _382 <= _601;
+            _382 <= _619;
         else
             _382 <= _29;
     end
@@ -920,24 +937,24 @@ module deadline_sequencer_mb_p6_d1 (
             _383 <= _368;
         endcase
     end
-    assign _575 = _383 == _601;
-    assign _577 = _575 ? _576 : _551;
-    assign _572 = imem_data[11:11];
-    assign _570 = flags[3:3];
-    assign _569 = flags[2:2];
-    assign _568 = flags[1:1];
-    assign _567 = flags[0:0];
-    assign _566 = _452[3:3];
-    assign _565 = _452[2:2];
-    assign _564 = _452[1:1];
-    assign _563 = _452[0:0];
-    assign _562 = _153[7:7];
-    assign _561 = _153[6:6];
-    assign _560 = _153[5:5];
-    assign _559 = _153[4:4];
-    assign _558 = _153[3:3];
-    assign _557 = _153[2:2];
-    assign _556 = _153[1:1];
+    assign _593 = _383 == _619;
+    assign _595 = _593 ? _594 : _569;
+    assign _590 = imem_data[11:11];
+    assign _588 = flags[3:3];
+    assign _587 = flags[2:2];
+    assign _586 = flags[1:1];
+    assign _585 = flags[0:0];
+    assign _584 = _452[3:3];
+    assign _583 = _452[2:2];
+    assign _582 = _452[1:1];
+    assign _581 = _452[0:0];
+    assign _580 = _153[7:7];
+    assign _579 = _153[6:6];
+    assign _578 = _153[5:5];
+    assign _577 = _153[4:4];
+    assign _576 = _153[3:3];
+    assign _575 = _153[2:2];
+    assign _574 = _153[1:1];
     assign _391 = _329 ? _52 : _152;
     assign _31 = _391;
     always @(posedge clock) begin
@@ -962,14 +979,52 @@ module deadline_sequencer_mb_p6_d1 (
         else
             _146 <= _33;
     end
-    assign _531 = imem_data[7:0];
-    assign _526 = _153[6:0];
-    assign _528 = { _526,
+    assign _549 = imem_data[7:0];
+    assign _544 = 7'b0000000;
+    assign _545 = { _544,
+                    _537 };
+    assign _541 = _153[6:0];
+    assign _543 = { _541,
                     _180 };
+    assign _546 = _543 | _545;
+    assign _535 = pin_in[7:7];
+    assign _534 = pin_in[6:6];
+    assign _533 = pin_in[5:5];
+    assign _532 = pin_in[4:4];
+    assign _531 = pin_in[3:3];
+    assign _530 = pin_in[2:2];
+    assign _529 = pin_in[1:1];
+    assign _528 = pin_in[0:0];
+    assign _527 = imem_data[5:3];
+    always @* begin
+        case (_527)
+        0:
+            _536 <= _528;
+        1:
+            _536 <= _529;
+        2:
+            _536 <= _530;
+        3:
+            _536 <= _531;
+        4:
+            _536 <= _532;
+        5:
+            _536 <= _533;
+        6:
+            _536 <= _534;
+        default:
+            _536 <= _535;
+        endcase
+    end
+    assign _526 = imem_data[6:6];
+    assign _537 = _526 & _536;
+    assign _539 = { _537,
+                    _544 };
     assign _524 = _153[7:1];
     assign _525 = { _180,
                     _524 };
-    assign _529 = _199 ? _528 : _525;
+    assign _540 = _525 | _539;
+    assign _547 = _199 ? _546 : _540;
     assign _519 = _153[6:0];
     assign _520 = { _519,
                     _516 };
@@ -1219,13 +1274,13 @@ module deadline_sequencer_mb_p6_d1 (
     assign _522 = _496 ? _521 : _507;
     assign _189 = 4'b0111;
     assign _495 = _86 == _189;
-    assign _530 = _495 ? _529 : _522;
+    assign _548 = _495 ? _547 : _522;
     assign _493 = 4'b0100;
     assign _494 = _86 == _493;
-    assign _532 = _494 ? _531 : _530;
-    assign _52 = _532;
-    assign _533 = _364 ? _52 : _143;
-    assign _53 = _533;
+    assign _550 = _494 ? _549 : _548;
+    assign _52 = _550;
+    assign _551 = _364 ? _52 : _143;
+    assign _53 = _551;
     always @(posedge clock) begin
         if (clear)
             _143 <= _136;
@@ -1244,50 +1299,50 @@ module deadline_sequencer_mb_p6_d1 (
             _153 <= _152;
         endcase
     end
-    assign _555 = _153[0:0];
-    assign _554 = imem_data[10:7];
+    assign _573 = _153[0:0];
+    assign _572 = imem_data[10:7];
     always @* begin
-        case (_554)
+        case (_572)
         0:
-            _571 <= _555;
+            _589 <= _573;
         1:
-            _571 <= _556;
+            _589 <= _574;
         2:
-            _571 <= _557;
+            _589 <= _575;
         3:
-            _571 <= _558;
+            _589 <= _576;
         4:
-            _571 <= _559;
+            _589 <= _577;
         5:
-            _571 <= _560;
+            _589 <= _578;
         6:
-            _571 <= _561;
+            _589 <= _579;
         7:
-            _571 <= _562;
+            _589 <= _580;
         8:
-            _571 <= _563;
+            _589 <= _581;
         9:
-            _571 <= _564;
+            _589 <= _582;
         10:
-            _571 <= _565;
+            _589 <= _583;
         11:
-            _571 <= _566;
+            _589 <= _584;
         12:
-            _571 <= _567;
+            _589 <= _585;
         13:
-            _571 <= _568;
+            _589 <= _586;
         14:
-            _571 <= _569;
+            _589 <= _587;
         default:
-            _571 <= _570;
+            _589 <= _588;
         endcase
     end
-    assign _573 = _571 == _572;
-    assign _578 = _573 ? _553 : _577;
-    assign _552 = 6'b000001;
+    assign _591 = _589 == _590;
+    assign _596 = _591 ? _571 : _595;
+    assign _570 = 6'b000001;
     assign _329 = _140 == _98;
-    assign _534 = _329 ? _58 : _160;
-    assign _54 = _534;
+    assign _552 = _329 ? _58 : _160;
+    assign _54 = _552;
     always @(posedge clock) begin
         if (clear)
             _160 <= _168;
@@ -1295,8 +1350,8 @@ module deadline_sequencer_mb_p6_d1 (
             _160 <= _54;
     end
     assign _335 = _140 == _100;
-    assign _535 = _335 ? _58 : _163;
-    assign _55 = _535;
+    assign _553 = _335 ? _58 : _163;
+    assign _55 = _553;
     always @(posedge clock) begin
         if (clear)
             _163 <= _168;
@@ -1304,8 +1359,8 @@ module deadline_sequencer_mb_p6_d1 (
             _163 <= _55;
     end
     assign _341 = _140 == _102;
-    assign _536 = _341 ? _58 : _166;
-    assign _56 = _536;
+    assign _554 = _341 ? _58 : _166;
+    assign _56 = _554;
     always @(posedge clock) begin
         if (clear)
             _166 <= _168;
@@ -1315,45 +1370,45 @@ module deadline_sequencer_mb_p6_d1 (
     always @* begin
         case (_140)
         0:
-            _551 <= _169;
+            _569 <= _169;
         1:
-            _551 <= _166;
+            _569 <= _166;
         2:
-            _551 <= _163;
+            _569 <= _163;
         default:
-            _551 <= _160;
+            _569 <= _160;
         endcase
     end
-    assign _553 = _551 + _552;
-    assign _549 = 4'b1111;
-    assign _550 = _86 == _549;
-    assign _579 = _550 ? _578 : _553;
+    assign _571 = _569 + _570;
+    assign _567 = 4'b1111;
+    assign _568 = _86 == _567;
+    assign _597 = _568 ? _596 : _571;
     assign _87 = 4'b1110;
-    assign _548 = _86 == _87;
-    assign _591 = _548 ? _590 : _579;
-    assign _546 = 4'b1101;
-    assign _547 = _86 == _546;
-    assign _592 = _547 ? _551 : _591;
+    assign _566 = _86 == _87;
+    assign _609 = _566 ? _608 : _597;
+    assign _564 = 4'b1101;
+    assign _565 = _86 == _564;
+    assign _610 = _565 ? _569 : _609;
     assign _171 = 4'b1100;
-    assign _545 = _86 == _171;
-    assign _594 = _545 ? _593 : _592;
-    assign _543 = 4'b1010;
-    assign _544 = _86 == _543;
-    assign _599 = _544 ? _598 : _594;
-    assign _541 = 4'b1001;
-    assign _542 = _86 == _541;
-    assign _600 = _542 ? _576 : _599;
-    assign _539 = 4'b0110;
-    assign _540 = _86 == _539;
-    assign _604 = _540 ? _603 : _600;
-    assign _537 = 4'b0101;
+    assign _563 = _86 == _171;
+    assign _612 = _563 ? _611 : _610;
+    assign _561 = 4'b1010;
+    assign _562 = _86 == _561;
+    assign _617 = _562 ? _616 : _612;
+    assign _559 = 4'b1001;
+    assign _560 = _86 == _559;
+    assign _618 = _560 ? _594 : _617;
+    assign _557 = 4'b0110;
+    assign _558 = _86 == _557;
+    assign _622 = _558 ? _621 : _618;
+    assign _555 = 4'b0101;
     assign _86 = imem_data[15:12];
-    assign _538 = _86 == _537;
-    assign _608 = _538 ? _607 : _604;
-    assign _58 = _608;
+    assign _556 = _86 == _555;
+    assign _626 = _556 ? _625 : _622;
+    assign _58 = _626;
     assign _364 = _140 == _80;
-    assign _609 = _364 ? _58 : _169;
-    assign _59 = _609;
+    assign _627 = _364 ? _58 : _169;
+    assign _59 = _627;
     always @(posedge clock) begin
         if (clear)
             _169 <= _168;
@@ -1361,30 +1416,30 @@ module deadline_sequencer_mb_p6_d1 (
             _169 <= _59;
     end
     always @* begin
-        case (_613)
+        case (_631)
         0:
-            _614 <= _169;
+            _632 <= _169;
         1:
-            _614 <= _166;
+            _632 <= _166;
         2:
-            _614 <= _163;
+            _632 <= _163;
         default:
-            _614 <= _160;
+            _632 <= _160;
         endcase
     end
     assign vdd = 1'b1;
-    assign _611 = _140 + _102;
-    assign _62 = _611;
+    assign _629 = _140 + _102;
+    assign _62 = _629;
     always @(posedge clock) begin
         if (clear)
             _140 <= _80;
         else
             _140 <= _62;
     end
-    assign _613 = _140 + _102;
-    assign _615 = { _613,
-                    _614 };
-    assign imem_addr = _615;
+    assign _631 = _140 + _102;
+    assign _633 = { _631,
+                    _632 };
+    assign imem_addr = _633;
     assign pin_out = _250;
     assign pin_oe = _193;
     assign host_out = _185;

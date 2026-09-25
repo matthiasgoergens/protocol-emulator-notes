@@ -223,12 +223,12 @@ module deadline_sequencer_mb_p6_d4 (
     wire [7:0] _17;
     reg [7:0] _258;
     wire [5:0] _176;
-    wire [5:0] _746;
-    wire _745;
-    wire [5:0] _747;
-    wire [11:0] _741;
-    wire _742;
-    wire [5:0] _743;
+    wire [5:0] _764;
+    wire _763;
+    wire [5:0] _765;
+    wire [11:0] _759;
+    wire _760;
+    wire [5:0] _761;
     wire [11:0] _341;
     wire [11:0] _19;
     reg [11:0] _340;
@@ -253,27 +253,27 @@ module deadline_sequencer_mb_p6_d4 (
     wire [11:0] _23;
     reg [11:0] _361;
     reg [11:0] _362;
-    wire _736;
-    wire _737;
-    wire [5:0] _738;
-    wire [5:0] _733;
-    wire [5:0] _727;
-    wire [5:0] _728;
-    wire [5:0] _725;
-    wire [5:0] _726;
-    wire [5:0] _729;
-    wire [5:0] _722;
+    wire _754;
+    wire _755;
+    wire [5:0] _756;
+    wire [5:0] _751;
+    wire [5:0] _745;
+    wire [5:0] _746;
+    wire [5:0] _743;
+    wire [5:0] _744;
+    wire [5:0] _747;
+    wire [5:0] _740;
     wire _124;
     wire _123;
     wire _122;
     wire _121;
     reg _125;
-    wire [5:0] _723;
-    wire [5:0] _720;
-    wire [5:0] _721;
-    wire [5:0] _724;
-    wire [5:0] _730;
-    wire [5:0] _716;
+    wire [5:0] _741;
+    wire [5:0] _738;
+    wire [5:0] _739;
+    wire [5:0] _742;
+    wire [5:0] _748;
+    wire [5:0] _734;
     wire [11:0] _377;
     wire [11:0] _25;
     reg [11:0] _376;
@@ -295,24 +295,24 @@ module deadline_sequencer_mb_p6_d4 (
     wire [11:0] _29;
     reg [11:0] _390;
     reg [11:0] _391;
+    wire _733;
+    wire [5:0] _735;
+    wire _730;
+    wire _728;
+    wire _727;
+    wire _726;
+    wire _725;
+    wire _724;
+    wire _723;
+    wire _722;
+    wire _721;
+    wire _720;
+    wire _719;
+    wire _718;
+    wire _717;
+    wire _716;
     wire _715;
-    wire [5:0] _717;
-    wire _712;
-    wire _710;
-    wire _709;
-    wire _708;
-    wire _707;
-    wire _706;
-    wire _705;
-    wire _704;
-    wire _703;
-    wire _702;
-    wire _701;
-    wire _700;
-    wire _699;
-    wire _698;
-    wire _697;
-    wire _696;
+    wire _714;
     wire [7:0] _399;
     wire [7:0] _31;
     reg [7:0] _160;
@@ -322,12 +322,29 @@ module deadline_sequencer_mb_p6_d4 (
     wire [7:0] _401;
     wire [7:0] _33;
     reg [7:0] _154;
-    wire [7:0] _671;
-    wire [6:0] _666;
-    wire [7:0] _668;
+    wire [7:0] _689;
+    wire [6:0] _684;
+    wire [7:0] _685;
+    wire [6:0] _681;
+    wire [7:0] _683;
+    wire [7:0] _686;
+    wire _675;
+    wire _674;
+    wire _673;
+    wire _672;
+    wire _671;
+    wire _670;
+    wire _669;
+    wire _668;
+    wire [2:0] _667;
+    reg _676;
+    wire _666;
+    wire _677;
+    wire [7:0] _679;
     wire [6:0] _664;
     wire [7:0] _665;
-    wire [7:0] _669;
+    wire [7:0] _680;
+    wire [7:0] _687;
     wire [6:0] _659;
     wire [7:0] _660;
     wire [6:0] _657;
@@ -550,72 +567,72 @@ module deadline_sequencer_mb_p6_d4 (
     wire [7:0] _662;
     wire [3:0] _197;
     wire _631;
-    wire [7:0] _670;
+    wire [7:0] _688;
     wire [3:0] _629;
     wire _630;
-    wire [7:0] _672;
+    wire [7:0] _690;
     wire [7:0] _68;
-    wire [7:0] _673;
+    wire [7:0] _691;
     wire [7:0] _69;
     reg [7:0] _151;
     reg [7:0] _161;
-    wire _695;
-    wire [3:0] _694;
-    reg _711;
     wire _713;
-    wire [5:0] _718;
-    wire [5:0] _692;
+    wire [3:0] _712;
+    reg _729;
+    wire _731;
+    wire [5:0] _736;
+    wire [5:0] _710;
     wire _337;
-    wire [5:0] _674;
+    wire [5:0] _692;
     wire [5:0] _70;
     reg [5:0] _168;
     wire _343;
-    wire [5:0] _675;
+    wire [5:0] _693;
     wire [5:0] _71;
     reg [5:0] _171;
     wire _349;
-    wire [5:0] _676;
+    wire [5:0] _694;
     wire [5:0] _72;
     reg [5:0] _174;
-    reg [5:0] _691;
-    wire [5:0] _693;
-    wire [3:0] _689;
-    wire _690;
-    wire [5:0] _719;
+    reg [5:0] _709;
+    wire [5:0] _711;
+    wire [3:0] _707;
+    wire _708;
+    wire [5:0] _737;
     wire [3:0] _95;
-    wire _688;
-    wire [5:0] _731;
-    wire [3:0] _686;
-    wire _687;
-    wire [5:0] _732;
+    wire _706;
+    wire [5:0] _749;
+    wire [3:0] _704;
+    wire _705;
+    wire [5:0] _750;
     wire [3:0] _179;
-    wire _685;
-    wire [5:0] _734;
-    wire [3:0] _683;
-    wire _684;
-    wire [5:0] _739;
-    wire [3:0] _681;
-    wire _682;
-    wire [5:0] _740;
-    wire [3:0] _679;
-    wire _680;
-    wire [5:0] _744;
-    wire [3:0] _677;
+    wire _703;
+    wire [5:0] _752;
+    wire [3:0] _701;
+    wire _702;
+    wire [5:0] _757;
+    wire [3:0] _699;
+    wire _700;
+    wire [5:0] _758;
+    wire [3:0] _697;
+    wire _698;
+    wire [5:0] _762;
+    wire [3:0] _695;
     wire [3:0] _94;
-    wire _678;
-    wire [5:0] _748;
+    wire _696;
+    wire [5:0] _766;
     wire [5:0] _74;
     wire _372;
-    wire [5:0] _749;
+    wire [5:0] _767;
     wire [5:0] _75;
     reg [5:0] _177;
-    reg [5:0] _754;
+    reg [5:0] _772;
     wire vdd;
-    wire [1:0] _751;
+    wire [1:0] _769;
     wire [1:0] _78;
     reg [1:0] _148;
-    wire [1:0] _753;
-    wire [7:0] _755;
+    wire [1:0] _771;
+    wire [7:0] _773;
     assign _93 = { _83,
                    _86,
                    _89,
@@ -858,17 +875,17 @@ module deadline_sequencer_mb_p6_d4 (
             _258 <= _17;
     end
     assign _176 = 6'b000000;
-    assign _746 = _715 ? _716 : _691;
-    assign _745 = _656 == _207;
-    assign _747 = _745 ? _693 : _746;
-    assign _741 = 12'b000000000000;
-    assign _742 = _391 == _741;
-    assign _743 = _742 ? _693 : _691;
+    assign _764 = _733 ? _734 : _709;
+    assign _763 = _656 == _207;
+    assign _765 = _763 ? _711 : _764;
+    assign _759 = 12'b000000000000;
+    assign _760 = _391 == _759;
+    assign _761 = _760 ? _711 : _709;
     assign _341 = _337 ? _22 : _340;
     assign _19 = _341;
     always @(posedge clock) begin
         if (clear)
-            _340 <= _741;
+            _340 <= _759;
         else
             _340 <= _19;
     end
@@ -876,7 +893,7 @@ module deadline_sequencer_mb_p6_d4 (
     assign _20 = _347;
     always @(posedge clock) begin
         if (clear)
-            _346 <= _741;
+            _346 <= _759;
         else
             _346 <= _20;
     end
@@ -884,7 +901,7 @@ module deadline_sequencer_mb_p6_d4 (
     assign _21 = _353;
     always @(posedge clock) begin
         if (clear)
-            _352 <= _741;
+            _352 <= _759;
         else
             _352 <= _21;
     end
@@ -903,7 +920,7 @@ module deadline_sequencer_mb_p6_d4 (
     assign _23 = _373;
     always @(posedge clock) begin
         if (clear)
-            _361 <= _741;
+            _361 <= _759;
         else
             _361 <= _23;
     end
@@ -919,16 +936,16 @@ module deadline_sequencer_mb_p6_d4 (
             _362 <= _340;
         endcase
     end
-    assign _736 = _362 == _741;
-    assign _737 = ~ _736;
-    assign _738 = _737 ? _716 : _693;
-    assign _733 = host_in_valid ? _693 : _691;
-    assign _727 = _715 ? _716 : _691;
-    assign _728 = _105 ? _693 : _727;
-    assign _725 = _715 ? _716 : _691;
-    assign _726 = _618 ? _693 : _725;
-    assign _729 = _99 ? _728 : _726;
-    assign _722 = _715 ? _716 : _691;
+    assign _754 = _362 == _759;
+    assign _755 = ~ _754;
+    assign _756 = _755 ? _734 : _711;
+    assign _751 = host_in_valid ? _711 : _709;
+    assign _745 = _733 ? _734 : _709;
+    assign _746 = _105 ? _711 : _745;
+    assign _743 = _733 ? _734 : _709;
+    assign _744 = _618 ? _711 : _743;
+    assign _747 = _99 ? _746 : _744;
+    assign _740 = _733 ? _734 : _709;
     assign _124 = port_out_ready[3:3];
     assign _123 = port_out_ready[2:2];
     assign _122 = port_out_ready[1:1];
@@ -945,17 +962,17 @@ module deadline_sequencer_mb_p6_d4 (
             _125 <= _124;
         endcase
     end
-    assign _723 = _125 ? _693 : _722;
-    assign _720 = _715 ? _716 : _691;
-    assign _721 = _595 ? _693 : _720;
-    assign _724 = _99 ? _723 : _721;
-    assign _730 = _98 ? _729 : _724;
-    assign _716 = imem_data[5:0];
+    assign _741 = _125 ? _711 : _740;
+    assign _738 = _733 ? _734 : _709;
+    assign _739 = _595 ? _711 : _738;
+    assign _742 = _99 ? _741 : _739;
+    assign _748 = _98 ? _747 : _742;
+    assign _734 = imem_data[5:0];
     assign _377 = _337 ? _28 : _376;
     assign _25 = _377;
     always @(posedge clock) begin
         if (clear)
-            _376 <= _741;
+            _376 <= _759;
         else
             _376 <= _25;
     end
@@ -963,7 +980,7 @@ module deadline_sequencer_mb_p6_d4 (
     assign _26 = _381;
     always @(posedge clock) begin
         if (clear)
-            _380 <= _741;
+            _380 <= _759;
         else
             _380 <= _26;
     end
@@ -971,13 +988,13 @@ module deadline_sequencer_mb_p6_d4 (
     assign _27 = _385;
     always @(posedge clock) begin
         if (clear)
-            _384 <= _741;
+            _384 <= _759;
         else
             _384 <= _27;
     end
     assign _369 = imem_data[11:0];
     assign _395 = _391 - _366;
-    assign _393 = _391 == _741;
+    assign _393 = _391 == _759;
     assign _396 = _393 ? _391 : _395;
     assign _386 = 4'b0011;
     assign _387 = _94 == _386;
@@ -987,7 +1004,7 @@ module deadline_sequencer_mb_p6_d4 (
     assign _29 = _398;
     always @(posedge clock) begin
         if (clear)
-            _390 <= _741;
+            _390 <= _759;
         else
             _390 <= _29;
     end
@@ -1003,24 +1020,24 @@ module deadline_sequencer_mb_p6_d4 (
             _391 <= _376;
         endcase
     end
-    assign _715 = _391 == _741;
-    assign _717 = _715 ? _716 : _691;
-    assign _712 = imem_data[11:11];
-    assign _710 = flags[3:3];
-    assign _709 = flags[2:2];
-    assign _708 = flags[1:1];
-    assign _707 = flags[0:0];
-    assign _706 = _589[3:3];
-    assign _705 = _589[2:2];
-    assign _704 = _589[1:1];
-    assign _703 = _589[0:0];
-    assign _702 = _161[7:7];
-    assign _701 = _161[6:6];
-    assign _700 = _161[5:5];
-    assign _699 = _161[4:4];
-    assign _698 = _161[3:3];
-    assign _697 = _161[2:2];
-    assign _696 = _161[1:1];
+    assign _733 = _391 == _759;
+    assign _735 = _733 ? _734 : _709;
+    assign _730 = imem_data[11:11];
+    assign _728 = flags[3:3];
+    assign _727 = flags[2:2];
+    assign _726 = flags[1:1];
+    assign _725 = flags[0:0];
+    assign _724 = _589[3:3];
+    assign _723 = _589[2:2];
+    assign _722 = _589[1:1];
+    assign _721 = _589[0:0];
+    assign _720 = _161[7:7];
+    assign _719 = _161[6:6];
+    assign _718 = _161[5:5];
+    assign _717 = _161[4:4];
+    assign _716 = _161[3:3];
+    assign _715 = _161[2:2];
+    assign _714 = _161[1:1];
     assign _399 = _337 ? _68 : _160;
     assign _31 = _399;
     always @(posedge clock) begin
@@ -1045,14 +1062,52 @@ module deadline_sequencer_mb_p6_d4 (
         else
             _154 <= _33;
     end
-    assign _671 = imem_data[7:0];
-    assign _666 = _161[6:0];
-    assign _668 = { _666,
+    assign _689 = imem_data[7:0];
+    assign _684 = 7'b0000000;
+    assign _685 = { _684,
+                    _677 };
+    assign _681 = _161[6:0];
+    assign _683 = { _681,
                     _188 };
+    assign _686 = _683 | _685;
+    assign _675 = pin_in[7:7];
+    assign _674 = pin_in[6:6];
+    assign _673 = pin_in[5:5];
+    assign _672 = pin_in[4:4];
+    assign _671 = pin_in[3:3];
+    assign _670 = pin_in[2:2];
+    assign _669 = pin_in[1:1];
+    assign _668 = pin_in[0:0];
+    assign _667 = imem_data[5:3];
+    always @* begin
+        case (_667)
+        0:
+            _676 <= _668;
+        1:
+            _676 <= _669;
+        2:
+            _676 <= _670;
+        3:
+            _676 <= _671;
+        4:
+            _676 <= _672;
+        5:
+            _676 <= _673;
+        6:
+            _676 <= _674;
+        default:
+            _676 <= _675;
+        endcase
+    end
+    assign _666 = imem_data[6:6];
+    assign _677 = _666 & _676;
+    assign _679 = { _677,
+                    _684 };
     assign _664 = _161[7:1];
     assign _665 = { _188,
                     _664 };
-    assign _669 = _207 ? _668 : _665;
+    assign _680 = _665 | _679;
+    assign _687 = _207 ? _686 : _680;
     assign _659 = _161[6:0];
     assign _660 = { _659,
                     _656 };
@@ -1521,13 +1576,13 @@ module deadline_sequencer_mb_p6_d4 (
     assign _662 = _632 ? _661 : _647;
     assign _197 = 4'b0111;
     assign _631 = _94 == _197;
-    assign _670 = _631 ? _669 : _662;
+    assign _688 = _631 ? _687 : _662;
     assign _629 = 4'b0100;
     assign _630 = _94 == _629;
-    assign _672 = _630 ? _671 : _670;
-    assign _68 = _672;
-    assign _673 = _372 ? _68 : _151;
-    assign _69 = _673;
+    assign _690 = _630 ? _689 : _688;
+    assign _68 = _690;
+    assign _691 = _372 ? _68 : _151;
+    assign _69 = _691;
     always @(posedge clock) begin
         if (clear)
             _151 <= _144;
@@ -1546,50 +1601,50 @@ module deadline_sequencer_mb_p6_d4 (
             _161 <= _160;
         endcase
     end
-    assign _695 = _161[0:0];
-    assign _694 = imem_data[10:7];
+    assign _713 = _161[0:0];
+    assign _712 = imem_data[10:7];
     always @* begin
-        case (_694)
+        case (_712)
         0:
-            _711 <= _695;
+            _729 <= _713;
         1:
-            _711 <= _696;
+            _729 <= _714;
         2:
-            _711 <= _697;
+            _729 <= _715;
         3:
-            _711 <= _698;
+            _729 <= _716;
         4:
-            _711 <= _699;
+            _729 <= _717;
         5:
-            _711 <= _700;
+            _729 <= _718;
         6:
-            _711 <= _701;
+            _729 <= _719;
         7:
-            _711 <= _702;
+            _729 <= _720;
         8:
-            _711 <= _703;
+            _729 <= _721;
         9:
-            _711 <= _704;
+            _729 <= _722;
         10:
-            _711 <= _705;
+            _729 <= _723;
         11:
-            _711 <= _706;
+            _729 <= _724;
         12:
-            _711 <= _707;
+            _729 <= _725;
         13:
-            _711 <= _708;
+            _729 <= _726;
         14:
-            _711 <= _709;
+            _729 <= _727;
         default:
-            _711 <= _710;
+            _729 <= _728;
         endcase
     end
-    assign _713 = _711 == _712;
-    assign _718 = _713 ? _693 : _717;
-    assign _692 = 6'b000001;
+    assign _731 = _729 == _730;
+    assign _736 = _731 ? _711 : _735;
+    assign _710 = 6'b000001;
     assign _337 = _148 == _106;
-    assign _674 = _337 ? _74 : _168;
-    assign _70 = _674;
+    assign _692 = _337 ? _74 : _168;
+    assign _70 = _692;
     always @(posedge clock) begin
         if (clear)
             _168 <= _176;
@@ -1597,8 +1652,8 @@ module deadline_sequencer_mb_p6_d4 (
             _168 <= _70;
     end
     assign _343 = _148 == _108;
-    assign _675 = _343 ? _74 : _171;
-    assign _71 = _675;
+    assign _693 = _343 ? _74 : _171;
+    assign _71 = _693;
     always @(posedge clock) begin
         if (clear)
             _171 <= _176;
@@ -1606,8 +1661,8 @@ module deadline_sequencer_mb_p6_d4 (
             _171 <= _71;
     end
     assign _349 = _148 == _110;
-    assign _676 = _349 ? _74 : _174;
-    assign _72 = _676;
+    assign _694 = _349 ? _74 : _174;
+    assign _72 = _694;
     always @(posedge clock) begin
         if (clear)
             _174 <= _176;
@@ -1617,45 +1672,45 @@ module deadline_sequencer_mb_p6_d4 (
     always @* begin
         case (_148)
         0:
-            _691 <= _177;
+            _709 <= _177;
         1:
-            _691 <= _174;
+            _709 <= _174;
         2:
-            _691 <= _171;
+            _709 <= _171;
         default:
-            _691 <= _168;
+            _709 <= _168;
         endcase
     end
-    assign _693 = _691 + _692;
-    assign _689 = 4'b1111;
-    assign _690 = _94 == _689;
-    assign _719 = _690 ? _718 : _693;
+    assign _711 = _709 + _710;
+    assign _707 = 4'b1111;
+    assign _708 = _94 == _707;
+    assign _737 = _708 ? _736 : _711;
     assign _95 = 4'b1110;
-    assign _688 = _94 == _95;
-    assign _731 = _688 ? _730 : _719;
-    assign _686 = 4'b1101;
-    assign _687 = _94 == _686;
-    assign _732 = _687 ? _691 : _731;
+    assign _706 = _94 == _95;
+    assign _749 = _706 ? _748 : _737;
+    assign _704 = 4'b1101;
+    assign _705 = _94 == _704;
+    assign _750 = _705 ? _709 : _749;
     assign _179 = 4'b1100;
-    assign _685 = _94 == _179;
-    assign _734 = _685 ? _733 : _732;
-    assign _683 = 4'b1010;
-    assign _684 = _94 == _683;
-    assign _739 = _684 ? _738 : _734;
-    assign _681 = 4'b1001;
-    assign _682 = _94 == _681;
-    assign _740 = _682 ? _716 : _739;
-    assign _679 = 4'b0110;
-    assign _680 = _94 == _679;
-    assign _744 = _680 ? _743 : _740;
-    assign _677 = 4'b0101;
+    assign _703 = _94 == _179;
+    assign _752 = _703 ? _751 : _750;
+    assign _701 = 4'b1010;
+    assign _702 = _94 == _701;
+    assign _757 = _702 ? _756 : _752;
+    assign _699 = 4'b1001;
+    assign _700 = _94 == _699;
+    assign _758 = _700 ? _734 : _757;
+    assign _697 = 4'b0110;
+    assign _698 = _94 == _697;
+    assign _762 = _698 ? _761 : _758;
+    assign _695 = 4'b0101;
     assign _94 = imem_data[15:12];
-    assign _678 = _94 == _677;
-    assign _748 = _678 ? _747 : _744;
-    assign _74 = _748;
+    assign _696 = _94 == _695;
+    assign _766 = _696 ? _765 : _762;
+    assign _74 = _766;
     assign _372 = _148 == _112;
-    assign _749 = _372 ? _74 : _177;
-    assign _75 = _749;
+    assign _767 = _372 ? _74 : _177;
+    assign _75 = _767;
     always @(posedge clock) begin
         if (clear)
             _177 <= _176;
@@ -1663,30 +1718,30 @@ module deadline_sequencer_mb_p6_d4 (
             _177 <= _75;
     end
     always @* begin
-        case (_753)
+        case (_771)
         0:
-            _754 <= _177;
+            _772 <= _177;
         1:
-            _754 <= _174;
+            _772 <= _174;
         2:
-            _754 <= _171;
+            _772 <= _171;
         default:
-            _754 <= _168;
+            _772 <= _168;
         endcase
     end
     assign vdd = 1'b1;
-    assign _751 = _148 + _110;
-    assign _78 = _751;
+    assign _769 = _148 + _110;
+    assign _78 = _769;
     always @(posedge clock) begin
         if (clear)
             _148 <= _112;
         else
             _148 <= _78;
     end
-    assign _753 = _148 + _110;
-    assign _755 = { _753,
-                    _754 };
-    assign imem_addr = _755;
+    assign _771 = _148 + _110;
+    assign _773 = { _771,
+                    _772 };
+    assign imem_addr = _773;
     assign pin_out = _258;
     assign pin_oe = _201;
     assign host_out = _193;

@@ -13,3 +13,8 @@
  (name ethtv)
  (modules ethtv)
  (libraries hardcaml unix mpcore))
+
+(executable
+ (name bridges)
+ (modules bridges)
+ (libraries hardcaml unix mpcore))

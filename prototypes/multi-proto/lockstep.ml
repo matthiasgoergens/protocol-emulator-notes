@@ -56,7 +56,8 @@ let lockstep ?mutant ~(c : Isa_mb.cfg) ~seed ~cycles cov =
 let extension ~seed ~cycles =
   Random.init seed;
   let c = Isa_mb.cfg ~pc_bits:6 ~depth:2 () in
-  let strip w = if (w lsr 12) >= 14 then w land 0x0FFF else w in
+  (* reserved fields zero: no E/F opcodes, no SHO capture bit *)
+  let strip w = if (w lsr 12) >= 14 then w land 0x0FFF else if (w lsr 12) = 7 then w land lnot 0x40 else w in
   let mem = Array.init 4 (fun _ -> Array.init 64 (fun _ -> strip (Random.int 0x10000))) in
   let s = Harness_mb.make c mem in
   let st = Isa.init () in
