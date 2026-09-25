@@ -28,6 +28,9 @@ Regimes (the audio is where the regulation question lives):
                 generator, so it tests the detector, not the premise; real audio is checked in
                 real_audio.py
   r128_noblack  as r128 but no black frames between adverts (as on many channels)
+  r128_mild     as r128, but adverts compressed only as much as the real ones measured by
+                real_audio.py (median 3 s crest factor about 14 dB against 16 dB for programmes,
+                instead of 11 dB); r128_mild_noblack likewise without black frames
 
 Usage:  uv run advert.py         (writes results/advert.{json,txt}, out/advert_*.png)
 """
@@ -232,6 +235,9 @@ def compress(x, ratio=8.0, thr_db=-20.0):
     return np.clip(y, -pk, pk)
 
 
+MILD = (1.25, 1.0)      # compressor ratios (compressed, dialogue adverts) in the r128_mild regime
+
+
 def seg_audio(rng, kind, n, regime, style=None):
     if kind == "black":
         return rng.standard_normal(n) * 1e-4
@@ -249,10 +255,11 @@ def seg_audio(rng, kind, n, regime, style=None):
     else:
         sp = speech(rng, n)
         m = music(rng, n, style != "dialogue")
+        mild = regime.endswith("mild")        # adverts compressed only as much as real ones measured
         if style == "dialogue":
-            x = compress(sp / np.std(sp) + 0.3 * m / np.std(m), ratio=2.0)
+            x = compress(sp / np.std(sp) + 0.3 * m / np.std(m), ratio=MILD[1] if mild else 2.0)
         else:
-            x = compress(sp / np.std(sp) + 0.7 * m / np.std(m))
+            x = compress(sp / np.std(sp) + 0.7 * m / np.std(m), ratio=MILD[0] if mild else 8.0)
         level_db = -17.0 if regime == "legacy" else -23.0
     rms = np.sqrt(np.mean(x ** 2)) + 1e-12
     return x / rms * 10 ** (level_db / 20)
@@ -287,7 +294,7 @@ class AudioFeatures:
 
 # ---------------------------------------------------------------------------------------------
 
-def simulate(seed, minutes, black, regimes=("legacy", "r128"), keep_frames=False):
+def simulate(seed, minutes, black, regimes=("legacy", "r128", "r128_mild"), keep_frames=False):
     rng = np.random.default_rng(seed)
     segs = timeline(rng, minutes, black)
     yy, xx = np.mgrid[0:H, 0:W]
@@ -448,7 +455,8 @@ def main(n_train=3, n_test=3, minutes=40):
             sims[(black, seed)] = simulate(seed, minutes, black, keep_frames=(seed == 0 and black))
             print(f"simulated seed {seed} black {black}: {len(sims[(black, seed)]['label'])} s, "
                   f"{time.time() - t0:.0f} s wall", flush=True)
-    regimes = [("legacy", True, "legacy"), ("r128", True, "r128"), ("r128_noblack", False, "r128")]
+    regimes = [("legacy", True, "legacy"), ("r128", True, "r128"), ("r128_noblack", False, "r128"),
+               ("r128_mild", True, "r128_mild"), ("r128_mild_noblack", False, "r128_mild")]
     out = {}
     states = {}
     lines = ["Demo B advert detection (advert.py). Synthetic timelines, %d train and %d test seeds of %d min."
@@ -502,7 +510,7 @@ def main(n_train=3, n_test=3, minutes=40):
         Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8)).resize((W * 3, H * 3), Image.NEAREST) \
             .save(OUT / f"advert_frame_{k}.png")
     np.savez_compressed(RES / "advert_test_seed.npz", **{f"{k}": v for k, v in sims[(True, n_train)]["vid"].items()},
-                        **{f"aud_{r}_{k}": v for r in ("legacy", "r128") for k, v in sims[(True, n_train)]["aud"][r].items()},
+                        **{f"aud_{r}_{k}": v for r in ("legacy", "r128", "r128_mild") for k, v in sims[(True, n_train)]["aud"][r].items()},
                         label=sims[(True, n_train)]["label"])
     np.savez_compressed(RES / "advert_states.npz",
                         **{f"label_{rname}": sims[(black, n_train)]["label"] for rname, black, _ in regimes},

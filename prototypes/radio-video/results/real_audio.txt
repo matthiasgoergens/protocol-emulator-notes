@@ -1,0 +1,30 @@
+Real audio (real_audio.py): freely licensed recordings, each normalised to -23 LUFS before the
+dynamics cues are measured. Columns: integrated loudness as found (LUFS), loudness range (LU,
+EBU Tech 3342 style), median 3 s crest factor (dB), fraction of 400 ms blocks 20 dB below median.
+
+advert      1948 ClassicT1948.wav                     536.0 s   -26.2 LUFS  LRA   7.2  crest 14.6  pauses 0.041
+advert      1948 ClassicT1948_2.wav                   714.5 s   -24.7 LUFS  LRA   3.4  crest 13.9  pauses 0.048
+advert      1948 ClassicT1948_3.wav                   557.1 s   -26.2 LUFS  LRA   8.2  crest 16.9  pauses 0.010
+advert      1948 LuckyStr1948.wav                      60.8 s   -23.4 LUFS  LRA   5.8  crest 15.2  pauses 0.010
+advert      1948 LuckyStr1948_2.wav                    57.6 s   -21.6 LUFS  LRA   1.2  crest 14.6  pauses 0.030
+advert      1960 Cheerios1960.wav                      60.6 s   -24.1 LUFS  LRA   3.2  crest 13.6  pauses 0.032
+advert      1970 Televisi1970.wav                     243.0 s   -37.6 LUFS  LRA   4.1  crest 14.9  pauses 0.000
+advert      1960 Wonderfu1960.wav                     181.5 s   -23.1 LUFS  LRA   4.6  crest 12.8  pauses 0.015
+advert      1991 cbs_commercials_1.wav                 95.7 s   -24.6 LUFS  LRA   3.5  crest 13.1  pauses 0.039
+advert      1991 cbs_commercials_5.wav                118.0 s   -25.4 LUFS  LRA   3.6  crest 13.6  pauses 0.040
+advert      1991 cbs_commercials_7.wav                 99.8 s   -25.7 LUFS  LRA   4.9  crest 14.7  pauses 0.105
+advert      1991 cbs_commercials_9.wav                203.6 s   -25.5 LUFS  LRA   6.1  crest 13.7  pauses 0.051
+advert      1991 cbs_commercials_13.wav                83.6 s   -25.5 LUFS  LRA   3.2  crest 14.4  pauses 0.079
+programme   1950 GoodSpor1950.wav                     569.2 s   -25.2 LUFS  LRA   5.7  crest 17.8  pauses 0.244
+programme   1955 WhatAbou1955.wav                     686.7 s   -23.7 LUFS  LRA   6.4  crest 15.6  pauses 0.018
+programme   1949 LawandSo1949.wav                     579.3 s   -24.6 LUFS  LRA   4.2  crest 16.2  pauses 0.119
+programme   2003 img-6030.wav                          38.4 s   -28.0 LUFS  LRA   3.2  crest 15.8  pauses 0.053
+programme   2012 nbn2012.wav                          192.7 s   -26.9 LUFS  LRA   2.0  crest 16.7  pauses 0.011
+
+all eras: crest: adverts median 14.3, programmes 16.5, AUC 0.712 (2978/2054 windows); lra: adverts median 6.4, programmes 10.9, AUC 0.681 (2950/2042 windows)
+1980+: crest: adverts median 13.8, programmes 16.5, AUC 0.827 (588/226 windows); lra: adverts median 5.5, programmes 5.6, AUC 0.446 (577/222 windows)
+pre-1980: crest: adverts median 14.5, programmes 16.5, AUC 0.689 (2390/1828 windows); lra: adverts median 6.7, programmes 12.6, AUC 0.703 (2373/1820 windows)
+file level integrated_lufs: adverts median -25.40 (n 13), programmes median -25.20 (n 5), AUC programme higher 0.42
+file level lra_lu: adverts median 4.10 (n 13), programmes median 4.20 (n 5), AUC programme higher 0.46
+file level crest_median_db: adverts median 14.40 (n 13), programmes median 16.20 (n 5), AUC programme higher 0.94
+file level pause_fraction: adverts median 0.04 (n 13), programmes median 0.05 (n 5), AUC programme higher 0.68
