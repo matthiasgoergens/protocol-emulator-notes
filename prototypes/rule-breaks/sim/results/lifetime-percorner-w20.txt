@@ -1,0 +1,21 @@
+### ss/27, VBAR 0, VLO 0.3, 10 ns: W 0.30 (baseline: read-nlv-bar0 = VLO 0 read, as the gain-cell README's per-corner row)
+  mos_ss   27C  a 1 reads above 0.406 V, a 0 reads below 0.372 V
+../../gain-cell/tricks-thin/results/hold-lv-vlo0.3-bar0.txt
+  mos_ss   27C  1: written 0.628 end 0.295  ->            19.6 ms   0: written 0.160 end 0.219 ->               >50m   lifetime 19.6 ms
+../../gain-cell/tricks-thin/results/hold-lv-vlo0.3-bar0-park.txt
+  mos_ss   27C  1: written 0.628 end 0.295  ->            19.6 ms   0: written 0.160 end 0.161 ->               >50m   lifetime 19.6 ms
+### W 0.20
+  mos_ss   27C  a 1 reads above 0.441 V, a 0 reads below 0.41 V
+  mos_ss   27C  1: written 0.582 end 0.285  ->            12.6 ms   0: written 0.130 end 0.224 ->               >50m   lifetime 12.6 ms
+### ff/85, VBAR 0.15, VLO 0.3, 10 ns: W 0.30
+  mos_ff   85C  a 1 reads above 0.413 V, a 0 reads below 0.36 V
+../../gain-cell/tricks-thin/results/hold-lv-vlo0.3-bar0.15.txt
+  mos_ff   85C  1: written 0.841 end 0.284  ->             930 us   0: written 0.193 end 0.331 ->               >50m   lifetime 930 us
+../../gain-cell/tricks-thin/results/hold-lv-vlo0.3-bar0.15-park.txt
+  mos_ff   85C  1: written 0.841 end 0.284  ->             930 us   0: written 0.193 end 0.284 ->               >50m   lifetime 930 us
+### W 0.20 (busy, idle)
+  mos_ff   85C  a 1 reads above 0.43 V, a 0 reads below 0.383 V
+results/hold-lv-w20-vlo0.3-bar0.15-ff85.txt
+  mos_ff   85C  1: written 0.799 end 0.285  ->             732 us   0: written 0.161 end 0.334 ->               >50m   lifetime 732 us
+results/hold-lv-w20-vlo0.3-bar0.15-park-ff85.txt
+  mos_ff   85C  1: written 0.799 end 0.285  ->             732 us   0: written 0.161 end 0.285 ->               >50m   lifetime 732 us
