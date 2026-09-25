@@ -194,10 +194,11 @@ B or on the GND bar. Neither is modellable with the PDK decks.
 
 **Tier 2, NW 0.24 (6T):** latch-up is not modelled by the PDK. The PDK has no well-proximity
 parameters: the PSP instance lines carry no SCA/SCB/SCC, so WPE is not in these models either.
-The PDK cell already sits at 0.27 with a tap row every 16 rows (`../sram-cut/pdk-cell/refs2.txt`).
-Our 6T's tap row every 36 rows should become every 16 at tier 2 (cost 1.20 µm per 16 rows,
-about 7 % of a 1.07 µm row pitch; *estimate*). That eats roughly half of tier 2's 4 % gain over
-tier 0.
+The PDK cell already sits at 0.27 with a tap row every 16 rows
+(`../sram-cut/pdk-cell/refs2.txt`); a 6T at tier 0 or tier 2 should copy that rather than our
+tap row every 36 rows. A 1.20 µm tap row per 16 rows of 1.07 µm adds 7 % (*estimate*):
+3.01 → ~3.22 µm² at tier 0 and 2.88 → ~3.08 µm² at tier 2. Tier 2 keeps its 4 % over tier 0 only
+if taps every 16 rows are enough at 0.24, which nobody has checked.
 
 ## 5. Yield (arithmetic with stated assumptions, `yield/yield.py` → `yield/yield.txt`)
 
