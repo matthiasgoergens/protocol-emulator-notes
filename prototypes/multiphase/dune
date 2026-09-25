@@ -1,10 +1,24 @@
 (library
  (name multiphase)
  (wrapped false)
- (modules isa sequencer harness stage eth_model eth_tx eth_rx)
+ (modules isa sequencer harness stage nco eth_model eth_tx eth_rx eth_rxn)
  (libraries hardcaml))
 
 (executable
  (name main)
  (modules main)
  (libraries hardcaml multiphase))
+
+(executable
+ (name fm)
+ (modules fm)
+ (libraries hardcaml multiphase))
+
+(executable
+ (name rx_jitter)
+ (modules rx_jitter)
+ (libraries hardcaml multiphase))
+
+(executable
+ (name shmoo)
+ (modules shmoo))
