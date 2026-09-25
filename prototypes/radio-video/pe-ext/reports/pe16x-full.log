@@ -1,0 +1,991 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69+77 (git sha1 9ff27d29c-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+-- Running command `read_verilog -sv  pe16x.v; hierarchy -check -top pe16x; synth -top pe16x -flatten; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/pe16x-full-y069.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Verilog-2005 frontend: pe16x.v
+Parsing SystemVerilog input from `pe16x.v' to AST representation.
+Generating RTLIL representation for module `\pe16x'.
+Warning: Replacing memory \cfg with list of registers. See pe16x.v:43
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \pe16x
+
+2.2. Analyzing design hierarchy..
+Top module:  \pe16x
+Removed 0 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \pe16x
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \pe16x
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$pe16x.v:112$39 in module pe16x.
+Marked 2 switch rules as full_case in process $proc$pe16x.v:63$3 in module pe16x.
+Marked 1 switch rules as full_case in process $proc$pe16x.v:42$2 in module pe16x.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 3 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~6 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\pe16x.$proc$pe16x.v:112$39'.
+     1/3: $0\hist[1:0]
+     2/3: $0\pipe[15:0]
+     3/3: $0\s[15:0]
+Creating decoders for process `\pe16x.$proc$pe16x.v:63$3'.
+     1/2: $1\y0[15:0]
+     2/2: $1\x[15:0]
+Creating decoders for process `\pe16x.$proc$pe16x.v:42$2'.
+     1/11: $1\i[31:0]
+     2/11: $0\cfg[9][7:0]
+     3/11: $0\cfg[8][7:0]
+     4/11: $0\cfg[7][7:0]
+     5/11: $0\cfg[6][7:0]
+     6/11: $0\cfg[5][7:0]
+     7/11: $0\cfg[4][7:0]
+     8/11: $0\cfg[3][7:0]
+     9/11: $0\cfg[2][7:0]
+    10/11: $0\cfg[1][7:0]
+    11/11: $0\cfg[0][7:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\pe16x.\x' from process `\pe16x.$proc$pe16x.v:63$3'.
+No latch inferred for signal `\pe16x.\y0' from process `\pe16x.$proc$pe16x.v:63$3'.
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\pe16x.\s' using process `\pe16x.$proc$pe16x.v:112$39'.
+  created $dff cell `$procdff$107' with positive edge clock.
+Creating register for signal `\pe16x.\pipe' using process `\pe16x.$proc$pe16x.v:112$39'.
+  created $dff cell `$procdff$108' with positive edge clock.
+Creating register for signal `\pe16x.\hist' using process `\pe16x.$proc$pe16x.v:112$39'.
+  created $dff cell `$procdff$109' with positive edge clock.
+Creating register for signal `\pe16x.\i' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$110' with positive edge clock.
+Creating register for signal `\pe16x.\cfg[0]' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$111' with positive edge clock.
+Creating register for signal `\pe16x.\cfg[1]' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$112' with positive edge clock.
+Creating register for signal `\pe16x.\cfg[2]' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$113' with positive edge clock.
+Creating register for signal `\pe16x.\cfg[3]' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$114' with positive edge clock.
+Creating register for signal `\pe16x.\cfg[4]' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$115' with positive edge clock.
+Creating register for signal `\pe16x.\cfg[5]' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$116' with positive edge clock.
+Creating register for signal `\pe16x.\cfg[6]' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$117' with positive edge clock.
+Creating register for signal `\pe16x.\cfg[7]' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$118' with positive edge clock.
+Creating register for signal `\pe16x.\cfg[8]' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$119' with positive edge clock.
+Creating register for signal `\pe16x.\cfg[9]' using process `\pe16x.$proc$pe16x.v:42$2'.
+  created $dff cell `$procdff$120' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 3 empty switches in `\pe16x.$proc$pe16x.v:112$39'.
+Removing empty process `pe16x.$proc$pe16x.v:112$39'.
+Found and cleaned up 2 empty switches in `\pe16x.$proc$pe16x.v:63$3'.
+Removing empty process `pe16x.$proc$pe16x.v:63$3'.
+Found and cleaned up 1 empty switch in `\pe16x.$proc$pe16x.v:42$2'.
+Removing empty process `pe16x.$proc$pe16x.v:42$2'.
+Cleaned up 6 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+<suppressed ~2 debug messages>
+
+3.3. Executing CHECK pass (checking for obvious problems).
+Checking module pe16x...
+Found and reported 0 problems.
+
+3.4. Executing FLATTEN pass (flatten design).
+
+3.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module pe16x...
+Found and reported 0 problems.
+
+3.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+Removed 2 unused cells and 57 unused wires.
+<suppressed ~4 debug messages>
+
+3.8. Executing OPT pass (performing simple optimizations).
+
+3.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+
+3.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 80 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pe16x..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~59 debug messages>
+
+3.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pe16x.
+Performed a total of 0 changes.
+
+3.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 80 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.8.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+
+3.8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+
+3.8.9. Finished fast OPT passes. (There is nothing left to do.)
+
+3.9. Executing FSM pass (extract and optimize FSM).
+
+3.9.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.9.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.9.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.9.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+
+3.9.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.9.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.9.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.9.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.10. Executing OPT pass (performing simple optimizations).
+
+3.10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+
+3.10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 80 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pe16x..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~59 debug messages>
+
+3.10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pe16x.
+Performed a total of 0 changes.
+
+3.10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 80 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.10.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $procdff$120 ($dff) from module pe16x (D = \cfg_in, Q = \cfg[9]).
+Adding SRST signal on $procdff$107 ($dff) from module pe16x (D = $procmux$52_Y, Q = \s, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$122 ($sdff) from module pe16x (D = \nxt, Q = \s).
+Adding SRST signal on $procdff$108 ($dff) from module pe16x (D = $procmux$45_Y, Q = \pipe, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$126 ($sdff) from module pe16x (D = \x, Q = \pipe).
+Adding SRST signal on $procdff$109 ($dff) from module pe16x (D = $procmux$40_Y, Q = \hist, rval = 2'00).
+Adding EN signal on $auto$ff.cc:337:slice$128 ($sdff) from module pe16x (D = \lin [1:0], Q = \hist).
+Adding EN signal on $procdff$119 ($dff) from module pe16x (D = \cfg[9], Q = \cfg[8]).
+Adding EN signal on $procdff$111 ($dff) from module pe16x (D = \cfg[1], Q = \cfg[0]).
+Adding EN signal on $procdff$112 ($dff) from module pe16x (D = \cfg[2], Q = \cfg[1]).
+Adding EN signal on $procdff$113 ($dff) from module pe16x (D = \cfg[3], Q = \cfg[2]).
+Adding EN signal on $procdff$114 ($dff) from module pe16x (D = \cfg[4], Q = \cfg[3]).
+Adding EN signal on $procdff$115 ($dff) from module pe16x (D = \cfg[5], Q = \cfg[4]).
+Adding EN signal on $procdff$116 ($dff) from module pe16x (D = \cfg[6], Q = \cfg[5]).
+Adding EN signal on $procdff$117 ($dff) from module pe16x (D = \cfg[7], Q = \cfg[6]).
+Adding EN signal on $procdff$118 ($dff) from module pe16x (D = \cfg[8], Q = \cfg[7]).
+
+3.10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+Removed 17 unused cells and 17 unused wires.
+<suppressed ~18 debug messages>
+
+3.10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+
+3.10.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.10.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pe16x..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~30 debug messages>
+
+3.10.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pe16x.
+Performed a total of 0 changes.
+
+3.10.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 64 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.10.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.10.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+
+3.10.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+
+3.10.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.11. Executing WREDUCE pass (reducing word size of cells).
+Converting cell pe16x.$sub$pe16x.v:86$13 ($sub) from unsigned to signed.
+Removed top 1 bits (of 17) from port A of cell pe16x.$sub$pe16x.v:86$13 ($sub).
+Removed top 1 bits (of 17) from port B of cell pe16x.$sub$pe16x.v:86$13 ($sub).
+Converting cell pe16x.$add$pe16x.v:103$18 ($add) from unsigned to signed.
+Removed top 2 bits (of 18) from port A of cell pe16x.$add$pe16x.v:103$18 ($add).
+Removed top 1 bits (of 18) from port B of cell pe16x.$add$pe16x.v:103$18 ($add).
+Removed top 1 bits (of 2) from port B of cell pe16x.$eq$pe16x.v:104$19 ($eq).
+Converting cell pe16x.$sub$pe16x.v:104$20 ($sub) from unsigned to signed.
+Removed top 2 bits (of 18) from port A of cell pe16x.$sub$pe16x.v:104$20 ($sub).
+Removed top 1 bits (of 18) from port B of cell pe16x.$sub$pe16x.v:104$20 ($sub).
+Converting cell pe16x.$add$pe16x.v:105$21 ($add) from unsigned to signed.
+Removed top 2 bits (of 18) from port A of cell pe16x.$add$pe16x.v:105$21 ($add).
+Removed top 1 bits (of 18) from port B of cell pe16x.$add$pe16x.v:105$21 ($add).
+Removed top 2 bits (of 18) from port B of cell pe16x.$gt$pe16x.v:106$24 ($gt).
+Removed top 2 bits (of 18) from port B of cell pe16x.$lt$pe16x.v:106$25 ($lt).
+Removed top 1 bits (of 17) from port A of cell pe16x.$lt$pe16x.v:108$29 ($lt).
+Removed top 1 bits (of 17) from port B of cell pe16x.$gt$pe16x.v:109$30 ($gt).
+Removed top 1 bits (of 3) from port B of cell pe16x.$procmux$62_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell pe16x.$procmux$63_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell pe16x.$procmux$64_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell pe16x.$procmux$70_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell pe16x.$procmux$71_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell pe16x.$procmux$72_CMP0 ($eq).
+Removed top 2 bits (of 16) from wire pe16x.src.
+
+3.12. Executing PEEPOPT pass (run peephole optimizers).
+
+3.13. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+Removed 0 unused cells and 1 unused wires.
+<suppressed ~1 debug messages>
+
+3.14. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module pe16x:
+  creating $macc model for $add$pe16x.v:105$21 ($add).
+  creating $macc model for $sub$pe16x.v:104$20 ($sub).
+  creating $macc model for $add$pe16x.v:103$18 ($add).
+  creating $macc model for $neg$pe16x.v:97$16 ($neg).
+  creating $macc model for $sub$pe16x.v:86$13 ($sub).
+  creating $alu model for $macc $sub$pe16x.v:86$13.
+  creating $alu model for $macc $neg$pe16x.v:97$16.
+  creating $alu model for $macc $add$pe16x.v:103$18.
+  creating $alu model for $macc $sub$pe16x.v:104$20.
+  creating $alu model for $macc $add$pe16x.v:105$21.
+  creating $alu model for $gt$pe16x.v:109$30 ($gt): new $alu
+  creating $alu model for $lt$pe16x.v:108$29 ($lt): merged with $sub$pe16x.v:104$20.
+  creating $alu model for $lt$pe16x.v:106$25 ($lt): new $alu
+  creating $alu model for $gt$pe16x.v:106$24 ($gt): new $alu
+  creating $alu cell for $gt$pe16x.v:106$24: $auto$alumacc.cc:548:replace_alu$143
+  creating $alu cell for $lt$pe16x.v:106$25: $auto$alumacc.cc:548:replace_alu$156
+  creating $alu cell for $gt$pe16x.v:109$30: $auto$alumacc.cc:548:replace_alu$163
+  creating $alu cell for $add$pe16x.v:105$21: $auto$alumacc.cc:548:replace_alu$176
+  creating $alu cell for $sub$pe16x.v:104$20, $lt$pe16x.v:108$29: $auto$alumacc.cc:548:replace_alu$179
+  creating $alu cell for $add$pe16x.v:103$18: $auto$alumacc.cc:548:replace_alu$182
+  creating $alu cell for $neg$pe16x.v:97$16: $auto$alumacc.cc:548:replace_alu$185
+  creating $alu cell for $sub$pe16x.v:86$13: $auto$alumacc.cc:548:replace_alu$188
+  created 8 $alu and 0 $macc cells.
+
+3.15. Executing SHARE pass (SAT-based resource sharing).
+
+3.16. Executing OPT pass (performing simple optimizations).
+
+3.16.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+<suppressed ~2 debug messages>
+
+3.16.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 75 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.16.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pe16x..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~30 debug messages>
+
+3.16.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pe16x.
+Performed a total of 0 changes.
+
+3.16.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 75 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.16.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.16.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+Removed 2 unused cells and 5 unused wires.
+<suppressed ~3 debug messages>
+
+3.16.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+
+3.16.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.16.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pe16x..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~30 debug messages>
+
+3.16.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pe16x.
+Performed a total of 0 changes.
+
+3.16.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 73 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.16.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.16.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+
+3.16.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+
+3.16.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.17. Executing MEMORY pass.
+
+3.17.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.17.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.17.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.17.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.17.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+3.17.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+
+3.17.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.17.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.17.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+
+3.17.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.18. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+
+3.19. Executing OPT pass (performing simple optimizations).
+
+3.19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+<suppressed ~1 debug messages>
+
+3.19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 88 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.19.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.19.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+Removed 15 unused cells and 15 unused wires.
+<suppressed ~16 debug messages>
+
+3.19.5. Finished fast OPT passes.
+
+3.20. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.21. Executing OPT pass (performing simple optimizations).
+
+3.21.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+
+3.21.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 73 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.21.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pe16x..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~30 debug messages>
+
+3.21.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pe16x.
+Performed a total of 0 changes.
+
+3.21.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 73 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.21.6. Executing OPT_SHARE pass.
+
+3.21.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.21.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+
+3.21.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+
+3.21.10. Finished fast OPT passes. (There is nothing left to do.)
+
+3.22. Executing TECHMAP pass (map to technology primitives).
+
+3.22.1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/techmap.v
+Parsing Verilog input from `/home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.22.2. Continuing TECHMAP pass.
+Using template $paramod$2470b7ea32c975a55c3ab8b283381b72d09e16d3\_90_alu for cells of type $alu.
+Using template $paramod$constmap:8b608b019a69c0678c5f78a27210d14ec65221e8$paramod$228b0d8c0f5c0a6486bb89ec3401a68cb432f194\_90_shift_ops_shr_shl_sshl_sshr for cells of type $sshr.
+Using template $paramod$dcb69476c4ea50ae33010ee411a8318aa586292f\_90_alu for cells of type $alu.
+Using template $paramod$1b51b7baf4c334a933c07227d8be0c2576aa5a98\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod$cff66329c78f14c05756fa469890bd1a4784ffc2\_90_alu for cells of type $alu.
+Using template $paramod$af987c41eb15cea3e227fb6b88cf36e74f01ad31\_90_alu for cells of type $alu.
+Using template $paramod$ff0178cc1d5e4357e3291991720c393d6d4ad8c3\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $dffe.
+Using extmapper simplemap for cells of type $sdffe.
+Using template $paramod$constmap:e52418040c15d93c3e4b09bd842b9db010545656$paramod$962bb79c2a50a422516483c1c9c06046761917ac\_90_shift_shiftx for cells of type $shiftx.
+Analyzing pattern of constant bits for this cell:
+Creating constmapped module `$paramod$constmap:53dd6ada2d45a8116ef2136a4476a16275b4fd66$paramod$962bb79c2a50a422516483c1c9c06046761917ac\_90_shift_shiftx'.
+
+3.22.25. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$constmap:53dd6ada2d45a8116ef2136a4476a16275b4fd66$paramod$962bb79c2a50a422516483c1c9c06046761917ac\_90_shift_shiftx..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 2/2 on $mux $procmux$723.
+    dead port 2/2 on $mux $procmux$729.
+    dead port 2/2 on $mux $procmux$735.
+    dead port 2/2 on $mux $procmux$741.
+Removed 4 multiplexer ports.
+<suppressed ~707 debug messages>
+
+3.22.26. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$constmap:53dd6ada2d45a8116ef2136a4476a16275b4fd66$paramod$962bb79c2a50a422516483c1c9c06046761917ac\_90_shift_shiftx.
+<suppressed ~3 debug messages>
+Removed 0 unused cells and 11 unused wires.
+Using template $paramod$constmap:53dd6ada2d45a8116ef2136a4476a16275b4fd66$paramod$962bb79c2a50a422516483c1c9c06046761917ac\_90_shift_shiftx for cells of type $shiftx.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $pmux.
+Using extmapper simplemap for cells of type $logic_not.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010001 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010001 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010010 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010010 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000011 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~974 debug messages>
+
+3.23. Executing OPT pass (performing simple optimizations).
+
+3.23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+<suppressed ~889 debug messages>
+
+3.23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 2035 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Computing hashes of 1957 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Computing hashes of 1942 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Computing hashes of 1938 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Computing hashes of 1936 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+<suppressed ~297 debug messages>
+Removed a total of 99 cells.
+
+3.23.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+Removed 370 unused cells and 568 unused wires.
+<suppressed ~371 debug messages>
+
+3.23.5. Finished fast OPT passes.
+
+3.24. Executing ABC pass (technology mapping using ABC).
+
+3.24.1. Summary of detected clock domains:
+  228 cells in clk=\clk, en=\en, arst={ }, srst=\rst
+  147 cells in clk=\clk, en=$auto$simple.cc:210:make_patterns_logic$124, arst={ }, srst=\rst
+  1191 cells in clk=\clk, en=\cfg_strobe, arst={ }, srst={ }
+
+3.24.2. Extracting gate netlist of module `\pe16x' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by \en, synchronously reset by \rst
+
+3.24.3. Extracting gate netlist of module `\pe16x' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$124, synchronously reset by \rst
+
+3.24.4. Extracting gate netlist of module `\pe16x' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by \cfg_strobe
+
+3.24.4.1. Executed ABC.
+Extracted 210 gates and 322 wires to a netlist network with 111 inputs and 37 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.4.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       81
+ABC RESULTS:            ANDNOT cells:       19
+ABC RESULTS:               MUX cells:        4
+ABC RESULTS:              NAND cells:       49
+ABC RESULTS:               NOR cells:       19
+ABC RESULTS:             ORNOT cells:       32
+ABC RESULTS:        internal signals:      174
+ABC RESULTS:           input signals:      111
+ABC RESULTS:          output signals:       37
+Removing temp directory.
+
+3.24.4.1. Executed ABC.
+Extracted 131 gates and 212 wires to a netlist network with 80 inputs and 93 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.4.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       54
+ABC RESULTS:            ANDNOT cells:       16
+ABC RESULTS:               MUX cells:       12
+ABC RESULTS:              NAND cells:        8
+ABC RESULTS:               NOR cells:        3
+ABC RESULTS:               NOT cells:       20
+ABC RESULTS:                OR cells:        3
+ABC RESULTS:             ORNOT cells:        3
+ABC RESULTS:              XNOR cells:        1
+ABC RESULTS:               XOR cells:       17
+ABC RESULTS:        internal signals:       39
+ABC RESULTS:           input signals:       80
+ABC RESULTS:          output signals:       93
+Removing temp directory.
+
+3.24.4.1. Executed ABC.
+Extracted 1111 gates and 1371 wires to a netlist network with 258 inputs and 79 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.4.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:      182
+ABC RESULTS:            ANDNOT cells:       45
+ABC RESULTS:               MUX cells:      158
+ABC RESULTS:              NAND cells:      467
+ABC RESULTS:               NOR cells:       33
+ABC RESULTS:               NOT cells:       46
+ABC RESULTS:                OR cells:      116
+ABC RESULTS:             ORNOT cells:       34
+ABC RESULTS:              XNOR cells:       21
+ABC RESULTS:               XOR cells:       12
+ABC RESULTS:        internal signals:     1034
+ABC RESULTS:           input signals:      258
+ABC RESULTS:          output signals:       79
+Removing temp directory.
+Removing global temp directory.
+
+3.25. Executing OPT pass (performing simple optimizations).
+
+3.25.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pe16x.
+<suppressed ~6 debug messages>
+
+3.25.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pe16x'.
+Computing hashes of 1566 cells of `\pe16x'.
+Finding duplicate cells in `\pe16x'.
+Removed a total of 0 cells.
+
+3.25.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.25.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+Removed 0 unused cells and 1222 unused wires.
+<suppressed ~7 debug messages>
+
+3.25.5. Finished fast OPT passes.
+
+3.26. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `pe16x'. Setting top module to pe16x.
+
+3.26.1. Analyzing design hierarchy..
+Top module:  \pe16x
+
+3.26.2. Analyzing design hierarchy..
+Top module:  \pe16x
+Removed 0 unused modules.
+
+3.27. Printing statistics.
+
+=== pe16x ===
+
+        +----------Local Count, excluding submodules.
+        | 
+     1378 wires
+     1847 wire bits
+       46 public wires
+      400 public wire bits
+       12 ports
+      103 port bits
+     1566 cells
+       80   $_ANDNOT_
+      316   $_AND_
+       80   $_DFFE_PP_
+      174   $_MUX_
+      524   $_NAND_
+       55   $_NOR_
+       65   $_NOT_
+       69   $_ORNOT_
+      118   $_OR_
+       34   $_SDFFE_PP0P_
+       22   $_XNOR_
+       29   $_XOR_
+
+3.28. Executing CHECK pass (checking for obvious problems).
+Checking module pe16x...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF/DLATCH cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  cell sg13g2_dlhq_1 (noninv, pins=3, area=30.84) is a direct match for cell type $_DLATCH_P_.
+  cell sg13g2_dllrq_1 (noninv, pins=4, area=29.03) is a direct match for cell type $_DLATCH_NN0_.
+  cell sg13g2_dlhrq_1 (noninv, pins=4, area=27.22) is a direct match for cell type $_DLATCH_PN0_.
+  final dff/dlatch cell mappings:
+    unmapped dff/dlatch cell: $_DFF_N_
+    unmapped dff/dlatch cell: $_DFF_P_
+    unmapped dff/dlatch cell: $_DFF_NN0_
+    unmapped dff/dlatch cell: $_DFF_NN1_
+    unmapped dff/dlatch cell: $_DFF_NP0_
+    unmapped dff/dlatch cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DFF_PN1_
+    unmapped dff/dlatch cell: $_DFF_PP0_
+    unmapped dff/dlatch cell: $_DFF_PP1_
+    unmapped dff/dlatch cell: $_DFFE_NN_
+    unmapped dff/dlatch cell: $_DFFE_NP_
+    unmapped dff/dlatch cell: $_DFFE_PN_
+    unmapped dff/dlatch cell: $_DFFE_PP_
+    unmapped dff/dlatch cell: $_DFFSR_NNN_
+    unmapped dff/dlatch cell: $_DFFSR_NNP_
+    unmapped dff/dlatch cell: $_DFFSR_NPN_
+    unmapped dff/dlatch cell: $_DFFSR_NPP_
+    unmapped dff/dlatch cell: $_DFFSR_PNN_
+    unmapped dff/dlatch cell: $_DFFSR_PNP_
+    unmapped dff/dlatch cell: $_DFFSR_PPN_
+    unmapped dff/dlatch cell: $_DFFSR_PPP_
+    unmapped dff/dlatch cell: $_DLATCH_N_
+    \sg13g2_dlhq_1 _DLATCH_P_ (.D( D), .GATE( E), .Q( Q));
+    \sg13g2_dllrq_1 _DLATCH_NN0_ (.D( D), .GATE_N( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_NN1_
+    unmapped dff/dlatch cell: $_DLATCH_NP0_
+    unmapped dff/dlatch cell: $_DLATCH_NP1_
+    \sg13g2_dlhrq_1 _DLATCH_PN0_ (.D( D), .GATE( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_PN1_
+    unmapped dff/dlatch cell: $_DLATCH_PP0_
+    unmapped dff/dlatch cell: $_DLATCH_PP1_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs and LATCHes to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF/DLATCH cells in module `\pe16x':
+  mapped 114 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Summary of detected clock domains:
+  1714 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+5.2. Extracting gate netlist of module `\pe16x' to `<abc-temp-dir>/input.blif'..
+ABC: using cached merged SCL: /tmp/yosys-liberty-scl-cache-1000/yosys_merged_284aa476.scl (1 files)
+No matching clock domain found. Not extracting any FF cells.
+
+5.2.1. Executed ABC.
+Extracted 1600 gates and 1793 wires to a netlist network with 192 inputs and 114 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_scl /tmp/yosys-liberty-scl-cache-1000/yosys_merged_284aa476.scl 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+5.2.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:       32
+ABC RESULTS:    sg13g2_a21oi_1 cells:      159
+ABC RESULTS:   sg13g2_a221oi_1 cells:       35
+ABC RESULTS:    sg13g2_a22oi_1 cells:       96
+ABC RESULTS:     sg13g2_and2_1 cells:       44
+ABC RESULTS:     sg13g2_and3_1 cells:       17
+ABC RESULTS:     sg13g2_and4_1 cells:        1
+ABC RESULTS:      sg13g2_inv_1 cells:       65
+ABC RESULTS:     sg13g2_mux2_1 cells:       77
+ABC RESULTS:     sg13g2_mux4_1 cells:       20
+ABC RESULTS:    sg13g2_nand2_1 cells:      112
+ABC RESULTS:   sg13g2_nand2b_1 cells:       24
+ABC RESULTS:    sg13g2_nand3_1 cells:       32
+ABC RESULTS:   sg13g2_nand3b_1 cells:        4
+ABC RESULTS:    sg13g2_nand4_1 cells:        7
+ABC RESULTS:     sg13g2_nor2_1 cells:      106
+ABC RESULTS:    sg13g2_nor2b_1 cells:       22
+ABC RESULTS:     sg13g2_nor3_1 cells:       20
+ABC RESULTS:     sg13g2_nor4_1 cells:        1
+ABC RESULTS:    sg13g2_o21ai_1 cells:      180
+ABC RESULTS:      sg13g2_or2_1 cells:       18
+ABC RESULTS:      sg13g2_or3_1 cells:        3
+ABC RESULTS:    sg13g2_xnor2_1 cells:       42
+ABC RESULTS:     sg13g2_xor2_1 cells:        8
+ABC RESULTS:        internal signals:     1487
+ABC RESULTS:           input signals:      192
+ABC RESULTS:          output signals:      114
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pe16x..
+Removed 0 unused cells and 1681 unused wires.
+<suppressed ~10 debug messages>
+
+7. Printing statistics.
+
+=== pe16x ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1162        - wires
+     1420        - wire bits
+       37        - public wires
+      295        - public wire bits
+       12        - ports
+      103        - port bits
+     1239 1.73E+04 cells
+       32  406.426   sg13g2_a21o_1
+      159 1.44E+03   sg13g2_a21oi_1
+       35  508.032   sg13g2_a221oi_1
+       96 1.04E+03   sg13g2_a22oi_1
+       44  399.168   sg13g2_and2_1
+       17  215.914   sg13g2_and3_1
+        1   14.515   sg13g2_and4_1
+      114 5.58E+03   sg13g2_dfrbpq_1
+       65  353.808   sg13g2_inv_1
+       77  1.4E+03   sg13g2_mux2_1
+       20  762.048   sg13g2_mux4_1
+      112  812.851   sg13g2_nand2_1
+       24  217.728   sg13g2_nand2b_1
+       32  290.304   sg13g2_nand3_1
+        4   50.803   sg13g2_nand3b_1
+        7   76.205   sg13g2_nand4_1
+      106  769.306   sg13g2_nor2_1
+       22  199.584   sg13g2_nor2b_1
+       20   181.44   sg13g2_nor3_1
+        1   10.886   sg13g2_nor4_1
+      180  1632.96   sg13g2_o21ai_1
+       18  163.296   sg13g2_or2_1
+        3   38.102   sg13g2_or3_1
+       42  609.638   sg13g2_xnor2_1
+        8  116.122   sg13g2_xor2_1
+
+   Chip area for module '\pe16x': 17294.860800
+     of which used for sequential elements: 5584.723200 (32.29%)
+
+Warnings: 1 unique messages, 1 total
+End of script. Logfile hash: cdd16aa043, time: 0.71s, user: 0.19s, system: 0.02s, MEM: 31.37 MB peak
+Yosys 0.69+77 (git sha1 9ff27d29c-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 77% 2x abc (0 sec), 4% 26x opt_expr (0 sec), ...
