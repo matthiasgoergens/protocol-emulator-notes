@@ -57,6 +57,17 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
 ## Pins and timing
 
+- **Receiving beyond Nyquist** (the user's insight: real protocols suit compressed-sensing ideas).
+  The framework is sampling at the finite rate of innovation (Vetterli, Marziliano, Blu 2002).
+  The floor is the entropy rate of the unknown content, not twice a bandwidth. Uses:
+  - once locked, one sample per bit at bit centres instead of 4× oversampling;
+  - sampling only unpredictable fields;
+  - telling which of a few candidate frames is present from a handful of samples (the matcher);
+  - super-resolution of edge times;
+  - protocols faster than our clock where their new content per second is low enough.
+
+  Being modelled in the scope study.
+
 - Merged: the four-phase stage, with FM transmit, jittery 10BASE-T receive and the shmoo demo.
 - To do:
   - a FINE instruction for per-edge programmable delay, and the exact-edge NCO;
