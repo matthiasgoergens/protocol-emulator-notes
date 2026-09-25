@@ -34,11 +34,15 @@ WBLIDLE = E("WBLIDLE", "opp")
 TWRITE = float(E("TWRITE", "20"))
 CORNERS = ["mos_" + c for c in E("CORNERS", "tt,ff,ss").split(",")]
 TEMPS = [int(t) for t in E("TEMPS", "27,85").split(",")]
-MODELS = "/pdk/libs.tech/ngspice/models"
+# DVTMW / DVTMS shift the write / storage transistor's threshold (volts, negative = leakier), for
+# mismatch sensitivity; they need MODELS=/work/models-dvt, a copy made by retention/mkmodels.sh
+# (run.sh copies it into each run directory)
+MODELS = E("MODELS", "/pdk/libs.tech/ngspice/models")
+DVTMW, DVTMS = E("DVTMW"), E("DVTMS")
 
 def cellnet(i, wbl, wwl, sn, rwl, rbl):
-    s = (f"XMW{i} {wbl} {wwl} {sn} 0 sg13_hv_nmos w={WMW}u l={LMW}u\n"
-         f"XMS{i} mid{i} {sn} 0 0 sg13_{MS}_nmos w={MSW}u l={MSL}u\n"
+    s = (f"XMW{i} {wbl} {wwl} {sn} 0 sg13_hv_nmos w={WMW}u l={LMW}u{f' dvt={DVTMW}' if DVTMW else ''}\n"
+         f"XMS{i} mid{i} {sn} 0 0 sg13_{MS}_nmos w={MSW}u l={MSL}u{f' dvt={DVTMS}' if DVTMS else ''}\n"
          f"XMR{i} {rbl} {rwl} mid{i} 0 sg13_{MR}_nmos w={MRW}u l={MRL}u\n")
     if float(CSN.rstrip("f") or 0):
         s += f"CSN{i} {sn} 0 {CSN}\n"
@@ -64,12 +68,13 @@ def run(sp, text, timeout=3600):
 
 def desc():
     return (f"MS {MS} {MSW}/{MSL}, MR {MR} {MRW}/{MRL}, MW hv {WMW}/{LMW}, CSN {CSN}, CC {CC}, "
-            f"VWWL {VWWL}, WBL idle {WBLIDLE}, write {TWRITE} ns")
+            f"VWWL {VWWL}, WBL idle {WBLIDLE}, write {TWRITE} ns"
+            + (f", MW dVT {DVTMW}" if DVTMW else "") + (f", MS dVT {DVTMS}" if DVTMS else ""))
 
 def ret():
     tstop, tmax = E("TSTOP", "1"), E("TMAX", "5u")
-    lv1 = [round(1.15 - 0.05 * k, 2) for k in range(20)]       # 1.15 .. 0.20
-    lv0 = [round(0.05 * k, 2) for k in range(1, 13)]           # 0.05 .. 0.60
+    lv1 = [round(1.15 - 0.05 * k, 2) for k in range(23)]       # 1.15 .. 0.05
+    lv0 = [round(0.05 * k, 2) for k in range(1, 17)]           # 0.05 .. 0.80
     print(f"ret: {desc()}; hold {tstop} s")
     for corner, temp, bit in itertools.product(CORNERS, TEMPS, [int(b) for b in E("BITS", "1,0").split(",")]):
         idle = (0 if bit else VDD) if WBLIDLE == "opp" else float(WBLIDLE)

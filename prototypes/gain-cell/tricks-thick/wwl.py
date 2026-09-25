@@ -31,6 +31,7 @@ CRES = E("CRES", "10x10")               # reservoir: 100 um2 ~ 460 fF
 # the thick-oxide capacitor does not start (its top plate only reaches VDD - VT, too little to
 # invert it once the clock lifts the bottom plate).
 FLY = E("FLY", "lv")
+STARTUP = E("STARTUP", FLY)            # oxide of the start-up diodes
 NCOL = int(E("NCOL", "32"))
 RWIRE, CWIRE = float(E("RWIRE", "500")), float(E("CWIRE", "4e-15"))
 TW = float(E("TW", "20"))
@@ -91,8 +92,8 @@ XCB ckb b ckb 0 sg13_{FLY}_nmos w={fw}u l={fl}u
 XN1 vdd b a 0 sg13_hv_nmos w=1.0u l=0.45u
 XN2 vdd a b 0 sg13_hv_nmos w=1.0u l=0.45u
 * start-up: diode-connected NMOS charge A and B to VDD - VT (the cross-coupled pair cannot start from 0)
-XSA vdd vdd a 0 sg13_{FLY}_nmos w=0.3u l={'0.13' if FLY == 'lv' else '0.45'}u
-XSB vdd vdd b 0 sg13_{FLY}_nmos w=0.3u l={'0.13' if FLY == 'lv' else '0.45'}u
+XSA vdd vdd a 0 sg13_{STARTUP}_nmos w=0.3u l={'0.13' if STARTUP == 'lv' else '0.45'}u
+XSB vdd vdd b 0 sg13_{STARTUP}_nmos w=0.3u l={'0.13' if STARTUP == 'lv' else '0.45'}u
 XP1 vpp b a vpp sg13_hv_pmos w=2.0u l=0.45u
 XP2 vpp a b vpp sg13_hv_pmos w=2.0u l=0.45u
 XCR 0 vpp 0 0 sg13_hv_nmos w={rw}u l={rl}u
@@ -135,7 +136,7 @@ meas tran pwr avg psup from=2.9u to={max(WRITES) + 0.2}u
 .end
 """
 
-print(f"boosted WWL: pump {FCK} MHz, flying caps {FLY} {CFLY} um, reservoir hv {CRES} um; {NCOL} cells ({MS} storage),"
+print(f"boosted WWL: pump {FCK} MHz, start-up diodes {STARTUP}, flying caps {FLY} {CFLY} um, reservoir hv {CRES} um; {NCOL} cells ({MS} storage),"
       f" wire {RWIRE} ohm / {CWIRE * 1e15:.1f} fF; writes of {TW} ns at {WRITES} us")
 for corner in [c for c in E("CORNERS", "mos_tt,mos_ff,mos_ss").split(",")]:
     for temp in [int(t) for t in E("TEMPS", "27,85").split(",")]:

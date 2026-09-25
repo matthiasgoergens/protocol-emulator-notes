@@ -9,6 +9,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 work=/var/tmp/spice-gc-thick/$name
 mkdir --parents "$work"
 cp --recursive /var/tmp/spice-gc-thick/osdi "$work/"
+[ -d /var/tmp/spice-gc-thick/models-dvt ] && cp --recursive /var/tmp/spice-gc-thick/models-dvt "$work/"
 cp "$here/$script" "$work/"
 envargs=""
 for e in $ENVS; do envargs="$envargs --env $e"; done

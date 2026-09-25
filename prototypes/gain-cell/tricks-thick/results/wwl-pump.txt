@@ -5,3 +5,28 @@ mos_tt   27C  peak VPP 2.314, A 2.320, B 2.320, LS 2.327 V; peak across the flyi
     write at 3.2 us: VPP 2.314 -> 2.224 V; far-end WWL 2.254 V, D to WWL 0.9 V 0.67 ns; written SN far -0.111, near -0.115 V
     write at 3.4 us: VPP 2.314 -> 2.231 V; far-end WWL 2.263 V, D to WWL 0.9 V 0.66 ns; written SN far 1.059, near 1.059 V
     write at 3.6 us: VPP 2.314 -> 2.224 V; far-end WWL 2.254 V, D to WWL 0.9 V 0.67 ns; written SN far -0.111, near -0.115 V
+mos_tt   85C  peak VPP 2.311, A 2.318, B 2.318, LS 2.324 V; peak across the flying caps 1.200 / 1.200 V; VPP reaches 2.0 V at 0.11 us; supply power idle 0.4 uW, with writes every 200 ns 1.5 uW
+    write at 3.0 us: VPP 2.311 -> 2.224 V; far-end WWL 2.258 V, D to WWL 0.9 V 0.72 ns; written SN far 1.058, near 1.058 V
+    write at 3.2 us: VPP 2.311 -> 2.217 V; far-end WWL 2.249 V, D to WWL 0.9 V 0.73 ns; written SN far -0.099, near -0.097 V
+    write at 3.4 us: VPP 2.311 -> 2.224 V; far-end WWL 2.258 V, D to WWL 0.9 V 0.72 ns; written SN far 1.058, near 1.058 V
+    write at 3.6 us: VPP 2.311 -> 2.217 V; far-end WWL 2.249 V, D to WWL 0.9 V 0.73 ns; written SN far -0.099, near -0.097 V
+mos_ff   27C  peak VPP 2.311, A 2.318, B 2.318, LS 2.323 V; peak across the flying caps 1.200 / 1.200 V; VPP reaches 2.0 V at 0.08 us; supply power idle 0.5 uW, with writes every 200 ns 1.6 uW
+    write at 3.0 us: VPP 2.311 -> 2.229 V; far-end WWL 2.263 V, D to WWL 0.9 V 0.50 ns; written SN far 1.057, near 1.058 V
+    write at 3.2 us: VPP 2.310 -> 2.223 V; far-end WWL 2.254 V, D to WWL 0.9 V 0.51 ns; written SN far -0.118, near -0.119 V
+    write at 3.4 us: VPP 2.310 -> 2.229 V; far-end WWL 2.263 V, D to WWL 0.9 V 0.50 ns; written SN far 1.057, near 1.058 V
+    write at 3.6 us: VPP 2.310 -> 2.223 V; far-end WWL 2.254 V, D to WWL 0.9 V 0.51 ns; written SN far -0.118, near -0.119 V
+mos_ff   85C  peak VPP 2.307, A 2.316, B 2.316, LS 2.319 V; peak across the flying caps 1.200 / 1.200 V; VPP reaches 2.0 V at 0.09 us; supply power idle 0.5 uW, with writes every 200 ns 1.6 uW
+    write at 3.0 us: VPP 2.307 -> 2.223 V; far-end WWL 2.258 V, D to WWL 0.9 V 0.56 ns; written SN far 1.057, near 1.057 V
+    write at 3.2 us: VPP 2.307 -> 2.216 V; far-end WWL 2.249 V, D to WWL 0.9 V 0.57 ns; written SN far -0.082, near -0.082 V
+    write at 3.4 us: VPP 2.307 -> 2.223 V; far-end WWL 2.258 V, D to WWL 0.9 V 0.56 ns; written SN far 1.057, near 1.057 V
+    write at 3.6 us: VPP 2.307 -> 2.216 V; far-end WWL 2.249 V, D to WWL 0.9 V 0.57 ns; written SN far -0.082, near -0.082 V
+mos_ss   27C  peak VPP 2.317, A 2.321, B 2.321, LS 2.330 V; peak across the flying caps 1.200 / 1.200 V; VPP reaches 2.0 V at 0.15 us; supply power idle 0.4 uW, with writes every 200 ns 1.5 uW
+    write at 3.0 us: VPP 2.317 -> 2.228 V; far-end WWL 2.259 V, D to WWL 0.9 V 0.91 ns; written SN far 1.060, near 1.060 V
+    write at 3.2 us: VPP 2.317 -> 2.220 V; far-end WWL 2.249 V, D to WWL 0.9 V 0.92 ns; written SN far -0.113, near -0.110 V
+    write at 3.4 us: VPP 2.317 -> 2.228 V; far-end WWL 2.259 V, D to WWL 0.9 V 0.91 ns; written SN far 1.060, near 1.060 V
+    write at 3.6 us: VPP 2.317 -> 2.220 V; far-end WWL 2.249 V, D to WWL 0.9 V 0.92 ns; written SN far -0.113, near -0.110 V
+mos_ss   85C  peak VPP 2.314, A 2.319, B 2.319, LS 2.327 V; peak across the flying caps 1.200 / 1.200 V; VPP reaches 2.0 V at 0.15 us; supply power idle 0.4 uW, with writes every 200 ns 1.5 uW
+    write at 3.0 us: VPP 2.314 -> 2.221 V; far-end WWL 2.254 V, D to WWL 0.9 V 0.98 ns; written SN far 1.059, near 1.059 V
+    write at 3.2 us: VPP 2.314 -> 2.213 V; far-end WWL 2.244 V, D to WWL 0.9 V 0.99 ns; written SN far -0.097, near -0.098 V
+    write at 3.4 us: VPP 2.314 -> 2.221 V; far-end WWL 2.254 V, D to WWL 0.9 V 0.98 ns; written SN far 1.059, near 1.059 V
+    write at 3.6 us: VPP 2.314 -> 2.213 V; far-end WWL 2.244 V, D to WWL 0.9 V 0.99 ns; written SN far -0.097, near -0.098 V

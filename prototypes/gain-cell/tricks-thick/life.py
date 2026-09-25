@@ -69,6 +69,12 @@ def time_to(k, bit, level):
     for (v0, t0), (v1, t1) in zip(pts, pts[1:]):
         if (bit and v0 >= level >= v1) or (not bit and v0 <= level <= v1):
             return t0 + (t1 - t0) * (level - v0) / (v1 - v0), ""
+    # not bracketed: either SN never got that far in the hold (> the hold time), or the level lies
+    # beyond the last level the run reports (> the time of the last crossing, a weaker bound)
+    reported = [lv for lv, t in cr]
+    beyond = (level < min(reported)) if bit else (level > max(reported))
+    if beyond and pts[-1][0] == (min(reported) if bit else max(reported)):
+        return pts[-1][1], ">"
     return (tstop or pts[-1][1]), ">"
 
 def lifetime(k, s1, s0):
