@@ -1,0 +1,675 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Executing script file `/var/tmp/multiphase/sta/synth.ys' --
+
+1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v
+Parsing Verilog input from `/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v' to AST representation.
+Generating RTLIL representation for module `\multiphase_stage'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \multiphase_stage
+
+2.2. Analyzing design hierarchy..
+Top module:  \multiphase_stage
+Removed 0 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:429$60 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:419$57 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:411$56 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:403$54 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:394$52 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:386$50 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:377$48 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:369$46 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:357$41 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:347$38 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:340$37 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:332$35 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:323$33 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:315$31 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:306$29 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:298$27 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:289$25 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:274$24 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:268$23 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:262$22 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:255$21 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:249$20 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:243$19 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:236$18 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:230$17 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:224$16 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:217$15 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:211$14 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:205$13 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:198$12 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:192$11 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:186$10 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:179$9 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:173$8 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:167$7 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:160$6 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:154$5 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:148$4 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:141$3 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:135$2 in module multiphase_stage.
+Marked 1 switch rules as full_case in process $proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:129$1 in module multiphase_stage.
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 41 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~41 debug messages>
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:429$60'.
+     1/1: $0\_184[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:419$57'.
+     1/1: $0\_179[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:411$56'.
+     1/1: $0\_174[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:403$54'.
+     1/1: $0\_170[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:394$52'.
+     1/1: $0\_164[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:386$50'.
+     1/1: $0\_160[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:377$48'.
+     1/1: $0\_154[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:369$46'.
+     1/1: $0\_150[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:357$41'.
+     1/1: $0\_144[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:347$38'.
+     1/1: $0\_139[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:340$37'.
+     1/1: $0\_134[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:332$35'.
+     1/1: $0\_130[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:323$33'.
+     1/1: $0\_124[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:315$31'.
+     1/1: $0\_120[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:306$29'.
+     1/1: $0\_114[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:298$27'.
+     1/1: $0\_110[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:289$25'.
+     1/1: $0\_104[1:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:274$24'.
+     1/1: $0\_30[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:268$23'.
+     1/1: $0\_27[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:262$22'.
+     1/1: $0\_24[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:255$21'.
+     1/1: $0\_40[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:249$20'.
+     1/1: $0\_37[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:243$19'.
+     1/1: $0\_34[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:236$18'.
+     1/1: $0\_50[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:230$17'.
+     1/1: $0\_47[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:224$16'.
+     1/1: $0\_44[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:217$15'.
+     1/1: $0\_60[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:211$14'.
+     1/1: $0\_57[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:205$13'.
+     1/1: $0\_54[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:198$12'.
+     1/1: $0\_70[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:192$11'.
+     1/1: $0\_67[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:186$10'.
+     1/1: $0\_64[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:179$9'.
+     1/1: $0\_80[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:173$8'.
+     1/1: $0\_77[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:167$7'.
+     1/1: $0\_74[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:160$6'.
+     1/1: $0\_90[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:154$5'.
+     1/1: $0\_87[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:148$4'.
+     1/1: $0\_84[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:141$3'.
+     1/1: $0\_100[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:135$2'.
+     1/1: $0\_97[0:0]
+Creating decoders for process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:129$1'.
+     1/1: $0\_94[0:0]
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\multiphase_stage.\_184' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:429$60'.
+  created $dff cell `$procdff$187' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_179' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:419$57'.
+  created $dff cell `$procdff$188' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_174' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:411$56'.
+  created $dff cell `$procdff$189' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_170' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:403$54'.
+  created $dff cell `$procdff$190' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_164' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:394$52'.
+  created $dff cell `$procdff$191' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_160' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:386$50'.
+  created $dff cell `$procdff$192' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_154' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:377$48'.
+  created $dff cell `$procdff$193' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_150' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:369$46'.
+  created $dff cell `$procdff$194' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_144' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:357$41'.
+  created $dff cell `$procdff$195' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_139' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:347$38'.
+  created $dff cell `$procdff$196' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_134' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:340$37'.
+  created $dff cell `$procdff$197' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_130' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:332$35'.
+  created $dff cell `$procdff$198' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_124' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:323$33'.
+  created $dff cell `$procdff$199' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_120' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:315$31'.
+  created $dff cell `$procdff$200' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_114' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:306$29'.
+  created $dff cell `$procdff$201' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_110' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:298$27'.
+  created $dff cell `$procdff$202' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_104' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:289$25'.
+  created $dff cell `$procdff$203' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_30' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:274$24'.
+  created $dff cell `$procdff$204' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_27' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:268$23'.
+  created $dff cell `$procdff$205' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_24' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:262$22'.
+  created $dff cell `$procdff$206' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_40' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:255$21'.
+  created $dff cell `$procdff$207' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_37' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:249$20'.
+  created $dff cell `$procdff$208' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_34' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:243$19'.
+  created $dff cell `$procdff$209' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_50' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:236$18'.
+  created $dff cell `$procdff$210' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_47' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:230$17'.
+  created $dff cell `$procdff$211' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_44' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:224$16'.
+  created $dff cell `$procdff$212' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_60' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:217$15'.
+  created $dff cell `$procdff$213' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_57' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:211$14'.
+  created $dff cell `$procdff$214' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_54' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:205$13'.
+  created $dff cell `$procdff$215' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_70' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:198$12'.
+  created $dff cell `$procdff$216' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_67' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:192$11'.
+  created $dff cell `$procdff$217' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_64' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:186$10'.
+  created $dff cell `$procdff$218' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_80' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:179$9'.
+  created $dff cell `$procdff$219' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_77' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:173$8'.
+  created $dff cell `$procdff$220' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_74' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:167$7'.
+  created $dff cell `$procdff$221' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_90' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:160$6'.
+  created $dff cell `$procdff$222' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_87' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:154$5'.
+  created $dff cell `$procdff$223' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_84' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:148$4'.
+  created $dff cell `$procdff$224' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_100' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:141$3'.
+  created $dff cell `$procdff$225' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_97' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:135$2'.
+  created $dff cell `$procdff$226' with positive edge clock.
+Creating register for signal `\multiphase_stage.\_94' using process `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:129$1'.
+  created $dff cell `$procdff$227' with positive edge clock.
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:429$60'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:429$60'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:419$57'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:419$57'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:411$56'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:411$56'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:403$54'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:403$54'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:394$52'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:394$52'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:386$50'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:386$50'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:377$48'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:377$48'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:369$46'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:369$46'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:357$41'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:357$41'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:347$38'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:347$38'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:340$37'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:340$37'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:332$35'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:332$35'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:323$33'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:323$33'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:315$31'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:315$31'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:306$29'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:306$29'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:298$27'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:298$27'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:289$25'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:289$25'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:274$24'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:274$24'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:268$23'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:268$23'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:262$22'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:262$22'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:255$21'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:255$21'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:249$20'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:249$20'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:243$19'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:243$19'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:236$18'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:236$18'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:230$17'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:230$17'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:224$16'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:224$16'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:217$15'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:217$15'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:211$14'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:211$14'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:205$13'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:205$13'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:198$12'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:198$12'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:192$11'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:192$11'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:186$10'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:186$10'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:179$9'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:179$9'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:173$8'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:173$8'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:167$7'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:167$7'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:160$6'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:160$6'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:154$5'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:154$5'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:148$4'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:148$4'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:141$3'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:141$3'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:135$2'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:135$2'.
+Found and cleaned up 1 empty switch in `\multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:129$1'.
+Removing empty process `multiphase_stage.$proc$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:129$1'.
+Cleaned up 41 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module multiphase_stage.
+
+4. Executing FLATTEN pass (flatten design).
+
+5. Executing OPT pass (performing simple optimizations).
+
+5.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module multiphase_stage.
+
+5.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\multiphase_stage'.
+Computing hashes of 104 cells of `\multiphase_stage'.
+Finding duplicate cells in `\multiphase_stage'.
+Removed a total of 0 cells.
+
+5.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \multiphase_stage..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~82 debug messages>
+
+5.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \multiphase_stage.
+Performed a total of 0 changes.
+
+5.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\multiphase_stage'.
+Computing hashes of 104 cells of `\multiphase_stage'.
+Finding duplicate cells in `\multiphase_stage'.
+Computing hashes of 98 cells of `\multiphase_stage'.
+Finding duplicate cells in `\multiphase_stage'.
+<suppressed ~18 debug messages>
+Removed a total of 6 cells.
+
+5.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$222 ($dff) from module multiphase_stage (D = \_87, Q = \_90, rval = 1'0).
+Adding SRST signal on $procdff$223 ($dff) from module multiphase_stage (D = \_84, Q = \_87, rval = 1'0).
+Adding SRST signal on $procdff$225 ($dff) from module multiphase_stage (D = \_97, Q = \_100, rval = 1'0).
+Adding SRST signal on $procdff$226 ($dff) from module multiphase_stage (D = \_94, Q = \_97, rval = 1'0).
+Adding SRST signal on $procdff$187 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:428$59_Y, Q = \_184, rval = 1'0).
+Adding SRST signal on $procdff$188 ($dff) from module multiphase_stage (D = \sub [7], Q = \_179, rval = 1'0).
+Adding SRST signal on $procdff$189 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:410$55_Y, Q = \_174, rval = 1'0).
+Adding SRST signal on $procdff$190 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:402$53_Y, Q = \_170, rval = 1'0).
+Adding SRST signal on $procdff$191 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:393$51_Y, Q = \_164, rval = 1'0).
+Adding SRST signal on $procdff$192 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:385$49_Y, Q = \_160, rval = 1'0).
+Adding SRST signal on $procdff$193 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:376$47_Y, Q = \_154, rval = 1'0).
+Adding SRST signal on $procdff$194 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:368$45_Y, Q = \_150, rval = 1'0).
+Adding SRST signal on $procdff$195 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:356$40_Y, Q = \_144, rval = 1'0).
+Adding SRST signal on $procdff$196 ($dff) from module multiphase_stage (D = \sub [3], Q = \_139, rval = 1'0).
+Adding SRST signal on $procdff$197 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:339$36_Y, Q = \_134, rval = 1'0).
+Adding SRST signal on $procdff$198 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:331$34_Y, Q = \_130, rval = 1'0).
+Adding SRST signal on $procdff$199 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:322$32_Y, Q = \_124, rval = 1'0).
+Adding SRST signal on $procdff$200 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:314$30_Y, Q = \_120, rval = 1'0).
+Adding SRST signal on $procdff$201 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:305$28_Y, Q = \_114, rval = 1'0).
+Adding SRST signal on $procdff$202 ($dff) from module multiphase_stage (D = $xor$/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v:297$26_Y, Q = \_110, rval = 1'0).
+Adding SRST signal on $procdff$203 ($dff) from module multiphase_stage (D = \oe, Q = \_104, rval = 2'00).
+Adding SRST signal on $procdff$204 ($dff) from module multiphase_stage (D = \_27, Q = \_30, rval = 1'0).
+Adding SRST signal on $procdff$205 ($dff) from module multiphase_stage (D = \_24, Q = \_27, rval = 1'0).
+Adding SRST signal on $procdff$207 ($dff) from module multiphase_stage (D = \_37, Q = \_40, rval = 1'0).
+Adding SRST signal on $procdff$208 ($dff) from module multiphase_stage (D = \_34, Q = \_37, rval = 1'0).
+Adding SRST signal on $procdff$210 ($dff) from module multiphase_stage (D = \_47, Q = \_50, rval = 1'0).
+Adding SRST signal on $procdff$211 ($dff) from module multiphase_stage (D = \_44, Q = \_47, rval = 1'0).
+Adding SRST signal on $procdff$213 ($dff) from module multiphase_stage (D = \_57, Q = \_60, rval = 1'0).
+Adding SRST signal on $procdff$214 ($dff) from module multiphase_stage (D = \_54, Q = \_57, rval = 1'0).
+Adding SRST signal on $procdff$216 ($dff) from module multiphase_stage (D = \_67, Q = \_70, rval = 1'0).
+Adding SRST signal on $procdff$217 ($dff) from module multiphase_stage (D = \_64, Q = \_67, rval = 1'0).
+Adding SRST signal on $procdff$219 ($dff) from module multiphase_stage (D = \_77, Q = \_80, rval = 1'0).
+Adding SRST signal on $procdff$220 ($dff) from module multiphase_stage (D = \_74, Q = \_77, rval = 1'0).
+
+5.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \multiphase_stage..
+Removed 33 unused cells and 143 unused wires.
+<suppressed ~34 debug messages>
+
+5.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module multiphase_stage.
+
+5.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \multiphase_stage..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~4 debug messages>
+
+5.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \multiphase_stage.
+Performed a total of 0 changes.
+
+5.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\multiphase_stage'.
+Computing hashes of 65 cells of `\multiphase_stage'.
+Finding duplicate cells in `\multiphase_stage'.
+Removed a total of 0 cells.
+
+5.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \multiphase_stage..
+
+5.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module multiphase_stage.
+
+5.16. Finished fast OPT passes. (There is nothing left to do.)
+
+6. Executing TECHMAP pass (map to technology primitives).
+
+6.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+6.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $xor.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $dff.
+No more expansions possible.
+<suppressed ~142 debug messages>
+
+7. Executing OPT pass (performing simple optimizations).
+
+7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module multiphase_stage.
+
+7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\multiphase_stage'.
+Computing hashes of 66 cells of `\multiphase_stage'.
+Finding duplicate cells in `\multiphase_stage'.
+Removed a total of 0 cells.
+
+7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \multiphase_stage..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \multiphase_stage.
+Performed a total of 0 changes.
+
+7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\multiphase_stage'.
+Computing hashes of 66 cells of `\multiphase_stage'.
+Finding duplicate cells in `\multiphase_stage'.
+Removed a total of 0 cells.
+
+7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \multiphase_stage..
+
+7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module multiphase_stage.
+
+7.9. Finished fast OPT passes. (There is nothing left to do.)
+
+8. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+8.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\multiphase_stage':
+  mapped 42 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+9. Executing ABC pass (technology mapping using ABC).
+
+9.1. Extracting gate netlist of module `\multiphase_stage' to `<abc-temp-dir>/input.blif'..
+
+9.1.1. Executed ABC.
+Extracted 58 gates and 104 wires to a netlist network with 45 inputs and 38 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.02 sec
+ABC: Memory =    2.85 MB. Time =     0.02 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+9.1.2. Re-integrating ABC results.
+ABC RESULTS:    sg13g2_a21oi_1 cells:       14
+ABC RESULTS:      sg13g2_inv_1 cells:        1
+ABC RESULTS:    sg13g2_nor2b_1 cells:       22
+ABC RESULTS:    sg13g2_o21ai_1 cells:       14
+ABC RESULTS:    sg13g2_xnor2_1 cells:        4
+ABC RESULTS:     sg13g2_xor2_1 cells:        4
+ABC RESULTS:        internal signals:       21
+ABC RESULTS:           input signals:       45
+ABC RESULTS:          output signals:       38
+Removing temp directory.
+Removing global temp directory.
+
+10. Executing SETUNDEF pass (replace undef values with defined constants).
+
+11. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \multiphase_stage..
+Removed 0 unused cells and 151 unused wires.
+<suppressed ~69 debug messages>
+
+12. Printing statistics.
+
+=== multiphase_stage ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      100        - wires
+      118        - wire bits
+       43        - public wires
+       61        - public wire bits
+       11        - ports
+       29        - port bits
+      101 2.63E+03 cells
+       14  127.008   sg13g2_a21oi_1
+       42  2057.53   sg13g2_dfrbpq_1
+        1    5.443   sg13g2_inv_1
+       22  199.584   sg13g2_nor2b_1
+       14  127.008   sg13g2_o21ai_1
+        4   58.061   sg13g2_xnor2_1
+        4   58.061   sg13g2_xor2_1
+
+   Chip area for module '\multiphase_stage': 2632.694400
+     of which used for sequential elements: 2057.529600 (78.15%)
+
+13. Executing Verilog backend.
+
+13.1. Executing BMUXMAP pass.
+
+13.2. Executing DEMUXMAP pass.
+Dumping module `\multiphase_stage'.
+
+14. Executing JSON backend.
+
+End of script. Logfile hash: e551a9f3f2, CPU: user 0.09s system 0.04s, MEM: 26.95 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 62% 1x abc (0 sec), 10% 3x read_verilog (0 sec), ...

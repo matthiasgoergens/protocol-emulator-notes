@@ -1,0 +1,12 @@
+unmutated:
+lockstep: 300 programmes x 2000 cycles, 0 mismatching cycles
+ALL PASS
+mutant s/(of_int ~width:2 p <: q_reg.value)/(of_int ~width:2 p <=: q_reg.value)/:
+lockstep: 300 programmes x 2000 cycles, 3825 mismatching cycles
+FAILURES
+mutant s/(concat_msb \[ nib; select acc 7 4 \])/(concat_msb [ rev4 nib; select acc 7 4 ])/:
+lockstep: 300 programmes x 2000 cycles, 15069 mismatching cycles
+FAILURES
+mutant s/pin_out_n <-- with_pin_bit sho_bit; sub_q <-- q/pin_out_n <-- with_pin_bit sho_bit/:
+lockstep: 300 programmes x 2000 cycles, 849 mismatching cycles
+FAILURES

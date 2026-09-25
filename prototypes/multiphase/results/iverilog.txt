@@ -1,0 +1,15 @@
+== nominal-16ns
+PERIOD 16000 ps SKEW 0 0 0 ps: 79976 output quarters checked, 0 wrong, 60125 pin changes; 19992 sample words checked, 0 wrong
+== nominal-15ns
+PERIOD 15000 ps SKEW 0 0 0 ps: 79976 output quarters checked, 0 wrong, 60125 pin changes; 19992 sample words checked, 0 wrong
+== skew-plus-1ns
+PERIOD 16000 ps SKEW 1000 1000 1000 ps: 79976 output quarters checked, 0 wrong, 60125 pin changes; 19992 sample words checked, 0 wrong
+== skew-mixed-1.5ns
+PERIOD 16000 ps SKEW 1500 -1500 1500 ps: 79976 output quarters checked, 0 wrong, 60125 pin changes; 19992 sample words checked, 0 wrong
+== control-lane-on-wrong-phase
+out mismatch clock 6 quarter 2: pin 10 want 01
+out mismatch clock 7 quarter 2: pin 00 want 01
+out mismatch clock 8 quarter 2: pin 10 want 00
+out mismatch clock 12 quarter 2: pin 01 want 11
+out mismatch clock 13 quarter 2: pin 10 want 00
+PERIOD 16000 ps SKEW 0 0 0 ps: 79976 output quarters checked, 15020 wrong, 45133 pin changes; 19992 sample words checked, 0 wrong
