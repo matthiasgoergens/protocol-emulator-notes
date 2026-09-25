@@ -11,10 +11,16 @@ from statistics import NormalDist
 
 ND = NormalDist()
 N = 65536
-for f in sys.argv[1:]:
+FIELD = next((a.split("=")[1] for a in sys.argv if a.startswith("--field=")), "life")
+for f in [a for a in sys.argv[1:] if not a.startswith("--")]:
     t, t1, t0, l1, h0, vw1 = [], [], [], [], [], []
     for line in open(f):
         m = re.search(r"vw1 ([-\d.]+) vw0 \S+ L1 (\S+) H0 (\S+) t1 (\S+) t0 (\S+) life (\S+)", line)
+        mp = re.search(r"t0park (\S+) lifepark (\S+)", line)
+        if m and FIELD == "lifepark":
+            if not mp:
+                continue
+            m = re.search(r"vw1 ([-\d.]+) vw0 \S+ L1 (\S+) H0 (\S+) t1 (\S+) t0 \S+ life \S+ t0park (\S+) lifepark (\S+)", line)
         if m:
             vw1.append(float(m[1]))
             l1.append(float(m[2]) if m[2] != "None" else float("nan"))
@@ -38,7 +44,7 @@ for f in sys.argv[1:]:
     z90 = ND.inv_cdf(-math.log(0.9) / N)
     u = lambda x: (f"{x * 1e3:.3g} ms" if x >= 1e-3 else f"{x * 1e6:.3g} us") if x < math.inf else "inf"
     nfail0 = sum(1 for a, b in zip(t1, t0) if b < a)
-    print(f"{f}: {n} samples ({n - len(fin)} infinite or zero)")
+    print(f"{f} [{FIELD}]: {n} samples ({n - len(fin)} infinite or zero)")
     print(f"  median {u(statistics.median(s))}, min {u(s[0])}, 1st percentile {u(s[max(0, int(0.01 * n) - 1)])}"
           f" (sample {max(0, int(0.01 * n) - 1) + 1} of {n}), max {u(s[-1])}")
     print(f"  the stored 0 fails first in {nfail0} of {n}; written 1: {min(vw1):.3f}..{max(vw1):.3f} V;"

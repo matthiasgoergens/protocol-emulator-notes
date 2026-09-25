@@ -33,6 +33,7 @@
 #   RBAR  if set, the bar level during a read (the selected row's bar is pulled there)
 #   WBLH  WBL level during hold: "opp" (default: the opposite data level, the worst case), or a
 #         number (the bank parks WBL there when not writing)
+#         or duty:D:P (a fraction D of every P us at VHI, the rest at VLO)
 #   VWWL  the unselected write word line level (default 0)
 #   VWEN  hold level of WEN for lv2g (default 0)
 import os, re, subprocess, sys
@@ -119,8 +120,15 @@ L1GRID = [round(0.05 + 0.025 * k, 3) for k in range(40)]     # 0.05 .. 1.025
 
 def hold_netlist(corner, temp, bit):
     vw = VHI if bit else VLO
+    duty = None
     if WBLH == "opp":
         vh = VLO if bit else VHI
+    elif WBLH.startswith("duty:"):
+        # duty:D:P  after the write, WBL spends a fraction D of every period P (us) at VHI (writes
+        # of 1s to other rows) and the rest parked at VLO
+        _, d, per = WBLH.split(":")
+        duty = (float(d), float(per))
+        vh = VLO
     else:
         vh = float(WBLH)
     # the cell held the opposite value before the write
@@ -133,12 +141,16 @@ def hold_netlist(corner, temp, bit):
         wwl_pwl = f"pwl(0 {VDD} {TWRITE}n {VDD} {TWRITE + 1}n {VWWL})"
     rwl_idle = VDD if PM else 0
     rbl_idle = 0 if PM else VDD
-    grid = [lv for lv in L1GRID if (lv < 1.0 if bit else lv > VLO)]
-    meas = "\n".join(f"meas tran t{int(round(lv * 1000))} when v(sn)={lv} {'fall' if bit else 'rise'}=1"
+    # every level for a 0 as well: a read threshold can lie below VLO (a bug before 11:30 on
+    # 2026-09-25 measured only levels above VLO and so missed a 0 creeping up to such a threshold)
+    grid = [lv for lv in L1GRID if (lv < 1.0 if bit else True)]
+    meas = "\n".join(f"meas tran t{int(round(lv * 1000))} when v(sn)={lv} {'fall' if bit else 'rise'}=1 from={TWRITE + 5}n"
                      for lv in grid)
     return header(corner, temp) + f"""
 .options reltol=1e-4 abstol=1e-18 vntol=1e-7
-vwbl wbl 0 pwl(0 {vw} {TWRITE + 10}n {vw} {TWRITE + 11}n {vh})
+{f"vwbl wbl 0 pwl(0 {vw} {TWRITE + 10}n {vw} {TWRITE + 11}n {vh})" if duty is None else
+ f"vwp wp 0 pulse({VLO} {VHI} {TWRITE + 1000}n 10n 10n {duty[0] * duty[1] * 1000 - 10}n {duty[1] * 1000}n)\n"
+ f"bwbl wbl 0 v = time < {TWRITE + 10}n ? {vw} : v(wp)"}
 vwwl wwl 0 {wwl_pwl}
 vrwl rwl 0 {rwl_idle}
 vrbl rbl 0 {rbl_idle}
@@ -208,6 +220,11 @@ def read_netlist(corner, temp, sn):
     cells = "\n".join(
         f"{write_dev(i, 'wbl', 'vdd' if PW else '0', f'sn{i}')}\n{read_devs(i, f'sn{i}', 'bar', unsel_rwl)}\n.ic v(sn{i})={sn_unsel}"
         for i in range(1, N))
+    if E("LUMP") == "1":
+        # the N-1 unselected cells as one instance of each device with multiplicity N-1 (they all
+        # hold the same level); about 10x faster, checked against the explicit column
+        cells = "\n".join(l + f" m={N - 1}" if l.startswith("X") else l
+                           for l in cells.split("\n") if not re.match(r"(X\w+|\.ic v\(sn)([2-9]|\d\d)", l.replace("XMWa", "XMW").replace("XMWb", "XMW")))
     return header(corner, temp) + f"""
 .options reltol=1e-4 abstol=1e-15 vntol=1e-6
 vwbl wbl 0 {wblh}

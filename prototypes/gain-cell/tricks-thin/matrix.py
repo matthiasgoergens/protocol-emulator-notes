@@ -14,15 +14,18 @@ ns = {}
 exec(src.replace("readf, holdfs = args[0], args[1:]", "readf, holdfs = None, []").replace(
     "for line in open(readf):", "for line in []:"), ns)
 R = os.path.join(here, "results")
-BARS = ["0", "0.1", "0.2", "0.3"]
-VLOS = ["0", "0.1", "0.2", "0.3", "0.4"]
+BARS = ["0", "0.05", "0.1", "0.15", "0.2", "0.3"]
+VLOS = ["0", "0.1", "0.2", "0.25", "0.3", "0.35", "0.4"]
 
 def read_pts(bar, sense):
     from collections import defaultdict
     import re
     pts = defaultdict(list)
     col = {"5": 0, "10": 1, "20": 2}[sense]
-    for line in open(f"{R}/read-nlv-bar{bar}.txt"):
+    fn = f"{R}/read-nlv-bar{bar}.txt"
+    if not os.path.exists(fn):
+        return {}
+    for line in open(fn):
         m = re.match(r"(mos_\w+)\s+(\d+)C SN\s+([-\d.]+): RBL\s+([-\d.na]+)\s+([-\d.na]+)\s+([-\d.na]+)", line)
         if m:
             pts[(m[1], int(m[2]))].append((float(m[3]), float(m[4 + col])))
@@ -44,8 +47,8 @@ def corner_life(th, res, k, park_zero_file=None):
     r1, r0 = res.get((k[0], k[1], 1)), res.get((k[0], k[1], 0))
     if not r1 or not r0:
         return None
-    t1 = ns["t_at"](r1[0], r1[1], l1, True) if l1 is not None else 0.0
-    t0 = ns["t_at"](r0[0], r0[1], h0, False) if h0 is not None else 0.0
+    t1 = ns["t_at"](r1[0], r1[1], l1, True, r1[2]) if l1 is not None else 0.0
+    t0 = ns["t_at"](r0[0], r0[1], h0, False, r0[2]) if h0 is not None else 0.0
     t1 = math.inf if t1 is None else t1
     t0 = math.inf if t0 is None else t0
     return min(t1, t0), t1, t0

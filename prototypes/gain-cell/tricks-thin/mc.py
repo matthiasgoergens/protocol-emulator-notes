@@ -3,7 +3,8 @@
 # One ngspice session per sample, so every analysis in it sees the same mismatch draws:
 #   1. hold run: write a 1 (from VLO), hold with WBL at VLO (the worst case for a 1); record the
 #      time SN crosses each level of a 12.5 mV grid;
-#   2. hold run: write a 0 (from 0.8 V), hold with WBL at VDD (the worst case for a 0);
+#   2. hold run: write a 0 (from 0.8 V), hold with WBL at VDD (the worst case for a 0), and
+#      again with WBL parked at VLO (an idle column): life and lifepark in the output;
 #   3. read runs: SN of the same cell forced to a level (a switch until 39 ns), then a read of the
 #      32-cell column; RBL at the sense time for a scan of levels gives this cell's thresholds:
 #      L1 (RBL falls below 0.5 V) and H0 (RBL stays above 0.7 V).
@@ -42,6 +43,8 @@ def netlist(seed):
              f"XMR1 rbl 0 mid1 0 sg13_lv_nmos w=0.30u l=0.13u m={N - 1}\n.ic v(sn1)=0.85")
     m1 = "\n".join(f"meas tran a{k} when v(sn0)={lv} fall=1 from=25n" for k, lv in enumerate(GRID))
     m0 = "\n".join(f"meas tran b{k} when v(sn0)={lv} rise=1 from=25n" for k, lv in enumerate(GRID))
+    mp = "\n".join(f"meas tran c{k} when v(sn0)={lv} rise=1 from=25n" for k, lv in enumerate(GRID))
+    pp = " ".join(f"c{k}" for k in range(len(GRID)))
     p1 = " ".join(f"a{k}" for k in range(len(GRID)))
     p0 = " ".join(f"b{k}" for k in range(len(GRID)))
     reads = "\n".join(f"""alter vlev dc={lv}
@@ -63,7 +66,9 @@ vbar bar 0 {VBAR}
 vwwlp wwlp 0 pwl(0 {VDD} 20n {VDD} 21n 0)
 bwwl wwl 0 v = v(wwlp) * (1 - v(m))
 * WBL: hold run: the bit's level during the write, the opposite level after; read run: VLO
-bwbl wbl 0 v = (1 - v(m)) * (time < 30n ? (v(bit) > 0.5 ? {VDD} : {VLO}) : (v(bit) > 0.5 ? {VLO} : {VDD})) + v(m) * {VLO}
+* after writing a 0, WBL goes to v(zw): VDD (a column written with 1s all the time) or VLO (parked)
+vzw zw 0 dc {VDD}
+bwbl wbl 0 v = (1 - v(m)) * (time < 30n ? (v(bit) > 0.5 ? {VDD} : {VLO}) : (v(bit) > 0.5 ? {VLO} : v(zw))) + v(m) * {VLO}
 vrwlp rwlp 0 pwl(0 0 40n 0 40.1n {VDD})
 brwl rwl 0 v = v(rwlp) * v(m)
 vprep prep 0 pwl(0 {VDD} 39n {VDD} 39.1n 0)
@@ -93,6 +98,11 @@ tran 1n {TSTOP} 0 {TMAX}
 meas tran vw0 find v(sn0) at=25n
 {m0}
 print vw0 {p0}
+alter vzw dc={VLO}
+tran 1n {TSTOP} 0 {TMAX}
+meas tran vwp find v(sn0) at=25n
+{mp}
+print vwp {pp}
 alter vm dc=1
 {reads}
 .endc
@@ -137,15 +147,19 @@ def sample(seed):
     vw1, vw0 = num(out, "vw1"), num(out, "vw0")
     c1 = [(lv, num(out, f"a{k}")) for k, lv in enumerate(GRID)]
     c0 = sorted([(lv, num(out, f"b{k}")) for k, lv in enumerate(GRID)])
+    cp = sorted([(lv, num(out, f"c{k}")) for k, lv in enumerate(GRID)])
+    vwp = num(out, "vwp")
     rd = [(lv, num(out, f"r{k}")) for k, lv in enumerate(SCAN)]
     l1, h0 = cross(rd, 0.5), cross(rd, 0.7)
     if vw1 is None or vw0 is None:
         return f"seed {seed} FAILED " + out[-300:].replace("\n", " | ")
     t1 = t_at(vw1, c1, l1, True) if l1 is not None else float("nan")
     t0 = t_at(vw0, c0, h0, False) if h0 is not None else float("nan")
+    tp = t_at(vwp, cp, h0, False) if h0 is not None and vwp is not None else float("nan")
     life = min(t1, t0)
     return (f"seed {seed:5d} vw1 {vw1:.4f} vw0 {vw0:.4f} L1 {l1 if l1 is None else round(l1, 4)} "
-            f"H0 {h0 if h0 is None else round(h0, 4)} t1 {t1:.4e} t0 {t0:.4e} life {life:.4e}  "
+            f"H0 {h0 if h0 is None else round(h0, 4)} t1 {t1:.4e} t0 {t0:.4e} life {life:.4e} "
+            f"t0park {tp:.4e} lifepark {min(t1, tp):.4e}  "
             f"rbl {' '.join('-' if r is None else f'{r:.3f}' for _, r in rd)}")
 
 print(f"mc: {LIB} {TEMP}C VLO={VLO} VBAR={VBAR} sense {SENSE} ns, seeds {N0}..{N0 + NS - 1}, "

@@ -1,0 +1,15 @@
+hold-lv-vlo0.3-bar0.1-park.txt
+  mos_ff   85C  1: written 0.842 end 0.282  ->            1.21 ms   0: written 0.195 end 0.282 ->               >50m   lifetime 1.21 ms
+  mos_tt   85C  1: written 0.768 end 0.262  ->            3.21 ms   0: written 0.191 end 0.262 ->               >50m   lifetime 3.21 ms
+hold-lv-vlo0.3-bar0.1-duty0.01.txt
+  mos_ff   85C  1: written 0.842 end 0.283  ->            1.22 ms   0: written 0.195 end 0.283 ->               >50m   lifetime 1.22 ms
+  mos_tt   85C  1: written 0.768 end 0.263  ->            3.21 ms   0: written 0.191 end 0.263 ->               >50m   lifetime 3.21 ms
+hold-lv-vlo0.3-bar0.1-duty0.1.txt
+  mos_ff   85C  1: written 0.842 end 0.287  ->            1.26 ms   0: written 0.195 end 0.287 ->             257 us   lifetime 257 us
+  mos_tt   85C  1: written 0.768 end 0.267  ->            3.25 ms   0: written 0.191 end 0.267 ->               >50m   lifetime 3.25 ms
+hold-lv-vlo0.3-bar0.1-duty0.5.txt
+  mos_ff   85C  1: written 0.842 end 0.305  ->            1.51 ms   0: written 0.195 end 0.305 ->             140 us   lifetime 140 us
+  mos_tt   85C  1: written 0.768 end 0.281  ->            3.44 ms   0: written 0.191 end 0.281 ->               >50m   lifetime 3.44 ms
+hold-lv-vlo0.3-bar0.1.txt
+  mos_ff   85C  1: written 0.842 end 0.282  ->            1.21 ms   0: written 0.195 end 0.328 ->             155 us   lifetime 155 us
+  mos_tt   85C  1: written 0.768 end 0.262  ->            3.21 ms   0: written 0.191 end 0.296 ->               >50m   lifetime 3.21 ms

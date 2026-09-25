@@ -55,14 +55,19 @@ def parse_hold(f):
         m = re.match(r"(mos_\w+)\s+(\d+)C stored (\d)\s+vw\s+([-\d.]+).*?vend\s+([-\d.na/ ]+?)\s+crossings (.*)", line)
         if not m:
             continue
-        cr = [(float(a), float(b)) for a, b in re.findall(r"([-\d.]+)@([-\d.eE+]+)", m[6])]
+        # crossings before the write ends (t < 25 ns) are start-up and write transients, not
+        # retention: e.g. a stored 0 written from 0.8 V can show a 'rise' through VLO at 40 ps
+        cr = [(float(a), float(b)) for a, b in re.findall(r"([-\d.]+)@([-\d.eE+]+)", m[6]) if float(b) >= 25e-9]
         vend = float(m[5]) if m[5].strip() not in ("n/a",) else None
         res[(m[1], int(m[2]), int(m[3]))] = (float(m[4]), cr, vend)
     tstop = re.search(r"TSTOP=(\S+)", open(f).read())
     return res, tstop[1] if tstop else "?"
 
-def t_at(vw, cr, level, falling):
-    """time the level is crossed, interpolated in log time between grid levels past vw"""
+def t_at(vw, cr, level, falling, vend=None):
+    """time the level is crossed, interpolated in log time between grid levels past vw. If no
+    grid crossing reaches the level but the final value is past it (the grid level that equals
+    VLO is dropped as a start-up artefact, see parse_hold), return the last crossing before it:
+    an early, conservative estimate."""
     c = sorted([(lv, t) for lv, t in cr if (lv < vw - 0.005 if falling else lv > vw + 0.005)],
                key=lambda x: -x[0] if falling else x[0])
     if (falling and vw < level) or (not falling and vw > level):
@@ -76,6 +81,8 @@ def t_at(vw, cr, level, falling):
             f = (level - v0) / (v1 - v0)
             return math.exp(math.log(t0) + f * (math.log(max(t1, t0)) - math.log(t0)))
         prev = (lv, t)
+    if vend is not None and ((falling and vend <= level) or (not falling and vend >= level)):
+        return prev[1]
     return None
 
 def fmt(t, tstop):
@@ -105,8 +112,8 @@ for hf in holdfs:
         if not r1 or not r0:
             continue
         if not plv:
-            t1 = t_at(r1[0], r1[1], l1, True) if l1 is not None else 0.0
-            t0 = t_at(r0[0], r0[1], h0, False) if h0 is not None else 0.0
+            t1 = t_at(r1[0], r1[1], l1, True, r1[2]) if l1 is not None else 0.0
+            t0 = t_at(r0[0], r0[1], h0, False, r0[2]) if h0 is not None else 0.0
         else:
             # plv: the stored 1 must stay above L1' (not conducting); the stored 0 below H0'
             t1 = t_at(r1[0], r1[1], l1, True) if l1 is not None else 0.0

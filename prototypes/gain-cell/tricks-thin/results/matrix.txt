@@ -1,30 +1,38 @@
 worst-corner lifetime (min over tt/ff/ss x 27/85 C) of a stored 1 and a stored 0; inverter sense
 (RBL < 0.5 V reads 1, > 0.7 V reads 0); unread = written level already fails some corner
 
-sense 10 ns, WBL opp:   rows VLO, columns bar        0       0.1       0.2       0.3   tracking bar
-  VLO    0      1.31us        -         -         -       1.31us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
-  VLO  0.1         -     16.35us        -         -      16.35us  (bars ff27:0.1, ff85:0.1, ss27:0.1, ss85:0.1, tt27:0.1, tt85:0.1)
-  VLO  0.2      0.59us   149.07us    unread    unread    149.07us  (bars ff27:0.1, ff85:0.1, ss27:0, ss85:0, tt27:0, tt85:0.1)
-  VLO  0.3     unread    43.95us    unread    unread    699.00us  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0, tt85:0)
-  VLO  0.4     unread    unread    unread    unread    922.35us  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0, tt85:0.1)
+sense 10 ns, WBL opp:   rows VLO, columns bar        0      0.05       0.1      0.15       0.2       0.3   tracking bar
+  VLO    0      1.31us        -         -         -         -         -       1.31us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
+  VLO  0.1      3.12us        -     16.35us        -         -         -      16.35us  (bars ff27:0.1, ff85:0.1, ss27:0, ss85:0, tt27:0, tt85:0)
+  VLO  0.2      2.56us        -    149.07us        -     unread    unread    149.07us  (bars ff27:0.1, ff85:0.1, ss27:0, ss85:0, tt27:0, tt85:0.1)
+  VLO 0.25         -     12.51us   147.46us    unread        -         -     509.25us  (bars ff27:0.05, ff85:0.15, ss27:0.05, ss85:0.05, tt27:0.05, tt85:0.05)
+  VLO  0.3     unread     0.36us   154.73us    unread    unread    unread    929.72us  (bars ff27:0.05, ff85:0.15, ss27:0, ss85:0, tt27:0, tt85:0.05)
+  VLO 0.35         -     unread    92.85us    unread        -         -      1.192ms  (bars ff27:0.05, ff85:0.15, ss27:0.05, ss85:0.05, tt27:0.05, tt85:0.05)
+  VLO  0.4     unread        -     unread        -     unread    unread    922.35us  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0, tt85:0.1)
 
-sense 10 ns, WBL park:   rows VLO, columns bar        0       0.1       0.2       0.3   tracking bar
-  VLO    0      1.31us        -         -         -       1.31us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
-  VLO  0.1     23.05us    16.35us     n/a          -      23.05us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
-  VLO  0.2         -         -         -         -    
-  VLO  0.3         -         -     unread        -      unread  (bars ff27:0.2, ff85:0.2, ss27:0.2, tt27:0.2, tt85:0.2)
-  VLO  0.4         -         -         -         -    
+sense 10 ns, WBL park:   rows VLO, columns bar        0      0.05       0.1      0.15       0.2       0.3   tracking bar
+  VLO    0      1.31us        -         -         -         -         -       1.31us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
+  VLO  0.1     23.05us        -     16.35us        -     unread    unread     23.05us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
+  VLO  0.2      6.37us        -    225.95us        -     unread    unread    225.95us  (bars ff27:0.1, ff85:0.1, ss27:0, ss85:0, tt27:0, tt85:0)
+  VLO 0.25         -     32.44us   627.08us    unread        -         -     627.08us  (bars ff27:0.05, ff85:0.1, ss27:0.05, ss85:0.05, tt27:0.05, tt85:0.05)
+  VLO  0.3     unread     0.51us    1.215ms    unread    unread    unread     1.215ms  (bars ff27:0.05, ff85:0.1, ss27:0, ss85:0, tt27:0, tt85:0.05)
+  VLO 0.35         -     unread   357.76us    unread        -         -      1.192ms  (bars ff27:0.05, ff85:0.15, ss27:0.05, ss85:0.05, tt27:0.05, tt85:0.05)
+  VLO  0.4     unread        -     unread        -     unread    unread    922.35us  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0, tt85:0.1)
 
-sense 20 ns, WBL opp:   rows VLO, columns bar        0       0.1       0.2       0.3   tracking bar
-  VLO    0      0.84us        -         -         -       0.84us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
-  VLO  0.1         -     18.15us        -         -      18.15us  (bars ff27:0.1, ff85:0.1, ss27:0.1, ss85:0.1, tt27:0.1, tt85:0.1)
-  VLO  0.2      0.05us    28.97us    unread    unread    174.39us  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0, tt85:0.1)
-  VLO  0.3     unread     0.69us    unread    unread    908.95us  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0, tt85:0.1)
-  VLO  0.4     unread    unread    unread    unread     1.264ms  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0.1, tt85:0.1)
+sense 20 ns, WBL opp:   rows VLO, columns bar        0      0.05       0.1      0.15       0.2       0.3   tracking bar
+  VLO    0      0.84us        -         -         -         -         -       0.84us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
+  VLO  0.1      0.72us        -     18.15us        -         -         -      18.15us  (bars ff27:0.1, ff85:0.1, ss27:0, ss85:0, tt27:0, tt85:0.1)
+  VLO  0.2      0.08us        -     28.97us        -     unread    unread    174.39us  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0, tt85:0.1)
+  VLO 0.25         -      0.19us    27.10us   314.71us        -         -     314.71us  (bars ff27:0.1, ff85:0.15, ss27:0.05, ss85:0.05, tt27:0.05, tt85:0.1)
+  VLO  0.3     unread    unread    16.97us   344.49us    unread    unread    908.95us  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0, tt85:0.1)
+  VLO 0.35         -     unread    unread   266.66us        -         -     266.66us  (bars ff27:0.1, ff85:0.15, ss27:0.05, ss85:0.05, tt27:0.05, tt85:0.1)
+  VLO  0.4     unread        -     unread        -     unread    unread     1.264ms  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0.1, tt85:0.1)
 
-sense 20 ns, WBL park:   rows VLO, columns bar        0       0.1       0.2       0.3   tracking bar
-  VLO    0      0.84us        -         -         -       0.84us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
-  VLO  0.1     26.63us    18.15us     n/a          -      26.63us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
-  VLO  0.2         -         -         -         -    
-  VLO  0.3         -         -     unread        -      unread  (bars ff27:0.2, ff85:0.2, ss27:0.2, tt27:0.2, tt85:0.2)
-  VLO  0.4         -         -         -         -    
+sense 20 ns, WBL park:   rows VLO, columns bar        0      0.05       0.1      0.15       0.2       0.3   tracking bar
+  VLO    0      0.84us        -         -         -         -         -       0.84us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
+  VLO  0.1     26.63us        -     18.15us        -     unread    unread     26.63us  (bars ff27:0, ff85:0, ss27:0, ss85:0, tt27:0, tt85:0)
+  VLO  0.2      0.10us        -    258.91us        -     unread    unread    258.91us  (bars ff27:0.1, ff85:0.1, ss27:0, ss85:0, tt27:0, tt85:0.1)
+  VLO 0.25         -      0.26us    59.91us   614.21us        -         -     614.21us  (bars ff27:0.1, ff85:0.15, ss27:0.05, ss85:0.05, tt27:0.05, tt85:0.05)
+  VLO  0.3     unread    unread    39.51us    1.201ms    unread    unread     1.201ms  (bars ff27:0.1, ff85:0.15, ss27:0, ss85:0, tt27:0, tt85:0.1)
+  VLO 0.35         -     unread    unread    1.629ms        -         -      1.629ms  (bars ff27:0.1, ff85:0.15, ss27:0.05, ss85:0.05, tt27:0.05, tt85:0.1)
+  VLO  0.4     unread        -     unread        -     unread    unread     1.264ms  (bars ff27:0.1, ff85:0.2, ss27:0, ss85:0, tt27:0.1, tt85:0.1)
