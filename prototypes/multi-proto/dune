@@ -28,3 +28,8 @@
  (name can_bridge)
  (modules can_bridge)
  (libraries hardcaml unix mpcore))
+
+(executable
+ (name loopback)
+ (modules loopback)
+ (libraries hardcaml unix mpcore))
