@@ -223,6 +223,15 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
   support new protocols after fabrication"). Our version: deterministic, compiler-scheduled
   hardware where protocols are programmes, and where hardware quirks (expiring memory,
   quarter-clock edges) are compiler constraints. Credit Groq for the phrase.
+- **Lead the write-up with determinism.** Jane Street visibly values it: their taste notes,
+  leading Antithesis's round, Hardcaml's cycle-exact expect tests, predictable latency in
+  trading. Present:
+  - timing exact by construction;
+  - programmes whose timing a verifier can prove;
+  - silicon runs that replay in simulation.
+
+  The deliberate nondeterminism (random source, equivalent-time sampling, expiring memory) then
+  appears as fenced and named, while everything else stays exactly reproducible.
 
 - Jane Street's hardware taste; tools to port (**running**).
 - Public competitors and the winners of Jane Street's recent challenges (**running**).
