@@ -127,9 +127,53 @@ def eyes_cap():
             print(f"| {case[4:]} | {c} {tmp}C | {ns(np.mean(r))} ({ns(min(r))}-{ns(max(r))}) | {ns(np.mean(f))} ({ns(min(f))}-{ns(max(f))}) | {ns(dl)} | {ns(jitter_pp(crossings(t, v, io / 2)))} | {100 * h / io:.0f} | {ns(w)} |")
     print()
 
+def ideal_wave(levels, t, t0=2e-9):
+    """ideal level per time sample (UI k spans t0 + k UI .. t0 + (k+1) UI)"""
+    k = np.clip(((t - t0) // UI).astype(int), 0, len(levels) - 1)
+    return np.asarray(levels, dtype=float)[k]
+
+def best_delay(t, v, levels, t0=2e-9, lo=0.0, hi=12e-9):
+    ds = np.arange(lo, hi, 0.05e-9)
+    m = t > 150e-9
+    cs = [np.dot(v[m], ideal_wave(levels, t[m] - d, t0)) for d in ds]
+    return ds[int(np.argmax(cs))]
+
+def eye_generic(t, v, levels, delay, t0=2e-9, tmin=150e-9):
+    """per sampling phase: for each level value, min and max of v; returns best phase and eyes
+    between adjacent level values, plus crossing jitter at midpoints"""
+    vals = sorted(set(levels))
+    best = None
+    for ph in np.linspace(0, UI, 81)[:-1]:
+        ts = t0 + np.arange(len(levels)) * UI + delay + ph
+        ok = (ts > tmin) & (ts < t[-1])
+        x = np.interp(ts[ok], t, v); lv = np.asarray(levels)[ok]
+        eyes = [x[lv == hi].min() - x[lv == lo].max() for lo, hi in zip(vals[:-1], vals[1:])]
+        if best is None or min(eyes) > min(best[1]):
+            best = (ph, eyes)
+    return best
+
+def edge_stats(t, v, levels, delay, a, b, t0=2e-9, tmin=150e-9):
+    """10-90 % times of transitions from level a to level b (values in V: va, vb)"""
+    out = []
+    for k in range(1, len(levels)):
+        if (levels[k - 1], levels[k]) != (a[0], b[0]):
+            continue
+        ts = t0 + k * UI + delay - 0.5 * UI
+        if ts < tmin or ts + UI > t[-1]:
+            continue
+        m = (t > ts) & (t < ts + UI)
+        lo_, hi_ = a[1] + 0.1 * (b[1] - a[1]), a[1] + 0.9 * (b[1] - a[1])
+        c1 = crossings(t[m], v[m], lo_); c2 = crossings(t[m], v[m], hi_)
+        if c1 and c2:
+            out.append(abs(c2[0][0] - c1[0][0]))
+    return out
+
 def eye_sfp():
-    print("## SFP transmit input: two 30 mA pads in antiphase, 150 ohm series, 50 ohm lines, AC-coupled 100 ohm differential")
-    print("| corner | diff swing p-p (mV) | rise 20-80 (ns) | fall 20-80 (ns) | DDJ p-p at 0 V (ns) | eye height (mV) | eye width (ns) |")
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import padsim
+    bits = padsim.nrzi(padsim.prbs7(140))
+    print("## SFP transmit input: two 30 mA pads in antiphase, 150 ohm series each, 8 cm 50 ohm lines (LC ladder), AC-coupled 100 ohm differential")
+    print("| corner | diff swing p-p (mV) | rise 20-80 (ns) | fall 20-80 (ns) | crossing jitter p-p at 0 V (ns) | eye height (mV) | eye width at 0 V (ns) |")
     print("|---|---|---|---|---|---|---|")
     for c, tmp in ORDER:
         d = load("eye_sfp", c, tmp)
@@ -137,86 +181,63 @@ def eye_sfp():
             print(f"| {c} {tmp}C | missing |"); continue
         t, vp = uniform(d["time"], d["v(sp)"]); _, vn = uniform(d["time"], d["v(sn)"])
         v = vp - vn
-        m = t > 200e-9
+        m = t > 150e-9
+        v = v - np.median(v[m])          # remove the AC-coupling offset still settling
+        lv = [2 * b - 1 for b in bits]
+        dl = best_delay(t, v, lv)
+        ph, eyes = eye_generic(t, v, lv, dl)
         hi, lo = np.percentile(v[m], 99), np.percentile(v[m], 1)
-        a, b = lo + 0.2 * (hi - lo), lo + 0.8 * (hi - lo)
-        r, f = [], []
-        # 20-80 edges
-        rr, ff = edge_times(t, v, lo - (hi - lo) * 0.125 / 0.75 + (hi - lo) * 0.125 / 0.75, hi)
-        ca, cb = crossings(t, v, a), crossings(t, v, b)
-        for ta, up in ca:
-            nxt = [x for x, u in cb if u == up and x > ta and x - ta < 6e-9] if up else []
-            if nxt: r.append(nxt[0] - ta)
-        for tb, up in cb:
-            nxt = [x for x, u in ca if u == up and x > tb and x - tb < 6e-9] if not up else []
-            if nxt: f.append(nxt[0] - tb)
-        cr = crossings(t, v, 0.0)
-        # reference bits: sign at the centre of each UI after the median delay
-        _, cp = uniform(d["time"], d["v(op)"])
-        bits = bits_from(t, cp, CORN[c][1] / 2, 140)
-        co = [x for x, _ in cr]
-        cc = [x for x, _ in crossings(t, cp, CORN[c][1] / 2)]
-        dl = np.median([min((y - x for y in co if y > x), default=np.nan) for x in cc[20:60]])
-        h, ph, w = eye(t, v, 2e-9, bits, dl, t0=200e-9)
-        print(f"| {c} {tmp}C | {1000 * (hi - lo):.0f} | {ns(np.mean(r))} | {ns(np.mean(f))} | {ns(jitter_pp(cr, skip=200e-9))} | {1000 * h:.0f} | {ns(w)} |")
+        r = edge_stats(t, v, lv, dl, (-1, lo + 0.125 * (hi - lo)), (1, hi - 0.125 * (hi - lo)))
+        f = edge_stats(t, v, lv, dl, (1, hi - 0.125 * (hi - lo)), (-1, lo + 0.125 * (hi - lo)))
+        cr = [x for x, _ in crossings(t, v, 0.0) if x > 150e-9]
+        jit = jitter_pp([(x - dl, u) for x, u in [(y, 0) for y in cr]], t_ref=2e-9, skip=0)
+        # eye width at 0 V: UI minus crossing spread
+        print(f"| {c} {tmp}C | {1000 * (hi - lo):.0f} | {ns(np.mean(r))} | {ns(np.mean(f))} | {ns(jit)} | {1000 * eyes[0]:.0f} | {ns(UI - jit)} |")
     print()
 
-def eye_tx():
-    print("## 100BASE-TX MLT-3 by pin pair: 82 ohm series each, 250 ohm across the primary, 1:1 magnetics, 1 m 100 ohm line, 100 ohm")
-    print("TP-PMD template (from memory of ANSI X3.263 / 802.3 clause 25, to verify): peak 950-1050 mV, symmetry 98-102 %, rise/fall 3-5 ns, rise/fall symmetry <= 0.5 ns, overshoot <= 5 %, jitter <= 1.4 ns p-p\n")
-    print("| corner | +peak (mV) | -peak (mV) | symmetry (%) | overshoot (%) | rise 10-90 (ns) | fall 10-90 (ns) | jitter p-p at +-50 % (ns) | eye height upper/lower (mV) |")
-    print("|---|---|---|---|---|---|---|---|---|")
+def eye_txcp():
+    """the same with 33 pF across the primary (CP_TX=33p), three corners"""
+    eye_tx(case="eye_txcp", note="with 33 pF across the primary")
+
+def eye_tx(case="eye_tx", note=""):
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import padsim
+    A, B, L = padsim.mlt3_pins(padsim.scrambled(160))
+    print("## 100BASE-TX MLT-3 by pin pair: series R per pin, shunt across the primary, 1:1 magnetics (350 uH, 0.3 uH leakage), 1 m of lossless 100 ohm line, 100 ohm")
+    print(f"resistors: {padsim.RS_TX} ohm series, {padsim.RP_TX} ohm across the primary {note}")
+    print("TP-PMD template (from memory of ANSI X3.263 / 802.3 clause 25, NOT checked against the text): peak 950-1050 mV, symmetry 98-102 %, rise/fall 3-5 ns, rise/fall symmetry <= 0.5 ns, overshoot <= 5 %, jitter <= 1.4 ns p-p\n")
+    print("| corner | simulated to (us) | +peak (mV) | -peak (mV) | symmetry (%) | overshoot (%) | rise 10-90 (ns) | fall 10-90 (ns) | jitter p-p at +-50 % (ns) | eye upper / lower (mV) |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
     for c, tmp in ORDER:
-        d = load("eye_tx", c, tmp)
+        d = load(case, c, tmp)
         if d is None:
-            print(f"| {c} {tmp}C | missing |"); continue
+            if case == "eye_tx": print(f"| {c} {tmp}C | missing |")
+            continue
         t, va = uniform(d["time"], d["v(la)"]); _, vb = uniform(d["time"], d["v(lb)"])
         v = va - vb
-        io = CORN[c][1]
-        _, ca = uniform(d["time"], d["v(oa)"]); _, cb = uniform(d["time"], d["v(ob)"])
-        # ideal level per UI from the pin states (A - B) sampled mid-UI, 160 UIs
-        lv = [int(np.interp(2e-9 + (k + 0.5) * UI + 3e-9, t, ca) > io / 2) - int(np.interp(2e-9 + (k + 0.5) * UI + 3e-9, t, cb) > io / 2) for k in range(160)]
-        m = t > 200e-9
-        # settled level: value at 85 % of a UI into runs of >= 2 UIs at the same level
-        pos, neg, peaks_p, peaks_n = [], [], [], []
-        dl = 5.2e-9  # nominal pin-to-line delay; refined below
-        for k in range(1, 159):
+        dl = best_delay(t, v, L)
+        # settled levels: value at 85 % into the second UI of runs of >= 2 equal levels
+        setp, setn, pk_p, pk_n = [], [], [], []
+        for k in range(2, len(L) - 1):
             ts = 2e-9 + k * UI + dl
-            if ts < 200e-9: continue
+            if ts < 150e-9 or ts + UI > t[-1]:
+                continue
+            # settled level: middle UI of a run of three (sampling late in a UI that ends a run
+            # lands inside the next edge: that artefact first showed as 800 mV / 22 % overshoot)
             x = np.interp(ts + 0.85 * UI, t, v)
-            if lv[k] == 1 and lv[k - 1] == 1: pos.append(x)
-            if lv[k] == -1 and lv[k - 1] == -1: neg.append(x)
+            if L[k + 1] == L[k] == L[k - 1] == 1: setp.append(x)
+            if L[k + 1] == L[k] == L[k - 1] == -1: setn.append(x)
             seg = v[(t > ts) & (t < ts + UI)]
-            if lv[k] == 1 and lv[k - 1] == 0 and len(seg): peaks_p.append(seg.max())
-            if lv[k] == -1 and lv[k - 1] == 0 and len(seg): peaks_n.append(seg.min())
-        vp, vn = np.median(pos), np.median(neg)
-        ov = max((max(peaks_p) - vp) / vp, (min(peaks_n) - vn) / vn) * 100
-        r, f = [], []
-        for k in range(1, 160):
-            if lv[k - 1] == 0 and lv[k] == 1:
-                ts = 2e-9 + k * UI + dl - 2e-9
-                seg_m = (t > ts) & (t < ts + 7e-9)
-                cr1 = crossings(t[seg_m], v[seg_m], 0.1 * vp, 1); cr9 = crossings(t[seg_m], v[seg_m], 0.9 * vp, 1)
-                if cr1 and cr9: r.append(cr9[0][0] - cr1[0][0])
-            if lv[k - 1] == 1 and lv[k] == 0:
-                ts = 2e-9 + k * UI + dl - 2e-9
-                seg_m = (t > ts) & (t < ts + 7e-9)
-                cr1 = crossings(t[seg_m], v[seg_m], 0.9 * vp, -1); cr9 = crossings(t[seg_m], v[seg_m], 0.1 * vp, -1)
-                if cr1 and cr9: f.append(cr9[0][0] - cr1[0][0])
-        jp = jitter_pp(crossings(t, v, 0.5 * vp), skip=200e-9)
-        jn = jitter_pp(crossings(t, v, 0.5 * vn), skip=200e-9)
-        # eye heights at best phase: upper eye between level +1 and 0, lower between 0 and -1
-        best_u, best_l = -9, -9
-        for ph in np.linspace(0, UI, 41)[:-1]:
-            s = {1: [], 0: [], -1: []}
-            for k in range(160):
-                ts = 2e-9 + k * UI + dl + ph
-                if ts < 200e-9: continue
-                s[lv[k]].append(np.interp(ts, t, v))
-            if s[1] and s[0] and s[-1]:
-                best_u = max(best_u, min(s[1]) - max(s[0]))
-                best_l = max(best_l, min(s[0]) - max(s[-1]))
-        print(f"| {c} {tmp}C | {1000 * vp:.0f} | {1000 * vn:.0f} | {100 * vp / -vn:.1f} | {ov:.1f} | {ns(np.mean(r))} | {ns(np.mean(f))} | {ns(max(jp, jn))} | {1000 * best_u:.0f} / {1000 * best_l:.0f} |")
+            if L[k] == 1 and L[k - 1] == 0: pk_p.append(seg.max())
+            if L[k] == -1 and L[k - 1] == 0: pk_n.append(seg.min())
+        vp, vn = np.median(setp), np.median(setn)
+        ov = max((max(pk_p) - vp) / vp, (min(pk_n) - vn) / vn) * 100
+        r = edge_stats(t, v, L, dl, (0, 0.0), (1, vp))
+        f = edge_stats(t, v, L, dl, (1, vp), (0, 0.0))
+        jp = jitter_pp([(x, 0) for x, _ in crossings(t, v, 0.5 * vp) if x > 150e-9], t_ref=2e-9 + dl, skip=0)
+        jn = jitter_pp([(x, 0) for x, _ in crossings(t, v, 0.5 * vn) if x > 150e-9], t_ref=2e-9 + dl, skip=0)
+        ph, eyes = eye_generic(t, v, L, dl)
+        print(f"| {c} {tmp}C | {t[-1] * 1e6:.2f} | {1000 * vp:.0f} | {1000 * vn:.0f} | {100 * vp / -vn:.1f} | {ov:.1f} | {ns(np.mean(r))} | {ns(np.mean(f))} | {ns(max(jp, jn))} | {1000 * eyes[1]:.0f} / {1000 * eyes[0]:.0f} |")
     print()
 
 def inputs():
@@ -242,10 +263,7 @@ def inputs():
             duty = (p[m] > vdd / 2).mean() * 100
             swing = p[m].max() - p[m].min()
             _, pad = uniform(d["time"], d["v(pad)"])
-            if case == "in_full":
-                lvl = CORN[c][1] / 2
-            else:
-                lvl = padsim.threshold(c, tmp)
+            lvl = padsim.threshold(c, tmp)   # delay from the pad crossing its own switching point
             cin = [x for x, u in crossings(t, pad, lvl) if x > 50e-9]
             cout = [x for x, u in crossings(t, p, vdd / 2) if x > 50e-9]
             dls = [min((y - x for y in cout if y > x), default=np.nan) for x in cin]

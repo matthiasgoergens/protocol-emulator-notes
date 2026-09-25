@@ -5,7 +5,7 @@ module R = Ref_model
 let bit_list_of_int w x = List.init w (fun i -> (x lsr i) land 1)
 
 (* Run the RTL transmitter over a list of frames; returns per-clock (code bits, line outputs) *)
-let run_tx media frames ~extra =
+let run_tx ?(idle_first = 0) media frames ~extra =
   let sim = Cyclesim.create (Pcs.tx_circuit media) in
   let i n = Cyclesim.in_port sim n and o n = Cyclesim.out_port ~clock_edge:Before sim n in
   let clear = i "clear" and valid = i "tx_valid" and data = i "tx_data" and last = i "tx_last" in
@@ -15,10 +15,13 @@ let run_tx media frames ~extra =
   let codes = ref [] and lines = ref [] in
   (* present the head byte; advance when tx_ready was high in that cycle *)
   let bytes = ref (List.concat_map (fun f -> List.mapi (fun j b -> (b, j = List.length f - 1)) f) frames) in
-  let gap = ref 0 in
+  let gap = ref 0 and waited = ref 0 in
   while !bytes <> [] || !gap < extra do
+    let hold = !waited < idle_first in
+    incr waited;
     (match !bytes with
-     | (b, l) :: _ -> valid := Bits.vdd; data := Bits.of_int ~width:8 b; last := Bits.of_bool l
+     | (b, l) :: _ when not hold -> valid := Bits.vdd; data := Bits.of_int ~width:8 b; last := Bits.of_bool l
+     | _ :: _ -> valid := Bits.gnd
      | [] -> valid := Bits.gnd; incr gap);
     (* output ports are sampled before the clock edge: this cycle's combinational values *)
     Cyclesim.cycle sim;
@@ -129,6 +132,8 @@ let score sent got =
 
 let sizes_default = [ 64; 128; 512; 1518 ]
 
+let last_per : (int * int * int) list ref = ref []
+
 (* 100BASE-FX receive through the behavioural line and front end *)
 let fx_trial ~seed ~osr ~nframes ~sizes ?(rj = 0.0) ?(dcd = 0.0) ?(ddr = 0.0) ?(ppm = 0.0) ?(tap_mis = 0.0) ?(sj = 0.0) () =
   let rng = Random.State.make [| seed |] in
@@ -146,7 +151,14 @@ let fx_trial ~seed ~osr ~nframes ~sizes ?(rj = 0.0) ?(dcd = 0.0) ?(ddr = 0.0) ?(
   let tend = 8.0 *. float (Array.length levels) -. 40.0 in
   while Line.end_time smp < tend do rx_clock r (cdr (Line.clock smp)) done;
   let sent = List.map R.with_fcs frames in
-  let ns, ok, fa, errs, bits = score sent (List.rev r.got) in
+  let got = List.rev r.got in
+  let ns, ok, fa, errs, bits = score sent got in
+  (* per frame size: sent and intact *)
+  let per = List.map (fun sz ->
+      let sent_sz = List.filter (fun f -> List.length f = max 64 sz) sent in
+      let _, ok_sz, _, _, _ = score sent_sz (List.filter (fun (f, _) -> List.length f = max 64 sz) got) in
+      (sz, List.length sent_sz, ok_sz)) sizes in
+  last_per := per;
   ns, ok, fa, errs, bits, r.overflow
 
 let fx_sweep oc =
@@ -174,6 +186,59 @@ let () =
   let _ = digital_checks () in
   match Sys.argv with
   | [| _; "fx" |] -> let oc = open_out "results/fx_sweep.txt" in fx_sweep oc; close_out oc
+  | [| _; "fxcell"; osr; ppm; rj; dcd; ddr; tap; nf |] ->
+    (* one cell of the FX sweep, one line of output *)
+    let f = float_of_string in
+    let osr = int_of_string osr in
+    let s, ok, fa, e, b, ov = fx_trial ~seed:(osr * 7919 + int_of_float (f rj *. 1000.) + int_of_float (f ppm) + int_of_float (f dcd *. 100.))
+        ~osr ~nframes:(int_of_string nf) ~sizes:sizes_default ~rj:(f rj) ~dcd:(f dcd) ~ddr:(f ddr) ~ppm:(f ppm) ~tap_mis:(f tap) () in
+    Printf.printf "osr %d ppm %+.0f rj %.2f dcd %.2f ddr %.2f tap %.2f | sent %d intact %d loss %.1f%% false_acc %d | bit_err %d / %d BER %.1e | %s | overflow %d\n"
+      osr (f ppm) (f rj) (f dcd) (f ddr) (f tap) s ok (100.0 *. float (s - ok) /. float s) fa e b (if b = 0 then nan else float e /. float b)
+      (String.concat " " (List.map (fun (sz, n, k) -> Printf.sprintf "%dB:%.0f%%" sz (100.0 *. float (n - k) /. float (max 1 n))) !last_per)) ov
+  | [| _; "txgen"; nf; out |] ->
+    (* 100BASE-TX: the RTL transmitter's MLT-3 line (A - B per UI) for nf frames after 10 000
+       clocks of idle, one char per UI (+ 0 -), and the frames (hex, one per line) *)
+    let rng = Random.State.make [| 11 |] in
+    let frames = List.init (int_of_string nf) (fun i -> R.random_frame ~rng (List.nth sizes_default (i mod 4))) in
+    let _, lines = run_tx ~idle_first:10000 Pcs.Tx frames ~extra:200 in
+    let oc = open_out (out ^ ".line") in
+    List.iter (function [ a; b; _ ] -> List.iter2 (fun x y -> output_char oc (match x - y with 1 -> '+' | -1 -> '-' | _ -> '0')) a b | _ -> ()) lines;
+    close_out oc;
+    let oc = open_out (out ^ ".frames") in
+    List.iter (fun f -> output_string oc (String.concat "" (List.map (Printf.sprintf "%02x") (R.with_fcs f))); output_char oc '\n') frames;
+    close_out oc
+  | [| _; "txrx"; samples; frames_file; osr |] ->
+    (* decode a sampled, sliced MLT-3 stream (one char per sample: + 0 -, n = 2 osr samples per
+       clock) with the CDR and the RTL 100BASE-TX receiver, and score it *)
+    let osr = int_of_string osr in
+    let n = 2 * osr in
+    let ic = open_in samples in
+    let len = in_channel_length ic in
+    let buf = really_input_string ic len in close_in ic;
+    let frames = let ic = open_in frames_file in let l = ref [] in
+      (try while true do let h = input_line ic in l := List.init (String.length h / 2) (fun i -> int_of_string ("0x" ^ String.sub h (2 * i) 2)) :: !l done with End_of_file -> ());
+      close_in ic; List.rev !l in
+    let cdr = make_cdr ~n ~osr in
+    let r = rx_create Pcs.Tx in
+    let lv c = match c with '+' -> 1 | '-' -> -1 | _ -> 0 in
+    let i = ref 0 in
+    while !i + n <= len do
+      rx_clock r (cdr (Array.init n (fun k -> lv buf.[!i + k]))); i := !i + n done;
+    let got = List.rev r.got in
+    let s, ok, fa, e, b = score frames got in
+    let per = List.map (fun sz ->
+        let sent_sz = List.filter (fun f -> List.length f = max 64 sz) frames in
+        let _, ok_sz, _, _, _ = score sent_sz (List.filter (fun (f, _) -> List.length f = max 64 sz) got) in
+        (sz, List.length sent_sz, ok_sz)) sizes_default in
+    Printf.printf "sent %d intact %d loss %.1f%% false_acc %d | bit_err %d / %d BER %.1e | %s | locked %d overflow %d\n"
+      s ok (100.0 *. float (s - ok) /. float s) fa e b (if b = 0 then nan else float e /. float b)
+      (String.concat " " (List.map (fun (sz, n, k) -> Printf.sprintf "%dB:%.0f%%" sz (100.0 *. float (n - k) /. float (max 1 n))) per))
+      (Bits.to_int !(Cyclesim.out_port ~clock_edge:Before r.sim "locked")) r.overflow
+  | [| _; "verilog"; dir |] ->
+    List.iter (fun (name, c) ->
+        let oc = open_out (Filename.concat dir (name ^ ".v")) in
+        Rtl.output ~output_mode:(To_channel oc) Verilog c; close_out oc)
+      [ "fx_tx", Pcs.tx_circuit Pcs.Fx; "fx_rx", Pcs.rx_circuit Pcs.Fx; "tx_tx", Pcs.tx_circuit Pcs.Tx; "tx_rx", Pcs.rx_circuit Pcs.Tx ]
   | [| _; "fx1"; osr; ppm; rj |] ->
     let s, ok, fa, e, b, ov = fx_trial ~seed:1 ~osr:(int_of_string osr) ~nframes:20 ~sizes:sizes_default ~rj:(float_of_string rj) ~ppm:(float_of_string ppm) () in
     Printf.printf "sent %d intact %d false %d errs %d/%d overflow %d\n" s ok fa e b ov

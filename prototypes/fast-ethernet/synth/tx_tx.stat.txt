@@ -1,0 +1,42 @@
+
+7. Printing statistics.
+
+=== tx_tx ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      548        - wires
+     2650        - wire bits
+      198        - public wires
+     2300        - public wire bits
+       10        - ports
+       21        - port bits
+      425  7135.43 cells
+        7   88.906   sg13g2_a21o_1
+       44  399.168   sg13g2_a21oi_1
+        3   43.546   sg13g2_a221oi_1
+       16  173.578   sg13g2_a22oi_1
+       11   99.792   sg13g2_and2_1
+        1   12.701   sg13g2_and3_1
+       68 3.33E+03   sg13g2_dfrbpq_1
+       20  108.864   sg13g2_inv_1
+        4   72.576   sg13g2_mux2_1
+        8  304.819   sg13g2_mux4_1
+       45  326.592   sg13g2_nand2_1
+       10    90.72   sg13g2_nand2b_1
+        9   81.648   sg13g2_nand3_1
+        2   25.402   sg13g2_nand3b_1
+       21   152.41   sg13g2_nor2_1
+        7   63.504   sg13g2_nor2b_1
+       11   99.792   sg13g2_nor3_1
+        2   21.773   sg13g2_nor4_1
+       43  390.096   sg13g2_o21ai_1
+       18  163.296   sg13g2_or2_1
+        2   25.402   sg13g2_or3_1
+       49  711.245   sg13g2_xnor2_1
+       24  348.365   sg13g2_xor2_1
+
+   Chip area for module '\tx_tx': 7135.430400
+     of which used for sequential elements: 3331.238400 (46.69%)
+

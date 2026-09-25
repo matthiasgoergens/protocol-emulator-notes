@@ -30,6 +30,15 @@ CORNERS = {  # name: (mos, dio, res, vdd, iovdd)
     "ff": ("mos_ff", "dio_ff", "res_bcs", 1.32, 3.6),
 }
 UI = 8e-9          # 125 Mbaud
+# 100BASE-TX resistor network: series per pin and shunt across the primary. The first design
+# (82 / 250) assumed ideal 3.3 V pins and gave 0.77 V peak; the 30 mA pads measured about 36 ohm
+# output resistance under that load (2.87 V / 0.35 V at 10.7 mA), so 47 ohm in series makes the
+# source 100 ohm differential and the amplitude about 1 V into 100 ohm.
+RS_TX = os.environ.get("RS_TX", "47")
+RP_TX = os.environ.get("RP_TX", "249")
+# optional edge-shaping capacitor across the primary (the unfiltered pins give 2.1-2.5 ns edges
+# and 20-33 % overshoot, see results/pads.txt); CP_TX=33p aims at 3.5 ns into 50 ohm
+CP_TX = os.environ.get("CP_TX", "")
 TEDGE = 80e-12     # core-side edge time into c2p
 
 def head(corner, temp):
@@ -80,6 +89,10 @@ def pkg(name, pad, node, c):
     # bond wire (2 nH, 1 ohm incl. skin loss) + package + PCB lumped
     return (f"lb{name} {pad} {node}_b 2n\nrb{name} {node}_b {node} 1\n"
             f"c{name} {node} 0 {c}\n")
+
+def ladder(name, a, b, sections=5, l="5n", c="2p"):
+    nodes = [a] + [f"{name}_l{i}" for i in range(1, sections)] + [b]
+    return "".join(f"ll{name}{i} {nodes[i]} {nodes[i+1]} {l}\ncl{name}{i} {nodes[i+1]} 0 {c}\n" for i in range(sections))
 
 def mlt3_pins(bits):
     """MLT-3 from a bit stream (1 = step to the next level in 0,+,0,-), as two pins A, B where the
@@ -149,7 +162,9 @@ def netlist(case, corner, temp):
                  + pkg("p", "pp", "op", "5p") + pkg("n", "pn", "on", "5p") +
                  # series resistors at the chip, 50 ohm lines (8 cm), SFP: AC caps then 100 ohm diff
                  "rsp op lp 150\nrsn on ln 150\n"
-                 "tlp lp 0 sp0 0 z0=50 td=0.5n\ntln ln 0 sn0 0 z0=50 td=0.5n\n"
+                 # 8 cm of 50 ohm line as a 5-section LC ladder (5 nH / 2 pF, 0.1 ns each): the
+                 # lossless T element made every run stop at 3 ns ("timestep too small")
+                 + ladder("p", "lp", "sp0") + ladder("n", "ln", "sn0") +
                  "cap sp0 sp 100n\ncan sn0 sn 100n\nrt sp sn 100\nrbiasp sp 0 10k\nrbiasn sn 0 10k\n"
                  "cs sp0 0 1p\ncsn sn0 0 1p\n")
         save += ["op", "on", "sp", "sn"]
@@ -160,9 +175,11 @@ def netlist(case, corner, temp):
                  f"xpa vss vdd iovss iovdd ca pa sg13g2_IOPadOut30mA\n"
                  f"xpb vss vdd iovss iovdd cb pb sg13g2_IOPadOut30mA\n"
                  + pkg("a", "pa", "oa", "5p") + pkg("b", "pb", "ob", "5p") +
-                 "rsa oa pria 82\nrsb ob prib 82\nrp pria prib 250\n"
-                 # 1:1 magnetics: 350 uH OCL, ~0.3 uH leakage, 10 pF winding capacitance each side
-                 "l1 pria prib 350u\nl2 seca secb 350u\nk1 l1 l2 0.99957\n"
+                 f"rsa oa pria {RS_TX}\nrsb ob prib {RS_TX}\nrp pria prib {RP_TX}\n"
+                 + (f"cpx pria prib {CP_TX}\n" if CP_TX else "") +
+                 # 1:1 magnetics: 350 uH OCL, ~0.3 uH leakage, 0.5 ohm winding resistance, 5 pF
+                 # winding capacitance each side
+                 "l1 pria w1 350u\nrw1 w1 prib 0.5\nl2 seca w2 350u\nrw2 w2 secb 0.5\nk1 l1 l2 0.99957\n"
                  "cw1 pria prib 5p\ncw2 seca secb 5p\nrref secb 0 1meg\n"
                  # 1 m of 100 ohm twisted pair (lossless here; loss is in the channel model), 100 ohm
                  "tl seca secb la lb z0=100 td=5n\nrl la lb 100\nrlr lb 0 1meg\n")
@@ -190,7 +207,11 @@ def netlist(case, corner, temp):
         tstep = "10p"
     else:
         raise SystemExit(f"unknown case {case}")
-    ctl = (f"tran {tstep} {tstop:.4e}\n"
+    # eye_tx needs a 20 ps maximum step: with the default the run stops ("timestep too small")
+    # at 114 ns, when the transformer current first pulls a pad below ground; with it, it gets
+    # to about 1.13 us of 1.28 (reproduced in /var/tmp/fast-eth/pads-dbg/tx-{a,b,c})
+    maxstep = " 0 20p" if case in ("eye_tx", "eye_sfp") else ""  # eye_sfp stopped the same way
+    ctl = (f"tran {tstep} {tstop:.4e}{maxstep}\n"
            f"wrdata /work/out.dat {' '.join('v(' + s + ')' for s in save)}\n")
     return h + body + control(ctl)
 

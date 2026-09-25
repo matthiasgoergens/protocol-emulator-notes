@@ -1,0 +1,109 @@
+# Pad simulations (spice/padsim.py, spice/run_all.sh, analysed by spice/analyse.py; worktree dac659c + uncommitted); raw runs in /var/tmp/fast-eth/pads/<case>-<corner>-<temp>/
+# corners: tt 1.20 V / 3.3 V, ss 1.08 V / 3.0 V (res_wcs, dio_ss), ff 1.32 V / 3.6 V (res_bcs, dio_ff); temperatures 27 and 85 C
+# PDK netlist changes, see padsim.py: clamp-gate antenna diodes removed, pad ESD diode models without breakdown/recombination terms
+
+## Toggle-rate test: square wave per pad into 2 nH + 10 pF, swing at the pin (node o)
+rates are toggles/s (a 62.5 Mt/s toggle = 62.5 MHz edge rate = 31.25 MHz square)
+
+### sg13g2_IOPadOut4mA: swing / IOVDD (%)
+| corner | 62.5 Mt/s | 100 Mt/s | 125 Mt/s | 166.7 Mt/s | 250 Mt/s | 333 Mt/s |
+|---|---|---|---|---|---|---|
+| tt 27C | 98 | 86 | 74 | 59 | 40 | 30 |
+| tt 85C | 96 | 79 | 67 | 52 | 35 | 27 |
+| ss 27C | 95 | 75 | 63 | 49 | 34 | 26 |
+| ss 85C | 91 | 68 | 56 | 44 | 30 | 24 |
+| ff 27C | 100 | 93 | 84 | 69 | 48 | 36 |
+| ff 85C | 99 | 87 | 77 | 61 | 42 | 32 |
+
+### sg13g2_IOPadOut16mA: swing / IOVDD (%)
+| corner | 62.5 Mt/s | 100 Mt/s | 125 Mt/s | 166.7 Mt/s | 250 Mt/s | 333 Mt/s |
+|---|---|---|---|---|---|---|
+| tt 27C | 100 | 100 | 100 | 100 | 97 | 86 |
+| tt 85C | 100 | 100 | 100 | 100 | 93 | 78 |
+| ss 27C | 100 | 100 | 100 | 99 | 91 | 76 |
+| ss 85C | 100 | 100 | 100 | 98 | 84 | 67 |
+| ff 27C | 100 | 100 | 100 | 100 | 99 | 94 |
+| ff 85C | 100 | 100 | 100 | 100 | 97 | 88 |
+
+### sg13g2_IOPadOut30mA: swing / IOVDD (%)
+| corner | 62.5 Mt/s | 100 Mt/s | 125 Mt/s | 166.7 Mt/s | 250 Mt/s | 333 Mt/s |
+|---|---|---|---|---|---|---|
+| tt 27C | 100 | 100 | 100 | 100 | 100 | 98 |
+| tt 85C | 100 | 100 | 100 | 100 | 100 | 95 |
+| ss 27C | 100 | 100 | 100 | 100 | 100 | 95 |
+| ss 85C | 100 | 100 | 100 | 100 | 98 | 89 |
+| ff 27C | 100 | 100 | 100 | 100 | 100 | 100 |
+| ff 85C | 100 | 100 | 100 | 100 | 100 | 99 |
+
+## PRBS7 NRZI at 125 Mbaud, 30 mA pad into 2 nH + C, at the pin
+| load | corner | rise 10-90 (ns) | fall 10-90 (ns) | delay c2p->pin 50% (ns) | DDJ p-p at IOVDD/2 (ns) | eye height (% IOVDD) | eye width (ns) |
+|---|---|---|---|---|---|---|---|
+| cap5 | tt 27C | 0.97 (0.97-0.97) | 1.15 (1.15-1.15) | 1.85 | 0.30 | 100 | 7.90 |
+| cap5 | tt 85C | 1.11 (1.11-1.11) | 1.35 (1.35-1.35) | 2.10 | 0.33 | 100 | 7.90 |
+| cap5 | ss 27C | 1.18 (1.18-1.18) | 1.35 (1.35-1.35) | 2.72 | 0.02 | 100 | 7.90 |
+| cap5 | ss 85C | 1.34 (1.34-1.34) | 1.59 (1.59-1.59) | 3.03 | 0.06 | 100 | 7.90 |
+| cap5 | ff 27C | 0.82 (0.82-0.82) | 0.99 (0.99-0.99) | 1.65 | 0.35 | 100 | 7.90 |
+| cap5 | ff 85C | 0.93 (0.93-0.93) | 1.17 (1.17-1.17) | 1.86 | 0.38 | 100 | 7.90 |
+| cap10 | tt 27C | 1.53 (1.53-1.53) | 1.57 (1.57-1.57) | 2.19 | 0.36 | 100 | 7.90 |
+| cap10 | tt 85C | 1.74 (1.74-1.74) | 1.84 (1.84-1.84) | 2.49 | 0.39 | 100 | 7.90 |
+| cap10 | ss 27C | 1.89 (1.89-1.89) | 1.86 (1.86-1.86) | 3.17 | 0.09 | 100 | 7.90 |
+| cap10 | ss 85C | 2.14 (2.14-2.14) | 2.18 (2.18-2.18) | 3.54 | 0.15 | 100 | 8.00 |
+| cap10 | ff 27C | 1.27 (1.27-1.27) | 1.34 (1.34-1.34) | 1.96 | 0.40 | 100 | 7.90 |
+| cap10 | ff 85C | 1.45 (1.45-1.45) | 1.58 (1.58-1.58) | 2.22 | 0.44 | 100 | 7.90 |
+
+## SFP transmit input: two 30 mA pads in antiphase, 150 ohm series each, 8 cm 50 ohm lines (LC ladder), AC-coupled 100 ohm differential
+| corner | diff swing p-p (mV) | rise 20-80 (ns) | fall 20-80 (ns) | crossing jitter p-p at 0 V (ns) | eye height (mV) | eye width at 0 V (ns) |
+|---|---|---|---|---|---|---|
+| tt 27C | 1405 | 0.92 | 0.64 | 0.75 | 1358 | 7.25 |
+| tt 85C | 1361 | 1.08 | 0.73 | 0.75 | 1317 | 7.25 |
+| ss 27C | 1224 | 1.11 | 0.77 | 0.75 | 1185 | 7.25 |
+| ss 85C | 1175 | 1.30 | 0.86 | 0.75 | 1141 | 7.25 |
+| ff 27C | 1579 | 0.79 | 0.59 | 0.75 | 1524 | 7.25 |
+| ff 85C | 1538 | 0.92 | 0.66 | 0.75 | 1486 | 7.25 |
+
+## 100BASE-TX MLT-3 by pin pair: series R per pin, shunt across the primary, 1:1 magnetics (350 uH, 0.3 uH leakage), 1 m of lossless 100 ohm line, 100 ohm
+resistors: 47 ohm series, 249 ohm across the primary 
+TP-PMD template (from memory of ANSI X3.263 / 802.3 clause 25, NOT checked against the text): peak 950-1050 mV, symmetry 98-102 %, rise/fall 3-5 ns, rise/fall symmetry <= 0.5 ns, overshoot <= 5 %, jitter <= 1.4 ns p-p
+
+| corner | simulated to (us) | +peak (mV) | -peak (mV) | symmetry (%) | overshoot (%) | rise 10-90 (ns) | fall 10-90 (ns) | jitter p-p at +-50 % (ns) | eye upper / lower (mV) |
+|---|---|---|---|---|---|---|---|---|---|
+| tt 27C | 1.13 | 969 | -980 | 98.9 | 1.3 | 2.90 | 2.86 | 0.53 | 962 / 964 |
+| tt 85C | 1.13 | 914 | -924 | 98.9 | 1.7 | 2.94 | 2.85 | 0.63 | 906 / 907 |
+| ss 27C | 1.28 | 814 | -825 | 98.7 | 2.1 | 2.92 | 2.86 | 0.70 | 805 / 805 |
+| ss 85C | 1.28 | 761 | -771 | 98.6 | 2.6 | 3.00 | 2.86 | 0.82 | 752 / 752 |
+| ff 27C | 1.00 | 1119 | nan | nan | 0.9 | 2.89 | 2.87 | 0.25 | 1113 / 1113 |
+| ff 85C | 1.28 | 1062 | -1075 | 98.8 | 1.4 | 2.90 | 2.84 | 0.48 | 1055 / 1054 |
+
+## 100BASE-TX MLT-3 by pin pair: series R per pin, shunt across the primary, 1:1 magnetics (350 uH, 0.3 uH leakage), 1 m of lossless 100 ohm line, 100 ohm
+resistors: 47 ohm series, 249 ohm across the primary with 33 pF across the primary
+TP-PMD template (from memory of ANSI X3.263 / 802.3 clause 25, NOT checked against the text): peak 950-1050 mV, symmetry 98-102 %, rise/fall 3-5 ns, rise/fall symmetry <= 0.5 ns, overshoot <= 5 %, jitter <= 1.4 ns p-p
+
+| corner | simulated to (us) | +peak (mV) | -peak (mV) | symmetry (%) | overshoot (%) | rise 10-90 (ns) | fall 10-90 (ns) | jitter p-p at +-50 % (ns) | eye upper / lower (mV) |
+|---|---|---|---|---|---|---|---|---|---|
+| tt 27C | 1.13 | 969 | -979 | 98.9 | 4.5 | 5.12 | 4.81 | 0.59 | 944 / 934 |
+| ss 85C | 1.28 | 761 | -771 | 98.7 | 4.9 | 5.39 | 4.94 | 0.92 | 720 / 719 |
+| ff 27C | 0.22 | 1122 | nan | nan | 4.0 | 5.08 | 4.86 | 0.08 | 1103 / 1095 |
+
+## sg13g2_IOPadIn
+DC threshold: pad voltage where p2c crosses VDD/2 (from in_dc)
+
+| corner | threshold (V) |
+|---|---|
+| tt 27C | 0.590 |
+| tt 85C | 0.596 |
+| ss 27C | 0.546 |
+| ss 85C | 0.556 |
+| ff 27C | 0.624 |
+| ff 85C | 0.632 |
+
+62.5 MHz input through 50 ohm + 3 pF + 2 nH: p2c duty cycle (ideal 50 %) and pad->p2c delay
+
+| corner | in_full | in_ac_300_0 | in_ac_150_0 | in_ac_75_0 |
+|---|---|---|---|---|
+| tt 27C | 57 % / 0.27 ns | 56 % / 2.19 ns | 58 % / 3.46 ns | 100 % / nan ns (swing 0.47 V) |
+| tt 85C | 57 % / 0.28 ns | 55 % / 1.89 ns | 55 % / 2.74 ns | 59 % / 3.77 ns |
+| ss 27C | 58 % / 0.34 ns | 60 % / 3.70 ns | 100 % / nan ns (swing 0.00 V) | 100 % / nan ns (swing 0.00 V) |
+| ss 85C | 58 % / 0.35 ns | 57 % / 3.14 ns | 100 % / nan ns (swing 0.10 V) | 100 % / nan ns (swing 0.00 V) |
+| ff 27C | 57 % / 0.22 ns | 54 % / 1.28 ns | 54 % / 1.75 ns | 55 % / 2.40 ns |
+| ff 85C | 56 % / 0.23 ns | 53 % / 1.19 ns | 53 % / 1.62 ns | 54 % / 2.21 ns |
+
