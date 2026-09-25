@@ -199,7 +199,7 @@ F  WAITC  val[11] cond[10:7] fail[pc_bits-1:0]
     lockstep compared too little state. All three are fixed.
   - **Not found:** any interpreter/RTL disagreement in SEND, RECV, WAITC or capture, including
     depth 1, the fail address at 6 and 7 bits, and `dl = 0` against `dl > 0`.
-  - **Log:** `/var/tmp/multi-proto/codex-review.txt`.
+  - **Log:** `results/codex-review.txt`.
 
 **Area** (Yosys 0.62, sg13g2 typical, flattened, instruction memory external; the base
 re-synthesised with the same Yosys):
