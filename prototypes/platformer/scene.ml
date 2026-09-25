@@ -87,3 +87,16 @@ let random_line () =
       if Random.int 5 = 0 then blank_tile else { pix = rpix (); pal = Random.int 4; front = Random.int 4 = 0 });
     sprites = List.init (Random.int 22) (fun _ ->
       { x = Random.int 290 - 20; spix = rpix (); spal = Random.int 4; flip = Random.bool (); behind = Random.int 3 = 0 }) }
+
+(* directed lines for the edges: on line i, one sprite at x = -15 + i mod 16 and one at
+   x = 240 + i mod 16, flipped on alternate groups of 16 lines, with asymmetric patterns, over
+   tiles at fine scroll i mod 16 *)
+let directed_line i =
+  let pa = [| 1; 2; 3; 0; 1; 2; 3; 1; 0; 2; 3; 1; 2; 0; 3; 2 |] in
+  let pb = [| 3; 0; 0; 1; 2; 2; 0; 3; 1; 1; 0; 2; 3; 3; 0; 1 |] in
+  let flip = (i / 16) mod 2 = 1 in
+  let tile j = { pix = Array.init 16 (fun p -> if (p + j) mod 5 = 0 then 0 else 1 + (p + 2 * j) mod 3);
+                 pal = j mod 4; front = false } in
+  { backdrop = 40; fine = i mod 16; tiles = Array.init ntiles tile;
+    sprites = [ { x = -15 + i mod 16; spix = pa; spal = 1; flip; behind = false };
+                { x = 240 + i mod 16; spix = pb; spal = 2; flip; behind = i mod 3 = 0 } ] }

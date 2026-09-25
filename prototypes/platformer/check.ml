@@ -8,14 +8,14 @@ open Hardcaml
 let palette_lut () =
   Array.init 64 (fun i -> if i = 63 then Sim.burst_entry else Sim.lut_entry ~hue:(i mod 13) ~luma:(i mod 11))
 
-let run ?fault ?lean ~fields () =
+let run ?fault ?lean ?(directed = false) ~fields () =
   Random.init 5;
   let s = Sim.make ?fault ?lean () in
   let descs = Hashtbl.create 1024 and got = Hashtbl.create 1024 in
   let lut = palette_lut () in
   let packet ~field ~line =
     if line >= Sim.first_vis && line < Sim.first_vis + Sim.nvis then begin
-      let l = Scene.random_line () in
+      let l = if directed then Scene.directed_line (line - Sim.first_vis) else Scene.random_line () in
       Hashtbl.replace descs (field, line) l;
       Scene.encode l
     end else Scene.encode_blank () in
@@ -45,6 +45,9 @@ let main () =
   Printf.printf "chip lockstep: %d random lines x 256 pixels against the reference: %d lines, %d pixels differ (%.0f s)\n"
     lines bl bp (Unix.gettimeofday () -. t0);
   print_string (Sim.print_stats st);
+  let lines, bl, bp_dir, _ = run ~directed:true ~fields:1 () in
+  Printf.printf "  directed edge cases (sprites at x -15..0 and 240..255, flipped and not, every fine scroll): %d of %d lines, %d pixels differ\n"
+    bl lines bp_dir;
   let lines, bl, bp_lean, _ = run ~lean:true ~fields:1 () in
   Printf.printf "  the same with the lean PE-X (2 bits per step, window above bit 4, no rotate): %d of %d lines, %d pixels differ\n"
     bl lines bp_lean;
@@ -52,4 +55,4 @@ let main () =
     let lines, bl, bp, _ = run ~fault:f ~fields:1 () in
     Printf.printf "  planted fault %d (%s): %d of %d lines, %d pixels differ\n" f name bl lines bp)
     [ 1, "no horizontal flip"; 2, "flag block ignored"; 3, "release at window start" ];
-  bp = 0 && bp_lean = 0
+  bp = 0 && bp_lean = 0 && bp_dir = 0

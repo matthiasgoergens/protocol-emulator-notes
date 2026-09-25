@@ -14,5 +14,6 @@ let () =
     print_string (Sim.print_stats st);
     List.iter print_endline (List.rev !Game.events)
   | [ _; "verilog"; name ] -> Synth_circuits.write name
+  | [ _; "modelcheck" ] -> exit (if Chipmodel.main () then 0 else 1)
   | [ _; "timing" ] -> print_string (Vprog.check ())
   | _ -> prerr_endline "usage: main (pecheck | ...)"; exit 2
