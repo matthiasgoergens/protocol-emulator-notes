@@ -1,0 +1,20 @@
+sprite (11 per line, 6 lines)      PASS  1536 checks, 0 wrong, 0 lockstep mismatches  -- per-line reload of S (init chain) and K (configuration chain); x in 0..240 (the window wraps mod 256)
+tile layer, mid-line reload (16 tiles) PASS  256 checks, 0 wrong, 0 lockstep mismatches  -- needs the renderer alone in a 2-PE segment and gaps between pixels for the init writes
+FIR, 8 taps, 1-bit samples         PASS  400 checks, 0 wrong, 0 lockstep mismatches  -- coefficients within +-1000, no saturation reached
+CIC, order 2, R = 4 (8 PEs)        PASS  100 checks, 0 wrong, 0 lockstep mismatches  -- inputs up to +-10,000 so the integrators wrap; output = boxcar4^2 at n = 4j, mod 2^16
+NCO 16-bit and 32-bit (PE pair)    PASS  5980 checks, 0 wrong, 0 lockstep mismatches  -- K16 = 0x1a55, K32 = 0x1264003; high word lags one step, cancelled by S = -K_hi at start
+mixer / carrier wipe-off           PASS  2991 checks, 0 wrong, 0 lockstep mismatches  -- sample c (fixed port, clock c) leaves PE 4 at c + 2, multiplied by sign(phase (c + 2) K)
+GPS C/A correlator (12 offsets, 2 segments) PASS  52 checks, 0 wrong, 0 lockstep mismatches  -- first-10-chip catalogue check (PRN 1-4) ok; PRN 1 tau 0: peak 3061 at 0; PRN 2 tau 11: peak 3037 at 11; PRN 3 tau 5: peak 3060 at 5; PRN 4 tau 7: peak 3103 at 7
+sync word: exact 16-bit match (2 PEs) PASS  1177 checks, 0 wrong, 0 lockstep mismatches  -- found at 50,200,420; soft 8-bit score >= 6 at 60(6),86(6),89(6),93(6),100(8),121(6),158(8),210(6),241(6),257(6),298(6),300(6),352(6),359(6),431(6),477(6),502(6),557(6),576(6),577(6),588(6)
+min-plus relaxation (2 PEs per edge) PASS  40 checks, 0 wrong, 0 lockstep mismatches  -- 10 instances, 4 edges each; one PE would need a fused add-then-min; inst 5 reaches infinity; inst 6 reaches infinity; inst 9 reaches infinity
+sorting (insertion, 8 PEs, 20 values) PASS  90 checks, 0 wrong, 0 lockstep mismatches  -- 10 instances; S holds the top 8 in order; the rest leave through the tap
+CRC-16/XMODEM (1 PE)               PASS  24 checks, 0 wrong, 0 lockstep mismatches  -- catalogue check 0x31c3; 20 random messages; bits via the mailbox feed
+CRC-16/IBM-3740 (1 PE)             PASS  24 checks, 0 wrong, 0 lockstep mismatches  -- catalogue check 0x29b1; 20 random messages; bits via the mailbox feed
+CRC-16/KERMIT (1 PE)               PASS  22 checks, 0 wrong, 0 lockstep mismatches  -- catalogue check 0x2189; 20 random messages; bits via the mailbox feed
+CRC-16/USB (1 PE)                  PASS  22 checks, 0 wrong, 0 lockstep mismatches  -- catalogue check 0xb4c8; 20 random messages; bits via the mailbox feed
+CRC-32/ISO-HDLC (PE pair)          PASS  43 checks, 0 wrong, 0 lockstep mismatches  -- bits every clock (as designed) and with gaps (follow bit); 21 messages each
+CRC-32/BZIP2 (PE pair)             PASS  43 checks, 0 wrong, 0 lockstep mismatches  -- bits every clock (as designed) and with gaps (follow bit); 21 messages each
+CRC-32/MPEG-2 (PE pair)            PASS  43 checks, 0 wrong, 0 lockstep mismatches  -- bits every clock (as designed) and with gaps (follow bit); 21 messages each
+CRC-32 pair, stream mode, no follow EXPECTED FAIL  21 of 21 messages wrong (expected: most, since the high PE steps a clock late)
+  same, bits every clock           21 of 21 messages wrong
+17 of 17 cells pass
