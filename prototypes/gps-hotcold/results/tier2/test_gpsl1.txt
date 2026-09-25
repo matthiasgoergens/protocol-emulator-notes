@@ -1,0 +1,5 @@
+C/A first 10 chips vs ICD octal table: 32/32 match
+periodic auto (off-peak) and cross-correlation values over all 32x32 pairs: [-65, -1, 63] (Gold: -65, -1, 63)
+ones per code: [512] (balanced Gold codes have 512)
+parity: 200/200 generated subframes pass; single-bit errors caught 200/200
+generator: static PRN 7 at 60 dB-Hz, Doppler 1500 Hz, planted code phase -> found Doppler 1500 Hz, code offset 2312 samples (expected 2312.80)
