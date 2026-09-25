@@ -112,6 +112,13 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   precheck unnoticed. Deliberate breaks (`prototypes/rule-breaks/README.md`) remain our own
   risk.
 
+- **Determinism as a tracked design property, not an afterthought.** The sequencer is deterministic
+  by construction; the chip is not at clock-domain crossings, the four-phase stage (metastability,
+  phase skew), asynchronous external inputs, the analogue parts (pads, pump, delay line), and the
+  expiring memory (retention varies with temperature and die). List every source of
+  nondeterminism, model each in simulation as injected nondeterminism (metastability, skew and
+  retention sweeps), and plan record-and-replay of silicon runs into simulation for debugging.
+  Exploration testing (hwfuzz, and ideas from Antithesis) must cover both regimes.
 - **A programme verifier**, built before the showpieces: deadlines met, every read inside its
   row's lifetime at the chosen temperature bin, ports never double-booked.
 - **A pessimising scheduler** as a test oracle (after Knuth's SHOAP).
