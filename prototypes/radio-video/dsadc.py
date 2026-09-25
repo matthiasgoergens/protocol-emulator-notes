@@ -19,7 +19,7 @@ Measured here (results/dsadc.txt, results/dsadc.json):
      and output stage), for a few capacitor values, with pin threshold noise;
   2. a PAL test card through the ADC: the software TV's picture (out/dsadc_*.png) and the error
      of the per-cell luma averages the chip would compute (boxcar counts of ones);
-  3. sync separation from the bit stream: a 32-sample boxcar sliced into a sync bit, pulse widths
+  3. sync separation from the bit stream: a 0.53 us boxcar sliced into a sync bit, pulse widths
      classified the way a sequencer thread would (wait for a level with a deadline);
   4. audio: a 1 kHz tone, SNR in 15 kHz.
 """
@@ -39,7 +39,7 @@ RPIN = 50.0                               # output driver resistance, in series 
 
 
 @njit(cache=True)
-def _loop(vin, T, C, rin, rf, rb, vdd, vth, noise, seed):
+def _loop(vin, T, C, rin, rf, rb, vdd, vth, noise, seed, delay):
     np.random.seed(seed)
     n = len(vin)
     bits = np.empty(n, np.uint8)
@@ -47,21 +47,21 @@ def _loop(vin, T, C, rin, rf, rb, vdd, vth, noise, seed):
     tau = C / g
     a = math.exp(-T / tau)
     v = vth
-    out = 1
     for i in range(n):
+        # the output during sample i is the complement of the sample taken `delay` samples earlier
+        out = 1 - bits[i - delay] if i >= delay else (i & 1)
         vo = vdd if out else 0.0
         vinf = (vin[i] / rin + vo / rf + vdd / rb) / g
         v = vinf + (v - vinf) * a
-        s = 1 if v > vth + noise * np.random.standard_normal() else 0
-        bits[i] = s
-        out = 1 - s
+        bits[i] = 1 if v > vth + noise * np.random.standard_normal() else 0
     return bits
 
 
-def adc(vin, fs, C=470e-12, vth_off=0.0, noise=1e-3, seed=0):
-    """Returns the pin samples: 1 = node above threshold = input high (so ones ~ video level)."""
+def adc(vin, fs, C=470e-12, vth_off=0.0, noise=1e-3, seed=0, delay=1):
+    """Returns the pin samples: 1 = node above threshold = input high (so ones ~ video level).
+    delay: loop delay in samples from a sample to the output level it sets (1 = next sample)."""
     bits = _loop(np.ascontiguousarray(vin, dtype=np.float64), 1.0 / fs, C, RIN, RF + RPIN, RB, VDD,
-                 VDD / 2 + vth_off, noise, seed)
+                 VDD / 2 + vth_off, noise, seed, delay)
     return bits
 
 
@@ -84,12 +84,12 @@ def recon(bits, fs, bw):
     return (d - d0) / (d1 - d0)
 
 
-def sine_snr(fs, C, noise, f0=200e3, amp=0.4, bws=(0.5e6, 1e6, 2e6, 4.2e6, 5e6), T=2e-3, seed=0):
+def sine_snr(fs, C, noise, f0=200e3, amp=0.4, bws=(0.5e6, 1e6, 2e6, 4.2e6, 5e6), T=2e-3, seed=0, delay=1):
     n = int(T * fs)
     t = np.arange(n) / fs
     f0 = round(f0 * T) / T                       # whole number of periods in the window
     vin = 0.5 + amp * np.sin(2 * np.pi * f0 * t)
-    bits = adc(vin, fs, C=C, noise=noise, seed=seed)
+    bits = adc(vin, fs, C=C, noise=noise, seed=seed, delay=delay)
     out = {}
     for bw in bws:
         r = recon(bits, fs, bw)[n // 10: -n // 10]
@@ -123,21 +123,34 @@ def main():
                              + "  ".join(f"{k}: {v}" for k, v in o.items()))
                 print(lines[-1], flush=True)
     res["sine"] = tab
+    # 1b. loop delay: the input path's synchroniser and the four-phase stage's retiming put
+    # clocks, not samples, between a sample and the output it drives
+    lines.append("")
+    lines.append("Loop delay (samples from a pin sample to the output level it sets), C 470 pF, 1 mV noise:")
+    tabd = []
+    for fs, delays in ((60e6, (1, 2, 3)), (240e6, (1, 4, 8, 12))):
+        for dl in delays:
+            o = sine_snr(fs, 470e-12, 1e-3, delay=dl)
+            tabd.append(dict(fs=fs, delay=dl, **o))
+            lines.append(f"fs {fs/1e6:5.0f} MS/s  delay {dl:2d} samples ({dl * 1e9 / fs:5.1f} ns)  "
+                         + "  ".join(f"{k}: {v}" for k, v in o.items()))
+            print(lines[-1], flush=True)
+    res["sine_delay"] = tabd
     # 2. PAL test card through the ADC
     import tv
     lines.append("")
     pics = {}
-    for fs in (60e6, 240e6):
+    for fs, dl in ((60e6, 1), (60e6, 2), (240e6, 4), (240e6, 8)):
         tv.FS = fs
         s = tv.STD["PAL"]
         src = tv.test_picture()
         comp = tv.encode(src, s)                       # 0 = sync tip ... 1 = white, in volts
         ideal = tv.decode(tv.lowpass(comp, s["recon"], 401), s)
         t0 = time.time()
-        bits = adc(comp, fs, C=470e-12, noise=1e-3)
+        bits = adc(comp, fs, C=470e-12, noise=1e-3, delay=dl)
         rec = recon(bits, fs, 5e6)
         dec = tv.decode(rec, s)
-        tv.save(dec, OUT / f"dsadc_PAL_{int(fs/1e6)}MSps.png", 480)
+        tv.save(dec, OUT / f"dsadc_PAL_{int(fs/1e6)}MSps_d{dl}.png", 480)
         p = tv.psnr(dec, ideal)
         # per-cell luma as the chip computes it: count of ones over a cell (boxcar), per line,
         # for a 32 x 24 grid of the active picture, compared with the same average of the composite
@@ -157,7 +170,8 @@ def main():
         # cells of 12 lines x (active / 32): the 32 x 24 grid
         g = errs[: 24 * 12].reshape(24, 12, 32).mean(axis=1)
         # 3. sync separation from the bit stream
-        box = np.convolve(bits.astype(float), np.ones(32) / 32, mode="same")
+        nbox = int(round(0.53e-6 * fs))                 # a 0.53 us boxcar (32 samples at 60 MS/s)
+        box = np.convolve(bits.astype(float), np.ones(nbox) / nbox, mode="same")
         low = box < 0.5 * (solve_duty(0.0) + solve_duty(s["blank"]))   # near the sync tip level
         edges = np.flatnonzero(low[1:] & ~low[:-1]) + 1
         rises = np.flatnonzero(~low[1:] & low[:-1]) + 1
@@ -172,7 +186,7 @@ def main():
         starts = edges[[i for i, wdt in enumerate(widths) if 3.5 < wdt < 6.0]]
         per = np.diff(starts) / fs * 1e6
         per = per[(per > 60) & (per < 68)]
-        o = dict(fs=fs, picture_psnr_vs_ideal_db=round(p, 1), seconds=round(time.time() - t0, 1),
+        o = dict(fs=fs, delay=dl, picture_psnr_vs_ideal_db=round(p, 1), seconds=round(time.time() - t0, 1),
                  cell_err_line_rms_mV=round(float(errs.std() * 1e3), 2),
                  cell_err_grid_rms_mV=round(float(g.std() * 1e3), 2),
                  cell_err_grid_max_mV=round(float(np.abs(g).max() * 1e3), 2),
@@ -180,8 +194,8 @@ def main():
                  hsync_width_us_sd=round(float(hs.std()), 3) if len(hs) else None,
                  line_period_us_sd=round(float(per.std()), 4) if len(per) else None,
                  broad_pulses=int(len(broad)), other_pulses=int(len(widths) - len(hs) - len(broad)))
-        pics[f"{int(fs/1e6)}"] = o
-        lines.append(f"PAL test card at {fs/1e6:.0f} MS/s: " + ", ".join(f"{k} {v}" for k, v in o.items() if k != "fs"))
+        pics[f"{int(fs/1e6)}_d{dl}"] = o
+        lines.append(f"PAL test card at {fs/1e6:.0f} MS/s, loop delay {dl}: " + ", ".join(f"{k} {v}" for k, v in o.items() if k not in ("fs", "delay")))
         print(lines[-1], flush=True)
     res["pal"] = pics
     # 4. audio: 1 kHz tone

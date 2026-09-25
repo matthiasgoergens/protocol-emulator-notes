@@ -504,6 +504,9 @@ def main(n_train=3, n_test=3, minutes=40):
     np.savez_compressed(RES / "advert_test_seed.npz", **{f"{k}": v for k, v in sims[(True, n_train)]["vid"].items()},
                         **{f"aud_{r}_{k}": v for r in ("legacy", "r128") for k, v in sims[(True, n_train)]["aud"][r].items()},
                         label=sims[(True, n_train)]["label"])
+    np.savez_compressed(RES / "advert_states.npz",
+                        **{f"label_{rname}": sims[(black, n_train)]["label"] for rname, black, _ in regimes},
+                        **{f"{rname}_{cs}": st for (rname, cs), st in states.items()})
     for rname, black, aregime in regimes:
         rows = []
         for cs, names in CUESETS.items():
