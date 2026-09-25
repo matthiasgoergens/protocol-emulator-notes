@@ -1,0 +1,318 @@
+Host kernels: llvm-mca LLVM version 22.1.8, -mcpu=cortex-m33, 1000 iterations of the innermost loop
+compiler: clang --target=thumbv8m.main-none-eabi -mcpu=cortex-m33 -mthumb -mfloat-abi=soft -O2 -fno-unroll-loops -S -o /var/tmp/array-uses/kernels.s /home/matthias/prog/janestreet/emulator-wt-array-uses/prototypes/array-uses/host/kernels.c
+
+kernel                   instr  cyc/iter (mca)  cyc/iter +2 branch
+k1_corr_bitpacked           14           15.00               17.00
+k1b_corr_harley_seal        25           25.00               27.00
+k2_pm1_smlad                 5            6.00                8.00
+k3_cic_ddc                  18           18.00               20.00
+k4_fold                      8            8.00               10.00
+k5_myers                    27           29.00               31.00
+k6_viterbi_step             35           36.00               38.00
+k7_dtw_row                  20           21.00               23.00
+k8_minplus                   9           10.00               12.00
+k9_voices                   11           11.00               13.00
+k10_rule110                 18           18.00               20.00
+k11_mandel                  18           21.00               23.00
+k12_rs_syndrome              8           10.00               12.00
+k13_crc_bitwise             10           10.00               12.00
+k14_dda                     10           11.00               13.00
+k15_lz_match                 8           10.00               12.00
+k16_pdm                      6            8.00               10.00
+k17_insert                   7            8.00               10.00
+
+Timed assembly (the innermost loop of each function):
+
+--- k1_corr_bitpacked
+	ldr	r5, [r3, #4]!
+	ldr	r6, [r1, #4]!
+	subs	r2, #1
+	eor.w	r5, r5, r6
+	and.w	r6, r12, r5, lsr #1
+	sub.w	r5, r5, r6
+	and.w	r6, lr, r5, lsr #2
+	bic	r5, r5, #-858993460
+	add	r5, r6
+	add.w	r5, r5, r5, lsr #4
+	bic	r5, r5, #-252645136
+	mul	r5, r5, r4
+	add.w	r0, r0, r5, lsr #24
+	bne	.LBB0_2
+
+--- k1b_corr_harley_seal
+	ldr	r11, [r0, #8]!
+	ldr	r5, [r1, #8]!
+	ldr	r6, [r0, #4]
+	ldr	r4, [r1, #4]
+	eor.w	r5, r5, r11
+	eors	r4, r6
+	eor.w	r6, r5, r12
+	and.w	r12, r12, r5
+	and.w	r5, r4, r6
+	orr.w	r5, r5, r12
+	eor.w	r12, r4, r6
+	and.w	r4, r5, r7
+	and.w	r6, r8, r4, lsr #1
+	subs	r4, r4, r6
+	and.w	r6, r9, r4, lsr #2
+	bic	r4, r4, #-858993460
+	add	r4, r6
+	add.w	r4, r4, r4, lsr #4
+	bic	r4, r4, #-252645136
+	mul	r4, r4, r10
+	adds	r3, #2
+	add.w	lr, lr, r4, lsr #24
+	cmp	r3, r2
+	eor.w	r7, r7, r5
+	blt	.LBB1_2
+
+--- k2_pm1_smlad
+	ldr	r12, [r3, #4]!
+	ldr	lr, [r1, #4]!
+	subs	r2, #1
+	smlad	r0, r12, lr, r0
+	bne	.LBB2_2
+
+--- k3_cic_ddc
+	ldrsb	r6, [r0, #1]!
+	cmp	r4, #0
+	mov	r8, r6
+	rsb.w	r12, r6, #0
+	it	mi
+	movmi	r8, r12
+	adds.w	r1, r4, #1073741824
+	it	mi
+	movmi	r6, r12
+	add	lr, r8
+	add	r7, r6
+	add	r10, lr
+	add	r11, r7
+	add	r4, r2
+	add	r3, r10
+	subs	r5, #1
+	add	r9, r11
+	bne	.LBB3_2
+
+--- k4_fold
+	ldr.w	r7, [r8, r6, lsl #2]
+	cmp	r6, #6
+	eor.w	r5, r7, r4
+	str.w	r5, [r8, r6, lsl #2]
+	bhi	.LBB4_2
+	ands	r4, r7
+	add.w	r6, r6, #1
+	bne	.LBB4_5
+
+--- k5_myers
+	ldrb	r6, [r0, #1]!
+	ldr.w	r6, [r2, r6, lsl #2]
+	and.w	r7, r6, r4
+	add	r7, r4
+	eors	r7, r4
+	orr.w	r8, r6, r5
+	orrs	r6, r7
+	orr.w	r7, r6, r4
+	ands	r4, r6
+	orn	r5, r5, r7
+	lsr.w	r7, r4, r12
+	lsr.w	r6, r5, r12
+	and	r7, r7, #1
+	lsls	r5, r5, #1
+	and	r6, r6, #1
+	subs	r3, r3, r7
+	adds	r5, #1
+	add	r3, r6
+	orr.w	r6, r5, r8
+	mvns	r6, r6
+	cmp	r3, lr
+	orr.w	r4, r6, r4, lsl #1
+	it	lt
+	movlt	lr, r3
+	subs	r1, #1
+	and.w	r5, r5, r8
+	bne	.LBB5_2
+
+--- k6_viterbi_step
+	adds.w	lr, lr, #1
+	add.w	r12, r12, #4
+	add.w	r0, r0, #2
+	bhs	.LBB6_4
+	adds	r4, r3, r0
+	ldrh	r7, [r2, r0]
+	ldrh	r4, [r4, #-64]
+	ldrh	r6, [r3, r0]
+	adds	r5, r4, r7
+	sub.w	r8, r6, r7
+	sxth	r5, r5
+	sxth.w	r1, r8
+	subs	r4, r4, r7
+	add	r6, r7
+	movs	r7, #0
+	add.w	r9, lr, #32
+	sxth	r4, r4
+	sxth	r6, r6
+	cmp	r1, r5
+	itt	lt
+	movlt	r7, #1
+	movlt	r5, r1
+	and	r1, r0, #30
+	mvn.w	r11, r9
+	strh	r5, [r12, #-2]
+	cmp	r6, r4
+	it	lt
+	movlt	r4, r6
+	strh.w	r4, [r12]
+	it	lt
+	addlt	r7, #2
+	lsl.w	r1, r7, r1
+	lsls.w	r4, r11, #28
+	orr.w	r10, r10, r1
+	bne	.LBB6_1
+
+--- k7_dtw_row
+	ldrh	r4, [r0, #2]!
+	ldrsh	r5, [r3, #2]!
+	subs	r4, r2, r4
+	sxth	r4, r4
+	ldrsh.w	r6, [r3, #2]
+	cmp	r4, #0
+	it	mi
+	rsbmi	r4, r4, #0
+	cmp	r6, r5
+	it	lt
+	movlt	r5, r6
+	sxth.w	r6, lr
+	cmp	r6, r5
+	it	lt
+	movlt	r5, r6
+	add.w	lr, r5, r4
+	strh.w	lr, [r12, #4]
+	subs	r1, #1
+	add.w	r12, r12, #2
+	bne	.LBB7_2
+
+--- k8_minplus
+	ldr	lr, [r1, #4]!
+	ldr	r4, [r0, #4]!
+	uqadd16	r2, r12, lr
+	usub16	r4, r2, r4
+	ldr	r4, [r0]
+	subs	r3, #1
+	sel	r2, r4, r2
+	str	r2, [r0]
+	bne	.LBB8_2
+
+--- k9_voices
+	ldr	r4, [r1, #4]!
+	ldr	r5, [r2, #4]!
+	ldrsh	r6, [lr, #2]!
+	add	r4, r5
+	lsrs	r5, r4, #24
+	ldrsh.w	r5, [r3, r5, lsl #1]
+	str	r4, [r2]
+	mul	r4, r6, r5
+	subs.w	r12, r12, #1
+	add.w	r0, r0, r4, asr #8
+	bne	.LBB9_2
+
+--- k10_rule110
+	ldr.w	r5, [r0, r3, lsl #2]
+	cmp	r2, lr
+	lsl.w	r6, r5, #1
+	orr.w	r6, r6, r12, lsr #31
+	orr.w	r4, r4, r5, lsr #1
+	and.w	r6, r6, r5
+	orr.w	r12, r4, r5
+	and.w	r4, r4, r6
+	eor.w	r6, r4, r12
+	str.w	r6, [r1, r3, lsl #2]
+	mov	r12, r5
+	mov	r3, lr
+	beq	.LBB10_6
+	add.w	lr, r3, #1
+	cmp	lr, r2
+	blt	.LBB10_2
+	movs	r4, #0
+	b	.LBB10_3
+
+--- k11_mandel
+	smull	r5, r8, lr, lr
+	smull	r7, r6, r4, r4
+	lsrs	r5, r5, #28
+	lsrs	r7, r7, #28
+	orr.w	r5, r5, r8, lsl #4
+	orr.w	r6, r7, r6, lsl #4
+	adds	r7, r5, r6
+	cmp.w	r12, r7, lsr #30
+	bne	.LBB11_5
+	smull	r7, r4, lr, r4
+	lsrs	r7, r7, #27
+	orr.w	r4, r7, r4, lsl #5
+	subs	r7, r0, r6
+	adds	r3, #1
+	add.w	lr, r7, r5
+	cmp	r2, r3
+	add	r4, r1
+	bne	.LBB11_2
+
+--- k12_rs_syndrome
+	ldrb.w	r3, [r12, lr]
+	ldrb	r3, [r5, r3]
+	ldrb	r4, [r0], #1
+	subs	r1, #1
+	eor.w	lr, r4, r3
+	beq	.LBB12_6
+	cmp.w	lr, #0
+	bne	.LBB12_2
+
+--- k13_crc_bitwise
+	ldrb	r3, [r12, #1]!
+	uxth.w	lr, r0
+	and	r4, r3, #1
+	eor.w	r3, r2, r0, lsl #1
+	cmp.w	r4, lr, lsr #15
+	it	eq
+	lsleq	r3, r0, #1
+	subs	r1, #1
+	mov	r0, r3
+	bne	.LBB13_2
+
+--- k14_dda
+	cmp	r0, r1
+	ittee	ge
+	addge	r1, r3
+	addge	r4, lr
+	addlt	r0, r2
+	addlt	r6, r5
+	orr.w	r7, r6, r4, lsl #6
+	ldrb.w	r7, [r12, r7]
+	cmp	r7, #0
+	beq	.LBB14_1
+
+--- k15_lz_match
+	ldrb.w	lr, [r12, r0]
+	ldrb	r3, [r1, r0]
+	cmp	lr, r3
+	it	ne
+	popne	{r7, pc}
+	adds	r0, #1
+	cmp	r2, r0
+	bne	.LBB15_2
+
+--- k16_pdm
+	ldrb	r3, [r12, #1]!
+	subs	r1, #1
+	ldrb	r3, [r2, r3]
+	add	lr, r3
+	add	r0, lr
+	bne	.LBB16_2
+
+--- k17_insert
+	ldrsh	r3, [r1], #-2
+	cmp	r3, r2
+	ble	.LBB17_5
+	strh.w	r3, [r12, #2]
+	subs.w	lr, lr, #1
+	mov	r12, r1
+	bgt	.LBB17_2
+
