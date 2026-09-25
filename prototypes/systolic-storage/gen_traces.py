@@ -10,7 +10,7 @@ linebuf: the Ethernet-fed line buffer in front of the semiring ring (prototypes/
   10 Mbit/s, one byte every 0.8 us. P lines per UDP packet; the host aims to finish each packet a
   margin M before its first line is loaded, starting up to J earlier at random (host jitter), and
   packets never overlap on the wire. Each 32-bit word is defined when its last byte arrives and
-  used once, when its line is loaded at the start of that line. PAL timing: 64 us lines, 312 lines
+  used once, when the ring shifts it in during the preceding line's blanking. PAL timing: 64 us lines, 312 lines
   per field, visible lines 40..279 (semiring-ring/model.ml: lpf, first_vis, nvis).
   P = 1 and 2 cannot keep up: 116 or 164 bytes on the wire per 64 or 128 us of lines.
 
@@ -28,7 +28,11 @@ BYTE = 0.8e-6 * CLK         # cycles per byte at 10 Mbit/s = 40
 HDR = 8 + 14 + 20 + 8       # preamble+SFD, Ethernet, IPv4, UDP headers (bytes)
 TAIL = 4 + 12               # FCS + inter-frame gap
 FIELDS = 2
-VIS_OFF = 662 * 50 // 53    # visible start within the line, scaled from vis_start = 662 at 53.2 MHz
+PAL_CLK = 53.203425e6
+VIS_OFF = round(662 * CLK / PAL_CLK)   # visible start, from vis_start = 662 at 12 fsc
+# the ring shifts the next line's 48 bytes in at clocks 3240..3287 of the preceding 3405-clock
+# line (semiring-ring/tb.ml); word j (bytes 4j..4j+3) is consumed with its last byte
+LOAD = lambda j: round((3240 + 4 * j + 3) * CLK / PAL_CLK)
 
 
 def visible_lines():
@@ -45,7 +49,7 @@ def linebuf(P, margin_us=100.0, jitter_us=200.0, seed=1):
         group = lines[k:k + P]
         nbytes = HDR + 2 + 48 * len(group) + TAIL
         dur = nbytes * BYTE
-        deadline = group[0] * LINE
+        deadline = (group[0] - 1) * LINE + LOAD(0)
         start = deadline - margin_us * 50 - dur - rng.uniform(0, jitter_us * 50)
         start = max(start, wire_free)
         wire_free = start + dur
@@ -55,7 +59,7 @@ def linebuf(P, margin_us=100.0, jitter_us=200.0, seed=1):
             for j in range(12):
                 arrive = start + (HDR + 2 + 48 * i + 4 * (j + 1)) * BYTE
                 rows.append(("linebuf", f"L{ln}.w{j}", 32, rng.getrandbits(32),
-                             int(arrive), ln * LINE))
+                             int(arrive), (ln - 1) * LINE + LOAD(j)))
     return rows, late
 
 

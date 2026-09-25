@@ -66,27 +66,29 @@ let () =
     let op = Isa.op_of_code ((instr lsr 12) land 0xF) in
     let now = !t in
     read pc.(th) now; read imem.(th).(p) now;
-    if st.dls.(th) <> 0 then read dl.(th) now;     (* the decrement reads dl *)
+    if st.dls.(th) <> 0 && op <> Isa.LDD then read dl.(th) now;   (* the decrement reads dl *)
     (match op with
-     | Isa.WAITP | WAITD -> read dl.(th) now
+     | Isa.WAITP ->
+       let pin = (instr lsr 9) land 7 and pv = (instr lsr 8) land 1 in
+       if (!bus lsr pin) land 1 <> pv then read dl.(th) now   (* dl only matters on a mismatch *)
+     | WAITD -> read dl.(th) now
      | SHO | SHI -> read acc.(th) now; read cnt.(th) now
      | JNZ -> read cnt.(th) now
      | OUT -> read acc.(th) now
      | HALT -> halted.(th) <- true
      | _ -> ());
-    let a0 = st.accs.(th) and c0 = st.cnts.(th) and d0 = st.dls.(th) in
+    let d0 = st.dls.(th) in
     let pin_in = !bus in
     ignore (Isa.step st ~mem ~pin_in ~host_in:0 ~host_in_valid:false);
     bus := resolve slave ~pin_out:st.pin_out ~pin_oe:st.pin_oe;
     (* a register is rewritten when the instruction targets it; dl also whenever it counts *)
-    let wr_acc = (match op with LDA | SHO | SHI -> true | IN -> st.accs.(th) <> a0 | _ -> false) in
+    let wr_acc = (match op with LDA | SHO | SHI -> true | _ -> false) in   (* IN: host_in_valid is always false here *)
     let wr_cnt = (match op with LDC | SHO | SHI -> true | _ -> false) in
     let wr_dl = op = LDD || d0 <> 0 in
     let name r = Printf.sprintf "t%d.%s" th r in
     if wr_acc then write (name "acc") acc.(th) st.accs.(th) (now + 1);
     if wr_cnt then write (name "cnt") cnt.(th) st.cnts.(th) (now + 1);
     if wr_dl then write (name "dl") dl.(th) st.dls.(th) (now + 1);
-    ignore c0;
     write (name "pc") pc.(th) st.pcs.(th) (now + 1);
     incr t
   done;

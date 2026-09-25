@@ -3,11 +3,11 @@ seq-regs     n= 24242 span=    348.9 us  peak_live=  13  max=    14.9 us  all-ze
    <=0.1:24078  <=1.2:66  <=8:2  <=95:96  <=118.8:0  <=2480:0  <=3100:0  <=9650:0  <=1e+09:0
 seq-imem     n=   165 span=    348.9 us  peak_live= 165  max=   348.9 us  all-zero=0
    <=0.1:5  <=1.2:7  <=8:11  <=95:75  <=118.8:2  <=2480:65  <=3100:0  <=9650:0  <=1e+09:0
-linebuf-P3   n=  5760 span=  35515.7 us  peak_live=  84  max=   470.6 us  all-zero=0
+linebuf-P3   n=  5760 span=  35516.5 us  peak_live=  84  max=   470.6 us  all-zero=0
    <=0.1:0  <=1.2:0  <=8:0  <=95:0  <=118.8:0  <=2480:5760  <=3100:0  <=9650:0  <=1e+09:0
-linebuf-P5   n=  5760 span=  35592.5 us  peak_live= 117  max=   603.2 us  all-zero=0
+linebuf-P5   n=  5760 span=  35593.3 us  peak_live= 117  max=   603.2 us  all-zero=0
    <=0.1:0  <=1.2:0  <=8:0  <=95:0  <=118.8:0  <=2480:5760  <=3100:0  <=9650:0  <=1e+09:0
-linebuf-P20  n=  5760 span=  36168.5 us  peak_live= 296  max=  1561.4 us  all-zero=0
+linebuf-P20  n=  5760 span=  36169.3 us  peak_live= 296  max=  1561.4 us  all-zero=0
    <=0.1:0  <=1.2:0  <=8:0  <=95:0  <=118.8:0  <=2480:5760  <=3100:0  <=9650:0  <=1e+09:0
 vfir2        n= 30592 span=  35313.8 us  peak_live=  64  max=    63.4 us  all-zero=0
    <=0.1:0  <=1.2:0  <=8:0  <=95:30592  <=118.8:0  <=2480:0  <=3100:0  <=9650:0  <=1e+09:0

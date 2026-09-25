@@ -88,3 +88,31 @@ def test_values_never_outlive_their_row_in_schedule():
     s = a.allocate(vs, a.make_rows(2, 8, 16), "ff85", guard=0.8, decay=d)
     assert s["ops"] > 0
     assert d.corrupt == 0 and d.detected == 0
+
+
+def test_decayed_refresh_stays_decayed():
+    """A refresh writes back what it read. If a bit has decayed by then, the final read must
+    still be corrupt (and flagged): a refresh cannot restore lost data. (Found by codex review.)"""
+    L = int(a.LIFE["thin"]["ff85"])                    # 60 cycles
+    vs = [a.Value("x", 1, 1, 0, 3 * L)]
+    rows = a.make_rows(0, 1, 1, weak=[(0, 0.5, 1.0)])
+    rows[0].bit_spread = [1.0] * len(rows[0].bit_spread)
+    d = a.Decay("ff85", 1)
+    s = a.allocate(vs, rows, "ff85", guard=0.8, decay=d)
+    assert s["refreshes"] >= 2
+    assert d.corrupt == d.reads and d.silent == 0
+
+
+def test_row_not_reused_in_its_last_read_cycle():
+    """[0,1] and [1,2] overlap in cycle 1, so they need two rows, as peak_live says."""
+    vs = [a.Value("a", 8, 1, 0, 1), a.Value("b", 8, 1, 1, 2)]
+    assert a.peak_live(vs) == 2
+    assert a.allocate(vs, a.make_rows(1, 0, 8), "tt27")["overflow"] == 1
+    assert a.allocate(vs, a.make_rows(2, 0, 8), "tt27")["overflow"] == 0
+
+
+def test_sub_cycle_lifetime_terminates():
+    vs = [a.Value("x", 8, 255, 0, 100)]
+    rows = a.make_rows(0, 1, 8, weak=[(0, 0.01, 0.01)])
+    s = a.allocate(vs, rows, "ff85")
+    assert s["refreshes"] == 99

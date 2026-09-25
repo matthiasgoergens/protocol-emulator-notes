@@ -90,10 +90,14 @@ class Decay:
         self.reads = self.corrupt = self.detected = self.silent = self.false_alarm = 0
         self.detect_rows = collections.Counter()
 
-    def read(self, row, data, tw, t):
+    def encode(self, data):
+        return data | (berger(data, self.width) << self.width)
+
+    def read(self, row, stored, data, tw, t):
+        """stored: the codeword written at tw (a refresh writes back what it read, decayed or
+        not); data: the value the program originally wrote. Returns the codeword read."""
         life = LIFE[row.kind][self.cond] * row.true
         age = t - tw
-        stored = data | (berger(data, self.width) << self.width)
         got = 0
         for b in range(self.width + self.cb):
             if (stored >> b) & 1 and age <= life * row.bit_spread[b]:
@@ -109,7 +113,7 @@ class Decay:
         self.false_alarm += flag and not bad
         if flag:
             self.detect_rows[row.idx] += 1
-        return d
+        return got
 
 
 def allocate(values, rows, cond, guard=0.8, decay=None, migrate=True, max_ops=None):
@@ -120,9 +124,13 @@ def allocate(values, rows, cond, guard=0.8, decay=None, migrate=True, max_ops=No
         classes[lp[r.idx]].append(r.idx)
     byid = {r.idx: r for r in rows}
     lifetimes = sorted(classes)
-    ev = []  # (time, order, kind, value index)
+    # (time, kind, value): at equal times definitions come first, releases last, so a row is
+    # reused only after the cycle of its value's last read (the convention of peak_live)
+    DEF, DEADLINE, RELEASE = 0, 1, 2
+    ev = []
     for i, v in enumerate(values):
-        heapq.heappush(ev, (v.t_def, 1, i))
+        heapq.heappush(ev, (v.t_def, DEF, i))
+    step = lambda r: max(1, int(lp[r]))
     where = {}    # value -> (row, time written)
     stats = collections.Counter()
     stats["values"] = len(values)
@@ -140,39 +148,39 @@ def allocate(values, rows, cond, guard=0.8, decay=None, migrate=True, max_ops=No
     while ev:
         t, kind, i = heapq.heappop(ev)
         v = values[i]
-        if kind == 0:                                  # last use: read, free the row
-            r, tw = where.pop(i)
+        if kind == RELEASE:                            # last use: read, free the row
+            r, tw, word = where.pop(i)
             if decay:
-                decay.read(byid[r], v.value, tw, t)
+                decay.read(byid[r], word, v.value, tw, t)
             classes[lp[r]].append(r)
             live -= 1
-        elif kind == 1:                                # definition
+        elif kind == DEF:                              # definition
             r = take(v.t_last - v.t_def)
             if r is None:
                 stats["overflow"] += 1
                 continue
-            where[i] = (r, t)
+            where[i] = (r, t, decay.encode(v.value) if decay else None)
             live += 1
             peak = max(peak, live)
             stats[f"placed_{byid[r].kind}"] += 1
-            heapq.heappush(ev, (v.t_last, 0, i))
-            if t + lp[r] < v.t_last:
-                heapq.heappush(ev, (t + int(lp[r]), 2, i))
+            heapq.heappush(ev, (v.t_last, RELEASE, i))
+            if t + step(r) < v.t_last:
+                heapq.heappush(ev, (t + step(r), DEADLINE, i))
         else:                                          # deadline before last use
-            r, tw = where[i]
+            r, tw, word = where[i]
             remaining = v.t_last - t
             r2 = take(remaining, better_than=lp[r]) if migrate else None
-            if decay:
-                decay.read(byid[r], v.value, tw, t)    # the refresh read is checked too
+            if decay:                                  # checked, and written back as read
+                word = decay.read(byid[r], word, v.value, tw, t)
             if r2 is not None:
                 classes[lp[r]].append(r)
                 r = r2
                 stats["migrations"] += 1
             else:
                 stats["refreshes"] += 1
-            where[i] = (r, t)
-            if t + lp[r] < v.t_last:
-                heapq.heappush(ev, (t + int(lp[r]), 2, i))
+            where[i] = (r, t, word)
+            if t + step(r) < v.t_last:
+                heapq.heappush(ev, (t + step(r), DEADLINE, i))
             if max_ops is not None and stats["refreshes"] + stats["migrations"] > max_ops:
                 stats["aborted"] = 1
                 break
@@ -263,9 +271,8 @@ def mixes(guard=0.8, cap=0.10):
             blind = lambda nt, nn: (nt * sp / (LIFE['thick'][cond] * guard)
                                     + nn * sp / (LIFE['thin'][cond] * guard))
             res = []
-            step = max(1, pk // 16)
             max_ops = cap * sp / 2
-            for n_thin in sorted(set(list(range(0, pk + 1, step)) + [pk])):
+            for n_thin in range(0, pk + 1):             # every thin count; slack 0, pk/8, pk/4
                 for slack in sorted({0, pk // 8, pk // 4}):
                     nt = max(0, pk - n_thin) + slack
                     s = allocate(vs, make_rows(nt, n_thin, width), cond, guard, max_ops=max_ops)
