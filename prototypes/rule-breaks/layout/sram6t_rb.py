@@ -59,8 +59,15 @@ def configure(**rules):
     NW = round(PP[1] + r["nw_c"], 3)          # n-well edge (NW.c)
     NS = (round(NW + r["nw_d"], 3), round(NW + r["nw_d"] + 0.30, 3))   # NMOS strip (NW.d), W 0.30
     XB = round(NS[1] + r["gat_c_n"] + 0.09, 3)
+    # Metal2 floor: the word-line island at the cell boundary keeps M2.b 0.21 from the VSS track
+    # (both 0.20 wide), i.e. XB >= XC_N + 0.41; the PDK cell sits exactly on it (0.17 end cap)
+    XB = max(XB, round((NS[0] + NS[1]) / 2 + 0.41, 3))
     # pSD edge: at the n-well edge, or nearer the PMOS when pSD.j (0.30 to the NFET gates) needs it
-    PSD_X = min(NW, round(NS[0] - 0.30, 3))  # half pitch: end cap + half of Gat.b
+    PSD_X = min(NW, round(NS[0] - 0.30, 3))
+    if PSD_X < PP[1] + 0.18:
+        # the well gap is too narrow for pSD.c (0.18 past P+ Activ) and pSD.j (0.30 to the NFET
+        # gates) together: keep pSD.c and give up pSD.j
+        PSD_X = round(PP[1] + 0.18, 3)  # half pitch: end cap + half of Gat.b
     XC_P = round((PP[0] + PP[1]) / 2, 3)
     XC_N = round((NS[0] + NS[1]) / 2, 3)
     X_GC = round((PP[1] + NS[0]) / 2, 3)      # gate-contact column, centred in the well gap
@@ -205,7 +212,9 @@ if __name__ == "__main__":
     tier = sys.argv[3] if len(sys.argv) > 3 else "standard"
     which = sys.argv[4].split(",") if len(sys.argv) > 4 and sys.argv[4] != "none" else []
     out = sys.argv[5] if len(sys.argv) > 5 else "sram6t_rb.gds"
-    configure(**(PDK if tier == "pdk" else STANDARD))
+    base, _, extra = tier.partition(":")
+    configure(**dict({"pdk": PDK, "standard": STANDARD}[base],
+                     **{k: float(v) for k, v in (kv.split("=") for kv in extra.split(",") if kv)}))
     lib = gdstk.Library(unit=1e-6, precision=5e-9)
     a, w, h = array(lib, cols, rows)
     if which:
