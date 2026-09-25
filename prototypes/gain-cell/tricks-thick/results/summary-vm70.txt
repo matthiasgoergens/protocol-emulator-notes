@@ -1,0 +1,28 @@
+worst-case lifetime (ms) and corner; latch margin 70 mV each side
+cell                                                      inv 10 ns          inv 20 ns         latch 5 ns        latch 20 ns
+thin MS (today's cell)                                  0.000 ss 27        9.033 ff 85       15.632 ff 27      >19.327 ff 85
+thin MS + CSN 1 fF                                     16.017 ff 85       25.343 ff 85       39.978 ff 85      >53.430 ff 85
+thin MS + WWL 2.0 V                                     5.889 ff 85        9.188 ff 85       15.164 ff 85      >19.483 ff 85
+thin MS + WWL 2.2 V                                     5.889 ff 85        9.187 ff 85       15.082 ff 85      >19.480 ff 85
+thin MS + WWL 2.2 V + CSN 1 fF                         16.330 ff 85       25.657 ff 85       40.076 ff 85      >53.747 ff 85
+thin MS + CC 0.25 fF                                    0.000 ff 27        0.000 ff 27        0.000 ff 27        0.000 ff 27
+thin MS + CC 0.5 fF                                     0.000 ff 27        0.000 ff 27        0.000 ff 27        0.000 ff 27
+thick MS, thin MR                                       0.000 ff 27        0.000 ss 27        0.000 ff 27        0.000 ss 27
+all thick                                               0.000 ff 27        0.000 ss 27        0.000 ff 27        0.000 ss 27
+all thick + CSN 1 fF                                    0.000 ff 27        0.000 ss 27        0.000 ff 27        0.000 ss 27
+all thick + WBL idle 0.6                                0.000 ff 27        0.000 ss 27        0.000 ff 27        0.000 ss 27
+all thick + CC 0.5 fF                                  71.119 ff 85       16.939 ff 85      126.993 ff 85        6.919 ff 85
+all thick + CC 1 fF                                     0.000 ff 27        0.000 ff 27        0.000 ff 27        0.000 ff 27
+all thick + WWL 1.6 V                                   0.000 ss 27        0.000 ss 27        0.000 ss 27       55.075 ss 27
+all thick + WWL 2.0 V                                 115.379 ss 85      146.835 ss 85      155.592 ss 85      199.476 ss 85
+all thick + WWL 2.2 V                                 111.508 ss 85      142.963 ss 85      151.719 ss 85      195.797 ss 85
+all thick + WWL 2.4 V                                 107.182 ss 85      138.637 ss 85      147.394 ss 85      191.472 ss 85
+all thick + WWL 2.2 V + WBL 0.6                       154.138 ss 85      201.809 ss 85      215.723 ss 85      291.334 ss 85
+all thick + WWL 2.2 V + CSN 0.5 fF                    203.805 ss 85      255.985 ss 85      270.999 ss 85      348.800 ss 85
+all thick + WWL 2.2 V + CSN 1 fF                      295.532 ss 85      368.450 ss 85      389.728 ss 85      500.966 ss 85
+all thick + WWL 2.2 V + CSN 1 fF + WBL 0.6            403.897 ss 85      514.483 ss 85      548.310 ss 85      741.432 ss 85
+thick MS thin MR + WWL 2.2 V                          127.345 ss 85      158.338 ss 85      168.527 ss 85      209.075 ss 85
+all thick + CC 0.5 fF + WBL idle 0                    251.661 ss 85      415.729 ss 85      344.265 ss 85      492.976 ss 85
+all thick + WWL 2.2 V + CC 0.5 fF                      67.421 ff 85       13.505 ff 85      148.470 ff 27        3.533 ff 85
+all thick + WWL 2.2 V + CC 0.5 fF + WBL idle 0        683.817 ss 85      847.889 ss 85      771.095 ss 85      914.721 ss 85
+all thick + WWL 2.2 V + CSN 1 fF + WBL idle 0         295.532 ss 85      368.450 ss 85      390.377 ss 85      506.550 ss 85

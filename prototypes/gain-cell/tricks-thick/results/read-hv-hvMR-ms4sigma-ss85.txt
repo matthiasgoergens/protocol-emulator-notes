@@ -1,0 +1,14 @@
+# gc.py read ENVS=MS=hv MR=hv SN1=1.0 CORNERS=ss TEMPS=85 MODELS=/work/models-dvt DVTMS=0.076 SWEEP=0.50:1.00:0.05 ZEROS=0.0  commit 99fa65e  2026-09-25T11:49:05+08:00
+read: MS hv 0.30/0.45, MR hv 0.30/0.45, MW hv 0.15/0.45, CSN 0, CC 0, VWWL 1.2, WBL idle opp, write 20.0 ns, MS dVT 0.076; N 32, wire 10f, unselected at 1.0 V, RWL 1.2 V for 40.0 ns; RBL at 2/5/10/20/40 ns after RWL rises; SN before -> during
+mos_ss   85C SN  0.00:  0.000 ->  0.083  RBL  1.203  1.203  1.202  1.201  1.201
+mos_ss   85C SN  0.50:  0.500 ->  0.603  RBL  1.201  1.199  1.197  1.192  1.183
+mos_ss   85C SN  0.55:  0.550 ->  0.647  RBL  1.200  1.196  1.190  1.177  1.152
+mos_ss   85C SN  0.60:  0.600 ->  0.690  RBL  1.197  1.188  1.172  1.140  1.078
+mos_ss   85C SN  0.65:  0.650 ->  0.732  RBL  1.190  1.168  1.132  1.060  0.917
+mos_ss   85C SN  0.70:  0.700 ->  0.774  RBL  1.176  1.131  1.056  0.909  0.623
+mos_ss   85C SN  0.75:  0.750 ->  0.817  RBL  1.151  1.067  0.929  0.659  0.213
+mos_ss   85C SN  0.80:  0.800 ->  0.856  RBL  1.114  0.971  0.738  0.307  0.005
+mos_ss   85C SN  0.85:  0.850 ->  0.864  RBL  1.062  0.840  0.485  0.040  0.000
+mos_ss   85C SN  0.90:  0.900 ->  0.901  RBL  0.999  0.683  0.214  0.002  0.000
+mos_ss   85C SN  0.95:  0.950 ->  0.950  RBL  0.929  0.513  0.055  0.000  0.000
+mos_ss   85C SN  1.00:  1.000 ->  1.000  RBL  0.860  0.354  0.013  0.000  0.000

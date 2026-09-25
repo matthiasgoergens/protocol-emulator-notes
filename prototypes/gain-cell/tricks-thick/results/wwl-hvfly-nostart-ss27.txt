@@ -1,0 +1,7 @@
+# wwl.py  ENVS=CORNERS=mos_ss TEMPS=27 FLY=hv STARTUP=lv CFLY=10x2  commit 78295db  2026-09-25T11:18:56+08:00
+boosted WWL: pump 100.0 MHz, start-up diodes lv, flying caps hv 10x2 um, reservoir hv 10x10 um; 32 cells (hv storage), wire 500.0 ohm / 4.0 fF; writes of 20.0 ns at [3.0, 3.2, 3.4, 3.6] us
+mos_ss   27C  peak VPP 0.940, A 1.698, B 1.165, LS 0.966 V; peak across the flying caps 0.999 / 0.721 V; VPP reaches 2.0 V at nan us; supply power idle 0.4 uW, with writes every 200 ns 0.4 uW
+    write at 3.0 us: VPP 0.940 -> 0.893 V; far-end WWL 0.900 V, D to WWL 0.9 V 14.91 ns; written SN far 0.257, near 0.257 V
+    write at 3.2 us: VPP 0.894 -> 0.848 V; far-end WWL 0.854 V, D to WWL 0.9 V nan ns; written SN far 0.000, near 0.000 V
+    write at 3.4 us: VPP 0.850 -> 0.808 V; far-end WWL 0.814 V, D to WWL 0.9 V nan ns; written SN far 0.186, near 0.186 V
+    write at 3.6 us: VPP 0.812 -> 0.770 V; far-end WWL 0.775 V, D to WWL 0.9 V nan ns; written SN far 0.000, near 0.000 V
