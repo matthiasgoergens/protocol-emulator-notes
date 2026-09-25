@@ -1,0 +1,4 @@
+# gc.py read ENVS=MS=hv MR=hv SN1=1.0 CORNERS=ss TEMPS=85 SWEEP=0.60:0.60:0.1 ZEROS=0.0 SA=1 TSENSE=5 VREFBL=1.125  commit cc7a202  2026-09-25T11:21:56+08:00
+read: MS hv 0.30/0.45, MR hv 0.30/0.45, MW hv 0.15/0.45, CSN 0, CC 0, VWWL 1.2, WBL idle opp, write 20.0 ns; N 32, wire 10f, unselected at 1.0 V, RWL 1.2 V for 40.0 ns; RBL at 2/5/10/20/40 ns after RWL rises; SN before -> during
+mos_ss   85C SN  0.00:  0.000 ->  0.093  RBL  1.202  1.201  0.700  0.700  0.699  SA OUTP  1.200 (RBL 1 ns after CLK  0.700)
+mos_ss   85C SN  0.60:  0.600 ->  0.676  RBL  1.188  1.164  0.659  0.617  0.533  SA OUTP  1.200 (RBL 1 ns after CLK  0.676)

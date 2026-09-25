@@ -20,6 +20,9 @@
 #   CORNERS (tt,ff,ss) TEMPS (27,85) BITS (1,0)
 #   read: N (32), CBL (10f), SN1 (unselected level, 0.7), SWEEP lo:hi:step, ZEROS (-0.06,0.0,0.05,0.10)
 #         VRWL (1.2) read word line level; TREAD (40) ns RWL pulse
+#         SA=1 attaches a StrongARM latch (sa.py's design B: input pair 4/0.5, latch 2/0.26) to RBL:
+#         INN = RBL, INP = a reference (REFCOL=fixed|cell|ideal, see below) plus VOS, clocked TSENSE ns
+#         after RWL rises; OUTP high 3 ns later = read as 1. Includes the latch's load and kickback.
 import itertools, os, re, subprocess, sys
 VDD = 1.2
 E = os.environ.get
@@ -127,6 +130,45 @@ def read():
             unsel = "".join(cellnet(i, "0", "0", f"sn{i}", "0", "rbl") + f".ic v(sn{i})={SN1}\n"
                             for i in range(1, N))
             ms = "\n".join(f"meas tran bl{t} find v(rbl) at={40 + t}n" for t in times)
+            sa = ""
+            if E("SA"):
+                ts, vref, vos = float(E("TSENSE", "20")), float(E("VREFBL", "1.125")), float(E("VOS", "0"))
+                ref = E("REFCOL", "fixed")
+                if ref == "ideal":        # an ideal source: the latch's kickback is then one-sided
+                    refnet = f"vref inp 0 {vref + vos}"
+                else:
+                    # a reference column like the data column (wire, N cells, the same latch input),
+                    # precharged to VREFBL (fixed) or to VDD with a dummy cell whose gate is held at
+                    # VREFSN (cell); the latch's kickback then acts on both inputs alike. VOS goes in
+                    # series with the latch input.
+                    pre = vref if ref == "fixed" else VDD
+                    refnet = (f"vpref vpr 0 {pre}\nsprer rblr vpr pre 0 swm\ncblr rblr 0 {CBL}\n"
+                              f"vos inp rblr {vos}\n"
+                              + "".join(cellnet(f"r{i}", "0", "0", f"snr{i}", "0", "rblr") + f".ic v(snr{i})={SN1}\n"
+                                        for i in range(1, N)))
+                    if ref == "cell":
+                        refnet += (f"vrefsn snrefd 0 {E('VREFSN', '0.6')}\n"
+                                   + cellnet("r0", "0", "0", "snrefd", "rwl", "rblr"))
+                    else:
+                        refnet += cellnet("r0", "0", "0", "snr0", "0", "rblr") + ".ic v(snr0)=0\n"
+                sa = f"""vclk clk 0 pwl(0 0 {40 + ts}n 0 {40 + ts + 0.05}n {VDD})
+{refnet}
+XT tail clk 0 0 sg13_lv_nmos w=2.0u l=0.13u
+XIP x inp tail 0 sg13_lv_nmos w=4.0u l=0.5u
+XIN y rbl tail 0 sg13_lv_nmos w=4.0u l=0.5u
+XLN1 outn outp x 0 sg13_lv_nmos w=2.0u l=0.26u
+XLN2 outp outn y 0 sg13_lv_nmos w=2.0u l=0.26u
+XLP1 outn outp vdd vdd sg13_lv_pmos w=2.0u l=0.26u
+XLP2 outp outn vdd vdd sg13_lv_pmos w=2.0u l=0.26u
+XP1 outn clk vdd vdd sg13_lv_pmos w=0.5u l=0.13u
+XP2 outp clk vdd vdd sg13_lv_pmos w=0.5u l=0.13u
+XP3 x clk vdd vdd sg13_lv_pmos w=0.5u l=0.13u
+XP4 y clk vdd vdd sg13_lv_pmos w=0.5u l=0.13u
+cl1 outp 0 5f
+cl2 outn 0 5f
+"""
+                ms += (f"\nmeas tran outp find v(outp) at={40 + ts + 3}n\nmeas tran blk find v(rbl) at={40 + ts + 1}n"
+                       f"\nmeas tran blr find v(inp) at={40 + ts - 0.1}n")
             text = head(f"read {corner} {temp} {v}", corner, temp) + f""".options reltol=1e-4 abstol=1e-15 vntol=1e-6
 vrwl rwl 0 pwl(0 0 40n 0 40.1n {VRWL} {40 + TREAD}n {VRWL} {40.1 + TREAD}n 0)
 vpre pre 0 pwl(0 {VDD} 39n {VDD} 39.1n 0)
@@ -136,6 +178,7 @@ cbl rbl 0 {CBL}
 .ic v(sn0)={v}
 {cellnet(0, '0', '0', 'sn0', 'rwl', 'rbl')}
 {unsel}
+{sa}
 .control
 pre_osdi /work/osdi/psp103.osdi
 tran 10p {50 + TREAD}n
@@ -148,7 +191,8 @@ meas tran snd find v(sn0) at={40 + min(TREAD, 20) - 1}n
             out, g = run(f"/work/read_{corner}_{temp}.sp", text, 1800)
             f = lambda x: "  nan " if x is None else f"{x:6.3f}"
             print(f"{corner:7s} {temp:3d}C SN {v:5.2f}: {f(g('snb'))} -> {f(g('snd'))}  RBL "
-                  + " ".join(f(g(f"bl{t}")) for t in times), flush=True)
+                  + " ".join(f(g(f"bl{t}")) for t in times)
+                  + (f"  SA OUTP {f(g('outp'))} (reference input at CLK {f(g('blr'))}; RBL 1 ns after CLK {f(g('blk'))})" if E("SA") else ""), flush=True)
 
 def csn():
     print(f"csn: {desc()}; C(SN) at 10 MHz, SN biased through 1 Tohm")
