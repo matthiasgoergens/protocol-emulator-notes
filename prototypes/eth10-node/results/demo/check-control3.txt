@@ -1,0 +1,22 @@
+0 of 29 expected replies correct; 10 requests correctly unanswered: 10
+  FAIL arp-bcast: FCS wrong
+  FAIL arp-unicast: FCS wrong
+  FAIL ping-0: FCS wrong
+  FAIL ping-1: FCS wrong
+  FAIL ping-18: FCS wrong
+  FAIL ping-56: FCS wrong
+  FAIL ping-100: FCS wrong
+  FAIL ping-200: FCS wrong
+  FAIL ping-df: FCS wrong
+  FAIL rand-ping-0-86: FCS wrong
+  FAIL rand-arp-1: FCS wrong
+  FAIL rand-ping-2-174: FCS wrong
+  FAIL rand-ping-3-49: FCS wrong
+  FAIL rand-arp-4: FCS wrong
+  FAIL rand-ping-5-149: FCS wrong
+  FAIL rand-ping-6-125: FCS wrong
+  FAIL rand-ping-7-23: FCS wrong
+  FAIL rand-arp-8: FCS wrong
+  FAIL rand-ping-9-139: FCS wrong
+  FAIL rand-ping-10-185: FCS wrong
+host stack verdict: FAIL

@@ -1,0 +1,58 @@
+== CRC unit (crc_unit.ml)
+  model CRC-32/ISO-HDLC (Ethernet)   check CBF43926 (catalogue CBF43926), residue DEBB20E3 (catalogue DEBB20E3) ok
+  model CRC-16/USB                   check B4C8 (catalogue B4C8), residue B001 (catalogue B001) ok
+  model CRC-5/USB                    check 19 (catalogue 19), residue 06 (catalogue 06) ok
+  model CRC-15/CAN                   check 059E (catalogue 059E), residue 0000 (catalogue 0000) ok
+  model CRC-8/SMBUS                  check F4 (catalogue F4), residue 00 (catalogue 00) ok
+  model CRC-8/MAXIM-DOW (1-Wire)     check A1 (catalogue A1), residue 00 (catalogue 00) ok
+  model CRC-16/MODBUS                check 4B37 (catalogue 4B37), residue 0000 (catalogue 0000) ok
+  model CRC-16/KERMIT                check 2189 (catalogue 2189), residue 0000 (catalogue 0000) ok
+  RTL against model: 208 configurations (8 catalogue + 200 random widths 1..32), 83200 cycles, 0 mismatches
+crc: PASS
+== edge sampler (edge_sampler.ml)
+  RTL against model: 300 random configurations over n = 1, 2, 4 (all three modes), 2000 clocks each; 101276 bits, 19497 burst ends; 0 mismatching clocks
+  control: model with holdoff + 1 against the same RTL: 20475 mismatching clocks (must be > 0)
+  matcher with enable (matcher_en.ml) against ../systolic-matcher/model.ml in enabled steps: 100 configurations x 1500 clocks, 0 mismatches
+  biphase mark, 300 kbit/s, n = 4 at 60 MHz, 64 random bits per burst, 10 bursts per cell:
+    rate  +0.0 %, jitter +-  0 ns: 10 of 10 bursts decoded exactly
+    rate +10.0 %, jitter +- 50 ns: 10 of 10 bursts decoded exactly
+    rate -10.0 %, jitter +- 50 ns: 10 of 10 bursts decoded exactly
+    rate  +0.0 %, jitter +-300 ns: 10 of 10 bursts decoded exactly
+  NRZ with resynchronisation, UART 8N1 at 1 Mbaud, n = 1 at 60 MHz, 16 random bytes per cell:
+    baud offset  -6.0 %: 16 of 16 bytes
+    baud offset  -4.0 %: 16 of 16 bytes
+    baud offset  +0.0 %: 16 of 16 bytes
+    baud offset  +4.0 %: 16 of 16 bytes
+    baud offset  +6.0 %: 16 of 16 bytes
+sampler: PASS
+== 10BASE-T receive path (rx_path.ml: edge sampler -> matcher -> packer + CRC unit)
+  delay-line length that recovers frames: 18 (the design uses 18)
+  clock offsets: transmitter at +-ppm against the receiver clock (10 frames of 46-245 bytes each sign):
+    receiver 60.00 MHz, n = 1: +-100 ppm 20/20  +-1000 ppm 20/20  +-10000 ppm 20/20  +-60000 ppm 20/20  +-100000 ppm 20/20  +-150000 ppm 20/20
+    receiver 60.86 MHz, n = 1: +-100 ppm 20/20  +-1000 ppm 20/20  +-10000 ppm 20/20  +-60000 ppm 20/20  +-100000 ppm 20/20  +-150000 ppm 20/20
+    receiver 60.00 MHz, n = 4: +-100 ppm 20/20  +-1000 ppm 20/20  +-10000 ppm 20/20  +-60000 ppm 20/20  +-100000 ppm 20/20  +-150000 ppm 20/20
+    receiver 60.86 MHz, n = 4: +-100 ppm 20/20  +-1000 ppm 20/20  +-10000 ppm 20/20  +-60000 ppm 20/20  +-100000 ppm 20/20  +-150000 ppm 20/20
+    receiver 53.20 MHz, n = 4: +-100 ppm 20/20  +-1000 ppm 20/20  +-10000 ppm 20/20  +-60000 ppm 20/20  +-100000 ppm 20/20  +-150000 ppm 20/20
+  edge jitter, uniform +-j ns on every edge, +-100 ppm (20 frames per cell):
+    60.00 MHz n = 1: 0:20/20 4:20/20 6:20/20 8:20/20 10:7/20 12:1/20 14:0/20
+    60.86 MHz n = 1: 0:20/20 4:20/20 6:20/20 8:20/20 10:9/20 12:0/20 14:0/20
+    60.00 MHz n = 4: 0:20/20 4:20/20 6:20/20 8:20/20 10:20/20 12:8/20 14:0/20
+    60.86 MHz n = 4: 0:20/20 4:20/20 6:20/20 8:20/20 10:20/20 12:0/20 14:0/20
+  preamble truncated to p bits before the SFD (60 MHz, n = 1, 4 frames each):
+    56:4/4  32:4/4  16:4/4  12:4/4  10:4/4  9:4/4  8:0/4  6:0/4  4:0/4  0:0/4
+  runts of 14..56 bytes with FCS: received 8, lengths 14,20,26,32,38,44,50,56, all CRC-good: true (dropped by the node on length < 64)
+  corrupted frames (100 with one flipped bit, 100 with 4 random bytes): 200 rejected, 0 accepted
+  frames back to back (10 frames, gap from end of TP_IDL to next preamble):
+    gap   9300 ns: 10/10
+    gap   2000 ns: 10/10
+    gap   1000 ns: 10/10
+    gap    600 ns: 10/10
+    gap    400 ns: 10/10
+    gap    200 ns: 10/10
+  activity dropped for k clocks every 3000 clocks; comparator reads 0 / keeps the line's sign while squelched: k=1:10/10,10/10  k=2:2/10,2/10  k=3:3/10,3/10  k=4:3/10,3/10  k=6:0/10,0/10
+  controls (each must fail to deliver the 6 frames):
+    delay line 17 instead of 18                          0/6 -> caught
+    SFD template's newest bit flipped                    0/6 -> caught
+    sampler holdoff 3 instead of 5 (boundaries qualify)  0/6 -> caught
+    CRC polynomial with one bit flipped                  0/6 -> caught
+rx: PASS
