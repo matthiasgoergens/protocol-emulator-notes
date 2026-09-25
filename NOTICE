@@ -1,0 +1,12 @@
+Protocol-emulator ASIC: design notes, prototypes and measurements
+Copyright 2026 Matthias Görgens
+
+Licensed under the Apache License, Version 2.0 (see LICENSE). Before 2026-09-25 this repository
+was published under the MIT licence; earlier commits remain available under those terms.
+
+Third-party material, under its own licence:
+- measurements/pio-area/variants/*.v: derived from fpga_pio by Lawrie Griffiths,
+  https://github.com/lawrie/fpga_pio (commit f38be97c), BSD-2-Clause, as stated in each file's
+  SPDX header.
+
+Ideas taken from other public work are credited where they are used (see notes/backlog.md).

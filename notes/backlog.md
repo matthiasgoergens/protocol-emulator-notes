@@ -150,8 +150,8 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   on 2026-09-25, 11 are Apache-2.0 and 2 are MIT; 3 have no licence (fjpolo/ProtocolEmulatorr,
   LeEmperor/hardcaml_protemu, DanielMBouyou/protocol-emulator-asic), so they are ideas only.
   Apache-2.0 files keep their licence, notice and a record of our changes, with a per-file
-  `SPDX-License-Identifier`. Our repository is MIT. Relicensing to Apache-2.0 (or to
-  "MIT OR Apache-2.0") is proposed, pending Matthias's go-ahead.
+  `SPDX-License-Identifier`. Our repository moved from MIT to Apache-2.0 on 2026-09-25 (see `NOTICE`),
+  matching most of the code we may borrow and adding a patent grant.
 - **Learn from other public entries' verification** (study of 15 repositories on 2026-09-25,
   private notes in `~/prog/janestreet/competitor-notes/`). Adopt, with credit:
   - **Mutation against formal proofs:** plant a broken deadline arm and require the BMC proof to
