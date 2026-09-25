@@ -8,5 +8,9 @@ Third-party material, under its own licence:
 - measurements/pio-area/variants/*.v: derived from fpga_pio by Lawrie Griffiths,
   https://github.com/lawrie/fpga_pio (commit f38be97c), BSD-2-Clause, as stated in each file's
   SPDX header.
+- measurements/fabulous/synth/models_pack_onelatch.v: derived from FABulous's models_pack.v,
+  Apache-2.0, with one module replaced.
+- measurements/fabulous/yosys-fabulous-0.60/: FABulous technology files from the Yosys
+  repository at tag v0.60, ISC licence, vendored because later Yosys releases no longer ship them.
 
 Ideas taken from other public work are credited where they are used (see notes/backlog.md).
