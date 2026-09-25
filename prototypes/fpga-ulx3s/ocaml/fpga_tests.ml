@@ -175,7 +175,7 @@ let decode_checks t (arr : cyc array) =
       let ok = gb = bytes && stopped && (match acks with None -> true | Some a -> a = ga) in
       verdict "i2c decode" ok (Printf.sprintf "got [%s] acks %s stop=%b expected [%s]%s" (hexs gb) acks_s stopped (hexs bytes)
                                  (match acks with None -> "" | Some a -> " acks " ^ String.concat "" (List.map (fun a -> if a then "A" else "N") a)))
-    | Capture_uart _ -> ()) t.expects
+    | Capture_uart _ | Trace_overflows -> ()) t.expects
 
 let capture_checks t capture =
   List.iter (function
@@ -204,6 +204,8 @@ let check name ~trace ~capture ~mode =
   let env = compare_prediction t ~mode arr in
   decode_checks t arr;
   capture_checks t capture;
+  if List.mem Trace_overflows t.expects then
+    verdict "trace overflow reported" ovf (Printf.sprintf "overflow %b, cycles checked %d of %d" ovf until n);
   (match t.forbid_flash_cmds_except with
    | Some allowed ->
      let cmds = List.rev env.Env.flash.commands in

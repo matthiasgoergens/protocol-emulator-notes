@@ -14,6 +14,7 @@ type expect =
   | Spi_bytes of { sclk : int; mosi : int; cs : int; bytes : int list }
   | I2c_bytes of { sda : int; scl : int; bytes : int list; acks : bool list option }
   | Capture_uart of int list             (* sampler capture, timed mode, 10-bit frames *)
+  | Trace_overflows                      (* the run must overflow the trace buffer *)
 
 type test = {
   name : string;
@@ -194,6 +195,33 @@ let stream ~loop =
     needs = (if loop then [] else [ "jumpers-streamer-to-sampler" ]); board_only_lenient = false;
     expects = [ Capture_uart stream_bytes ]; forbid_flash_cmds_except = None }
 
+(* Pin 0 toggling as fast as one thread can (two edges every three slots), for longer than the
+   2048-entry trace holds: the checker must see the overflow and check only the cycles before it. *)
+let overflow () =
+  let p = Array.make Isa.prog_len Isa.halt in
+  p.(0) <- Isa.setp ~mask:1 ~value:1 ~oe:1; p.(1) <- Isa.setp ~mask:1 ~value:0 ~oe:1; p.(2) <- Isa.jmp 0;
+  { name = "trace_overflow"; doc = "pin 0 toggles every slot for 20000 cycles; the 2048-entry trace must overflow";
+    mem = image [ (0, p) ]; cycles = 20000; ctrl = 0; cfg = []; host_in = []; stream = [];
+    wiring = Env.no_wiring; needs = []; board_only_lenient = false; expects = [ Trace_overflows ];
+    forbid_flash_cmds_except = None }
+
+(* Host bytes in through the host_in FIFO (IN), back out with OUT, and onto a pin as UART: the
+   host_in path and IN's stall-until-valid semantics under replay. *)
+let host_echo () =
+  let bytes = [ 0x12; 0x34; 0x56; 0xA5 ] in
+  let x = bit_slots - 4 in
+  let items = [ W (Isa.setp ~mask:1 ~value:1 ~oe:1);
+                Label "next"; W Isa.in_; W Isa.out;
+                W (Isa.setp ~mask:1 ~value:0 ~oe:1); W (Isa.ldd x); W Isa.waitd; W (Isa.ldc 8);
+                Label "bit"; W (Isa.sho ~pin:0 ~msb:0 ()); W (Isa.ldd x); W Isa.waitd; Jnz "bit";
+                W (Isa.setp ~mask:1 ~value:1 ~oe:1); W (Isa.ldd x); W Isa.waitd; Jmp "next" ] in
+  let p, _ = assemble items in
+  { name = "host_echo"; doc = "bytes from the host through IN, back with OUT and out on pin 0 as UART";
+    mem = image [ (0, p) ]; cycles = 3200; ctrl = 0; cfg = []; host_in = bytes; stream = [];
+    wiring = Env.no_wiring; needs = []; board_only_lenient = false;
+    expects = [ Host_bytes bytes; Uart_on_pin { pin = 0; bit_cycles = bit_slots * slot; bytes } ];
+    forbid_flash_cmds_except = None }
+
 let all () = [
   uart_pair ~ctrl:Env.ctrl_uloop ~wiring:Env.no_wiring ~name:"uart_loop" ~needs:[]
     ~doc:"UART transmitter (thread 0, pin 0) into UART receiver (thread 1, pin 7) through the internal loop";
@@ -206,4 +234,6 @@ let all () = [
   flash_id ();
   stream ~loop:true;
   stream ~loop:false;
+  overflow ();
+  host_echo ();
 ]
