@@ -78,7 +78,7 @@ The honest reading:
   32 bits per cycle, not the 128 needed.
 - **D1 is not dominated.** It is the only design for weight-stationary products, at a cost of
   22 PEs. A cheaper version would put an 8-word gain-cell bank with Berger columns in each PE:
-  about 2,280 µm² (17.8 µm²/bit, periphery estimated) against 5,835 µm² of latches. It is not
+  about 2,340 µm² (18.3 µm²/bit, periphery estimated) against 5,835 µm² of latches. It is not
   evaluated here.
 - **Refresh helps only where D3's thin banks overflow.** No workload needs refresh of a thick
   bank except resident data.
