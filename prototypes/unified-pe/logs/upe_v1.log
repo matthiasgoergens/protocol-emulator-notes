@@ -1,0 +1,1044 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Running command `read_verilog -sv  rtl/upe_v1.v;  hierarchy -check -top upe_v1; synth -top upe_v1 -flatten; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/upe_v1.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Verilog-2005 frontend: rtl/upe_v1.v
+Parsing SystemVerilog input from `rtl/upe_v1.v' to AST representation.
+Generating RTLIL representation for module `\upe_v1'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \upe_v1
+
+2.2. Analyzing design hierarchy..
+Top module:  \upe_v1
+Removed 0 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \upe_v1
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \upe_v1
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:732$76 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:669$67 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:652$63 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:627$56 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:605$54 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:568$53 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:526$47 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:480$42 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:413$41 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:388$35 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:304$12 in module upe_v1.
+Marked 1 switch rules as full_case in process $proc$rtl/upe_v1.v:270$2 in module upe_v1.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 12 redundant assignments.
+Promoted 2 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~23 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:744$77'.
+     1/1: $0\_259[15:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:732$76'.
+     1/1: $0\_256[15:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:719$75'.
+     1/1: $0\_54[7:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:715$74'.
+     1/1: $0\_51[7:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:711$73'.
+     1/1: $0\_48[7:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:707$72'.
+     1/1: $0\_45[7:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:703$71'.
+     1/1: $0\_42[7:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:699$70'.
+     1/1: $0\_39[7:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:695$69'.
+     1/1: $0\_36[7:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:691$68'.
+     1/1: $0\_33[7:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:669$67'.
+     1/1: $0\_247[15:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:652$63'.
+     1/1: $0\_147[15:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:647$62'.
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:627$56'.
+     1/1: $0\_149[15:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:605$54'.
+     1/1: $0\_136[0:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:568$53'.
+     1/1: $0\_84[0:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:538$48'.
+     1/1: $0\_200[0:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:526$47'.
+     1/1: $0\_197[0:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:480$42'.
+     1/1: $0\_134[0:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:413$41'.
+     1/1: $0\_143[0:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:388$35'.
+     1/1: $0\_160[15:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:304$12'.
+     1/1: $0\_251[15:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:292$8'.
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:282$3'.
+     1/1: $0\_185[0:0]
+Creating decoders for process `\upe_v1.$proc$rtl/upe_v1.v:270$2'.
+     1/1: $0\_182[0:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\upe_v1.\_256' from process `\upe_v1.$proc$rtl/upe_v1.v:732$76'.
+No latch inferred for signal `\upe_v1.\_247' from process `\upe_v1.$proc$rtl/upe_v1.v:669$67'.
+No latch inferred for signal `\upe_v1.\_147' from process `\upe_v1.$proc$rtl/upe_v1.v:652$63'.
+No latch inferred for signal `\upe_v1.\_149' from process `\upe_v1.$proc$rtl/upe_v1.v:627$56'.
+No latch inferred for signal `\upe_v1.\_136' from process `\upe_v1.$proc$rtl/upe_v1.v:605$54'.
+No latch inferred for signal `\upe_v1.\_84' from process `\upe_v1.$proc$rtl/upe_v1.v:568$53'.
+No latch inferred for signal `\upe_v1.\_197' from process `\upe_v1.$proc$rtl/upe_v1.v:526$47'.
+No latch inferred for signal `\upe_v1.\_134' from process `\upe_v1.$proc$rtl/upe_v1.v:480$42'.
+No latch inferred for signal `\upe_v1.\_143' from process `\upe_v1.$proc$rtl/upe_v1.v:413$41'.
+No latch inferred for signal `\upe_v1.\_160' from process `\upe_v1.$proc$rtl/upe_v1.v:388$35'.
+No latch inferred for signal `\upe_v1.\_251' from process `\upe_v1.$proc$rtl/upe_v1.v:304$12'.
+No latch inferred for signal `\upe_v1.\_182' from process `\upe_v1.$proc$rtl/upe_v1.v:270$2'.
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\upe_v1.\_259' using process `\upe_v1.$proc$rtl/upe_v1.v:744$77'.
+  created $dff cell `$procdff$193' with positive edge clock.
+Creating register for signal `\upe_v1.\_54' using process `\upe_v1.$proc$rtl/upe_v1.v:719$75'.
+  created $dff cell `$procdff$194' with positive edge clock.
+Creating register for signal `\upe_v1.\_51' using process `\upe_v1.$proc$rtl/upe_v1.v:715$74'.
+  created $dff cell `$procdff$195' with positive edge clock.
+Creating register for signal `\upe_v1.\_48' using process `\upe_v1.$proc$rtl/upe_v1.v:711$73'.
+  created $dff cell `$procdff$196' with positive edge clock.
+Creating register for signal `\upe_v1.\_45' using process `\upe_v1.$proc$rtl/upe_v1.v:707$72'.
+  created $dff cell `$procdff$197' with positive edge clock.
+Creating register for signal `\upe_v1.\_42' using process `\upe_v1.$proc$rtl/upe_v1.v:703$71'.
+  created $dff cell `$procdff$198' with positive edge clock.
+Creating register for signal `\upe_v1.\_39' using process `\upe_v1.$proc$rtl/upe_v1.v:699$70'.
+  created $dff cell `$procdff$199' with positive edge clock.
+Creating register for signal `\upe_v1.\_36' using process `\upe_v1.$proc$rtl/upe_v1.v:695$69'.
+  created $dff cell `$procdff$200' with positive edge clock.
+Creating register for signal `\upe_v1.\_33' using process `\upe_v1.$proc$rtl/upe_v1.v:691$68'.
+  created $dff cell `$procdff$201' with positive edge clock.
+Creating register for signal `\upe_v1.\_207' using process `\upe_v1.$proc$rtl/upe_v1.v:647$62'.
+  created $dff cell `$procdff$202' with positive edge clock.
+Creating register for signal `\upe_v1.\_200' using process `\upe_v1.$proc$rtl/upe_v1.v:538$48'.
+  created $dff cell `$procdff$203' with positive edge clock.
+Creating register for signal `\upe_v1.\_193' using process `\upe_v1.$proc$rtl/upe_v1.v:292$8'.
+  created $dff cell `$procdff$204' with positive edge clock.
+Creating register for signal `\upe_v1.\_185' using process `\upe_v1.$proc$rtl/upe_v1.v:282$3'.
+  created $dff cell `$procdff$205' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:744$77'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:744$77'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:732$76'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:732$76'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:719$75'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:719$75'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:715$74'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:715$74'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:711$73'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:711$73'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:707$72'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:707$72'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:703$71'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:703$71'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:699$70'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:699$70'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:695$69'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:695$69'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:691$68'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:691$68'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:669$67'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:669$67'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:652$63'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:652$63'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:647$62'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:627$56'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:627$56'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:605$54'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:605$54'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:568$53'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:568$53'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:538$48'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:538$48'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:526$47'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:526$47'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:480$42'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:480$42'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:413$41'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:413$41'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:388$35'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:388$35'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:304$12'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:304$12'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:292$8'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:282$3'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:282$3'.
+Found and cleaned up 1 empty switch in `\upe_v1.$proc$rtl/upe_v1.v:270$2'.
+Removing empty process `upe_v1.$proc$rtl/upe_v1.v:270$2'.
+Cleaned up 23 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+<suppressed ~16 debug messages>
+
+3.3. Executing FLATTEN pass (flatten design).
+
+3.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+Removed 2 unused cells and 102 unused wires.
+<suppressed ~5 debug messages>
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module upe_v1...
+Found and reported 0 problems.
+
+3.7. Executing OPT pass (performing simple optimizations).
+
+3.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 152 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Computing hashes of 148 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+<suppressed ~12 debug messages>
+Removed a total of 4 cells.
+
+3.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upe_v1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~70 debug messages>
+
+3.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upe_v1.
+Performed a total of 0 changes.
+
+3.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 148 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+3.7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.7.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.7.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upe_v1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~70 debug messages>
+
+3.7.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upe_v1.
+Performed a total of 0 changes.
+
+3.7.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 148 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.7.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.7.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.7.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.8. Executing FSM pass (extract and optimize FSM).
+
+3.8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.9. Executing OPT pass (performing simple optimizations).
+
+3.9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 148 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upe_v1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~70 debug messages>
+
+3.9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upe_v1.
+Performed a total of 0 changes.
+
+3.9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 148 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.9.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $procdff$205 ($dff) from module upe_v1 (D = \_182, Q = \_185).
+Adding EN signal on $procdff$204 ($dff) from module upe_v1 (D = \_189, Q = \_193).
+Adding EN signal on $procdff$203 ($dff) from module upe_v1 (D = \_197, Q = \_200).
+Adding EN signal on $procdff$202 ($dff) from module upe_v1 (D = \_204 [14:0], Q = \_207 [14:0]).
+Adding EN signal on $procdff$202 ($dff) from module upe_v1 (D = \_204 [15], Q = \_207 [15]).
+Adding EN signal on $procdff$201 ($dff) from module upe_v1 (D = \cfg_in, Q = \_33).
+Adding EN signal on $procdff$200 ($dff) from module upe_v1 (D = \_33, Q = \_36).
+Adding EN signal on $procdff$199 ($dff) from module upe_v1 (D = \_36, Q = \_39).
+Adding EN signal on $procdff$198 ($dff) from module upe_v1 (D = \_39, Q = \_42).
+Adding EN signal on $procdff$197 ($dff) from module upe_v1 (D = \_42, Q = \_45).
+Adding EN signal on $procdff$196 ($dff) from module upe_v1 (D = \_45, Q = \_48).
+Adding EN signal on $procdff$195 ($dff) from module upe_v1 (D = \_48, Q = \_51).
+Adding EN signal on $procdff$194 ($dff) from module upe_v1 (D = \_51, Q = \_54).
+Adding EN signal on $procdff$193 ($dff) from module upe_v1 (D = \_256, Q = \_259).
+
+3.9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+Removed 12 unused cells and 12 unused wires.
+<suppressed ~14 debug messages>
+
+3.9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+<suppressed ~4 debug messages>
+
+3.9.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upe_v1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~49 debug messages>
+
+3.9.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upe_v1.
+Performed a total of 0 changes.
+
+3.9.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 144 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Computing hashes of 143 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+3.9.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+Removed 0 unused cells and 1 unused wires.
+<suppressed ~1 debug messages>
+
+3.9.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.9.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upe_v1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~49 debug messages>
+
+3.9.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upe_v1.
+Performed a total of 0 changes.
+
+3.9.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 143 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.9.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.9.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.9.23. Finished fast OPT passes. (There is nothing left to do.)
+
+3.10. Executing WREDUCE pass (reducing word size of cells).
+Removed top 8 bits (of 16) from mux cell upe_v1.$ternary$rtl/upe_v1.v:301$9 ($mux).
+Removed top 1 bits (of 17) from port A of cell upe_v1.$add$rtl/upe_v1.v:367$28 ($add).
+Removed top 1 bits (of 17) from port B of cell upe_v1.$add$rtl/upe_v1.v:367$28 ($add).
+Removed top 16 bits (of 17) from port B of cell upe_v1.$add$rtl/upe_v1.v:368$29 ($add).
+Removed top 1 bits (of 2) from port B of cell upe_v1.$eq$rtl/upe_v1.v:403$37 ($eq).
+Removed top 1 bits (of 2) from port B of cell upe_v1.$procmux$83_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell upe_v1.$procmux$106_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell upe_v1.$procmux$107_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell upe_v1.$procmux$108_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell upe_v1.$procmux$113_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell upe_v1.$procmux$118_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell upe_v1.$procmux$125_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell upe_v1.$procmux$126_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell upe_v1.$procmux$127_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell upe_v1.$procmux$138_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell upe_v1.$procmux$139_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell upe_v1.$procmux$140_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell upe_v1.$procmux$141_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell upe_v1.$procmux$142_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell upe_v1.$procmux$143_CMP0 ($eq).
+Removed top 3 bits (of 4) from port B of cell upe_v1.$procmux$144_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell upe_v1.$procmux$151_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell upe_v1.$procmux$161_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell upe_v1.$procmux$162_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell upe_v1.$procmux$163_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell upe_v1.$procmux$164_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell upe_v1.$procmux$165_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell upe_v1.$procmux$166_CMP0 ($eq).
+Removed top 3 bits (of 4) from port B of cell upe_v1.$procmux$167_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell upe_v1.$procmux$172_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell upe_v1.$procmux$177_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell upe_v1.$procmux$191_CMP0 ($eq).
+
+3.11. Executing PEEPOPT pass (run peephole optimizers).
+
+3.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.13. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module upe_v1:
+  creating $macc model for $add$rtl/upe_v1.v:367$28 ($add).
+  creating $macc model for $add$rtl/upe_v1.v:368$29 ($add).
+  creating $macc model for $sub$rtl/upe_v1.v:520$43 ($sub).
+  merging $macc model for $add$rtl/upe_v1.v:367$28 into $add$rtl/upe_v1.v:368$29.
+  creating $alu model for $macc $add$rtl/upe_v1.v:368$29.
+  creating $alu model for $macc $sub$rtl/upe_v1.v:520$43.
+  creating $alu model for $lt$rtl/upe_v1.v:337$18 ($lt): new $alu
+  creating $alu model for $lt$rtl/upe_v1.v:350$23 ($lt): merged with $lt$rtl/upe_v1.v:337$18.
+  creating $alu cell for $lt$rtl/upe_v1.v:337$18, $lt$rtl/upe_v1.v:350$23: $auto$alumacc.cc:512:replace_alu$235
+  creating $alu cell for $sub$rtl/upe_v1.v:520$43: $auto$alumacc.cc:512:replace_alu$246
+  creating $alu cell for $add$rtl/upe_v1.v:368$29: $auto$alumacc.cc:512:replace_alu$249
+  created 3 $alu and 0 $macc cells.
+
+3.14. Executing SHARE pass (SAT-based resource sharing).
+
+3.15. Executing OPT pass (performing simple optimizations).
+
+3.15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+<suppressed ~4 debug messages>
+
+3.15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 146 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upe_v1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~49 debug messages>
+
+3.15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upe_v1.
+Performed a total of 0 changes.
+
+3.15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 146 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+Removed 2 unused cells and 4 unused wires.
+<suppressed ~5 debug messages>
+
+3.15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.15.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.15.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upe_v1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~49 debug messages>
+
+3.15.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upe_v1.
+Performed a total of 0 changes.
+
+3.15.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 144 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.15.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.15.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.15.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.16. Executing MEMORY pass.
+
+3.16.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.16.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.16.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.16.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.16.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+3.16.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.16.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.16.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.16.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.16.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.18. Executing OPT pass (performing simple optimizations).
+
+3.18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+<suppressed ~2 debug messages>
+
+3.18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 143 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.18.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.18.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.18.5. Finished fast OPT passes.
+
+3.19. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.20. Executing OPT pass (performing simple optimizations).
+
+3.20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 143 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upe_v1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~48 debug messages>
+
+3.20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upe_v1.
+    Consolidated identical input bits for $mux cell $ternary$rtl/upe_v1.v:356$26:
+      Old ports: A=16'0111111111111111, B=16'1000000000000000, Y=\_220
+      New ports: A=2'01, B=2'10, Y={ \_220 [15] \_220 [0] }
+      New connections: \_220 [14:1] = { \_220 [0] \_220 [0] \_220 [0] \_220 [0] \_220 [0] \_220 [0] \_220 [0] \_220 [0] \_220 [0] \_220 [0] \_220 [0] \_220 [0] \_220 [0] \_220 [0] }
+  Optimizing cells in module \upe_v1.
+Performed a total of 1 changes.
+
+3.20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 143 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.20.6. Executing OPT_SHARE pass.
+
+3.20.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.20.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.20.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.20.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upe_v1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~48 debug messages>
+
+3.20.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upe_v1.
+Performed a total of 0 changes.
+
+3.20.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 143 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.20.14. Executing OPT_SHARE pass.
+
+3.20.15. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+
+3.20.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.20.18. Finished fast OPT passes. (There is nothing left to do.)
+
+3.21. Executing TECHMAP pass (map to technology primitives).
+
+3.21.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.21.2. Continuing TECHMAP pass.
+Using template $paramod$556548cb7038fa09465db9fdc5b10cb4e4ea85e6\_90_pmux for cells of type $pmux.
+Using template $paramod$bf541dd3c0ba8228982b61e7bfbc350a2c253f4c\_90_pmux for cells of type $pmux.
+Using template $paramod$d629d85c8826a74239b9178d1930215a43b0ceb0\_90_pmux for cells of type $pmux.
+Using template $paramod$d5c1c4131927aec19f116e7a36372b1981bfcd7e\_90_pmux for cells of type $pmux.
+Using template $paramod$081ba1a4a7201ecdb44563d3c3bd7013d1ebf4eb\_90_alu for cells of type $alu.
+Using template $paramod$a1bc51c02ce12ac21eb18988e83292af48ed7d72\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $not.
+Using template $paramod$6df0329addda9228fcc2546de2aaf14ad26c98e1\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $dffe.
+Using extmapper simplemap for cells of type $ne.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $xor.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $logic_not.
+Using template $paramod$504d7726e493b7d5a8a8ac16f387eb0143f8a853\_90_pmux for cells of type $pmux.
+Using template $paramod$0d149ffe75563ef6fcc1a3dddc59d00af28651a7\_90_pmux for cells of type $pmux.
+Using extmapper simplemap for cells of type $reduce_or.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010001 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010001 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001000 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001000 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010000 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010000 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~1133 debug messages>
+
+3.22. Executing OPT pass (performing simple optimizations).
+
+3.22.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+<suppressed ~403 debug messages>
+
+3.22.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 1773 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Computing hashes of 1642 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Computing hashes of 1606 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Computing hashes of 1605 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+<suppressed ~504 debug messages>
+Removed a total of 168 cells.
+
+3.22.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.22.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+Removed 47 unused cells and 861 unused wires.
+<suppressed ~48 debug messages>
+
+3.22.5. Finished fast OPT passes.
+
+3.23. Executing ABC pass (technology mapping using ABC).
+
+3.23.1. Extracting gate netlist of module `\upe_v1' to `<abc-temp-dir>/input.blif'..
+Replacing 15 occurrences of constant undef bits with constant zero bits
+
+3.23.1.1. Executed ABC.
+Extracted 1459 gates and 1577 wires to a netlist network with 115 inputs and 56 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library /tmp/yosys-abc-PflG6n/stdcells.genlib 
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+3.23.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       57
+ABC RESULTS:            ANDNOT cells:      552
+ABC RESULTS:               MUX cells:      212
+ABC RESULTS:              NAND cells:       19
+ABC RESULTS:               NOR cells:       80
+ABC RESULTS:               NOT cells:       34
+ABC RESULTS:                OR cells:      290
+ABC RESULTS:             ORNOT cells:       46
+ABC RESULTS:              XNOR cells:       21
+ABC RESULTS:               XOR cells:       47
+ABC RESULTS:        internal signals:     1406
+ABC RESULTS:           input signals:      115
+ABC RESULTS:          output signals:       56
+Removing temp directory.
+Removing global temp directory.
+
+3.24. Executing OPT pass (performing simple optimizations).
+
+3.24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upe_v1.
+
+3.24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upe_v1'.
+Computing hashes of 1457 cells of `\upe_v1'.
+Finding duplicate cells in `\upe_v1'.
+Removed a total of 0 cells.
+
+3.24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+Removed 0 unused cells and 623 unused wires.
+<suppressed ~73 debug messages>
+
+3.24.5. Finished fast OPT passes.
+
+3.25. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `upe_v1'. Setting top module to upe_v1.
+
+3.25.1. Analyzing design hierarchy..
+Top module:  \upe_v1
+
+3.25.2. Analyzing design hierarchy..
+Top module:  \upe_v1
+Removed 0 unused modules.
+
+3.26. Printing statistics.
+
+=== upe_v1 ===
+
+        +----------Local Count, excluding submodules.
+        | 
+     1461 wires
+     2114 wire bits
+      156 public wires
+      809 public wire bits
+       24 ports
+       97 port bits
+     1457 cells
+      552   $_ANDNOT_
+       57   $_AND_
+       99   $_DFFE_PP_
+      212   $_MUX_
+       19   $_NAND_
+       80   $_NOR_
+       34   $_NOT_
+       46   $_ORNOT_
+      290   $_OR_
+       21   $_XNOR_
+       47   $_XOR_
+
+3.27. Executing CHECK pass (checking for obvious problems).
+Checking module upe_v1...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\upe_v1':
+  mapped 99 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Extracting gate netlist of module `\upe_v1' to `<abc-temp-dir>/input.blif'..
+
+5.1.1. Executed ABC.
+Extracted 1457 gates and 1598 wires to a netlist network with 141 inputs and 117 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.01 sec
+ABC: Memory =    2.85 MB. Time =     0.01 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+5.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:       22
+ABC RESULTS:    sg13g2_a21oi_1 cells:      110
+ABC RESULTS:   sg13g2_a221oi_1 cells:       76
+ABC RESULTS:    sg13g2_a22oi_1 cells:       61
+ABC RESULTS:     sg13g2_and2_1 cells:       18
+ABC RESULTS:     sg13g2_and3_1 cells:        2
+ABC RESULTS:      sg13g2_inv_1 cells:       70
+ABC RESULTS:     sg13g2_mux2_1 cells:       65
+ABC RESULTS:     sg13g2_mux4_1 cells:        7
+ABC RESULTS:    sg13g2_nand2_1 cells:      148
+ABC RESULTS:   sg13g2_nand2b_1 cells:       24
+ABC RESULTS:    sg13g2_nand3_1 cells:       23
+ABC RESULTS:   sg13g2_nand3b_1 cells:        4
+ABC RESULTS:    sg13g2_nand4_1 cells:        6
+ABC RESULTS:     sg13g2_nor2_1 cells:       99
+ABC RESULTS:    sg13g2_nor2b_1 cells:       38
+ABC RESULTS:     sg13g2_nor3_1 cells:       25
+ABC RESULTS:     sg13g2_nor4_1 cells:        8
+ABC RESULTS:    sg13g2_o21ai_1 cells:      106
+ABC RESULTS:      sg13g2_or2_1 cells:       13
+ABC RESULTS:      sg13g2_or4_1 cells:        2
+ABC RESULTS:    sg13g2_xnor2_1 cells:       16
+ABC RESULTS:     sg13g2_xor2_1 cells:        8
+ABC RESULTS:        internal signals:     1340
+ABC RESULTS:           input signals:      141
+ABC RESULTS:          output signals:      117
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upe_v1..
+Removed 0 unused cells and 1568 unused wires.
+<suppressed ~6 debug messages>
+
+7. Printing statistics.
+
+=== upe_v1 ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1084        - wires
+     1707        - wire bits
+      151        - public wires
+      774        - public wire bits
+       24        - ports
+       97        - port bits
+     1050 1.44E+04 cells
+       22  279.418   sg13g2_a21o_1
+      110   997.92   sg13g2_a21oi_1
+       76  1.1E+03   sg13g2_a221oi_1
+       61  661.765   sg13g2_a22oi_1
+       18  163.296   sg13g2_and2_1
+        2   25.402   sg13g2_and3_1
+       99 4.85E+03   sg13g2_dfrbpq_1
+       70  381.024   sg13g2_inv_1
+       65  1179.36   sg13g2_mux2_1
+        7  266.717   sg13g2_mux4_1
+      148 1.07E+03   sg13g2_nand2_1
+       24  217.728   sg13g2_nand2b_1
+       23  208.656   sg13g2_nand3_1
+        4   50.803   sg13g2_nand3b_1
+        6   65.318   sg13g2_nand4_1
+       99  718.502   sg13g2_nor2_1
+       38  344.736   sg13g2_nor2b_1
+       25    226.8   sg13g2_nor3_1
+        8   87.091   sg13g2_nor4_1
+      106  961.632   sg13g2_o21ai_1
+       13  117.936   sg13g2_or2_1
+        2    29.03   sg13g2_or4_1
+       16  232.243   sg13g2_xnor2_1
+        8  116.122   sg13g2_xor2_1
+
+   Chip area for module '\upe_v1': 14358.670200
+     of which used for sequential elements: 4849.891200 (33.78%)
+
+End of script. Logfile hash: 4a18eec333, CPU: user 0.19s system 0.04s, MEM: 34.23 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 60% 2x abc (0 sec), 8% 22x opt_clean (0 sec), ...

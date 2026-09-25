@@ -218,6 +218,31 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
 
 ## Research threads
 
+- **Framing for the write-up: "software-defined hardware".** The term is Groq's (their ISCA papers;
+  see `notes/prior-art-systolic-uses.md`), and it fits Jane Street's ask ("reprogrammable enough to
+  support new protocols after fabrication"). Our version: deterministic, compiler-scheduled
+  hardware where protocols are programmes, and where hardware quirks (expiring memory,
+  quarter-clock edges) are compiler constraints. Credit Groq for the phrase.
+- **Lead the write-up with determinism.** Jane Street visibly values it: their taste notes,
+  leading Antithesis's round, Hardcaml's cycle-exact expect tests, predictable latency in
+  trading. Present:
+  - timing exact by construction;
+  - programmes whose timing a verifier can prove;
+  - silicon runs that replay in simulation.
+
+  The deliberate nondeterminism (random source, equivalent-time sampling, expiring memory) then
+  appears as fenced and named, while everything else stays exactly reproducible.
+- **...and with compilers.** Jane Street is an OCaml shop with its own compiler work (OxCaml
+  and the OCaml compiler team), and Hardcaml is itself a compiler of sorts. Our design puts the
+  compiler at the centre:
+  - protocol compilers produce sequencer programmes;
+  - the scheduler handles memory lifetimes, as rows with deadlines;
+  - programmes are placed on array segments;
+  - the verifier proves deadlines;
+  - agents write code that the exact interpreter judges.
+
+  Show the compiler stack as a first-class part of the entry, in OCaml.
+
 - Jane Street's hardware taste; tools to port (**running**).
 - Public competitors and the winners of Jane Street's recent challenges (**running**).
 - The codex brainstorm on everything since 23 September (**running**; triage it when it lands).
@@ -237,6 +262,10 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
   2026-09-25, "Let's do more OCaml." Python only where an existing Python tool is the point
   (independent references such as scapy or pynmea2, plotting). Port core Python models to OCaml
   when they are touched again.
+  Each Python tool we lean on is also an impetus to write an OCaml equivalent: packet
+  building and parsing like scapy, NMEA parsing, plotting to PNG and SVG, sigrok-style decoders.
+  Keep the Python original as an independent cross-check. Two independent implementations
+  agreeing is the point.
 
 - Codex reviews run on `codex-luna` (the cheap model) unless a decision warrants more. DeepSeek
   runs off-peak, and MiMo Flash stands in for it.

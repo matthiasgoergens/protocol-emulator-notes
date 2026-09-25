@@ -7,6 +7,13 @@ the RTL here has an executable specification or a lockstep test yet; the archite
 that as its first gap. A probe whose logic is wrong can still have roughly the right area, which is
 all it is used for.
 
+**Superseded for the PE (2026-09-25):** `verify/` specifies the PE and the segmented array
+(`upe_v1`), implements both in Hardcaml (`rtl/upe_v1.v`, `rtl/upe_v1_array.v` are its output),
+checks them in lockstep against an OCaml model with 41 planted-bug controls, and runs the
+configuration library against independent references. The Hardcaml PE synthesises to 14,359 µm²
+against this probe's 14,312 (`results/areas.txt`, row `upe_v1`). See `verify/README.md`. The
+probe RTL below stays for its ablation numbers.
+
 ## Flow
 
 `synth.sh TAG FILE TOP "DEFINES" "CHPARAM"` runs Yosys 0.62 inside the LibreLane 3.0.14 container
