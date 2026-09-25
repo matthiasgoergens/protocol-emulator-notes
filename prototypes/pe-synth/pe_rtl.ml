@@ -63,12 +63,9 @@ let ring_cell w =
   Circuit.create_exn ~name:(Printf.sprintf "ring_cell%d" w)
     [ output "s" s; output "cfg_out" cfg_out; output "init_out" (select s (w - 1) (w - 8)) ]
 
-let pe16 () =
+let pe16_logic ~clock ~clear ~cfg_in ~cfg_strobe ~en ~nbr =
   let w = 16 in
-  let clock = input "clock" 1 and clear = input "clear" 1 in
   let spec = Reg_spec.create ~clock ~clear () in
-  let cfg_in = input "cfg_in" 8 and cfg_strobe = input "cfg_strobe" 1 in
-  let en = input "en" 1 and nbr = input "nbr_in" w in
   let cfg, cfg_out = chain (Reg_spec.create ~clock ()) ~enable:cfg_strobe ~din:cfg_in 3 in
   let o = cfg 0 and k = concat_msb [ cfg 1; cfg 2 ] in
   let s = wire w in
@@ -77,8 +74,28 @@ let pe16 () =
   let x = mux2 (bit o 3) s nbr and y = mux2 (bit o 2) k s in
   s <== reg spec ~enable:en (alu ~w (select o 1 0) x y);
   let pipe = reg spec nbr in
+  mux2 (bit o 4) s pipe, pipe, cfg_out
+
+let pe16 () =
+  let clock = input "clock" 1 and clear = input "clear" 1 in
+  let cfg_in = input "cfg_in" 8 and cfg_strobe = input "cfg_strobe" 1 in
+  let en = input "en" 1 and nbr = input "nbr_in" 16 in
+  let out, pipe, cfg_out = pe16_logic ~clock ~clear ~cfg_in ~cfg_strobe ~en ~nbr in
   Circuit.create_exn ~name:"pe16"
-    [ output "out" (mux2 (bit o 4) s pipe); output "pipe_out" pipe; output "cfg_out" cfg_out ]
+    [ output "out" out; output "pipe_out" pipe; output "cfg_out" cfg_out ]
+
+(* n pe16s in a row, for place and route: the pipeline register feeds the next PE, the
+   configuration chain runs through all of them, each PE's output leaves the row *)
+let pe16_row n () =
+  let clock = input "clock" 1 and clear = input "clear" 1 in
+  let cfg_in = input "cfg_in" 8 and cfg_strobe = input "cfg_strobe" 1 in
+  let en = input "en" n and nbr = ref (input "nbr_in" 16) and cfg = ref cfg_in in
+  let outs = List.init n (fun i ->
+    let out, pipe, cfg_out = pe16_logic ~clock ~clear ~cfg_in:!cfg ~cfg_strobe ~en:(bit en i) ~nbr:!nbr in
+    nbr := pipe; cfg := cfg_out;
+    output (Printf.sprintf "out%d" i) out) in
+  Circuit.create_exn ~name:(Printf.sprintf "pe16_row%d" n)
+    (outs @ [ output "pipe_out" !nbr; output "cfg_out" !cfg ])
 
 let mac16 () =
   let clock = input "clock" 1 and clear = input "clear" 1 in
@@ -104,4 +121,4 @@ let minplus16 () =
 
 let circuits =
   [ "ring_cell24", (fun () -> ring_cell 24); "ring_cell16", (fun () -> ring_cell 16);
-    "pe16", pe16; "mac16", mac16; "minplus16", minplus16 ]
+    "pe16", pe16; "pe16_row8", pe16_row 8; "mac16", mac16; "minplus16", minplus16 ]

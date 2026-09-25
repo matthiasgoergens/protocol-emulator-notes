@@ -1,0 +1,30 @@
+
+9. Printing statistics.
+
+=== gc_periph ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      342        - wires
+      756        - wire bits
+       51        - public wires
+      465        - public wire bits
+       10        - ports
+      418        - port bits
+      670  8362.57 cells
+      256 3.25E+03   sg13g2_and3_1
+      256 2.32E+03   sg13g2_buf_2
+        9  440.899   sg13g2_dfrbpq_1
+       38 1.17E+03   sg13g2_dlhq_1
+       38  689.472   sg13g2_ebufn_2
+       42  228.614   sg13g2_inv_1
+        3   21.773   sg13g2_nand2_1
+        4   36.288   sg13g2_nand2b_1
+       11   79.834   sg13g2_nor2_1
+       12  108.864   sg13g2_nor3_1
+        1   10.886   sg13g2_nor4_1
+
+   Chip area for module '\gc_periph': 8362.569600
+     of which used for sequential elements: 440.899200 (5.27%)
+

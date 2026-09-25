@@ -1,0 +1,665 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Running command `read_liberty -lib /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; read_verilog -sv rtl/gc_periph.v; chparam -set ROWS 8 -set COLS 21 -set AW 3 gc_periph; hierarchy -check -top gc_periph; synth -top gc_periph -flatten; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/gc_periph_8x21.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Liberty frontend: /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib
+Imported 84 cell types from liberty file.
+
+2. Executing Verilog-2005 frontend: rtl/gc_periph.v
+Parsing SystemVerilog input from `rtl/gc_periph.v' to AST representation.
+Generating RTLIL representation for module `\gc_periph'.
+Successfully finished Verilog frontend.
+Parameter \ROWS = 8
+Parameter \COLS = 21
+Parameter \AW = 3
+
+3. Executing AST frontend in derive mode using pre-parsed AST for module `\gc_periph'.
+Parameter \ROWS = 8
+Parameter \COLS = 21
+Parameter \AW = 3
+Generating RTLIL representation for module `$paramod$7380810b5e9be8e9b9f4b48290893fcab66fed97\gc_periph'.
+
+4. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1. Analyzing design hierarchy..
+Top module:  \gc_periph
+
+4.2. Analyzing design hierarchy..
+Top module:  \gc_periph
+Removed 0 unused modules.
+
+5. Executing SYNTH pass.
+
+5.1. Executing HIERARCHY pass (managing design hierarchy).
+
+5.1.1. Analyzing design hierarchy..
+Top module:  \gc_periph
+
+5.1.2. Analyzing design hierarchy..
+Top module:  \gc_periph
+Removed 0 unused modules.
+
+5.2. Executing PROC pass (convert processes to netlists).
+
+5.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+5.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+5.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 3 assignments to connections.
+
+5.2.4. Executing PROC_INIT pass (extract init attributes).
+
+5.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+5.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+5.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\gc_periph.$proc$rtl/gc_periph.v:31$162'.
+
+5.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+5.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\gc_periph.\addr_r' using process `\gc_periph.$proc$rtl/gc_periph.v:31$162'.
+  created $dff cell `$procdff$208' with positive edge clock.
+Creating register for signal `\gc_periph.\we_r' using process `\gc_periph.$proc$rtl/gc_periph.v:31$162'.
+  created $dff cell `$procdff$209' with positive edge clock.
+Creating register for signal `\gc_periph.\re_r' using process `\gc_periph.$proc$rtl/gc_periph.v:31$162'.
+  created $dff cell `$procdff$210' with positive edge clock.
+
+5.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+5.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `gc_periph.$proc$rtl/gc_periph.v:31$162'.
+Cleaned up 0 empty switches.
+
+5.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+<suppressed ~1 debug messages>
+
+5.3. Executing FLATTEN pass (flatten design).
+
+5.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+Removed 0 unused cells and 11 unused wires.
+<suppressed ~1 debug messages>
+
+5.6. Executing CHECK pass (checking for obvious problems).
+Checking module gc_periph...
+Found and reported 0 problems.
+
+5.7. Executing OPT pass (performing simple optimizations).
+
+5.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 127 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Computing hashes of 107 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+<suppressed ~60 debug messages>
+Removed a total of 20 cells.
+
+5.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \gc_periph..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+5.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \gc_periph.
+Performed a total of 0 changes.
+
+5.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 107 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Removed a total of 0 cells.
+
+5.7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+Removed 0 unused cells and 20 unused wires.
+<suppressed ~1 debug messages>
+
+5.7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.7.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.7.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \gc_periph..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+5.7.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \gc_periph.
+Performed a total of 0 changes.
+
+5.7.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 107 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Removed a total of 0 cells.
+
+5.7.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.7.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+
+5.7.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.7.16. Finished fast OPT passes. (There is nothing left to do.)
+
+5.8. Executing FSM pass (extract and optimize FSM).
+
+5.8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+5.8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+5.8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+5.8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+
+5.8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+5.8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+5.8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+5.8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+5.9. Executing OPT pass (performing simple optimizations).
+
+5.9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 107 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Removed a total of 0 cells.
+
+5.9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \gc_periph..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+5.9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \gc_periph.
+Performed a total of 0 changes.
+
+5.9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 107 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Removed a total of 0 cells.
+
+5.9.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+
+5.9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.9.9. Finished fast OPT passes. (There is nothing left to do.)
+
+5.10. Executing WREDUCE pass (reducing word size of cells).
+Removed top 2 bits (of 3) from port B of cell gc_periph.$eq$rtl/gc_periph.v:40$166 ($eq).
+Removed top 1 bits (of 3) from port B of cell gc_periph.$eq$rtl/gc_periph.v:40$169 ($eq).
+Removed top 1 bits (of 3) from port B of cell gc_periph.$eq$rtl/gc_periph.v:40$172 ($eq).
+
+5.11. Executing PEEPOPT pass (run peephole optimizers).
+
+5.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+
+5.13. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module gc_periph:
+  created 0 $alu and 0 $macc cells.
+
+5.14. Executing SHARE pass (SAT-based resource sharing).
+
+5.15. Executing OPT pass (performing simple optimizations).
+
+5.15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 107 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Removed a total of 0 cells.
+
+5.15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \gc_periph..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+5.15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \gc_periph.
+Performed a total of 0 changes.
+
+5.15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 107 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Removed a total of 0 cells.
+
+5.15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+
+5.15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.15.9. Finished fast OPT passes. (There is nothing left to do.)
+
+5.16. Executing MEMORY pass.
+
+5.16.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+5.16.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+5.16.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+5.16.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+5.16.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+5.16.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+
+5.16.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+5.16.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+5.16.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+
+5.16.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+5.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+
+5.18. Executing OPT pass (performing simple optimizations).
+
+5.18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 107 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Removed a total of 0 cells.
+
+5.18.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.18.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+
+5.18.5. Finished fast OPT passes.
+
+5.19. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+5.20. Executing OPT pass (performing simple optimizations).
+
+5.20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 107 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Removed a total of 0 cells.
+
+5.20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \gc_periph..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+5.20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \gc_periph.
+Performed a total of 0 changes.
+
+5.20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 107 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Removed a total of 0 cells.
+
+5.20.6. Executing OPT_SHARE pass.
+
+5.20.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.20.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+
+5.20.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.20.10. Finished fast OPT passes. (There is nothing left to do.)
+
+5.21. Executing TECHMAP pass (map to technology primitives).
+
+5.21.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+5.21.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $dff.
+No more expansions possible.
+<suppressed ~105 debug messages>
+
+5.22. Executing OPT pass (performing simple optimizations).
+
+5.22.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+<suppressed ~21 debug messages>
+
+5.22.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 137 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Computing hashes of 127 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Computing hashes of 124 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+<suppressed ~39 debug messages>
+Removed a total of 13 cells.
+
+5.22.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.22.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+Removed 0 unused cells and 27 unused wires.
+<suppressed ~1 debug messages>
+
+5.22.5. Finished fast OPT passes.
+
+5.23. Executing ABC pass (technology mapping using ABC).
+
+5.23.1. Extracting gate netlist of module `\gc_periph' to `<abc-temp-dir>/input.blif'..
+
+5.23.1.1. Executed ABC.
+Extracted 40 gates and 45 wires to a netlist network with 5 inputs and 17 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library /tmp/yosys-abc-P0nLg5/stdcells.genlib 
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+5.23.1.2. Re-integrating ABC results.
+ABC RESULTS:            ANDNOT cells:       16
+ABC RESULTS:              NAND cells:        1
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:        9
+ABC RESULTS:             ORNOT cells:        2
+ABC RESULTS:        internal signals:       23
+ABC RESULTS:           input signals:        5
+ABC RESULTS:          output signals:       17
+Removing temp directory.
+Removing global temp directory.
+
+5.24. Executing OPT pass (performing simple optimizations).
+
+5.24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gc_periph.
+
+5.24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\gc_periph'.
+Computing hashes of 114 cells of `\gc_periph'.
+Finding duplicate cells in `\gc_periph'.
+Removed a total of 0 cells.
+
+5.24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+Removed 0 unused cells and 45 unused wires.
+<suppressed ~9 debug messages>
+
+5.24.5. Finished fast OPT passes.
+
+5.25. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `gc_periph'. Setting top module to gc_periph.
+
+5.25.1. Analyzing design hierarchy..
+Top module:  \gc_periph
+
+5.25.2. Analyzing design hierarchy..
+Top module:  \gc_periph
+Removed 0 unused modules.
+
+5.26. Printing statistics.
+
+=== gc_periph ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       64 wires
+      162 wire bits
+       34 public wires
+      132 public wire bits
+       10 ports
+      106 port bits
+      114 cells
+       16   $_ANDNOT_
+        5   $_DFF_P_
+        1   $_NAND_
+        2   $_NOT_
+        2   $_ORNOT_
+        9   $_OR_
+       16   sg13g2_buf_2
+       21   sg13g2_dlhq_1
+       21   sg13g2_ebufn_2
+       21   sg13g2_inv_1
+
+5.27. Executing CHECK pass (checking for obvious problems).
+Checking module gc_periph...
+Found and reported 0 problems.
+
+6. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+6.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\gc_periph':
+  mapped 5 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+7. Executing ABC pass (technology mapping using ABC).
+
+7.1. Extracting gate netlist of module `\gc_periph' to `<abc-temp-dir>/input.blif'..
+
+7.1.1. Executed ABC.
+Extracted 30 gates and 35 wires to a netlist network with 5 inputs and 17 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.02 sec
+ABC: Memory =    2.85 MB. Time =     0.02 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+7.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_and2_1 cells:        2
+ABC RESULTS:     sg13g2_and3_1 cells:        6
+ABC RESULTS:     sg13g2_and4_1 cells:        2
+ABC RESULTS:      sg13g2_inv_1 cells:        2
+ABC RESULTS:   sg13g2_nand2b_1 cells:        2
+ABC RESULTS:   sg13g2_nand3b_1 cells:        1
+ABC RESULTS:     sg13g2_nor2_1 cells:        3
+ABC RESULTS:    sg13g2_nor2b_1 cells:        2
+ABC RESULTS:     sg13g2_nor3_1 cells:        5
+ABC RESULTS:        internal signals:       13
+ABC RESULTS:           input signals:        5
+ABC RESULTS:          output signals:       17
+Removing temp directory.
+Removing global temp directory.
+
+8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gc_periph..
+Removed 0 unused cells and 35 unused wires.
+<suppressed ~1 debug messages>
+
+9. Printing statistics.
+
+=== gc_periph ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+       59        - wires
+      157        - wire bits
+       34        - public wires
+      132        - public wire bits
+       10        - ports
+      106        - port bits
+      109 1.78E+03 cells
+        2   18.144   sg13g2_and2_1
+        6   76.205   sg13g2_and3_1
+        2    29.03   sg13g2_and4_1
+       16  145.152   sg13g2_buf_2
+        5  244.944   sg13g2_dfrbpq_1
+       21  647.741   sg13g2_dlhq_1
+       21  381.024   sg13g2_ebufn_2
+       23  125.194   sg13g2_inv_1
+        2   18.144   sg13g2_nand2b_1
+        1   12.701   sg13g2_nand3b_1
+        3   21.773   sg13g2_nor2_1
+        2   18.144   sg13g2_nor2b_1
+        5    45.36   sg13g2_nor3_1
+
+   Chip area for module '\gc_periph': 1783.555200
+     of which used for sequential elements: 244.944000 (13.73%)
+
+End of script. Logfile hash: eccb0dae3e, CPU: user 0.12s system 0.04s, MEM: 29.62 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 50% 2x abc (0 sec), 11% 3x read_verilog (0 sec), ...
