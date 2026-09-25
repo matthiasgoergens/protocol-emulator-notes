@@ -118,6 +118,17 @@ are 0 mismatches. With the correlators' tag negation disconnected, 7 of 8 sums d
 (`results/tier2/acq_verify.txt`). So the Monte Carlo's numbers are the numbers the PE row would
 produce.
 
+**The limit of that check** (raised by the codex review):
+- `pe_array.py` is a Python model of pe16's datapath semantics plus the proposed extension. It
+  is not pe16's RTL.
+- It has no `en` input (every PE is enabled every clock in this use), and it does not model
+  configuration or readout.
+- The extension does not exist in RTL yet.
+
+So the check proves that this configuration computes the correlation. It does not prove
+equivalence to pe16. The next step is extension RTL, and lockstep of that RTL against this
+model.
+
 ### The PE extension: a one-bit tag lane
 
 pe16's op is static configuration, so it cannot multiply by a data-dependent ±1. Every Gold-code
@@ -189,6 +200,11 @@ scrambler or whitener.
   | 16 | 37 | 221 ms | 35 s | 3.8 s | 396k µm² |
   | 32 | 69 | 114 ms | 18 s | 2.0 s | 736k µm² |
 
+  - These are chip time only. The table excludes the host's peak search, the loading of NCO and
+    LFSR start states between passes, and bank switching (codex review). The host work overlaps
+    with the next pass, but the state loading does not; it is a few words per pass, so small
+    against 3,300 clocks, and it is not counted.
+  - "1 ms" blocks are 3,274 samples, which is 1.00012 ms.
   - Add 56k µm² for the two 4 kbit banks (placed).
   - Placed PE area is `../pe-synth`'s 9,852 µm² per PE, plus the extension at an assumed 1.5×
     placement ratio.
@@ -248,6 +264,10 @@ This is one scenario, one seed, from `tier2/fix.py`.
   - Then **16-bit** tracking NCOs (50 Hz and 50 chip/s steps) left the PLL unable to lock and
     wound up the DLL. **Tracking needs 32-bit NCOs.** That is why the carry-in tag mode is in
     the extension.
+- **Assisted:** the host is given the true ephemerides, which the generator also uses. Receive
+  time comes from the usual trick (t_rx = latest t_tx + 70 ms, the error going into the solved
+  clock bias). So the fix tests code-phase ranging, TOW decode and the solver, not ephemeris
+  decoding.
 - **Not modelled:** multipath, ionosphere and troposphere, satellite clocks, ephemeris decode
   (assisted), the front end's AGC and 2-bit mode. Only one sky was run.
 
