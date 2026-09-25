@@ -1,0 +1,44 @@
+allocation: 24 tiles x 31,318 = 751,641 um2
+PE (upe_v0, synthesised): 14,311 um2
+
+block                                                           synth um2  source
+sequencer v1 (proxy: CAN variant, shared config, measured)         29,428  sequencer-ps2-can/synth (master); includes 8-bit pc, JC, CFG, tagged OUT
+segment interconnect, 4 segments, lean                             11,090  unified-pe/reports/xbarlean16k4
+feed registers, 4 x 18 flops (est)                                  3,527  LEF flop area x count, est
+four-phase pin stage, 8 out + 8 in (scaled)                        10,532  multiphase/sta/synth.log x 4, est
+pin streamer                                                       11,359  pin-streamer/README.md
+pin sampler (also the byte packer)                                 12,639  pin-sampler/README.md
+edge-tracking sampler, 4 samples/clock                              9,184  eth10-node/synth/area.txt (master)
+edge-tracking sampler, 1 sample/clock                               2,991  eth10-node/synth/area.txt (master)
+stuff tracker x 2                                                   1,626  unified-pe/reports/stuff
+line coder x 2                                                        954  unified-pe/reports/linecode
+systolic matcher with enable                                       11,422  eth10-node/synth/area.txt (master)
+pin NCO, 24 bit, four points per clock                              6,678  unified-pe/reports/pin_nco
+host link (est)                                                     3,000  est
+gain-cell refresh, Berger and canary control (est)                  3,000  est
+reset synchronisers, phase control (est)                            1,000  est
+sum of logic other than PEs                                       118,431
+gain-cell banks, 2 x 128x32 thick + Berger, placed                 53,236  systolic-storage/results/candidates-placed.txt (placed/drawn)
+fine delay: DTC on 2 pins + one TDC line (est)                     15,473  multiphase/README.md cheap point; sta/dtc_area.txt; est (placed/drawn)
+
+placed total = (logic + N x PE) x factor + (macros + SRAM) x halo
+factor 1.5: pe-synth row of 8 PEs, core/synth at 90 % utilisation; 2.0: pessimistic, est
+ N PEs     SRAM factor  placed um2 of alloc  slack um2
+    12   256x16    1.5     541,761    72.1%    209,880
+    12   256x16    2.0     686,841    91.4%     64,800
+    12   512x16    1.5     560,661    74.6%    190,980
+    12   512x16    2.0     705,741    93.9%     45,899
+    12  1024x16    1.5     598,462    79.6%    153,178
+    12  1024x16    2.0     743,543    98.9%      8,098
+    16   256x16    1.5     627,626    83.5%    124,015
+    16   256x16    2.0     801,327   106.6%    -49,687
+    16   512x16    1.5     646,526    86.0%    105,115
+    16   512x16    2.0     820,228   109.1%    -68,587
+    16  1024x16    1.5     684,327    91.0%     67,313
+    16  1024x16    2.0     858,029   114.2%   -106,389
+    20   256x16    1.5     713,490    94.9%     38,150
+    20   256x16    2.0     915,814   121.8%   -164,173
+    20   512x16    1.5     732,391    97.4%     19,250
+    20   512x16    2.0     934,714   124.4%   -183,074
+    20  1024x16    1.5     770,192   102.5%    -18,551
+    20  1024x16    2.0     972,516   129.4%   -220,875

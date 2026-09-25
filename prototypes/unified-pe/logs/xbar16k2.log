@@ -1,0 +1,1119 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Running command `read_verilog -sv  rtl/assists.v; chparam -set NPE 16 -set KSEG 2 seg_xbar_cfg; hierarchy -check -top seg_xbar_cfg; synth -top seg_xbar_cfg -flatten; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/xbar16k2.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Verilog-2005 frontend: rtl/assists.v
+Parsing SystemVerilog input from `rtl/assists.v' to AST representation.
+Generating RTLIL representation for module `\crc_unit'.
+Generating RTLIL representation for module `\stuff_unit'.
+Generating RTLIL representation for module `\linecode_unit'.
+Generating RTLIL representation for module `\seg_xbar'.
+rtl/assists.v:145: Warning: Range [-1:-17] select out of bounds on signal `\pe_p': Setting 17 LSB bits to undef.
+Generating RTLIL representation for module `\seg_xbar_cfg'.
+Successfully finished Verilog frontend.
+Parameter \NPE = 16
+Parameter \KSEG = 2
+
+2. Executing AST frontend in derive mode using pre-parsed AST for module `\seg_xbar_cfg'.
+Parameter \NPE = 16
+Parameter \KSEG = 2
+Generating RTLIL representation for module `$paramod$6e56cc9c7b9a83458dd1438a538a6f6009ecddec\seg_xbar_cfg'.
+
+3. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1. Analyzing design hierarchy..
+Top module:  \seg_xbar_cfg
+Used module:     \seg_xbar
+Parameter \NPE = 16
+Parameter \KSEG = 2
+Parameter \NSRC = 8
+Parameter \NDST = 8
+
+3.2. Executing AST frontend in derive mode using pre-parsed AST for module `\seg_xbar'.
+Parameter \NPE = 16
+Parameter \KSEG = 2
+Parameter \NSRC = 8
+Parameter \NDST = 8
+Generating RTLIL representation for module `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar'.
+rtl/assists.v:145: Warning: Range [-1:-17] select out of bounds on signal `\pe_p': Setting 17 LSB bits to undef.
+
+3.3. Analyzing design hierarchy..
+Top module:  \seg_xbar_cfg
+Used module:     $paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar
+
+3.4. Analyzing design hierarchy..
+Top module:  \seg_xbar_cfg
+Used module:     $paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar
+Removing unused module `\seg_xbar'.
+Removing unused module `\linecode_unit'.
+Removing unused module `\stuff_unit'.
+Removing unused module `\crc_unit'.
+Removed 4 unused modules.
+
+4. Executing SYNTH pass.
+
+4.1. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1.1. Analyzing design hierarchy..
+Top module:  \seg_xbar_cfg
+Used module:     $paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar
+
+4.1.2. Analyzing design hierarchy..
+Top module:  \seg_xbar_cfg
+Used module:     $paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar
+Removed 0 unused modules.
+
+4.2. Executing PROC pass (convert processes to netlists).
+
+4.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 88 switch rules as full_case in process $proc$rtl/assists.v:142$142 in module $paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.
+Removed a total of 0 dead cases.
+
+4.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 19 assignments to connections.
+
+4.2.4. Executing PROC_INIT pass (extract init attributes).
+
+4.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~89 debug messages>
+
+4.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.$proc$rtl/assists.v:142$142'.
+     1/88: $64\dst[135:119]
+     2/88: $63\dst[135:119]
+     3/88: $62\dst[135:119]
+     4/88: $61\dst[135:119]
+     5/88: $60\dst[135:119]
+     6/88: $59\dst[135:119]
+     7/88: $58\dst[135:119]
+     8/88: $57\dst[135:119]
+     9/88: $56\dst[118:102]
+    10/88: $55\dst[118:102]
+    11/88: $54\dst[118:102]
+    12/88: $53\dst[118:102]
+    13/88: $52\dst[118:102]
+    14/88: $51\dst[118:102]
+    15/88: $50\dst[118:102]
+    16/88: $49\dst[118:102]
+    17/88: $48\dst[101:85]
+    18/88: $47\dst[101:85]
+    19/88: $46\dst[101:85]
+    20/88: $45\dst[101:85]
+    21/88: $44\dst[101:85]
+    22/88: $43\dst[101:85]
+    23/88: $42\dst[101:85]
+    24/88: $41\dst[101:85]
+    25/88: $40\dst[84:68]
+    26/88: $39\dst[84:68]
+    27/88: $38\dst[84:68]
+    28/88: $37\dst[84:68]
+    29/88: $36\dst[84:68]
+    30/88: $35\dst[84:68]
+    31/88: $34\dst[84:68]
+    32/88: $33\dst[84:68]
+    33/88: $32\dst[67:51]
+    34/88: $31\dst[67:51]
+    35/88: $30\dst[67:51]
+    36/88: $29\dst[67:51]
+    37/88: $28\dst[67:51]
+    38/88: $27\dst[67:51]
+    39/88: $26\dst[67:51]
+    40/88: $25\dst[67:51]
+    41/88: $24\dst[50:34]
+    42/88: $23\dst[50:34]
+    43/88: $22\dst[50:34]
+    44/88: $21\dst[50:34]
+    45/88: $20\dst[50:34]
+    46/88: $19\dst[50:34]
+    47/88: $18\dst[50:34]
+    48/88: $17\dst[50:34]
+    49/88: $16\dst[33:17]
+    50/88: $15\dst[33:17]
+    51/88: $14\dst[33:17]
+    52/88: $13\dst[33:17]
+    53/88: $12\dst[33:17]
+    54/88: $11\dst[33:17]
+    55/88: $10\dst[33:17]
+    56/88: $9\dst[33:17]
+    57/88: $8\dst[16:0]
+    58/88: $7\dst[16:0]
+    59/88: $6\dst[16:0]
+    60/88: $5\dst[16:0]
+    61/88: $4\dst[16:0]
+    62/88: $3\dst[16:0]
+    63/88: $2\dst[16:0]
+    64/88: $1\dst[16:0]
+    65/88: $24\seg_a[135:119]
+    66/88: $23\seg_a[135:119]
+    67/88: $22\seg_a[135:119]
+    68/88: $21\seg_a[118:102]
+    69/88: $20\seg_a[118:102]
+    70/88: $19\seg_a[118:102]
+    71/88: $18\seg_a[101:85]
+    72/88: $17\seg_a[101:85]
+    73/88: $16\seg_a[101:85]
+    74/88: $15\seg_a[84:68]
+    75/88: $14\seg_a[84:68]
+    76/88: $13\seg_a[84:68]
+    77/88: $12\seg_a[67:51]
+    78/88: $11\seg_a[67:51]
+    79/88: $10\seg_a[67:51]
+    80/88: $9\seg_a[50:34]
+    81/88: $8\seg_a[50:34]
+    82/88: $7\seg_a[50:34]
+    83/88: $6\seg_a[33:17]
+    84/88: $5\seg_a[33:17]
+    85/88: $4\seg_a[33:17]
+    86/88: $3\seg_a[16:0]
+    87/88: $2\seg_a[16:0]
+    88/88: $1\seg_a[16:0]
+Creating decoders for process `\seg_xbar_cfg.$proc$rtl/assists.v:173$141'.
+     1/1: $0\cfg[55:0]
+
+4.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.\s' from process `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.$proc$rtl/assists.v:142$142'.
+No latch inferred for signal `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.\seg_a' from process `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.$proc$rtl/assists.v:142$142'.
+No latch inferred for signal `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.\dst' from process `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.$proc$rtl/assists.v:142$142'.
+No latch inferred for signal `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.\q' from process `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.$proc$rtl/assists.v:142$142'.
+No latch inferred for signal `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.\m' from process `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.$proc$rtl/assists.v:142$142'.
+
+4.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\seg_xbar_cfg.\cfg' using process `\seg_xbar_cfg.$proc$rtl/assists.v:173$141'.
+  created $dff cell `$procdff$625' with positive edge clock.
+
+4.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 88 empty switches in `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.$proc$rtl/assists.v:142$142'.
+Removing empty process `$paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.$proc$rtl/assists.v:142$142'.
+Found and cleaned up 1 empty switch in `\seg_xbar_cfg.$proc$rtl/assists.v:173$141'.
+Removing empty process `seg_xbar_cfg.$proc$rtl/assists.v:173$141'.
+Cleaned up 89 empty switches.
+
+4.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.
+<suppressed ~27 debug messages>
+Optimizing module seg_xbar_cfg.
+
+4.3. Executing FLATTEN pass (flatten design).
+Deleting now unused module $paramod$58a0c9d55378293666a3cf12bbab5b1a9b1aa409\seg_xbar.
+<suppressed ~1 debug messages>
+
+4.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+<suppressed ~8 debug messages>
+
+4.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+Removed 1 unused cells and 243 unused wires.
+<suppressed ~10 debug messages>
+
+4.6. Executing CHECK pass (checking for obvious problems).
+Checking module seg_xbar_cfg...
+Found and reported 0 problems.
+
+4.7. Executing OPT pass (performing simple optimizations).
+
+4.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 239 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \seg_xbar_cfg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $flatten\x.$procmux$483.
+    dead port 1/2 on $mux $flatten\x.$procmux$486.
+    dead port 1/2 on $mux $flatten\x.$procmux$492.
+    dead port 1/2 on $mux $flatten\x.$procmux$501.
+    dead port 1/2 on $mux $flatten\x.$procmux$504.
+    dead port 1/2 on $mux $flatten\x.$procmux$510.
+    dead port 1/2 on $mux $flatten\x.$procmux$519.
+    dead port 1/2 on $mux $flatten\x.$procmux$522.
+    dead port 1/2 on $mux $flatten\x.$procmux$528.
+    dead port 1/2 on $mux $flatten\x.$procmux$537.
+    dead port 1/2 on $mux $flatten\x.$procmux$540.
+    dead port 1/2 on $mux $flatten\x.$procmux$546.
+    dead port 1/2 on $mux $flatten\x.$procmux$555.
+    dead port 1/2 on $mux $flatten\x.$procmux$558.
+    dead port 1/2 on $mux $flatten\x.$procmux$564.
+    dead port 1/2 on $mux $flatten\x.$procmux$573.
+    dead port 1/2 on $mux $flatten\x.$procmux$576.
+    dead port 1/2 on $mux $flatten\x.$procmux$582.
+    dead port 1/2 on $mux $flatten\x.$procmux$591.
+    dead port 1/2 on $mux $flatten\x.$procmux$594.
+    dead port 1/2 on $mux $flatten\x.$procmux$600.
+    dead port 1/2 on $mux $flatten\x.$procmux$609.
+Removed 22 multiplexer ports.
+<suppressed ~127 debug messages>
+
+4.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \seg_xbar_cfg.
+Performed a total of 0 changes.
+
+4.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 217 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+Removed 0 unused cells and 22 unused wires.
+<suppressed ~1 debug messages>
+
+4.7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.7.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.7.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \seg_xbar_cfg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~105 debug messages>
+
+4.7.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \seg_xbar_cfg.
+Performed a total of 0 changes.
+
+4.7.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 217 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.7.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.7.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+
+4.7.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.7.16. Finished fast OPT passes. (There is nothing left to do.)
+
+4.8. Executing FSM pass (extract and optimize FSM).
+
+4.8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+4.8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+4.8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+4.8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+
+4.8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+4.8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+4.8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+4.8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+4.9. Executing OPT pass (performing simple optimizations).
+
+4.9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 217 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \seg_xbar_cfg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~105 debug messages>
+
+4.9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \seg_xbar_cfg.
+Performed a total of 0 changes.
+
+4.9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 217 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.9.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $procdff$625 ($dff) from module seg_xbar_cfg (D = { \cfg [47:0] \cfg_in }, Q = \cfg).
+
+4.9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+Removed 1 unused cells and 1 unused wires.
+<suppressed ~2 debug messages>
+
+4.9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.9.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.9.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \seg_xbar_cfg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~103 debug messages>
+
+4.9.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \seg_xbar_cfg.
+Performed a total of 0 changes.
+
+4.9.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 216 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.9.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.9.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+
+4.9.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.9.16. Finished fast OPT passes. (There is nothing left to do.)
+
+4.10. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$282 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$281 ($eq).
+Removed top 2 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$280 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$274 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$273 ($eq).
+Removed top 2 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$272 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$266 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$265 ($eq).
+Removed top 2 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$264 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$258 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$257 ($eq).
+Removed top 2 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$256 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$250 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$249 ($eq).
+Removed top 2 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$248 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$242 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$241 ($eq).
+Removed top 2 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$240 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$234 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$233 ($eq).
+Removed top 2 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$232 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$226 ($eq).
+Removed top 1 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$225 ($eq).
+Removed top 2 bits (of 3) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:154$224 ($eq).
+Removed top 27 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$mul$rtl/assists.v:147$220 ($mul).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$219 ($sub).
+Removed top 30 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$219 ($sub).
+Removed top 27 bits (of 32) from port Y of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$219 ($sub).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$217 ($lt).
+Removed top 28 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$217 ($lt).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$216 ($ge).
+Removed top 6 bits (of 8) from port B of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$216 ($ge).
+Removed top 3 bits (of 4) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:146$215 ($eq).
+Removed top 27 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$mul$rtl/assists.v:147$210 ($mul).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$209 ($sub).
+Removed top 30 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$209 ($sub).
+Removed top 27 bits (of 32) from port Y of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$209 ($sub).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$207 ($lt).
+Removed top 28 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$207 ($lt).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$206 ($ge).
+Removed top 6 bits (of 8) from port B of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$206 ($ge).
+Removed top 3 bits (of 4) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:146$205 ($eq).
+Removed top 27 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$mul$rtl/assists.v:147$200 ($mul).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$199 ($sub).
+Removed top 30 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$199 ($sub).
+Removed top 27 bits (of 32) from port Y of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$199 ($sub).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$197 ($lt).
+Removed top 28 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$197 ($lt).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$196 ($ge).
+Removed top 6 bits (of 8) from port B of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$196 ($ge).
+Removed top 3 bits (of 4) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:146$195 ($eq).
+Removed top 27 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$mul$rtl/assists.v:147$190 ($mul).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$189 ($sub).
+Removed top 30 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$189 ($sub).
+Removed top 27 bits (of 32) from port Y of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$189 ($sub).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$187 ($lt).
+Removed top 28 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$187 ($lt).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$186 ($ge).
+Removed top 6 bits (of 8) from port B of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$186 ($ge).
+Removed top 3 bits (of 4) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:146$185 ($eq).
+Removed top 27 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$mul$rtl/assists.v:147$180 ($mul).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$179 ($sub).
+Removed top 30 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$179 ($sub).
+Removed top 27 bits (of 32) from port Y of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$179 ($sub).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$177 ($lt).
+Removed top 28 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$177 ($lt).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$176 ($ge).
+Removed top 6 bits (of 8) from port B of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$176 ($ge).
+Removed top 3 bits (of 4) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:146$175 ($eq).
+Removed top 27 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$mul$rtl/assists.v:147$170 ($mul).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$169 ($sub).
+Removed top 30 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$169 ($sub).
+Removed top 27 bits (of 32) from port Y of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$169 ($sub).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$167 ($lt).
+Removed top 28 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$167 ($lt).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$166 ($ge).
+Removed top 6 bits (of 8) from port B of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$166 ($ge).
+Removed top 3 bits (of 4) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:146$165 ($eq).
+Removed top 27 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$mul$rtl/assists.v:147$160 ($mul).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$159 ($sub).
+Removed top 30 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$159 ($sub).
+Removed top 27 bits (of 32) from port Y of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$159 ($sub).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$157 ($lt).
+Removed top 28 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$157 ($lt).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$156 ($ge).
+Removed top 6 bits (of 8) from port B of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$156 ($ge).
+Removed top 3 bits (of 4) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:146$155 ($eq).
+Removed top 27 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$mul$rtl/assists.v:147$150 ($mul).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$149 ($sub).
+Removed top 30 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$149 ($sub).
+Removed top 27 bits (of 32) from port Y of cell seg_xbar_cfg.$flatten\x.$sub$rtl/assists.v:147$149 ($sub).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$147 ($lt).
+Removed top 28 bits (of 32) from port B of cell seg_xbar_cfg.$flatten\x.$lt$rtl/assists.v:147$147 ($lt).
+Removed top 4 bits (of 8) from port A of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$146 ($ge).
+Removed top 6 bits (of 8) from port B of cell seg_xbar_cfg.$flatten\x.$ge$rtl/assists.v:147$146 ($ge).
+Removed top 3 bits (of 4) from port B of cell seg_xbar_cfg.$flatten\x.$eq$rtl/assists.v:146$145 ($eq).
+Removed top 4 bits (of 64) from wire seg_xbar_cfg.si.
+Removed top 5 bits (of 64) from wire seg_xbar_cfg.so.
+
+4.11. Executing PEEPOPT pass (run peephole optimizers).
+
+4.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+4.13. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module seg_xbar_cfg:
+  creating $macc model for $flatten\x.$mul$rtl/assists.v:147$150 ($mul).
+  creating $macc model for $flatten\x.$mul$rtl/assists.v:147$160 ($mul).
+  creating $macc model for $flatten\x.$mul$rtl/assists.v:147$170 ($mul).
+  creating $macc model for $flatten\x.$mul$rtl/assists.v:147$180 ($mul).
+  creating $macc model for $flatten\x.$mul$rtl/assists.v:147$190 ($mul).
+  creating $macc model for $flatten\x.$mul$rtl/assists.v:147$200 ($mul).
+  creating $macc model for $flatten\x.$mul$rtl/assists.v:147$210 ($mul).
+  creating $macc model for $flatten\x.$mul$rtl/assists.v:147$220 ($mul).
+  creating $macc model for $flatten\x.$sub$rtl/assists.v:147$149 ($sub).
+  creating $macc model for $flatten\x.$sub$rtl/assists.v:147$159 ($sub).
+  creating $macc model for $flatten\x.$sub$rtl/assists.v:147$169 ($sub).
+  creating $macc model for $flatten\x.$sub$rtl/assists.v:147$179 ($sub).
+  creating $macc model for $flatten\x.$sub$rtl/assists.v:147$189 ($sub).
+  creating $macc model for $flatten\x.$sub$rtl/assists.v:147$199 ($sub).
+  creating $macc model for $flatten\x.$sub$rtl/assists.v:147$209 ($sub).
+  creating $macc model for $flatten\x.$sub$rtl/assists.v:147$219 ($sub).
+  creating $alu model for $macc $flatten\x.$sub$rtl/assists.v:147$219.
+  creating $alu model for $macc $flatten\x.$sub$rtl/assists.v:147$209.
+  creating $alu model for $macc $flatten\x.$sub$rtl/assists.v:147$199.
+  creating $alu model for $macc $flatten\x.$sub$rtl/assists.v:147$189.
+  creating $alu model for $macc $flatten\x.$sub$rtl/assists.v:147$179.
+  creating $alu model for $macc $flatten\x.$sub$rtl/assists.v:147$169.
+  creating $alu model for $macc $flatten\x.$sub$rtl/assists.v:147$159.
+  creating $alu model for $macc $flatten\x.$sub$rtl/assists.v:147$149.
+  creating $macc cell for $flatten\x.$mul$rtl/assists.v:147$220: $auto$alumacc.cc:382:replace_macc$630
+  creating $macc cell for $flatten\x.$mul$rtl/assists.v:147$210: $auto$alumacc.cc:382:replace_macc$631
+  creating $macc cell for $flatten\x.$mul$rtl/assists.v:147$200: $auto$alumacc.cc:382:replace_macc$632
+  creating $macc cell for $flatten\x.$mul$rtl/assists.v:147$190: $auto$alumacc.cc:382:replace_macc$633
+  creating $macc cell for $flatten\x.$mul$rtl/assists.v:147$180: $auto$alumacc.cc:382:replace_macc$634
+  creating $macc cell for $flatten\x.$mul$rtl/assists.v:147$170: $auto$alumacc.cc:382:replace_macc$635
+  creating $macc cell for $flatten\x.$mul$rtl/assists.v:147$160: $auto$alumacc.cc:382:replace_macc$636
+  creating $macc cell for $flatten\x.$mul$rtl/assists.v:147$150: $auto$alumacc.cc:382:replace_macc$637
+  creating $alu model for $flatten\x.$ge$rtl/assists.v:147$146 ($ge): merged with $flatten\x.$sub$rtl/assists.v:147$149.
+  creating $alu model for $flatten\x.$ge$rtl/assists.v:147$156 ($ge): merged with $flatten\x.$sub$rtl/assists.v:147$159.
+  creating $alu model for $flatten\x.$ge$rtl/assists.v:147$166 ($ge): merged with $flatten\x.$sub$rtl/assists.v:147$169.
+  creating $alu model for $flatten\x.$ge$rtl/assists.v:147$176 ($ge): merged with $flatten\x.$sub$rtl/assists.v:147$179.
+  creating $alu model for $flatten\x.$ge$rtl/assists.v:147$186 ($ge): merged with $flatten\x.$sub$rtl/assists.v:147$189.
+  creating $alu model for $flatten\x.$ge$rtl/assists.v:147$196 ($ge): merged with $flatten\x.$sub$rtl/assists.v:147$199.
+  creating $alu model for $flatten\x.$ge$rtl/assists.v:147$206 ($ge): merged with $flatten\x.$sub$rtl/assists.v:147$209.
+  creating $alu model for $flatten\x.$ge$rtl/assists.v:147$216 ($ge): merged with $flatten\x.$sub$rtl/assists.v:147$219.
+  creating $alu model for $flatten\x.$lt$rtl/assists.v:147$147 ($lt): new $alu
+  creating $alu model for $flatten\x.$lt$rtl/assists.v:147$157 ($lt): new $alu
+  creating $alu model for $flatten\x.$lt$rtl/assists.v:147$167 ($lt): new $alu
+  creating $alu model for $flatten\x.$lt$rtl/assists.v:147$177 ($lt): new $alu
+  creating $alu model for $flatten\x.$lt$rtl/assists.v:147$187 ($lt): new $alu
+  creating $alu model for $flatten\x.$lt$rtl/assists.v:147$197 ($lt): new $alu
+  creating $alu model for $flatten\x.$lt$rtl/assists.v:147$207 ($lt): new $alu
+  creating $alu model for $flatten\x.$lt$rtl/assists.v:147$217 ($lt): new $alu
+  creating $alu cell for $flatten\x.$lt$rtl/assists.v:147$217: $auto$alumacc.cc:512:replace_alu$646
+  creating $alu cell for $flatten\x.$lt$rtl/assists.v:147$207: $auto$alumacc.cc:512:replace_alu$651
+  creating $alu cell for $flatten\x.$lt$rtl/assists.v:147$197: $auto$alumacc.cc:512:replace_alu$656
+  creating $alu cell for $flatten\x.$lt$rtl/assists.v:147$187: $auto$alumacc.cc:512:replace_alu$661
+  creating $alu cell for $flatten\x.$lt$rtl/assists.v:147$177: $auto$alumacc.cc:512:replace_alu$666
+  creating $alu cell for $flatten\x.$lt$rtl/assists.v:147$167: $auto$alumacc.cc:512:replace_alu$671
+  creating $alu cell for $flatten\x.$lt$rtl/assists.v:147$157: $auto$alumacc.cc:512:replace_alu$676
+  creating $alu cell for $flatten\x.$lt$rtl/assists.v:147$147: $auto$alumacc.cc:512:replace_alu$681
+  creating $alu cell for $flatten\x.$sub$rtl/assists.v:147$149, $flatten\x.$ge$rtl/assists.v:147$146: $auto$alumacc.cc:512:replace_alu$686
+  creating $alu cell for $flatten\x.$sub$rtl/assists.v:147$159, $flatten\x.$ge$rtl/assists.v:147$156: $auto$alumacc.cc:512:replace_alu$699
+  creating $alu cell for $flatten\x.$sub$rtl/assists.v:147$169, $flatten\x.$ge$rtl/assists.v:147$166: $auto$alumacc.cc:512:replace_alu$712
+  creating $alu cell for $flatten\x.$sub$rtl/assists.v:147$179, $flatten\x.$ge$rtl/assists.v:147$176: $auto$alumacc.cc:512:replace_alu$725
+  creating $alu cell for $flatten\x.$sub$rtl/assists.v:147$189, $flatten\x.$ge$rtl/assists.v:147$186: $auto$alumacc.cc:512:replace_alu$738
+  creating $alu cell for $flatten\x.$sub$rtl/assists.v:147$199, $flatten\x.$ge$rtl/assists.v:147$196: $auto$alumacc.cc:512:replace_alu$751
+  creating $alu cell for $flatten\x.$sub$rtl/assists.v:147$209, $flatten\x.$ge$rtl/assists.v:147$206: $auto$alumacc.cc:512:replace_alu$764
+  creating $alu cell for $flatten\x.$sub$rtl/assists.v:147$219, $flatten\x.$ge$rtl/assists.v:147$216: $auto$alumacc.cc:512:replace_alu$777
+  created 16 $alu and 8 $macc cells.
+
+4.14. Executing SHARE pass (SAT-based resource sharing).
+
+4.15. Executing OPT pass (performing simple optimizations).
+
+4.15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 256 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \seg_xbar_cfg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~103 debug messages>
+
+4.15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \seg_xbar_cfg.
+Performed a total of 0 changes.
+
+4.15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 256 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+Removed 0 unused cells and 16 unused wires.
+<suppressed ~1 debug messages>
+
+4.15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.15.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.15.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \seg_xbar_cfg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~103 debug messages>
+
+4.15.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \seg_xbar_cfg.
+Performed a total of 0 changes.
+
+4.15.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 256 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.15.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.15.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+
+4.15.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.15.16. Finished fast OPT passes. (There is nothing left to do.)
+
+4.16. Executing MEMORY pass.
+
+4.16.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+4.16.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+4.16.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+4.16.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+4.16.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+4.16.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+
+4.16.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+4.16.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+4.16.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+
+4.16.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+4.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+
+4.18. Executing OPT pass (performing simple optimizations).
+
+4.18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+<suppressed ~31 debug messages>
+
+4.18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 272 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Computing hashes of 264 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+<suppressed ~24 debug messages>
+Removed a total of 8 cells.
+
+4.18.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.18.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+Removed 0 unused cells and 16 unused wires.
+<suppressed ~1 debug messages>
+
+4.18.5. Finished fast OPT passes.
+
+4.19. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+4.20. Executing OPT pass (performing simple optimizations).
+
+4.20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 264 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \seg_xbar_cfg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~103 debug messages>
+
+4.20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \seg_xbar_cfg.
+Performed a total of 0 changes.
+
+4.20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 264 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Removed a total of 0 cells.
+
+4.20.6. Executing OPT_SHARE pass.
+
+4.20.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.20.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+
+4.20.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+
+4.20.10. Finished fast OPT passes. (There is nothing left to do.)
+
+4.21. Executing TECHMAP pass (map to technology primitives).
+
+4.21.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+4.21.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $reduce_and.
+Using template $paramod$1a9b2adc0e90ccf2d22dba8d72430d10741e65ed\_90_alu for cells of type $alu.
+Using template $paramod$78e969f2586efcf3a5b0b0440bcca0db83d5cca2\_90_alu for cells of type $alu.
+Using extmapper maccmap for cells of type $macc_v2.
+  add { $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [31] $flatten\x.$sub$rtl/assists.v:147$149_Y [3:1] \cfg [0] } * 5'10001 (32x5 bits, unsigned)
+  add { $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [31] $flatten\x.$sub$rtl/assists.v:147$159_Y [3:1] \cfg [4] } * 5'10001 (32x5 bits, unsigned)
+  add { $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [31] $flatten\x.$sub$rtl/assists.v:147$169_Y [3:1] \cfg [8] } * 5'10001 (32x5 bits, unsigned)
+  add { $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [31] $flatten\x.$sub$rtl/assists.v:147$179_Y [3:1] \cfg [12] } * 5'10001 (32x5 bits, unsigned)
+  add { $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [31] $flatten\x.$sub$rtl/assists.v:147$189_Y [3:1] \cfg [16] } * 5'10001 (32x5 bits, unsigned)
+  add { $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [31] $flatten\x.$sub$rtl/assists.v:147$199_Y [3:1] \cfg [20] } * 5'10001 (32x5 bits, unsigned)
+  add { $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [31] $flatten\x.$sub$rtl/assists.v:147$209_Y [3:1] \cfg [24] } * 5'10001 (32x5 bits, unsigned)
+  add { $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [31] $flatten\x.$sub$rtl/assists.v:147$219_Y [3:1] \cfg [28] } * 5'10001 (32x5 bits, unsigned)
+Using extmapper simplemap for cells of type $dffe.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $logic_not.
+Using template $paramod$constmap:bc7cdf0d2913306cf6b2a00b2664547b73a4e0b0$paramod$e4a4bd62a4a9eb815fe34a7c7d13e9adacd4ec9f\_90_shift_shiftx for cells of type $shiftx.
+Using extmapper simplemap for cells of type $logic_and.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000100000 for cells of type $fa.
+Using template $paramod$fbc7873bff55778c0b3173955b7e4bce1d9d6834\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000011 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000100 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000100 for cells of type $lcu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000100000 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~3146 debug messages>
+
+4.22. Executing OPT pass (performing simple optimizations).
+
+4.22.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+<suppressed ~34975 debug messages>
+
+4.22.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 31556 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Computing hashes of 31357 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Computing hashes of 31221 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Computing hashes of 31173 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Computing hashes of 31165 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+<suppressed ~1173 debug messages>
+Removed a total of 391 cells.
+
+4.22.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.22.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+Removed 21103 unused cells and 2671 unused wires.
+<suppressed ~21104 debug messages>
+
+4.22.5. Finished fast OPT passes.
+
+4.23. Executing ABC pass (technology mapping using ABC).
+
+4.23.1. Extracting gate netlist of module `\seg_xbar_cfg' to `<abc-temp-dir>/input.blif'..
+Replacing 2240 occurrences of constant undef bits with constant zero bits
+
+4.23.1.1. Executed ABC.
+Extracted 10005 gates and 10335 wires to a netlist network with 328 inputs and 272 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library /tmp/yosys-abc-9Ndrk6/stdcells.genlib 
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+4.23.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       16
+ABC RESULTS:            ANDNOT cells:     1372
+ABC RESULTS:               MUX cells:     7783
+ABC RESULTS:              NAND cells:      152
+ABC RESULTS:               NOR cells:       25
+ABC RESULTS:               NOT cells:      207
+ABC RESULTS:                OR cells:     2095
+ABC RESULTS:             ORNOT cells:       96
+ABC RESULTS:              XNOR cells:       24
+ABC RESULTS:               XOR cells:       80
+ABC RESULTS:        internal signals:     9735
+ABC RESULTS:           input signals:      328
+ABC RESULTS:          output signals:      272
+Removing temp directory.
+Removing global temp directory.
+
+4.24. Executing OPT pass (performing simple optimizations).
+
+4.24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module seg_xbar_cfg.
+<suppressed ~2129 debug messages>
+
+4.24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\seg_xbar_cfg'.
+Computing hashes of 11907 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+Computing hashes of 11899 cells of `\seg_xbar_cfg'.
+Finding duplicate cells in `\seg_xbar_cfg'.
+<suppressed ~24 debug messages>
+Removed a total of 8 cells.
+
+4.24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+Removed 0 unused cells and 1133 unused wires.
+<suppressed ~1 debug messages>
+
+4.24.5. Finished fast OPT passes.
+
+4.25. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `seg_xbar_cfg'. Setting top module to seg_xbar_cfg.
+
+4.25.1. Analyzing design hierarchy..
+Top module:  \seg_xbar_cfg
+
+4.25.2. Analyzing design hierarchy..
+Top module:  \seg_xbar_cfg
+Removed 0 unused modules.
+
+4.26. Printing statistics.
+
+=== seg_xbar_cfg ===
+
+        +----------Local Count, excluding submodules.
+        | 
+    11590 wires
+    13316 wire bits
+       20 public wires
+     1746 public wire bits
+        7 ports
+      690 port bits
+    11899 cells
+     1364   $_ANDNOT_
+       16   $_AND_
+       56   $_DFFE_PP_
+     7783   $_MUX_
+      152   $_NAND_
+       25   $_NOR_
+      207   $_NOT_
+       96   $_ORNOT_
+     2095   $_OR_
+       24   $_XNOR_
+       80   $_XOR_
+        1   $scopeinfo
+
+4.27. Executing CHECK pass (checking for obvious problems).
+Checking module seg_xbar_cfg...
+Found and reported 0 problems.
+
+5. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+5.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\seg_xbar_cfg':
+  mapped 56 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+6. Executing ABC pass (technology mapping using ABC).
+
+6.1. Extracting gate netlist of module `\seg_xbar_cfg' to `<abc-temp-dir>/input.blif'..
+
+6.1.1. Executed ABC.
+Extracted 11898 gates and 12235 wires to a netlist network with 337 inputs and 328 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.02 sec
+ABC: Memory =    2.85 MB. Time =     0.02 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+6.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:      157
+ABC RESULTS:    sg13g2_a21oi_1 cells:     1081
+ABC RESULTS:   sg13g2_a221oi_1 cells:      139
+ABC RESULTS:    sg13g2_a22oi_1 cells:      832
+ABC RESULTS:     sg13g2_and2_1 cells:      242
+ABC RESULTS:     sg13g2_and3_1 cells:       12
+ABC RESULTS:      sg13g2_inv_1 cells:       94
+ABC RESULTS:     sg13g2_mux2_1 cells:      227
+ABC RESULTS:     sg13g2_mux4_1 cells:      192
+ABC RESULTS:    sg13g2_nand2_1 cells:      807
+ABC RESULTS:   sg13g2_nand2b_1 cells:       85
+ABC RESULTS:    sg13g2_nand3_1 cells:      438
+ABC RESULTS:   sg13g2_nand3b_1 cells:        2
+ABC RESULTS:    sg13g2_nand4_1 cells:       34
+ABC RESULTS:     sg13g2_nor2_1 cells:      361
+ABC RESULTS:    sg13g2_nor2b_1 cells:       12
+ABC RESULTS:     sg13g2_nor3_1 cells:      150
+ABC RESULTS:     sg13g2_nor4_1 cells:       17
+ABC RESULTS:    sg13g2_o21ai_1 cells:      751
+ABC RESULTS:      sg13g2_or2_1 cells:       53
+ABC RESULTS:      sg13g2_or3_1 cells:       12
+ABC RESULTS:      sg13g2_or4_1 cells:        1
+ABC RESULTS:    sg13g2_xnor2_1 cells:       11
+ABC RESULTS:     sg13g2_xor2_1 cells:        3
+ABC RESULTS:        internal signals:    11570
+ABC RESULTS:           input signals:      337
+ABC RESULTS:          output signals:      328
+Removing temp directory.
+Removing global temp directory.
+
+7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \seg_xbar_cfg..
+Removed 0 unused cells and 12235 unused wires.
+<suppressed ~1 debug messages>
+
+8. Printing statistics.
+
+=== seg_xbar_cfg ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     5461        - wires
+     7187        - wire bits
+       20        - public wires
+     1746        - public wire bits
+        7        - ports
+      690        - port bits
+     5770 6.28E+04 cells
+        1        -   $scopeinfo
+      157 1.99E+03   sg13g2_a21o_1
+     1081 9.81E+03   sg13g2_a21oi_1
+      139 2.02E+03   sg13g2_a221oi_1
+      832 9.03E+03   sg13g2_a22oi_1
+      242  2.2E+03   sg13g2_and2_1
+       12   152.41   sg13g2_and3_1
+       56 2.74E+03   sg13g2_dfrbpq_1
+       94  511.661   sg13g2_inv_1
+      227 4.12E+03   sg13g2_mux2_1
+      192 7.32E+03   sg13g2_mux4_1
+      807 5.86E+03   sg13g2_nand2_1
+       85   771.12   sg13g2_nand2b_1
+      438 3.97E+03   sg13g2_nand3_1
+        2   25.402   sg13g2_nand3b_1
+       34  370.138   sg13g2_nand4_1
+      361 2.62E+03   sg13g2_nor2_1
+       12  108.864   sg13g2_nor2b_1
+      150   1360.8   sg13g2_nor3_1
+       17  185.069   sg13g2_nor4_1
+      751 6.81E+03   sg13g2_o21ai_1
+       53  480.816   sg13g2_or2_1
+       12   152.41   sg13g2_or3_1
+        1   14.515   sg13g2_or4_1
+       11  159.667   sg13g2_xnor2_1
+        3   43.546   sg13g2_xor2_1
+
+   Area for cell type $scopeinfo is unknown!
+
+   Chip area for module '\seg_xbar_cfg': 62817.552000
+     of which used for sequential elements: 2743.372800 (4.37%)
+
+Warnings: 1 unique messages, 2 total
+End of script. Logfile hash: edac2240b5, CPU: user 3.23s system 0.11s, MEM: 138.94 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 45% 2x abc (2 sec), 21% 24x opt_expr (1 sec), ...
