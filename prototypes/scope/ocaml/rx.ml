@@ -199,7 +199,7 @@ let () =
   say "   the pad is the limit above that: SPICE shows full-swing inputs clean at 200 MHz (IHP's own report),";
   say "   i.e. 400 Mbit/s; the kicked-sampling aperture is 0.8 GHz.";
   say "";
-  say "bit-count slips of the 1x receiver over all runs: %d (the receiver's own count of bits since the last edge";
-  say "disagreeing with the transmitted index; each is charged as 8 bit errors and re-synchronised)" !total_slips;
+  say "bit-count slips of the 1x receiver over all runs: %d (the receiver's own count of bits since the last edge" !total_slips;
+  say "disagreeing with the transmitted index; each is charged as 8 bit errors and re-synchronised)";
   let oc = open_out (if quick then "../results/rx-quick.txt" else "../results/rx.txt") in
   output_string oc (Buffer.contents out); close_out oc
