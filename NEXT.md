@@ -34,7 +34,8 @@ worktree (commits ahead of master / uncommitted files):
 - `emulator-wt-isa-v2` (9/0): **G2**, ISA v2 interpreter, RTL and firmware ports. It was
   resumed at 19:17 and may still be running; otherwise resume it.
 - `emulator-wt-scope` (12/0): beyond-Nyquist scope, compressive inference, K-hypothesis tests.
-  Resumed at 19:17.
+  Resumed at 19:17, then stopped by Matthias at about 19:30 while revising its README after
+  review. It has uncommitted edits, so check `git status` there.
 - `emulator-wt-array-uses` (9/0): problems for the systolic array (Viterbi, Reed–Solomon,
   raycaster, …). Status unknown.
 - **Killed, not resumed:**
