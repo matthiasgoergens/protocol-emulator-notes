@@ -104,13 +104,15 @@ Gat.d, Cnt.e and M1.b (`drc/6t-t2-nw0.24-*` is the drawable limit).
 
 Generators: `layout/gain_rb.py` and `layout/sram6t_rb.py`, parametrised copies of
 `../gain-cell/draw2.py` and `../sram-cut/layout/sram6t.py`. At the standard values they
-reproduce the originals' geometry polygon for polygon (checked with a polygon comparison).
+reproduce the originals' geometry polygon for polygon (`layout/standard-identity.txt`,
+`layout/polycmp.py`).
 Every array was DRC'd four ways (`drc/run.sh`, `drc/tt.sh`, `drc/gain-tiers.sh`):
 
 - the stock main table;
 - stock main + maximal;
 - a relaxed deck (`deck/mkdeck.py`: the tier's values, **SRAM exemption removed**, so the
-  stated values are enforced everywhere);
+  stated values are enforced everywhere; each deck's substitutions are listed in
+  `deck/relaxed-decks/*.txt`, and `mkdeck.py` refuses a requested rule it cannot find);
 - the Tiny Tapeout way, with the upstream deck and the SRAM marker plus DigiBnd drawn.
 
 Controls:
@@ -160,7 +162,7 @@ parameter; results are in `sim/results/`, and lifetimes come from `sim/life.py`,
 |---|---|---|---|
 | level-shifted thin, VLO 0.3 / VBAR 0.1 V fixed, 10 ns sense | ss/27 °C | written 1 0.619 V, reads above 0.556 V → 4.98 ms | written 1 0.567 V, reads above 0.587 V → **fails** (`hold-lv-w20-vlo0.3-bar0.1.txt`) |
 | same | ff/85 °C | 1.22 ms idle / 131 µs busy | 975 µs idle / 275 µs busy |
-| level-shifted, per-corner bar (VBAR 0 at ss/27, 0.15 at ff/85) | ss/27 °C | 19.6 ms | 12.6 ms |
+| level-shifted, per-corner bar (VBAR 0 at ss/27, 0.15 at ff/85) | ss/27 °C | 19.6 ms (read sweep at VLO 0, as in `../gain-cell/`) | 12.6 ms (read sweep at VLO 0.3, matched) |
 | same | ff/85 °C | 930 µs (idle and busy) | **732 µs** (`results/lifetime-percorner-w20.txt`) |
 | untricked thin, 10 ns sense | worst corner (ff/85 °C) | 1.31 µs | 0.93 µs (`results/lifetime-w20-untricked.txt`) |
 | thick-write, 20 ns write, 20 ns sense | ss/27 °C | written 1 0.366 V, reads above 0.354 V → 261 µs | written 1 0.329 V, reads above 0.392 V → **fails** |
@@ -169,7 +171,7 @@ parameter; results are in `sim/results/`, and lifetimes come from `sim/life.py`,
 
 So tier 0 is not free for the gain cells. The written 1 is 40–50 mV lower (less SN capacitance
 against the same word-line feedthrough), and the readable level is 30–40 mV higher (a weaker
-read path). The level-shifted thin cell survives only with the per-corner bar. The thick-write
+read path). In these nominal simulations the level-shifted thin cell survives only with the per-corner bar. The thick-write
 cell, whose ss/27 °C margin was 12 mV, does not survive at all without a sense amplifier or a
 boosted write word line. That is why the recommended tiers keep the read strip at 0.30. Mismatch was not rerun. σVt scales as 1/√(WL), so it is
 about 1.2× larger at W 0.20, on margins of tens of millivolts. **This must be run before

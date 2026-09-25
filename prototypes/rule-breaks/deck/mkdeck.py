@@ -69,5 +69,8 @@ r = open(rp).read()
 r2 = r.replace('script_dir / "../../python/sg13g2_pycell_lib/sg13g2_tech_mod.json"', 'script_dir / "tech_mod_relaxed.json"')
 assert r2 != r
 open(rp, "w").write(r2)
+for rule in rules:
+    # every requested rule must have changed somewhere, or the deck silently checks the stock value
+    assert any((f" {rule} " in l or f": {rule.replace('.', '_')} " in l) for l in log), f"{rule}: not found in any deck"
 open(os.path.join(out, "CHANGES.txt"), "w").write("\n".join(log) + "\n")
 print("\n".join(log))
