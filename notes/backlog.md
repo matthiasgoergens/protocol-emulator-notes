@@ -119,6 +119,21 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   nondeterminism, model each in simulation as injected nondeterminism (metastability, skew and
   retention sweeps), and plan record-and-replay of silicon runs into simulation for debugging.
   Exploration testing (hwfuzz, and ideas from Antithesis) must cover both regimes.
+- **Deliberate nondeterminism as design space** (the user's point: breaking determinism on purpose,
+  knowing where and how to fence it, opens designs up). Candidates:
+  - self-timed handshakes between elements, as in the GA144;
+  - ring-oscillator or metastability randomness as a true random source;
+  - the expiring memory as a physical unclonable function;
+  - stochastic computing (numbers as random bit streams, multiplication as AND) for cheap,
+    error-tolerant image and scoring maths;
+  - equivalent-time sampling with the TDC, so the chip works as a debugging scope far beyond
+    its clock;
+  - dithering and randomised timing (FM spurs, glitch hardening, randomised refresh);
+  - approximate storage (letting memory decay on purpose for lossy data);
+  - chaotic and oscillator networks.
+
+  Each needs its fence written down: which interfaces re-synchronise, what the verifier may
+  assume, and how a run is still replayed.
 - **A programme verifier**, built before the showpieces: deadlines met, every read inside its
   row's lifetime at the chosen temperature bin, ports never double-booked.
 - **A pessimising scheduler** as a test oracle (after Knuth's SHOAP).
