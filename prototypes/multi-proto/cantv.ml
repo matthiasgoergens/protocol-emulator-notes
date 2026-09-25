@@ -179,19 +179,24 @@ let frame_renderer () =
   block_recv b 2; block_send b 6; block_recv b 2; block_send b 6; block_recv b 5; block_send b 6;
   emit b (jmp "top");
   label b "end_ev";
-  block_recv b 5; emit b (br_clr 0 "top");
+  (* any non-zero end code (stuff 1, CRC 2, form 3, ...) flashes the header *)
+  block_recv b 5; List.iter (fun k -> emit b (br_set k "flash")) [ 0; 1; 2; 3 ]; emit b (jmp "top");
+  label b "flash";
   emit b (W (Isa.lda 0x40)); block_send b 7; emit b (jmp "top");
   assemble b
 
 (* ---------------- traffic ---------------- *)
 let ids = [| 0x0A5; 0x1B2; 0x23C; 0x341; 0x4F0; 0x512; 0x6AA; 0x7C3 |]      (* slot = ID10..ID8 *)
 
-type slot_ev = { t : int; bits : (int * int) list; fevs : (int * int list) list }
+(* What the analyser's in-ports receive, from either source: per-bit codes (bus, TXD A, TXD B,
+   mark) and frame events (0xA1 c1 c2 c3 after the header; 0xA2 status at the end), timed in
+   clocks of this simulation. *)
+type events = { bits : (int * int) list; fevs : (int * int list) list; ntrans : int; contests : int; source : string }
 
-(* frames during the first two fields; the third is quiet and is the one judged *)
+(* the stand-in: frames during the first two fields; the third is quiet and is the one judged *)
 let traffic ~seed ~error_frame =
   let rnd = Random.State.make [| seed |] in
-  let t = ref 20_000 and out = ref [] and log = ref [] in
+  let t = ref 20_000 and bits_acc = ref [] and fevs_acc = ref [] and ntrans = ref 0 and contests = ref 0 in
   let quiet_from = (n_fields - 1) * Video_fw.field_clocks - 40_000 in
   let k = ref 0 in
   let last_contest = ref false in
@@ -213,35 +218,68 @@ let traffic ~seed ~error_frame =
       else if !k mod 7 = 3 then (Some (mk ids.(1) false), Some (mk ids.(2) false))          (* an arbitration contest *)
       else if error_frame && !k = 23 then (None, Some { (mk ids.(5) true) with data = [ 0xFF; 0xFF; 0x00 ] })
       else if Random.State.bool rnd then (Some (mk ids.(pick ()) false), None) else (None, Some (mk ids.(pick ()) false)) in
-    let bits, fevs, winner = Can_standin.transmit ?a ?b:bb () in
-    let fevs = List.map (fun (i, bs) -> (!t + ((i + 1) * bit_clocks), bs)) fevs in
-    out := { t = !t; bits = List.mapi (fun i e -> (!t + ((i + 1) * bit_clocks) - (bit_clocks / 3), Can_standin.code e)) bits; fevs } :: !out;
-    log := (!t, bits, fevs, winner) :: !log;
+    let bits, fevs, _ = Can_standin.transmit ?a ?b:bb () in
+    if a <> None && bb <> None then incr contests;
+    incr ntrans;
+    fevs_acc := List.rev_append (List.map (fun (i, bs) -> (!t + ((i + 1) * bit_clocks), bs)) fevs) !fevs_acc;
+    bits_acc := List.rev_append (List.mapi (fun i e -> (!t + ((i + 1) * bit_clocks) - (bit_clocks / 3), Can_standin.code e)) bits) !bits_acc;
     t := if !last_contest then quiet_from else !t + ((List.length bits + 20 + Random.State.int rnd 200) * bit_clocks);
     incr k
     end
   done;
-  List.rev !out, List.rev !log
+  { bits = List.rev !bits_acc; fevs = List.rev !fevs_acc; ntrans = !ntrans; contests = !contests; source = "stand-in" }
+
+(* the real firmware: the log written by can_events.exe (master's CAN RX thread, raw mode, on its
+   bus model). Its tagged reports become the frame events: after SOF the first three DATA bytes
+   are c1 c2 c3 (0xA1 c1 c2 c3), END v is 0xA2 v; RAW/STUFF reports with the TXD probes are the
+   bit codes. Times are converted from the branch's femtoseconds to this simulation's clocks. *)
+let load_log path =
+  let ic = open_in path in
+  let cyc t_fs = int_of_float (float t_fs *. 1e-15 *. fclk) in
+  let bits = ref [] and fevs = ref [] and hdr = ref [] and ntrans = ref 0 and contests = ref 0 in
+  let a_drove = ref false and b_drove = ref false in
+  (try while true do
+      match String.split_on_char ' ' (input_line ic) with
+      | [ "B"; t; l; ta; tb; mark ] ->
+        let l = int_of_string l and ta = int_of_string ta and tb = int_of_string tb and mark = int_of_string mark in
+        if ta = 0 then a_drove := true; if tb = 0 then b_drove := true;
+        bits := (cyc (int_of_string t), l lor (ta lsl 1) lor (tb lsl 2) lor ((if mark > 0 then 1 else 0) lsl 3)) :: !bits
+      | [ "F"; t; tag; v ] ->
+        let t = cyc (int_of_string t) and tag = int_of_string tag and v = int_of_string v in
+        if tag = 1 then begin
+          hdr := []; incr ntrans;
+          if !a_drove && !b_drove then incr contests; a_drove := false; b_drove := false
+        end
+        else if tag = 0 then begin
+          if List.length !hdr < 3 then hdr := !hdr @ [ v ];
+          if List.length !hdr = 3 then
+            (* the first DATA byte carries three bits (SOF ID10 ID9); its upper five bits are whatever
+               the RX thread's accumulator held before (ones from the idle bus: 0xF8..0xFB), which the
+               branch's own decoder masks too *)
+            (match !hdr with [ c1; c2; c3 ] -> fevs := (t, [ 0xA1; c1 land 7; c2; c3 ]) :: !fevs; hdr := [ c1; c2; c3; -1 ] | _ -> ())
+        end
+        else if tag = 4 then fevs := (t, [ 0xA2; v ]) :: !fevs
+      | _ -> ()
+    done with End_of_file -> ());
+  close_in ic;
+  if !a_drove && !b_drove then incr contests;
+  { bits = List.rev !bits; fevs = List.rev !fevs; ntrans = !ntrans; contests = !contests; source = "CAN RX firmware (" ^ path ^ ")" }
 
 (* ---------------- the reference analyser: from events alone ---------------- *)
-let reference_screen log ~judged_field =
+let reference_screen ev ~judged_field =
   (* field ticks happen at the first playback of each field *)
   let pe = Array.make 8 0 and flash = ref 0 in
-  let evs = List.concat_map (fun (_, _, fevs, _) -> List.map (fun (i, bs) -> (i, bs)) fevs) log in
   let ticks = List.init (judged_field + 1) (fun f -> (tick f, [ -1 ])) in
-  let all = List.sort compare (evs @ ticks) in
+  let all = List.stable_sort (fun (a, _) (b, _) -> compare a b) (ev.fevs @ ticks) in
   let last_hdr = Array.make 8 None in
-  let cur = ref [] in
-  List.iter (fun (t, bs) ->
-    ignore t;
+  List.iter (fun (_, bs) ->
     match bs with
     | [ -1 ] -> Array.iteri (fun k x -> pe.(k) <- max 0 (x - 4)) pe; if !flash > 0 then decr flash
-    | 0xA1 :: c1 :: c2 :: c3 :: _ -> let k = ((c1 land 3) lsl 1) lor (c2 lsr 7) in pe.(k) <- min 255 (pe.(k) + 32); last_hdr.(k) <- Some (c1, c2, c3); cur := []
-    | [ 0xA2; st ] -> if st land 1 = 1 then flash := 30
+    | 0xA1 :: c1 :: c2 :: c3 :: _ -> let k = ((c1 land 3) lsl 1) lor (c2 lsr 7) in pe.(k) <- min 255 (pe.(k) + 32); last_hdr.(k) <- Some (c1, c2, c3)
+    | [ 0xA2; st ] -> if st <> 0 then flash := 30
     | _ -> ()) all;
-  let bits = List.concat_map (fun (_, b, _, _) -> List.map Can_standin.code b) log in
-  let nb = List.length bits in
-  let arr = Array.of_list bits in
+  let arr = Array.of_list (List.map snd ev.bits) in
+  let nb = Array.length arr in
   let ring = Array.init 64 (fun x -> let i = nb - 64 + x in if i >= 0 then arr.(i) else 0) in
   Array.init 240 (fun i ->
     let row, bank, bar = descriptor i in
@@ -260,21 +298,21 @@ let reference_screen log ~judged_field =
         bank_colour bank nib)), pe, !flash
 
 (* ---------------- the run ---------------- *)
-type opts = { rtl : bool; neigh : [ `Compiled | `Random of int | `None ]; analyser : bool; error_frame : bool; out : string option }
+type opts = { rtl : bool; neigh : [ `Compiled | `Random of int | `None ]; ev : events option; out : string option }
 
 let run o =
   let c = Isa_mb.cfg ~pc_bits:7 ~depth:2 () in
   let halt = Array.make 128 Isa.halt in
-  let t0 = if o.analyser then (let p, _, _ = bit_renderer () in p) else halt in
-  let t2 = if o.analyser then (let p, _, _ = frame_renderer () in p) else halt in
-  let t1 = if o.analyser then fst (Video_fw.video_programme ()) else halt in
+  let analyser = o.ev <> None in
+  let t0 = if analyser then (let p, _, _ = bit_renderer () in p) else halt in
+  let t2 = if analyser then (let p, _, _ = frame_renderer () in p) else halt in
+  let t1 = if analyser then fst (Video_fw.video_programme ()) else halt in
   let t3 = match o.neigh with
     | `Compiled -> Asm.of_base ~loop:true (Compiler.uart_tx { upin = 7; bit_slots = 13; ubytes = [ 0x43; 0x41; 0x4E ]; stretch = None }) ~plen:128
     | `Random s -> Random.init s; Dual.random_neighbour ~plen:128 ~pins:0x80 ~own:[ 3 ]
     | `None -> halt in
   let d = Dual.make ~rtl:o.rtl c [| t0; t1; t2; t3 |] in
-  let slots, log = if o.analyser then traffic ~seed:3 ~error_frame:o.error_frame else [], [] in
-  let bitq = ref (List.concat_map (fun s -> s.bits) slots) and fq = ref (List.concat_map (fun s -> s.fevs) slots) in
+  let bitq = ref (match o.ev with Some e -> e.bits | None -> []) and fq = ref (match o.ev with Some e -> e.fevs | None -> []) in
   let p0 = Queue.create () and p1 = Queue.create () in
   let overflow = ref 0 in
   let m = make_amem () and s = make_astage () in
@@ -301,52 +339,45 @@ let run o =
     (match oc with Some oc -> Bytes.set_int32_le fb 0 (Int32.bits_of_float (Video.composite ~code ~a ~b)); output_bytes oc fb | None -> ())
   done;
   Option.iter close_out oc;
-  (d, s, m, log, !overflow, !comp_hash, !neigh_hash)
+  (d, s, m, !overflow, !comp_hash, !neigh_hash)
 
 let () =
   let dir = "/var/tmp/multi-proto" in
   let t_start = Unix.gettimeofday () in
   let pr = Printf.printf in
-  let (_, l0, _) = bit_renderer () and (_, l2, _) = frame_renderer () in
-  ignore l0; ignore l2;
   let _, n0, _ = bit_renderer () and _, n2, _ = frame_renderer () in
   pr "programmes: T0 bit renderer %d words, T2 frame renderer %d words, T1 video timing %d words\n" n0 n2 (snd (Video_fw.video_programme ()));
-  let judge_and_write name (d, s, m, log, overflow, _, _) =
-    let expected, pe, flash = reference_screen log ~judged_field:(n_fields - 1) in
+  let judge_and_write name tag ev ~rtl =
+    let (d, s, m, overflow, ch, nh) = run { rtl; neigh = `Compiled; ev = Some ev; out = Some (Printf.sprintf "%s/cantv_%s.f32" dir tag) } in
+    let expected, pe, flash = reference_screen ev ~judged_field:(n_fields - 1) in
     let shown = Array.make 240 [||] in
     List.iter (fun (l, a) -> if l < 240 then shown.(l) <- a) s.shown;
     let diff = ref 0 in
     Array.iteri (fun i a -> if Array.length a = 64 then Array.iteri (fun x c -> if c <> expected.(i).(x) then incr diff) a else diff := !diff + 64) shown;
-    let frames = List.length log and contests = List.length (List.filter (fun (_, bits, _, _) -> List.exists (fun e -> e.Can_standin.ta = 0) bits && List.exists (fun e -> e.Can_standin.tb = 0) bits) log) in
-    pr "%s: %d transmissions (%d arbitration contests), RTL/interp mismatches %d, port overflow %d; \
+    pr "%s [%s]: %d frames (%d arbitration contests), RTL/interp mismatches %d, port overflow %d; \
         stage vs reference analyser: %d of 15360 pixels differ; counters %s (reference %s); flash %d (reference %d); \
         longest interval between refreshes of a displayed row %.2f ms\n%!"
-      name frames contests d.Dual.mismatches overflow !diff
+      name ev.source ev.ntrans ev.contests d.Dual.mismatches overflow !diff
       (String.concat "," (Array.to_list (Array.map string_of_int s.pe))) (String.concat "," (Array.to_list (Array.map string_of_int pe)))
       s.flash flash (float m.max_interval /. fclk *. 1e3);
-    expected in
-  let r = run { rtl = true; neigh = `Compiled; analyser = true; error_frame = true; out = Some (dir ^ "/cantv_main.f32") } in
-  let expected = judge_and_write "main (RTL + interpreter)" r in
-  let oc = open_out (dir ^ "/cantv_expect.txt") in
-  Array.iteri (fun i (rr, g, b) -> Printf.fprintf oc "P %d %.4f %.4f %.4f\n" i rr g b) (Video.refs ());
-  Array.iteri (fun i a -> Printf.fprintf oc "S %d %s\n" i (String.concat " " (Array.to_list (Array.map string_of_int a)))) expected;
-  Printf.fprintf oc "G play_offset_clocks %d pix_clocks %d fclk %.3f\n" (4 * Video_fw.active_slot) Video.pix_clocks fclk;
-  close_out oc;
-  (* no error frame: the header must not flash *)
-  let r2 = run { rtl = false; neigh = `Compiled; analyser = true; error_frame = false; out = Some (dir ^ "/cantv_noerr.f32") } in
-  let e2 = judge_and_write "no error frame" r2 in
-  let oc = open_out (dir ^ "/cantv_noerr_expect.txt") in
-  Array.iteri (fun i (rr, g, b) -> Printf.fprintf oc "P %d %.4f %.4f %.4f\n" i rr g b) (Video.refs ());
-  Array.iteri (fun i a -> Printf.fprintf oc "S %d %s\n" i (String.concat " " (Array.to_list (Array.map string_of_int a)))) e2;
-  Printf.fprintf oc "G play_offset_clocks %d pix_clocks %d fclk %.3f\n" (4 * Video_fw.active_slot) Video.pix_clocks fclk;
-  close_out oc;
+    let oc = open_out (Printf.sprintf "%s/cantv_%s_expect.txt" dir tag) in
+    Array.iteri (fun i (rr, g, b) -> Printf.fprintf oc "P %d %.4f %.4f %.4f\n" i rr g b) (Video.refs ());
+    Array.iteri (fun i a -> Printf.fprintf oc "S %d %s\n" i (String.concat " " (Array.to_list (Array.map string_of_int a)))) expected;
+    Printf.fprintf oc "G play_offset_clocks %d pix_clocks %d fclk %.3f\n" (4 * Video_fw.active_slot) Video.pix_clocks fclk;
+    close_out oc;
+    ch, nh in
+  let fw = "results/can_events.log" and fw_noerr = "results/can_events_noerr.log" in
+  let have_fw = Sys.file_exists fw && Sys.file_exists fw_noerr in
+  let main_ev = if have_fw then load_log fw else traffic ~seed:3 ~error_frame:true in
+  let ch, nh = judge_and_write "main (RTL + interpreter)" "main" main_ev ~rtl:true in
+  ignore (judge_and_write "no error frame" "noerr" (if have_fw then load_log fw_noerr else traffic ~seed:3 ~error_frame:false) ~rtl:false);
+  ignore (judge_and_write "stand-in, error frame" "standin" (traffic ~seed:3 ~error_frame:true) ~rtl:false);
   (* isolation *)
-  let (_, _, _, _, _, ch, nh) = r in
-  let (_, _, _, _, _, ch2, _) = run { rtl = false; neigh = `None; analyser = true; error_frame = true; out = None } in
-  let (_, _, _, _, _, _, nh2) = run { rtl = false; neigh = `Compiled; analyser = false; error_frame = true; out = None } in
+  let (_, _, _, _, ch2, _) = run { rtl = false; neigh = `None; ev = Some main_ev; out = None } in
+  let (_, _, _, _, _, nh2) = run { rtl = false; neigh = `Compiled; ev = None; out = None } in
   let same = ref 0 in
   for sd = 1 to 3 do
-    let (_, _, _, _, _, chr, _) = run { rtl = false; neigh = `Random sd; analyser = true; error_frame = true; out = None } in
+    let (_, _, _, _, chr, _) = run { rtl = false; neigh = `Random sd; ev = Some main_ev; out = None } in
     if chr = ch then incr same
   done;
   pr "isolation: composite identical without the neighbour %b, under 3 random neighbours %d/3; neighbour pin identical without the analyser %b\n"

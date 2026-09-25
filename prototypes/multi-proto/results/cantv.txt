@@ -1,5 +1,6 @@
-programmes: T0 bit renderer 3 words, T2 frame renderer 74 words, T1 video timing 84 words
-main (RTL + interpreter): 79 transmissions (12 arbitration contests), RTL/interp mismatches 0, port overflow 0; stage vs reference analyser: 0 of 15360 pixels differ; counters 251,251,251,216,120,60,56,88 (reference 251,251,251,216,120,60,56,88); flash 28 (reference 28); longest interval between refreshes of a displayed row 15.95 ms
-no error frame: 80 transmissions (12 arbitration contests), RTL/interp mismatches 0, port overflow 0; stage vs reference analyser: 0 of 15360 pixels differ; counters 251,251,251,184,152,60,56,88 (reference 251,251,251,184,152,60,56,88); flash 0 (reference 0); longest interval between refreshes of a displayed row 15.95 ms
+programmes: T0 bit renderer 3 words, T2 frame renderer 78 words, T1 video timing 84 words
+main (RTL + interpreter) [CAN RX firmware (results/can_events.log)]: 75 frames (10 arbitration contests), RTL/interp mismatches 0, port overflow 0; stage vs reference analyser: 0 of 15360 pixels differ; counters 251,251,251,251,120,152,28,28 (reference 251,251,251,251,120,152,28,28); flash 28 (reference 28); longest interval between refreshes of a displayed row 15.95 ms
+no error frame [CAN RX firmware (results/can_events_noerr.log)]: 74 frames (10 arbitration contests), RTL/interp mismatches 0, port overflow 0; stage vs reference analyser: 0 of 15360 pixels differ; counters 251,251,251,251,120,152,28,28 (reference 251,251,251,251,120,152,28,28); flash 0 (reference 0); longest interval between refreshes of a displayed row 15.95 ms
+stand-in, error frame [stand-in]: 79 frames (12 arbitration contests), RTL/interp mismatches 0, port overflow 0; stage vs reference analyser: 0 of 15360 pixels differ; counters 251,251,251,216,120,60,56,88 (reference 251,251,251,216,120,60,56,88); flash 28 (reference 28); longest interval between refreshes of a displayed row 15.95 ms
 isolation: composite identical without the neighbour true, under 3 random neighbours 3/3; neighbour pin identical without the analyser true
-elapsed 18 s
+elapsed 56 s
