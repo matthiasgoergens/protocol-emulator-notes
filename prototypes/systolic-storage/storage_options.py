@@ -38,7 +38,7 @@ EBUF = STD["sg13g2_ebufn_2"]
 # gain-cell bit cells, strap every 32 columns (prototypes/gain-cell/README.md)
 GC_THICK = 2.89   # 3T, thick-oxide write, W 0.15 / L 0.45
 GC_THIN = 2.20    # 3T, thin-oxide write, W 0.15 / L 0.13
-SRAM_CELL = 3.50  # PDK SRAM bit cell, for reference
+SRAM_CELL = 3.01  # PDK SRAM bit cell (2.81 x 1.07, prototypes/sram-cut/pdk-cell/refs.txt); unused
 
 # lifetimes of a stored 1, 10 ns sense (prototypes/gain-cell/retention/results/)
 LIFE = {  # seconds
