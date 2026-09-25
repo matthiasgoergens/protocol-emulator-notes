@@ -1,0 +1,6 @@
+== stream_jumper (simulation)
+  replay through interpreter   PASS  3784 cycles, every output equal
+  prediction (whole trace)     PASS  3784 cycles identical to the OCaml board model
+  sampler capture decode       PASS  3 words, got [48 69 21] expected [48 69 21]
+RESULT stream_jumper PASS
+  (1 trace entries, 3 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.00 s)

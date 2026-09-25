@@ -45,6 +45,8 @@ class SimLink:
     """The Verilator model of emu_core, talking 8N1 on its uart pins via stdin/stdout."""
 
     def __init__(self, binary: Path, args: list[str], log: Path):
+        self.log_path = log
+        self.closed = False
         self.log = open(log, "wb")
         self.p = subprocess.Popen([str(binary), *args], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                   stderr=self.log, bufsize=0)
@@ -72,6 +74,9 @@ class SimLink:
         return bytes(out)
 
     def close(self) -> None:
+        if self.closed:
+            return
+        self.closed = True
         if self.p.stdin:
             self.p.stdin.close()
         try:
@@ -228,7 +233,11 @@ def run_test(emu: Emu, test: dict, outdir: Path, mode: str, mutate: str | None =
         i = next(i for i, w in enumerate(imem) if (w >> 12) == 3 and (w & 0xFFF) > 1)   # first LDD n>1
         imem[i] ^= 0x001
     ctrl = test["ctrl"] | CTRL_USB_ATTACH
-    flash_guard(test, ctrl)
+    interlock_control = "sim-only" in test["needs"]
+    if interlock_control and mode != "sim" and not isinstance(emu.link, SimLink):
+        raise LinkError(f"{test['name']} is a simulation-only control")
+    if not interlock_control:
+        flash_guard(test, ctrl)
     emu.load_imem(imem)
     regs = {r: 0 for r in range(1, 7)}
     regs.update({r: v for r, v in test["cfg"]})
@@ -255,8 +264,17 @@ def run_test(emu: Emu, test: dict, outdir: Path, mode: str, mutate: str | None =
     args = [str(CHECKER), "check", test["name"], "--trace", str(tr), "--capture", str(cp), "--mode", mode]
     r = subprocess.run(args, capture_output=True, text=True)
     report = r.stdout + r.stderr + f"  ({len(entries)} trace entries, {len(cap)} capture words, status {st}, {elapsed:.2f} s)\n"
+    ok = r.returncode == 0
+    if interlock_control:
+        # the simulated flash prints every complete command byte it received when it exits
+        emu.link.close()
+        log = emu.link.log_path.read_text()
+        cmds = [l for l in log.splitlines() if l.startswith("sim: flash commands:")]
+        blocked = not any("06" in l.split(":", 2)[2].split() for l in cmds)
+        report += f"  {'interlock (sim flash log)':28s} {'PASS' if blocked else 'FAIL'}  flash saw: {cmds or 'no complete command byte'}\n"
+        ok = ok and blocked
     (outdir / f"{stem}.check.txt").write_text(report)
-    return r.returncode == 0, report
+    return ok, report
 
 
 def main() -> int:

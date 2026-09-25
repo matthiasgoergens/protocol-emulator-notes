@@ -123,6 +123,7 @@ module emu_core #(
   output wire [15:0] ctrl,
   output wire running_o,
   output wire trace_ovf_o,
+  output wire flash_blocked_o,
   output wire host_activity
 `ifdef EMU_MULTIPHASE
   // four-phase variant (ulx3s_top_multiphase.v): needs the sequencer with the sub-slot ISA
@@ -211,9 +212,41 @@ module emu_core #(
   wire [7:0] routed_away = {1'b0, (r_flash ? 1'b1 : 1'b0), (r_i2c ? 2'b11 : 2'b00), (r_flash ? 3'b111 : 3'b000), 1'b0};
   assign seq_pad_out = core_pin_out;
   assign seq_pad_oe = core_pin_oe & ~routed_away;
-  assign aux_spi_sclk = r_flash ? (core_pin_oe[1] & core_pin_out[1]) : 1'b0;
-  assign aux_spi_mosi = r_flash ? (core_pin_oe[2] & core_pin_out[2]) : 1'b0;
-  assign aux_spi_csn = r_flash ? (~core_pin_oe[3] | core_pin_out[3]) : 1'b1;
+  // Flash interlock, in hardware, behind the runner's software allow-list: the first byte after
+  // chip select falls must stay a prefix of a read-only command (0x9F RDID, 0x03 READ, 0x0B FAST
+  // READ, 0x05 RDSR). Each rising SCLK edge the core is about to make is checked against the bit
+  // on MOSI; on the first bit that leaves every allowed prefix, that edge is suppressed and chip
+  // select is forced high until the programme raises it, so a write, erase or status-write
+  // command never gets its eighth bit and the flash discards it. After eight good bits the rest
+  // (address, dummy, data) passes.
+  wire f_sclk = core_pin_oe[1] & core_pin_out[1];
+  wire f_mosi = core_pin_oe[2] & core_pin_out[2];
+  wire f_csn = ~core_pin_oe[3] | core_pin_out[3];
+  reg f_sclk_q = 1'b0, f_blocked = 1'b0;
+  reg [3:0] f_nbits = 4'd0;
+  reg [7:0] f_prefix = 8'd0;
+  wire f_rise = f_sclk & ~f_sclk_q;
+  wire [7:0] f_cand = {f_prefix[6:0], f_mosi};   // the first f_nbits+1 bits, right-aligned
+  function prefix_ok(input [7:0] cand, input [3:0] n);   // n = bits in cand, 1..8
+    reg [7:0] c9f, c03, c0b, c05;
+    begin
+      c9f = 8'h9F >> (4'd8 - n); c03 = 8'h03 >> (4'd8 - n);
+      c0b = 8'h0B >> (4'd8 - n); c05 = 8'h05 >> (4'd8 - n);
+      prefix_ok = (cand == c9f) | (cand == c03) | (cand == c0b) | (cand == c05);
+    end
+  endfunction
+  wire f_bad_edge = r_flash & ~f_csn & f_rise & (f_nbits < 4'd8) & ~prefix_ok(f_cand & (8'hFF >> (4'd7 - f_nbits)), f_nbits + 4'd1);
+  wire f_block_now = f_blocked | f_bad_edge;
+  always @(posedge clk) begin
+    f_sclk_q <= f_sclk;
+    if (!r_flash || f_csn) begin f_nbits <= 4'd0; f_prefix <= 8'd0; f_blocked <= 1'b0; end
+    else if (f_bad_edge) f_blocked <= 1'b1;
+    else if (f_rise && !f_blocked && f_nbits < 4'd8) begin f_prefix <= f_cand; f_nbits <= f_nbits + 4'd1; end
+  end
+  assign flash_blocked_o = f_blocked;
+  assign aux_spi_sclk = r_flash ? (f_sclk & ~f_block_now) : 1'b0;
+  assign aux_spi_mosi = r_flash ? f_mosi : 1'b0;
+  assign aux_spi_csn = r_flash ? (f_csn | f_block_now) : 1'b1;
   // I2C is open drain whatever the programme does: an enabled 1 is treated as released
   assign aux_sda_low = r_i2c & core_pin_oe[4] & ~core_pin_out[4];
   assign aux_scl_low = r_i2c & core_pin_oe[5] & ~core_pin_out[5];

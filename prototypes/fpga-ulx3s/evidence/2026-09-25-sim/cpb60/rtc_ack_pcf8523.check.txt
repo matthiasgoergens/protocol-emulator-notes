@@ -1,0 +1,7 @@
+== rtc_ack_pcf8523 (simulation)
+  replay through interpreter   PASS  15220 cycles, every output equal
+  prediction (whole trace)     PASS  15220 cycles identical to the OCaml board model
+  i2c decode                   PASS  got [d0 00] acks AA stop=true expected [d0 00] acks AA
+  host bytes                   PASS  got [00 00] expected [00 00]
+RESULT rtc_ack_pcf8523 PASS
+  (101 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.39 s)

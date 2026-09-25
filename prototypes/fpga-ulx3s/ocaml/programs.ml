@@ -260,6 +260,17 @@ let uart_adapter () =
     wiring = Env.no_wiring; needs = [ "usb-serial-rx-on-0" ]; board_only_lenient = false;
     expects = [ Uart_on_pin { pin = 0; bit_cycles = 130 * 4; bytes = text } ]; forbid_flash_cmds_except = None }
 
+(* Control for emu_core's flash interlock, simulation only: WRITE ENABLE (0x06) on the flash route.
+   The runner's software guard would refuse it, so the runner lets it through only in simulation,
+   and the simulated flash must see no complete command byte (sim log). 0x06 = 0000 0110 leaves
+   every allowed prefix at its seventh bit. *)
+let flash_interlock () =
+  let prog, _ = spi_read ~sclk:1 ~mosi:2 ~cs:3 ~miso:6 ~p:24 ~cmd:0x06 ~n_read:0 in
+  { name = "flash_interlock"; doc = "control, simulation only: WREN (0x06) on the flash route must be cut off by the RTL interlock";
+    mem = image [ (0, prog) ]; cycles = 24 * 4 * 8 + 400; ctrl = Env.ctrl_flash; cfg = []; host_in = [];
+    stream = []; wiring = Env.no_wiring; needs = [ "sim-only" ]; board_only_lenient = false;
+    expects = []; forbid_flash_cmds_except = None }
+
 let all () = [
   uart_pair ~ctrl:Env.ctrl_uloop ~wiring:Env.no_wiring ~name:"uart_loop" ~needs:[] ~lenient:false
     ~doc:"UART transmitter (thread 0, pin 0) into UART receiver (thread 1, pin 7) through the internal loop";
@@ -278,4 +289,5 @@ let all () = [
   eeprom ();
   header_flash ();
   uart_adapter ();
+  flash_interlock ();
 ]
