@@ -14,7 +14,7 @@ all it is used for.
 `../pe-synth/synth.sh`. **Control:** `pe16` (copied from `../pe-synth/rtl/pe16.v`) gives
 6,586.1964 µm², the figure `../pe-synth/results/areas.txt` reports for the same Yosys, so numbers
 here compare directly with pe16. `python3 summary.py > results/areas.txt` tabulates every report.
-`python3 budget.py > results/budget.txt` is the chip-level area budget.
+`python3 budget.py > results/budget.txt` is the chip-level area budget, including the chip without the array.
 
 ## Files
 
@@ -37,10 +37,10 @@ mode, the `upe_v0_*` rows one mode from the recommended PE.
 | pe16 (control) | 6,586 | reproduces `../pe-synth` exactly |
 | upe_none (base: operand and writeback selects, 8-byte configuration, init chain, flag) | 11,118 | the price of generality before any mode: +4.5k over pe16 |
 | upe_full (every mode) | 16,332 | |
-| upe_v0 (no popcount, no LUT, plus bit test) | see `results/areas.txt` | the recommended PE |
+| upe_v0 (no popcount, no LUT, plus bit test, zero flag) | 14,312 | the recommended PE; increments on it: GF(2) 1,115, window 963, lanes 399, bit test 246 |
 | mode increments on upe_full: GF(2) (shift, logic, gate, POP result path) / POP / WIN / LANES / LUT | 3,066 / 1,798 / 838 / 267 / 241 | full minus the variant |
 | GF(2) parts alone on upe_full: SHIFT / LOGIC / GATE | 185 / 713 / 13 | the three overlap: together they are 3,066 |
-| programmable CRC/LFSR, 32 bit, 1 bit per clock, with its poly and state registers | 7,127 | cf. 6,956 for `eth10-node`'s CRC unit without configuration registers (master) |
+| programmable CRC/LFSR, 32 bit, 1 bit per clock, with its poly and state registers | 7,127 | cf. 6,956 for `eth10-node`'s CRC unit without configuration registers, and 3,621 for `usb-ls`'s 16-bit checker |
 | the same, 16 bit | 3,387 | |
 | the same, 32 bit, 8 bits per clock | 20,902 | a byte-wise CRC for 100 Mbit/s costs three 1-bit units |
 | stuff unit / line coder | 813 / 477 | |

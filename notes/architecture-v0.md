@@ -120,7 +120,7 @@ modes, CAN's CRC feed and the capture option. One encoding (16-bit words, opcode
 | 4 LDA | imm[7:0] | unchanged; 11:8 reserved | |
 | 5 WAITP | pin[11:9] val[8] fail[7:0] | unchanged semantics, 8-bit fail | 8-bit pc |
 | 6 WAITD | | unchanged | |
-| 7 SHO | pin[11:9] msb[8] od[7] pair[6] psel[5] cap[4] q[1:0] | pair: also drive pin+1 in the same slot, with the complement (psel 0: 10BASE-T TD±, USB J/K) or with the next acc bit (psel 1: usb-ls's two-bit mode). cap: sample pin XOR 1 into the vacated bit in the same slot (full duplex: SPI, JTAG on one thread, scan chains). 3:2 free | e10 and usb-ls pairs; multi-proto's capture with its own fallback "cpin = pin XOR 1"; replaces SHX |
+| 7 SHO | pin[11:9] msb[8] od[7] pair[6] psel[5] cap[4] q[1:0] | pair: also drive pin+1 in the same slot, with the complement (psel 0: 10BASE-T TD±, USB J/K) or with the next acc bit (psel 1: usb-ls's two-bit mode). cap: sample pin XOR 1 into the vacated bit in the same slot (full duplex: SPI, JTAG on one thread, scan chains). 3:2 free | e10 and usb-ls pairs; multi-proto's capture with its own fallback "cpin = pin XOR 1"; replaces SHX. Deliberately not multi-proto's `cap[6] cpin[5:3]`: its own unification (§6 of its README) proposes this fixed partner pin to free the bits for the pair modes |
 | 8 SHI | pin[11:9] msb[8] quad[7] | unchanged; 6:0 reserved | multiphase quad |
 | 9 JMP, A JNZ | addr[7:0] | 8-bit addresses | 8-bit pc |
 | B OUT | src[11] tag[10:8] imm[7:0] | src 0: acc, src 1: the immediate; with a 3-bit tag to the host | can's tagged OUT; usb-ls's event mode is tag ≠ 0 with src 1 |
@@ -128,6 +128,10 @@ modes, CAN's CRC feed and the capture option. One encoding (16-bit words, opcode
 | D MBX | dir[11] ch[10:8] fail[7:0] | SEND (dir 0) or RECV (dir 1) on inbox ch 0–3, or port ch 4–7 (the four segment feed/tap ports of the array); blocks in its own slot; at dl = 0 jumps to fail | multi-proto; takes HALT's opcode, HALT becomes the pseudo-op `JMP self` |
 | E WAITC | cond[11:8] fail[7:0] | proceed when the condition holds; else at dl = 0 jump to fail, else stay. With dl = 0 it is a one-slot conditional branch (can's JC). Conditions: 0–7 acc bit k; 8 byte boundary (cnt[2:0] = 0); 9 host_in_valid; 10 own inbox non-empty; 11 last SEND target has space; 12–15 flag inputs 0–3 (selected per thread: PE segment flags, CRC good, stuff error, matcher hit, edge-sampler bit valid, TRNG) | can's JC, multi-proto's WAITC (without its polarity bit, which does not fit beside an 8-bit address; the inverse costs one JMP word) |
 | F EXT | sub[11:8] imm[7:0] | 0 SKNE imm (skip the next instruction if acc ≠ imm), 1 SKEQ imm; 2 FINE (per-edge offset in 1/256 clock for the next pin write); 3 CNTA (cnt ← acc); 4 LDB, 5 STB (bank byte at the thread's bank pointer, post-increment); 6 BANK imm (set the bank pointer's high byte); 7 CFG imm (flag-input select, round-latch mode); 8–15 reserved | usb-ls SKNE, multiphase FINE, can CNTA; memory access new |
+
+This is a new encoding, not any one variant's: multi-proto had MBX on E and WAITC on F, can had JC
+on E and CFG on F, usb-ls SKNE on E. No RTL implements v2 yet, so its compatibility claims are
+checked on paper only (gap G2: interpreter, RTL and lockstep, then every landed suite re-run).
 
 **Rejected, with the measurement:** can's per-thread CRC engine and stuff tracker (its core grows
 from 17,266 to 29,428 µm² with shared configuration, `sequencer-ps2-can/synth/`; it serves only
@@ -223,8 +227,10 @@ It sits in bit-path chain 1, behind the destuffer, with "CRC good" on a flag inp
 
 - **Protocols must not depend on the array.** Section 4a finds that every protocol on Jane
   Street's list runs without PEs, and recommends shrinking the array first if area is short. CRC
-  then cannot live only in the array. One unit covers the common case (one CRC-protected stream:
-  every mix of section 4 but the sniffer).
+  then cannot live only in the array. One unit covers one CRC-protected stream, which is every
+  mix of section 4 but the sniffer. The honest limit: two CRC protocols at once (a sniffer, a
+  CAN ↔ USB bridge) need a GF(2) PE or a second unit, so that case does depend on the array
+  keeping at least one PE, or on 7,000 µm² more.
 - **The PE mode still earns its 1,115 µm²:** the second and third concurrent CRC (sniffers,
   bridges between two CRC protocols), LFSR, PRBS, scramblers and Gold codes (P11), and the word
   XOR/AND of P18 (six prototypes).
@@ -283,7 +289,7 @@ One step (every clock, or only when A is valid in stream mode):
 | semiring ring cell (ring) | op x y with x = S or A, y = A or K; loop-back closes the ring | designed; ring used 4 neighbour distances (gap G9) |
 | sorting (insertion) | S ← max(S, A), P ← the loser | designed |
 | CRC-16/15/5, LFSR | S ← (S << 1 with g) XOR (g ? K : 0), g = S[15] XOR A[0] (data bit on A[0]); K = the polynomial without its x⁰ term; residue check by the next PE: result = 0 into F | designed |
-| CRC-32 | a pair: low PE takes feedback from the carry-back (high's S[15]) XOR A[0] and shifts its S[15] into the high PE; the high PE takes g from the low PE's pair wire | designed |
+| CRC-32 | a pair, low PE left of high. Low: gs = 4 with pairlo, so g = cb_in (high's S[15]) XOR A[0] (the data bit); X = S << 1 with sin = g; Y = K_low gated by g; XOR. High: gs = 7, so g = g_in (low's g, combinational); X = S << 1 with sin = s15_in (low's S[15]); Y = K_high gated by g; XOR. K_low lacks the x⁰ term, which sin = g supplies | designed; the wiring exists in `upe.v`, untested |
 | sigma-delta (1 bit) | S ← S + A wrapping; lane out = carry | gps tier 1, model |
 | deserialiser | S ← S << 1 with the lane bit; stream mode. It marks no word boundary: the reader pulls on a known schedule, or the sampler packs instead | designed |
 
@@ -370,7 +376,9 @@ gain-cell banks. Reasons:
   allocator, canaries) is the novelty.
 
 **Banks.** Two banks of 128 × 32 thick-oxide 3T cells with Berger columns, 4 kbit each
-(`gain-cell/README.md`: 2.88 µm² per bit, ≥3.1 ms worst corner with a 20 ns sense). Each bank has
+(`gain-cell/README.md`: 2.88 µm² per bit, ≥3.1 ms worst corner with a 20 ns sense). The two banks
+are not enough for everything at once: GPS capture and replay take both, so GPS is exclusive with
+the Ethernet line buffer and the tile tables (section 4 runs them as separate mixes). Each bank has
 one port, fixed to one segment boundary (bank 0 at the start of segment 3, bank 1 at the start of
 segment 4) and to the sequencer's LDB/STB. Uses: the Ethernet line buffer (5 lines per packet:
 117 words, one bank), the GPS 1 ms capture (3,274 bits, one bank each for capture and replay,
@@ -465,13 +473,13 @@ demo" means demonstrated on special-purpose hardware only. PEs are counted per c
 | PAL/NTSC composite, console | line timing in a thread (sync by SETP in exact slots); pixel chain in segments 3+4 joined: counter and background (4 PEs), sprites (8), luma pins from the chain's tap; hue as pin-NCO phase offset on 2 chroma pins; line data from the host via the link into the init chains during blanking | 1–2 | 12 | special demo (`retro-console`, lockstep 0 mismatches, software TV); v2 mapping designed |
 | tile platformer | tile layer: window PEs reloaded per 16 pixels from bank 1 (tile map and patterns; needs G14); sprites multiplexed per line by the host; split screen by per-line reconfiguration | 2 | 12 | designed, with a gap (the platformer work is running) |
 | sound for the console | one-bit voice: NCO PE and sigma-delta PE (segment 1 or 2), pin output | 0 | 2 | special demo (`one-bit-synth`, 68 dB in-band SNR); gps tier 1 audio on PEs (model) |
-| Ethernet-to-TV | demonstrated without the array: the 10BASE-T receiver, a header matcher, a parser thread writing 32 pixel bytes per line into gain-cell rows, a video-timing thread, NCO chroma pins, a memory streamer and a 16-entry LUT; one source line per frame, shown line-doubled. v2 with the array: the receiver into bank 0 (5 lines per packet), a thread copying 48 bytes per line into segment 4's init chain, a ring renderer (8 PEs) and text sprites (4) | 2–3 | 0 (12 for shapes and sprites) | demonstrated at low resolution without PEs (`multi-proto/README.md`: 1,920 of 1,920 blocks through the software TV, RTL sequencer, other blocks as models, 60.852 MHz); the array version designed |
-| CAN-to-TV (bus analyser on a television) | demonstrated: CAN RX firmware events, a bit-renderer thread, a frame-renderer thread, video timing, ring-mode memory rows and saturating counters. v2 with the array: tiles and sprites for text | 4 | 0–1 (counters) | demonstrated with the CAN RX joined through a log, one core awaiting the ISA merge (`multi-proto/README.md`); array version designed |
+| Ethernet-to-TV | demonstrated in part without the array: the 10BASE-T receiver, a header matcher, a parser thread writing 32 pixel bytes per line into gain-cell rows, a video-timing thread, NCO chroma pins, a memory streamer and a 16-entry LUT; one source line per frame, shown line-doubled. v2 with the array: the receiver into bank 0 (5 lines per packet), a thread copying 48 bytes per line into segment 4's init chain, a ring renderer (8 PEs) and text sprites (4) | 2–3 | 0 (12 for shapes and sprites) | demonstrated in part, at low resolution, without PEs (`multi-proto/README.md`: 1,920 of 1,920 blocks through the software TV, RTL sequencer, other blocks as models, 60.852 MHz); the array version designed |
+| CAN-to-TV (bus analyser on a television) | demonstrated in part: CAN RX firmware events, a bit-renderer thread, a frame-renderer thread, video timing, ring-mode memory rows and saturating counters. v2 with the array: tiles and sprites for text | 4 | 0–1 (counters) | demonstrated in part: the CAN RX joined through a log, one core awaiting the ISA merge (`multi-proto/README.md`); array version designed |
 | FM TX | pin NCO → four-phase stage; a thread (or an NCO PE) writes the frequency word per audio sample | 1 | 0–1 | demonstrated through the RTL stage (`multiphase/README.md`, SINAD* 31.5 dB) |
 | FM RX with RDS | 1-bit direct sampling through the four-phase inputs; everything else unknown | ? | ? | unknown (running) |
 | TV-in advert detection | composite in through a comparator and the four-phase inputs; black-frame and cut detection in PEs, output on CAN | ? | ? | unknown (running) |
 | GPS, tier 1 (NMEA to audio) | UART RX thread (16 words); host parses; 2 PEs per ear (NCO, sigma-delta) | 1 | 4 | demonstrated end to end in simulation (`gps-hotcold/README.md`): UART on RTL in lockstep, the audio PEs on a model |
-| GPS, tier 2 hot/cold (raw 1-bit) | sampler timed mode (1 of 5 samples) into a bank; replay at one sample per clock through all segments joined: 2 carrier NCOs, 2 wipe-offs, 2 × 5 correlators, 1 code NCO; C/A codes from a bank or a GF(2) PE pair; host loops and fix | 1 | 15 | modelled bit-exactly on pe16 plus the tag lane (9.7 m fix on a synthetic sky); not on RTL |
+| GPS, tier 2 hot/cold (raw 1-bit) | capture into a bank: at gps's 65.472 MHz clock the sampler's timed mode with period 20 keeps one front-end sample in 5 (3.2736 MS/s); at 60 MHz the sampler's clocked mode on the front end's 16.368 MHz clock with a 1-of-5 counter (G15); replay at one sample per clock through all segments joined: 2 carrier NCOs, 2 wipe-offs, 2 × 5 correlators, 1 code NCO; C/A codes from a bank or a GF(2) PE pair; host loops and fix | 1 | 15 | modelled bit-exactly on pe16 plus the tag lane (9.7 m fix on a synthetic sky); not on RTL |
 | margin testing, shmoo | fine-delay DTC on a pin; PRBS from a GF(2) PE; error counter PE (XOR with the expected stream, add); TDC for response times | 1 | 2 | behavioural demo (`multiphase/results/shmoo.txt`); PRBS path designed |
 | glitch and runt injection | two lanes of one pin (rise at t, fall at t + w); randomised offsets from a PE LFSR | 1 | 0–1 | behavioural demo (same) |
 | hwfuzz-driven debugging | offline: hwfuzz on every block's RTL (`hwfuzz/README.md`: USB, 10BASE-T RX findings). On silicon: the host runs the fuzzer, the chip plays inputs with exact timing (streamer, threads) and observes (sampler, TDC buckets as coverage features) | 1–2 | 0–2 | offline demonstrated; on-chip designed |
@@ -480,10 +488,12 @@ demo" means demonstrated on special-purpose hardware only. PEs are counted per c
 
 **Headline.** 27 uses map onto **ten block types** (plus the programme store and the host link):
 the sequencer, the pin stage, the streamer and sampler, the pin NCO, the edge-tracking sampler,
-the stuff tracker and line coder, the CRC unit, the matcher, the PE array, and the banks. 15 uses
-are demonstrated in simulation as firmware or on generic blocks (UART, SPI, I2C, JTAG, SWD, PS/2,
-CAN and USB LS on ISA variants that v2 contains, 10BASE-T TX and RX, Ethernet-to-TV at low
-resolution, CAN-to-TV, the bridges, FM TX, GPS tier 1); 6 on special-purpose hardware, behavioural
+the stuff tracker and line coder, the CRC unit, the matcher, the PE array, and the banks. 12 uses
+are demonstrated in simulation as firmware on the RTL sequencer or on generic blocks, against
+independent models (UART, SPI, I2C, JTAG, SWD, PS/2, CAN and USB LS on ISA variants whose changes
+v2 contains, 10BASE-T TX and RX, the bridges, FM TX); 3 in part, with some blocks as behavioural
+models or joined through logs (Ethernet-to-TV at low resolution, CAN-to-TV, GPS tier 1). None of
+them has run on v2 itself, which exists only as the encoding in section 2.1 (gap G2); 6 on special-purpose hardware, behavioural
 models or offline (USB FS, console, sound, shmoo, glitches, hwfuzz); 3 are designed (platformer,
 GPS tier 2 modelled bit-exactly, logic analyser); 3 are unknown (100BASE-FX, FM RX, TV-in). **No
 protocol in the table needs the PE array**; the demos beyond the protocols are where it is used
@@ -495,12 +505,12 @@ protocol in the table needs the PE array**; the demos beyond the protocols are w
 
 | mix | segment 1 (2) | segment 2 (2) | segment 3 (4) | segment 4 (8) | threads | PE duty, keeps up? |
 |---|---|---|---|---|---|---|
-| M1 Ethernet-to-TV | – (CRC-32 in the CRC unit) | – | text sprites (4) | ring renderer (8, looped) | RX parse, line copy, sync | video: 1 step per 10-clock pixel = 10 %; 12 of 16 PEs; the CRC unit at 1 bit per 6 clocks. Yes, 10× headroom |
+| M1 Ethernet-to-TV | – (CRC-32 in the CRC unit) | – | text sprites (4) | ring renderer (8, looped) | RX parse, line copy, video timing (3) | video: 1 step per 10-clock pixel = 10 %; 12 of 16 PEs; the CRC unit at 1 bit per 6 clocks. Yes, 10× headroom |
 | M2 CAN-to-TV plus UART | – (CRC-15 in the CRC unit) | – | tiles and background (4) | sprites (8) | CAN RX, CAN TX, UART, line timing | 12 PEs at 10 %; the CRC unit at 1 bit per 120 clocks. Yes |
 | M3 USB LS plus I2C plus SPI | – (CRC in the unit) | – | – | – | USB (3 threads in usb-ls's firmware), I2C | no PEs: the array is idle. Threads are the limit: SPI needs a fifth |
 | M4 GPS tier 2 | all joined: 15 PEs | | | | capture control | 100 % during replay: 3,274 clocks per 1 ms block. Cold start about 121 s (est: gps's 139 s at K = 4 and 65.472 MHz, scaled by 4/5 for K = 5 and by 65.472/60) |
 | M5 console with sound | audio voice (2) | – | background and tile (4) | sprites (8) | line timing, pad | 10 %; 14 PEs |
-| M6 three-bus sniffer (CAN, USB LS, UART) | CRC-16 (second stream; the first is in the unit) | – | – | – | 3 decoders | 1 PE at 2.5 %; the third bus (UART) goes to a thread (two edge samplers) |
+| M6 three-bus sniffer (CAN, USB LS, UART) | CRC-16 (second stream; the first is in the unit) | – | – | – | 3 decoders | 1 PE at 2.5 %; CAN and USB LS on the two bit-path chains; the UART is received by a thread's own programme (no edge sampler) |
 
 **Time-sharing.** Every mix leaves most PE clocks idle (duty 2–10 % outside GPS) yet allocates PEs in space,
 because a PE holds one configuration and one state. Time-sharing a PE between streams needs its
@@ -533,14 +543,15 @@ So the array is not needed for protocols, and the flagship demo exists without i
 | a second sequencer (v2, est 30,600 synthesised) with its own 512 × 16 store | 45,900 + 49,800 | 8 threads: two CAN nodes and JTAG and SWD at once; the M3 mix gets its fifth thread |
 | two more CRC units | 21,000 | three CRC streams without PEs |
 | two more 4× edge samplers, stuffers and line coders | 31,400 | four bit-level streams at once |
-| a 1P_1024x32 SRAM (32 kbit) | 154,000 | deep capture for the logic analyser; packet, line and display-list memory |
-| total | about 302,000 | the chip at about 79 % |
+| a 1P_1024x32 SRAM (32 kbit; 140,183 µm², `systolic-storage/results/lef_areas.txt`, plus 10 % halo) | 154,000 | deep capture for the logic analyser; packet, line and display-list memory |
+| total | about 302,000 | the chip at about 79 % (a scenario estimate: 293,398 + 302,000, not a `budget.py` row) |
 
 Lost or degraded without the array:
 - **Video beyond what the pin stage and memory streamer do.** Racing-the-beam sprites, tiles,
   the ring's shapes and the wave engine need per-pixel arithmetic on many objects at once, one
   step per 10-clock pixel. Without PEs the host renders pixels and the chip plays them: about
-  3 MB/s of hue-and-luma bytes for 256 × 240 at 50 fields (arithmetic) over a link estimated at
+  3 MB/s for 256 × 240 at 50 fields with one colour byte (hue and luma) per pixel, as the console
+  uses (arithmetic) over a link estimated at
   7.5 MB/s. It works, but the host then makes the demo.
 - **Ethernet-to-TV at full resolution.** 4-bit pixels at 256 × 240 × 50 fields are 12.3 Mbit/s
   (arithmetic), more than 10BASE-T carries; the ring's line descriptions are 4.6 Mbit/s
@@ -608,12 +619,12 @@ Further gaps: **G11** time-sharing PEs (contexts); **G12** the full-speed pad qu
 figure is sky130's 33 MHz output; `notes/tiny-tapeout-ihp-rules.md` §4) gates 100BASE-FX, runts,
 and composite at 66 Msps; **G13** a whole-chip place and route (sequencer, four PEs, the
 interconnect, one macro) to replace the assumed placement factor of section 6, which decides
-between 16 and 12 PEs; **G14** a mid-line reload path for a PE's state (tile layers), for example
+between 16 and 12 PEs; **G15** GPS capture at 60 MHz through the sampler's clocked mode, not yet modelled; **G14** a mid-line reload path for a PE's state (tile layers), for example
 a conditional S ← A on a second condition bit.
 
 ## 6. Area budget against 6 × 4 tiles
 
-Allocation: 24 tiles of 202.08 × 154.98 µm = 751,632 µm² (`notes/tiny-tapeout-ihp-rules.md` §1).
+Allocation: 24 tiles of 202.08 × 154.98 µm = 751,641 µm² (`notes/tiny-tapeout-ihp-rules.md` §1).
 The computation is `prototypes/unified-pe/budget.py` → `results/budget.txt`; every line there
 names its source. Standard-cell logic is converted to floor area with the factor 1.5 measured for
 a placed row of PEs at 90 % utilisation (`pe-synth/README.md`), and with 2.0 as a pessimistic case
@@ -637,8 +648,8 @@ segment interconnect and feed registers 14,617; estimates for the host link, mem
 reset 7,000. Drawn and macro blocks: the two gain-cell banks 53,236, the fine delay 15,473 (est),
 the programme SRAM 45,309, each with 10 % halo (est).
 
-**Verdict.** **Sixteen PEs with a 512 × 16 programme store fit at the measured placement
-factor, with 12 % of the allocation left (92,817 µm²), and do not fit at the pessimistic one (11 %
+**Verdict.** **Sixteen PEs with a 512 × 16 programme store fit if the placement factor
+measured for a row of pe16s (1.5) holds for the whole chip, which is an assumption, with 12 % of the allocation left (92,817 µm²), and do not fit at the pessimistic one (11 %
 over).** Twelve PEs fit either way, narrowly at 2.0 (4 % left). So: plan for 16, and settle it
 with the first whole-chip place and route (gap G13: the sequencer, four PEs, the interconnect and
 one macro together) before anything else is built on the count. If the factor comes out near 2,
@@ -761,4 +772,29 @@ Built from what every prototype already has, in this order:
 
 ## Review
 
-REVIEW_SECTION
+One adversarial review by another model family (codex-luna), verdict in
+`notes/architecture-v0/codex-review.txt`. It confirmed the budget arithmetic, the CRC break-even,
+the GPS scaling, the line lengths and hue bound, and that the listed PE configurations are
+expressible by `upe.v`'s datapath. What it found, and what was done:
+
+- **The placement verdict was worded as measured.** The 1.5 factor comes from a row of pe16s;
+  the verdict now says it is an assumption, and G13 (a whole-chip place and route) decides it.
+- **The no-array scenario** used a 32 kbit SRAM not in `budget.py`; its source is now cited and
+  the total labelled a scenario estimate.
+- **Host-rendered video bandwidth** was ambiguous; it is one colour byte per pixel (the console's
+  format), so about 3 MB/s stands, and the wording now says so.
+- **The CRC-32 pair** was underspecified; the configuration of both PEs is now spelled out
+  against `upe.v`'s wiring. It remains untested.
+- **ISA v2** is a new encoding, not a merge of one variant; now said, with multi-proto's own
+  unification cited for the fixed capture partner, and G2 for the missing RTL.
+- **CRC and the premise.** Two concurrent CRC protocols do depend on a PE or a second unit; now
+  said in section 2.3.
+- **"Demonstrated" overclaimed** for Ethernet-to-TV, CAN-to-TV and GPS tier 1, which used models
+  or logs for some blocks; relabelled "in part", and the headline recounted (12 plus 3 in part).
+- **Bank conflicts**: GPS takes both banks; now stated as exclusive with the line buffer.
+- **Mix accounting**: M1's threads named (video timing); M6's third bus explained.
+- **GPS clock**: the capture schedule at 60 MHz differs from gps's 65.472 MHz plan; now in the
+  mapping row, with G15.
+
+Not changed: the finding that "designed" configurations are not validated. The note already
+marks them designed, and G1 (a model and lockstep for the PE) is the first gap.
