@@ -1,0 +1,1181 @@
+25-Sep-2026 04:19:53 | INFO    | KLayout version detected: 0.30.0
+25-Sep-2026 04:19:53 | INFO    | Using DRC JSON file: /pdk/libs.tech/klayout/tech/drc/tech_mod_relaxed.json
+25-Sep-2026 04:19:53 | INFO    | Running IHP-SG13G2 main checks on design /work/pdkcell-nomark-pdkvaluesdeck.gds, topcell: PDK_16x2_NOMARK
+2026-09-25 04:19:53 +0000: Memory Usage (415268K) : Starting running IHP-SG13G2 KLayout DRC runset on /work/pdkcell-nomark-pdkvaluesdeck.gds
+2026-09-25 04:19:53 +0000: Memory Usage (415268K) : Ruby Version for klayout: 3.3.8
+Warning: In file /work/pdkcell-nomark-pdkvaluesdeck.gds:
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=264000, record number=22643, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=264080, record number=22653, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=264620, record number=22723, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=264698, record number=22733, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=264774, record number=22743, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=264850, record number=22753, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=264926, record number=22763, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=267152, record number=23056, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=267232, record number=23066, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=267772, record number=23136, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=267850, record number=23146, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=267926, record number=23156, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=268002, record number=23166, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=268078, record number=23176, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=270304, record number=23469, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=270384, record number=23479, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=270924, record number=23549, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=271002, record number=23559, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=271078, record number=23569, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=271154, record number=23579, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=271230, record number=23589, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=273456, record number=23882, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=273536, record number=23892, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=274076, record number=23962, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=274154, record number=23972, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=274230, record number=23982, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=274306, record number=23992, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=274382, record number=24002, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=287826, record number=25756, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=287906, record number=25766, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=288446, record number=25836, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=288524, record number=25846, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=288600, record number=25856, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=288676, record number=25866, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=288752, record number=25876, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=290978, record number=26169, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=291058, record number=26179, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=291598, record number=26249, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=291676, record number=26259, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=291752, record number=26269, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=291828, record number=26279, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=291904, record number=26289, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=294130, record number=26582, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=294210, record number=26592, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=294750, record number=26662, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=294828, record number=26672, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=294904, record number=26682, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=294980, record number=26692, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=295056, record number=26702, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=297282, record number=26995, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=297362, record number=27005, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=297902, record number=27075, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=297980, record number=27085, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=298056, record number=27095, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=298132, record number=27105, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=298208, record number=27115, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=561636, record number=49812, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=561716, record number=49822, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=562256, record number=49892, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=562334, record number=49902, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=562410, record number=49912, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=562486, record number=49922, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=562562, record number=49932, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=564788, record number=50225, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=564868, record number=50235, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=565408, record number=50305, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=565486, record number=50315, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=565562, record number=50325, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=565638, record number=50335, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=565714, record number=50345, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=567940, record number=50638, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=568020, record number=50648, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=568560, record number=50718, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=568638, record number=50728, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=568714, record number=50738, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=568790, record number=50748, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=568866, record number=50758, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=571092, record number=51051, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=571172, record number=51061, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=571712, record number=51131, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=571790, record number=51141, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=571866, record number=51151, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=571942, record number=51161, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=572018, record number=51171, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=585462, record number=52925, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=585542, record number=52935, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=586082, record number=53005, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=586160, record number=53015, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=586236, record number=53025, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=586312, record number=53035, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=586388, record number=53045, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=588614, record number=53338, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=588694, record number=53348, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=589234, record number=53418, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=589312, record number=53428, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=589388, record number=53438, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=589464, record number=53448, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=589540, record number=53458, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=591766, record number=53751, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=591846, record number=53761, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=592386, record number=53831, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=592464, record number=53841, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=592540, record number=53851, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=592616, record number=53861, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=592692, record number=53871, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=594918, record number=54164, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=594998, record number=54174, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=595538, record number=54244, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=595616, record number=54254, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=595692, record number=54264, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=595768, record number=54274, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=595844, record number=54284, cell=PDK_16x2_NOMARK)
+2026-09-25 04:19:53 +0000: Memory Usage (416928K) : Loading database to memory is complete.
+2026-09-25 04:19:53 +0000: Memory Usage (416928K) : IHP-SG13G2 KLayout DRC runset output at: /work/pdkcell-nomark-pdkvaluesdeck-full/pdkcell-nomark-pdkvaluesdeck_PDK_16x2_NOMARK_main.lyrdb
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : Evaluate switches.
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : tables selected: main
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : KLayout will use 32 thread(s) in tiling mode.
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : flat mode is enabled.
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : FEOL enabled: true
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : BEOL enabled: true
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : OFFGRID enabled: true
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : PIN enabled: true
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : FORBIDDEN enabled: true
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : RECOMMENDED enabled: true
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : PreCheck DRC enabled: false
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : CONNECTIVITY_RULES enabled: true.
+2026-09-25 04:19:53 +0000: Memory Usage (417184K) : Read in polygons from layers.
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : activ_drw has 48 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : activ_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : activ_mask has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : activ_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : activ_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : activ_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : activ_iopc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : activ_noqrc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : biwind_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : biwind_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : pemwind_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : gatpoly_drw has 112 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : gatpoly_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : gatpoly_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : gatpoly_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : gatpoly_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : gatpoly_iopc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : gatpoly_noqrc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (417952K) : cont_drw has 358 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418208K) : cont_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418208K) : nsd_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418208K) : nsd_block has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418208K) : metal1_drw has 215 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418208K) : metal1_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418464K) : metal1_mask has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418464K) : metal1_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418464K) : metal1_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418720K) : metal1_slit has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418720K) : metal1_text has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418720K) : metal1_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418976K) : metal1_noqrc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418976K) : metal1_res has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (418976K) : metal1_iprobe has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419232K) : metal1_diffprb has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419232K) : passiv_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419232K) : passiv_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419232K) : passiv_sbump has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419232K) : passiv_pillar has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419232K) : passiv_pdl has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419488K) : metal2_drw has 58 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419488K) : metal2_pin has 82 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419744K) : metal2_mask has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419744K) : metal2_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (419744K) : metal2_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (420000K) : metal2_slit has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (420000K) : metal2_text has 232 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (420000K) : metal2_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (420256K) : metal2_noqrc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (420256K) : metal2_res has 64 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (420256K) : metal2_iprobe has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (420512K) : metal2_diffprb has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (420512K) : baspoly_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (420768K) : baspoly_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421024K) : psd_drw has 8 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421024K) : nldb_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421280K) : digibnd_drw has 1 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421280K) : via1_drw has 162 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421280K) : backmetal1_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421536K) : backmetal1_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421536K) : backmetal1_mask has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421536K) : backmetal1_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421792K) : backmetal1_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421792K) : backmetal1_slit has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421792K) : backmetal1_text has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (421792K) : backmetal1_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422048K) : backmetal1_noqrc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422048K) : backmetal1_res has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422048K) : backmetal1_iprobe has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422304K) : backmetal1_diffprb has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422304K) : backpassiv_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422560K) : res_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422560K) : sram_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422560K) : trans_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422816K) : ind_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422816K) : ind_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (422816K) : ind_text has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423072K) : salblock_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423072K) : via2_drw has 98 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423072K) : metal3_drw has 33 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423328K) : metal3_pin has 130 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423328K) : metal3_mask has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423584K) : metal3_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423584K) : metal3_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423584K) : metal3_slit has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423840K) : metal3_text has 98 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423840K) : metal3_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (423840K) : metal3_noqrc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424096K) : metal3_res has 32 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424096K) : metal3_iprobe has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal3_diffprb has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : nwell_drw has 2 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : nwell_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : nbulay_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : nbulay_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : nbulay_block has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : emwind_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : emwind_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : deepco_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : deepco_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : mim_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : edgeseal_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : edgeseal_bound has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : substrate_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : substrate_text has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : dfpad_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : dfpad_pillar has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : dfpad_sbump has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : thickgateox_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : pldb_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : pwell_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : pwell_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : pwell_block has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : ic_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : via3_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal4_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal4_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal4_mask has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal4_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal4_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal4_slit has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal4_text has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal4_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal4_noqrc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424352K) : metal4_res has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424608K) : metal4_iprobe has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424608K) : metal4_diffprb has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424608K) : heattrans_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424864K) : heatres_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (424864K) : pempoly_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425120K) : fbe_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425120K) : empoly_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425120K) : ldmos_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425376K) : pbiwind_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425376K) : digisub_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425632K) : nodrc_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425632K) : text_drw has 386 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425632K) : via4_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425888K) : metal5_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425888K) : metal5_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (425888K) : metal5_mask has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426144K) : metal5_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426144K) : metal5_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426144K) : metal5_slit has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : metal5_text has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : metal5_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : metal5_noqrc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : metal5_res has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : metal5_iprobe has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : metal5_diffprb has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : radhard_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : memcap_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : varicap_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : flash_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : intbondvia_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : intbondmet_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : devbondvia_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : devbondmet_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : devtrench_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : redist_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphbot_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphtop_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : antvia1_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : antmetal2_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphcont_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : siwg_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : siwg_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : siwg_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : sigrating_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : singrating_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphpas_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : emwind3_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : emwihv3_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : redbulay_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : smos_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphpad_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : polimide_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : polimide_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_pin has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_esd has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_diode has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_tsv has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_iprobe has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_diffprb has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_pillar has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_sbump has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_otp has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_pdiode has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_mom has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : recog_pcm has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : colopen_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphmetal1_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphmetal1_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphmetal1_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphmetal1_slit has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphmetal1_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphmet1l_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphmet1l_filler has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphmet1l_nofill has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphmet1l_slit has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : graphmet1l_opc has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : extblock_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : nldd_drw has 0 polygons
+2026-09-25 04:19:53 +0000: Memory Usage (426400K) : pldd_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : next_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : pext_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : nexthv_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : pexthv_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : graphgate_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : sinwg_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : sinwg_filler has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : sinwg_nofill has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : mempad_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topvia1_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_pin has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_mask has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_filler has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_nofill has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_slit has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_text has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_noqrc has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_res has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_iprobe has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal1_diffprb has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : inldpwl_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : polyres_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : polyres_pin has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : vmim_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : nbulaycut_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : antmetal1_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topvia2_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_pin has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_mask has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_filler has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_nofill has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_slit has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_text has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_noqrc has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_res has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_iprobe has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : topmetal2_diffprb has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : snsring_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : sensor_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : snsarms_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : snscmosvia_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : colwind_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : flm_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : hafniumox_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : memvia_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : thinfilmres_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : rfmem_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m2m3 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m2m4 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m2m5 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m2tm1 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m2tm2 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m3m4 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m3m5 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m3tm1 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m3tm2 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m4m5 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m4tm1 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m4tm2 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m5tm1 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m5tm2 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_tm1tm2 has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m1sub has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m2sub has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m3sub has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m4sub has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_m5sub has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_tm1sub has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : norcx_tm2sub has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : snsbotvia_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : snstopvia_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : deepvia_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : fgetch_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : ctrgat_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : fgimp_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : emwihv_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : lbe_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : alcustop_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : nometfiller_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : prboundary_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange0_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange0_pin has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange0_text has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange1_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange1_pin has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange1_text has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange2_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange2_pin has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange2_text has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange3_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange3_pin has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange3_text has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange4_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange4_pin has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : exchange4_text has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : isonwell_drw has 0 polygons
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : Total no. of polygons in the design is 2119
+2026-09-25 04:19:54 +0000: Memory Usage (426400K) : Loaded TECH DRC rules values from /pdk/libs.tech/klayout/tech/drc/tech_mod_relaxed.json
+2026-09-25 04:19:54 +0000: Memory Usage (426656K) : Loaded default DRC rules values from /pdk/libs.tech/klayout/tech/drc/rule_decks/sg13g2_tech_default.json
+2026-09-25 04:19:54 +0000: Memory Usage (426656K) : The following rules values were missing in tech json and default values were used:
+2026-09-25 04:19:54 +0000: Memory Usage (426656K) :   - Cnt_c_digibnd
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Total area of the design is 112.0064 um^2.
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : The design dimensions are 5.920000000000001 µm * 18.919999999999998 µm.
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting general IHP-SG13G2 derivations.
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting Pwell derivations
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting n-Activ derivations
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting p-Activ derivations
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting ptap derivations
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting ntap derivations
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting pact FET derivations
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting nact FET derivations
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting Gate derivations
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting cont/contbar general derivations
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting pad general derivations
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting IHP-SG13G2 DRC connectivity related derivations.
+2026-09-25 04:19:54 +0000: Memory Usage (426912K) : Starting IHP-SG13G2 DRC connectivity setup
+2026-09-25 04:19:54 +0000: Memory Usage (427936K) : Starting IHP-SG13G2 DRC rules.
+2026-09-25 04:19:54 +0000: Memory Usage (427936K) : Running all FEOL rules
+2026-09-25 04:19:54 +0000: Memory Usage (427936K) : Running all BEOL rules
+2026-09-25 04:19:54 +0000: Memory Usage (427936K) : Running all PIN rules
+2026-09-25 04:19:54 +0000: Memory Usage (427936K) : Running all FORBIDDEN rules
+2026-09-25 04:19:54 +0000: Memory Usage (427936K) : Starting 5.1 NWell table
+2026-09-25 04:19:54 +0000: Memory Usage (427936K) : Executing rule NW.b
+2026-09-25 04:19:54 +0000: Memory Usage (428960K) : Executing rule NW.b1
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Starting 5.2 PWell:block
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule PWB.e
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule PWB.e1
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule PWB.f
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule PWB.f1
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Starting 5.3 nBuLay table
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule NBL.b
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule NBL.c
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule NBL.d
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule NBL.e
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule NBL.f
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Starting 5.5. Activ table
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule Act.a
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule Act.b
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Starting 5.6 Activ:filler table
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule AFil.c1
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule AFil.c
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule AFil.d
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule AFil.e
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule AFil.j
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Starting 5.7. ThickGateOx table
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule TGO.f
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Starting 5.8. GatPoly table
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule Gat.a
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule Gat.b
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule Gat.d
+2026-09-25 04:19:54 +0000: Memory Usage (429272K) : Executing rule Gat.a1
+2026-09-25 04:19:54 +0000: Memory Usage (429528K) : Executing rule Gat.a2
+2026-09-25 04:19:54 +0000: Memory Usage (429528K) : Executing rule Gat.g
+2026-09-25 04:19:54 +0000: Memory Usage (429528K) : Starting 5.9 GatPoly:filler
+2026-09-25 04:19:54 +0000: Memory Usage (429528K) : Executing rule GFil.d
+2026-09-25 04:19:54 +0000: Memory Usage (429528K) : Executing rule GFil.e
+2026-09-25 04:19:54 +0000: Memory Usage (429528K) : Executing rule GFil.i
+2026-09-25 04:19:54 +0000: Memory Usage (429528K) : Starting 5.10 pSD table
+2026-09-25 04:19:54 +0000: Memory Usage (429528K) : Executing rule pSD.c1
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Starting 5.14. Cont table
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule Cnt.a
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule Cnt.b
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule Cnt.c
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule Cnt.c
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule Cnt.d
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule Cnt.e
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule Cnt.g1
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule Cnt.g2
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Starting 5.15. ContBar table
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule CntB.b1
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule CntB.h1
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Starting 6.1.3 NPN Substrate-Tie table
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule npn13G2.bR 
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule npn13G2L.cR 
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule npn13G2V.cR 
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Starting 6.7 Schottky diode table
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule Sdiod.d
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule Sdiod.e
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Starting 7.2 Latch-up table
+2026-09-25 04:19:54 +0000: Memory Usage (429784K) : Executing rule LU.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.16. Metal1 table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M1.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M1.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M1.e
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M1.f
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M1.g
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M1.i
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.17 Metaln table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M2.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M2.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M2.e
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M2.f
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M2.g
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M2.i
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M3.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M3.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M3.e
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M3.f
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M3.g
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M3.i
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M4.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M4.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M4.e
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M4.f
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M4.g
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M4.i
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M5.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M5.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M5.e
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M5.f
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M5.g
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M5.i
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.18 Metaln:filler table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M1Fil.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M1Fil.a2
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M2Fil.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M2Fil.a2
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M3Fil.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M3Fil.a2
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M4Fil.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M4Fil.a2
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M5Fil.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule M5Fil.a2
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.19. Via1 table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.19. Via1 table derivations
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V1.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V1.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V1.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.20. Vian table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V2.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V2.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V2.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V3.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V3.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V3.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V4.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V4.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule V4.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.21. TopVia1 table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TV1.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TV1.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TV1.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TV1.d
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.22. TopMetal1 table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TM1.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TM1.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.23 TopMetal1:filler table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TM1Fil.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TM1Fil.a1
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.24. TopVia2 table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TV2.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TV2.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TV2.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TV2.d
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.25. TopMetal2 table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TM2.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TM2.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TM2.bR
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.26 TopMetal2:filler table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TM2Fil.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule TM2Fil.a1
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 5.27. Passiv table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule Pas.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule Pas.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule Pas.c
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Starting 6.9.2 Copper Pillar table
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule Padc.a
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule Padc.b
+2026-09-25 04:19:54 +0000: Memory Usage (430552K) : Executing rule Padc.c
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Padb.f
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Starting 6.9 Pad table
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pad.m
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pad.fR_M1
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pad.fR_M2
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pad.fR_M3
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pad.fR_M4
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pad.fR_M5
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pad.fR_TM1
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pad.fR_TM2
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pad.i
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Starting 6.9.1 Solder Bump
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Padb.a
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Padb.b
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Padb.c
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Padb.f
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Padb.d
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Starting 6.10 Sealring table
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Seal.l
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Seal.n
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule seal.b_metal1
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule seal.b_metal2
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule seal.b_metal3
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule seal.b_metal4
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule seal.b_metal5
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule seal.b_topmetal1
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule seal.b_topmetal2
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule seal.b_activ
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule seal.b_psd
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Seal.k
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Seal.m
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Starting 6.11 MIM table
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule MIM.c
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule MIM.d
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule MIM.gR
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Starting 7.3 Metal Slits table
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Slt.e1_M1
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Slt.e1_M2
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Slt.e1_M3
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Slt.e1_M4
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Slt.e1_M5
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Slt.e1_TM1
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Slt.e1_TM2
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Starting 9.1. LBE table
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule LBE.a
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule LBE.b
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule LBE.b1
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule LBE.c
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule LBE.d
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule LBE.h
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Starting 7.4. PIN table
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pin.a
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pin.b
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pin.e
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pin.f_M2
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pin.f_M3
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pin.f_M4
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pin.f_M5
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pin.g
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule Pin.h
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Starting 3.2. FORBIDDEN table
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule forbidden.biwind
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule forbidden.pemwind
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule forbidden.baspoly
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule forbidden.deepco
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule forbidden.pempoly
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule forbidden.empoly
+2026-09-25 04:19:54 +0000: Memory Usage (430808K) : Executing rule forbidden.ldmos
+2026-09-25 04:19:54 +0000: Memory Usage (431064K) : Executing rule forbidden.pbiwind
+2026-09-25 04:19:54 +0000: Memory Usage (431064K) : Executing rule forbidden.nodrc
+2026-09-25 04:19:54 +0000: Memory Usage (431064K) : Executing rule forbidden.flash
+2026-09-25 04:19:54 +0000: Memory Usage (431064K) : Executing rule forbidden.colwind
+2026-09-25 04:19:54 +0000: Memory Usage (431064K) : KLayout DRC run for tables 'main' completed in 0.41 seconds
+25-Sep-2026 04:19:54 | INFO    | Running IHP-SG13G2 sg13g2_maximal checks on design /work/pdkcell-nomark-pdkvaluesdeck.gds, topcell: PDK_16x2_NOMARK
+Warning: In file /work/pdkcell-nomark-pdkvaluesdeck.gds:
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=264000, record number=22643, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=264080, record number=22653, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=264620, record number=22723, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=264698, record number=22733, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=264774, record number=22743, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=264850, record number=22753, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=264926, record number=22763, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=267152, record number=23056, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=267232, record number=23066, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=267772, record number=23136, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=267850, record number=23146, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=267926, record number=23156, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=268002, record number=23166, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=268078, record number=23176, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=270304, record number=23469, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=270384, record number=23479, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=270924, record number=23549, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=271002, record number=23559, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=271078, record number=23569, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=271154, record number=23579, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=271230, record number=23589, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=273456, record number=23882, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=273536, record number=23892, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=274076, record number=23962, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=274154, record number=23972, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=274230, record number=23982, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=274306, record number=23992, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=274382, record number=24002, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=287826, record number=25756, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=287906, record number=25766, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=288446, record number=25836, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=288524, record number=25846, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=288600, record number=25856, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=288676, record number=25866, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=288752, record number=25876, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=290978, record number=26169, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=291058, record number=26179, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=291598, record number=26249, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=291676, record number=26259, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=291752, record number=26269, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=291828, record number=26279, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=291904, record number=26289, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=294130, record number=26582, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=294210, record number=26592, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=294750, record number=26662, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=294828, record number=26672, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=294904, record number=26682, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=294980, record number=26692, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=295056, record number=26702, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=297282, record number=26995, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=297362, record number=27005, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=297902, record number=27075, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=297980, record number=27085, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=298056, record number=27095, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=298132, record number=27105, cell=PDK_16x2)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=298208, record number=27115, cell=PDK_16x2)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=561636, record number=49812, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=561716, record number=49822, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=562256, record number=49892, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=562334, record number=49902, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=562410, record number=49912, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=562486, record number=49922, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=562562, record number=49932, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=564788, record number=50225, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=564868, record number=50235, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=565408, record number=50305, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=565486, record number=50315, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=565562, record number=50325, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=565638, record number=50335, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=565714, record number=50345, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=567940, record number=50638, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=568020, record number=50648, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=568560, record number=50718, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=568638, record number=50728, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=568714, record number=50738, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=568790, record number=50748, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=568866, record number=50758, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=571092, record number=51051, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=571172, record number=51061, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=571712, record number=51131, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=571790, record number=51141, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=571866, record number=51151, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=571942, record number=51161, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=572018, record number=51171, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=585462, record number=52925, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=585542, record number=52935, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=586082, record number=53005, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=586160, record number=53015, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=586236, record number=53025, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=586312, record number=53035, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=586388, record number=53045, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=588614, record number=53338, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=588694, record number=53348, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=589234, record number=53418, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=589312, record number=53428, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=589388, record number=53438, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=589464, record number=53448, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=589540, record number=53458, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=591766, record number=53751, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=591846, record number=53761, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=592386, record number=53831, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=592464, record number=53841, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=592540, record number=53851, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=592616, record number=53861, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=592692, record number=53871, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=594918, record number=54164, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=594998, record number=54174, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=595538, record number=54244, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (450 is less than -360 or larger than 360) (position=595616, record number=54254, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=595692, record number=54264, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=595768, record number=54274, cell=PDK_16x2_NOMARK)
+Warning: Invalid text rotation angle (540 is less than -360 or larger than 360) (position=595844, record number=54284, cell=PDK_16x2_NOMARK)
+2026-09-25 04:19:55 +0000: Memory Usage (413992K) : Starting running IHP-SG13G2 Klayout DRC maximum runset on /work/pdkcell-nomark-pdkvaluesdeck.gds
+2026-09-25 04:19:55 +0000: Memory Usage (413992K) : Ruby Version for klayout: 3.3.8
+2026-09-25 04:19:55 +0000: Memory Usage (415372K) : Loading database to memory is complete.
+2026-09-25 04:19:55 +0000: Memory Usage (415372K) : IHP-SG13G2 Klayout DRC maximum runset output at: /work/pdkcell-nomark-pdkvaluesdeck-full/pdkcell-nomark-pdkvaluesdeck_PDK_16x2_NOMARK_sg13g2_maximal.lyrdb
+2026-09-25 04:19:55 +0000: Memory Usage (415628K) : Evaluate switches.
+2026-09-25 04:19:55 +0000: Memory Usage (415628K) : Klayout will use  thread(s)
+2026-09-25 04:19:55 +0000: Memory Usage (415628K) : flat mode is enabled for sg13g2_maximal runset.
+Rule NW.a: 0 error(s)
+Rule NW.c: 0 error(s)
+Rule NW.c1: 0 error(s)
+Rule NW.d: 0 error(s)
+Rule NW.d1: 0 error(s)
+Rule NW.e: 0 error(s)
+Rule NW.e1: 0 error(s)
+Rule NW.f: 0 error(s)
+Rule NW.f1: 0 error(s)
+Rule PWB.a: 0 error(s)
+Rule PWB.b: 0 error(s)
+Rule PWB.c: 0 error(s)
+Rule NBL.a: 0 error(s)
+Rule NBLB.a: 0 error(s)
+Rule NBLB.b: 0 error(s)
+Rule NBLB.c: 0 error(s)
+Rule NBLB.d: 0 error(s)
+Rule Act.c: 0 error(s)
+Rule Act.d: 0 error(s)
+Rule Act.e: 0 error(s)
+Rule AFil.a: 0 error(s)
+Rule AFil.a1: 0 error(s)
+Rule AFil.b: 0 error(s)
+Rule AFil.i: 0 error(s)
+Rule TGO.a: 0 error(s)
+Rule TGO.b: 0 error(s)
+Rule TGO.c: 0 error(s)
+Rule TGO.d: 0 error(s)
+Rule TGO.e: 0 error(s)
+Rule Gat.a3: 0 error(s)
+Rule Gat.a4: 0 error(s)
+Rule Gat.b1: 0 error(s)
+Rule Gat.c: 0 error(s)
+Rule Gat.c: 0 error(s)
+Rule Gat.e: 0 error(s)
+Rule Gat.f: 0 error(s)
+Rule GFil.a: 0 error(s)
+Rule GFil.b: 0 error(s)
+Rule GFil.c: 0 error(s)
+Rule GFil.f: 0 error(s)
+Rule GFil.j: 0 error(s)
+Rule pSD.a: 0 error(s)
+Rule pSD.b: 0 error(s)
+Rule pSD.c: 0 error(s)
+Rule pSD.d: 0 error(s)
+Rule pSD.d1: 0 error(s)
+Rule pSD.e: 0 error(s)
+Rule pSD.f: 0 error(s)
+Rule pSD.g: 0 error(s)
+Rule pSD.g: 0 error(s)
+Rule pSD.i: 0 error(s)
+Rule pSD.i1: 0 error(s)
+Rule pSD.j: 0 error(s)
+Rule pSD.j1: 0 error(s)
+Rule pSD.k: 0 error(s)
+Rule pSD.l: 0 error(s)
+Rule pSD.m: 0 error(s)
+Rule pSD.n: 0 error(s)
+Rule nSDB.a: 0 error(s)
+Rule nSDB.b: 0 error(s)
+Rule nSDB.c: 0 error(s)
+Rule nSDB.e: 0 error(s)
+Rule EXTB.a: 0 error(s)
+Rule EXTB.b: 0 error(s)
+Rule EXTB.c: 0 error(s)
+Rule Sal.a: 0 error(s)
+Rule Sal.b: 0 error(s)
+Rule Sal.c: 0 error(s)
+Rule Sal.c: 0 error(s)
+Rule Sal.d: 0 error(s)
+Rule Sal.d: 0 error(s)
+Rule Sal.e: 0 error(s)
+Rule Cnt.b1: 0 error(s)
+Rule Cnt.f: 0 error(s)
+Rule Cnt.g: 0 error(s)
+Rule Cnt.h: 0 error(s)
+Rule Cnt.j: 0 error(s)
+Rule CntB.a: 0 error(s)
+Rule CntB.a: 0 error(s)
+Rule CntB.a1: 0 error(s)
+Rule CntB.b: 0 error(s)
+Rule CntB.b2: 0 error(s)
+Rule CntB.c: 0 error(s)
+Rule CntB.d: 0 error(s)
+Rule CntB.e: 0 error(s)
+Rule CntB.f: 0 error(s)
+Rule CntB.g: 0 error(s)
+Rule CntB.g1: 0 error(s)
+Rule CntB.g2: 0 error(s)
+Rule CntB.h: 0 error(s)
+Rule CntB.j: 0 error(s)
+Rule M1.c: 0 error(s)
+Rule M1.c1: 0 error(s)
+Rule M1.d: 0 error(s)
+Rule M2.c: 0 error(s)
+Rule M2.c1: 0 error(s)
+Rule M2.d: 0 error(s)
+Rule M3.c: 0 error(s)
+Rule M3.c1: 0 error(s)
+Rule M3.d: 0 error(s)
+Rule M4.c: 0 error(s)
+Rule M4.c1: 0 error(s)
+Rule M4.d: 0 error(s)
+Rule M5.c: 0 error(s)
+Rule M5.c1: 0 error(s)
+Rule M5.d: 0 error(s)
+Rule M1Fil.a1: 0 error(s)
+Rule M1Fil.b: 0 error(s)
+Rule M1Fil.d: 0 error(s)
+Rule M2Fil.a1: 0 error(s)
+Rule M2Fil.b: 0 error(s)
+Rule M2Fil.d: 0 error(s)
+Rule M3Fil.a1: 0 error(s)
+Rule M3Fil.b: 0 error(s)
+Rule M3Fil.d: 0 error(s)
+Rule M4Fil.a1: 0 error(s)
+Rule M4Fil.b: 0 error(s)
+Rule M4Fil.d: 0 error(s)
+Rule M5Fil.a1: 0 error(s)
+Rule M5Fil.b: 0 error(s)
+Rule M5Fil.d: 0 error(s)
+Rule V1.b1: 0 error(s)
+Rule V1.c1: 0 error(s)
+Rule V2.b1: 0 error(s)
+Rule V2.c1: 0 error(s)
+Rule V3.b1: 0 error(s)
+Rule V3.c1: 0 error(s)
+Rule V4.b1: 0 error(s)
+Rule V4.c1: 0 error(s)
+Rule TM1Fil.a: 0 error(s)
+Rule TM1Fil.b: 0 error(s)
+Rule TM1Fil.d: 0 error(s)
+Rule TM2Fil.a: 0 error(s)
+Rule TM2Fil.b: 0 error(s)
+Rule TM2Fil.d: 0 error(s)
+Rule npnG2.b: 0 error(s)
+Rule npnG2.c: 0 error(s)
+Rule npnG2.d.N_Activ: 0 error(s)
+Rule npnG2.d.NWell: 0 error(s)
+Rule npnG2.d.PWell_block: 0 error(s)
+Rule npnG2.d.nBuLay: 0 error(s)
+Rule npnG2.d.nSD_block: 0 error(s)
+Rule npnG2.d1: 0 error(s)
+Rule npnG2.d2: 0 error(s)
+Rule npnG2.e: 0 error(s)
+Rule npn13G2.a: 0 error(s)
+Rule npn13G2L.a: 0 error(s)
+Rule npn13G2L.b: 0 error(s)
+Rule npn13G2V.a: 0 error(s)
+Rule npn13G2V.b: 0 error(s)
+Rule Rsil.a: 0 error(s)
+Rule Rsil.b: 0 error(s)
+Rule Rsil.c: 0 error(s)
+Rule Rsil.d: 0 error(s)
+Rule Rsil.e: 0 error(s)
+Rule Rsil.f: 0 error(s)
+Rule Rppd.a: 0 error(s)
+Rule Rppd.b: 0 error(s)
+Rule Rppd.c: 0 error(s)
+Rule Rppd.c: 0 error(s)
+Rule Rppd.d: 0 error(s)
+Rule Rppd.e: 0 error(s)
+Rule Rhi.a: 0 error(s)
+Rule Rhi.b: 0 error(s)
+Rule Rhi.c: 0 error(s)
+Rule Rhi.d: 0 error(s)
+Rule Rhi.d: 0 error(s)
+Rule Rhi.e: 0 error(s)
+Rule Rhi.f: 0 error(s)
+Rule nmosi.b: 0 error(s)
+Rule nmosi.c: 0 error(s)
+Rule nmosi.d: 0 error(s)
+Rule nmosi.f: 0 error(s)
+Rule nmosi.g: 0 error(s)
+Rule Sdiod.a: 0 error(s)
+Rule Sdiod.b: 0 error(s)
+Rule Sdiod.c: 0 error(s)
+Rule Pad.aR: 0 error(s)
+Rule Pad.a1: 0 error(s)
+Rule Pad.bR: 0 error(s)
+Rule Pad.d: 0 error(s)
+Rule Pad.dR: 0 error(s)
+Rule Pad.d1R: 0 error(s)
+Rule Pad.gR: 0 error(s)
+Rule Pad.jR: 0 error(s)
+Rule Pad.jR: 0 error(s)
+Rule Pad.kR: 0 error(s)
+Rule Padc.d: 0 error(s)
+Rule Seal.a_Activ: 0 error(s)
+Rule Seal.a_pSD: 0 error(s)
+Rule Seal.a_Metal1: 0 error(s)
+Rule Seal.a_Metal2: 0 error(s)
+Rule Seal.a_Metal3: 0 error(s)
+Rule Seal.a_Metal4: 0 error(s)
+Rule Seal.a_Metal5: 0 error(s)
+Rule Seal.a_TopMetal1: 0 error(s)
+Rule Seal.a_TopMetal2: 0 error(s)
+Rule Seal.c: 0 error(s)
+Rule Seal.c: 0 error(s)
+Rule Seal.c1.Via1: 0 error(s)
+Rule Seal.c1.Via1: 0 error(s)
+Rule Seal.c1.Via2: 0 error(s)
+Rule Seal.c1.Via2: 0 error(s)
+Rule Seal.c1.Via3: 0 error(s)
+Rule Seal.c1.Via3: 0 error(s)
+Rule Seal.c1.Via4: 0 error(s)
+Rule Seal.c1.Via4: 0 error(s)
+Rule Seal.c2: 0 error(s)
+Rule Seal.c2: 0 error(s)
+Rule Seal.c3: 0 error(s)
+Rule Seal.c3: 0 error(s)
+Rule Seal.d.Cont: 0 error(s)
+Rule Seal.d.Via1: 0 error(s)
+Rule Seal.d.Via2: 0 error(s)
+Rule Seal.d.Via3: 0 error(s)
+Rule Seal.d.Via4: 0 error(s)
+Rule Seal.d.TopVia1: 0 error(s)
+Rule Seal.d.TopVia2: 0 error(s)
+Rule Seal.e: 0 error(s)
+Rule Seal.f.Activ: 0 error(s)
+Rule Seal.f.pSD: 0 error(s)
+Rule Seal.f.Metal1: 0 error(s)
+Rule Seal.f.Metal2: 0 error(s)
+Rule Seal.f.Metal3: 0 error(s)
+Rule Seal.f.Metal4: 0 error(s)
+Rule Seal.f.Metal5: 0 error(s)
+Rule Seal.f.TopMetal1: 0 error(s)
+Rule Seal.f.TopMetal2: 0 error(s)
+Rule MIM.a: 0 error(s)
+Rule MIM.b: 0 error(s)
+Rule MIM.e: 0 error(s)
+Rule MIM.f: 0 error(s)
+Rule MIM.g: 0 error(s)
+Rule MIM.h: 0 error(s)
+Rule LU.a: 0 error(s)
+Rule LU.c: 0 error(s)
+Rule LU.c1: 0 error(s)
+Rule LU.d: 0 error(s)
+Rule LU.d1: 0 error(s)
+Rule Slt.a.M1: 0 error(s)
+Rule Slt.b.M1: 0 error(s)
+Rule Slt.c.M1: 0 error(s)
+Rule Slt.e.M1: 0 error(s)
+Rule Slt.f.M1: 0 error(s)
+Rule Slt.h1: 0 error(s)
+Rule Slt.h1: 0 error(s)
+Rule Slt.a.M2: 0 error(s)
+Rule Slt.b.M2: 0 error(s)
+Rule Slt.c.M2: 0 error(s)
+Rule Slt.e.M2: 0 error(s)
+Rule Slt.f.M2: 0 error(s)
+Rule Slt.h2.M2: 0 error(s)
+Rule Slt.h2.M2: 0 error(s)
+Rule Slt.a.M3: 0 error(s)
+Rule Slt.b.M3: 0 error(s)
+Rule Slt.c.M3: 0 error(s)
+Rule Slt.e.M3: 0 error(s)
+Rule Slt.f.M3: 0 error(s)
+Rule Slt.h2.M3: 0 error(s)
+Rule Slt.h2.M3: 0 error(s)
+Rule Slt.a.M4: 0 error(s)
+Rule Slt.b.M4: 0 error(s)
+Rule Slt.c.M4: 0 error(s)
+Rule Slt.e.M4: 0 error(s)
+Rule Slt.f.M4: 0 error(s)
+Rule Slt.h2.M4: 0 error(s)
+Rule Slt.h2.M4: 0 error(s)
+Rule Slt.a.M5: 0 error(s)
+Rule Slt.b.M5: 0 error(s)
+Rule Slt.c.M5: 0 error(s)
+Rule Slt.e.M5: 0 error(s)
+Rule Slt.f.M5: 0 error(s)
+Rule Slt.g.M5: 0 error(s)
+Rule Slt.h2.M5: 0 error(s)
+Rule Slt.h2.M5: 0 error(s)
+Rule Slt.a.TM1: 0 error(s)
+Rule Slt.b.TM1: 0 error(s)
+Rule Slt.c.TM1: 0 error(s)
+Rule Slt.e.TM1: 0 error(s)
+Rule Slt.f.TM1: 0 error(s)
+Rule Slt.g.TM1: 0 error(s)
+Rule Slt.h3: 0 error(s)
+Rule Slt.a.TM2: 0 error(s)
+Rule Slt.b.TM2: 0 error(s)
+Rule Slt.c.TM2: 0 error(s)
+Rule Slt.e.TM2: 0 error(s)
+Rule Slt.f.TM2: 0 error(s)
+Rule Slt.h4: 0 error(s)
+Rule NW.c1.dig: 0 error(s)
+Rule NW.d1.dig: 0 error(s)
+Rule NW.e1.dig: 0 error(s)
+Rule NW.f1.dig: 0 error(s)
+Rule Cnt.c.Digi: 0 error(s)
+Rule LBE.b2: 0 error(s)
+Rule LBE.e.dfPad: 0 error(s)
+Rule LBE.e.Passiv: 0 error(s)
+Rule LBE.f: 0 error(s)
+Rule OffGrid.NWell: 0 error(s)
+Rule OffGrid.PWell: 0 error(s)
+Rule OffGrid.PWell_block: 0 error(s)
+Rule OffGrid.nBuLay: 0 error(s)
+Rule OffGrid.nBuLay_block: 0 error(s)
+Rule OffGrid.Activ: 0 error(s)
+Rule OffGrid.ThickGateOx: 0 error(s)
+Rule OffGrid.Activ_filler: 0 error(s)
+Rule OffGrid.GatPoly_filler: 0 error(s)
+Rule OffGrid.GatPoly: 0 error(s)
+Rule OffGrid.pSD: 0 error(s)
+Rule OffGrid.nSD: 0 error(s)
+Rule OffGrid.nSD_block: 0 error(s)
+Rule OffGrid.EXTBlock: 0 error(s)
+Rule OffGrid.SalBlock: 0 error(s)
+Rule OffGrid.Cont: 0 error(s)
+Rule OffGrid.Activ_nofill: 0 error(s)
+Rule OffGrid.GatPoly_nofill: 0 error(s)
+Rule OffGrid.Metal1: 0 error(s)
+Rule OffGrid.Via1: 0 error(s)
+Rule OffGrid.Metal2: 0 error(s)
+Rule OffGrid.Via2: 0 error(s)
+Rule OffGrid.Metal3: 0 error(s)
+Rule OffGrid.Via3: 0 error(s)
+Rule OffGrid.Metal4: 0 error(s)
+Rule OffGrid.Via4: 0 error(s)
+Rule OffGrid.Metal5: 0 error(s)
+Rule OffGrid.MIM: 0 error(s)
+Rule OffGrid.Vmim: 0 error(s)
+Rule OffGrid.TopVia1: 0 error(s)
+Rule OffGrid.TopMetal1: 0 error(s)
+Rule OffGrid.TopVia2: 0 error(s)
+Rule OffGrid.TopMetal2: 0 error(s)
+Rule OffGrid.Passiv: 0 error(s)
+Rule OffGrid.Metal1_filler: 0 error(s)
+Rule OffGrid.Metal2_filler: 0 error(s)
+Rule OffGrid.Metal3_filler: 0 error(s)
+Rule OffGrid.Metal4_filler: 0 error(s)
+Rule OffGrid.Metal5_filler: 0 error(s)
+Rule OffGrid.TopMetal1_filler: 0 error(s)
+Rule OffGrid.TopMetal2_filler: 0 error(s)
+Rule OffGrid.Metal1_nofill: 0 error(s)
+Rule OffGrid.Metal2_nofill: 0 error(s)
+Rule OffGrid.Metal3_nofill: 0 error(s)
+Rule OffGrid.Metal4_nofill: 0 error(s)
+Rule OffGrid.Metal5_nofill: 0 error(s)
+Rule OffGrid.TopMetal1_nofill: 0 error(s)
+Rule OffGrid.TopMetal2_nofill: 0 error(s)
+Rule OffGrid.NoMetFiller: 0 error(s)
+Rule OffGrid.Metal1_slit: 0 error(s)
+Rule OffGrid.Metal2_slit: 0 error(s)
+Rule OffGrid.Metal3_slit: 0 error(s)
+Rule OffGrid.Metal4_slit: 0 error(s)
+Rule OffGrid.Metal5_slit: 0 error(s)
+Rule OffGrid.TopMetal1_slit: 0 error(s)
+Rule OffGrid.TopMetal2_slit: 0 error(s)
+Rule OffGrid.EdgeSeal: 0 error(s)
+Rule OffGrid.EmWind: 0 error(s)
+Rule OffGrid.dfpad: 0 error(s)
+Rule OffGrid.Polimide: 0 error(s)
+Rule OffGrid.TRANS: 0 error(s)
+Rule OffGrid.IND: 0 error(s)
+Rule OffGrid.RES: 0 error(s)
+Rule OffGrid.RFMEM: 0 error(s)
+Rule OffGrid.Recog_diode: 0 error(s)
+Rule OffGrid.Recog_esd: 0 error(s)
+Rule OffGrid.DigiBnd: 0 error(s)
+Rule OffGrid.DigiSub: 0 error(s)
+Rule OffGrid.SRAM: 0 error(s)
+Rule OffGrid.dfpad_pillar: 0 error(s)
+Rule OffGrid.dfpad_sbump: 0 error(s)
+Rule OffGrid.DeepVia: 0 error(s)
+Rule OffGrid.LBE: 0 error(s)
+Rule OffGrid.PolyRes: 0 error(s)
+Number of DRC errors for maximum rule set: 0
+2026-09-25 04:19:56 +0000: Memory Usage (432840K) : KLayout DRC run for maximum ruleSet completed in 0.9 seconds
+25-Sep-2026 04:19:56 | INFO    | Completed running Sg13g2_maximal checks.
+25-Sep-2026 04:19:56 | INFO    | =====================================================================================
+25-Sep-2026 04:19:56 | INFO    | ✅ --- KLayout DRC Check Passed: No DRC violations detected in the layout. --- ✅
+25-Sep-2026 04:19:56 | INFO    | =====================================================================================
+25-Sep-2026 04:19:56 | INFO    | Total DRC Run time: 3.21 seconds (including execution, analysis, and reporting)

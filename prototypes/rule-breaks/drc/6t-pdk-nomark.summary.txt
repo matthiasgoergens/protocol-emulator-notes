@@ -1,0 +1,12 @@
+== main (deck: stock, options: --disable_extra_rules): Violated rules are : {'Cnt.c'}
+104 violations
+  Cnt.c                      104  min measured 0.020 um
+== full (deck: stock, options: none): Violated rules are : {'Gat.c', 'pSD.i', 'NW.c', 'Cnt.c', 'NW.d'}
+276 violations
+  Cnt.c                      104  min measured 0.020 um
+  Gat.c                       96  min measured 0.130 um
+  NW.c                        20  min measured 0.270 um
+  NW.d                        24  min measured 0.270 um
+  pSD.i                       32  min measured 0.240 um
+== precheck (deck: stock, options: --precheck_drc --disable_extra_rules --no_offgrid): DRC Check Passed: No DRC violations detected in the layout. --- ✅
+0 violations (clean)
