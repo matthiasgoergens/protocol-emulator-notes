@@ -294,3 +294,19 @@ counters, and `ping` plus Wireshark on 10.0.0.x checks the replies.
   a burst of pings all be answered.
 - **Transmit at the NTSC clock.** It might be possible with quarter-clock edge placement, but the
   thread-ownership schedule breaks, so it was not tried.
+
+## Review
+
+codex (the cheap `codex-luna` model) reviewed the directory read-only (`results/codex-review.txt`)
+and made four findings:
+
+1. Three receive sweeps could pass without recovering any frame. Fixed: jitter now requires full
+   recovery up to ±8 ns with 1 sample per clock and ±10 ns with 4, and preamble loss requires it
+   down to 9 bits.
+2. The first link pulse was not checked against the start of idle. Fixed.
+3. The host stack did not compare IP header fields other than the addresses. Fixed: it now
+   compares version, IHL, TOS, length, id, flags, fragment offset, TTL and protocol.
+4. "Never accepts wrong bytes" is only as strong as CRC-32. Agreed, so the README claims only the
+   200 tested corruptions.
+
+Everything was re-run after the fixes.
