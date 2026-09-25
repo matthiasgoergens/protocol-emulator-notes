@@ -1,0 +1,12 @@
+4tp ; WL idle 1.2 V, active 0.0 V; cell supply 1.2 V
+corner   T   hold SNM(mV)  read SNM(mV)  write-0 BL(mV)  write-1 BL(mV)  leak(pA/bit)  Q/QB hold (V)
+mos_tt   27       3.7        203.2         945.7             nan           4.25   0.145/0.001
+mos_tt   85       8.2        203.3         935.8             nan          76.60   0.226/0.000
+mos_ff   27      36.7        199.0         936.4             nan          91.52   0.664/0.000
+mos_ff   85      40.9        188.3         938.8             nan        1025.77   0.747/0.000
+mos_ss   27       9.2        212.9         946.2             nan           0.19   0.208/0.000
+mos_ss   85      10.5        216.4         934.9             nan           5.68   0.254/0.000
+mos_sf   27      99.3        164.0         996.7             nan          15.01   1.157/0.000
+mos_sf   85     100.9        161.4         993.1             nan         191.81   1.185/0.000
+mos_fs   27      -0.0        248.6         883.6             nan           0.94   0.003/0.003
+mos_fs   85      -0.0        243.9         875.5             nan          21.63   0.005/0.005

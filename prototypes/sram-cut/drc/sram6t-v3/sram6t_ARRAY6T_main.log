@@ -1,0 +1,567 @@
+# Logfile created on 2026-09-25 03:16:44 +0000 by logger.rb/v1.6.0
+2026-09-25 03:16:44 +0000: Memory Usage (417040K) : Starting running IHP-SG13G2 KLayout DRC runset on /work/sram6t.gds
+2026-09-25 03:16:44 +0000: Memory Usage (417040K) : Ruby Version for klayout: 3.3.8
+2026-09-25 03:16:44 +0000: Memory Usage (418080K) : Loading database to memory is complete.
+2026-09-25 03:16:44 +0000: Memory Usage (418080K) : IHP-SG13G2 KLayout DRC runset output at: /work/sram6t-v3/sram6t_ARRAY6T_main.lyrdb
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : Evaluate switches.
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : tables selected: main
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : KLayout will use 32 thread(s) in tiling mode.
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : flat mode is enabled.
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : FEOL enabled: true
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : BEOL enabled: true
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : OFFGRID enabled: true
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : PIN enabled: true
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : FORBIDDEN enabled: true
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : RECOMMENDED enabled: true
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : PreCheck DRC enabled: false
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : CONNECTIVITY_RULES enabled: true.
+2026-09-25 03:16:44 +0000: Memory Usage (418376K) : Read in polygons from layers.
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : activ_drw has 52 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : activ_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : activ_mask has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : activ_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : activ_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : activ_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : activ_iopc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : activ_noqrc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : biwind_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : biwind_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : pemwind_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : gatpoly_drw has 52 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : gatpoly_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : gatpoly_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : gatpoly_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : gatpoly_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : gatpoly_iopc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : gatpoly_noqrc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : cont_drw has 200 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419452K) : cont_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419708K) : nsd_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419708K) : nsd_block has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419708K) : metal1_drw has 136 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419708K) : metal1_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419964K) : metal1_mask has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419964K) : metal1_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (419964K) : metal1_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420220K) : metal1_slit has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420220K) : metal1_text has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420220K) : metal1_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420476K) : metal1_noqrc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420476K) : metal1_res has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420476K) : metal1_iprobe has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420732K) : metal1_diffprb has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420732K) : passiv_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420732K) : passiv_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420732K) : passiv_sbump has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420732K) : passiv_pillar has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420988K) : passiv_pdl has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420988K) : metal2_drw has 40 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420988K) : metal2_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420988K) : metal2_mask has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (420988K) : metal2_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (421244K) : metal2_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (421244K) : metal2_slit has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (421244K) : metal2_text has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (421500K) : metal2_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (421500K) : metal2_noqrc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (421500K) : metal2_res has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (421756K) : metal2_iprobe has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (421756K) : metal2_diffprb has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (421756K) : baspoly_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422012K) : baspoly_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422012K) : psd_drw has 4 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422268K) : nldb_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422268K) : digibnd_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422268K) : via1_drw has 104 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422524K) : backmetal1_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422524K) : backmetal1_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422780K) : backmetal1_mask has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422780K) : backmetal1_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422780K) : backmetal1_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (422780K) : backmetal1_slit has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423036K) : backmetal1_text has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423036K) : backmetal1_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423292K) : backmetal1_noqrc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423292K) : backmetal1_res has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423292K) : backmetal1_iprobe has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423292K) : backmetal1_diffprb has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423548K) : backpassiv_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423548K) : res_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423804K) : sram_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423804K) : trans_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (423804K) : ind_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424060K) : ind_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424060K) : ind_text has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424060K) : salblock_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424316K) : via2_drw has 20 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424316K) : metal3_drw has 4 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424572K) : metal3_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424572K) : metal3_mask has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424572K) : metal3_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424828K) : metal3_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424828K) : metal3_slit has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (424828K) : metal3_text has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425084K) : metal3_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425084K) : metal3_noqrc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425084K) : metal3_res has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425340K) : metal3_iprobe has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425340K) : metal3_diffprb has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : nwell_drw has 4 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : nwell_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : nbulay_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : nbulay_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : nbulay_block has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : emwind_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : emwind_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : deepco_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : deepco_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : mim_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : edgeseal_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : edgeseal_bound has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : substrate_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : substrate_text has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : dfpad_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : dfpad_pillar has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : dfpad_sbump has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : thickgateox_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : pldb_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : pwell_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : pwell_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : pwell_block has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : ic_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : via3_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_mask has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_slit has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_text has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_noqrc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_res has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_iprobe has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : metal4_diffprb has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425596K) : heattrans_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425852K) : heatres_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (425852K) : pempoly_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426108K) : fbe_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426108K) : empoly_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426108K) : ldmos_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426108K) : pbiwind_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426108K) : digisub_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426364K) : nodrc_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426364K) : text_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426364K) : via4_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426620K) : metal5_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426620K) : metal5_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426620K) : metal5_mask has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426876K) : metal5_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (426876K) : metal5_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : metal5_slit has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : metal5_text has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : metal5_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : metal5_noqrc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : metal5_res has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : metal5_iprobe has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : metal5_diffprb has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : radhard_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : memcap_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : varicap_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : flash_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : intbondvia_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : intbondmet_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : devbondvia_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : devbondmet_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : devtrench_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : redist_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphbot_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphtop_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : antvia1_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : antmetal2_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphcont_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : siwg_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : siwg_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : siwg_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : sigrating_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : singrating_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphpas_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : emwind3_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : emwihv3_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : redbulay_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : smos_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphpad_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : polimide_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : polimide_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_esd has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_diode has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_tsv has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_iprobe has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_diffprb has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_pillar has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_sbump has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_otp has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_pdiode has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_mom has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : recog_pcm has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : colopen_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphmetal1_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphmetal1_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphmetal1_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphmetal1_slit has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphmetal1_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphmet1l_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphmet1l_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphmet1l_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphmet1l_slit has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphmet1l_opc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : extblock_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : nldd_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : pldd_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : next_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : pext_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : nexthv_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : pexthv_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : graphgate_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : sinwg_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : sinwg_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : sinwg_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : mempad_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topvia1_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_mask has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_slit has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_text has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_noqrc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_res has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_iprobe has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal1_diffprb has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : inldpwl_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : polyres_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : polyres_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : vmim_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : nbulaycut_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : antmetal1_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topvia2_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_pin has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_mask has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_filler has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_nofill has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_slit has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_text has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_noqrc has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_res has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_iprobe has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : topmetal2_diffprb has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : snsring_drw has 0 polygons
+2026-09-25 03:16:44 +0000: Memory Usage (427132K) : sensor_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : snsarms_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : snscmosvia_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : colwind_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : flm_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : hafniumox_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : memvia_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : thinfilmres_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : rfmem_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m2m3 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m2m4 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m2m5 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m2tm1 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m2tm2 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m3m4 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m3m5 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m3tm1 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m3tm2 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m4m5 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m4tm1 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m4tm2 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m5tm1 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m5tm2 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_tm1tm2 has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m1sub has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m2sub has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m3sub has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m4sub has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_m5sub has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_tm1sub has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : norcx_tm2sub has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : snsbotvia_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : snstopvia_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : deepvia_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : fgetch_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : ctrgat_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : fgimp_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : emwihv_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : lbe_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : alcustop_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : nometfiller_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : prboundary_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange0_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange0_pin has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange0_text has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange1_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange1_pin has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange1_text has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange2_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange2_pin has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange2_text has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange3_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange3_pin has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange3_text has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange4_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange4_pin has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : exchange4_text has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : isonwell_drw has 0 polygons
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : Total no. of polygons in the design is 616
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : Loaded TECH DRC rules values from /pdk/libs.tech/klayout/python/sg13g2_pycell_lib/sg13g2_tech_mod.json
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : Loaded default DRC rules values from /pdk/libs.tech/klayout/tech/drc/rule_decks/sg13g2_tech_default.json
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : The following rules values were missing in tech json and default values were used:
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) :   - Cnt_c_digibnd
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : Total area of the design is 87.24080000000001 um^2.
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : The design dimensions are 13.059999999999999 µm * 6.680000000000001 µm.
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : Starting general IHP-SG13G2 derivations.
+2026-09-25 03:16:45 +0000: Memory Usage (427132K) : Starting Pwell derivations
+2026-09-25 03:16:45 +0000: Memory Usage (427400K) : Starting n-Activ derivations
+2026-09-25 03:16:45 +0000: Memory Usage (427400K) : Starting p-Activ derivations
+2026-09-25 03:16:45 +0000: Memory Usage (427400K) : Starting ptap derivations
+2026-09-25 03:16:45 +0000: Memory Usage (427400K) : Starting ntap derivations
+2026-09-25 03:16:45 +0000: Memory Usage (427400K) : Starting pact FET derivations
+2026-09-25 03:16:45 +0000: Memory Usage (427400K) : Starting nact FET derivations
+2026-09-25 03:16:45 +0000: Memory Usage (427400K) : Starting Gate derivations
+2026-09-25 03:16:45 +0000: Memory Usage (427400K) : Starting cont/contbar general derivations
+2026-09-25 03:16:45 +0000: Memory Usage (427400K) : Starting pad general derivations
+2026-09-25 03:16:45 +0000: Memory Usage (427400K) : Starting IHP-SG13G2 DRC connectivity related derivations.
+2026-09-25 03:16:45 +0000: Memory Usage (427656K) : Starting IHP-SG13G2 DRC connectivity setup
+2026-09-25 03:16:45 +0000: Memory Usage (428956K) : Starting IHP-SG13G2 DRC rules.
+2026-09-25 03:16:45 +0000: Memory Usage (428956K) : Running all FEOL rules
+2026-09-25 03:16:45 +0000: Memory Usage (428956K) : Running all BEOL rules
+2026-09-25 03:16:45 +0000: Memory Usage (428956K) : Running all PIN rules
+2026-09-25 03:16:45 +0000: Memory Usage (428956K) : Running all FORBIDDEN rules
+2026-09-25 03:16:45 +0000: Memory Usage (428956K) : Starting 5.1 NWell table
+2026-09-25 03:16:45 +0000: Memory Usage (428956K) : Executing rule NW.b
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule NW.b1
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Starting 5.2 PWell:block
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule PWB.e
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule PWB.e1
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule PWB.f
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule PWB.f1
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Starting 5.3 nBuLay table
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule NBL.b
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule NBL.c
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule NBL.d
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule NBL.e
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule NBL.f
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Starting 5.5. Activ table
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule Act.a
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Executing rule Act.b
+2026-09-25 03:16:45 +0000: Memory Usage (430364K) : Starting 5.6 Activ:filler table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule AFil.c1
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule AFil.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule AFil.d
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule AFil.e
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule AFil.j
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.7. ThickGateOx table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TGO.f
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.8. GatPoly table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Gat.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Gat.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Gat.d
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Gat.a1
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Gat.a2
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Gat.g
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.9 GatPoly:filler
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule GFil.d
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule GFil.e
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule GFil.i
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.10 pSD table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule pSD.c1
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.14. Cont table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Cnt.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Cnt.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Cnt.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Cnt.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Cnt.d
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Cnt.e
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Cnt.g1
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Cnt.g2
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.15. ContBar table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule CntB.b1
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule CntB.h1
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 6.1.3 NPN Substrate-Tie table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule npn13G2.bR 
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule npn13G2L.cR 
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule npn13G2V.cR 
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 6.7 Schottky diode table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Sdiod.d
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Sdiod.e
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 7.2 Latch-up table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule LU.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.16. Metal1 table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M1.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M1.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M1.e
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M1.f
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M1.g
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M1.i
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.17 Metaln table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M2.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M2.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M2.e
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M2.f
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M2.g
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M2.i
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M3.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M3.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M3.e
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M3.f
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M3.g
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M3.i
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M4.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M4.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M4.e
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M4.f
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M4.g
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M4.i
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M5.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M5.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M5.e
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M5.f
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M5.g
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M5.i
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.18 Metaln:filler table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M1Fil.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M1Fil.a2
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M2Fil.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M2Fil.a2
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M3Fil.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M3Fil.a2
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M4Fil.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M4Fil.a2
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M5Fil.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule M5Fil.a2
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.19. Via1 table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.19. Via1 table derivations
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V1.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V1.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V1.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.20. Vian table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V2.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V2.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V2.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V3.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V3.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V3.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V4.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V4.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule V4.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.21. TopVia1 table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TV1.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TV1.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TV1.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TV1.d
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.22. TopMetal1 table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TM1.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TM1.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.23 TopMetal1:filler table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TM1Fil.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TM1Fil.a1
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.24. TopVia2 table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TV2.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TV2.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TV2.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TV2.d
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.25. TopMetal2 table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TM2.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TM2.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TM2.bR
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.26 TopMetal2:filler table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TM2Fil.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule TM2Fil.a1
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 5.27. Passiv table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Pas.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Pas.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Pas.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 6.9.2 Copper Pillar table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Padc.a
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Padc.b
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Padc.c
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Padb.f
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Starting 6.9 Pad table
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Pad.m
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Pad.fR_M1
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Pad.fR_M2
+2026-09-25 03:16:45 +0000: Memory Usage (430620K) : Executing rule Pad.fR_M3
+2026-09-25 03:16:45 +0000: Memory Usage (430876K) : Executing rule Pad.fR_M4
+2026-09-25 03:16:45 +0000: Memory Usage (430876K) : Executing rule Pad.fR_M5
+2026-09-25 03:16:45 +0000: Memory Usage (430876K) : Executing rule Pad.fR_TM1
+2026-09-25 03:16:45 +0000: Memory Usage (430876K) : Executing rule Pad.fR_TM2
+2026-09-25 03:16:45 +0000: Memory Usage (430876K) : Executing rule Pad.i
+2026-09-25 03:16:45 +0000: Memory Usage (430876K) : Starting 6.9.1 Solder Bump
+2026-09-25 03:16:45 +0000: Memory Usage (430876K) : Executing rule Padb.a
+2026-09-25 03:16:45 +0000: Memory Usage (430876K) : Executing rule Padb.b
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Padb.c
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Padb.f
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Padb.d
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Starting 6.10 Sealring table
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Seal.l
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Seal.n
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule seal.b_metal1
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule seal.b_metal2
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule seal.b_metal3
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule seal.b_metal4
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule seal.b_metal5
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule seal.b_topmetal1
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule seal.b_topmetal2
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule seal.b_activ
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule seal.b_psd
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Seal.k
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Seal.m
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Starting 6.11 MIM table
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule MIM.c
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule MIM.d
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule MIM.gR
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Starting 7.3 Metal Slits table
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Slt.e1_M1
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Slt.e1_M2
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Slt.e1_M3
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Slt.e1_M4
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Slt.e1_M5
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Slt.e1_TM1
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Slt.e1_TM2
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Starting 9.1. LBE table
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule LBE.a
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule LBE.b
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule LBE.b1
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule LBE.c
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule LBE.d
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule LBE.h
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Starting 7.4. PIN table
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Pin.a
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Pin.b
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Pin.e
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Pin.f_M2
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Pin.f_M3
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Pin.f_M4
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Pin.f_M5
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Pin.g
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule Pin.h
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Starting 3.2. FORBIDDEN table
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.biwind
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.pemwind
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.baspoly
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.deepco
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.pempoly
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.empoly
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.ldmos
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.pbiwind
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.nodrc
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.flash
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : Executing rule forbidden.colwind
+2026-09-25 03:16:45 +0000: Memory Usage (431132K) : KLayout DRC run for tables 'main' completed in 0.71 seconds

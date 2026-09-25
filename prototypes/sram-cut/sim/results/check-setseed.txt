@@ -1,0 +1,20 @@
+6T PD 0.3 PG 0.3 PU 0.15, WL 1.2, mos_tt 27 C, 6 mismatch samples
+seed    1  hold   471.1  read   224.0  wm   407.2 mV
+seed    2  hold   490.0  read   204.0  wm   437.9 mV
+seed    3  hold   465.2  read   182.5  wm   419.9 mV
+seed    4  hold   482.2  read   183.2  wm   461.9 mV
+seed    5  hold   480.1  read   208.7  wm   399.1 mV
+seed    6  hold   480.1  read   215.3  wm   360.6 mV
+hold SNM     : mean  478.1 mV  sigma   8.7 mV  min  465.2 mV  mean/sigma 54.66  fails(<=0) 0
+read SNM     : mean  203.0 mV  sigma  17.0 mV  min  182.5 mV  mean/sigma 11.96  fails(<=0) 0
+write margin : mean  414.4 mV  sigma  34.7 mV  min  360.6 mV  mean/sigma 11.95  fails(<=0) 0
+6T PD 0.3 PG 0.3 PU 0.15, WL 1.2, mos_tt 27 C, 6 mismatch samples
+seed    1  hold   471.1  read   224.0  wm   407.2 mV
+seed    2  hold   490.0  read   204.0  wm   437.9 mV
+seed    3  hold   465.2  read   182.5  wm   419.9 mV
+seed    4  hold   482.2  read   183.2  wm   461.9 mV
+seed    5  hold   480.1  read   208.7  wm   399.1 mV
+seed    6  hold   480.1  read   215.3  wm   360.6 mV
+hold SNM     : mean  478.1 mV  sigma   8.7 mV  min  465.2 mV  mean/sigma 54.66  fails(<=0) 0
+read SNM     : mean  203.0 mV  sigma  17.0 mV  min  182.5 mV  mean/sigma 11.96  fails(<=0) 0
+write margin : mean  414.4 mV  sigma  34.7 mV  min  360.6 mV  mean/sigma 11.95  fails(<=0) 0

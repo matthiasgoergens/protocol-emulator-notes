@@ -1,0 +1,12 @@
+6T PD 0.3 PG 0.3 PU 0.15: read transient, 64 cells on 10 fF bit lines, WL 1.2 V for 10 ns; selected Q=0, the other 63 store Q=1
+corner   T   BL differential at 1/2/5 ns (mV)   Q peak during read   Q/QB after
+mos_tt   27   1198.6 1207.7 1207.7              0.189            0.000/1.200 ok
+mos_tt   85   1191.6 1207.2 1206.7              0.200            0.000/1.200 ok
+mos_ff   27   1204.0 1207.7 1207.4              0.212            0.000/1.200 ok
+mos_ff   85   1198.9 1205.2 1201.6              0.223            0.000/1.200 ok
+mos_ss   27   1180.6 1207.4 1207.5              0.170            0.000/1.200 ok
+mos_ss   85   1166.3 1207.2 1207.4              0.180            0.000/1.200 ok
+mos_sf   27   1192.0 1207.6 1207.6              0.180            0.000/1.200 ok
+mos_sf   85   1182.1 1207.3 1207.3              0.191            0.000/1.200 ok
+mos_fs   27   1202.0 1207.8 1207.6              0.199            0.000/1.200 ok
+mos_fs   85   1196.5 1206.7 1205.2              0.210            0.000/1.200 ok

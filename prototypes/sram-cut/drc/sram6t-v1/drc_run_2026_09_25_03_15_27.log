@@ -1,0 +1,11 @@
+25-Sep-2026 03:15:28 | INFO    | KLayout version detected: 0.30.0
+25-Sep-2026 03:15:28 | INFO    | Using DRC JSON file: /pdk/libs.tech/klayout/python/sg13g2_pycell_lib/sg13g2_tech_mod.json
+25-Sep-2026 03:15:28 | INFO    | Running IHP-SG13G2 main checks on design /work/sram6t.gds, topcell: ARRAY6T
+25-Sep-2026 03:15:31 | INFO    | Running IHP-SG13G2 sg13g2_maximal checks on design /work/sram6t.gds, topcell: ARRAY6T
+25-Sep-2026 03:15:34 | INFO    | Completed running Sg13g2_maximal checks.
+25-Sep-2026 03:15:34 | ERROR   | ==================================================================================
+25-Sep-2026 03:15:34 | ERROR   | ❌ --- KLayout DRC Check Failed: Violations were detected in the layout. --- ❌
+25-Sep-2026 03:15:34 | ERROR   | ==================================================================================
+25-Sep-2026 03:15:34 | ERROR   | Violated rules are : {'M3.c', 'Act.d', 'M3.c1', 'pSD.b'}
+
+25-Sep-2026 03:15:34 | INFO    | Total DRC Run time: 7.43 seconds (including execution, analysis, and reporting)

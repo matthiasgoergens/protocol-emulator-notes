@@ -1,0 +1,12 @@
+6T PD 0.3/0.45 PG 0.3/0.45 PU 0.15/0.45 thick oxide; WL 1.2 V, read bit lines at 1.2 V
+corner   T   hold SNM (mV)   read SNM (mV)   write margin (mV)   leakage (pA/bit)
+mos_tt   27      540.8           278.3           365.3                0.12
+mos_tt   85      517.6           255.5           386.0                6.54
+mos_ff   27      516.6           248.2           407.3                1.34
+mos_ff   85      488.3           221.4           427.0               49.31
+mos_ss   27      552.0           296.4           321.2                0.02
+mos_ss   85      537.2           281.7           343.3                0.95
+mos_sf   27      526.0           307.0           315.9                0.32
+mos_sf   85      515.7           285.5           336.7               13.18
+mos_fs   27      527.0           248.1           414.0                0.12
+mos_fs   85      500.1           223.6           434.7                7.19
