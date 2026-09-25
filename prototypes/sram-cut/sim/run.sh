@@ -10,5 +10,5 @@ exec nice ionice --class 3 podman run --rm \
   --volume /var/tmp/spice-sram-cut/"$run":/work \
   --volume /var/tmp/spice-sram-cut/osdi:/osdi:ro \
   --volume "$(dirname "$(readlink --canonicalize "$0")")":/src:ro \
-  --env JOBS="${JOBS:-4}" --env PYTHONPATH=/src --workdir /work \
+  --env JOBS="${JOBS:-4}" --env HV="${HV:-}" --env VWL="${VWL:-1.2}" --env VBL="${VBL:-1.2}" --env PYTHONPATH=/src --workdir /work \
   spice-retention:latest python3 -u "/src/$@"

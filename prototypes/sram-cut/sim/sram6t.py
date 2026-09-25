@@ -92,6 +92,43 @@ def leakage(corner, temp):
     return meas(out, "itot")
 
 
+def read_tran(corner, temp, n=64, cbl="10f", twl=10e-9):
+    """A real read: a column of n cells on floating, precharged bit lines (cbl each, about
+    0.15 fF/um of Metal2 over n x 1.07 um plus junctions), the selected cell storing Q=0 and the
+    n-1 others storing Q=1 (their access transistors leak onto BLB's partner, BL, in the direction
+    that erodes the differential). WL high for twl. Reports the bit-line differential after 1, 2,
+    5 ns and the stored nodes after the word line falls (read disturb)."""
+    name = f"rd_{TAG}_{corner}_{temp}"
+    cells = "".join(half(f"A{i}", f"qb{i}", f"q{i}", "bl", "0") + half(f"B{i}", f"q{i}", f"qb{i}", "blb", "0")
+                    for i in range(1, n))
+    ics = " ".join(f"v(q{i})={VDD} v(qb{i})=0" for i in range(1, n))
+    ckt = (f"* read transient\n" + libs(corner) + f".temp {temp}\n"
+           f"vdd vdd 0 {VDD}\nvwl wl 0 pwl(0 0 2n 0 2.1n {VWL} {2.1e-9 + twl:.4e} {VWL} {2.2e-9 + twl:.4e} 0)\n"
+           f"vpre pre 0 pwl(0 {VDD} 1.9n {VDD} 2n 0)\n"
+           "spa bl vdd pre 0 swm\nspb blb vdd pre 0 swm\n.model swm sw vt=0.6 ron=100 roff=1e12\n"
+           f"cbl bl 0 {cbl}\ncblb blb 0 {cbl}\n"
+           + half("A0", "qb0", "q0", "bl", "wl") + half("B0", "q0", "qb0", "blb", "wl") + cells +
+           f".ic v(q0)=0 v(qb0)={VDD} {ics}\n")
+    out = run(name, ckt + control(
+        f"tran 10p {2.2e-9 + twl + 20e-9:.4e}\n"
+        + "".join(f"meas tran a{k} find v(bl) at={2.1 + k}n\nmeas tran b{k} find v(blb) at={2.1 + k}n\n"
+                  for k in (1, 2, 5)) +
+        f"meas tran qa find v(q0) at={2.2e-9 + twl + 19e-9:.4e}\nmeas tran qba find v(qb0) at={2.2e-9 + twl + 19e-9:.4e}\n"
+        "meas tran qmax max v(q0) from=2n"))
+    d = [meas(out, f"b{k}") - meas(out, f"a{k}") for k in (1, 2, 5)]
+    return d + [meas(out, k) for k in ("qmax", "qa", "qba")]
+
+
+if MODE == "read":
+    print(f"6T PD {PD} PG {PG} PU {PU}: read transient, 64 cells on 10 fF bit lines, WL {VWL} V for 10 ns;"
+          " selected Q=0, the other 63 store Q=1")
+    print("corner   T   BL differential at 1/2/5 ns (mV)   Q peak during read   Q/QB after")
+    for (c, t), (d1, d2, d5, qm, qa, qba) in zip([(c, t) for c in CORNERS for t in TEMPS],
+                                               pmap(lambda ct: read_tran(*ct), [(c, t) for c in CORNERS for t in TEMPS])):
+        print(f"{c:7s} {t:3d}   {1e3*d1:6.1f} {1e3*d2:6.1f} {1e3*d5:6.1f}              {qm:.3f}            "
+              f"{qa:.3f}/{qba:.3f} {'ok' if qba > qa + 0.5 else 'FLIPPED'}", flush=True)
+    raise SystemExit
+
 if MODE == "corners":
     print(f"6T PD {PD}/{LPD} PG {PG}/{LPG} PU {PU}/{LPU}{' thick oxide' if HV else ''}; "
           f"WL {VWL} V, read bit lines at {VBL} V")

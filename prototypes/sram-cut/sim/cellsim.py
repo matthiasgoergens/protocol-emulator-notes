@@ -14,7 +14,7 @@ CELL:
        to the node, its gate tied to the node (Vgs = 0 always, so it only ever leaks). Driver and
        load are the same device type, so their leakage ratio (k/d) holds across global corners.
        Keys d (driver W), a (access W), k (load W), lk (load L). No PMOS, no n-well.
-Other keys: vcell (cell supply for hold, SNM and leakage; default 1.2), vbl (bit-line level during
+Other keys: blcell (1: bit lines sit at the cell supply in hold, as in a drowsy array), vcell (cell supply for hold, SNM and leakage; default 1.2), vbl (bit-line level during
 read, default 1.2), wlon (active word-line level; default 0 for 4tp, 1.2 otherwise), corners
 (comma list), temps (comma list).
 
@@ -100,7 +100,7 @@ def go(name, ckt, body, seed):
 def butterfly(corner, temp, mode, seed=None, mm=False):
     name = f"bf_{TAG}_{corner}_{temp}_{mode}_{seed}"
     wl = WLON if mode == "read" else WLIDLE
-    blv = VBL if mode == "read" else VDD
+    blv = VBL if mode == "read" else (VCELL if K.get("blcell") == "1" else VDD)
     ckt = (head(corner, temp, mm, "butterfly " + mode) +
            f"vwl wl 0 {wl}\nvbl bl 0 {blv}\nvblb blb 0 {blv}\nvs s 0 0\n"
            + half("A", "s", "ya", "bl", "wl") + half("B", "s", "yb", "blb", "wl", access=CELL != "5t"))
@@ -125,10 +125,15 @@ def write(corner, temp, direction, seed=None, mm=False):
     return meas(out, "wm")
 
 
+def HOLDBL():
+    """Bit-line level in hold: VDD, or with blcell=1 the cell supply (a whole drowsy array)."""
+    return VCELL if K.get("blcell") == "1" else VDD
+
+
 def leakage(corner, temp):
     name = f"lk_{TAG}_{corner}_{temp}"
     ckt = (head(corner, temp, False, "leakage") +
-           f"vwl wl 0 {WLIDLE}\nvbl bl 0 {VDD}\nvblb blb 0 {VDD}\n" + cell("q", "qb") +
+           f"vwl wl 0 {WLIDLE}\nvbl bl 0 {HOLDBL()}\nvblb blb 0 {HOLDBL()}\n" + cell("q", "qb") +
            f".nodeset v(q)={VCELL} v(qb)=0\n")
     out = run(name, ckt + control(
         "op\nprint v(q) v(qb)\nlet itot = -i(vdd)-i(vcellsrc)-i(vbl)-i(vblb)-i(vwl)\nprint itot"))
