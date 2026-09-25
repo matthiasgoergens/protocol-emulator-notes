@@ -1,0 +1,32 @@
+programmes: T0 parser 21 words, T1 video timing 84 words (of 128)
+palette (luma code, phase, difference, chroma): target -> predicted decode
+   0: code  4 th  0 d  0      (0.00 0.00 0.00) -> (0.00 0.00 0.00)
+   1: code 15 th  0 d  0      (1.00 1.00 1.00) -> (1.00 1.00 1.00)
+   2: code  9 th  0 d  0      (0.50 0.50 0.50) -> (0.46 0.46 0.46)
+   3: code  8 th  8 d 14 col  (0.80 0.10 0.10) -> (0.86 0.14 0.09)
+   4: code  9 th  2 d 13 col  (0.10 0.70 0.10) -> (0.06 0.73 0.11)
+   5: code  7 th  9 d  6 col  (0.15 0.20 0.90) -> (0.18 0.16 0.85)
+   6: code 12 th  6 d 13 col  (0.90 0.90 0.10) -> (0.94 0.85 0.05)
+   7: code 10 th 13 d  4 col  (0.10 0.80 0.80) -> (0.06 0.78 0.82)
+   8: code  8 th 10 d 14 col  (0.80 0.10 0.80) -> (0.82 0.03 0.77)
+   9: code 11 th  7 d 14 col  (0.95 0.55 0.10) -> (1.00 0.57 0.11)
+  10: code  7 th  6 d  7 col  (0.45 0.10 0.60) -> (0.40 0.10 0.56)
+  11: code  7 th  0 d  0      (0.25 0.25 0.25) -> (0.24 0.24 0.24)
+  12: code  8 th  2 d  7 col  (0.50 0.30 0.10) -> (0.54 0.30 0.10)
+  13: code 12 th  9 d 13 col  (1.00 0.60 0.70) -> (1.00 0.57 0.71)
+  14: code  6 th  9 d  7 col  (0.10 0.10 0.45) -> (0.05 0.10 0.53)
+  15: code 12 th  0 d  0      (0.75 0.75 0.75) -> (0.78 0.78 0.78)
+  smallest distance between two palette colours: 0.287
+main (RTL + interpreter, neighbours on T2/T3): RTL/interpreter mismatching cycles 0; frames matched 119, dropped by header 1, commits 118, pixel bytes written 3808; lines played 240, underruns 4; buffer reads 7552, max write-to-read 102.9 us, lifetime violations 0
+without neighbours: RTL/interpreter mismatching cycles 0; frames matched 119, dropped by header 1, commits 118, pixel bytes written 3808; lines played 240, underruns 4; buffer reads 7552, max write-to-read 102.9 us, lifetime violations 0
+isolation: composite trace identical with and without neighbours: true
+isolation: neighbour pins (4..7) identical with and without Ethernet/video: true
+isolation: composite identical under 4 random neighbour programme pairs: 4 of 4
+control: thin-oxide rows at 85 C (lifetime 8 us): RTL/interpreter mismatching cycles 0; frames matched 119, dropped by header 1, commits 118, pixel bytes written 3808; lines played 240, underruns 4; buffer reads 7552, max write-to-read 102.9 us, lifetime violations 7552
+control: no refresh on the first read (lifetime 120 us): RTL/interpreter mismatching cycles 0; frames matched 119, dropped by header 1, commits 118, pixel bytes written 3808; lines played 240, underruns 4; buffer reads 7552, max write-to-read 166.5 us, lifetime violations 3578
+control: one extra slot in the active line: RTL/interpreter mismatching cycles 0; frames matched 119, dropped by header 1, commits 118, pixel bytes written 3808; lines played 240, underruns 4; buffer reads 7552, max write-to-read 118.2 us, lifetime violations 0
+finding: the shared receiver (../ethernet-10base-t/eth_rx.ml, no shift-register clear): RTL/interpreter mismatching cycles 0; frames matched 118, dropped by header 2, commits 117, pixel bytes written 3776; lines played 240, underruns 6; buffer reads 7488, max write-to-read 102.9 us, lifetime violations 0
+  lines not received with a matching header: 70 113
+reordered pair (91 before 90), thin-oxide rows, 120 us: RTL/interpreter mismatching cycles 0; frames matched 119, dropped by header 1, commits 118, pixel bytes written 3808; lines played 240, underruns 4; buffer reads 7552, max write-to-read 264.1 us, lifetime violations 32
+reordered pair (91 before 90), thick-oxide rows, 3 ms: RTL/interpreter mismatching cycles 0; frames matched 119, dropped by header 1, commits 118, pixel bytes written 3808; lines played 240, underruns 4; buffer reads 7552, max write-to-read 264.1 us, lifetime violations 0
+elapsed 25 s
