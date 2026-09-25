@@ -79,3 +79,17 @@ let of_v ~addr w =
   | 11 -> w
   | 14 | 15 -> raise (Untranslatable (addr, w))
   | _ -> of_wide ~addr w
+
+(* Benches that mix programmes assembled for v2 with raw words of an earlier variant (a bench's
+   all-HALT threads, say) register the v2 arrays; [fetch_mixed] passes their words through and
+   translates the others. *)
+let v2_arrays : int array list ref = ref []
+let register_v2 p = v2_arrays := p :: !v2_arrays; p
+let is_v2 a = List.exists (fun p -> p == a) !v2_arrays
+
+let fetch_mixed ~translate (mem : int array array) =
+  let v2 = Array.map is_v2 mem in
+  fun a ->
+    let t = a lsr Isa2.pc_bits and pc = a land (Isa2.page_len - 1) in
+    if pc >= Array.length mem.(t) then 0
+    else if v2.(t) then mem.(t).(pc) else translate ~addr:pc mem.(t).(pc)
