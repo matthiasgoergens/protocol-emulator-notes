@@ -1,0 +1,13 @@
+; ../../../multi-proto: bridge A (UART <-> I2C, with an SPI master as neighbour), re-assembled
+; for v2. bridge_lib.ml, compiler.ml and decoders.ml are unchanged (symlinks); asm.ml re-targets
+; the assembler at v2, isa_mb.ml and dual.ml put the v2 interpreter and RTL behind multi-proto's
+; interface, bridge_a.ml is bridges.ml cut down to bridge A (see its header).
+(rule
+ (with-stdout-to
+  isa.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
+
+(executable
+ (name bridge_a)
+ (flags (:standard -w -37))
+ (libraries hardcaml unix seqv2))

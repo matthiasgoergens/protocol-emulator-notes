@@ -1,0 +1,18 @@
+; ../../../sequencer-ps2-can: the PS/2 device and host firmware, models, bench and ps2_main.exe,
+; unchanged (symlinks), on v2. sim.ml is the original with one mechanical edit (sed below): its
+; lockstep Machine also compared the rejected CRC and stuffing engines' state, which v2 does not
+; have; pins, output enables, host output and pcs are still compared every clock.
+(rule
+ (with-stdout-to
+  isa_v_enc.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa_v.ml})))
+
+(rule
+ (with-stdout-to
+  sim.ml
+  (run sed -e "/let dbg_of (st : Isa_v.state)/,+1d" -e "s/&& o.dbg = dbg_of m.st in/in/"
+   %{dep:orig/sim.ml})))
+
+(executable
+ (name ps2_main)
+ (libraries hardcaml seqv2))

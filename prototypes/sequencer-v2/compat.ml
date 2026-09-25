@@ -64,3 +64,18 @@ let relocate ~base w =
   if op = Isa2.op_waitp || op = Isa2.op_jmp || op = Isa2.op_jnz || op = Isa2.op_mbx || op = Isa2.op_waitc
   then (w land 0xFF00) lor (((w land 0xFF) + base) land 0xFF)
   else w
+
+(* sequencer-ps2-can's variant v (../sequencer-ps2-can/isa_v.ml): as wide, except that OUT
+   already has v2's layout (src[11] tag[10:8] imm[7:0]) and is kept. Its per-thread CRC engine,
+   stuff tracker, JC and CFG were rejected for v2 (notes/architecture-v0.md section 2.1), so a word
+   that uses them has no translation: [of_v] raises, which makes a programme that needs them fail
+   loudly instead of running something else. *)
+exception Untranslatable of int * int
+
+let of_v ~addr w =
+  match (w lsr 12) land 15 with
+  | 7 -> if (w lsr 5) land 3 <> 0 then raise (Untranslatable (addr, w)) else of_wide ~addr w
+  | 8 -> if (w lsr 4) land 7 <> 0 then raise (Untranslatable (addr, w)) else of_wide ~addr w
+  | 11 -> w
+  | 14 | 15 -> raise (Untranslatable (addr, w))
+  | _ -> of_wide ~addr w
