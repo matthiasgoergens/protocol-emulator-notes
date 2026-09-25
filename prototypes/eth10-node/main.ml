@@ -112,6 +112,16 @@ let () =
     let ok, _, _ = Node_demo.run ~requests:Sys.argv.(2) ~replies_out:Sys.argv.(3) () in
     pr "node (simulation side): %s" (verdict ok)
   end;
+  if what = "emit" then begin
+    let emit name c =
+      let oc = open_out (Filename.concat "synth" (name ^ ".v")) in
+      Hardcaml.Rtl.output ~output_mode:(To_channel oc) Verilog c; close_out oc; pr "wrote synth/%s.v" name in
+    emit "edge_sampler1" (Edge_sampler.circuit ~n:1);
+    emit "edge_sampler4" (Edge_sampler.circuit ~n:4);
+    emit "crc_unit" (Crc_unit.circuit ());
+    emit "systolic_matcher_en" (Matcher_en.circuit ());
+    emit "eth_rx_path4" (Rx_path.circuit ~n:4 ~scfg:(Rx_path.eth_sampler_cfg ~clock_hz:60e6 ~n:4) ())
+  end;
   if what = "node-busy" then begin
     pr "== node with requests %s us apart (faster than replies go out; in half duplex these would collide with the replies, the model ignores that)" Sys.argv.(4);
     let ok, _, _ = Node_demo.run ~subset:true ~gap_us:(float_of_string Sys.argv.(4)) ~tail_ms:1.0 ~requests:Sys.argv.(2) ~replies_out:Sys.argv.(3) () in
