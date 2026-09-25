@@ -267,7 +267,7 @@ plus uncertainty for the phase error.
 - every corner and period passes (15.0, 16.67 and 18.8 ns);
 - worst setup slack +2.05 ns (slow, 15 ns), worst hold +0.10 ns (fast);
 - the tightest real transfer is ph0 → ph1: a quarter period for clock-to-Q, one XOR and setup,
-  about 0.5 ns at the slow corner against 3.75 ns;
+  about 0.6 ns at the slow corner (0.27 + 0.13 + 0.19) against 3.75 ns;
 - the reported worst path starts at `clear` with a 1 ns input delay into a quarter-period domain.
   That is an artefact of treating the reset as a ph0 input; in silicon each phase domain gets its
   own reset synchroniser.
@@ -289,7 +289,7 @@ the four phase trees (no CTS was run) and the pad.
   and Cyclesim both catch it (15,020 and 33,858 wrong quarters).
 - **Tolerable skew.**
   - Function survives any skew below a quarter period minus the ph0 → ph_p transfer (clock-to-Q +
-    XOR + setup, about 0.5 ns slow): about 3 ns at 66 MHz. iverilog passes at ±1.5 ns.
+    XOR + setup, about 0.6 ns slow): about 3 ns at 66 MHz. iverilog passes at ±1.5 ns.
   - FM quality survives ±400 ps with 1.6 dB lost in SINAD*.
   - Receive survives ±1 ns to ±10 ns jitter.
 - **Pulse width.** The shortest pulse the stage can make is a quarter clock: 3.75 ns at 66.5 MHz,
@@ -336,8 +336,8 @@ The input lanes use the same line two ways:
 The FM table shows that even 100 ps taps are far beyond the need (85 dB SINAD* before INL).
 
 **The cheap point.** Four phases plus a quarter-period dlygate line per lane: about 1,300 um2 per
-lane plus a 6-bit select, so about 6,000 um2 per pin with four lanes, at about 90 to 130 ps
-resolution. A full-period buf_1 line per lane costs about 7,800 um2 per lane, which is too much for
+lane (chain and mux4 tree) plus a 6-bit select register (about 300 um2), so about 6,500 um2 per pin
+with four lanes, at about 90 to 130 ps resolution. A full-period buf_1 line per lane costs about 7,800 um2 per lane, which is too much for
 more than one or two pins.
 
 **Shared clock line.** The alternative delays the clock instead of the data: one chain shared by
@@ -407,6 +407,10 @@ target here are behavioural.
   the chain alone (ring oscillators need `keep` attributes).
 - **Second clock on LibreLane.** Does Tiny Tapeout's second-clock recipe work on LibreLane with a
   related (not asynchronous) clock?
+- **RP2350 HSTX.** Could the RP2350's HSTX peripheral (double-data-rate serial output, from
+  memory of its datasheet: up to 150 MHz, so 300 Mbit/s per pin) give a quadrature pair at up to
+  75 MHz, and are its pins wired to the chip's inputs on the demo board? Unverified; if so, the
+  quadrature source would not cost clock speed.
 - **Real 10BASE-T jitter.** What edge jitter do real 10BASE-T links deliver? That sets how much of
   the ±10 ns is needed.
 - **Supply-induced jitter and mismatch.** Both need a SPICE or Monte Carlo view of the sg13g2
