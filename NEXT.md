@@ -28,16 +28,17 @@ permission to push master fast-forward).
 - **Notes:** Jane Street taste; hard-to-program history; systolic prior art (Groq, TPU, Eyeriss).
 - **Fix:** 10BASE-T receiver shift-register clear (74562bf); its regenerated Verilog is bad8787.
 
-## In flight: agent worktrees (each on its own branch; merge when a report lands)
+## In flight: agent worktrees (no agents are running now; each worktree is on its own branch)
 All agents were killed by the restart at about 15:05, or later by the usage limit. Status per
 worktree (commits ahead of master / uncommitted files):
 - `emulator-wt-isa-v2` (9/0): **G2**, ISA v2 interpreter, RTL and firmware ports. It was
-  resumed at 19:17 and may still be running; otherwise resume it.
+  resumed at 19:17, then stopped by Matthias at about 19:30 while committing and merging master.
+  Check `git status` and finish.
 - `emulator-wt-scope` (12/0): beyond-Nyquist scope, compressive inference, K-hypothesis tests.
   Resumed at 19:17, then stopped by Matthias at about 19:30 while revising its README after
   review. It has uncommitted edits, so check `git status` there.
 - `emulator-wt-array-uses` (9/0): problems for the systolic array (Viterbi, Reed–Solomon,
-  raycaster, …). Status unknown.
+  raycaster, …). Stopped by Matthias at about 19:30.
 - **Killed, not resumed:**
   - `emulator-wt-mc-thick` (22/0): Monte Carlo of the thick cells;
   - `emulator-wt-periphery` (4/0): gain-cell periphery and pump safety;
@@ -85,7 +86,8 @@ worktree (commits ahead of master / uncommitted files):
   `~/prog/janestreet/competitor-notes/`, never in the public repo.
 
 ## Next actions, in priority order
-1. **Collect finished agents and merge:** isa-v2, scope, array-uses. Check their numbers at
+1. **Finish and merge the three stopped agents** (all stopped by Matthias at about 19:30):
+   isa-v2, scope, array-uses. Check their numbers at
    source first.
 2. **Triage the codex brainstorm** with a cheap reader, commit it, and fix the Berger-code
    design (open item 1).
@@ -94,6 +96,5 @@ worktree (commits ahead of master / uncommitted files):
    periphery, fast-eth).
 
 ## Unverified beliefs
-- That array-uses is still running: no notification since 19:17.
 - That the fast-eth and radio-video uncommitted files are useful work in progress, not
   scratch.
