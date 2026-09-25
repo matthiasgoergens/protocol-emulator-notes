@@ -1,0 +1,46 @@
+
+8. Printing statistics.
+
+=== seg_xbar_cfg ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1385        - wires
+     2787        - wire bits
+       20        - public wires
+     1422        - public wire bits
+        7        - ports
+      588        - port bits
+     1568 1.82E+04 cells
+        1        -   $scopeinfo
+       28  355.622   sg13g2_a21o_1
+      172 1.56E+03   sg13g2_a21oi_1
+       49  711.245   sg13g2_a221oi_1
+      289 3.14E+03   sg13g2_a22oi_1
+      116 1.05E+03   sg13g2_and2_1
+        4   50.803   sg13g2_and3_1
+        2    29.03   sg13g2_and4_1
+       32 1.57E+03   sg13g2_dfrbpq_1
+      174  947.117   sg13g2_inv_1
+       45   816.48   sg13g2_mux2_1
+       85 3.24E+03   sg13g2_mux4_1
+      144 1.05E+03   sg13g2_nand2_1
+       19  172.368   sg13g2_nand2b_1
+       59  535.248   sg13g2_nand3_1
+        1   10.886   sg13g2_nand4_1
+      110  798.336   sg13g2_nor2_1
+        2   18.144   sg13g2_nor2b_1
+       31  281.232   sg13g2_nor3_1
+        2   21.773   sg13g2_nor4_1
+      178 1.61E+03   sg13g2_o21ai_1
+       17  154.224   sg13g2_or2_1
+        4   50.803   sg13g2_or3_1
+        3   43.546   sg13g2_xnor2_1
+        1   14.515   sg13g2_xor2_1
+
+   Area for cell type $scopeinfo is unknown!
+
+   Chip area for module '\seg_xbar_cfg': 18225.610200
+     of which used for sequential elements: 1567.641600 (8.60%)
+

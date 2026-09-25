@@ -1,0 +1,45 @@
+
+7. Printing statistics.
+
+=== upe ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1089        - wires
+     1356        - wire bits
+       64        - public wires
+      331        - public wire bits
+       23        - ports
+       89        - port bits
+     1143 1.61E+04 cells
+       17  215.914   sg13g2_a21o_1
+      127 1.15E+03   sg13g2_a21oi_1
+       34  493.517   sg13g2_a221oi_1
+       34  368.852   sg13g2_a22oi_1
+       30   272.16   sg13g2_and2_1
+       10  127.008   sg13g2_and3_1
+        1   14.515   sg13g2_and4_1
+      100  4898.88   sg13g2_dfrbpq_1
+       50   272.16   sg13g2_inv_1
+       79 1.43E+03   sg13g2_mux2_1
+       26  990.662   sg13g2_mux4_1
+      100   725.76   sg13g2_nand2_1
+       39  353.808   sg13g2_nand2b_1
+       44  399.168   sg13g2_nand3_1
+        8  101.606   sg13g2_nand3b_1
+        9   97.978   sg13g2_nand4_1
+      123  892.685   sg13g2_nor2_1
+       26  235.872   sg13g2_nor2b_1
+       39  353.808   sg13g2_nor3_1
+        9   97.978   sg13g2_nor4_1
+      135  1224.72   sg13g2_o21ai_1
+       22  199.584   sg13g2_or2_1
+        4   50.803   sg13g2_or3_1
+        3   43.546   sg13g2_or4_1
+       44  638.669   sg13g2_xnor2_1
+       30  435.456   sg13g2_xor2_1
+
+   Chip area for module '\upe': 16090.628400
+     of which used for sequential elements: 4898.880000 (30.45%)
+

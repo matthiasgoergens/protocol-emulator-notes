@@ -1,0 +1,84 @@
+host model self-checks pass
+== hardened device: directed, host clock exact
+  -- enumeration (with a 10 ms bus reset after the first descriptor read)
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       4b 12 01 10 01 00 00 00 08 11 77 (3.33 bits)
+    IN ep0                       c3 09 12 01 00 00 01 00 00 1d 8e (3.33 bits)
+    IN ep0                       4b 00 01 3f 8f (3.33 bits)
+    OUT ep0                      d2 (3.33 bits)
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       4b 00 00 (3.33 bits)
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       4b 12 01 10 01 00 00 00 08 11 77 (3.33 bits)
+    IN ep0                       c3 09 12 01 00 00 01 00 00 1d 8e (3.33 bits)
+    IN ep0                       4b 00 01 3f 8f (3.33 bits)
+    OUT ep0                      d2 (3.33 bits)
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       4b 09 02 22 00 01 01 00 a0 0a 98 (3.33 bits)
+    IN ep0                       c3 32 c1 6a (3.33 bits)
+    OUT ep0                      d2 (3.33 bits)
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       4b 09 02 22 00 01 01 00 a0 0a 98 (3.33 bits)
+    IN ep0                       c3 32 09 04 00 00 01 03 01 35 4d (3.33 bits)
+    IN ep0                       4b 01 00 09 21 11 01 00 01 57 9a (3.33 bits)
+    IN ep0                       c3 22 3f 00 07 05 81 03 08 17 24 (3.33 bits)
+    IN ep0                       4b 00 0a 7e 48 (3.33 bits)
+    OUT ep0                      d2 (3.33 bits)
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       4b 00 00 (3.33 bits)
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       4b 00 00 (3.33 bits)
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       4b 05 01 09 06 a1 01 05 07 d7 3c (3.33 bits)
+    IN ep0                       c3 19 e0 29 e7 15 00 25 01 73 ef (3.33 bits)
+    IN ep0                       4b 75 01 95 08 81 02 95 01 b3 87 (3.33 bits)
+    IN ep0                       c3 75 08 81 01 95 05 75 01 08 63 (3.33 bits)
+    IN ep0                       4b 05 08 19 01 29 05 91 02 3d ce (3.33 bits)
+    IN ep0                       c3 95 01 75 03 91 01 95 06 bb 6c (3.33 bits)
+    IN ep0                       4b 75 08 15 00 25 65 05 07 aa 6b (3.33 bits)
+    IN ep0                       c3 19 00 29 65 81 00 c0 7f 4c (3.33 bits)
+    OUT ep0                      d2 (3.33 bits)
+  -- keep-alives, then interrupt IN on endpoint 1
+    IN ep1                       5a (3.33 bits)
+    IN ep1                       c3 02 00 0b 00 00 00 00 00 3f 56 (3.33 bits)
+    IN ep1                       4b 00 00 08 0f 00 00 00 00 ea bd (3.33 bits)
+    IN ep1                       5a (3.33 bits)
+  -- packets the device must ignore
+    IN with a bad CRC5           no reply
+    IN to another address        no reply
+    SETUP data with a bad CRC16  no reply
+    SETUP data missing a stuff bit no reply
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       4b 12 01 10 01 00 00 00 08 11 77 (3.33 bits)
+    IN ep0                       c3 09 12 01 00 00 01 00 00 1d 8e (3.33 bits)
+    IN ep0                       4b 00 01 3f 8f (3.33 bits)
+    OUT ep0                      d2 (3.33 bits)
+  -- an unsupported request is stalled
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       1e (3.33 bits)
+    SETUP                        d2 (3.33 bits)
+    IN ep0                       4b 09 02 22 00 01 01 00 a0 0a 98 (3.33 bits)
+    IN ep0                       c3 32 09 04 00 00 01 03 01 35 4d (3.33 bits)
+    IN ep0                       4b 01 00 09 21 11 01 00 01 57 9a (3.33 bits)
+    IN ep0                       c3 22 3f 00 07 05 81 03 08 17 24 (3.33 bits)
+    IN ep0                       4b 00 0a 7e 48 (3.33 bits)
+    OUT ep0                      d2 (3.33 bits)
+  hardened ppm +0: 931487 clocks, 113 packets sent, 55 replies (turnaround 3.33..3.33 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
+  hardened ppm -15000: 928683 clocks, 113 packets sent, 55 replies (turnaround 3.40..3.40 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
+  hardened ppm +15000: 934302 clocks, 113 packets sent, 55 replies (turnaround 3.25..3.25 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
+== hardened device: constrained random sessions
+  hardened ppm +14147: 1075407 clocks, 302 packets sent, 153 replies (turnaround 3.25..3.25 bits), 0 NAKs while preparing, 22 silences as required, 26 keep-alives, 5 resets, lockstep mismatches 0, errors 0
+  hardened ppm +5255: 1079786 clocks, 321 packets sent, 158 replies (turnaround 3.28..3.31 bits), 0 NAKs while preparing, 29 silences as required, 29 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+  hardened ppm +2438: 1088410 clocks, 322 packets sent, 153 replies (turnaround 3.29..3.32 bits), 0 NAKs while preparing, 26 silences as required, 28 keep-alives, 8 resets, lockstep mismatches 0, errors 0
+  hardened ppm +588: 1233075 clocks, 360 packets sent, 184 replies (turnaround 3.32..3.32 bits), 0 NAKs while preparing, 20 silences as required, 31 keep-alives, 8 resets, lockstep mismatches 0, errors 0
+  hardened ppm -7765: 1161731 clocks, 328 packets sent, 158 replies (turnaround 3.35..3.38 bits), 0 NAKs while preparing, 25 silences as required, 20 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+  hardened ppm +7772: 1234908 clocks, 357 packets sent, 169 replies (turnaround 3.27..3.30 bits), 0 NAKs while preparing, 30 silences as required, 19 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+  hardened ppm +14185: 1087294 clocks, 311 packets sent, 147 replies (turnaround 3.23..3.25 bits), 0 NAKs while preparing, 31 silences as required, 24 keep-alives, 5 resets, lockstep mismatches 0, errors 0
+  hardened ppm +8555: 1306124 clocks, 389 packets sent, 198 replies (turnaround 3.27..3.30 bits), 0 NAKs while preparing, 19 silences as required, 23 keep-alives, 8 resets, lockstep mismatches 0, errors 0
+== controls: each must FAIL
+  J and K swapped (full-speed polarity)        caught (15 errors; first: [jk-swapped clk 19163] SETUP: got undecodable: bad sync, expected ACK)
+  reply 4 bit times late                       caught (21 errors; first: [late clk 6507] turnaround 7.33 bit times outside 2..6.5)
+  reply 1.5 bit times early                    caught (21 errors; first: [early clk 6287] turnaround 1.82 bit times outside 2..6.5)
+  CRC16 check disabled                         caught (1 errors; first: [no-crc clk 847156] SETUP data with a bad CRC16: expected silence, got d2 (3.33 bits))
+HARDENED LS DEVICE PASS
+exit 0

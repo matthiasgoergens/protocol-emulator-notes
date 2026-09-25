@@ -1,3 +1,9 @@
+(* LOCAL COPY of ../ethernet-10base-t/eth_rx.ml with one fix, kept here so this directory does not
+   modify a shared prototype (the proto-eth10 branch owns the receiver). The fix: the byte shift
+   register is cleared when a frame starts. Without it, the previous frame's last bits plus the new
+   preamble can match 0xD5 one bit early on back-to-back frames: in ethtv.exe frame 113 (after 112,
+   gap >= 9.6 us) was read with its header shifted by one bit (0x55 as 0xAA) and dropped,
+   deterministically and independently of jitter (0 to 3 ns). ethtv.exe rx-shared reproduces it. *)
 (* 10BASE-T receiver, digital side: takes a comparator output (1 = positive differential) and an
    activity flag (squelch), recovers bits from mid-bit transitions, finds the SFD, assembles bytes
    LSB first, runs CRC-32 and reports frame end with the residual check. [h] cycles per half bit. *)
