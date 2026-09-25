@@ -1,0 +1,12 @@
+programmes: T0 translator 79 words, T1 I2C master (bridges.ml) 99, T2 assembler 36
+I2C<->CAN, RTL + interpreter                 PASS: 28 response frames (28 expected), I2C bus bytes as expected true (101 bytes), device registers ok, RTL mismatches 0, 675201 cycles
+  random seed 2                              PASS: 26 response frames (26 expected), I2C bus bytes as expected true (89 bytes), device registers ok, RTL mismatches 0, 675380 cycles
+  random seed 3                              PASS: 25 response frames (25 expected), I2C bus bytes as expected true (88 bytes), device registers ok, RTL mismatches 0, 675946 cycles
+  random seed 4                              PASS: 27 response frames (27 expected), I2C bus bytes as expected true (92 bytes), device registers ok, RTL mismatches 0, 675543 cycles
+  random seed 5                              PASS: 26 response frames (26 expected), I2C bus bytes as expected true (91 bytes), device registers ok, RTL mismatches 0, 675441 cycles
+  random seed 6                              PASS: 28 response frames (28 expected), I2C bus bytes as expected true (95 bytes), device registers ok, RTL mismatches 0, 676642 cycles
+isolation: bridge pins identical without the neighbour true, with a random neighbour true
+control: mailbox drops push 30 (interp)      FAIL: 28 response frames (28 expected), I2C bus bytes as expected false (101 bytes), device registers WRONG, RTL mismatches 0, 675201 cycles
+control: two pushes swapped at 31 (interp)   FAIL: 28 response frames (28 expected), I2C bus bytes as expected false (101 bytes), device registers WRONG, RTL mismatches 0, 675201 cycles
+I2C-CAN PASS
+elapsed 5 s
