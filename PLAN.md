@@ -17,7 +17,8 @@ evidence for which blocks are worth having (a primitive that many prototypes nee
 block or a processing-element mode; one needed by a single prototype goes to firmware or goes). Where a generic block falls short, extend it
 minimally and name the other uses that benefit. Why: it is what Jane Street asks for ("The goal
 isn't to put a UART block, an SPI block, and an I2C block on one die"), and it makes the area
-budget add up. The unified architecture is being written up as `notes/architecture-v0.md`.
+budget add up. The unified architecture is being written up as `notes/architecture-v0.md`. Everything we have
+said we want to do is collected in `notes/backlog.md`.
 
 ## The shape of the chip
 
