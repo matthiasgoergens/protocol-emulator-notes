@@ -36,6 +36,13 @@ let () =
     if !total <> 0 then ok := false
   end;
   if want "jtag" then (if not (Jtag_suite.main ()) then ok := false);
-  if want "swd" then (if not (Swd_suite.main ()) then ok := false);
+  if List.mem "swddbg" args then begin
+    let mem, len = Swd_host.programmes Swd_host.fastest in
+    for i = 0 to len - 1 do Printf.printf "%3d %s\n" i (Asm.disassemble mem.(0).(i)) done;
+    let r = Swd_test.run ~debug:2600 ~mk:Asm.interp ~mem ~cfg:(Swd_suite.cfg ~seed:1 ()) (List.filteri (fun i _ -> i < 3) Swd_test.bring_up) in
+    Printf.printf "cycles %d complete %b contention %d outcomes %d\n" r.cycles r.complete r.contention (List.length r.outcomes);
+    List.iter print_endline (Swd_target.log r.target)
+  end;
+  if want "swd" && not (List.mem "swddbg" args) then (if not (Swd_suite.main ()) then ok := false);
   print_endline (if !ok then "ALL PASS" else "FAILURES");
   exit (if !ok then 0 else 1)

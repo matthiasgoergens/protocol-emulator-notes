@@ -101,7 +101,7 @@ let main () =
       if !s = None then s := Some (Wire.clock_stats ri.tck)
     done;
     !fails, Option.get !s in
-  pr "TCK at a 60 MHz core clock (min high/low and period in core clocks, 8 random sessions each):";
+  pr "TCK at a 60 MHz core clock (characterisation, not gated: min high/low and period in core clocks; 8 random sessions each):";
   List.iter (fun (t, sync, tco) ->
     let fails, s = rate t ~sync ~tco in
     (* a 4-TCK group is 4 * (4 + lo + hi) + 1 slots of 4 clocks, so that many clocks per TCK *)
@@ -109,7 +109,8 @@ let main () =
     pr "  lo %d hi %d sample+%d, sync %d, tco %d: high %d low %d period %d-%d -> max %.2f MHz, mean %.2f MHz: %s"
       t.lo t.hi t.sample_delay sync tco s.min_high s.min_low s.min_period s.max_period
       (60.0 /. float_of_int s.min_period) avg (if fails = 0 then "pass" else Printf.sprintf "FAIL %d/8" fails))
-    [ Jtag_host.fastest, 2, 0; Jtag_host.fastest, 2, 3; Jtag_host.fastest, 3, 4; Jtag_host.fastest, 2, 6;
-      { Jtag_host.fastest with lo = 1 }, 2, 6; { Jtag_host.fastest with lo = 1 }, 2, 9;
-      { Jtag_host.fastest with lo = 2 }, 2, 10 ];
+    (let f = Jtag_host.fastest in
+     [ f, 0, 0; f, 2, 0; f, 3, 3; f, 2, 8; f, 2, 16; f, 2, 18; f, 2, 19; f, 2, 20; f, 2, 22;
+       { f with lo = 1 }, 2, 22; { f with lo = 1 }, 2, 23; { f with lo = 1 }, 2, 24; { f with lo = 1 }, 2, 26;
+       { f with lo = 3 }, 2, 30; { f with lo = 3 }, 2, 32; { f with lo = 3 }, 2, 34 ]);
   !ok

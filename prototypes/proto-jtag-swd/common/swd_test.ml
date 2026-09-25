@@ -24,7 +24,7 @@ type run = {
   target : Swd_target.t; complete : bool; wire_bits : int;
 }
 
-let run ?(sync = 2) ?(tco = 0) ?(stall = fun () -> false) ?(max_retries = 64) ~mk ~mem ~cfg script =
+let run ?(debug = 0) ?(sync = 2) ?(tco = 0) ?(stall = fun () -> false) ?(max_retries = 64) ~mk ~mem ~cfg script =
   let tg = Swd_target.create cfg in
   let core : Asm.core = mk mem in
   let din = Wire.delay sync 0 and dtco = Wire.delay tco None in
@@ -90,6 +90,12 @@ let run ?(sync = 2) ?(tco = 0) ?(stall = fun () -> false) ?(max_retries = 64) ~m
     let dev_now = Wire.through dtco (Swd_target.drive tg) in
     let host_oe = Wire.bit o.pin_oe Wire.p_swdio = 1 in
     let swdio = Wire.resolve ~oe:host_oe ~out:(Wire.bit o.pin_out Wire.p_swdio) ~dev:dev_now ~pull:1 ~contention in
+    let prev_clk = match !clkt with c :: _ -> c | [] -> 0 in
+    if !cyc < debug && (prev_clk = 0 && swclk = 1 || o.host_in_ready || o.host_out <> None) then
+      Printf.printf "  pc%-3d c%-6d %s swdio=%d host_oe=%b dev=%s in_ready=%b out=%s\n" !Asm.dbg_pc !cyc
+        (if prev_clk = 0 && swclk = 1 then "RISE" else "    ") swdio host_oe
+        (match dev_now with Some b -> string_of_int b | None -> "-") o.host_in_ready
+        (match o.host_out with Some b -> Printf.sprintf "%02x" b | None -> "-");
     Swd_target.step tg ~swclk ~swdio;
     clkt := swclk :: !clkt;
     pin_in := Wire.through din (swclk lor (swdio lsl 1));

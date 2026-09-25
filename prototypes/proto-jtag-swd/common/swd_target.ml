@@ -35,6 +35,7 @@ type t = {
   mutable phase : phase;
   (* line-reset / switch-sequence bookkeeping *)
   mutable high_run : int;             (* consecutive high cycles seen while not driving *)
+  mutable reset_hold : bool;          (* FIX 1: still inside a line reset's run of ones *)
   mutable magic_idx : int;
   (* request-packet bookkeeping *)
   mutable req_idx : int;
@@ -81,6 +82,7 @@ let create (cfg : config) =
     need_dpidr = false;
     phase = (if cfg.start_in_swd then Idle else Jtag_high1);
     high_run = 0;
+    reset_hold = false;
     magic_idx = 0;
     req_idx = 0;
     req_acc = 0;
@@ -139,6 +141,7 @@ let enter_line_reset t =
   t.mode <- "swd-reset";
   t.phase <- Idle;
   t.high_run <- 0;
+  t.reset_hold <- true;
   log_event t "line-reset"
 
 let start_req t =
@@ -206,7 +209,13 @@ let decode_and_act t =
       t.write_target <- W_none;
       t.dpidr_gate_pending <- false;
       let ack =
-        if apndp = 0 then begin
+        (* FIX 3: in SW-DP any sticky error flag, WDATAERR included, makes the DP answer FAULT to
+           every access except DPIDR and CTRL/STAT reads and ABORT writes (the model first
+           checked STICKYERR for AP accesses only). Such a FAULT does not itself set STICKYERR. *)
+        let sticky = t.ctrl_stat land sticky_mask <> 0 in
+        let exempt = apndp = 0 && ((rnw = 1 && (a32 = 0 || a32 = 1)) || (rnw = 0 && a32 = 0)) in
+        if sticky && not exempt then 5
+        else if apndp = 0 then begin
           (* DP access *)
           match rnw, a32 with
           | 1, 0 ->
@@ -263,7 +272,7 @@ let decode_and_act t =
          error); a DP-level FAULT from an unimplemented DP register slot is
          a model limitation, not a real AP error, so it does not. *)
       if ack = 4 && t.is_ap then t.ctrl_stat <- t.ctrl_stat lor (1 lsl 5);
-      Some ack
+      Some (if ack = 5 then 4 else ack)
     end
   end
 
@@ -312,6 +321,10 @@ let do_rising_edge t bit =
         t.phase <- Jtag_magic
       end
     end else t.high_run <- 0
+  | Jtag_magic when t.magic_idx = 0 && bit = 1 ->
+    (* FIX 2: ADIv5 asks for AT LEAST 50 ones before the select sequence; further ones
+       extend the run instead of mismatching the sequence's first bit (which is 0). *)
+    ()
   | Jtag_magic ->
     let expect = (0xE79E lsr t.magic_idx) land 1 in
     if bit = expect then begin
@@ -336,6 +349,10 @@ let do_rising_edge t bit =
       t.high_run <- 0;
       t.phase <- Jtag_high1
     end
+  | Idle when t.reset_hold ->
+    (* FIX 1: ones beyond the 50 of a line reset are still the reset, not a start bit; the
+       reset ends at the first 0 (an idle cycle). *)
+    if bit = 0 then (t.reset_hold <- false; t.high_run <- 0)
   | Idle ->
     t.high_run <- (if bit = 1 then t.high_run + 1 else 0);
     if t.high_run >= 50 then enter_line_reset t

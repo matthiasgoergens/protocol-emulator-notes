@@ -99,7 +99,9 @@ type t = {
   mutable state : state16;
   mutable ir_shift : int;         (* IR shift register content *)
   mutable ir : int;               (* latched (updated) instruction *)
-  mutable dr_shift : int;         (* currently selected DR shift register *)
+  mutable dr_shift : int array;   (* currently selected DR shift register, bit i at index i.
+                                     FIX 4: was an int, which silently overflowed for boundary
+                                     registers longer than 62 bits *)
   mutable dr_len : int;           (* bit width of the currently selected DR *)
   mutable dr_kind : dr_kind;
   mutable pins_in : int array;    (* boundary-scan capture inputs *)
@@ -133,7 +135,7 @@ let create (cfg : config) =
     state = Test_Logic_Reset;
     ir_shift = ir_capture_value;
     ir = init_ir;
-    dr_shift = 0;
+    dr_shift = [| 0 |];
     dr_len;
     dr_kind;
     pins_in = Array.make (max cfg.bsr_len 1) 0;
@@ -146,15 +148,10 @@ let create (cfg : config) =
 
 let capture_value t =
   match t.dr_kind with
-  | Dr_bypass -> 0
-  | Dr_idcode -> (match t.cfg.idcode with Some v -> v | None -> 0)
+  | Dr_bypass -> [| 0 |]
+  | Dr_idcode -> let v = (match t.cfg.idcode with Some v -> v | None -> 0) in Array.init 32 (fun i -> (v lsr i) land 1)
   | Dr_bsr ->
-    let v = ref 0 in
-    for i = 0 to t.cfg.bsr_len - 1 do
-      let bit = if i < Array.length t.pins_in then t.pins_in.(i) land 1 else 0 in
-      v := !v lor (bit lsl i)
-    done;
-    !v
+    Array.init t.cfg.bsr_len (fun i -> if i < Array.length t.pins_in then t.pins_in.(i) land 1 else 0)
 
 let do_rising_edge t ~tms ~tdi =
   let old_state = t.state in
@@ -168,8 +165,9 @@ let do_rising_edge t ~tms ~tdi =
      t.dr_shift <- capture_value t;
      t.last_shift <- `Dr
    | Shift_DR ->
-     let len = t.dr_len in
-     t.dr_shift <- (t.dr_shift lsr 1) lor ((tdi land 1) lsl (len - 1));
+     let len = Array.length t.dr_shift in
+     Array.blit t.dr_shift 1 t.dr_shift 0 (len - 1);
+     t.dr_shift.(len - 1) <- tdi land 1;
      t.last_shift <- `Dr
    | Capture_IR ->
      t.ir_shift <- ir_capture_value;
@@ -193,7 +191,7 @@ let do_falling_edge t =
      (match t.dr_kind with
       | Dr_bsr ->
         for i = 0 to t.cfg.bsr_len - 1 do
-          t.pins_out.(i) <- (t.dr_shift lsr i) land 1
+          t.pins_out.(i) <- t.dr_shift.(i)
         done
       | Dr_bypass | Dr_idcode -> ())
    | Update_IR ->
@@ -206,7 +204,7 @@ let do_falling_edge t =
   t.tdo_active <- (t.last_shift <> `None);
   t.tdo_bit <-
     (match t.last_shift with
-     | `Dr -> t.dr_shift land 1
+     | `Dr -> t.dr_shift.(0)
      | `Ir -> t.ir_shift land 1
      | `None -> 0)
 

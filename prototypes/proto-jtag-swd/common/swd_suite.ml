@@ -186,13 +186,16 @@ let main () =
   control "sampling after the rising edge" ~knobs:{ Swd_host.fastest with late_sample = true } ();
   control "one wrong bit in the switch sequence" ~knobs:{ Swd_host.fastest with bad_switch = true } ();
   (* clock rate *)
-  pr "SWCLK at a 60 MHz core clock (directed scenario, interpreter and RTL):";
+  pr "SWCLK at a 60 MHz core clock (characterisation, not gated; directed scenario, interpreter and RTL):";
   List.iter (fun (lo, hi, sync, tco) ->
     let knobs = { Swd_host.fastest with lo; hi } in
-    let fi, fr, _, d, ri = both ~knobs ~sync ~tco ~seed:1 directed in
+    match both ~knobs ~sync ~tco ~seed:1 directed with
+    | exception Failure m -> pr "  lo %d hi %d: %s" lo hi m
+    | fi, fr, _, d, ri ->
     let s = Wire.clock_stats ri.swclk in
     pr "  lo %d hi %d sync %d tco %d: high >= %d, low >= %d, period %d-%d clocks -> %.2f MHz max: %s"
       lo hi sync tco s.min_high s.min_low s.min_period s.max_period (60.0 /. float_of_int s.min_period)
       (if fi = [] && fr = [] && d = 0 then "pass" else "FAIL " ^ show (fi @ fr)))
-    [ 1, 1, 2, 0; 1, 1, 3, 3; 1, 1, 2, 6; 1, 1, 2, 8; 2, 1, 2, 8; 2, 1, 2, 12; 3, 2, 2, 16 ];
+    [ 1, 1, 0, 0; 1, 1, 2, 0; 1, 1, 3, 3; 1, 1, 2, 8; 1, 1, 2, 9; 1, 1, 2, 10; 1, 1, 2, 12;
+      1, 2, 2, 12; 1, 2, 2, 13; 1, 2, 2, 14; 1, 3, 2, 18 ];
   !ok

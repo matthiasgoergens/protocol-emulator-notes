@@ -83,7 +83,7 @@ let engine k =
       @ (if i < 2 then [ clk0 ] @ pad (k.lo - 1) @ [ shi; W Isa.nop ] else []) in
     (* each entry falls through into the next: entry 0 clocks ACK 1, entry 1 clocks ACK 2 *)
     entry 0 @ entry 1 @ entry 2 @ [ W Isa.out ] @ trn () @ idle_cycle () @ tail @ [ Jmp "top" ] in
-  let req_rest = loop 5 `Out in
+  let req_rest () = loop 5 `Out in   (* a function: each use needs its own label *)
   let prologue = [ clk0; drive 1 ] in
   let top =
     [ L "top"; W Isa.in_ ]
@@ -92,7 +92,7 @@ let engine k =
     @ loop 2 `Out                                  (* APnDP, RnW *)
     @ [ Waitp (dio, 1, "write") ] in               (* RnW still on the line: 0 = write *)
   let read_path =
-    req_rest
+    req_rest ()
     @ (if k.no_trn then [ release ] else trn ())
     @ ack_checked "rnk"
     @ [ W Isa.out ]
@@ -100,7 +100,7 @@ let engine k =
     @ in_cycle ~high:[ W Isa.out ] ()              (* parity *)
     @ trn () @ idle_cycle () @ [ Jmp "top" ] in
   let write_path =
-    [ L "write" ] @ req_rest
+    [ L "write" ] @ req_rest ()
     @ (if k.no_trn then [ release ] else trn ())
     @ ack_checked "wnk"
     @ [ W Isa.out ]
