@@ -1,0 +1,10 @@
+(library
+ (name usbls)
+ (wrapped false)
+ (modules ls_host descriptors ls_rx ls_tx ls_sie ls_dev ref_device bench scenario dut_hard)
+ (libraries hardcaml))
+
+(executable
+ (name main_hard)
+ (modules main_hard)
+ (libraries hardcaml usbls))
