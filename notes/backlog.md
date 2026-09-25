@@ -237,6 +237,10 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
   2026-09-25, "Let's do more OCaml." Python only where an existing Python tool is the point
   (independent references such as scapy or pynmea2, plotting). Port core Python models to OCaml
   when they are touched again.
+  Each Python tool we lean on is also an impetus to write an OCaml equivalent: packet
+  building and parsing like scapy, NMEA parsing, plotting to PNG and SVG, sigrok-style decoders.
+  Keep the Python original as an independent cross-check. Two independent implementations
+  agreeing is the point.
 
 - Codex reviews run on `codex-luna` (the cheap model) unless a decision warrants more. DeepSeek
   runs off-peak, and MiMo Flash stands in for it.
