@@ -1,0 +1,5 @@
+kick 0.5 V, rise 200 ps: delay vs static level (mV: ps) -150:2642 -120:1802 -90:1318 -60:1018 -30:820 0:682 30:584 60:512 90:456 120:412 150:376 180:346 210:320
+  slope at the base -3.80 ps/mV; aperture: integral 1.030 (1 = linear), centroid 386 ps after the kick starts, rms width 146 ps, -3 dB bandwidth 0.88 GHz
+kick 0.5 V, rise 500 ps: delay vs static level (mV: ps) -150:2910 -120:2064 -90:1576 -60:1270 -30:1068 0:926 30:822 60:744 90:682 120:632 150:590 180:554 210:522
+  slope at the base -4.00 ps/mV; aperture: integral 1.031 (1 = linear), centroid 610 ps after the kick starts, rms width 165 ps, -3 dB bandwidth 0.79 GHz
+SPICE comparison (results/pad2-aper.txt, 200 ps kick, 30 mV x 100 ps bumps): the delay moved by 5-25 ps for bumps from +100 to +700 ps, nothing outside; slope 4.0 ps/mV (pad2-kick.txt, -10..+10 mV)
