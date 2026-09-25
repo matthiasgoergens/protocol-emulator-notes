@@ -1,0 +1,1315 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Running command `read_verilog -sv rtl/seq_mb_p6_d1.v; hierarchy -check -top deadline_sequencer_mb_p6_d1; synth -top deadline_sequencer_mb_p6_d1 -flatten; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/seq_mb_p6_d1.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Verilog-2005 frontend: rtl/seq_mb_p6_d1.v
+Parsing SystemVerilog input from `rtl/seq_mb_p6_d1.v' to AST representation.
+Generating RTLIL representation for module `\deadline_sequencer_mb_p6_d1'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_mb_p6_d1
+
+2.2. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_mb_p6_d1
+Removed 0 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_mb_p6_d1
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_mb_p6_d1
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1433$293 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1418$291 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1412$290 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1370$270 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1364$269 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1355$266 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1346$263 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1304$258 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1290$257 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1284$256 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1251$241 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1237$238 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1205$221 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1192$218 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1177$209 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1162$200 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1127$184 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1121$183 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1113$181 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1105$179 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1097$177 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1082$174 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1066$173 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:1041$170 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:999$166 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:976$164 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:968$162 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:960$160 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:928$156 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:922$155 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:906$148 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:898$146 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:890$144 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:870$137 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:844$126 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:838$125 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:819$115 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:811$113 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:803$111 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:788$104 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:695$61 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:631$34 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:621$31 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:603$25 in module deadline_sequencer_mb_p6_d1.
+Marked 1 switch rules as full_case in process $proc$rtl/seq_mb_p6_d1.v:590$19 in module deadline_sequencer_mb_p6_d1.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 45 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~45 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1433$293'.
+     1/1: $0\_140[1:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1418$291'.
+     1/1: $0\_632[5:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1412$290'.
+     1/1: $0\_169[5:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1370$270'.
+     1/1: $0\_569[5:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1364$269'.
+     1/1: $0\_166[5:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1355$266'.
+     1/1: $0\_163[5:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1346$263'.
+     1/1: $0\_160[5:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1304$258'.
+     1/1: $0\_589[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1290$257'.
+     1/1: $0\_153[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1284$256'.
+     1/1: $0\_143[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1251$241'.
+     1/1: $0\_481[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1237$238'.
+     1/1: $0\_68[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1205$221'.
+     1/1: $0\_457[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1192$218'.
+     1/1: $0\_73[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1177$209'.
+     1/1: $0\_78[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1162$200'.
+     1/1: $0\_83[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1127$184'.
+     1/1: $0\_499[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1121$183'.
+     1/1: $0\_420[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1113$181'.
+     1/1: $0\_413[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1105$179'.
+     1/1: $0\_406[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1097$177'.
+     1/1: $0\_399[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1082$174'.
+     1/1: $0\_97[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1066$173'.
+     1/1: $0\_501[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1041$170'.
+     1/1: $0\_516[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:999$166'.
+     1/1: $0\_536[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:976$164'.
+     1/1: $0\_146[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:968$162'.
+     1/1: $0\_149[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:960$160'.
+     1/1: $0\_152[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:928$156'.
+     1/1: $0\_383[11:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:922$155'.
+     1/1: $0\_382[11:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:906$148'.
+     1/1: $0\_376[11:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:898$146'.
+     1/1: $0\_372[11:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:890$144'.
+     1/1: $0\_368[11:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:870$137'.
+     1/1: $0\_117[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:844$126'.
+     1/1: $0\_354[11:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:838$125'.
+     1/1: $0\_353[11:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:819$115'.
+     1/1: $0\_344[11:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:811$113'.
+     1/1: $0\_338[11:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:803$111'.
+     1/1: $0\_332[11:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:788$104'.
+     1/1: $0\_250[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:695$61'.
+     1/1: $0\_193[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:631$34'.
+     1/1: $0\_185[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:621$31'.
+     1/1: $0\_181[0:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:603$25'.
+     1/1: $0\_137[7:0]
+Creating decoders for process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:590$19'.
+     1/1: $0\_133[3:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_632' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1418$291'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_569' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1370$270'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_589' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1304$258'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_153' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1290$257'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_481' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1251$241'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_457' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1205$221'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_499' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1127$184'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_97' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1082$174'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_501' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1066$173'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_516' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1041$170'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_536' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:999$166'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_383' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:928$156'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_117' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:870$137'.
+No latch inferred for signal `\deadline_sequencer_mb_p6_d1.\_354' from process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:844$126'.
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_140' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1433$293'.
+  created $dff cell `$procdff$478' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_169' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1412$290'.
+  created $dff cell `$procdff$479' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_166' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1364$269'.
+  created $dff cell `$procdff$480' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_163' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1355$266'.
+  created $dff cell `$procdff$481' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_160' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1346$263'.
+  created $dff cell `$procdff$482' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_143' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1284$256'.
+  created $dff cell `$procdff$483' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_68' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1237$238'.
+  created $dff cell `$procdff$484' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_73' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1192$218'.
+  created $dff cell `$procdff$485' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_78' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1177$209'.
+  created $dff cell `$procdff$486' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_83' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1162$200'.
+  created $dff cell `$procdff$487' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_420' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1121$183'.
+  created $dff cell `$procdff$488' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_413' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1113$181'.
+  created $dff cell `$procdff$489' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_406' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1105$179'.
+  created $dff cell `$procdff$490' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_399' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1097$177'.
+  created $dff cell `$procdff$491' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_146' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:976$164'.
+  created $dff cell `$procdff$492' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_149' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:968$162'.
+  created $dff cell `$procdff$493' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_152' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:960$160'.
+  created $dff cell `$procdff$494' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_382' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:922$155'.
+  created $dff cell `$procdff$495' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_376' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:906$148'.
+  created $dff cell `$procdff$496' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_372' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:898$146'.
+  created $dff cell `$procdff$497' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_368' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:890$144'.
+  created $dff cell `$procdff$498' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_353' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:838$125'.
+  created $dff cell `$procdff$499' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_344' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:819$115'.
+  created $dff cell `$procdff$500' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_338' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:811$113'.
+  created $dff cell `$procdff$501' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_332' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:803$111'.
+  created $dff cell `$procdff$502' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_250' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:788$104'.
+  created $dff cell `$procdff$503' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_193' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:695$61'.
+  created $dff cell `$procdff$504' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_185' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:631$34'.
+  created $dff cell `$procdff$505' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_181' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:621$31'.
+  created $dff cell `$procdff$506' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_137' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:603$25'.
+  created $dff cell `$procdff$507' with positive edge clock.
+Creating register for signal `\deadline_sequencer_mb_p6_d1.\_133' using process `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:590$19'.
+  created $dff cell `$procdff$508' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1433$293'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1433$293'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1418$291'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1418$291'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1412$290'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1412$290'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1370$270'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1370$270'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1364$269'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1364$269'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1355$266'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1355$266'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1346$263'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1346$263'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1304$258'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1304$258'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1290$257'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1290$257'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1284$256'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1284$256'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1251$241'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1251$241'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1237$238'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1237$238'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1205$221'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1205$221'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1192$218'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1192$218'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1177$209'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1177$209'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1162$200'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1162$200'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1127$184'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1127$184'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1121$183'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1121$183'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1113$181'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1113$181'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1105$179'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1105$179'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1097$177'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1097$177'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1082$174'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1082$174'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1066$173'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1066$173'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1041$170'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:1041$170'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:999$166'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:999$166'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:976$164'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:976$164'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:968$162'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:968$162'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:960$160'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:960$160'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:928$156'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:928$156'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:922$155'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:922$155'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:906$148'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:906$148'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:898$146'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:898$146'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:890$144'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:890$144'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:870$137'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:870$137'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:844$126'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:844$126'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:838$125'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:838$125'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:819$115'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:819$115'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:811$113'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:811$113'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:803$111'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:803$111'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:788$104'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:788$104'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:695$61'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:695$61'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:631$34'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:631$34'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:621$31'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:621$31'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:603$25'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:603$25'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:590$19'.
+Removing empty process `deadline_sequencer_mb_p6_d1.$proc$rtl/seq_mb_p6_d1.v:590$19'.
+Cleaned up 45 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+<suppressed ~40 debug messages>
+
+3.3. Executing FLATTEN pass (flatten design).
+
+3.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+Removed 6 unused cells and 345 unused wires.
+<suppressed ~13 debug messages>
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module deadline_sequencer_mb_p6_d1...
+Found and reported 0 problems.
+
+3.7. Executing OPT pass (performing simple optimizations).
+
+3.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 373 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 293 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+<suppressed ~240 debug messages>
+Removed a total of 80 cells.
+
+3.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_mb_p6_d1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~403 debug messages>
+
+3.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_mb_p6_d1.
+Performed a total of 0 changes.
+
+3.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 293 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 287 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+<suppressed ~18 debug messages>
+Removed a total of 6 cells.
+
+3.7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+Removed 0 unused cells and 37 unused wires.
+<suppressed ~1 debug messages>
+
+3.7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.7.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.7.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_mb_p6_d1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~403 debug messages>
+
+3.7.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_mb_p6_d1.
+Performed a total of 0 changes.
+
+3.7.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 287 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.7.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+
+3.7.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.7.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.8. Executing FSM pass (extract and optimize FSM).
+
+3.8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+
+3.8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.9. Executing OPT pass (performing simple optimizations).
+
+3.9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 287 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_mb_p6_d1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~403 debug messages>
+
+3.9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_mb_p6_d1.
+Performed a total of 0 changes.
+
+3.9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 287 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.9.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$508 ($dff) from module deadline_sequencer_mb_p6_d1 (D = { \_119 \_101 \_103 \_105 }, Q = \_133, rval = 4'0000).
+Adding SRST signal on $procdff$507 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_157, Q = \_137, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$518 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_153, Q = \_137).
+Adding SRST signal on $procdff$506 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_11, Q = \_181, rval = 1'0).
+Adding SRST signal on $procdff$505 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_13, Q = \_185, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$525 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_153, Q = \_185).
+Adding SRST signal on $procdff$504 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_15, Q = \_193, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$527 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_15 [0], Q = \_193 [0]).
+Adding EN signal on $auto$ff.cc:337:slice$527 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_15 [1], Q = \_193 [1]).
+Adding EN signal on $auto$ff.cc:337:slice$527 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_15 [2], Q = \_193 [2]).
+Adding EN signal on $auto$ff.cc:337:slice$527 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_15 [3], Q = \_193 [3]).
+Adding EN signal on $auto$ff.cc:337:slice$527 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_15 [4], Q = \_193 [4]).
+Adding EN signal on $auto$ff.cc:337:slice$527 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_15 [5], Q = \_193 [5]).
+Adding EN signal on $auto$ff.cc:337:slice$527 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_15 [6], Q = \_193 [6]).
+Adding EN signal on $auto$ff.cc:337:slice$527 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_15 [7], Q = \_193 [7]).
+Adding SRST signal on $procdff$503 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_17, Q = \_250, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$600 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_17 [0], Q = \_250 [0]).
+Adding EN signal on $auto$ff.cc:337:slice$600 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_17 [1], Q = \_250 [1]).
+Adding EN signal on $auto$ff.cc:337:slice$600 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_17 [2], Q = \_250 [2]).
+Adding EN signal on $auto$ff.cc:337:slice$600 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_17 [3], Q = \_250 [3]).
+Adding EN signal on $auto$ff.cc:337:slice$600 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_17 [4], Q = \_250 [4]).
+Adding EN signal on $auto$ff.cc:337:slice$600 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_17 [5], Q = \_250 [5]).
+Adding EN signal on $auto$ff.cc:337:slice$600 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_17 [6], Q = \_250 [6]).
+Adding EN signal on $auto$ff.cc:337:slice$600 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_17 [7], Q = \_250 [7]).
+Adding SRST signal on $procdff$502 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_19, Q = \_332, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$657 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_22, Q = \_332).
+Adding SRST signal on $procdff$501 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_20, Q = \_338, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$659 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_22, Q = \_338).
+Adding SRST signal on $procdff$500 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_21, Q = \_344, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$661 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_22, Q = \_344).
+Adding SRST signal on $procdff$499 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_23, Q = \_353, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$663 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_22, Q = \_353).
+Adding SRST signal on $procdff$498 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_25, Q = \_368, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$665 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_28, Q = \_368).
+Adding SRST signal on $procdff$497 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_26, Q = \_372, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$667 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_28, Q = \_372).
+Adding SRST signal on $procdff$496 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_27, Q = \_376, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$669 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_28, Q = \_376).
+Adding SRST signal on $procdff$495 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_29, Q = \_382, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$671 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_28, Q = \_382).
+Adding SRST signal on $procdff$494 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_31, Q = \_152, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$673 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_52, Q = \_152).
+Adding SRST signal on $procdff$493 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_32, Q = \_149, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$675 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_52, Q = \_149).
+Adding SRST signal on $procdff$492 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_33, Q = \_146, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$677 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_52, Q = \_146).
+Adding SRST signal on $procdff$491 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_400, Q = \_399, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$679 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_153, Q = \_399).
+Adding SRST signal on $procdff$490 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_407, Q = \_406, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$681 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_153, Q = \_406).
+Adding SRST signal on $procdff$489 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_414, Q = \_413, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$683 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_153, Q = \_413).
+Adding SRST signal on $procdff$488 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_421, Q = \_420, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$685 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_153, Q = \_420).
+Adding SRST signal on $procdff$487 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_428, Q = \_83, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$687 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_428, Q = \_83).
+Adding SRST signal on $procdff$486 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_435, Q = \_78, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$691 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_435, Q = \_78).
+Adding SRST signal on $procdff$485 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_442, Q = \_73, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$695 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_442, Q = \_73).
+Adding SRST signal on $procdff$484 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_492, Q = \_68, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$699 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_492, Q = \_68).
+Adding SRST signal on $procdff$483 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_53, Q = \_143, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$703 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_52, Q = \_143).
+Adding SRST signal on $procdff$482 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_54, Q = \_160, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$705 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_58, Q = \_160).
+Adding SRST signal on $procdff$481 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_55, Q = \_163, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$707 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_58, Q = \_163).
+Adding SRST signal on $procdff$480 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_554, Q = \_166, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$709 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_58, Q = \_166).
+Adding SRST signal on $procdff$479 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_59, Q = \_169, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$711 ($sdff) from module deadline_sequencer_mb_p6_d1 (D = \_58, Q = \_169).
+Adding SRST signal on $procdff$478 ($dff) from module deadline_sequencer_mb_p6_d1 (D = \_62, Q = \_140, rval = 2'00).
+
+3.9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+Removed 60 unused cells and 83 unused wires.
+<suppressed ~113 debug messages>
+
+3.9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+<suppressed ~44 debug messages>
+
+3.9.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_mb_p6_d1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~139 debug messages>
+
+3.9.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_mb_p6_d1.
+Performed a total of 0 changes.
+
+3.9.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 307 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 277 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+<suppressed ~90 debug messages>
+Removed a total of 30 cells.
+
+3.9.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+Removed 0 unused cells and 30 unused wires.
+<suppressed ~1 debug messages>
+
+3.9.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.9.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_mb_p6_d1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~139 debug messages>
+
+3.9.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_mb_p6_d1.
+Performed a total of 0 changes.
+
+3.9.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 277 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.9.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+
+3.9.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.9.23. Finished fast OPT passes. (There is nothing left to do.)
+
+3.10. Executing WREDUCE pass (reducing word size of cells).
+Removed top 2 bits (of 3) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:654$41 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:658$43 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:662$45 ($eq).
+Removed top 3 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:692$59 ($eq).
+Removed top 11 bits (of 12) from port B of cell deadline_sequencer_mb_p6_d1.$sub$rtl/seq_mb_p6_d1.v:826$116 ($sub).
+Removed top 2 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:833$122 ($eq).
+Removed top 11 bits (of 12) from port B of cell deadline_sequencer_mb_p6_d1.$sub$rtl/seq_mb_p6_d1.v:913$149 ($sub).
+Removed top 2 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:917$152 ($eq).
+Removed top 7 bits (of 8) from port B of cell deadline_sequencer_mb_p6_d1.$or$rtl/seq_mb_p6_d1.v:989$165 ($or).
+Removed top 1 bits (of 8) from port A of cell deadline_sequencer_mb_p6_d1.$or$rtl/seq_mb_p6_d1.v:1026$168 ($or).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:1173$206 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:1276$251 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:1279$253 ($eq).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:1361$267 ($eq).
+Removed top 5 bits (of 6) from port B of cell deadline_sequencer_mb_p6_d1.$add$rtl/seq_mb_p6_d1.v:1382$271 ($add).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:1402$284 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$eq$rtl/seq_mb_p6_d1.v:1406$286 ($eq).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_mb_p6_d1.$add$rtl/seq_mb_p6_d1.v:1431$292 ($add).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$301_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$329_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$330_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$331_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$332_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$333_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$334_CMP0 ($eq).
+Removed top 3 bits (of 4) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$335_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$408_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$409_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell deadline_sequencer_mb_p6_d1.$procmux$410_CMP0 ($eq).
+Removed top 2 bits (of 12) from wire deadline_sequencer_mb_p6_d1._85.
+
+3.11. Executing PEEPOPT pass (run peephole optimizers).
+
+3.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+Removed 0 unused cells and 1 unused wires.
+<suppressed ~1 debug messages>
+
+3.13. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module deadline_sequencer_mb_p6_d1:
+  creating $macc model for $add$rtl/seq_mb_p6_d1.v:1150$192 ($add).
+  creating $macc model for $add$rtl/seq_mb_p6_d1.v:1155$194 ($add).
+  creating $macc model for $add$rtl/seq_mb_p6_d1.v:1170$203 ($add).
+  creating $macc model for $add$rtl/seq_mb_p6_d1.v:1185$212 ($add).
+  creating $macc model for $add$rtl/seq_mb_p6_d1.v:1382$271 ($add).
+  creating $macc model for $add$rtl/seq_mb_p6_d1.v:1431$292 ($add).
+  creating $macc model for $sub$rtl/seq_mb_p6_d1.v:1149$191 ($sub).
+  creating $macc model for $sub$rtl/seq_mb_p6_d1.v:1154$193 ($sub).
+  creating $macc model for $sub$rtl/seq_mb_p6_d1.v:1169$202 ($sub).
+  creating $macc model for $sub$rtl/seq_mb_p6_d1.v:1184$211 ($sub).
+  creating $macc model for $sub$rtl/seq_mb_p6_d1.v:826$116 ($sub).
+  creating $macc model for $sub$rtl/seq_mb_p6_d1.v:913$149 ($sub).
+  creating $alu model for $macc $sub$rtl/seq_mb_p6_d1.v:913$149.
+  creating $alu model for $macc $sub$rtl/seq_mb_p6_d1.v:826$116.
+  creating $alu model for $macc $sub$rtl/seq_mb_p6_d1.v:1184$211.
+  creating $alu model for $macc $sub$rtl/seq_mb_p6_d1.v:1169$202.
+  creating $alu model for $macc $sub$rtl/seq_mb_p6_d1.v:1154$193.
+  creating $alu model for $macc $sub$rtl/seq_mb_p6_d1.v:1149$191.
+  creating $alu model for $macc $add$rtl/seq_mb_p6_d1.v:1431$292.
+  creating $alu model for $macc $add$rtl/seq_mb_p6_d1.v:1382$271.
+  creating $alu model for $macc $add$rtl/seq_mb_p6_d1.v:1185$212.
+  creating $alu model for $macc $add$rtl/seq_mb_p6_d1.v:1170$203.
+  creating $alu model for $macc $add$rtl/seq_mb_p6_d1.v:1155$194.
+  creating $alu model for $macc $add$rtl/seq_mb_p6_d1.v:1150$192.
+  creating $alu cell for $add$rtl/seq_mb_p6_d1.v:1150$192: $auto$alumacc.cc:512:replace_alu$715
+  creating $alu cell for $add$rtl/seq_mb_p6_d1.v:1155$194: $auto$alumacc.cc:512:replace_alu$718
+  creating $alu cell for $add$rtl/seq_mb_p6_d1.v:1170$203: $auto$alumacc.cc:512:replace_alu$721
+  creating $alu cell for $add$rtl/seq_mb_p6_d1.v:1185$212: $auto$alumacc.cc:512:replace_alu$724
+  creating $alu cell for $add$rtl/seq_mb_p6_d1.v:1382$271: $auto$alumacc.cc:512:replace_alu$727
+  creating $alu cell for $add$rtl/seq_mb_p6_d1.v:1431$292: $auto$alumacc.cc:512:replace_alu$730
+  creating $alu cell for $sub$rtl/seq_mb_p6_d1.v:1149$191: $auto$alumacc.cc:512:replace_alu$733
+  creating $alu cell for $sub$rtl/seq_mb_p6_d1.v:1154$193: $auto$alumacc.cc:512:replace_alu$736
+  creating $alu cell for $sub$rtl/seq_mb_p6_d1.v:1169$202: $auto$alumacc.cc:512:replace_alu$739
+  creating $alu cell for $sub$rtl/seq_mb_p6_d1.v:1184$211: $auto$alumacc.cc:512:replace_alu$742
+  creating $alu cell for $sub$rtl/seq_mb_p6_d1.v:826$116: $auto$alumacc.cc:512:replace_alu$745
+  creating $alu cell for $sub$rtl/seq_mb_p6_d1.v:913$149: $auto$alumacc.cc:512:replace_alu$748
+  created 12 $alu and 0 $macc cells.
+
+3.14. Executing SHARE pass (SAT-based resource sharing).
+
+3.15. Executing OPT pass (performing simple optimizations).
+
+3.15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 277 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_mb_p6_d1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~139 debug messages>
+
+3.15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_mb_p6_d1.
+Performed a total of 0 changes.
+
+3.15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 277 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+
+3.15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.15.9. Finished fast OPT passes. (There is nothing left to do.)
+
+3.16. Executing MEMORY pass.
+
+3.16.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.16.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.16.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.16.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.16.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+3.16.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+
+3.16.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.16.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.16.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+
+3.16.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+
+3.18. Executing OPT pass (performing simple optimizations).
+
+3.18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+<suppressed ~39 debug messages>
+
+3.18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 243 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.18.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.18.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+
+3.18.5. Finished fast OPT passes.
+
+3.19. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.20. Executing OPT pass (performing simple optimizations).
+
+3.20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 243 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_mb_p6_d1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~98 debug messages>
+
+3.20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_mb_p6_d1.
+    Consolidated identical input bits for $mux cell $ternary$rtl/seq_mb_p6_d1.v:781$99:
+      Old ports: A={ \_202 \_202 \_202 \_202 \_202 \_202 \_202 \_202 }, B=8'00000000, Y=\_317
+      New ports: A=\_202, B=1'0, Y=\_317 [0]
+      New connections: \_317 [7:1] = { \_317 [0] \_317 [0] \_317 [0] \_317 [0] \_317 [0] \_317 [0] \_317 [0] }
+  Optimizing cells in module \deadline_sequencer_mb_p6_d1.
+Performed a total of 1 changes.
+
+3.20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 243 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.20.6. Executing OPT_SHARE pass.
+    Found cells that share an operand and can be merged by moving the $mux $ternary$rtl/seq_mb_p6_d1.v:1160$199 in front of them:
+        $auto$alumacc.cc:512:replace_alu$736
+        $auto$alumacc.cc:512:replace_alu$718
+
+    Found cells that share an operand and can be merged by moving the $mux $ternary$rtl/seq_mb_p6_d1.v:1175$208 in front of them:
+        $auto$alumacc.cc:512:replace_alu$739
+        $auto$alumacc.cc:512:replace_alu$721
+
+    Found cells that share an operand and can be merged by moving the $mux $ternary$rtl/seq_mb_p6_d1.v:1190$217 in front of them:
+        $auto$alumacc.cc:512:replace_alu$742
+        $auto$alumacc.cc:512:replace_alu$724
+
+    Found cells that share an operand and can be merged by moving the $mux $ternary$rtl/seq_mb_p6_d1.v:1235$237 in front of them:
+        $auto$alumacc.cc:512:replace_alu$733
+        $auto$alumacc.cc:512:replace_alu$715
+
+3.20.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+Removed 0 unused cells and 28 unused wires.
+<suppressed ~13 debug messages>
+
+3.20.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+<suppressed ~12 debug messages>
+
+3.20.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.20.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_mb_p6_d1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~90 debug messages>
+
+3.20.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_mb_p6_d1.
+Performed a total of 0 changes.
+
+3.20.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 235 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.20.14. Executing OPT_SHARE pass.
+
+3.20.15. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+Removed 0 unused cells and 12 unused wires.
+<suppressed ~1 debug messages>
+
+3.20.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.20.18. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.20.19. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_mb_p6_d1..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~90 debug messages>
+
+3.20.20. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_mb_p6_d1.
+Performed a total of 0 changes.
+
+3.20.21. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 235 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Removed a total of 0 cells.
+
+3.20.22. Executing OPT_SHARE pass.
+
+3.20.23. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.24. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+
+3.20.25. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+
+3.20.26. Finished fast OPT passes. (There is nothing left to do.)
+
+3.21. Executing TECHMAP pass (map to technology primitives).
+
+3.21.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.21.2. Continuing TECHMAP pass.
+Using template $paramod$c654a831025ee805eb993d5880de10a3d616cd3b\_90_pmux for cells of type $pmux.
+Using template $paramod$6831557730818fb92b11a295f9eb33ff8fa62af1\_90_alu for cells of type $alu.
+Using template $paramod$fc972a7a46956c1788f3cb5257b53c8f1df2d0cc\_90_alu for cells of type $alu.
+Using template $paramod$175e67c02b86e96b1288b9dc100122520d7240d8\_90_alu for cells of type $alu.
+Using template $paramod$c15e84c77f007506123baf6c4be45847f0e33a3b\_90_pmux for cells of type $pmux.
+Using template $paramod$32efbfac1c4dc57230cf86180788fdfd12e3b511\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $logic_not.
+Using template $paramod$645fe0cc96ae5edb83bff90cc2c78f4a20ca3e3c\_90_pmux for cells of type $pmux.
+Using template $paramod$556548cb7038fa09465db9fdc5b10cb4e4ea85e6\_90_pmux for cells of type $pmux.
+Using template $paramod$d629d85c8826a74239b9178d1930215a43b0ceb0\_90_pmux for cells of type $pmux.
+Using template $paramod$bf541dd3c0ba8228982b61e7bfbc350a2c253f4c\_90_pmux for cells of type $pmux.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000110 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000110 for cells of type $lcu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000010 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000010 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000001 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000001 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001100 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001100 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~1326 debug messages>
+
+3.22. Executing OPT pass (performing simple optimizations).
+
+3.22.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+<suppressed ~833 debug messages>
+
+3.22.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 1612 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 1490 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 1441 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+<suppressed ~513 debug messages>
+Removed a total of 171 cells.
+
+3.22.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.22.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+Removed 39 unused cells and 1027 unused wires.
+<suppressed ~58 debug messages>
+
+3.22.5. Finished fast OPT passes.
+
+3.23. Executing ABC pass (technology mapping using ABC).
+
+3.23.1. Extracting gate netlist of module `\deadline_sequencer_mb_p6_d1' to `<abc-temp-dir>/input.blif'..
+
+3.23.1.1. Executed ABC.
+Extracted 1175 gates and 1460 wires to a netlist network with 284 inputs and 115 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library /tmp/yosys-abc-J8M1BP/stdcells.genlib 
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+3.23.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       89
+ABC RESULTS:            ANDNOT cells:      243
+ABC RESULTS:               MUX cells:      372
+ABC RESULTS:              NAND cells:       16
+ABC RESULTS:               NOR cells:       41
+ABC RESULTS:               NOT cells:       39
+ABC RESULTS:                OR cells:      192
+ABC RESULTS:             ORNOT cells:       28
+ABC RESULTS:              XNOR cells:        2
+ABC RESULTS:               XOR cells:       31
+ABC RESULTS:        internal signals:     1061
+ABC RESULTS:           input signals:      284
+ABC RESULTS:          output signals:      115
+Removing temp directory.
+Removing global temp directory.
+
+3.24. Executing OPT pass (performing simple optimizations).
+
+3.24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_mb_p6_d1.
+<suppressed ~112 debug messages>
+
+3.24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 1280 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+Computing hashes of 1273 cells of `\deadline_sequencer_mb_p6_d1'.
+Finding duplicate cells in `\deadline_sequencer_mb_p6_d1'.
+<suppressed ~21 debug messages>
+Removed a total of 7 cells.
+
+3.24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+Removed 6 unused cells and 829 unused wires.
+<suppressed ~153 debug messages>
+
+3.24.5. Finished fast OPT passes.
+
+3.25. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `deadline_sequencer_mb_p6_d1'. Setting top module to deadline_sequencer_mb_p6_d1.
+
+3.25.1. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_mb_p6_d1
+
+3.25.2. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_mb_p6_d1
+Removed 0 unused modules.
+
+3.26. Printing statistics.
+
+=== deadline_sequencer_mb_p6_d1 ===
+
+        +----------Local Count, excluding submodules.
+        | 
+     1234 wires
+     2024 wire bits
+      282 public wires
+     1072 public wire bits
+       24 ports
+      165 port bits
+     1267 cells
+      242   $_ANDNOT_
+       88   $_AND_
+      372   $_MUX_
+       15   $_NAND_
+       41   $_NOR_
+       33   $_NOT_
+       26   $_ORNOT_
+      190   $_OR_
+      152   $_SDFFE_PP0N_
+       68   $_SDFFE_PP0P_
+        7   $_SDFF_PP0_
+        2   $_XNOR_
+       31   $_XOR_
+
+3.27. Executing CHECK pass (checking for obvious problems).
+Checking module deadline_sequencer_mb_p6_d1...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\deadline_sequencer_mb_p6_d1':
+  mapped 227 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Extracting gate netlist of module `\deadline_sequencer_mb_p6_d1' to `<abc-temp-dir>/input.blif'..
+
+5.1.1. Executed ABC.
+Extracted 1487 gates and 1788 wires to a netlist network with 300 inputs and 240 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.01 sec
+ABC: Memory =    2.85 MB. Time =     0.01 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+5.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:        8
+ABC RESULTS:    sg13g2_a21oi_1 cells:      291
+ABC RESULTS:   sg13g2_a221oi_1 cells:       14
+ABC RESULTS:    sg13g2_a22oi_1 cells:      136
+ABC RESULTS:     sg13g2_and2_1 cells:       33
+ABC RESULTS:     sg13g2_and3_1 cells:        2
+ABC RESULTS:     sg13g2_and4_1 cells:        3
+ABC RESULTS:      sg13g2_inv_1 cells:       90
+ABC RESULTS:     sg13g2_mux2_1 cells:        9
+ABC RESULTS:     sg13g2_mux4_1 cells:       21
+ABC RESULTS:    sg13g2_nand2_1 cells:       88
+ABC RESULTS:   sg13g2_nand2b_1 cells:       27
+ABC RESULTS:    sg13g2_nand3_1 cells:       26
+ABC RESULTS:   sg13g2_nand3b_1 cells:        1
+ABC RESULTS:    sg13g2_nand4_1 cells:        8
+ABC RESULTS:     sg13g2_nor2_1 cells:       76
+ABC RESULTS:    sg13g2_nor2b_1 cells:       21
+ABC RESULTS:     sg13g2_nor3_1 cells:       23
+ABC RESULTS:     sg13g2_nor4_1 cells:        2
+ABC RESULTS:    sg13g2_o21ai_1 cells:      287
+ABC RESULTS:      sg13g2_or2_1 cells:        7
+ABC RESULTS:      sg13g2_or3_1 cells:        1
+ABC RESULTS:      sg13g2_or4_1 cells:        1
+ABC RESULTS:    sg13g2_xnor2_1 cells:       14
+ABC RESULTS:     sg13g2_xor2_1 cells:        8
+ABC RESULTS:        internal signals:     1248
+ABC RESULTS:           input signals:      300
+ABC RESULTS:          output signals:      240
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_mb_p6_d1..
+Removed 0 unused cells and 1773 unused wires.
+<suppressed ~62 debug messages>
+
+7. Printing statistics.
+
+=== deadline_sequencer_mb_p6_d1 ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1405        - wires
+     2034        - wire bits
+      221        - public wires
+      850        - public wire bits
+       24        - ports
+      165        - port bits
+     1424 2.26E+04 cells
+        8  101.606   sg13g2_a21o_1
+      291 2.64E+03   sg13g2_a21oi_1
+       14  203.213   sg13g2_a221oi_1
+      136  1475.41   sg13g2_a22oi_1
+       33  299.376   sg13g2_and2_1
+        2   25.402   sg13g2_and3_1
+        3   43.546   sg13g2_and4_1
+      227 1.11E+04   sg13g2_dfrbpq_1
+       90  489.888   sg13g2_inv_1
+        9  163.296   sg13g2_mux2_1
+       21   800.15   sg13g2_mux4_1
+       88  638.669   sg13g2_nand2_1
+       27  244.944   sg13g2_nand2b_1
+       26  235.872   sg13g2_nand3_1
+        1   12.701   sg13g2_nand3b_1
+        8   87.091   sg13g2_nand4_1
+       76  551.578   sg13g2_nor2_1
+       21  190.512   sg13g2_nor2b_1
+       23  208.656   sg13g2_nor3_1
+        2   21.773   sg13g2_nor4_1
+      287  2.6E+03   sg13g2_o21ai_1
+        7   63.504   sg13g2_or2_1
+        1   12.701   sg13g2_or3_1
+        1   14.515   sg13g2_or4_1
+       14  203.213   sg13g2_xnor2_1
+        8  116.122   sg13g2_xor2_1
+
+   Chip area for module '\deadline_sequencer_mb_p6_d1': 22567.809600
+     of which used for sequential elements: 11120.457600 (49.28%)
+
+End of script. Logfile hash: ec337f6a06, CPU: user 0.43s system 0.05s, MEM: 34.66 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 51% 2x abc (0 sec), 13% 23x opt_clean (0 sec), ...

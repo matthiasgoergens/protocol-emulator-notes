@@ -1,0 +1,5 @@
+built against ded69f4f8155bb1e9e8f25890a10a12d72d92743
+rx: 40 requests planned, 4 glitched; requester sent 40 frames, 3 errors; our RX thread: 43 records, 40 ok, 3 errors; RTL/interpreter mismatches 0
+firmware requests: 40 requests, 40 response frames (40 expected), equal true, I2C bus bytes as expected true, device registers ok, RTL mismatches 0 -> PASS
+tx: submit-to-delivery delay min 291 us, max 331 us; requests delivered while a response waited: 40; TX status codes 1 x40
+tx: 40 responses submitted to our TX thread; the requester received 40 frames from it, equal and in order: true; our node lost arbitration 0 times and retransmitted; RTL/interpreter mismatches 0

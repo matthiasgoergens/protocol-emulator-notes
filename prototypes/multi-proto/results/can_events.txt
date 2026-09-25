@@ -1,0 +1,5 @@
+ref A sent 39, errors 1; ref B sent 35, errors 1; frames left in queues 0
+RX thread (214 words, raw mode, SP 22): 75 frame records, 74 ok, 1 with an error end code; A lost 0, B lost 10 arbitration; RTL/interpreter mismatches 0
+ref A sent 39, errors 0; ref B sent 35, errors 0; frames left in queues 0
+RX thread (214 words, raw mode, SP 22): 74 frame records, 74 ok, 0 with an error end code; A lost 0, B lost 10 arbitration; RTL/interpreter mismatches 0
+built against 623cc7caa14f125f6c1a8c41f3e54b1d606e71db
