@@ -26,7 +26,7 @@
 //   [4:3]   xs   X = S | A | S << 1 with sin | S >> 1 with sin
 //   [6:5]   ys   Y = K | A | S | 1
 //   [8:7]   ym   Y' = Y | (g ? Y : 0) | (g ? -Y : Y) | -Y   (for XOR/AND/OR, -Y means ~Y)
-//   [11:9]  gs   g = 1 | A[0] | b_in | A[0]^b_in | fb | F | lut/window | g_in
+//   [11:9]  gs   g = 1 | A[0] (A[ib] with BITSEL) | b_in | S[15]^b_in | fb | F | lut/window | g_in
 //                fb = (pairlo ? cb_in : S[15]) ^ A[0]      (Galois LFSR / CRC feedback)
 //   [13:12] sw   S <= hold | result | X | (g ? result : hold)
 //   [15:14] pw   P <= A | result | loser of MAX/MIN | (g ? {A[15:8], K[7:0]} : A)
@@ -53,6 +53,7 @@ module upe (
   input  wire        cfg_strobe,
   output wire [7:0]  cfg_out,
   input  wire [7:0]  init_in,
+  output wire [7:0]  init_out,     // the init chain onward: S's high byte (wires only)
   input  wire        init_strobe,
   input  wire        en,
   input  wire [15:0] a_in,
@@ -157,7 +158,7 @@ module upe (
     3'd1: g = A[0];
 `endif
     3'd2: g = bi;
-    3'd3: g = A[0] ^ bi;
+    3'd3: g = S[15] ^ bi;          // lane XOR own MSB (rotozoomer checker, two-LFSR codes)
     3'd4: g = fb;
     3'd5: g = F;
     3'd6: g = g_lk;
@@ -267,5 +268,6 @@ module upe (
   assign s15_out = S[15];
 `endif
   assign flag = F;
+  assign init_out = S[15:8];
   assign s_out = outs ? S : p_out;
 endmodule

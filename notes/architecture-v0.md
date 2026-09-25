@@ -208,9 +208,9 @@ with SJW added (gap G6).
 | CRC engine per thread in the sequencer (can) | +12.2k µm² over the core with shared config (includes JC etc.; measured 29,428 − 17,266) | one bit per SHO/SHI, so CAN ≤ 625 kbit/s in firmware | 4 threads, ≤ 16 bits |
 | standalone CRC unit (e10) | 6,956 µm² without its configuration registers (master); 7,127 with poly and state registers, 3,387 for 16 bits (`unified-pe`) | 1 bit per clock | one stream per unit |
 | LFSR helper (gps) | "about 3.5k µm²" was an estimate; the measured 32-bit unit with its registers is 7,127 | | |
-| **GF(2) mode in every PE** (shift with serial input, XOR/AND/OR, operand gating) | +1,181 µm² per PE on the recommended PE (`upe_v0` against `upe_v0_no_gf2`), 18.9k for 16 PEs | 1 bit per step: 60 Mbit/s | one stream per PE (CRC-32 takes a pair) |
+| **GF(2) mode in every PE** (shift with serial input, XOR/AND/OR, operand gating) | +1,115 µm² per PE on the recommended PE (`upe_v0` against `upe_v0_no_gf2`), 17.8k for 16 PEs | 1 bit per step: 60 Mbit/s | one stream per PE (CRC-32 takes a pair) |
 
-Break-even: 16 × 1,181 / 7,127 = **2.7 concurrent CRC streams**. With at most two, dedicated units
+Break-even: 16 × 1,115 / 7,127 = **2.5 concurrent CRC streams**. With at most two, dedicated units
 would be about 4k µm² cheaper, a third of a PE. The recommendation is still the **GF(2) PE mode,
 and no CRC unit**, for three reasons that are measured or counted, not argued: the same mode is
 the LFSR, PRBS, scrambler and Gold-code generator (P11), the word XOR/AND of P18 (six prototypes),
@@ -229,7 +229,7 @@ the template steps, and a bank holding the buffer. It is one prototype's need (P
 ### 2.4 The PE array and its one processing element
 
 **One PE, "upe_v0"** (`prototypes/unified-pe/rtl/upe.v`, built with `-DNO_POP -DNO_LUT -DBITSEL`):
-**14,311 µm² synthesised, 989 cells, 100 flip-flops** (`prototypes/unified-pe/results/areas.txt`).
+**14,312 µm² synthesised, 985 cells, 100 flip-flops** (`prototypes/unified-pe/results/areas.txt`).
 In the same flow the PE with every mode is 16,332 µm² and pe16 is 6,586. At the placed/synthesised
 ratio of 1.50 measured for a row of pe16s (`pe-synth/README.md`) it would occupy about 21,500 µm²
 (est). It is an area probe: no model or lockstep test exists yet (gap G1).
@@ -247,7 +247,7 @@ One step (every clock, or only when A is valid in stream mode):
 
 - operands: X ∈ {S, A, S<<1 with a serial bit, S>>1 with a serial bit}; Y ∈ {K, A, S, 1};
   Y may be gated by g (g ? Y : 0), negated by g (g ? −Y : Y) or negated;
-- condition bit g ∈ {1, A[i] (any bit), lane bit, A[0] XOR lane, CRC feedback (S[15] or the
+- condition bit g ∈ {1, A[i] (any bit), lane bit, S[15] XOR lane, CRC feedback (S[15] or the
   carry-back, XOR A[0]), F, window, the left neighbour's g};
 - ALU: saturating add, wrapping add (carry-in from the lane optional), max, min, XOR, AND, OR;
 - writeback: S ← hold | result | X | (g ? result : hold); P ← A | result | the loser of max/min |
@@ -258,21 +258,21 @@ One step (every clock, or only when A is valid in stream mode):
 | cell the demos need | configuration | status |
 |---|---|---|
 | sprite (con) | K = {x, colour}; S = the 16-pixel bitmap, per line through the init chain; A = {pixel x, colour}; g = window (A.hi − x < 16 and S[15 − (A.hi − x)]); P ← merge; stream stepping per pixel. Later PEs win. | configuration designed; the console's lockstep reference is the oracle |
-| tile (platformer) | the sprite configuration with S and K reloaded every 16 pixels from the segment feed, which a thread fills from a bank | designed |
-| background, rotozoomer (con) | 3–4 PEs: pixel counter (wrapping add of 0x0100 on {x, colour A}), u and v accumulators (wrapping add of the step, MSB on the lane), colour merge on the XOR of the two MSBs | designed |
+| tile (platformer) | the sprite configuration, with S and K reloaded every 16 pixels | **not expressible in the probe**: the only mid-line write of S is the step's writeback, which the window mode already uses; needs a reload path (gap G14), or a tile layer made of sprite PEs reloaded per line |
+| background, rotozoomer (con) | 4 PEs: pixel counter (S ← S + 0x0100 on {x, colour A}, P ← result); u accumulator (S ← S + ustep, lane out = S[15]); v accumulator (S ← S + vstep, g = S[15] XOR lane, lane out = g); merge (K = {0, colour B}, g = lane, P ← merge). The host offsets u₀ and v₀ by the one-step skew | designed |
 | FIR tap on 1-bit samples, PDM decimation | transposed form: P ← A + (g ? −K : K), g = the broadcast sample bit | designed |
 | CIC integrator / comb | integrator S ← S + A; comb P ← A − S, S ← A | designed |
 | NCO, 16 / 32 bit | S ← S + K wrapping; lane out = S[15]. 32 bit: low PE lane out = carry, high PE carry-in = lane | designed; gps needs 32 bit to lock (master) |
 | mixer, carrier wipe-off | P ← (g ? −A : A), g = the NCO's MSB on the lane | gps's configuration (master), checked on a Python model of the row |
 | GPS code correlator | S ← S + (g ? −A : A), g = the broadcast code chip, P ← A (the sample walks one PE per clock, so PE j integrates code offset j) | same |
 | sync-word correlator | not a PE configuration: the matcher assist (popcount measured at 1,798 µm² per PE) | |
-| min-plus cell | two PEs: P ← A + K (saturating), then S ← min(S, A) | designed; one PE would need a fused add-then-min (est +1.5k) |
+| min-plus cell | two PEs: P ← A + K (saturating), then S ← min(S, A) | designed; one PE would need a fused add-then-min (a second adder and comparator, est about 1.5k µm² from the datapath of minplus16) |
 | semiring ring cell (ring) | op x y with x = S or A, y = A or K; loop-back closes the ring | designed; ring used 4 neighbour distances (gap G9) |
 | sorting (insertion) | S ← max(S, A), P ← the loser | designed |
 | CRC-16/15/5, LFSR | S ← (S << 1 with g) XOR (g ? K : 0), g = S[15] XOR A[0] (data bit on A[0]); K = the polynomial without its x⁰ term; residue check by the next PE: result = 0 into F | designed |
 | CRC-32 | a pair: low PE takes feedback from the carry-back (high's S[15]) XOR A[0] and shifts its S[15] into the high PE; the high PE takes g from the low PE's pair wire | designed |
 | sigma-delta (1 bit) | S ← S + A wrapping; lane out = carry | gps tier 1 (master), model |
-| deserialiser | S ← S << 1 with the lane bit; stream mode | designed |
+| deserialiser | S ← S << 1 with the lane bit; stream mode. It marks no word boundary: the reader pulls on a known schedule, or the sampler packs instead | designed |
 
 **What pe16 and the semiring cell already did, and what was added.** pe16
 (`pe-synth/pe_rtl.ml`): add/sub/max/min with saturation, x from the state or one neighbour, y from
@@ -283,14 +283,14 @@ each measured as an increment on the recommended PE (`results/areas.txt`, rows `
 | addition | why | increment µm² |
 |---|---|---|
 | base generality: Y from A and 1, S ← X, P ← result/loser/merge, the flag, the wider configuration, the init chain | sorting, CIC, deserialising, per-line reload | `upe_none` − pe16 = 4,532 |
-| GF(2): shift with serial input, XOR/AND/OR, gating by g | CRC, LFSR, masks | 1,181 |
-| window and merge | sprites, tiles | 1,114 |
-| lanes: stream stepping, valid, the lane and its broadcast, pair and carry-back wires, carry in and out | GPS, 32-bit NCOs, CRC-32, deletion | 378 |
-| bit test A[i] | branchless selects, the rotozoomer, Gold-code taps | 238 |
+| GF(2): shift with serial input, XOR/AND/OR, gating by g | CRC, LFSR, masks | 1,115 |
+| window and merge | sprites, tiles | 963 |
+| lanes: stream stepping, valid, the lane and its broadcast, pair and carry-back wires, carry in and out | GPS, 32-bit NCOs, CRC-32, deletion | 399 |
+| bit test A[i] | branchless selects, the rotozoomer, Gold-code taps | 246 |
 
 Increments are `upe_v0` minus the variant without the mode. Abc's mapping moves them by up to
-about 300 µm² between runs (the window increment measured 778 before the zero flag was added and
-1,114 after), so read them to the nearest few hundred.
+about 300 µm² between runs (the window increment measured 778, 1,114 and 963 in three runs of
+near-identical RTL), so read them to the nearest few hundred.
 
 Rejected as PE modes, measured: popcount-match (1,798 µm² per PE, the matcher assist does it
 once), the 16-entry LUT (241 per PE; lookup goes to the banks), a multiplier (mac16 is 17,004 µm²
@@ -446,8 +446,8 @@ demo" means demonstrated on special-purpose hardware only. PEs are counted per c
 | 10BASE-T TX | firmware on four threads with TP_IDL, link pulses, TD± (33 words per thread); or the line coder in Manchester mode fed from a segment or the streamer, freeing the threads | 4, or 1 | 0 (or 2 for an on-chip FCS) | demonstrated as firmware (`eth10-node/README.md`, master; `sequencer-ethernet`); the assist path designed |
 | 10BASE-T RX | edge sampler Manchester 4× → matcher (SFD, enable per bit) → packer; CRC-32 in a PE pair on the bit stream; a thread parses into a bank | 1 | 2 | demonstrated with an e10 CRC unit in place of the PE pair (`eth10-node`, master: ARP and ping answered, judged by scapy) |
 | 100BASE-FX | 125 MBd 4B5B/NRZI through an SFP: 1.9 samples per bit with four phases at 60 MHz; CRC-32 at 1.67 bits per clock exceeds a PE's 1 per step (2 interleaved pairs, or the 20.9k byte-wise unit) | ? | ≥4 | unknown (the fast-Ethernet work is running; pad speed decides) |
-| PAL/NTSC composite, console | line timing in a thread (sync by SETP in exact slots); pixel chain in segments 3+4 joined: counter and background (3–4 PEs), sprites (8), luma pins from the chain's tap; hue as pin-NCO phase offset on 2 chroma pins; line data from the host via the link into the init chains during blanking | 1–2 | 12 | special demo (`retro-console`, lockstep 0 mismatches, software TV); v1 mapping designed |
-| tile platformer | tile layer: WIN PEs reloaded per 16 pixels from bank 1 (tile map and patterns); sprites multiplexed per line by the host; split screen by per-line reconfiguration | 2 | 12 | designed (the platformer work is running) |
+| PAL/NTSC composite, console | line timing in a thread (sync by SETP in exact slots); pixel chain in segments 3+4 joined: counter and background (4 PEs), sprites (8), luma pins from the chain's tap; hue as pin-NCO phase offset on 2 chroma pins; line data from the host via the link into the init chains during blanking | 1–2 | 12 | special demo (`retro-console`, lockstep 0 mismatches, software TV); v1 mapping designed |
+| tile platformer | tile layer: window PEs reloaded per 16 pixels from bank 1 (tile map and patterns; needs G14); sprites multiplexed per line by the host; split screen by per-line reconfiguration | 2 | 12 | designed, with a gap (the platformer work is running) |
 | sound for the console | one-bit voice: NCO PE and sigma-delta PE (segment 1 or 2), pin output | 0 | 2 | special demo (`one-bit-synth`, 68 dB in-band SNR); gps tier 1 audio on PEs (master, model) |
 | Ethernet-to-TV | 10BASE-T RX (above) into bank 0 as a line buffer (5 lines per packet); a thread copies 48 bytes per line into segment 4's init chain in blanking; segment 4 as a ring renderer (8 PEs, loop-back); segment 3 text sprites | 3 | 14 | designed; pieces demonstrated (`pal-ethernet` step 1, `semiring-ring`, `eth10-node`) |
 | CAN-to-TV (bus analyser on a television) | CAN RX (above) plus a text overlay: tiles (segment 3) and sprites (segment 4); the RX thread filters with JC | 3 | 1 + 12 | designed |
@@ -491,9 +491,9 @@ G11). GPS is the exception: it already time-shares by replaying a bank many time
 ### 4a. What is the array buying? The chip without it
 
 The question: with the protocols landing as sequencer firmware plus small assists, how much is the
-systolic array buying? The array (16 PEs and its interconnect) is 243,593 µm² synthesised, about
+systolic array buying? The array (16 PEs and its interconnect) is 243,609 µm² synthesised, about
 365,000 µm² placed at the 1.5 factor: **about half the allocation** (`results/budget.txt`
-arithmetic: 16 × 14,311 + 14,617, × 1.5).
+arithmetic: 16 × 14,312 + 14,617, × 1.5).
 
 **(a) The counterfactual chip with no array.** Without PEs and interconnect the rest places at
 about 281,000 µm² (37 %), leaving about 470,000 µm². One way to spend it, all measured blocks:
@@ -554,7 +554,7 @@ the array to 12 or 8 PEs before cutting anything the protocols use.
 
 | prototype | what becomes a programme or configuration | gap and smallest generic extension |
 |---|---|---|
-| retro-console | sprite cells → PE window mode; u/v background → 3–4 PEs; 54-byte double-buffered packet (864 flops) → init chains loaded in blanking; 12 × fsc chroma → pin NCO with hue offset; line timing → a thread | G1: UPE RTL and lockstep against the console's reference (reuse its 720-line test); G4: NCO colour judged through the software TV |
+| retro-console | sprite cells → PE window mode; u/v background → 4 PEs; 54-byte double-buffered packet (864 flops) → init chains loaded in blanking; 12 × fsc chroma → pin NCO with hue offset; line timing → a thread | G1: UPE RTL and lockstep against the console's reference (reuse its 720-line test); G4: NCO colour judged through the software TV |
 | composite-video | host precomputation unchanged; the chip side is the streamer at width 1–3 | G3: host link at 8 MB/s per pin |
 | semiring-ring | cells → PEs in a looped segment; 24 → 16 bits; 4 neighbour distances → 1 | G9: only the cubic wiggle needs 24 bits (32-bit pairs with carry exist); distances by placement or the P-lane delay |
 | wave-engine | 10-record ring with one sine table → 8 waves on 16 PEs (NCO PE plus triangle or bank-table PE per wave) | bank as sine table, fed at a segment start; 8 waves instead of 10 |
@@ -578,7 +578,8 @@ Further gaps: **G11** time-sharing PEs (contexts); **G12** the full-speed pad qu
 figure is sky130's 33 MHz output; `notes/tiny-tapeout-ihp-rules.md` §4) gates 100BASE-FX, runts,
 and composite at 66 Msps; **G13** a whole-chip place and route (sequencer, four PEs, the
 interconnect, one macro) to replace the assumed placement factor of section 6, which decides
-between 16 and 12 PEs.
+between 16 and 12 PEs; **G14** a mid-line reload path for a PE's state (tile layers), for example
+a conditional S ← A on a second condition bit.
 
 ## 6. Area budget against 6 × 4 tiles
 
@@ -592,11 +593,11 @@ size plus 10 % (est).
 
 | PEs | programme SRAM | factor 1.5: placed µm², share, slack | factor 2.0 |
 |---|---|---|---|
-| 12 | 512 × 16 | 560,661, 74.6 %, 190,980 | 705,741, 93.9 %, 45,899 |
-| **16** | **512 × 16** | **646,526, 86.0 %, 105,115** | **820,228, 109.1 %, −68,587** |
-| 16 | 256 × 16 | 627,626, 83.5 %, 124,015 | 801,327, 106.6 %, −49,687 |
-| 16 | 1024 × 16 | 684,327, 91.0 %, 67,313 | 858,029, 114.2 %, −106,389 |
-| 20 | 512 × 16 | 732,391, 97.4 %, 19,250 | 934,714, 124.4 %, −183,074 |
+| 12 | 512 × 16 | 560,691, 74.6 %, 190,950 | 705,781, 93.9 %, 45,860 |
+| **16** | **512 × 16** | **646,566, 86.0 %, 105,075** | **820,281, 109.1 %, −68,640** |
+| 16 | 256 × 16 | 627,665, 83.5 %, 123,975 | 801,381, 106.6 %, −49,740 |
+| 16 | 1024 × 16 | 684,367, 91.0 %, 67,273 | 858,082, 114.2 %, −106,442 |
+| 20 | 512 × 16 | 732,440, 97.4 %, 19,200 | 934,781, 124.4 %, −183,140 |
 
 The logic other than PEs sums to 118,431 µm² synthesised (the sequencer proxy 29,428; the pin
 stage, streamer and sampler 34,530; the bit-path assists and matcher 26,177; the pin NCO 6,678;
@@ -605,7 +606,7 @@ and reset 7,000). Drawn and macro blocks: the two gain-cell banks 53,236, the fi
 (est), the programme SRAM 45,309.
 
 **Verdict.** **Sixteen PEs with a 512 × 16 programme store fit at the measured placement
-factor, with 14 % of the allocation left (105k µm²), and do not fit at the pessimistic one (9 %
+factor, with 14 % of the allocation left (105,075 µm²), and do not fit at the pessimistic one (9 %
 over).** Twelve PEs fit either way. So: plan for 16, and settle it with the first whole-chip
 place and route (the sequencer, four PEs and the interconnect together) before anything else is
 built on the count. If the factor comes out near 2, drop to 12 PEs (segments 2|2|8), which loses
@@ -706,7 +707,7 @@ Built from what every prototype already has, in this order:
 
 | # | decision | options | recommendation |
 |---|---|---|---|
-| D1 | CRC placement | per-thread engines in the sequencer; a CRC unit per stream; GF(2) PE mode | **GF(2) PE mode**, no CRC unit (section 2.3: break-even 2.7 streams; the mode also serves LFSR, PRBS, masks) |
+| D1 | CRC placement | per-thread engines in the sequencer; a CRC unit per stream; GF(2) PE mode | **GF(2) PE mode**, no CRC unit (section 2.3: break-even 2.5 streams; the mode also serves LFSR, PRBS, masks) |
 | D2 | PE richness | 16 rich PEs (upe_v0) or about 32 lean ones (pe16 + tag lane, est) | **16 rich**: sprites, CRC pairs and the NCO carry need the modes; only GPS cold-start time scales with count |
 | D3 | array partitioning | fixed arrays; 2 / 3 / 4 / 8 segments | **one array, 4 segments 2|2|4|8** with loop-backs (about 9k µm² over fixed arrays, est) |
 | D4 | programme store | 256 / 512 / 1024 × 16 SRAM macro; gain cells | **SRAM 512 × 16** with page bits (measured firmware sizes exceed 256) |
