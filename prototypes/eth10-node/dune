@@ -1,0 +1,10 @@
+(library
+ (name eth10)
+ (wrapped false)
+ (modules isa sequencer harness eth_model eth_tx eth_rx eth_rxn model tx_fw clause14)
+ (libraries hardcaml))
+
+(executable
+ (name main)
+ (modules main)
+ (libraries hardcaml eth10))
