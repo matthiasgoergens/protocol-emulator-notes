@@ -1,0 +1,5 @@
+; isa.ml, compiler.ml and decoders.ml are symlinks into ../../deadline-sequencer, so the FPGA
+; checks use the same interpreter, compiler and decoders as the simulation work.
+(executable
+ (name fpga_tests)
+ (modules isa compiler decoders env programs fpga_tests))
