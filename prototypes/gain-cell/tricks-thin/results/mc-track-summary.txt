@@ -1,0 +1,20 @@
+mc-track-ff85.txt [life]: 200 samples (0 infinite or zero)
+  median 894 us, min 89.8 us, 1st percentile 220 us (sample 2 of 200), max 1.41 ms
+  the stored 0 fails first in 15 of 200; written 1: 0.782..0.927 V; L1 0.358..0.463 V; H0 0.304..0.410 V
+  lognormal, all samples: median 829 us, sigma(ln t) 0.351 (x1.42 per sigma); 64 kbit worst cell (z -4.25) 186 us; 90 % array yield (z -4.66) 162 us
+  lognormal, lower-half probit fit: median 1.08 ms, sigma 0.595; 64 kbit worst cell 86.1 us; 90 % array yield 67.7 us
+mc-track-ss27.txt [life]: 200 samples (0 infinite or zero)
+  median 19.9 ms, min 11.6 ms, 1st percentile 11.8 ms (sample 2 of 200), max 29.3 ms
+  the stored 0 fails first in 0 of 200; written 1: 0.568..0.713 V; L1 0.350..0.455 V; H0 0.316..0.421 V
+  lognormal, all samples: median 19.6 ms, sigma(ln t) 0.164 (x1.18 per sigma); 64 kbit worst cell (z -4.25) 9.76 ms; 90 % array yield (z -4.66) 9.13 ms
+  lognormal, lower-half probit fit: median 19.9 ms, sigma 0.178; 64 kbit worst cell 9.31 ms; 90 % array yield 8.66 ms
+mc-track-ff85.txt [lifepark]: 200 samples (0 infinite or zero)
+  median 896 us, min 358 us, 1st percentile 452 us (sample 2 of 200), max 1.41 ms
+  the stored 0 fails first in 0 of 200; written 1: 0.782..0.927 V; L1 0.358..0.463 V; H0 0.304..0.410 V
+  lognormal, all samples: median 886 us, sigma(ln t) 0.199 (x1.22 per sigma); 64 kbit worst cell (z -4.25) 380 us; 90 % array yield (z -4.66) 350 us
+  lognormal, lower-half probit fit: median 942 us, sigma 0.263; 64 kbit worst cell 307 us; 90 % array yield 276 us
+mc-track-ss27.txt [lifepark]: 200 samples (0 infinite or zero)
+  median 19.9 ms, min 11.6 ms, 1st percentile 11.8 ms (sample 2 of 200), max 29.3 ms
+  the stored 0 fails first in 0 of 200; written 1: 0.568..0.713 V; L1 0.350..0.455 V; H0 0.316..0.421 V
+  lognormal, all samples: median 19.6 ms, sigma(ln t) 0.164 (x1.18 per sigma); 64 kbit worst cell (z -4.25) 9.76 ms; 90 % array yield (z -4.66) 9.13 ms
+  lognormal, lower-half probit fit: median 19.9 ms, sigma 0.178; 64 kbit worst cell 9.31 ms; 90 % array yield 8.66 ms

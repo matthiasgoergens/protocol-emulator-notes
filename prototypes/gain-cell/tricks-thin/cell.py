@@ -26,8 +26,8 @@
 #   MS    storage device: nlv (thin NMOS, source on the row bar), nhv (thick), plv (thin PMOS in
 #         an n-well at VDD, source on a bar at VBAR, read into an RBL precharged low; MR is then
 #         a thin PMOS gated by RWL active low)
-#   VLO   the WBL level that writes a 0 (default 0; >0 shifts the stored 0 up, which puts every
-#         unselected write transistor at Vgs <= -VLO without a negative rail)
+#   VLO   the WBL level that writes a 0 (default 0; >0 shifts the stored 0 up, which puts a
+#         write transistor holding a 1 at Vgs <= -VLO without a negative rail)
 #   VHI   the WBL level that writes a 1 (default VDD)
 #   VBAR  the storage transistor's source bar during hold and read (default 0; VDD for plv)
 #   RBAR  if set, the bar level during a read (the selected row's bar is pulled there)
