@@ -1,0 +1,10 @@
+(library
+ (name mpcore)
+ (wrapped false)
+ (modules isa compiler decoders sequencer harness isa_mb sequencer_mb harness_mb eth_tx eth_rx eth_model)
+ (libraries hardcaml))
+
+(executable
+ (name lockstep)
+ (modules lockstep)
+ (libraries hardcaml unix mpcore))
