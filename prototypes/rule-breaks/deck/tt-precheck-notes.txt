@@ -1,0 +1,415 @@
+Tiny Tapeout / IHP SG13G2 precheck DRC research notes
+Date: 2026-09-25
+Local IHP-Open-PDK checkout (~/.ciel/ihp-sg13g2/ihp-sg13g2) pins commit
+c4b8b4e5e7a05f375cca3815d51b3a37721fbf5c (IHP-GmbH/IHP-Open-PDK, dated
+2026-01-16T13:40:16Z, "[Qucs-S] Update README..."). Verified via
+`gh api repos/IHP-GmbH/IHP-Open-PDK/commits/<sha>`.
+
+====================================================================
+1. WHICH DRC DECK(S) RUN, WITH WHICH OPTIONS
+====================================================================
+
+There are (at least) THREE distinct places DRC is invoked for a TT IHP
+project, using two different entry points into the IHP PDK's KLayout
+Ruby DRC deck.
+
+(a) Per-project PR precheck — TinyTapeout/tt-support-tools,
+    precheck/precheck.py (fetched from repo, file is 614 lines).
+    URL: https://github.com/TinyTapeout/tt-support-tools/blob/master/precheck/precheck.py
+    For tech == "ihp-sg13g2" it runs one check called "KLayout SG13G2 DRC":
+
+        def klayout_sg13g2(gds: str):
+            return klayout_drc(
+                gds, "sg13g2",
+                f"{PDK_ROOT}/{PDK_NAME}/libs.tech/klayout/tech/drc/ihp-sg13g2.drc",
+            )
+
+    which calls klayout_custom_drc with script_vars =
+        {"sg13g2": "true", "input": gds, "thr": "1"}
+    i.e. it invokes the IHP PDK's main `ihp-sg13g2.drc` Ruby deck DIRECTLY
+    (not via the PDK's own `run_drc.py` wrapper), setting only `input`
+    and `thr`. It does NOT set $tables, $no_forbidden, $no_feol, $no_beol,
+    $precheck_drc, etc. Fail criterion: `check_drc_report()` raises if the
+    resulting .lyrdb has >0 items (i.e. ANY violation across whatever
+    tables actually ran fails precheck outright — no per-rule allowlist).
+
+    This same precheck.py runs the same suite for sky130A/gf180mcuD too,
+    plus tech-independent checks: layer_check(), klayout_checks() (top-cell
+    name / forbidden-layer / prBoundary check), pin_check(), boundary_check(),
+    analog_pin_check() (for is_analog / analog_pins>0 projects), cell_name_check(),
+    verilog_syntax_check().
+
+    Because ihp-sg13g2.drc defaults `TABLES = ($tables || 'main').split`
+    (see below), only the table named "main" runs by default here — but
+    FORBIDDEN defaults to true regardless of TABLES (see section 2), so the
+    IHP "forbidden layers" table (3.2) also runs.
+
+(b) Shuttle-level "foundry submission" repo precheck, e.g.
+    TinyTapeout/tinytapeout-ihp-0p4-foundry-submission,
+    .github/workflows/verification.yml (fetched, full text saved separately
+    at /var/tmp/spice-rule-breaks/verification.yml). URL:
+    https://github.com/TinyTapeout/tinytapeout-ihp-0p4-foundry-submission/blob/66fb0eb377f4e565a6f7b275ad748bc21783f57a/.github/workflows/verification.yml
+    (same file, same content, also found in
+    TinyTapeout/tinytapeout-ihp-26a-foundry-submission and
+    TinyTapeout/tinytapeout-ihp-26b-foundry-submission).
+
+    This time it DOES use the PDK's own `run_drc.py` wrapper:
+
+        python3 PDK/libs.tech/klayout/tech/drc/run_drc.py \
+          --path="$gds_path" --topcell="$top_cell" \
+          --precheck_drc --mp=4 --no_offgrid --no_angle \
+          --disable_extra_rules --no_recommended
+
+    plus a separate density-only job:
+        python3 PDK/libs.tech/klayout/tech/drc/run_drc.py \
+          --path=$gds_path --topcell=$top_cell --density_only --density_thr=4 --mp=4
+
+    NOTE: `--no_angle` is passed but does NOT appear as a recognised
+    argparse option in the run_drc.py fetched from the local ciel checkout
+    (~/.ciel/ihp-sg13g2/ihp-sg13g2/libs.tech/klayout/tech/drc/run_drc.py,
+    full argparse list read and includes: --path --table --mp --run_dir
+    --topcell --density_thr --run_mode --drc_json --precheck_drc --no_feol
+    --no_beol --disable_extra_rules --no_density --density_only --antenna
+    --antenna_only --no_offgrid --no_recommended). There is no --no_angle.
+    Either (i) the version of run_drc.py used by that specific PDK_repo
+    pin (arbitrary user-supplied `pdk_repository`/`pdk_version` from the
+    project's info.json) differs from HEAD / the local ciel checkout, or
+    (ii) this is a latent bug in the workflow (argparse with parse_args()
+    would normally exit(2) on an unrecognized flag). NOT independently
+    verified which; flagging as open question.
+
+    `--disable_extra_rules` explicitly SKIPS `sg13g2_maximal.drc` — the
+    "Extra Rule Set" / residual rules, explicitly documented as "not part
+    of the main set... have not been verified or tested and may be slower"
+    (local DRC README.md). This is exactly the deck that contains ALL of
+    the SRAM-layer-aware DRC logic (see section 5) — so that logic never
+    runs in this per-shuttle foundry-submission CI job.
+
+    `--precheck_drc` sets PRECHECK_DRC=true inside ihp-sg13g2.drc but (from
+    reading run_drc.py) does not by itself change which TABLES run; per the
+    local README.md, PDK rules are split into three documented sets:
+    PreCheck Rule Set (docs/precheck_rules.md, "essential... verified,
+    tested, optimized... intended for foundry precheck purposes"), Main
+    Rule Set (docs/main_rules.md), and Extra Rule Set (docs/extra_rules.md,
+    disabled via --disable_extra_rules). Did not fully cross-reference how
+    PRECHECK_DRC gates individual rule files inside feol/*.drc, beol/*.drc
+    (time-boxed out) — flag as not fully verified.
+
+(c) IHP's own repo TinyTapeout/mpw_precheck (fork/adaptation of the classic
+    efabless mpw_precheck for IHP MPW runs), .github/workflows/precheck.yaml
+    (fetched in full; saved at /var/tmp/spice-rule-breaks/precheck.yaml).
+    This targets tech "ihp-sg13cmos5l" (note: sg13cmos5l, not sg13g2 — a
+    related/successor IHP process used for the open MPW "TO_Sep2025" run)
+    and downloads a "foundry_submission" GDS artifact from a prior `gds`
+    workflow run, then does:
+
+        python3 $PDK_ROOT/ihp-sg13cmos5l/libs.tech/klayout/tech/drc/run_drc.py \
+          --path "gds/tt_ihp_wrapper_final.gds" --run_dir drc_results \
+          --table main --no_density --no_recommended --no_offgrid
+
+    Here `--table main` is explicit (same effective default as the bare
+    ihp-sg13g2.drc invocation), `--disable_extra_rules` is NOT passed, so
+    in this job the "maximal"/extra deck (if the sg13cmos5l tree mirrors
+    sg13g2's layout) would in principle be eligible to run — but --table
+    main + run_parallel_run's logic (main() → run_single_processor since
+    mp not multi... actually --mp not passed so defaults mp=1 →
+    run_single_processor) DOES also unconditionally run
+    `run_check_by_flag(not args.disable_extra_rules, "sg13g2_maximal")` —
+    i.e. yes, the extra/maximal deck DOES run here unless
+    --disable_extra_rules is passed, and it is not passed in this job.
+    (This is inferred from reading run_single_processor() in the ihp-sg13g2
+    tree; not independently confirmed the sg13cmos5l tree has an identical
+    run_drc.py — plausible given the shared IHP-Open-PDK repo structure but
+    NOT verified by directly reading the sg13cmos5l DRC tree.)
+
+    Density and error-counting logic in this workflow only fails the job if
+    the log matches `Number of DRC violations: <N>` with N>0, OR the log
+    lacks the string "completed" (fallback heuristic) — a comparatively
+    loose/brittle pass/fail parse compared to precheck.py's structured
+    .lyrdb item-count check.
+
+====================================================================
+2. LAYER ALLOW-LIST / FORBIDDEN-LAYER CHECKS — IS 25/0 (SRAM) OR 16/0
+   (DigiBnd) PERMITTED?
+====================================================================
+
+TWO independent forbidden/allow mechanisms exist; NEITHER blocks SRAM
+(25/0) or DigiBnd (16/0).
+
+(A) IHP PDK's own DRC "forbidden" table.
+    Local file: ~/.ciel/ihp-sg13g2/ihp-sg13g2/libs.tech/klayout/tech/drc/
+    rule_decks/forbidden/3_2_forbidden.drc (Apache-2.0, IHP PDK Authors,
+    2025). Full text read. It defines:
+
+        forb_lays = {
+          'biwind' => biwind_drw, 'pemwind' => pemwind_drw,
+          'baspoly' => baspoly_drw, 'deepco' => deepco_drw,
+          'pempoly' => pempoly_drw, 'empoly' => empoly_drw,
+          'ldmos' => ldmos_drw, 'pbiwind' => pbiwind_drw,
+          'nodrc' => nodrc_drw, 'flash' => flash_drw,
+          'colwind' => colwind_drw
+        }
+        forb_lays.each do |forb_lay, lay|
+          lay.output("forbidden.#{forb_lay}",
+            "forbidden.#{forb_lay} : 3.2. #{forb_lay} is forbidden in
+             designs submitted for all 0.13 um techs.")
+        end
+
+    i.e. it forbids process layers unrelated to digital/SRAM markers
+    (bipolar windows, deep collector, poly resistor variants, LDMOS, flash,
+    "nodrc" (no-DRC override layer!), "colwind"). SRAM (get_polygons(25,0))
+    and DigiBnd (get_polygons(16,0)) are DEFINED in
+    rule_decks/layers_def.drc (lines 306-308 and 386-388, confirmed by
+    grep) but are NOT in this forbidden list.
+
+    This table is gated by:
+        FORBIDDEN = !bool_check?($no_forbidden)   # true unless --no_forbidden
+      and executes when `TABLES.include?('forbidden') || FORBIDDEN` — so it
+      runs BY DEFAULT (FORBIDDEN defaults true) any time ihp-sg13g2.drc is
+      invoked without --no_forbidden, INCLUDING the bare
+      `klayout -b -r ihp-sg13g2.drc -rd sg13g2=true -rd input=... -rd thr=1`
+      invocation tt-support-tools' precheck.py makes (section 1a) and the
+      run_drc.py-based CI jobs in sections 1b/1c (none of which pass
+      --no_forbidden). But since SRAM/DigiBnd aren't on the forbidden list,
+      this running-by-default doesn't matter for them.
+
+    Local file: rule_decks/layers_def.drc, confirmed via grep:
+        line 306: digibnd_drw = get_polygons(16, 0)
+        line 386: sram_drw   = get_polygons(25, 0)
+      Also present at (139,0) "colwind_drw" which IS on the forbidden list.
+
+(B) TinyTapeout's own layer allow-list, tt-support-tools/precheck/tech_data.py
+    (fetched in full). This is TT's independent, additional gate
+    (`layer_check()` in precheck.py), NOT part of the IHP PDK. It computes
+    `gds_layers - valid_layer_list` for the whole GDS and fails if any
+    "excess" (layer,datatype) pair not in the allow-list is present:
+
+        valid_layers_ihp_sg13g2 = [
+          ... "DigiBnd.drawing", "DigiBnd.drawing0", "RES.drawing",
+          "RES.label", "SRAM.drawing", "SRAM.label", "SRAM.boundary",
+          "DigiSub.drawing", ... ]
+
+    i.e. TT's OWN allow-list EXPLICITLY PERMITS SRAM.drawing/label/boundary
+    and DigiBnd.drawing/drawing0 as valid layers for ihp-sg13g2 projects.
+    A user GDS containing shapes on GDS layer 25/0 or 16/0 will NOT fail
+    this check.
+
+    Separately, tt-support-tools also has a small `forbidden_layers` dict
+    used by `klayout_checks()` (checks top-cell name, forbidden layers,
+    prBoundary presence):
+
+        forbidden_layers = {
+          "sky130A": ["met5.drawing", "met5.pin", "met5.label"],
+          "ihp-sg13g2": ["TopMetal2.drawing", "TopMetal2.pin", "TopMetal2.label"],
+          "gf180mcuD": ["Metal5", "Metal5_Label"],
+        }
+
+    For ihp-sg13g2 this forbids only TopMetal2 (presumably reserved for
+    TT's own harness/power routing above the user tile) — again nothing to
+    do with SRAM or DigiBnd.
+
+    CONCLUSION for Q2: as of this PDK/tt-support-tools snapshot, a user's
+    GDS CAN legally contain shapes on SRAM (25/0) and DigiBnd (16/0)
+    without tripping either TT's layer allow-list, TT's forbidden-layer
+    check, or IHP's own PDK-level "forbidden" DRC table. Whether it trips
+    the *DRC rule engine itself* (geometric/spacing rules) depends on
+    section 5 below.
+
+====================================================================
+3. WAIVER MECHANISM / DID A TT IHP PROJECT USE AN IHP SRAM MACRO?
+====================================================================
+
+- No dedicated "waiver"/"exception" file or per-project override mechanism
+  was found in tt-support-tools (no waiver.yaml, no manual-review flag
+  found via directory listing + reading precheck.py/tech_data.py). The
+  pass/fail is purely mechanical (checks list, all must pass, or the CI
+  job fails / precheck.py exits 1). No evidence of a human sign-off/waiver
+  path in this tooling; NOT exhaustively verified against tt_tool.py /
+  project.py / shuttle.py (time-boxed out — those files were listed but
+  not read).
+
+- CONFIRMED: at least one real TT IHP project used an IHP hardened SRAM
+  macro. TinyTapeout/tinytapeout-ihp-0p2 (and the same project also present
+  in TinyTapeout/tinytapeout-ihp-staging), project directory
+  projects/tt_um_urish_sram_test, by Uri Shaked (discord: urish),
+  info.yaml description: "Tests the foundry provided SRAM macro".
+  Its Verilog netlist (tt_um_urish_sram_test.v) instantiates:
+
+      RM_IHPSG13_1P_1024x8_c2_bm_bist sram (.A_CLK(clknet_1_1__leaf_clk), ...);
+
+  i.e. IHP's own hardened/hard-macro SRAM cell RM_IHPSG13_1P_1024x8_c2_bm_bist
+  (from IHP-Open-PDK ihp-sg13g2/libs.ref/sg13g2_sram/) used as a black-box
+  hard macro. URL:
+  https://github.com/TinyTapeout/tinytapeout-ihp-0p2/blob/f64e0906737747bbb16014b76c10498d276e3892/projects/tt_um_urish_sram_test/tt_um_urish_sram_test.v
+  https://github.com/TinyTapeout/tinytapeout-ihp-0p2/blob/f64e0906737747bbb16014b76c10498d276e3892/projects/tt_um_urish_sram_test/info.yaml
+
+  Did NOT independently confirm (time-boxed out) whether that project's
+  final GDS macro instance actually carries SRAM(25/0)/DigiBnd(16/0)
+  marker-layer geometry in the merged shuttle GDS, nor whether its precheck
+  CI run log shows those layers appearing without incident — inferred only
+  from the fact that IHP's reference SRAM macro GDS views are documented
+  (libs.qa/sram, libs.tech/magic/read_sram_gds.tcl,
+  libs.tech/klayout/tech/lvs/rule_decks/sram_integration.lvs) to exist and
+  to be treated specially at the LVS/QA level (see section 5), which
+  implies the marker layer is present in IHP's shipped SRAM GDS views.
+
+====================================================================
+4. IHP'S OWN FOUNDRY-SIDE MPW PRECHECK / SUBMISSION REQUIREMENTS
+====================================================================
+
+- TinyTapeout/mpw_precheck (see section 1c) is TinyTapeout's own repo, not
+  IHP's; it is TinyTapeout's adaptation used specifically to prepare/verify
+  the GDS TT sends to IHP for the "TO_Sep2025" open-MPW run (it checks out
+  IHP-GmbH/TO_Sep2025 as the "TO repo" — Tapeout template/rules repo for
+  that run). This strongly suggests IHP's own official submission
+  checklist lives in per-run repos named `TO_<Month><Year>` (also saw
+  TinyTapeout/TO_Apr2025, TinyTapeout/TO_May2025 as forks/mirrors of such
+  repos in the TinyTapeout org's repo list) rather than in IHP-Open-PDK
+  itself. Did NOT fetch IHP-GmbH/TO_Sep2025 directly (belongs to IHP-GmbH,
+  not TinyTapeout, and was out of the explicitly listed repos to check;
+  flagging as a gap — worth reading IHP-GmbH/TO_Sep2025's README/rules for
+  IHP's own official DRC/precheck sign-off requirements if that matters).
+
+- The PDK's run_drc.py `--precheck_drc` flag ("Run a minimal set of DRC
+  checks typically required for foundry prechecks") together with the
+  three documented rule sets in the DRC README.md (PreCheck Rule Set /
+  Main Rule Set / Extra Rule Set, with precheck_rules.md / main_rules.md /
+  extra_rules.md docs under libs.tech/klayout/tech/drc/docs/) appears to be
+  IHP's own codification of what it calls foundry-precheck-required rules
+  vs. everything else. Attempted to read docs/precheck_rules.md directly
+  from the local checkout but the read was interrupted by a tooling error
+  and not retried (time-boxed); the classification above is taken from the
+  DRC README.md text alone, which WAS read in full.
+
+====================================================================
+5. IHP'S SRAM RULES / FOUNDRY QUALIFICATION — SRAM AS A DRC-RELAXATION
+   MARKER, NOT A FORBIDDEN LAYER
+====================================================================
+
+Grepping the entire local DRC tree for "sram" (case-insensitive) found
+matches ONLY in:
+  - rule_decks/layers_def.drc (layer definition, as above)
+  - rule_decks/sg13g2_maximal.drc (the "Extra Rule Set" deck)
+
+No feol/*.drc or beol/*.drc ("Main Rule Set") file references SRAM at all
+(confirmed by grep against the whole tree; only layers_def.drc and
+sg13g2_maximal.drc matched). This means: the SRAM (25/0) marker layer's
+special DRC treatment lives EXCLUSIVELY in sg13g2_maximal.drc, e.g.:
+
+    SRAM = source.polygons("25/0")
+    ...
+    Act_Nsram = Activ.ext_not(SRAM)
+    pSD_Nsram = pSD.ext_not(SRAM)
+    GP_Nsram  = GatPoly.ext_not(SRAM)
+    ...
+    (dozens of "*_Nsram" derived layers = "everything of that layer type
+    OUTSIDE the SRAM boundary", used throughout sg13g2_maximal.drc so that
+    normal spacing/enclosure rules are evaluated only OUTSIDE any
+    user-drawn SRAM boundary)
+
+  and even an explicit off-grid check that treats SRAM specially:
+    SRAM.ongrid(5.nm) ... .output("OffGrid.SRAM", "SRAM is off-grid")
+
+  i.e. inside sg13g2_maximal.drc, marking a region with SRAM (25/0) is a
+  MASK that EXEMPTS everything inside it from the deck's normal
+  minimum-spacing / enclosure rules (that's what "IHP's SRAM bitcell rules
+  are foundry-qualified only for the IHP bit cell" cashes out to
+  mechanically: the DRC deck simply doesn't apply its usual rules inside
+  an SRAM-tagged region, trusting that IHP's own qualified macro already
+  satisfies whatever internal rules the macro needs). Nothing in the deck
+  verifies that the SRAM-tagged geometry actually IS one of IHP's
+  qualified macros — it is a boundary/marker layer, not a checksum or
+  macro-identity check.
+
+  CRITICAL CONSEQUENCE FOR THE RESEARCH QUESTION: sg13g2_maximal.drc,
+  which is the ONLY place any of this SRAM-aware logic exists, is
+  explicitly skipped by `--disable_extra_rules` — and that flag IS passed
+  in the shuttle-level foundry-submission precheck CI (section 1b). It is
+  also (per the DRC README.md) explicitly documented as unverified/
+  untested/slower and off the "Main" and "PreCheck" rule sets. So in the
+  actual TT precheck flow that gates a shuttle submission
+  (tinytapeout-ihp-*-foundry-submission/.github/workflows/verification.yml),
+  the SRAM-exemption logic never runs at all — meaning a user marking
+  arbitrary custom analog geometry as SRAM (25/0) would, in that specific
+  CI job, neither be exempted by it (deck not run) nor be caught by any
+  other IHP or TT check as improper use of the marker (nothing checks
+  "SRAM-marked geometry actually matches a real IHP macro"). In the
+  per-project PR precheck.py path (section 1a), which invokes
+  ihp-sg13g2.drc bare (no --disable_extra_rules, no --tables at all, so
+  TABLES defaults to just 'main'), sg13g2_maximal.drc ALSO does not run,
+  because it is a SEPARATE FILE from ihp-sg13g2.drc / the table system —
+  it's only invoked by run_drc.py's own logic
+  (`run_check_by_flag(not args.disable_extra_rules, "sg13g2_maximal")`),
+  and precheck.py never calls run_drc.py at all for ihp-sg13g2 — it drives
+  ihp-sg13g2.drc directly. So sg13g2_maximal.drc/the SRAM-exemption logic
+  NEVER RUNS via precheck.py either, regardless of flags.
+
+- IHP-Open-PDK's own documentation of the SRAM macros' scope of
+  qualification: ihp-sg13g2/libs.qa/sram/README.md (fetched in full):
+      "This check catches packaging, interface, and functional-model
+      regressions. It does not validate electrical characterization data
+      and does not replace DRC, LVS, or silicon qualification."
+      "The validator was generated with OpenAI Codex (GPT-5)."
+  URL: https://github.com/IHP-GmbH/IHP-Open-PDK/blob/5e6d592e4002946a4616f798c357f0f3c06cf3b6/ihp-sg13g2/libs.qa/sram/README.md
+  This confirms IHP treats its SRAM macros (RM_IHPSG13_*, in
+  ihp-sg13g2/libs.ref/sg13g2_sram/{lef,cdl,lib,verilog,gds}) as pre-
+  characterized hard macros with their own packaging/consistency
+  validator, separate from — and explicitly NOT a substitute for — DRC/LVS
+  sign-off. There is also a dedicated LVS deck,
+  ihp-sg13g2/libs.tech/klayout/tech/lvs/rule_decks/sram_integration.lvs,
+  and a magic helper libs.tech/magic/read_sram_gds.tcl, both suggesting
+  IHP's flow treats "an SRAM macro instance in a larger design" as a
+  special-cased integration point at LVS time, not something covered by
+  ordinary DRC rules outside sg13g2_maximal.drc. Did not fetch the full
+  text of sram_integration.lvs (time-boxed) — flagging as an open item if
+  more detail on LVS-side SRAM handling is needed.
+
+- Did NOT find any OpenRAM sg13g2 port evidence: `gh search repos "sg13g2
+  openram"` and `gh search repos "sg13g2 sram"` both returned EMPTY
+  results. Could not confirm or deny an OpenRAM effort for sg13g2 from
+  GitHub search alone; this may be a search-index limitation rather than
+  true absence — NOT verified further (no web search performed for this
+  specific sub-question due to time budget; flagging as unresolved).
+
+====================================================================
+OPEN QUESTIONS / NOT VERIFIED (be explicit about these)
+====================================================================
+1. Whether `--no_angle` in the foundry-submission verification.yml is a
+   stale/mismatched flag against the current run_drc.py, or whether the
+   pinned PDK version for that specific project actually has a run_drc.py
+   with that flag. NOT resolved.
+2. Whether PRECHECK_DRC (the $precheck_drc switch inside ihp-sg13g2.drc)
+   changes which individual feol/beol rule files execute, beyond gating
+   the top-level TABLES/FORBIDDEN/etc. switches already covered. NOT
+   traced through feol/*.drc, beol/*.drc in detail (that's dozens of
+   files); only the top-level switch-parsing logic was read.
+3. IHP's own (IHP-GmbH-authored, not TinyTapeout-authored) MPW submission
+   requirements/docs — IHP-GmbH/TO_Sep2025 (and equivalents) were not
+   fetched; only inferred their role from being referenced in TinyTapeout's
+   mpw_precheck workflow.
+4. Whether tt_um_urish_sram_test's actual merged shuttle GDS (not just its
+   Verilog netlist) carries SRAM(25/0)/DigiBnd(16/0) shapes, and whether
+   its specific CI precheck run log is available to confirm it passed
+   without incident. Not fetched (would require pulling the actual GDS
+   files or CI run artifacts).
+5. No web search (WebSearch/WebFetch) was actually used in this session —
+   all findings above come from `gh api`/`gh search code` against GitHub
+   and direct reads of the local ~/.ciel IHP-Open-PDK checkout. If
+   tinytapeout.com docs or IHP's own MPW web pages contain additional
+   stated policy (e.g. an explicit "SRAM macros must be pre-approved"
+   clause), that has NOT been checked.
+
+====================================================================
+KEY LOCAL FILE PATHS REFERENCED (read-only, all still exist on disk)
+====================================================================
+~/.ciel/ihp-sg13g2/ihp-sg13g2/libs.tech/klayout/tech/drc/run_drc.py
+~/.ciel/ihp-sg13g2/ihp-sg13g2/libs.tech/klayout/tech/drc/README.md
+~/.ciel/ihp-sg13g2/ihp-sg13g2/libs.tech/klayout/tech/drc/ihp-sg13g2.drc
+~/.ciel/ihp-sg13g2/ihp-sg13g2/libs.tech/klayout/tech/drc/rule_decks/forbidden/3_2_forbidden.drc
+~/.ciel/ihp-sg13g2/ihp-sg13g2/libs.tech/klayout/tech/drc/rule_decks/layers_def.drc
+~/.ciel/ihp-sg13g2/ihp-sg13g2/libs.tech/klayout/tech/drc/rule_decks/sg13g2_maximal.drc
+~/.ciel/ihp-sg13g2/ciel/ihp-sg13g2/versions/c4b8b4e5e7a05f375cca3815d51b3a37721fbf5c  (pinned commit)
+
+Downloaded copies saved under /var/tmp/spice-rule-breaks/:
+  precheck.py, tech_data.py, verification.yml, precheck.yaml (mpw_precheck
+  workflow), repos.json, tt-org-repos.txt, various search*.json

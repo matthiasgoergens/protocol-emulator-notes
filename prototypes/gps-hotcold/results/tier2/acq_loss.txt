@@ -1,0 +1,5 @@
+implementation loss, coherent 1 ms, C/N0 45.0 dB-Hz, 200 blocks, exact Doppler, IF filter 2.5 MHz:
+  ideal C/N0 * T = 15.00 dB
+  float                                      SNR  12.67 dB, loss vs ideal  2.33 dB, vs float  0.00 dB
+  1-bit samples, float carrier               SNR  10.61 dB, loss vs ideal  4.39 dB, vs float  2.06 dB
+  chip: 1-bit samples, 1-bit NCO carrier     SNR   9.73 dB, loss vs ideal  5.27 dB, vs float  2.94 dB

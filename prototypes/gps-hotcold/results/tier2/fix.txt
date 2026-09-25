@@ -1,0 +1,22 @@
+scenario: GPS time 408089.407 s of week, receiver (1.3441, 103.82, 20.0), LO offset -1800 Hz, 31099200 one-bit samples (9.50 s at 3.2736 MS/s)
+  PRN 15  elevation  80.9 deg  C/N0 44.2 dB-Hz
+  PRN 14  elevation  60.4 deg  C/N0 45.0 dB-Hz
+  PRN  2  elevation  56.5 deg  C/N0 40.6 dB-Hz
+  PRN 19  elevation  35.9 deg  C/N0 44.4 dB-Hz
+  PRN 23  elevation  28.9 deg  C/N0 46.9 dB-Hz
+  PRN 20  elevation  24.5 deg  C/N0 43.0 dB-Hz
+  PRN 12  elevation  16.3 deg  C/N0 40.8 dB-Hz
+acquisition (chip arithmetic, N = 5 ms, threshold 5.44 from the Monte Carlo noise runs): found [14, 15, 19, 20, 23]; visible [2, 12, 14, 15, 19, 20, 23]; false []
+  PRN 14: 9499 epochs tracked, bit edge at epoch mod 20 = 2 (histogram peak 24 of 24 sign changes), PLL phase error rms 14.5 deg, subframe 1 found, TOW of its start 408090 s
+  PRN 15: 9499 epochs tracked, bit edge at epoch mod 20 = 0 (histogram peak 25 of 25 sign changes), PLL phase error rms 15.6 deg, subframe 1 found, TOW of its start 408090 s
+  PRN 19: 9499 epochs tracked, bit edge at epoch mod 20 = 7 (histogram peak 25 of 25 sign changes), PLL phase error rms 15.3 deg, subframe 1 found, TOW of its start 408090 s
+  PRN 20: 9499 epochs tracked, bit edge at epoch mod 20 = 9 (histogram peak 26 of 30 sign changes), PLL phase error rms 18.9 deg, subframe 1 found, TOW of its start 408090 s
+  PRN 23: 9499 epochs tracked, bit edge at epoch mod 20 = 8 (histogram peak 25 of 25 sign changes), PLL phase error rms 11.3 deg, subframe 1 found, TOW of its start 408090 s
+  PRN 14 range error (common mode removed): mean -0.80 m, sd 1.47 m
+  PRN 15 range error (common mode removed): mean +1.83 m, sd 2.76 m
+  PRN 19 range error (common mode removed): mean -2.33 m, sd 2.02 m
+  PRN 20 range error (common mode removed): mean +0.79 m, sd 3.16 m
+  PRN 23 range error (common mode removed): mean +0.51 m, sd 1.39 m
+position: 15 fixes (every 100 ms over the last 1.5 s) from 5 satellites [14, 15, 19, 20, 23], HDOP 3.13, VDOP 4.16
+  horizontal error: mean 9.72 m, max 21.21 m; vertical error mean -7.80 m, rms 15.01 m; mean east/north bias -4.14 / -6.33 m; range residual rms 0.94 m
+wall time 6 s

@@ -1,0 +1,62 @@
+codex exec -m gpt-6-luna, reasoning effort medium, read-only sandbox, 2026-09-25; prompt: /var/tmp/multiphase/codex-prompt.txt (copied below the verdict).
+
+## Findings
+
+1. **Output invariant and clocking — WEAKENED.** The equations in [stage.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/stage.ml:47) implement the stated quarter-level invariant under the assumed phase order; the substep driver also deliberately feeds the prior nibble at quarter 0 ([stage.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/stage.ml:115)). The checks support sampled, cycle-level behaviour. They do not establish “cannot glitch”: the XOR output is not checked between sample points, and asynchronous clear can reset multiple lane flops outside their distinct phase edges. I found no functional counterexample to the invariant under ideal clocks.
+
+2. **Input ordering and metastability protection — WEAKENED.** The RTL has a first sampler, same-phase second flop, then ph0 retiming flop ([stage.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/stage.ml:61)). The quarter ordering is consistent in the cycle model. But phase 3’s second flop changes only a quarter period before the ph0 retiming edge. The stated two-flop synchroniser gives the first metastability stage roughly one full period to settle; the retiming path gets only a quarter period. Random-value sampling cannot establish an MTBF or detect metastability, and the ideal-clock simulation does not cover that analogue risk.
+
+3. **Meaningfulness and independence of checks — WEAKENED.** The Verilog testbench is a useful independently coded checker, and the planted faults show sensitivity to those particular mutations. But both references encode the same quarter ordering and latency convention as the RTL; neither challenges that convention. The Cyclesim checker observes only values after each simulated quarter, so it cannot detect transient glitches. The random input pads are sampled at idealised phase points, so they do not test setup/hold or metastability. See [main.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/main.ml:11) and [tb_stage.v](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/iverilog/tb_stage.v:51).
+
+4. **FM, circular SINAD*, and DTC model — WEAKENED.** The NCO updates frequency words using the ideal phase at each future 16-clock boundary ([fm.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/fm.ml:35)); this is a useful phase-tracked simulation, but it does not demonstrate an independently specified firmware frequency-word tracker. The comparison allows a best shift of up to 32 quarters ([fm_eval.py](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/fm_eval.py:91)), so the “2 of 1,064,000” figure is not a fixed-latency alignment check. The 4 ms ideal phase is mathematically periodic, but the code does not verify periodicity of the generated RTL waveform before applying the circular metric; the independent per-edge jitter used by DTC cases also does not make a repeated periodic waveform. Box-filter rendering and Newton-refined edge times are behavioural models, not measurements of a physical DTC. These results support comparisons within the model, not a general claim that SINAD* is valid for every reported waveform.
+
+5. **Receive jitter result — WEAKENED.** `eth_rxn`’s n=1 rule is explicitly matched to `eth_rx` ([eth_rxn.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/eth_rxn.ml:1)), and the stage path delays activity along with samples ([rx_jitter.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/rx_jitter.ml:70)). That reduces concern about a simple squelch-latency mismatch. The result remains a finite random sweep: 20 frames per cell, generated with uniform independent edge jitter, with no confidence bounds. It demonstrates outcomes for that harness and traffic model, not a general ±10 ns tolerance guarantee. The sampler comparison uses the same generated line and ideal phase schedule; it does not validate asynchronous hardware sampling.
+
+6. **ISA compatibility and RTL/interpreter match — CONFIRMED, within binary-program semantics.** The new fields occupy previously unused instruction bits; the legacy helpers encode q=0 and quad=0 ([isa.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/deadline-sequencer/isa.ml:64), [isa.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/deadline-sequencer/isa.ml:71)). Both interpreter and RTL retain the old one-bit SHI path when quad is clear, and the RTL constructs `pin_sub` from the previous and new pin levels ([sequencer.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/deadline-sequencer/sequencer.ml:31)). I found no semantic mismatch in the changed paths. This confirms instruction semantics; it does not mean an old external module instantiation can use the new top-level ports without integration changes.
+
+7. **STA, DTC switching, phase-source verdicts, and area — WEAKENED.** The SDC does declare four clocks with quarter-period offsets ([gen_sdc.py](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/sta/gen_sdc.py:13)), so the idealised ph0→ph1 timing result is meaningful for that model. But the README calls the reset path an artefact because silicon will have per-phase reset synchronisers; the stage RTL has one shared `clear` and no such synchronisers ([stage.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/stage.ml:31)). Reset release and recovery/removal are therefore outside the demonstrated STA result. DTC tap-switching rules, RP2350 PIO limits, and physical area are design estimates; the README itself records missing CTS, pad, and implementation checks ([README.md](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/README.md:265), [README.md](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/README.md:358)). The reported synthesis area is reproducible as a synthesis number, not a placed implementation cost.
+
+8. **Design premise — CONFIRMED, with the stated throughput constraint.** A fixed thread-to-phase assignment ties each thread’s writes to its recurring clock residue, so it cannot choose an arbitrary quarter for each write. The q field supplies that per-write choice ([isa.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/deadline-sequencer/isa.ml:13)). Under the described FM workload, some clocks need multiple data-dependent edges, while the sequencer can issue at most one instruction per clock; an NCO or another independent edge source is therefore needed for that workload ([nco.ml](/home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/nco.ml:4)).
+
+I did not run `dune build`: it writes generated build artefacts, and this checkout is read-only.
+## Response (what was done about each finding)
+
+1. Glitch claim: agreed that no simulation can show it (both are zero-delay and sample between
+   edges). The README now says the no-glitch statement is an argument from structure and STA
+   numbers, not a simulation result. "Asynchronous clear" is not what the RTL has: Hardcaml's
+   clear is synchronous (multiphase_stage.v: `always @(posedge ph1) if (clear) ...`; yosys ties
+   every RESET_B to 1'h1 in sta/multiphase_stage_synth.v). The underlying point stands anyway: the
+   lanes leave reset on different phases, so the README now says to keep output enables low during
+   reset.
+2. Metastability: agreed. The README now says the ph3 -> ph0 retiming is a synchronous quarter-period
+   transfer covered by STA, that each first stage has a full clock to resolve, and that no MTBF
+   was computed.
+3. Shared convention between references: agreed; the quarter ordering and latency are a definition
+   that both references encode. The FM result checks the ordering independently: the RTL wave
+   matches fm_sim's clk/4 wave, which knows nothing of the stage.
+4. FM: the best shift is a single constant for the whole run (12 quarters, the pipeline latency),
+   so it is a fixed-latency alignment; the README says so. The match with fm_sim's wave, which is
+   periodic by construction, is the evidence that the RTL wave is periodic. The frequency-word
+   generation is indeed a model of the host, stated in fm.ml's header.
+5. Receive: agreed that 20 frames per cell has no confidence bounds; the README now says so and
+   rests the figure on its agreement with the analytic bound.
+6. Confirmed.
+7. Reset: agreed, the README wrongly implied per-phase reset synchronisers exist. Rewritten: one
+   synchronous clear, per-phase synchronisers needed in silicon and not built. Area is a synthesis
+   number, as stated.
+8. Confirmed.
+
+--- prompt ---
+Adversarially review the four-phase output/input stage in prototypes/multiphase (read README.md first, then stage.ml, main.ml, iverilog/tb_stage.v, nco.ml, fm.ml, fm_eval.py, eth_rxn.ml, rx_jitter.ml, shmoo.ml, sta/sta_summary.txt) and the ISA change in prototypes/deadline-sequencer (isa.ml, sequencer.ml, harness.ml; git diff c519d57 -- prototypes/deadline-sequencer). Your job is to REFUTE, not to approve. "Looks fine" is a failed review.
+
+Claims to attack, each with its mechanism:
+1. stage.ml invariant: with N_k the nibble held from core edge E_k to E_(k+1), after E_(k+1)+p/4 the pin equals N_k[p]; lanes clocked on phases p with toggles registered on ph0 (lane 0 fed combinationally from the core's registers) implement it, and the XOR combiner cannot glitch because lanes change only at distinct phase edges. The Substep clocking (one fast clock with one-hot enables) is equivalent to the four real clocks for zero skew.
+2. Input: sampler on ph_p, second flop on ph_p, retime to ph0: the core sees clock j's four samples at clock j+2, correctly ordered, with adequate metastability protection.
+3. The checks are meaningful: random_stage_test and the iverilog testbench are independent references that would catch mistakes; the planted faults prove sensitivity. Look for places where the reference shares an assumption with the RTL (e.g. both wrong the same way), or where a test could pass vacuously.
+4. FM: fm.exe + fm_eval.py show the RTL quarter-grid pin equals fm_sim's clk/4 quantisation (2 of 1,064,000 quarters differ) and the circular "SINAD*" metric is valid (signal exactly periodic over the 4 ms window). Check the periodicity claim, the NCO frequency-word tracking, the box-filter rendering, the lane-skew experiment (lane = quarter index mod 4) and the DTC model (exact edge times via Newton).
+5. Receive: eth_rxn at n=1 equals eth_rx; the 4x receiver's jitter tolerance (+-10 ns at the PAL clock vs +-3 ns for 1x) is real and not an artefact of how activity (squelch) is sampled or of the test harness.
+6. ISA: SETP/SHO q field and SHI quad mode are backward compatible (old programmes unchanged) and the RTL matches the interpreter.
+7. README claims about STA (four related create_clocks, ph0->ph1 quarter-period transfer), glitch-free tap-switching rules for the DTC, phase-source verdicts (quadrature from an RP2350 PIO limited to sys/4), and area numbers.
+8. The design premise: "thread i owns quarter i" cannot place arbitrary edges; lanes must belong to phases with the sub-slot per write; FM needs an NCO because firmware cannot supply an edge per clock.
+
+Read the real code; run things if useful (dune: opam exec --switch=5.3.0 -- dune build in prototypes/multiphase; do not modify tracked files). For every problem give file:line, the mechanism, and severity (wrong result / misleading claim / nit). End with one verdict line per claim: REFUTED, WEAKENED or CONFIRMED, with reasons.

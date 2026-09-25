@@ -1,0 +1,10 @@
+acquisition time and area (per 1 ms block; FS = 3.2736 MS/s, 3274 samples, 21 Doppler bins x 500 Hz)
+pass = 3274 + K + 3 clocks of replay + K readout + 3(K+2) configuration clocks; two rows (I, Q) of K correlators
+   K  PEs passes/bin  ms/PRN/block  32 PRNs, N=1  32 PRNs, N=5 8 PRNs warm, N=5  PE area synth    placed
+   4   13        819         867.7        27.8 s       138.8 s          14.87 s       95,397   141,521
+   8   21        410         437.0        14.0 s        69.9 s           7.49 s      151,949   226,457
+  16   37        205         221.1         7.1 s        35.4 s           3.79 s      265,053   396,329
+  32   69        103         113.7         3.6 s        18.2 s           1.95 s      491,261   736,073
+  64  133         52          60.1         1.9 s         9.6 s           1.03 s      943,677 1,415,561
+plus two 4 kbit sample banks (double buffer): 56,254 um2 placed (SRAM 1P_256x16 equivalent)
+tracking: one channel = E, P, L on both arms (6 PEs) + a mixer per arm (2) + 32-bit carrier NCO per arm (2 x 2 PEs) + 32-bit code NCO (2 PEs) = 14 PEs, one pass of about 3304 clocks per code period; 19 passes fit in 1 ms, so 12 channels use 61 % of a 14-PE array's time

@@ -1,0 +1,7 @@
+distance, integer pipeline vs WGS84 geodesic of the reported (unrounded) fix: max |err| 2.16 cm over 698 fixes
+distance vs the true position (GPS error included): rms 1.96 m, max 5.40 m
+silence between beeps: rms -106.0 dBFS over 582.1 s of gaps
+beep pitch (first note) vs plan over 619 beeps: max |err| 0.33 % (FFT bin 0.34 Hz; NCO step 3.9 Hz)
+beep period (< 450 ms) from onsets vs plan: median err 0.0 ms, max |err| 0.1 ms over 73 seconds
+stereo right/left level vs planned pan gains over 575 beeps: median +0.05 dB, 95 % within 0.14 dB
+modes per fix: {'nofix': 3, 'beep': 667, 'found': 32}; trend warmer/neutral/colder: 543/44/112

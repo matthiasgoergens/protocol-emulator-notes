@@ -3,6 +3,23 @@
 What the measurements and prototypes in this repository add up to, and what
 comes next. Numbers are in `datapoints.md` with their runs.
 
+## Direction (decided 2026-09-25)
+
+Converge on ONE programmable chip. Every protocol and every demo (the retro console and
+platformer, video over Ethernet, radio, GPS, the debugging tools) must be a programme or a
+configuration of a small set of generic blocks: the sequencer threads; the pin stage (streamer,
+sampler, quarter-clock timing); generic protocol assists (programmable CRC, bit stuffing, line
+coding, oversampling with resynchronisation, the matcher); a systolic array of one programmable
+processing element; and the memory. The special-purpose prototypes built so far (the retro
+console's sprite pipeline, the USB block, the Ethernet receiver) are feasibility studies, not parts
+of the chip. They serve twice: they are re-expressed on the generic blocks, and they are the
+evidence for which blocks are worth having (a primitive that many prototypes need becomes a
+block or a processing-element mode; one needed by a single prototype goes to firmware or goes). Where a generic block falls short, extend it
+minimally and name the other uses that benefit. Why: it is what Jane Street asks for ("The goal
+isn't to put a UART block, an SPI block, and an I2C block on one die"), and it makes the area
+budget add up. The unified architecture is being written up as `notes/architecture-v0.md`. Everything we have
+said we want to do is collected in `notes/backlog.md`.
+
 ## The shape of the chip
 
 Fix the schedule in hardware, compute everything else offline. Every
