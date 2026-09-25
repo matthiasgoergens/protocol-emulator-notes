@@ -1,0 +1,11 @@
+3T_thin_L13n: pitch 0.88 x 1.99 um = 1.751 um2 per bit core; 2.075 with a strap every 4; 1.792 every 32; array 7.69 x 7.96 um
+2T_thin_L13n: pitch 0.88 x 1.68 um = 1.478 um2 per bit core; 1.751 with a strap every 4; 1.513 every 32; array 7.69 x 6.72 um
+3T_thick_L45n: pitch 0.88 x 2.31 um = 2.033 um2 per bit core; 2.408 with a strap every 4; 2.080 every 32; array 7.69 x 9.24 um
+2T_thick_L45n: pitch 0.88 x 2.0 um = 1.760 um2 per bit core; 2.085 with a strap every 4; 1.801 every 32; array 7.69 x 8.00 um
+3T_allthick_L45n: pitch 0.88 x 2.85 um = 2.508 um2 per bit core; 2.971 with a strap every 4; 2.566 every 32; array 7.69 x 11.40 um
+2T_allthick_L45n: pitch 0.88 x 2.15 um = 1.892 um2 per bit core; 2.241 with a strap every 4; 1.936 every 32; array 7.69 x 8.60 um
+mixed (3T_thin_L13n / 3T_thick_L45n alternating): array 7.69 x 17.20 um
+rules {'cnt_c': 0.02, 'gat_c': 0.13, 'cnt_c_end': 0.02, 'cnt_f': 0.11, 'cnt_d': 0.07, 'act_b': 0.21, 'tgo_a': 0.105, 'tgo_b': 0.105, 'tgo_c': 0.34, 'tgo_d': 0.34}: column pitch 0.88 um; wrote gain_t2tgo_nomark.gds
+3T_thin_L13n: pitch 0.88 x 1.99 um = 1.751 um2 per bit core; 1.792 with a strap every 32; 1.792 every 32; array 7.04 x 7.96 um
+3T_thick_L45n: pitch 0.88 x 2.31 um = 2.033 um2 per bit core; 2.080 with a strap every 32; 2.080 every 32; array 7.04 x 9.24 um
+3T_allthick_L45n: pitch 0.88 x 2.85 um = 2.508 um2 per bit core; 2.566 with a strap every 32; 2.566 every 32; array 7.04 x 11.40 um

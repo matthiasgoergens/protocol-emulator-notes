@@ -37,19 +37,24 @@ LY = {"Activ": (1, 0), "GatPoly": (5, 0), "Cont": (6, 0), "Metal1": (8, 0), "Via
 # Cont 0.02 across a strip (Cnt.c; the PDK cell's PMOS pads are 0.20 wide) and a poly end cap of
 # 0.13 (Gat.c; the PDK cell's PMOS gates). Along the strips the PDK cell keeps 0.07 and Cnt.f 0.11,
 # so the row height is unchanged. x = end cap + strip + Gat.d 0.07 + poly pad 0.30 + Gat.b 0.18.
-STANDARD = dict(cnt_c=0.07, gat_c=0.18)
-PDK = dict(cnt_c=0.02, gat_c=0.13)
+STANDARD = dict(cnt_c=0.07, gat_c=0.18, cnt_c_end=0.07, cnt_f=0.11, cnt_d=0.07, act_b=0.21,
+                tgo_a=0.27, tgo_b=0.27, tgo_c=0.34, tgo_d=0.34)
+PDK = dict(STANDARD, cnt_c=0.02, gat_c=0.13)
 RULES = dict(STANDARD)
 
 def configure(**rules):
-    global RULES, XS0, SWA, XC, XP0, PX, XW, DX, SW
+    global RULES, XS0, SWA, XC, XP0, PW, PX, XW, DX, SW
     RULES = dict(STANDARD, **rules)
     XS0 = RULES["gat_c"]                        # strip left edge = MS gate end cap
     SWA = round(0.16 + 2 * RULES["cnt_c"], 3)   # strip width (contacts across it)
     XC = round(XS0 + SWA / 2, 3)                # contact / RBL column
     XP0 = round(XS0 + SWA + 0.07, 3)            # SN poly pad (Gat.d from the strip)
-    PX = round(XP0 + 0.30 + 0.18, 3)            # pad (Cnt.d 0.07 around the contact) + Gat.b
+    PW = round(0.16 + 2 * RULES["cnt_d"], 3)    # pad (Cnt.d around the contact)
+    PX = round(XP0 + PW + 0.18, 3)              # + Gat.b
     XW = round(XC + 0.41, 3)                    # WBL track (Metal2 space 0.21 from RBL)
+    # two Metal2 tracks per column (RBL over the strip, WBL beside it; M2.a 0.20, M2.b 0.21) set a
+    # floor on the pitch once the front-end rules are relaxed enough
+    PX = round(max(PX, XW + 0.10 + 0.21 + 0.10 - XC), 3)
     assert PX - XW - 0.10 + XC - 0.10 >= 0.21 - 1e-9, "WBL too close to the next column's RBL"
     # the strap's GND track (x 0.02..0.22 in the strap) must keep M2.b 0.21 from the WBL of the
     # column before it; if the column is narrower, shift the strap's contents right by DX and widen it
@@ -79,37 +84,59 @@ def vname(v):
             f"{'_S2' if v.get('stack', 1) == 2 else ''}{'_P' if v.get('pms') else ''}")
 
 def geometry(v):
-    n = 0.03 if v["narrow"] else 0    # the dogbone's width steps keep 0.07 from the gate (Gat.d)
-    sx = (v.get("stack", 1) - 1) * (v["lmw"] + 0.18)     # a second write gate, at Gat.b
-    d = round(v["lmw"] - 0.45 + 2 * n + sx, 3)   # everything above the write gate moves up by this
-    k = 0 if v["ox"] == "thick" else round(0.21 - 0.54, 3)   # and the bar and strip A by this
-    k = round(k + (0.41 if v.get("pms") else 0), 3)          # n-well clearance (NW.c + NW.d)
-    up = lambda p: tuple(round(x + d, 3) for x in p)
-    upk = lambda p: tuple(round(x + d + k, 3) for x in p)
-    w0 = 0.19 + n
+    """y positions of the upper row of a tile (the lower row is its mirror image), from the rule
+    values in RULES. Upwards from the shared WBL contact at y = 0:
+      half contact 0.08, Cnt.f, [dogbone step n], WWL gate(s), [n], Cnt.f, SN contact 0.16,
+      Activ enclosure of Cont along the strip (cnt_c_end), then to the bar: Act.b (thin strip B
+      or all-thick), or TGO.a + TGO.b (thick strip B next to a thin bar);
+      bar 0.30, Gat.d 0.07, MS gate (L 0.13, or 0.45 all-thick) with the SN poly pad
+      (0.16 + 2 Cnt.d), Gat.b (0.25 between thick gates), RWL, Cnt.f, half contact 0.08."""
+    r = RULES
+    # a dogbone strip B narrows under the write gate; its width steps keep Gat.d 0.07 from the gate,
+    # and the wide ends enclose the contacts by cnt_c_end, so a gate edge sits at least
+    # max(Cnt.f, cnt_c_end + 0.07) from a contact (0.14 at the standard rules, where draw2.py wrote
+    # it as Cnt.f 0.11 plus a 0.03 step)
+    cg = max(r["cnt_f"], r["cnt_c_end"] + 0.07) if v["narrow"] else r["cnt_f"]
+    allthick = v["ox"] == "allthick"
+    w0 = round(0.08 + cg, 3)
     wwls = [(round(w0 + j * (v["lmw"] + 0.18), 3), round(w0 + j * (v["lmw"] + 0.18) + v["lmw"], 3))
             for j in range(v.get("stack", 1))]
-    g = dict(b_top=0.98 + d, sn_c=up((0.75, 0.91)), wwl=wwls[0], wwls=wwls, tgo_top=1.25 + d,
-             pms=v.get("pms", False),
-             bar=upk((1.52, 1.82)), ms=upk((1.89, 2.02)), pad=upk((1.89, 2.19)),
-             pad_c=upk((1.96, 2.12)), thick=v["ox"] != "thin", narrow=v["narrow"])
-    if v["ox"] == "allthick":
-        # all three transistors thick oxide (L 0.45): no keep-out between strip B and the bar,
-        # and the storage and read gates grow by 0.32 each; ThickGateOx covers the whole tile
-        g.update(ms=upk((1.89, 2.34)), pad=upk((1.89, 2.34)), pad_c=upk((2.035, 2.195)))
-        if v["kind"] == "3T":
-            g["rwl"] = upk((2.59, 3.04))      # Gat.b1: 0.25 between thick-oxide gates
-            g["H"] = round(3.23 + d + k, 3)
-        else:
-            g["H"] = round(2.70 + d + k, 3)
+    wtop = wwls[-1][1]
+    sn0 = round(wtop + cg, 3)
+    sn_c = (sn0, round(sn0 + 0.16, 3))
+    b_top = round(sn_c[1] + r["cnt_c_end"], 3)
+    thick_b = v["ox"] == "thick"
+    if thick_b:
+        # ThickGateOx edge: TGO.a past strip B and TGO.c past the write gate; the bar TGO.b beyond
+        tgo_top = round(max(b_top + r["tgo_a"], wtop + r["tgo_c"]), 3)
+        bar0 = round(max(tgo_top + r["tgo_b"], b_top + r["act_b"]), 3)
+    else:
+        tgo_top = None
+        bar0 = round(b_top + r["act_b"], 3)
+    if v.get("pms"):
+        bar0 = round(bar0 + 0.41, 3)          # n-well clearance (NW.c + NW.d), as draw2.py
+    bar = (bar0, round(bar0 + 0.30, 3))
+    lms = 0.45 if allthick else 0.13
+    ms0 = round(bar[1] + 0.07, 3)
+    if thick_b:
+        ms0 = round(max(ms0, tgo_top + r["tgo_d"]), 3)   # TGO.d: thin gate clear of ThickGateOx
+    pad_h = round(0.16 + 2 * r["cnt_d"], 3)
+    ms = (ms0, round(ms0 + lms, 3))
+    pad = (ms0, round(ms0 + max(pad_h, lms), 3))
+    pc = round(ms0 + (max(pad_h, lms) - 0.16) / 2, 3)
+    pad_c = (pc, round(pc + 0.16, 3))
+    g = dict(b_top=b_top, sn_c=sn_c, wwl=wwls[0], wwls=wwls, tgo_top=tgo_top, pms=v.get("pms", False),
+             bar=bar, ms=ms, pad=pad, pad_c=pad_c, thick=v["ox"] != "thin", narrow=v["narrow"])
+    gb = 0.25 if allthick else 0.18                     # Gat.b1 between thick-oxide gates
+    if v["kind"] == "3T":
+        r0 = round(pad[1] + gb, 3)
+        g["rwl"] = (r0, round(r0 + lms, 3))
+        g["H"] = round(g["rwl"][1] + r["cnt_f"] + 0.08, 3)
+    else:
+        g["H"] = round(pad[1] + r["cnt_f"] + 0.08, 3)
+    if allthick:
         g["tgo_top"] = g["H"]
         g["allthick"] = True
-        return g
-    if v["kind"] == "3T":
-        g["rwl"] = upk((2.37, 2.50))
-        g["H"] = round(2.69 + d + k, 3)
-    else:
-        g["H"] = round(2.38 + d + k, 3)
     return g
 
 def R(cell, layer, x0, y0, x1, y1):
@@ -125,9 +152,11 @@ def tile(lib, v):
             a, b = sorted((s * y0, s * y1))
             R(c, layer, x0, a, x1, b)
         if g["narrow"]:                                              # strip B, a dogbone
-            r("Activ", XS0, 0, XS0 + SWA, 0.15)
-            r("Activ", XC - 0.075, 0.15, XC + 0.075, g["sn_c"][0] - 0.07)
-            r("Activ", XS0, g["sn_c"][0] - 0.07, XS0 + SWA, g["b_top"])
+            ys1 = round(g["wwls"][0][0] - 0.07, 3)
+            ys2 = round(g["wwls"][-1][1] + 0.07, 3)
+            r("Activ", XS0, 0, XS0 + SWA, ys1)
+            r("Activ", XC - 0.075, ys1, XC + 0.075, ys2)
+            r("Activ", XS0, ys2, XS0 + SWA, g["b_top"])
         else:
             r("Activ", XS0, 0, XS0 + SWA, g["b_top"])                   # strip B
         for w in g["wwls"]:
@@ -141,10 +170,10 @@ def tile(lib, v):
         r("Activ", 0, g["bar"][0], PX, g["bar"][1])                  # GND / RWL bar
         r("Activ", XS0, g["bar"][0], XS0 + SWA, H)                       # strip A
         r("GatPoly", 0, g["ms"][0], XP0, g["ms"][1])                # MS gate with its left end-cap
-        r("GatPoly", XP0, g["pad"][0], XP0 + 0.30, g["pad"][1])           # SN pad
-        r("Cont", XP0 + 0.07, g["pad_c"][0], XP0 + 0.23, g["pad_c"][1])
-        r("Metal1", XC - 0.13, g["sn_c"][0], XP0 + 0.23, g["sn_c"][1])          # SN link, across
-        r("Metal1", XP0 + 0.07, g["sn_c"][0], XP0 + 0.23, g["pad_c"][1] + 0.05)  # SN link, up to the pad
+        r("GatPoly", XP0, g["pad"][0], XP0 + PW, g["pad"][1])           # SN pad
+        r("Cont", XP0 + PW / 2 - 0.08, g["pad_c"][0], XP0 + PW / 2 + 0.08, g["pad_c"][1])
+        r("Metal1", XC - 0.13, g["sn_c"][0], XP0 + PW / 2 + 0.08, g["sn_c"][1])          # SN link, across
+        r("Metal1", XP0 + PW / 2 - 0.08, g["sn_c"][0], XP0 + PW / 2 + 0.08, g["pad_c"][1] + 0.05)  # SN link, up to the pad
         if "rwl" in g:
             r("GatPoly", 0, g["rwl"][0], PX, g["rwl"][1])            # RWL (3T)
         # RBL: contact shared with the neighbouring tile at y = +-H, via straight up to Metal2
@@ -324,8 +353,10 @@ if __name__ == "__main__":
     # MARKERS: none, sram, digi or sram,digi, drawn over each array
     tier, which, out = sys.argv[1], sys.argv[2], sys.argv[3]
     sys.argv = sys.argv[:1] + sys.argv[4:]
-    rules = PDK if tier == "pdk" else STANDARD if tier == "standard" else dict(kv.split("=") for kv in tier.split(","))
-    configure(**{k: float(v) for k, v in rules.items()})
+    base, _, extra = tier.partition(":")
+    rules = dict({"pdk": PDK, "standard": STANDARD}[base])
+    rules.update({k: float(v) for k, v in (kv.split("=") for kv in extra.split(",") if kv)})
+    configure(**rules)
     which = [] if which == "none" else which.split(",")
     cols, npairs, every = (int(x) for x in sys.argv[1:4]) if len(sys.argv) > 3 else (8, 2, 4)
     rest = sys.argv[4:]
