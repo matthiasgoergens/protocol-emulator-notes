@@ -156,6 +156,23 @@ let () =
     let nst = match rf with Some x -> List.length (List.filter (( = ) 2) x.raw) | None -> 0 in
     total_frames := !total_frames + 1;
     ignore (result (Printf.sprintf "raw sample stream from B (SP %d): %d stuff bits marked, destuffed = reference bits" tr.sp nst) p [ s ]));
+  (* S4: a node must not acknowledge its own frame. A alone with a reference node that does not
+     acknowledge: A's TX thread must see no ACK, i.e. A's RX thread kept the ACK slot recessive *)
+  begin
+    let bus = Can_model.Bus.create [| Sim.ns 50.; Sim.ns 40. |] in
+    let a = make_node ~name:"A" ~pins:pins_a ~bus_idx:0 in
+    let s = make_seq ~bus ~hz:clock_hz ~name:"seq" ~a () in
+    let r = Can_model.create ~bus ~idx:1 ~skip_ack:true () in
+    submit a ~at:(us 30.) [ fr 0x155 2 ];
+    ignore (Sim.run ~until:(us 400.) [ s.agent; ref_agent r ]);
+    a.queue <- [];
+    let st = List.rev_map (fun (_, _, v) -> v) a.tx_status in
+    let own = List.filter_map (fun rf -> rf.ack_level) (frames_of a) in
+    total_frames := !total_frames + List.length st;
+    let p = (if st <> [] && List.for_all (( = ) 2) st then [] else [ Printf.sprintf "A's TX statuses [%s]" (String.concat "," (List.map string_of_int st)) ])
+            @ (if own <> [] && List.for_all (( = ) 1) own then [] else [ "A's RX saw its ACK slot dominant" ]) in
+    ignore (result (Printf.sprintf "A alone, reference not acknowledging: %d attempts, all 'no ACK'" (List.length st)) p [ s ])
+  end;
   (* ---- controls *)
   print_endline "Controls (each must be caught):";
   let caught name ok = Printf.printf "  %-78s %s\n" name (if ok then "caught" else "MISSED"); if not ok then incr fails in
