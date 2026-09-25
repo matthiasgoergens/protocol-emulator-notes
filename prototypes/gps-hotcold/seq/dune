@@ -1,0 +1,10 @@
+(library
+ (name seqgps)
+ (wrapped false)
+ (modules isa sequencer harness)
+ (libraries hardcaml))
+
+(executable
+ (name uart_rx)
+ (modules uart_rx)
+ (libraries hardcaml seqgps unix))

@@ -1,0 +1,44 @@
+##### sense 10 ns; thin untricked (VLO 0, VBAR 0) and thick-write: W 0.30 baseline
+../../gain-cell/tricks-thin/results/hold-lv-vlo0.txt
+  mos_ss   27C  1: written 0.628 end 0.0  ->             1.9 ms   0: written -0.105 end 0.189 ->               >50m   lifetime 1.9 ms
+  worst corner: 1.31 us
+../../gain-cell/tricks-thin/results/hold-hv-vlo0.txt
+  mos_ss   27C  1: written 0.366 end 0.253  ->  0 (written wrong)   0: written -0.082 end 0.097 ->               >50m   lifetime 0 (written wrong)
+  worst corner: 0 (written wrong)
+##### W 0.20
+results/hold-lv-w20-vlo0.txt
+  mos_ss   27C  1: written 0.583 end 0.0  ->             950 us   0: written -0.128 end 0.208 ->               >50m   lifetime 950 us
+  worst corner: 931 ns
+results/hold-hv-w20-vlo0.txt
+  mos_ss   27C  1: written 0.329 end 0.233  ->  0 (written wrong)   0: written -0.100 end 0.111 ->               >50m   lifetime 0 (written wrong)
+  worst corner: 0 (written wrong)
+##### sense 20 ns; thin untricked (VLO 0, VBAR 0) and thick-write: W 0.30 baseline
+../../gain-cell/tricks-thin/results/hold-lv-vlo0.txt
+  mos_ss   27C  1: written 0.628 end 0.0  ->            2.39 ms   0: written -0.105 end 0.189 ->               >50m   lifetime 2.39 ms
+  worst corner: 842 ns
+../../gain-cell/tricks-thin/results/hold-hv-vlo0.txt
+  mos_ss   27C  1: written 0.366 end 0.253  ->             261 us   0: written -0.082 end 0.097 ->               >50m   lifetime 261 us
+  worst corner: 261 us
+##### W 0.20
+results/hold-lv-w20-vlo0.txt
+  mos_ss   27C  1: written 0.583 end 0.0  ->             1.3 ms   0: written -0.128 end 0.208 ->               >50m   lifetime 1.3 ms
+  worst corner: 1.03 us
+results/hold-hv-w20-vlo0.txt
+  mos_ss   27C  1: written 0.329 end 0.233  ->  0 (written wrong)   0: written -0.100 end 0.111 ->               >50m   lifetime 0 (written wrong)
+  worst corner: 0 (written wrong)
+read thresholds from results/read-w20-bar0.txt, sense at 20 ns, RBL < 0.5 reads 1, > 0.7 reads 0 (NMOS storage)
+  mos_ff   27C  a 1 reads above 0.207 V, a 0 reads below 0.167 V
+  mos_ff   85C  a 1 reads above 0.189 V, a 0 reads below 0.142 V
+  mos_ss   27C  a 1 reads above 0.392 V, a 0 reads below 0.363 V
+  mos_ss   85C  a 1 reads above 0.348 V, a 0 reads below 0.316 V
+  mos_tt   27C  a 1 reads above 0.295 V, a 0 reads below 0.262 V
+  mos_tt   85C  a 1 reads above 0.253 V, a 0 reads below 0.215 V
+
+results/hold-hv-w20-vlo0.txt
+  mos_ff   27C  1: written 0.526 end 0.029  ->            7.83 ms   0: written -0.102 end 0.057 ->               >50m   lifetime 7.83 ms
+  mos_ff   85C  1: written 0.607 end 0.018  ->             5.7 ms   0: written -0.089 end 0.044 ->               >50m   lifetime 5.7 ms
+  mos_ss   27C  1: written 0.329 end 0.233  ->  0 (written wrong)   0: written -0.100 end 0.111 ->               >50m   lifetime 0 (written wrong)
+  mos_ss   85C  1: written 0.431 end 0.205  ->            11.9 ms   0: written -0.094 end 0.093 ->               >50m   lifetime 11.9 ms
+  mos_tt   27C  1: written 0.438 end 0.145  ->            12.5 ms   0: written -0.093 end 0.093 ->               >50m   lifetime 12.5 ms
+  mos_tt   85C  1: written 0.524 end 0.088  ->            13.4 ms   0: written -0.098 end 0.073 ->               >50m   lifetime 13.4 ms
+  worst corner: 0 (written wrong)

@@ -1,0 +1,8 @@
+== demo3_noslave (simulation)
+  replay through interpreter   PASS  6000 cycles, every output equal
+  prediction (whole trace)     PASS  6000 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  spi decode (mosi)            PASS  got [a5 3c] expected prefix [a5 3c]
+  i2c decode                   PASS  got [a0 5a] acks NN stop=true expected [a0 5a]
+RESULT demo3_noslave PASS
+  (248 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.68 s)

@@ -1,0 +1,8 @@
+== uart_loop (simulation)
+  replay through interpreter   PASS  2600 cycles, every output equal
+  prediction (whole trace)     PASS  2600 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  uart decode pin 7            PASS  got [4f 4b 21] expected [4f 4b 21]
+  host bytes                   PASS  got [4f 4b 21] expected [4f 4b 21]
+RESULT uart_loop PASS
+  (48 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.13 s)

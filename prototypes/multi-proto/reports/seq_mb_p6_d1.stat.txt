@@ -1,0 +1,45 @@
+
+7. Printing statistics.
+
+=== deadline_sequencer_mb_p6_d1 ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1405        - wires
+     2034        - wire bits
+      221        - public wires
+      850        - public wire bits
+       24        - ports
+      165        - port bits
+     1424 2.26E+04 cells
+        8  101.606   sg13g2_a21o_1
+      291 2.64E+03   sg13g2_a21oi_1
+       14  203.213   sg13g2_a221oi_1
+      136  1475.41   sg13g2_a22oi_1
+       33  299.376   sg13g2_and2_1
+        2   25.402   sg13g2_and3_1
+        3   43.546   sg13g2_and4_1
+      227 1.11E+04   sg13g2_dfrbpq_1
+       90  489.888   sg13g2_inv_1
+        9  163.296   sg13g2_mux2_1
+       21   800.15   sg13g2_mux4_1
+       88  638.669   sg13g2_nand2_1
+       27  244.944   sg13g2_nand2b_1
+       26  235.872   sg13g2_nand3_1
+        1   12.701   sg13g2_nand3b_1
+        8   87.091   sg13g2_nand4_1
+       76  551.578   sg13g2_nor2_1
+       21  190.512   sg13g2_nor2b_1
+       23  208.656   sg13g2_nor3_1
+        2   21.773   sg13g2_nor4_1
+      287  2.6E+03   sg13g2_o21ai_1
+        7   63.504   sg13g2_or2_1
+        1   12.701   sg13g2_or3_1
+        1   14.515   sg13g2_or4_1
+       14  203.213   sg13g2_xnor2_1
+        8  116.122   sg13g2_xor2_1
+
+   Chip area for module '\deadline_sequencer_mb_p6_d1': 22567.809600
+     of which used for sequential elements: 11120.457600 (49.28%)
+

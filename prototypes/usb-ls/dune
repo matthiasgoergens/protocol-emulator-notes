@@ -1,0 +1,31 @@
+(library
+ (name usbls)
+ (wrapped false)
+ (modules ls_host descriptors ls_rx ls_tx ls_sie ls_dev ref_device bench scenario dut_hard
+  isa sequencer harness isa_ls sequencer_ls crc_unit fw_sys asm fw_codec firmware controller dut_fw)
+ (libraries hardcaml))
+
+(executable
+ (name main_hard)
+ (modules main_hard)
+ (libraries hardcaml usbls))
+
+(executable
+ (name main_fw)
+ (modules main_fw)
+ (libraries hardcaml usbls))
+
+(executable
+ (name dbg2)
+ (modules dbg2)
+ (libraries hardcaml usbls))
+
+(executable
+ (name emit)
+ (modules emit)
+ (libraries hardcaml usbls))
+
+(executable
+ (name matcher_exp)
+ (modules matcher_model matcher_exp)
+ (libraries hardcaml usbls))

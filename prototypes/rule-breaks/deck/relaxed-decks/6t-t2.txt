@@ -1,0 +1,21 @@
+# mkdeck.py 6t-t2 Cnt.c=0.02 Cnt.c.digibnd=0.02 Cnt.c.Digi=0.02 Gat.c=0.13 NW.c=0.24 NW.d=0.24 pSD.i=0.18 pSD.j=0.26
+maximal: SRAM marker exemption removed (SRAM = empty layer)
+maximal: Cnt.c.Digi 0.05 -> 0.02 (1 substitution(s))
+maximal: Gat.c 0.18 -> 0.13 (1 substitution(s))
+maximal: NW.c 0.31 -> 0.24 (1 substitution(s))
+maximal: NW.d 0.31 -> 0.24 (1 substitution(s))
+maximal: pSD.i 0.30 -> 0.18 (1 substitution(s))
+maximal: pSD.j 0.30 -> 0.26 (1 substitution(s))
+json tech_mod_relaxed.json: Cnt_c 0.07 -> 0.02
+json tech_mod_relaxed.json: Gat_c 0.18 -> 0.13
+json tech_mod_relaxed.json: NW_c 0.31 -> 0.24
+json tech_mod_relaxed.json: NW_d 0.31 -> 0.24
+json tech_mod_relaxed.json: pSD_i 0.3 -> 0.18
+json tech_mod_relaxed.json: pSD_j 0.3 -> 0.26
+json sg13g2_tech_default.json: Cnt_c 0.07 -> 0.02
+json sg13g2_tech_default.json: Cnt_c_digibnd 0.05 -> 0.02
+json sg13g2_tech_default.json: Gat_c 0.18 -> 0.13
+json sg13g2_tech_default.json: NW_c 0.31 -> 0.24
+json sg13g2_tech_default.json: NW_d 0.31 -> 0.24
+json sg13g2_tech_default.json: pSD_i 0.3 -> 0.18
+json sg13g2_tech_default.json: pSD_j 0.3 -> 0.26

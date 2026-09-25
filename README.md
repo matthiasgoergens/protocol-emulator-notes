@@ -69,7 +69,7 @@ commits used.
 
 ## Licence
 
-Notes and scripts: MIT. The two shift-register variants under
+Notes and scripts: Apache-2.0 since 2026-09-25 (MIT before; see `NOTICE`). The two shift-register variants under
 `measurements/pio-area/variants/` are derived from fpga_pio and keep its
 BSD-2-Clause header. `measurements/fabulous/synth/models_pack_onelatch.v` is
 derived from FABulous's Apache-2.0 `models_pack.v` with one module replaced.

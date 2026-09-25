@@ -1,0 +1,64 @@
+13:import klayout.db as pya
+14:import klayout.rdb as rdb
+16:from klayout_tools import parse_lyp_layers
+28:PDK_ROOT = os.getenv("PDK_ROOT")
+29:PDK_NAME = os.getenv("PDK") or "sky130A"
+30:LYP_DIR = f"{PDK_ROOT}/{PDK_NAME}/libs.tech/klayout/tech"
+33:if not PDK_ROOT:
+34:    logging.error("PDK_ROOT environment variable not set")
+60:            f"{PDK_ROOT}/{PDK_NAME}/libs.tech/magic/{PDK_NAME}.magicrc",
+64:            PDK_ROOT,
+81:            f"Klayout {check} failed with {report.num_items()} DRC violations"
+85:def klayout_custom_drc(
+89:    klayout_args = ["klayout", "-b", "-r", script_path]
+91:        klayout_args.extend(["-rd", f"{k}={v}"])
+93:        klayout_args.extend(["-rd", f"{k}={report_file}"])
+94:    klayout = subprocess.run(klayout_args)
+95:    if klayout.returncode != 0:
+96:        raise PrecheckFailure(f"Klayout {check} failed")
+101:def klayout_drc(
+104:    script=f"{PDK_NAME}_mr.drc",
+108:    logging.info(f"Running klayout {check} on {gds}")
+114:        "thr": "1",  # single-threaded operation in sky130A_mr.drc to work around klayout bug
+117:    klayout_custom_drc(check, script, script_vars, ["report", "report_file"])
+120:def klayout_zero_area(gds: str):
+121:    return klayout_drc(gds, "zero_area", "zeroarea.rb.drc")
+124:def klayout_sg13g2(gds: str):
+125:    return klayout_drc(
+128:        f"{PDK_ROOT}/{PDK_NAME}/libs.tech/klayout/tech/drc/ihp-sg13g2.drc",
+132:def klayout_gf180mcuD_rule_deck(gds: str, top_module: str, check: str, decks: str):
+133:    # All gf180mcuD DRC runs go through the PDK's unified rule deck
+134:    # (gf180mcu.drc); `decks` selects which rule groups to run (see its
+136:    logging.info(f"Running klayout {check} on {gds}")
+137:    script = f"{PDK_ROOT}/{PDK_NAME}/libs.tech/klayout/tech/drc/gf180mcu.drc"
+143:        "threads": "1",  # single-threaded to work around a klayout bug
+146:    klayout_custom_drc(check, script, script_vars, ["report"])
+149:def klayout_gf180mcuD_antenna(gds: str, top_module: str):
+152:    return klayout_gf180mcuD_rule_deck(gds, top_module, "antenna", "antenna")
+155:def klayout_gf180mcuD_drc(gds: str, top_module: str):
+159:    return klayout_gf180mcuD_rule_deck(
+164:def klayout_checks(gds: str, expected_name: str, tech: str):
+314:    klayout_drc(
+315:        gds=gds, check="nwell_urpm", script="nwell_urpm.drc", extra_vars=extra_vars
+401:    default_tech = PDK_NAME
+412:    logging.info(f"PDK_ROOT: {PDK_ROOT}")
+466:    elif tech == "ihp-sg13g2" or tech == "gf180mcuD":
+488:            "name": "KLayout FEOL",
+489:            "check": lambda: klayout_drc(gds_file, "feol"),
+493:            "name": "KLayout BEOL",
+494:            "check": lambda: klayout_drc(gds_file, "beol"),
+498:            "name": "KLayout offgrid",
+499:            "check": lambda: klayout_drc(gds_file, "offgrid"),
+503:            "name": "KLayout pin label overlapping drawing",
+504:            "check": lambda: klayout_drc(
+507:                "pin_label_purposes_overlapping_drawing.rb.drc",
+511:            "name": "KLayout SG13G2 DRC",
+512:            "check": lambda: klayout_sg13g2(gds_file),
+513:            "techs": ["ihp-sg13g2"],
+515:        {"name": "KLayout zero area", "check": lambda: klayout_zero_area(gds_file)},
+517:            "name": "KLayout Checks",
+518:            "check": lambda: klayout_checks(gds_file, top_module, tech),
+543:            "name": "KLayout GF180MCU DRC",
+544:            "check": lambda: klayout_gf180mcuD_drc(gds_file, top_module),
+549:            "check": lambda: klayout_gf180mcuD_antenna(gds_file, top_module),
+557:            "techs": ["sky130A", "ihp-sg13g2", "gf180mcuD"],

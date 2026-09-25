@@ -1,0 +1,7 @@
+== trace_overflow (simulation)
+  trace buffer overflowed: checking cycles 0..6144 only
+  replay through interpreter   PASS  6145 cycles, every output equal
+  prediction (whole trace)     PASS  6145 cycles identical to the OCaml board model
+  trace overflow reported      PASS  overflow true, cycles checked 6145 of 20000
+RESULT trace_overflow PASS
+  (2048 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 1}, 0.40 s)

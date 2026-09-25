@@ -1,0 +1,4 @@
+# control: wide RTL with the stock 6-bit address field (select instr 5 0, zero-extended); commit 17ae3d4 + this one-line mutation
+# command: dune build && ./_build/default/main.exe lockstep
+wide variant lockstep: 300 programmes x 2000 cycles, 561761 mismatching cycles
+FAILURES

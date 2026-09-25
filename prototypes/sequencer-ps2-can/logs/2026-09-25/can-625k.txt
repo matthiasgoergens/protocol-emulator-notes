@@ -1,0 +1,31 @@
+CAN firmware, 625 kbit/s at 60 MHz (N=24 SP=18 SJW=2 slots): RX thread 208 words, TX thread 60 words
+Scenarios:
+  one sequencer, nodes A (0x123) and B (0x0F0) start together, ref +0.3% PASS (54000 cycles, 0 mismatches)
+      bus order: 0f0[8] 90 ad ca e7 04 21 3e 5b, 123[3] f5 12 2f, 7ffr[2]; A lost arbitration 1 time(s) and retransmitted
+  two sequencers at +0.5% / -0.5%, ref +0.2%, 3-way arbitration      PASS (120000 cycles, 0 mismatches)
+      bus order: 3A4 3A5 3A6 (ids 3A4 < 3A5 < 3A6)
+  raw sample stream: not possible at this timing (hdr_d: sample point too early for k=12 (m=-1))
+  A alone, reference not acknowledging: 3 attempts, all 'no ACK'     PASS (24000 cycles, 0 mismatches)
+Controls (each must be caught):
+  A's stream missing its first stuff bit: B end codes [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], ref errors [stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff], A tx [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3] caught
+  A's CRC with its last bit flipped: B end codes [2,2,2,2,2], ref errors [crc,crc,crc,crc,crc], A tx [2,2,2,2,2] caught
+  B without resync, clocks 1% apart: B good frames 0 (codes [2,2,2]); with resync 1; ref errors [form,bit,form,bit,form,bit] caught
+  B with CRC polynomial 0x4599 xor 1: B end codes [2,2,2,2,2]                    caught
+  no arbitration check, A and B start together: ref errors [stuff,stuff,stuff], ref good frames 0 caught
+Constrained random (12 runs): two sequencer instances (1 or 2 nodes each) and a reference node,
+  clocks within +-0.5 %, delays 10-150 ns, random frames, often submitted simultaneously:
+  seed  1: 6 frames, spread, clocks -98/-3703/-91 ppm, 2 lost arbitrations PASS (114085 cycles, 0 mismatches)
+  seed  2: 5 frames, spread, clocks -449/+1213/-1711 ppm, 1 lost arbitrations PASS (111071 cycles, 0 mismatches)
+  seed  3: 6 frames, spread, clocks +2784/+604/-3082 ppm, 0 lost arbitrations PASS (124598 cycles, 0 mismatches)
+  seed  4: 3 frames, spread, clocks +1468/-3448/-1612 ppm, 0 lost arbitrations PASS (97150 cycles, 0 mismatches)
+  seed  5: 5 frames, spread, clocks +3487/-2106/-2857 ppm, 0 lost arbitrations PASS (108378 cycles, 0 mismatches)
+  seed  6: 5 frames, simultaneous, clocks +17/+3456/-1360 ppm, 4 lost arbitrations PASS (92379 cycles, 0 mismatches)
+  seed  7: 7 frames, spread, clocks -2538/+2124/+4805 ppm, 4 lost arbitrations PASS (163891 cycles, 0 mismatches)
+  seed  8: 6 frames, spread, clocks -2955/+1068/-2077 ppm, 0 lost arbitrations PASS (104419 cycles, 0 mismatches)
+  seed  9: 7 frames, simultaneous, clocks -3460/+549/+4258 ppm, 5 lost arbitrations PASS (104681 cycles, 0 mismatches)
+  seed 10: 5 frames, simultaneous, clocks +2540/+2705/+2716 ppm, 3 lost arbitrations PASS (90533 cycles, 0 mismatches)
+  seed 11: 4 frames, spread, clocks +2680/-2767/-3395 ppm, 0 lost arbitrations PASS (92286 cycles, 0 mismatches)
+  seed 12: 4 frames, spread, clocks +55/-2754/+1192 ppm, 0 lost arbitrations PASS (98239 cycles, 0 mismatches)
+random: 12 of 12 runs pass; 19 arbitration losses resolved
+totals: 72 frames on the bus, 1727290 cycles compared in lockstep, 0 mismatches
+CAN: ALL PASS

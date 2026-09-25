@@ -1,0 +1,27 @@
+codex
+## Findings
+
+1. **The PE model’s verification does not establish that it matches `pe16`.** In [pe_array.py](tier2/pe_array.py:20), `PE.clock` updates every state unconditionally; there is no `en` input, although `pe16` only updates state when `en` is asserted. The extension’s negate, carry, and wrap behaviour is modelled in Python, but no extension RTL is provided to verify it. Also, [acq.py](tier2/acq.py:93) compares the row against a closed form and an FFT search, not against a cycle-level simulation of `pe16`. The “0 mismatches” in `results/tier2/acq_verify.txt` therefore checks internal consistency, not PE equivalence. **Check:** model `en`, configuration/readout and extension logic from RTL, then compare cycle by cycle, including saturation boundaries and `-32768` negation.
+
+2. **The timing report omits pass costs used by the stated architecture.** [acq.py](tier2/acq.py:252) multiplies the number of correlation passes by replay, readout and configuration clocks, but does not count host-side peak search/refinement, sample-bank switching, or loading start phase/code state. The README’s warm-start estimate further assumes nine bins and eight PRNs without evidence that acquisition actually reuses this data or overlaps those host operations. These are presented as “chip time” estimates, but the listed time is not an end-to-end acquisition latency. **Check:** add explicit cycle counts for each setup, bank, host and refinement step, and state which can overlap capture.
+
+3. **The block duration is approximate, and acquisition blocks do not span exactly 1 ms.** `BLK=3274` at 3.2736 MS/s is 1.000122 ms. The implementation processes `N × 3274` samples, while the description calls it N ms. That introduces a 0.122 ms offset per 1,000 blocks, relevant to longer integrations/tracking epoch alignment. **Check:** report sample-count duration and test phase continuity across successive blocks.
+
+4. **`gpsl1.py`’s IF generator does not simulate the documented sampler.** It filters at 16.368 MHz, then takes every fifth sample (`ys[off::DECIM]`), without modelling a distinct pin sampler or its timing. More seriously, `acq.py`’s synthetic-signal `chip0` calculation assumes a fixed 70 ms delay, while `_tau` includes `code_phase_chips/F_CHIP + 0.07`; its modulo arithmetic is not a direct validation that acquisition’s sample offset maps to the injected code phase. **Check:** derive expected sampled code/carrier phase from `IFGen`’s actual `t_tx` and verify against acquisition for multiple offsets and chunk boundaries.
+
+5. **The position result is optimistic by construction.** `fix.py` uses the generator’s true ephemerides as assisted input, and `solve()` forms pseudoranges from decoded transmit times using `t_rx = max(t_tx) + 70 ms`. It does not estimate reception time from an independent clock observation; the common time choice is absorbed by the solved clock bias. The reported fix is therefore a synthetic, assisted case, not an end-to-end GPS time/ephemeris solution. **Check:** state that limitation alongside the position figures and test time recovery with independent receive-time error.
+
+6. **The README’s UART sweep claim is contradicted by its result.** The saved sweep has 240/240 byte errors at −60,000 ppm, but 0/240 at +60,000 ppm (`results/tier1/uart_rx_sweep.txt`). The README says all bytes are wrong at ±6%. **Check:** correct the claim or rerun with a sweep that includes both signs and document the asymmetric receiver behaviour.
+
+7. **Some cited results are absent.** The README cites `../systolic-storage/results/lef_areas.txt` for tag-lane areas, but that file is not present in the supplied result listing. It also cites a 2.33 dB subsampling loss without a dedicated result file; `acq_loss.txt` contains the measured comparison, but no standalone evidence isolates the sampler loss. **Check:** include the cited source artefacts or point to the exact measurement that supports each figure.
+
+## Verdicts (2026-09-25)
+1. Fair: the check is internal consistency with a Python pe16 model, not RTL. README says so now.
+2. Fair: the timing table is chip time only. README says so now.
+3. Already stated (3274 samples = 1.00012 ms); tracking uses code-epoch intervals, not fixed blocks.
+4. Partly: fix.py's diag_track.txt compares acquisition against the generator's actual light time
+   (errors 0.14-0.43 chip, all late: filter group delay). The MC tolerance of 2 samples covers it.
+5. Fair on ephemerides (already assisted, now stated at the figures). The t_rx choice is the
+   standard one; its error is absorbed by the clock bias, and satellite positions use t_tx.
+6. Wrong: uart_rx_sweep.txt has 240/240 bad bytes at both -60000 and +60000 ppm.
+7. Wrong: ../systolic-storage/results/lef_areas.txt exists; the 2.33 dB is the float row of acq_loss.txt.

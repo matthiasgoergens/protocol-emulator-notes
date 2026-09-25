@@ -1,0 +1,1569 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69+77 (git sha1 9ff27d29c-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+-- Running command `read_verilog systolic_matcher_en.v; hierarchy -check -top systolic_matcher_en; synth -top systolic_matcher_en -flatten; dfflibmap -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; stat -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Verilog-2005 frontend: systolic_matcher_en.v
+Parsing Verilog input from `systolic_matcher_en.v' to AST representation.
+Generating RTLIL representation for module `\systolic_matcher_en'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \systolic_matcher_en
+
+2.2. Analyzing design hierarchy..
+Top module:  \systolic_matcher_en
+Removed 0 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \systolic_matcher_en
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \systolic_matcher_en
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:741$134 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:733$132 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:725$130 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:717$128 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:709$126 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:701$124 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:693$122 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:685$120 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:677$118 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:669$116 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:661$114 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:653$112 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:645$110 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:637$108 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:629$106 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:621$104 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:606$100 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:587$95 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:580$94 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:561$89 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:554$88 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:535$83 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:528$82 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:509$77 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:502$76 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:483$71 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:476$70 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:457$65 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:450$64 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:431$59 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:424$58 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:405$53 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:398$52 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:379$47 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:372$46 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:353$41 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:346$40 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:327$35 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:320$34 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:301$29 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:294$28 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:275$23 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:268$22 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:249$17 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:242$16 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:222$11 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:215$10 in module systolic_matcher_en.
+Marked 1 switch rules as full_case in process $proc$systolic_matcher_en.v:203$8 in module systolic_matcher_en.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~133 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:741$134'.
+     1/1: $0\_324[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:733$132'.
+     1/1: $0\_304[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:725$130'.
+     1/1: $0\_284[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:717$128'.
+     1/1: $0\_264[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:709$126'.
+     1/1: $0\_244[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:701$124'.
+     1/1: $0\_224[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:693$122'.
+     1/1: $0\_204[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:685$120'.
+     1/1: $0\_184[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:677$118'.
+     1/1: $0\_164[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:669$116'.
+     1/1: $0\_144[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:661$114'.
+     1/1: $0\_124[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:653$112'.
+     1/1: $0\_104[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:645$110'.
+     1/1: $0\_84[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:637$108'.
+     1/1: $0\_64[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:629$106'.
+     1/1: $0\_44[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:621$104'.
+     1/1: $0\_24[4:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:614$102'.
+     1/1: $0\_12[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:606$100'.
+     1/1: $0\_15[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:602$99'.
+     1/1: $0\_18[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:595$97'.
+     1/1: $0\_28[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:587$95'.
+     1/1: $0\_34[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:580$94'.
+     1/1: $0\_31[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:576$93'.
+     1/1: $0\_37[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:569$91'.
+     1/1: $0\_48[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:561$89'.
+     1/1: $0\_54[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:554$88'.
+     1/1: $0\_51[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:550$87'.
+     1/1: $0\_57[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:543$85'.
+     1/1: $0\_68[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:535$83'.
+     1/1: $0\_74[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:528$82'.
+     1/1: $0\_71[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:524$81'.
+     1/1: $0\_77[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:517$79'.
+     1/1: $0\_88[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:509$77'.
+     1/1: $0\_94[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:502$76'.
+     1/1: $0\_91[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:498$75'.
+     1/1: $0\_97[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:491$73'.
+     1/1: $0\_108[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:483$71'.
+     1/1: $0\_114[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:476$70'.
+     1/1: $0\_111[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:472$69'.
+     1/1: $0\_117[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:465$67'.
+     1/1: $0\_128[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:457$65'.
+     1/1: $0\_134[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:450$64'.
+     1/1: $0\_131[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:446$63'.
+     1/1: $0\_137[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:439$61'.
+     1/1: $0\_148[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:431$59'.
+     1/1: $0\_154[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:424$58'.
+     1/1: $0\_151[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:420$57'.
+     1/1: $0\_157[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:413$55'.
+     1/1: $0\_168[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:405$53'.
+     1/1: $0\_174[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:398$52'.
+     1/1: $0\_171[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:394$51'.
+     1/1: $0\_177[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:387$49'.
+     1/1: $0\_188[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:379$47'.
+     1/1: $0\_194[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:372$46'.
+     1/1: $0\_191[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:368$45'.
+     1/1: $0\_197[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:361$43'.
+     1/1: $0\_208[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:353$41'.
+     1/1: $0\_214[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:346$40'.
+     1/1: $0\_211[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:342$39'.
+     1/1: $0\_217[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:335$37'.
+     1/1: $0\_228[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:327$35'.
+     1/1: $0\_234[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:320$34'.
+     1/1: $0\_231[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:316$33'.
+     1/1: $0\_237[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:309$31'.
+     1/1: $0\_248[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:301$29'.
+     1/1: $0\_254[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:294$28'.
+     1/1: $0\_251[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:290$27'.
+     1/1: $0\_257[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:283$25'.
+     1/1: $0\_268[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:275$23'.
+     1/1: $0\_274[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:268$22'.
+     1/1: $0\_271[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:264$21'.
+     1/1: $0\_277[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:257$19'.
+     1/1: $0\_288[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:249$17'.
+     1/1: $0\_294[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:242$16'.
+     1/1: $0\_291[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:238$15'.
+     1/1: $0\_297[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:230$13'.
+     1/1: $0\_308[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:222$11'.
+     1/1: $0\_314[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:215$10'.
+     1/1: $0\_311[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:211$9'.
+     1/1: $0\_317[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:203$8'.
+     1/1: $0\_345[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:192$5'.
+     1/1: $0\_339[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:188$4'.
+     1/1: $0\_336[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:184$3'.
+     1/1: $0\_333[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:180$2'.
+     1/1: $0\_330[0:0]
+Creating decoders for process `\systolic_matcher_en.$proc$systolic_matcher_en.v:176$1'.
+     1/1: $0\_327[0:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\systolic_matcher_en.\_324' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:741$134'.
+  created $dff cell `$procdff$449' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_304' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:733$132'.
+  created $dff cell `$procdff$450' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_284' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:725$130'.
+  created $dff cell `$procdff$451' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_264' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:717$128'.
+  created $dff cell `$procdff$452' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_244' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:709$126'.
+  created $dff cell `$procdff$453' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_224' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:701$124'.
+  created $dff cell `$procdff$454' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_204' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:693$122'.
+  created $dff cell `$procdff$455' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_184' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:685$120'.
+  created $dff cell `$procdff$456' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_164' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:677$118'.
+  created $dff cell `$procdff$457' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_144' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:669$116'.
+  created $dff cell `$procdff$458' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_124' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:661$114'.
+  created $dff cell `$procdff$459' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_104' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:653$112'.
+  created $dff cell `$procdff$460' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_84' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:645$110'.
+  created $dff cell `$procdff$461' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_64' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:637$108'.
+  created $dff cell `$procdff$462' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_44' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:629$106'.
+  created $dff cell `$procdff$463' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_24' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:621$104'.
+  created $dff cell `$procdff$464' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_12' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:614$102'.
+  created $dff cell `$procdff$465' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_15' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:606$100'.
+  created $dff cell `$procdff$466' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_18' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:602$99'.
+  created $dff cell `$procdff$467' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_28' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:595$97'.
+  created $dff cell `$procdff$468' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_34' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:587$95'.
+  created $dff cell `$procdff$469' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_31' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:580$94'.
+  created $dff cell `$procdff$470' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_37' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:576$93'.
+  created $dff cell `$procdff$471' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_48' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:569$91'.
+  created $dff cell `$procdff$472' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_54' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:561$89'.
+  created $dff cell `$procdff$473' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_51' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:554$88'.
+  created $dff cell `$procdff$474' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_57' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:550$87'.
+  created $dff cell `$procdff$475' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_68' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:543$85'.
+  created $dff cell `$procdff$476' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_74' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:535$83'.
+  created $dff cell `$procdff$477' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_71' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:528$82'.
+  created $dff cell `$procdff$478' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_77' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:524$81'.
+  created $dff cell `$procdff$479' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_88' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:517$79'.
+  created $dff cell `$procdff$480' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_94' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:509$77'.
+  created $dff cell `$procdff$481' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_91' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:502$76'.
+  created $dff cell `$procdff$482' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_97' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:498$75'.
+  created $dff cell `$procdff$483' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_108' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:491$73'.
+  created $dff cell `$procdff$484' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_114' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:483$71'.
+  created $dff cell `$procdff$485' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_111' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:476$70'.
+  created $dff cell `$procdff$486' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_117' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:472$69'.
+  created $dff cell `$procdff$487' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_128' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:465$67'.
+  created $dff cell `$procdff$488' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_134' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:457$65'.
+  created $dff cell `$procdff$489' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_131' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:450$64'.
+  created $dff cell `$procdff$490' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_137' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:446$63'.
+  created $dff cell `$procdff$491' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_148' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:439$61'.
+  created $dff cell `$procdff$492' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_154' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:431$59'.
+  created $dff cell `$procdff$493' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_151' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:424$58'.
+  created $dff cell `$procdff$494' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_157' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:420$57'.
+  created $dff cell `$procdff$495' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_168' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:413$55'.
+  created $dff cell `$procdff$496' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_174' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:405$53'.
+  created $dff cell `$procdff$497' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_171' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:398$52'.
+  created $dff cell `$procdff$498' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_177' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:394$51'.
+  created $dff cell `$procdff$499' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_188' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:387$49'.
+  created $dff cell `$procdff$500' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_194' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:379$47'.
+  created $dff cell `$procdff$501' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_191' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:372$46'.
+  created $dff cell `$procdff$502' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_197' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:368$45'.
+  created $dff cell `$procdff$503' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_208' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:361$43'.
+  created $dff cell `$procdff$504' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_214' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:353$41'.
+  created $dff cell `$procdff$505' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_211' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:346$40'.
+  created $dff cell `$procdff$506' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_217' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:342$39'.
+  created $dff cell `$procdff$507' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_228' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:335$37'.
+  created $dff cell `$procdff$508' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_234' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:327$35'.
+  created $dff cell `$procdff$509' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_231' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:320$34'.
+  created $dff cell `$procdff$510' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_237' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:316$33'.
+  created $dff cell `$procdff$511' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_248' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:309$31'.
+  created $dff cell `$procdff$512' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_254' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:301$29'.
+  created $dff cell `$procdff$513' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_251' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:294$28'.
+  created $dff cell `$procdff$514' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_257' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:290$27'.
+  created $dff cell `$procdff$515' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_268' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:283$25'.
+  created $dff cell `$procdff$516' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_274' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:275$23'.
+  created $dff cell `$procdff$517' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_271' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:268$22'.
+  created $dff cell `$procdff$518' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_277' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:264$21'.
+  created $dff cell `$procdff$519' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_288' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:257$19'.
+  created $dff cell `$procdff$520' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_294' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:249$17'.
+  created $dff cell `$procdff$521' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_291' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:242$16'.
+  created $dff cell `$procdff$522' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_297' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:238$15'.
+  created $dff cell `$procdff$523' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_308' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:230$13'.
+  created $dff cell `$procdff$524' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_314' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:222$11'.
+  created $dff cell `$procdff$525' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_311' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:215$10'.
+  created $dff cell `$procdff$526' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_317' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:211$9'.
+  created $dff cell `$procdff$527' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_345' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:203$8'.
+  created $dff cell `$procdff$528' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_339' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:192$5'.
+  created $dff cell `$procdff$529' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_336' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:188$4'.
+  created $dff cell `$procdff$530' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_333' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:184$3'.
+  created $dff cell `$procdff$531' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_330' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:180$2'.
+  created $dff cell `$procdff$532' with positive edge clock.
+Creating register for signal `\systolic_matcher_en.\_327' using process `\systolic_matcher_en.$proc$systolic_matcher_en.v:176$1'.
+  created $dff cell `$procdff$533' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:741$134'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:741$134'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:733$132'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:733$132'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:725$130'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:725$130'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:717$128'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:717$128'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:709$126'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:709$126'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:701$124'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:701$124'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:693$122'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:693$122'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:685$120'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:685$120'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:677$118'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:677$118'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:669$116'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:669$116'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:661$114'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:661$114'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:653$112'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:653$112'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:645$110'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:645$110'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:637$108'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:637$108'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:629$106'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:629$106'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:621$104'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:621$104'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:614$102'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:614$102'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:606$100'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:606$100'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:602$99'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:602$99'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:595$97'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:595$97'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:587$95'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:587$95'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:580$94'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:580$94'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:576$93'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:576$93'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:569$91'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:569$91'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:561$89'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:561$89'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:554$88'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:554$88'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:550$87'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:550$87'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:543$85'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:543$85'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:535$83'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:535$83'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:528$82'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:528$82'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:524$81'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:524$81'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:517$79'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:517$79'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:509$77'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:509$77'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:502$76'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:502$76'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:498$75'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:498$75'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:491$73'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:491$73'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:483$71'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:483$71'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:476$70'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:476$70'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:472$69'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:472$69'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:465$67'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:465$67'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:457$65'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:457$65'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:450$64'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:450$64'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:446$63'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:446$63'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:439$61'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:439$61'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:431$59'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:431$59'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:424$58'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:424$58'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:420$57'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:420$57'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:413$55'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:413$55'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:405$53'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:405$53'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:398$52'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:398$52'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:394$51'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:394$51'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:387$49'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:387$49'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:379$47'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:379$47'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:372$46'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:372$46'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:368$45'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:368$45'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:361$43'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:361$43'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:353$41'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:353$41'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:346$40'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:346$40'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:342$39'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:342$39'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:335$37'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:335$37'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:327$35'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:327$35'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:320$34'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:320$34'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:316$33'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:316$33'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:309$31'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:309$31'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:301$29'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:301$29'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:294$28'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:294$28'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:290$27'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:290$27'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:283$25'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:283$25'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:275$23'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:275$23'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:268$22'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:268$22'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:264$21'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:264$21'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:257$19'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:257$19'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:249$17'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:249$17'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:242$16'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:242$16'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:238$15'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:238$15'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:230$13'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:230$13'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:222$11'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:222$11'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:215$10'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:215$10'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:211$9'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:211$9'.
+Found and cleaned up 2 empty switches in `\systolic_matcher_en.$proc$systolic_matcher_en.v:203$8'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:203$8'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:192$5'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:192$5'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:188$4'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:188$4'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:184$3'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:184$3'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:180$2'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:180$2'.
+Found and cleaned up 1 empty switch in `\systolic_matcher_en.$proc$systolic_matcher_en.v:176$1'.
+Removing empty process `systolic_matcher_en.$proc$systolic_matcher_en.v:176$1'.
+Cleaned up 133 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.3. Executing CHECK pass (checking for obvious problems).
+Checking module systolic_matcher_en...
+Found and reported 0 problems.
+
+3.4. Executing FLATTEN pass (flatten design).
+
+3.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module systolic_matcher_en...
+Found and reported 0 problems.
+
+3.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+Removed 0 unused cells and 267 unused wires.
+<suppressed ~1 debug messages>
+
+3.8. Executing OPT pass (performing simple optimizations).
+
+3.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 267 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \systolic_matcher_en..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~218 debug messages>
+
+3.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \systolic_matcher_en.
+Performed a total of 0 changes.
+
+3.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 267 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.8.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+
+3.8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.8.9. Finished fast OPT passes. (There is nothing left to do.)
+
+3.9. Executing FSM pass (extract and optimize FSM).
+
+3.9.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.9.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.9.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.9.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+
+3.9.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.9.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.9.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.9.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.10. Executing OPT pass (performing simple optimizations).
+
+3.10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 267 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \systolic_matcher_en..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~218 debug messages>
+
+3.10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \systolic_matcher_en.
+Performed a total of 0 changes.
+
+3.10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 267 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.10.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$449 ($dff) from module systolic_matcher_en (D = $procmux$135_Y, Q = \_324, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$534 ($sdff) from module systolic_matcher_en (D = \_321, Q = \_324).
+Adding SRST signal on $procdff$450 ($dff) from module systolic_matcher_en (D = $procmux$140_Y, Q = \_304, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$536 ($sdff) from module systolic_matcher_en (D = \_301, Q = \_304).
+Adding SRST signal on $procdff$451 ($dff) from module systolic_matcher_en (D = $procmux$145_Y, Q = \_284, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$538 ($sdff) from module systolic_matcher_en (D = \_281, Q = \_284).
+Adding SRST signal on $procdff$452 ($dff) from module systolic_matcher_en (D = $procmux$150_Y, Q = \_264, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$540 ($sdff) from module systolic_matcher_en (D = \_261, Q = \_264).
+Adding SRST signal on $procdff$453 ($dff) from module systolic_matcher_en (D = $procmux$155_Y, Q = \_244, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$542 ($sdff) from module systolic_matcher_en (D = \_241, Q = \_244).
+Adding SRST signal on $procdff$454 ($dff) from module systolic_matcher_en (D = $procmux$160_Y, Q = \_224, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$544 ($sdff) from module systolic_matcher_en (D = \_221, Q = \_224).
+Adding SRST signal on $procdff$455 ($dff) from module systolic_matcher_en (D = $procmux$165_Y, Q = \_204, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$546 ($sdff) from module systolic_matcher_en (D = \_201, Q = \_204).
+Adding SRST signal on $procdff$456 ($dff) from module systolic_matcher_en (D = $procmux$170_Y, Q = \_184, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$548 ($sdff) from module systolic_matcher_en (D = \_181, Q = \_184).
+Adding SRST signal on $procdff$457 ($dff) from module systolic_matcher_en (D = $procmux$175_Y, Q = \_164, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$550 ($sdff) from module systolic_matcher_en (D = \_161, Q = \_164).
+Adding SRST signal on $procdff$458 ($dff) from module systolic_matcher_en (D = $procmux$180_Y, Q = \_144, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$552 ($sdff) from module systolic_matcher_en (D = \_141, Q = \_144).
+Adding SRST signal on $procdff$459 ($dff) from module systolic_matcher_en (D = $procmux$185_Y, Q = \_124, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$554 ($sdff) from module systolic_matcher_en (D = \_121, Q = \_124).
+Adding SRST signal on $procdff$460 ($dff) from module systolic_matcher_en (D = $procmux$190_Y, Q = \_104, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$556 ($sdff) from module systolic_matcher_en (D = \_101, Q = \_104).
+Adding SRST signal on $procdff$461 ($dff) from module systolic_matcher_en (D = $procmux$195_Y, Q = \_84, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$558 ($sdff) from module systolic_matcher_en (D = \_81, Q = \_84).
+Adding SRST signal on $procdff$462 ($dff) from module systolic_matcher_en (D = $procmux$200_Y, Q = \_64, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$560 ($sdff) from module systolic_matcher_en (D = \_61, Q = \_64).
+Adding SRST signal on $procdff$463 ($dff) from module systolic_matcher_en (D = $procmux$205_Y, Q = \_44, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$562 ($sdff) from module systolic_matcher_en (D = \_41, Q = \_44).
+Adding SRST signal on $procdff$464 ($dff) from module systolic_matcher_en (D = $procmux$210_Y, Q = \_24, rval = 5'00000).
+Adding EN signal on $auto$ff.cc:337:slice$564 ($sdff) from module systolic_matcher_en (D = { 4'0000 \_20 }, Q = \_24).
+Adding EN signal on $procdff$465 ($dff) from module systolic_matcher_en (D = \cfg_in, Q = \_12).
+Adding SRST signal on $procdff$466 ($dff) from module systolic_matcher_en (D = $procmux$217_Y, Q = \_15, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$567 ($sdff) from module systolic_matcher_en (D = \x, Q = \_15).
+Adding EN signal on $procdff$467 ($dff) from module systolic_matcher_en (D = \_12, Q = \_18).
+Adding EN signal on $procdff$468 ($dff) from module systolic_matcher_en (D = \_18, Q = \_28).
+Adding SRST signal on $procdff$469 ($dff) from module systolic_matcher_en (D = $procmux$226_Y, Q = \_34, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$571 ($sdff) from module systolic_matcher_en (D = \_31, Q = \_34).
+Adding SRST signal on $procdff$470 ($dff) from module systolic_matcher_en (D = $procmux$231_Y, Q = \_31, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$573 ($sdff) from module systolic_matcher_en (D = \_15, Q = \_31).
+Adding EN signal on $procdff$471 ($dff) from module systolic_matcher_en (D = \_28, Q = \_37).
+Adding EN signal on $procdff$472 ($dff) from module systolic_matcher_en (D = \_37, Q = \_48).
+Adding SRST signal on $procdff$473 ($dff) from module systolic_matcher_en (D = $procmux$240_Y, Q = \_54, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$577 ($sdff) from module systolic_matcher_en (D = \_51, Q = \_54).
+Adding SRST signal on $procdff$474 ($dff) from module systolic_matcher_en (D = $procmux$245_Y, Q = \_51, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$579 ($sdff) from module systolic_matcher_en (D = \_34, Q = \_51).
+Adding EN signal on $procdff$475 ($dff) from module systolic_matcher_en (D = \_48, Q = \_57).
+Adding EN signal on $procdff$476 ($dff) from module systolic_matcher_en (D = \_57, Q = \_68).
+Adding SRST signal on $procdff$477 ($dff) from module systolic_matcher_en (D = $procmux$254_Y, Q = \_74, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$583 ($sdff) from module systolic_matcher_en (D = \_71, Q = \_74).
+Adding SRST signal on $procdff$478 ($dff) from module systolic_matcher_en (D = $procmux$259_Y, Q = \_71, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$585 ($sdff) from module systolic_matcher_en (D = \_54, Q = \_71).
+Adding EN signal on $procdff$479 ($dff) from module systolic_matcher_en (D = \_68, Q = \_77).
+Adding EN signal on $procdff$480 ($dff) from module systolic_matcher_en (D = \_77, Q = \_88).
+Adding SRST signal on $procdff$481 ($dff) from module systolic_matcher_en (D = $procmux$268_Y, Q = \_94, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$589 ($sdff) from module systolic_matcher_en (D = \_91, Q = \_94).
+Adding SRST signal on $procdff$482 ($dff) from module systolic_matcher_en (D = $procmux$273_Y, Q = \_91, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$591 ($sdff) from module systolic_matcher_en (D = \_74, Q = \_91).
+Adding EN signal on $procdff$483 ($dff) from module systolic_matcher_en (D = \_88, Q = \_97).
+Adding EN signal on $procdff$484 ($dff) from module systolic_matcher_en (D = \_97, Q = \_108).
+Adding SRST signal on $procdff$485 ($dff) from module systolic_matcher_en (D = $procmux$282_Y, Q = \_114, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$595 ($sdff) from module systolic_matcher_en (D = \_111, Q = \_114).
+Adding SRST signal on $procdff$486 ($dff) from module systolic_matcher_en (D = $procmux$287_Y, Q = \_111, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$597 ($sdff) from module systolic_matcher_en (D = \_94, Q = \_111).
+Adding EN signal on $procdff$487 ($dff) from module systolic_matcher_en (D = \_108, Q = \_117).
+Adding EN signal on $procdff$488 ($dff) from module systolic_matcher_en (D = \_117, Q = \_128).
+Adding SRST signal on $procdff$489 ($dff) from module systolic_matcher_en (D = $procmux$296_Y, Q = \_134, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$601 ($sdff) from module systolic_matcher_en (D = \_131, Q = \_134).
+Adding SRST signal on $procdff$490 ($dff) from module systolic_matcher_en (D = $procmux$301_Y, Q = \_131, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$603 ($sdff) from module systolic_matcher_en (D = \_114, Q = \_131).
+Adding EN signal on $procdff$491 ($dff) from module systolic_matcher_en (D = \_128, Q = \_137).
+Adding EN signal on $procdff$492 ($dff) from module systolic_matcher_en (D = \_137, Q = \_148).
+Adding SRST signal on $procdff$493 ($dff) from module systolic_matcher_en (D = $procmux$310_Y, Q = \_154, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$607 ($sdff) from module systolic_matcher_en (D = \_151, Q = \_154).
+Adding SRST signal on $procdff$494 ($dff) from module systolic_matcher_en (D = $procmux$315_Y, Q = \_151, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$609 ($sdff) from module systolic_matcher_en (D = \_134, Q = \_151).
+Adding EN signal on $procdff$495 ($dff) from module systolic_matcher_en (D = \_148, Q = \_157).
+Adding EN signal on $procdff$496 ($dff) from module systolic_matcher_en (D = \_157, Q = \_168).
+Adding SRST signal on $procdff$497 ($dff) from module systolic_matcher_en (D = $procmux$324_Y, Q = \_174, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$613 ($sdff) from module systolic_matcher_en (D = \_171, Q = \_174).
+Adding SRST signal on $procdff$498 ($dff) from module systolic_matcher_en (D = $procmux$329_Y, Q = \_171, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$615 ($sdff) from module systolic_matcher_en (D = \_154, Q = \_171).
+Adding EN signal on $procdff$499 ($dff) from module systolic_matcher_en (D = \_168, Q = \_177).
+Adding EN signal on $procdff$500 ($dff) from module systolic_matcher_en (D = \_177, Q = \_188).
+Adding SRST signal on $procdff$501 ($dff) from module systolic_matcher_en (D = $procmux$338_Y, Q = \_194, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$619 ($sdff) from module systolic_matcher_en (D = \_191, Q = \_194).
+Adding SRST signal on $procdff$502 ($dff) from module systolic_matcher_en (D = $procmux$343_Y, Q = \_191, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$621 ($sdff) from module systolic_matcher_en (D = \_174, Q = \_191).
+Adding EN signal on $procdff$503 ($dff) from module systolic_matcher_en (D = \_188, Q = \_197).
+Adding EN signal on $procdff$504 ($dff) from module systolic_matcher_en (D = \_197, Q = \_208).
+Adding SRST signal on $procdff$505 ($dff) from module systolic_matcher_en (D = $procmux$352_Y, Q = \_214, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$625 ($sdff) from module systolic_matcher_en (D = \_211, Q = \_214).
+Adding SRST signal on $procdff$506 ($dff) from module systolic_matcher_en (D = $procmux$357_Y, Q = \_211, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$627 ($sdff) from module systolic_matcher_en (D = \_194, Q = \_211).
+Adding EN signal on $procdff$507 ($dff) from module systolic_matcher_en (D = \_208, Q = \_217).
+Adding EN signal on $procdff$508 ($dff) from module systolic_matcher_en (D = \_217, Q = \_228).
+Adding SRST signal on $procdff$509 ($dff) from module systolic_matcher_en (D = $procmux$366_Y, Q = \_234, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$631 ($sdff) from module systolic_matcher_en (D = \_231, Q = \_234).
+Adding SRST signal on $procdff$510 ($dff) from module systolic_matcher_en (D = $procmux$371_Y, Q = \_231, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$633 ($sdff) from module systolic_matcher_en (D = \_214, Q = \_231).
+Adding EN signal on $procdff$511 ($dff) from module systolic_matcher_en (D = \_228, Q = \_237).
+Adding EN signal on $procdff$512 ($dff) from module systolic_matcher_en (D = \_237, Q = \_248).
+Adding SRST signal on $procdff$513 ($dff) from module systolic_matcher_en (D = $procmux$380_Y, Q = \_254, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$637 ($sdff) from module systolic_matcher_en (D = \_251, Q = \_254).
+Adding SRST signal on $procdff$514 ($dff) from module systolic_matcher_en (D = $procmux$385_Y, Q = \_251, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$639 ($sdff) from module systolic_matcher_en (D = \_234, Q = \_251).
+Adding EN signal on $procdff$515 ($dff) from module systolic_matcher_en (D = \_248, Q = \_257).
+Adding EN signal on $procdff$516 ($dff) from module systolic_matcher_en (D = \_257, Q = \_268).
+Adding SRST signal on $procdff$517 ($dff) from module systolic_matcher_en (D = $procmux$394_Y, Q = \_274, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$643 ($sdff) from module systolic_matcher_en (D = \_271, Q = \_274).
+Adding SRST signal on $procdff$518 ($dff) from module systolic_matcher_en (D = $procmux$399_Y, Q = \_271, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$645 ($sdff) from module systolic_matcher_en (D = \_254, Q = \_271).
+Adding EN signal on $procdff$519 ($dff) from module systolic_matcher_en (D = \_268, Q = \_277).
+Adding EN signal on $procdff$520 ($dff) from module systolic_matcher_en (D = \_277, Q = \_288).
+Adding SRST signal on $procdff$521 ($dff) from module systolic_matcher_en (D = $procmux$408_Y, Q = \_294, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$649 ($sdff) from module systolic_matcher_en (D = \_291, Q = \_294).
+Adding SRST signal on $procdff$522 ($dff) from module systolic_matcher_en (D = $procmux$413_Y, Q = \_291, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$651 ($sdff) from module systolic_matcher_en (D = \_274, Q = \_291).
+Adding EN signal on $procdff$523 ($dff) from module systolic_matcher_en (D = \_288, Q = \_297).
+Adding EN signal on $procdff$524 ($dff) from module systolic_matcher_en (D = \_297, Q = \_308).
+Adding SRST signal on $procdff$525 ($dff) from module systolic_matcher_en (D = $procmux$422_Y, Q = \_314, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$655 ($sdff) from module systolic_matcher_en (D = \_311, Q = \_314).
+Adding SRST signal on $procdff$526 ($dff) from module systolic_matcher_en (D = $procmux$427_Y, Q = \_311, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$657 ($sdff) from module systolic_matcher_en (D = \_294, Q = \_311).
+Adding EN signal on $procdff$527 ($dff) from module systolic_matcher_en (D = \_308, Q = \_317).
+Adding SRST signal on $procdff$528 ($dff) from module systolic_matcher_en (D = $procmux$434_Y, Q = \_345, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$660 ($sdff) from module systolic_matcher_en (D = \_342, Q = \_345).
+Adding EN signal on $procdff$529 ($dff) from module systolic_matcher_en (D = \_336, Q = \_339).
+Adding EN signal on $procdff$530 ($dff) from module systolic_matcher_en (D = \_333, Q = \_336).
+Adding EN signal on $procdff$531 ($dff) from module systolic_matcher_en (D = \_330, Q = \_333).
+Adding EN signal on $procdff$532 ($dff) from module systolic_matcher_en (D = \_327, Q = \_330).
+Adding EN signal on $procdff$533 ($dff) from module systolic_matcher_en (D = \_317, Q = \_327).
+Setting constant 0-bit at position 1 on $auto$ff.cc:337:slice$565 ($sdffe) from module systolic_matcher_en.
+Setting constant 0-bit at position 2 on $auto$ff.cc:337:slice$565 ($sdffe) from module systolic_matcher_en.
+Setting constant 0-bit at position 3 on $auto$ff.cc:337:slice$565 ($sdffe) from module systolic_matcher_en.
+Setting constant 0-bit at position 4 on $auto$ff.cc:337:slice$565 ($sdffe) from module systolic_matcher_en.
+
+3.10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+Removed 133 unused cells and 133 unused wires.
+<suppressed ~134 debug messages>
+
+3.10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.10.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.10.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \systolic_matcher_en..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+3.10.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \systolic_matcher_en.
+Performed a total of 0 changes.
+
+3.10.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 134 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.10.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.10.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+
+3.10.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.10.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.11. Executing WREDUCE pass (reducing word size of cells).
+Removed top 4 bits (of 5) from port A of cell systolic_matcher_en.$add$systolic_matcher_en.v:628$105 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:628$105 ($add).
+Removed top 3 bits (of 5) from port Y of cell systolic_matcher_en.$add$systolic_matcher_en.v:628$105 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:636$107 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:644$109 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:652$111 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:660$113 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:668$115 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:676$117 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:684$119 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:692$121 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:700$123 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:708$125 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:716$127 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:724$129 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:732$131 ($add).
+Removed top 4 bits (of 5) from port B of cell systolic_matcher_en.$add$systolic_matcher_en.v:740$133 ($add).
+Removed top 3 bits (of 5) from wire systolic_matcher_en._41.
+Removed top 4 bits (of 5) from wire systolic_matcher_en._24.
+
+3.12. Executing PEEPOPT pass (run peephole optimizers).
+
+3.13. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+3.14. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module systolic_matcher_en:
+  creating $macc model for $add$systolic_matcher_en.v:740$133 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:732$131 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:724$129 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:716$127 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:708$125 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:700$123 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:692$121 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:684$119 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:676$117 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:668$115 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:660$113 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:652$111 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:644$109 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:636$107 ($add).
+  creating $macc model for $add$systolic_matcher_en.v:628$105 ($add).
+  creating $alu model for $macc $add$systolic_matcher_en.v:628$105.
+  creating $alu model for $macc $add$systolic_matcher_en.v:636$107.
+  creating $alu model for $macc $add$systolic_matcher_en.v:644$109.
+  creating $alu model for $macc $add$systolic_matcher_en.v:652$111.
+  creating $alu model for $macc $add$systolic_matcher_en.v:660$113.
+  creating $alu model for $macc $add$systolic_matcher_en.v:668$115.
+  creating $alu model for $macc $add$systolic_matcher_en.v:676$117.
+  creating $alu model for $macc $add$systolic_matcher_en.v:684$119.
+  creating $alu model for $macc $add$systolic_matcher_en.v:692$121.
+  creating $alu model for $macc $add$systolic_matcher_en.v:700$123.
+  creating $alu model for $macc $add$systolic_matcher_en.v:708$125.
+  creating $alu model for $macc $add$systolic_matcher_en.v:716$127.
+  creating $alu model for $macc $add$systolic_matcher_en.v:724$129.
+  creating $alu model for $macc $add$systolic_matcher_en.v:732$131.
+  creating $alu model for $macc $add$systolic_matcher_en.v:740$133.
+  creating $alu model for $lt$systolic_matcher_en.v:201$6 ($lt): new $alu
+  creating $alu cell for $lt$systolic_matcher_en.v:201$6: $auto$alumacc.cc:548:replace_alu$671
+  creating $alu cell for $add$systolic_matcher_en.v:740$133: $auto$alumacc.cc:548:replace_alu$676
+  creating $alu cell for $add$systolic_matcher_en.v:732$131: $auto$alumacc.cc:548:replace_alu$679
+  creating $alu cell for $add$systolic_matcher_en.v:724$129: $auto$alumacc.cc:548:replace_alu$682
+  creating $alu cell for $add$systolic_matcher_en.v:716$127: $auto$alumacc.cc:548:replace_alu$685
+  creating $alu cell for $add$systolic_matcher_en.v:708$125: $auto$alumacc.cc:548:replace_alu$688
+  creating $alu cell for $add$systolic_matcher_en.v:700$123: $auto$alumacc.cc:548:replace_alu$691
+  creating $alu cell for $add$systolic_matcher_en.v:692$121: $auto$alumacc.cc:548:replace_alu$694
+  creating $alu cell for $add$systolic_matcher_en.v:684$119: $auto$alumacc.cc:548:replace_alu$697
+  creating $alu cell for $add$systolic_matcher_en.v:676$117: $auto$alumacc.cc:548:replace_alu$700
+  creating $alu cell for $add$systolic_matcher_en.v:668$115: $auto$alumacc.cc:548:replace_alu$703
+  creating $alu cell for $add$systolic_matcher_en.v:660$113: $auto$alumacc.cc:548:replace_alu$706
+  creating $alu cell for $add$systolic_matcher_en.v:652$111: $auto$alumacc.cc:548:replace_alu$709
+  creating $alu cell for $add$systolic_matcher_en.v:644$109: $auto$alumacc.cc:548:replace_alu$712
+  creating $alu cell for $add$systolic_matcher_en.v:636$107: $auto$alumacc.cc:548:replace_alu$715
+  creating $alu cell for $add$systolic_matcher_en.v:628$105: $auto$alumacc.cc:548:replace_alu$718
+  created 16 $alu and 0 $macc cells.
+
+3.15. Executing SHARE pass (SAT-based resource sharing).
+
+3.16. Executing OPT pass (performing simple optimizations).
+
+3.16.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+<suppressed ~1 debug messages>
+
+3.16.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 134 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.16.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \systolic_matcher_en..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+3.16.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \systolic_matcher_en.
+Performed a total of 0 changes.
+
+3.16.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 134 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.16.6. Executing OPT_DFF pass (perform DFF optimizations).
+Setting constant 0-bit at position 2 on $auto$ff.cc:337:slice$563 ($sdffe) from module systolic_matcher_en.
+Setting constant 0-bit at position 3 on $auto$ff.cc:337:slice$563 ($sdffe) from module systolic_matcher_en.
+Setting constant 0-bit at position 4 on $auto$ff.cc:337:slice$563 ($sdffe) from module systolic_matcher_en.
+
+3.16.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+Removed 1 unused cells and 2 unused wires.
+<suppressed ~3 debug messages>
+
+3.16.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.16.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.16.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \systolic_matcher_en..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+3.16.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \systolic_matcher_en.
+Performed a total of 0 changes.
+
+3.16.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 133 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.16.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.16.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+
+3.16.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.16.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.17. Executing MEMORY pass.
+
+3.17.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.17.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.17.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.17.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.17.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+3.17.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+
+3.17.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.17.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.17.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+
+3.17.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.18. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+
+3.19. Executing OPT pass (performing simple optimizations).
+
+3.19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+<suppressed ~9 debug messages>
+
+3.19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 133 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.19.3. Executing OPT_DFF pass (perform DFF optimizations).
+Setting constant 0-bit at position 3 on $auto$ff.cc:337:slice$561 ($sdffe) from module systolic_matcher_en.
+Setting constant 0-bit at position 4 on $auto$ff.cc:337:slice$561 ($sdffe) from module systolic_matcher_en.
+
+3.19.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+3.19.5. Rerunning OPT passes. (Removed registers in this run.)
+
+3.19.6. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+<suppressed ~5 debug messages>
+
+3.19.7. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 133 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.19.8. Executing OPT_DFF pass (perform DFF optimizations).
+Setting constant 0-bit at position 4 on $auto$ff.cc:337:slice$559 ($sdffe) from module systolic_matcher_en.
+
+3.19.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+Removed 0 unused cells and 1 unused wires.
+<suppressed ~1 debug messages>
+
+3.19.10. Rerunning OPT passes. (Removed registers in this run.)
+
+3.19.11. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.19.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 133 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.19.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.19.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+
+3.19.15. Finished fast OPT passes.
+
+3.20. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.21. Executing OPT pass (performing simple optimizations).
+
+3.21.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.21.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 133 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.21.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \systolic_matcher_en..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+3.21.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \systolic_matcher_en.
+Performed a total of 0 changes.
+
+3.21.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 133 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.21.6. Executing OPT_SHARE pass.
+
+3.21.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.21.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+
+3.21.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.21.10. Finished fast OPT passes. (There is nothing left to do.)
+
+3.22. Executing TECHMAP pass (map to technology primitives).
+
+3.22.1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/techmap.v
+Parsing Verilog input from `/home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.22.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $sdffe.
+Using template $paramod$740b056ede97228d3eae64ea2fdc81f0a33e0fe7\_90_alu for cells of type $alu.
+Using template $paramod$78e969f2586efcf3a5b0b0440bcca0db83d5cca2\_90_alu for cells of type $alu.
+Using template $paramod$1d1e68f77481583066c6d429218f48ea9d5739b3\_90_alu for cells of type $alu.
+Using template $paramod$672a140277c71df8314410f22acc08d55222c3c7\_90_alu for cells of type $alu.
+Using template $paramod$b18e16801adf491a64caa0542270798e5d4ac6b6\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $dffe.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000101 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000101 for cells of type $lcu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000010 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000010 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000011 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000100 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000100 for cells of type $lcu.
+Using extmapper simplemap for cells of type $or.
+No more expansions possible.
+<suppressed ~1071 debug messages>
+
+3.23. Executing OPT pass (performing simple optimizations).
+
+3.23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+<suppressed ~560 debug messages>
+
+3.23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 426 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.23.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+Removed 83 unused cells and 756 unused wires.
+<suppressed ~84 debug messages>
+
+3.23.5. Finished fast OPT passes.
+
+3.24. Executing ABC pass (technology mapping using ABC).
+
+3.24.1. Summary of detected clock domains:
+  88 cells in clk=\clock, en=\cfg_shift, arst={ }, srst={ }
+  255 cells in clk=\clock, en=\enable, arst={ }, srst=\clear
+
+3.24.2. Extracting gate netlist of module `\systolic_matcher_en' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \cfg_shift
+
+3.24.3. Extracting gate netlist of module `\systolic_matcher_en' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \enable, synchronously reset by \clear
+
+3.24.3.1. Executed ABC.
+Extracted 51 gates and 103 wires to a netlist network with 52 inputs and 21 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.3.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       15
+ABC RESULTS:               NOT cells:        5
+ABC RESULTS:              XNOR cells:       15
+ABC RESULTS:               XOR cells:        1
+ABC RESULTS:        internal signals:       30
+ABC RESULTS:           input signals:       52
+ABC RESULTS:          output signals:       21
+Removing temp directory.
+
+3.24.3.1. Executed ABC.
+Extracted 153 gates and 245 wires to a netlist network with 92 inputs and 71 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.3.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       47
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:              NAND cells:       20
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:                OR cells:        4
+ABC RESULTS:              XNOR cells:       11
+ABC RESULTS:               XOR cells:       54
+ABC RESULTS:        internal signals:       82
+ABC RESULTS:           input signals:       92
+ABC RESULTS:          output signals:       71
+Removing temp directory.
+Removing global temp directory.
+
+3.25. Executing OPT pass (performing simple optimizations).
+
+3.25.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module systolic_matcher_en.
+
+3.25.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\systolic_matcher_en'.
+Computing hashes of 313 cells of `\systolic_matcher_en'.
+Finding duplicate cells in `\systolic_matcher_en'.
+Removed a total of 0 cells.
+
+3.25.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.25.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+Removed 0 unused cells and 302 unused wires.
+<suppressed ~17 debug messages>
+
+3.25.5. Finished fast OPT passes.
+
+3.26. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `systolic_matcher_en'. Setting top module to systolic_matcher_en.
+
+3.26.1. Analyzing design hierarchy..
+Top module:  \systolic_matcher_en
+
+3.26.2. Analyzing design hierarchy..
+Top module:  \systolic_matcher_en
+Removed 0 unused modules.
+
+3.27. Printing statistics.
+
+=== systolic_matcher_en ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      229 wires
+      429 wire bits
+      145 public wires
+      341 public wire bits
+        8 ports
+       12 port bits
+      313 cells
+        1   $_ANDNOT_
+       62   $_AND_
+       37   $_DFFE_PP_
+       20   $_NAND_
+        1   $_NOR_
+        5   $_NOT_
+        4   $_OR_
+      102   $_SDFFE_PP0P_
+       26   $_XNOR_
+       55   $_XOR_
+
+3.28. Executing CHECK pass (checking for obvious problems).
+Checking module systolic_matcher_en...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF/DLATCH cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  cell sg13g2_dlhq_1 (noninv, pins=3, area=30.84) is a direct match for cell type $_DLATCH_P_.
+  cell sg13g2_dllrq_1 (noninv, pins=4, area=29.03) is a direct match for cell type $_DLATCH_NN0_.
+  cell sg13g2_dlhrq_1 (noninv, pins=4, area=27.22) is a direct match for cell type $_DLATCH_PN0_.
+  final dff/dlatch cell mappings:
+    unmapped dff/dlatch cell: $_DFF_N_
+    unmapped dff/dlatch cell: $_DFF_P_
+    unmapped dff/dlatch cell: $_DFF_NN0_
+    unmapped dff/dlatch cell: $_DFF_NN1_
+    unmapped dff/dlatch cell: $_DFF_NP0_
+    unmapped dff/dlatch cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DFF_PN1_
+    unmapped dff/dlatch cell: $_DFF_PP0_
+    unmapped dff/dlatch cell: $_DFF_PP1_
+    unmapped dff/dlatch cell: $_DFFE_NN_
+    unmapped dff/dlatch cell: $_DFFE_NP_
+    unmapped dff/dlatch cell: $_DFFE_PN_
+    unmapped dff/dlatch cell: $_DFFE_PP_
+    unmapped dff/dlatch cell: $_DFFSR_NNN_
+    unmapped dff/dlatch cell: $_DFFSR_NNP_
+    unmapped dff/dlatch cell: $_DFFSR_NPN_
+    unmapped dff/dlatch cell: $_DFFSR_NPP_
+    unmapped dff/dlatch cell: $_DFFSR_PNN_
+    unmapped dff/dlatch cell: $_DFFSR_PNP_
+    unmapped dff/dlatch cell: $_DFFSR_PPN_
+    unmapped dff/dlatch cell: $_DFFSR_PPP_
+    unmapped dff/dlatch cell: $_DLATCH_N_
+    \sg13g2_dlhq_1 _DLATCH_P_ (.D( D), .GATE( E), .Q( Q));
+    \sg13g2_dllrq_1 _DLATCH_NN0_ (.D( D), .GATE_N( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_NN1_
+    unmapped dff/dlatch cell: $_DLATCH_NP0_
+    unmapped dff/dlatch cell: $_DLATCH_NP1_
+    \sg13g2_dlhrq_1 _DLATCH_PN0_ (.D( D), .GATE( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_PN1_
+    unmapped dff/dlatch cell: $_DLATCH_PP0_
+    unmapped dff/dlatch cell: $_DLATCH_PP1_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs and LATCHes to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF/DLATCH cells in module `\systolic_matcher_en':
+  mapped 139 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Summary of detected clock domains:
+  554 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+5.2. Extracting gate netlist of module `\systolic_matcher_en' to `<abc-temp-dir>/input.blif'..
+ABC: using cached merged SCL: /tmp/yosys-liberty-scl-cache-1000/yosys_merged_a6013080.scl (1 files)
+No matching clock domain found. Not extracting any FF cells.
+
+5.2.1. Executed ABC.
+Extracted 415 gates and 560 wires to a netlist network with 144 inputs and 139 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_scl /tmp/yosys-liberty-scl-cache-1000/yosys_merged_a6013080.scl 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+5.2.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:       19
+ABC RESULTS:    sg13g2_a21oi_1 cells:      106
+ABC RESULTS:   sg13g2_a221oi_1 cells:        1
+ABC RESULTS:    sg13g2_a22oi_1 cells:        1
+ABC RESULTS:     sg13g2_and2_1 cells:        1
+ABC RESULTS:     sg13g2_and3_1 cells:        1
+ABC RESULTS:     sg13g2_and4_1 cells:        9
+ABC RESULTS:      sg13g2_inv_1 cells:       46
+ABC RESULTS:     sg13g2_mux2_1 cells:       34
+ABC RESULTS:    sg13g2_nand2_1 cells:       16
+ABC RESULTS:   sg13g2_nand2b_1 cells:        8
+ABC RESULTS:    sg13g2_nand3_1 cells:       22
+ABC RESULTS:   sg13g2_nand3b_1 cells:        1
+ABC RESULTS:    sg13g2_nand4_1 cells:        4
+ABC RESULTS:     sg13g2_nor2_1 cells:       14
+ABC RESULTS:    sg13g2_nor2b_1 cells:        3
+ABC RESULTS:     sg13g2_nor3_1 cells:        3
+ABC RESULTS:    sg13g2_o21ai_1 cells:      108
+ABC RESULTS:    sg13g2_xnor2_1 cells:       30
+ABC RESULTS:     sg13g2_xor2_1 cells:       24
+ABC RESULTS:        internal signals:      277
+ABC RESULTS:           input signals:      144
+ABC RESULTS:          output signals:      139
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \systolic_matcher_en..
+Removed 0 unused cells and 498 unused wires.
+<suppressed ~30 debug messages>
+
+7. Printing statistics.
+
+=== systolic_matcher_en ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      567        - wires
+      714        - wire bits
+      116        - public wires
+      263        - public wire bits
+        8        - ports
+       12        - port bits
+      590 1.14E+04 cells
+       19  241.315   sg13g2_a21o_1
+      106  961.632   sg13g2_a21oi_1
+        1   14.515   sg13g2_a221oi_1
+        1   10.849   sg13g2_a22oi_1
+        1    9.072   sg13g2_and2_1
+        1   12.701   sg13g2_and3_1
+        9  130.637   sg13g2_and4_1
+      139 6.81E+03   sg13g2_dfrbpq_1
+       46  250.387   sg13g2_inv_1
+       34  616.896   sg13g2_mux2_1
+       16  116.122   sg13g2_nand2_1
+        8   72.576   sg13g2_nand2b_1
+       22  199.584   sg13g2_nand3_1
+        1   12.701   sg13g2_nand3b_1
+        4   43.546   sg13g2_nand4_1
+       14  101.606   sg13g2_nor2_1
+        3   27.216   sg13g2_nor2b_1
+        3   27.216   sg13g2_nor3_1
+      108  979.776   sg13g2_o21ai_1
+       30  435.456   sg13g2_xnor2_1
+       24  348.365   sg13g2_xor2_1
+
+   Chip area for module '\systolic_matcher_en': 11421.610200
+     of which used for sequential elements: 6809.443200 (59.62%)
+
+End of script. Logfile hash: 5f31e57393, time: 0.19s, user: 0.09s, system: 0.01s, MEM: 27.76 MB peak
+Yosys 0.69+77 (git sha1 9ff27d29c-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 58% 2x abc (0 sec), 7% 1x techmap (0 sec), ...
