@@ -16,14 +16,22 @@ starting with the breaks IHP itself makes, and what would we pay?
 
   Our 6T becomes the PDK cell's 3.01 µm², 12 % smaller.
 - **Tier 1** adds the same contact break along the diffusions, for 17–19 %.
-- **Tier 2: the most valuable single break.** Relaxing the thick-oxide keep-out (TGO.a/TGO.b
-  0.27 → 0.105) and contact to gate (Cnt.f 0.11 → 0.07) brings the **thick-write cell to
-  2.01 µm² (−30 %)**. That is denser than today's standard-rule thin cell, while keeping the thick
-  cell's millisecond retention.
+- **Tier 2: the most valuable single break.** Relax the thick-oxide keep-out (TGO.a/TGO.b
+  0.27 → 0.105) with the read strip kept at 0.30, so the electricals are unchanged. Adding
+  Cnt.c 0.02 along the strips and the 0.13 end cap takes the **thick-write cell from 2.88 to
+  2.31 µm² (−20 %)**, and to 2.23 µm² (−23 %) with Cnt.f 0.07 as well. That is about the density
+  of today's standard-rule thin cell (2.20), with the thick cell's millisecond retention. With
+  the 0.20 strip it would be 2.01 µm², but that cell does not read at ss/27 °C.
 - **The cost of tier 0 is electrical as well as procedural.** The narrower diffusion makes the
-  storage and read transistors W 0.20 instead of 0.30. The level-shifted thin cell then loses 20
-  to 35 % of its nominal lifetime (0.93 → 0.73 ms at ff/85 °C, with the per-corner bar). With a
-  fixed bar it fails ss/27 °C outright.
+  storage and read transistors W 0.20 instead of 0.30.
+  - **It breaks the thick-write cell's read.** At ss/27 °C the written 1 (0.33 V) falls below
+    the readable level (0.39 V), even with a 100 ns write and a 20 ns sense. At W 0.30 the margin
+    was only 12 mV to begin with.
+  - The level-shifted thin cell loses 20 to 35 % of its nominal lifetime (0.93 → 0.73 ms at
+    ff/85 °C, with the per-corner bar), and with a fixed bar it fails ss/27 °C.
+
+  **Keeping the read strip at 0.30** gives up the Cnt.c part of tier 0 and keeps only the
+  0.13 end cap: 2.10 / 2.75 / 2.96 µm² (−5 %), with unchanged electricals.
 - **Tiny Tapeout's precheck would accept every tier drawn here**, if two conditions hold:
   - the array carries the SRAM marker;
   - the PDK is recent enough to have `Cnt.c.SRAM`.
@@ -125,7 +133,9 @@ Areas are per bit with a strap every 32 columns (gain) or for the core cell (6T)
 | 0 | thick-write 3T | 2.48 | −14 % | Cnt.c, Gat.c as above | clean | clean |
 | 1 | thick-write 3T | 2.38 | −18 % | same | clean | clean |
 | 2 (TGO only) | thick-write 3T | 2.08 | −28 % | + TGO.a 0.105, TGO.b | clean | clean |
-| 2 | thick-write 3T | **2.01** | −30 % | + Cnt.f 0.070 | clean | clean |
+| 2 | thick-write 3T | 2.01 | −30 % | + Cnt.f 0.070 | clean | clean |
+| 0, W 0.30 read strip | thin / thick / all-thick | 2.10 / 2.75 / 2.96 | −5 % | Gat.c 0.130 only (and pSD.j1 before a fix in the all-thick strap) | clean | clean |
+| 2, W 0.30 read strip | thin / thick / all-thick | 1.91 / **2.23** / 2.77 | −13 / **−23** / −11 % | Cnt.c 0.020 (along the strips), Cnt.f 0.070, Gat.c 0.130; thick: TGO.a 0.105, TGO.b | clean | clean |
 | std | all-thick 3T | 3.10 | — | none | — | — |
 | 0 / 1 / 2 | all-thick 3T | 2.66 / 2.57 / 2.49 | −14 / −17 / −20 % | as the thin cell | clean | clean |
 
@@ -152,11 +162,16 @@ parameter; results are in `sim/results/`, and lifetimes come from `sim/life.py`,
 | same | ff/85 °C | 1.22 ms idle / 131 µs busy | 975 µs idle / 275 µs busy |
 | level-shifted, per-corner bar (VBAR 0 at ss/27, 0.15 at ff/85) | ss/27 °C | 19.6 ms | 12.6 ms |
 | same | ff/85 °C | 930 µs (idle and busy) | **732 µs** (`results/lifetime-percorner-w20.txt`) |
-| untricked thin / thick-write | worst corner | see `results/lifetime-w20-untricked.txt` | see `results/lifetime-w20-untricked.txt` |
+| untricked thin, 10 ns sense | worst corner (ff/85 °C) | 1.31 µs | 0.93 µs (`results/lifetime-w20-untricked.txt`) |
+| thick-write, 20 ns write, 20 ns sense | ss/27 °C | written 1 0.366 V, reads above 0.354 V → 261 µs | written 1 0.329 V, reads above 0.392 V → **fails** |
+| thick-write, 100 ns write, 20 ns sense | ss/27 °C | written 0.418 V → 16.5 ms | written 0.382 V, needs 0.392 V → **fails** (`results/lifetime-thick-tw100-ss27.txt`) |
+| thick-write, 20 ns write, 20 ns sense | other corners | ≥ 3.1 ms (`../gain-cell/`) | 5.7–13.4 ms |
 
-So tier 0 is not free for the gain cells: the ss/27 °C margin of the level-shifted scheme
-shrinks by about 80 mV (the written 1 is 50 mV lower and the threshold 30 mV higher), and it
-survives only with the per-corner bar. Mismatch was not rerun. σVt scales as 1/√(WL), so it is
+So tier 0 is not free for the gain cells. The written 1 is 40–50 mV lower (less SN capacitance
+against the same word-line feedthrough), and the readable level is 30–40 mV higher (a weaker
+read path). The level-shifted thin cell survives only with the per-corner bar. The thick-write
+cell, whose ss/27 °C margin was 12 mV, does not survive at all without a sense amplifier or a
+boosted write word line. That is why the recommended tiers keep the read strip at 0.30. Mismatch was not rerun. σVt scales as 1/√(WL), so it is
 about 1.2× larger at W 0.20, on margins of tens of millivolts. **This must be run before
 committing to tier 0 for the level-shifted cell.**
 
@@ -213,17 +228,19 @@ tier 0.
 |---|---|---|---|---|---|---|---|
 | 0 | 6T | 3.01 | 12 % | Cnt.c 0.02, Gat.c 0.13–0.17, NW.c/d 0.27, pSD.i 0.24 | none by schematic; IHP's own values | passes with the marker and a PDK ≥ 2026-02-15 | as good as IHP's cell, but still 1.6× the tier-0 thin gain cell |
 | 0 | thin 3T | 1.89 | 14 % | Cnt.c 0.02 across, Gat.c 0.13 | W 0.20 read path: level shift survives only with the per-corner bar (0.73 ms ff/85); MC not rerun | same | **worth it** if the MC holds; keep Cnt.c off the SN contact |
-| 0 | thick-write 3T | 2.48 | 14 % | same | same W 0.20 read path; retention from the thick write transistor | same | worth it |
+| 0 | thick-write 3T | 2.48 | 14 % | same | **does not read at ss/27 °C** (W 0.20) | same | no; with the 0.30 read strip 2.75 (−5 %) |
 | 1 | gain cells | 1.79 / 2.38 / 2.57 | 17–19 % | + Cnt.c 0.02 along strips | as tier 0, plus contacts at strip ends over the trench edge | same | small extra gain; put it only on non-storage contacts |
-| 2 | thick-write 3T | **2.01** | **30 %** | + TGO.a/b 0.105 (gates kept 0.34), Cnt.f 0.07 | TGO: an oxide remnant on diffusion only (≥ 0.34 µm to any gate); Cnt.f: ~1 % of dies at 45 nm 3σ (*assumption*) | passes (TT checks neither rule) | **the most valuable break**: thick-oxide retention at the density of today's thin cell. TGO alone gives 2.08 (−28 %) without the Cnt.f risk |
+| 2, 0.30 read strip | thick-write 3T | **2.31** (TGO) / 2.23 (+ Cnt.f) | **20 / 23 %** | TGO.a/b 0.105 (gates kept 0.34), Cnt.c 0.02 along strips, Gat.c 0.13, [Cnt.f 0.07] | none in SPICE (same devices); TGO: an oxide remnant on diffusion only (≥ 0.34 µm to any gate); Cnt.f: ~1 % of dies at 45 nm 3σ (*assumption*) | passes (TT checks neither TGO nor Cnt.f) | **the most valuable break**: thick-oxide retention at the density of today's thin cell |
+| 2, 0.20 strip | thick-write 3T | 2.01 | 30 % | as above + Cnt.c 0.02 across | does not read at ss/27 °C | passes | no, unless a sense amplifier |
 | 2 | thin 3T | 1.72 | 22 % | + Cnt.f 0.07 | Cnt.f die loss as above | passes | marginal over tier 1 |
 | 2 | 6T | 2.88 | 16 % | NW.c/d 0.24, pSD.i 0.18 | latch-up and WPE unmodelled; would want taps every 16 rows | passes | not worth it |
 | — | Cnt.d 0.02 (SN pad) | — | ≤ 9–14 % (*estimate*) | Cnt.d, then Cnt.e | — | **fails** (main-deck rule) | out |
 
 **The most valuable break, and its price.** For the thick-write cell, move the ThickGateOx edge
 to the middle of the 0.21 µm gap between the write strip and the thin-oxide bar (TGO.a/TGO.b
-0.27 → 0.105), keeping every gate 0.34 µm from the edge. On its own this takes 2.38 → 2.08 µm²
-at tier 1. The price:
+0.27 → 0.105), keeping every gate 0.34 µm from the edge. On its own, at the standard rules, this
+takes 2.88 → 2.54 µm² (−12 %; `layout/rule-costs-w30.txt`). With the small tier-1 breaks and the
+0.30 read strip, it reaches 2.31 µm². The price:
 
 - an oxide-edge placement margin of 0.105 µm instead of 0.27;
 - no gate is ever at risk;
