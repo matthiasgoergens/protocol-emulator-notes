@@ -34,37 +34,47 @@ LY = {"Activ": (1, 0), "GatPoly": (5, 0), "Cont": (6, 0), "Metal1": (8, 0), "Via
       "Metal2": (10, 0), "ThickGateOx": (44, 0), "pSD": (14, 0)}
 PX = 1.03
 
-# The write transistor: gate length LMW (0.45 is the thick-oxide minimum), and, if NARROW, a
-# channel width of 0.15 instead of the strip's 0.30 (a dogbone: the strip narrows under the
-# gate only). Both cut its leakage; see retention/.
-LMW, NARROW = 0.45, False
+# A variant of the cell: kind "3T" or "2T"; ox "thick" or "thin" for the write transistor; its
+# gate length lmw (thick-oxide minimum 0.45, thin 0.13); and, if narrow, a channel width of 0.15
+# instead of the strip's 0.30 (a dogbone: the strip narrows under the gate only).
+# Thick oxide costs a keep-out: ThickGateOx reaches 0.27 past strip B (TGO.a) and must clear the
+# thin-oxide bar by another 0.27 (TGO.b); thin oxide needs only the Activ spacing of 0.21.
+def V(kind="3T", ox="thick", lmw=None, narrow=True):
+    return dict(kind=kind, ox=ox, lmw=lmw if lmw is not None else (0.45 if ox == "thick" else 0.13),
+                narrow=narrow)
 
-def geometry(kind):
-    n = 0.03 if NARROW else 0         # the dogbone's width steps keep 0.07 from the gate (Gat.d)
-    d = round(LMW - 0.45 + 2 * n, 3)  # everything above the write gate moves up by this
-    up = lambda p: tuple(round(v + d, 3) for v in p)
+def vname(v):
+    return f"{v['kind']}_{v['ox']}_L{int(round(v['lmw'] * 100))}{'n' if v['narrow'] else 'w'}"
+
+def geometry(v):
+    n = 0.03 if v["narrow"] else 0    # the dogbone's width steps keep 0.07 from the gate (Gat.d)
+    d = round(v["lmw"] - 0.45 + 2 * n, 3)   # everything above the write gate moves up by this
+    k = 0 if v["ox"] == "thick" else round(0.21 - 0.54, 3)   # and the bar and strip A by this
+    up = lambda p: tuple(round(x + d, 3) for x in p)
+    upk = lambda p: tuple(round(x + d + k, 3) for x in p)
     g = dict(b_top=0.98 + d, sn_c=up((0.75, 0.91)), wwl=(0.19 + n, 0.64 + d - n), tgo_top=1.25 + d,
-             bar=up((1.52, 1.82)), ms=up((1.89, 2.02)), pad=up((1.89, 2.19)), pad_c=up((1.96, 2.12)))
-    if kind == "3T":
-        g["rwl"] = up((2.37, 2.50))
-        g["H"] = round(2.69 + d, 3)
+             bar=upk((1.52, 1.82)), ms=upk((1.89, 2.02)), pad=upk((1.89, 2.19)),
+             pad_c=upk((1.96, 2.12)), thick=v["ox"] == "thick", narrow=v["narrow"])
+    if v["kind"] == "3T":
+        g["rwl"] = upk((2.37, 2.50))
+        g["H"] = round(2.69 + d + k, 3)
     else:
-        g["H"] = round(2.38 + d, 3)
+        g["H"] = round(2.38 + d + k, 3)
     return g
 
 def R(cell, layer, x0, y0, x1, y1):
     cell.add(gdstk.rectangle((round(x0, 3), round(y0, 3)), (round(x1, 3), round(y1, 3)),
                              layer=LY[layer][0], datatype=LY[layer][1]))
 
-def tile(lib, kind):
-    g = geometry(kind)
+def tile(lib, v):
+    g = geometry(v)
     H = g["H"]
-    c = lib.new_cell(f"TILE{kind}")
+    c = lib.new_cell(f"TILE_{vname(v)}")
     for s in (1, -1):          # upper row, then its mirror image
         def r(layer, x0, y0, x1, y1):
             a, b = sorted((s * y0, s * y1))
             R(c, layer, x0, a, x1, b)
-        if NARROW:                                                   # strip B, a dogbone
+        if g["narrow"]:                                              # strip B, a dogbone
             r("Activ", 0.18, 0, 0.48, 0.15)
             r("Activ", 0.255, 0.15, 0.405, g["sn_c"][0] - 0.07)
             r("Activ", 0.18, g["sn_c"][0] - 0.07, 0.48, g["b_top"])
@@ -72,7 +82,8 @@ def tile(lib, kind):
             r("Activ", 0.18, 0, 0.48, g["b_top"])                   # strip B
         r("GatPoly", 0, g["wwl"][0], PX, g["wwl"][1])                # WWL
         r("Cont", 0.25, g["sn_c"][0], 0.41, g["sn_c"][1])            # SN on strip B
-        r("ThickGateOx", 0, 0, PX, g["tgo_top"])
+        if g["thick"]:
+            r("ThickGateOx", 0, 0, PX, g["tgo_top"])
         r("Activ", 0, g["bar"][0], PX, g["bar"][1])                  # GND / RWL bar
         r("Activ", 0.18, g["bar"][0], 0.48, H)                       # strip A
         r("GatPoly", 0, g["ms"][0], 0.55, g["ms"][1])                # MS gate with its left end-cap
@@ -96,19 +107,20 @@ def tile(lib, kind):
 
 SW = 0.60      # strap column: a GND track in Metal2 and a substrate tie per row
 
-def strap(lib, kind):
+def strap(lib, v):
     """Strap column, as a tile of the same height. Word lines, the bars and ThickGateOx run
     straight through. 3T: the GND bar gets an abutted P+ tie (pSD over the bar) and a contact to
     the GND track. 2T: the bar is a word line, so the tie is a separate P+ island between rows."""
-    g = geometry(kind)
+    g = geometry(v)
     H = g["H"]
-    c = lib.new_cell(f"STRAP{kind}")
+    c = lib.new_cell(f"STRAP_{vname(v)}")
     for s in (1, -1):
         def r(layer, x0, y0, x1, y1):
             a, b = sorted((s * y0, s * y1))
             R(c, layer, x0, a, x1, b)
         r("GatPoly", 0, g["wwl"][0], SW, g["wwl"][1])
-        r("ThickGateOx", 0, 0, SW, g["tgo_top"])
+        if g["thick"]:
+            r("ThickGateOx", 0, 0, SW, g["tgo_top"])
         r("Activ", 0, g["bar"][0], SW, g["bar"][1])
         if "rwl" in g:
             r("GatPoly", 0, g["rwl"][0], SW, g["rwl"][1])
@@ -128,46 +140,72 @@ def strap(lib, kind):
     R(c, "Metal2", 0.02, -H, 0.22, H)                                # GND
     return c
 
-def array(lib, kind, cols, pairs, every):
-    """cols data columns, with a strap column after every [every] of them"""
-    t, H = tile(lib, kind)
-    st = strap(lib, kind)
-    a = lib.new_cell(f"ARRAY{kind}_{cols}x{2 * pairs}")
-    top = 2 * H * pairs
-    x, xs = 0.0, []
+CELLS = {}     # tiles and straps already in a library, by variant name
+
+def array(lib, name, pairs, cols, every):
+    """[pairs] is a list of variants, one per row pair, stacked bottom to top; all share the
+    column pitch, so bit lines run through the whole stack. A strap column follows every
+    [every] data columns."""
+    cells = CELLS.setdefault(id(lib), {})
+    for v in pairs:
+        if vname(v) not in cells:
+            cells[vname(v)] = (tile(lib, v)[0], strap(lib, v), geometry(v))
+    a = lib.new_cell(name)
+    xs, x = [], 0.0
+    straps = []
     for k in range(cols):
         if k and k % every == 0:
-            a.add(gdstk.Reference(st, (x, H), columns=1, rows=pairs, spacing=(SW, 2 * H)))
+            straps.append(x)
             x += SW
         xs.append(x)
         x += PX
     width = x
-    for k in range(1, (cols - 1) // every + 1):          # GND track end-caps
-        x0 = xs[k * every] - SW
-        for y0, y1 in ((-0.15, 0), (top, top + 0.15)):
-            R(a, "Metal2", x0 + 0.02, y0, x0 + 0.22, y1)
+    y = 0.0
+    for v in pairs:
+        t, st, g = cells[vname(v)]
+        H = g["H"]
+        yc = y + H
+        for x0 in xs:
+            a.add(gdstk.Reference(t, (x0, yc)))
+        for x0 in straps:
+            a.add(gdstk.Reference(st, (x0, yc)))
+        if g["thick"]:
+            # ThickGateOx must extend 0.34 past the leftmost gates (TGO.c)
+            R(a, "ThickGateOx", -0.16, yc - g["tgo_top"], 0, yc + g["tgo_top"])
+        y += 2 * H
+    top = y
     for x0 in xs:
-        a.add(gdstk.Reference(t, (x0, H), columns=1, rows=pairs, spacing=(PX, 2 * H)))
         # array top and bottom: strip A end-caps around the outermost RBL contacts, and Metal2
         # end-caps past the outermost vias
         for y0, y1 in ((-0.15, 0), (top, top + 0.15)):
             R(a, "Activ", x0 + 0.18, y0, x0 + 0.48, y1)
             R(a, "Metal2", x0 + 0.23, y0, x0 + 0.43, y1)
-    for p in range(pairs):
-        yc = H + 2 * H * p
-        # ThickGateOx must extend 0.34 past the leftmost gates (TGO.c)
-        R(a, "ThickGateOx", -0.16, yc - geometry(kind)["tgo_top"], 0, yc + geometry(kind)["tgo_top"])
+    for x0 in straps:
+        for y0, y1 in ((-0.15, 0), (top, top + 0.15)):
+            R(a, "Metal2", x0 + 0.02, y0, x0 + 0.22, y1)
     return a, width, top
 
-lib = gdstk.Library(unit=1e-6, precision=5e-9)
-cols, pairs, every = (int(v) for v in sys.argv[1:4]) if len(sys.argv) > 3 else (8, 2, 4)
-if len(sys.argv) > 4:
-    LMW, NARROW = float(sys.argv[4]), sys.argv[5] == "narrow"
-    print(f"write transistor L {LMW}, W {0.15 if NARROW else 0.30}")
-for kind in ("3T", "2T"):
-    a, w, h = array(lib, kind, cols, pairs, every)
-    H = geometry(kind)["H"]
-    per = (PX + SW / every) * H
-    print(f"{kind}: core pitch {PX} x {H} um = {PX * H:.3f} um2 per bit; with a strap every "
-          f"{every} columns {per:.3f}; this {cols}x{2 * pairs} array {w:.2f} x {h:.2f} um")
-lib.write_gds("gain_v2.gds")
+def per_bit(v, every):
+    return (PX + SW / every) * geometry(v)["H"]
+
+if __name__ == "__main__":
+    # uv run draw2.py COLS PAIRS EVERY [ox lmw narrow|wide] ...: one uniform array per variant
+    # given (default: the chosen thick-oxide dogbone), plus a mixed array alternating the first
+    # two variants' row pairs; writes gain_v2.gds
+    cols, npairs, every = (int(x) for x in sys.argv[1:4]) if len(sys.argv) > 3 else (8, 2, 4)
+    rest = sys.argv[4:]
+    variants = [V("3T", rest[i], float(rest[i + 1]), rest[i + 2] == "narrow") for i in range(0, len(rest), 3)] \
+        or [V("3T", "thick", 0.45, True)]
+    lib = gdstk.Library(unit=1e-6, precision=5e-9)
+    for v in variants:
+        for kind in ("3T", "2T"):
+            w = dict(v, kind=kind)
+            a, wd, h = array(lib, f"ARRAY_{vname(w)}", [w] * npairs, cols, every)
+            print(f"{vname(w)}: pitch {PX} x {geometry(w)['H']} um = {PX * geometry(w)['H']:.3f} um2 "
+                  f"per bit core; {per_bit(w, every):.3f} with a strap every {every}; "
+                  f"{per_bit(w, 32):.3f} every 32; array {wd:.2f} x {h:.2f} um")
+    if len(variants) > 1:
+        mixed = [variants[i % 2] for i in range(2 * npairs)]
+        a, wd, h = array(lib, "ARRAY_MIXED", mixed, cols, every)
+        print(f"mixed ({vname(variants[0])} / {vname(variants[1])} alternating): array {wd:.2f} x {h:.2f} um")
+    lib.write_gds("gain_v2.gds")

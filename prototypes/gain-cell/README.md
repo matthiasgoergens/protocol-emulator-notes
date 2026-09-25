@@ -119,6 +119,25 @@ core pitch first suggested, because thick oxide costs 0.54 µm of keep-out per r
 threshold near minimum length (the reverse short-channel effect), but I have only the model for
 it, not silicon.
 
+## What leaks, and the thin-oxide alternative (2026-09-25)
+
+- **Leakage:** `retention/leak.py` isolates the paths. In the thick-oxide cell, the stored 1
+  leaks through the storage transistor's thin gate oxide: 14–200 mV per ms from 0.55 V. The
+  write transistor alone loses 1 mV (`results/leak.txt`). A ±100 mV shift of the write
+  transistor's threshold leaves the decay rate unchanged (`mkmodels.sh`, `run.py` `DVT`).
+- **Thick-oxide storage transistor:** it cuts the droop 30–100-fold
+  (`results/v7-3T-mshv-*.txt`). But it needs 0.57–0.77 V to read with an inverter
+  (`results/sweep-3t-mshv.txt`), more than the write gives, so it needs a sense amplifier.
+- **Thin-oxide write transistor:** its own channel leaks
+  (`results/lifetimes-3t-thin.txt`, `results/v6-*.txt`). The lifetime of a 1 is 1.2 µs at
+  ff/85 °C, 8 µs at tt/85 °C, 120 µs at tt/27 °C, and about 2 ms at ss/27 °C. Its cell is
+  1.03 × 2.10 µm = 2.16 µm² (2.20 µm² with straps), 1.59× the SRAM bit cell's density.
+- **Mixed arrays:** thick and thin row pairs mix in one array on shared bit lines. DRC is clean
+  (`drc/v3-ARRAY_MIXED.log`), and extraction shows the intended devices and nets
+  (`lvs/mixed/extracted.cir`).
+- **For the compiler:** how it would use rows with uneven lifetimes is in
+  `notes/gain-cell-compiler.md`.
+
 ## What would change the numbers
 
 - **A higher write word line.** The written 1 is 1.2 V minus a thick-oxide threshold, about
@@ -135,11 +154,13 @@ it, not silicon.
 ## Files
 
 - `draw.py`: the first thin-oxide 3T sketch (superseded).
-- `draw2.py`: the v2 arrays. `uv run draw2.py COLS PAIRS EVERY [LMW narrow|wide]` writes
-  `gain_v2.gds` (gitignored).
+- `draw2.py`: the v2 arrays. `uv run draw2.py COLS PAIRS EVERY [thick|thin LMW narrow|wide]...`
+  writes `gain_v2.gds` (gitignored), with a mixed array when two variants are given.
 - `drc/`: logs from IHP's DRC deck.
 - `lvs/`: netlists extracted by the PDK LVS deck.
 - `retention/run.py`: the retention simulation.
 - `retention/read.py`: the read simulation, with the stored-level sweep (`SNSWEEP`).
 - `retention/analyse.py`: joins the read sweep and the retention runs into lifetimes.
+- `retention/leak.py`: isolates the leakage paths of the storage node.
+- `retention/mkmodels.sh`: patches the PDK models to take a per-instance threshold offset.
 - `retention/results/`: every run cited above.
