@@ -1,0 +1,7 @@
+# gc.py csn ENVS=MS=hv CORNERS=tt TEMPS=27  commit 2b09a94  2026-09-25T10:52:39+08:00
+csn: MS hv 0.30/0.45, MR lv 0.30/0.13, MW hv 0.15/0.45, CSN 0, CC 0, VWWL 1.2, WBL idle opp, write 20.0 ns; C(SN) at 10 MHz, SN biased through 1 Tohm
+mos_tt   27C SN 0.00 V: C = 0.621 fF
+mos_tt   27C SN 0.30 V: C = 0.567 fF
+mos_tt   27C SN 0.50 V: C = 0.579 fF
+mos_tt   27C SN 0.80 V: C = 0.847 fF
+mos_tt   27C SN 1.20 V: C = 0.910 fF

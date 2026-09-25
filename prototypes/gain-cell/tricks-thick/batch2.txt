@@ -1,0 +1,14 @@
+ret-hv-base|MS=hv
+ret-lv-base|MS=lv TSTOP=0.2
+ret-hv-wwl1.6|MS=hv VWWL=1.6
+ret-hv-wwl2.0|MS=hv VWWL=2.0
+ret-hv-wwl2.4|MS=hv VWWL=2.4
+ret-hv-wwl2.8|MS=hv VWWL=2.8
+ret-lv-wwl2.0|MS=lv VWWL=2.0 TSTOP=0.2
+ret-lv-wwl2.4|MS=lv VWWL=2.4 TSTOP=0.2
+ret-hv-base-wblhalf|MS=hv WBLIDLE=0.6
+ret-hv-wwl2.4-wblhalf|MS=hv VWWL=2.4 WBLIDLE=0.6
+ret-hv-csn1|MS=hv CSN=1f
+ret-hv-wwl2.4-csn1|MS=hv VWWL=2.4 CSN=1f
+ret-lv-csn1|MS=lv CSN=1f TSTOP=0.2
+ret-lv-wwl2.4-csn1|MS=lv VWWL=2.4 CSN=1f TSTOP=0.2

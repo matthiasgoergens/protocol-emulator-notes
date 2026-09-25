@@ -1,0 +1,9 @@
+# Layers used in TinyTapeout tt-support-tools tech/ihp-sg13g2/def/analog/tt_analog_1x2.def (fetched 2026-09-25T11:16:33+08:00); count of 'LAYER' mentions
+      2 LAYER Metal1
+      2 LAYER Metal2
+      2 LAYER Metal3
+     45 LAYER Metal4
+      2 LAYER Metal5
+     10 LAYER TopMetal1
+      2 LAYER TopMetal2
+# magic_init_project.tcl in the same directory paints power stripes on met6 (TopMetal1 in the IHP Magic tech), min width 2.1 um, min spacing 1.64 um
