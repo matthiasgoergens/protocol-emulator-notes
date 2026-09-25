@@ -118,7 +118,11 @@ def rds_baseband(nbits, fs, rng):
 # ---------------------------------------------------------------------------------------------
 # the broadcast: MPX at 1 MS/s, integrated to phase
 
-def preemph(f, tau=50e-6):
+TAU = 75e-6        # pre-/de-emphasis: 75 us (Americas, Korea) because one shift gives it on the
+                   # chip (EMA k = 3 at 100 kS/s is 74.9 us); 50 us would need a second shift term
+
+
+def preemph(f, tau=TAU):
     h = 1 + 1j * 2 * np.pi * f * tau
     return abs(h), np.angle(h)
 
@@ -199,7 +203,8 @@ def wrap16(v):
 class PEChain:
     """The chip's receiver, carrying state across chunks. Integers only."""
 
-    def __init__(self, f_lo, n_chan=4, lo_offset_hz=0.0):
+    def __init__(self, f_lo, n_chan=4, lo_offset_hz=0.0, lo="tri3"):
+        self.lo = lo
         # NCO: per-sample increment in 1/65536 turns; four PEs hold the phases of lanes 0..3,
         # each advancing by 4*k per clock (wrap). Lane p starts at p*k.
         self.k = int(round((f_lo + lo_offset_hz) / FS * 65536)) & 0xFFFF
@@ -227,8 +232,20 @@ class PEChain:
         sin_neg = b15
         bb = nib.astype(np.int64)
         # nibble correlator assist: popcount of (sample XOR LO bit), minus 2: values -2..2
-        cI = np.sum(bb ^ cos_neg, axis=1) - 2
-        cQ = np.sum(1 - (bb ^ sin_neg), axis=1) - 2
+        if self.lo == "sq":
+            # nibble correlator assist: popcount of (sample XOR LO bit), minus 2: values -2..2
+            cI = np.sum(bb ^ cos_neg, axis=1) - 2
+            cQ = np.sum(1 - (bb ^ sin_neg), axis=1) - 2
+        else:
+            # 3-level LO: the correlator also takes an enable per lane (LO zero for 22.5 degrees
+            # either side of each zero crossing: phase sectors 3, 4, 11, 12 of 16 for the cosine),
+            # which cuts the LO's 3rd harmonic from 1/3 to 0.14 of the fundamental. Sum -4..4.
+            sec = ph >> 12
+            lut_c = np.array([1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1])
+            lut_s = -np.roll(lut_c, 4)
+            x = 2 * bb - 1
+            cI = np.sum(x * lut_c[sec], axis=1)
+            cQ = np.sum(x * lut_s[sec], axis=1)
         out = []
         for j, cx in enumerate((cI, cQ)):
             # CIC2, R = 60: two wrap integrators at 60 MHz (PE: s <- s + nbr), two combs at 1 MS/s
@@ -246,6 +263,8 @@ class PEChain:
             f = wrap16(e - prev)
             out.append(f)
         I, Q = out
+        if self.lo != "sq":
+            I, Q = I >> 1, Q >> 1          # the last comb's result shift (H): keep CORDIC in 16 bits
         # channel filter: n_chan PEs, each s <- (nbr + pipe) >> 1  (floor shift)
         for s in range(self.n_chan):
             pI = np.concatenate([[self.chan_prev[s, 0]], I[:-1]])
@@ -329,17 +348,20 @@ def ema(x, k, s0=0):
     return y
 
 
+AUDIO_EMA = (4, 3)     # anti-alias before 100 kS/s: stages, shift (k = 3: poles near 21 kHz)
+
+
 def pe_audio(delta, stats):
     """delta: phase differences at 1 MS/s, 1 LSB = 1e6/65536 = 15.26 Hz. Audio: shifted up by 2
-    (so the EMA truncation sits at 3.8 Hz), three EMA stages with k = 4 (poles near 10 kHz: the
-    anti-alias filter), take every 20th sample (50 kS/s), de-emphasis EMA with k = 2 (tau about
-    70 us). Returns Hz."""
+    (so the EMA truncation sits at 3.8 Hz), two EMA stages with k = 2 (poles near 46 kHz: the
+    anti-alias filter for 100 kS/s, where the pilot, L-R and RDS all alias outside 0-15 kHz),
+    take every 10th sample (100 kS/s), de-emphasis EMA with k = 3 (tau 74.9 us). Returns Hz."""
     x = delta.astype(np.int64) << 2
     stats["audio_in_max"] = int(np.abs(x).max())
-    for _ in range(3):
-        x = ema(x, 4)
-    x = x[19::20]
-    x = ema(x, 2)
+    for _ in range(AUDIO_EMA[0]):
+        x = ema(x, AUDIO_EMA[1])
+    x = x[9::10]
+    x = ema(x, 3)
     return x * (1e6 / 65536 / 4)
 
 
@@ -404,9 +426,9 @@ def ref_mpx(z):
 
 
 def ref_audio(mpx):
-    a = sg.resample_poly(mpx, 1, 20)                 # 50 kS/s, with a proper anti-alias FIR
-    a = sg.lfilter(*sg.butter(6, 15e3, fs=50e3), a)
-    alpha = 1 - math.exp(-1 / (50e3 * 50e-6))
+    a = sg.resample_poly(mpx, 1, 10)                 # 100 kS/s, with a proper anti-alias FIR
+    a = sg.lfilter(*sg.butter(6, 15e3, fs=100e3), a)
+    alpha = 1 - math.exp(-1 / (100e3 * TAU))
     return sg.lfilter([alpha], [1, -(1 - alpha)], a)
 
 
@@ -591,13 +613,13 @@ SCEN = {
 }
 
 
-def run(cnr, scenario="single", rel=0.0, seconds=3.0, ppm=30.0, seed=1, n_chan=4, lo_offset=31.25e3,
+def run(cnr, scenario="single", rel=0.0, seconds=3.0, ppm=30.0, seed=1, n_chan=4, lo_offset=31.25e3, lo="tri3",
         receivers=("pe", "ref", "ideal"), keep=False):
     t0 = time.time()
     st = SCEN[scenario](rel)
     w = World(seconds, cnr, st, ppm, seed)
     tgt = w.stations[0]
-    pe = PEChain(tgt["fc"], n_chan=n_chan, lo_offset_hz=lo_offset)
+    pe = PEChain(tgt["fc"], n_chan=n_chan, lo_offset_hz=lo_offset, lo=lo)
     ref = RefChain(tgt["fc"]) if "ref" in receivers else None
     ideal = RefChain(tgt["fc"]) if "ideal" in receivers else None
     I_all, Q_all = [], []
@@ -615,7 +637,7 @@ def run(cnr, scenario="single", rel=0.0, seconds=3.0, ppm=30.0, seed=1, n_chan=4
         if ideal is not None:
             ideal.process(x)
     out = dict(cnr_db=cnr, scenario=scenario, rel_db=rel, seconds=seconds, ppm=ppm, seed=seed,
-               n_chan=n_chan, lo_offset_hz=lo_offset, ones_fraction=ones / w.n_total,
+               n_chan=n_chan, lo_offset_hz=lo_offset, lo=lo, ones_fraction=ones / w.n_total,
                antenna_dbm_nf3=round(cnr - 174 + 10 * math.log10(200e3) + 3, 1))
     truth = tgt["info"]["bits"]
     ftone = 1000.0 / (1 + ppm * 1e-6)     # the tone as the chip's (fast) clock sees it
@@ -635,7 +657,7 @@ def run(cnr, scenario="single", rel=0.0, seconds=3.0, ppm=30.0, seed=1, n_chan=4
         phi = cordic_phase(I, Q, stats)
         delta = wrap16(np.diff(np.concatenate([[phi[0]], phi])))
         aud = pe_audio(delta, stats)
-        s, rms = sinad(aud, 50e3, ftone=ftone)
+        s, rms = sinad(aud, 100e3, ftone=ftone)
         zr = pe_rds(delta, stats)
         bits = rds_backend(zr.astype(complex), 1e6 / 53)
         r = rds_decode(bits, truth)
@@ -649,7 +671,7 @@ def run(cnr, scenario="single", rel=0.0, seconds=3.0, ppm=30.0, seed=1, n_chan=4
         z = ch.finish()
         mpx = ref_mpx(z)
         aud = ref_audio(mpx)
-        s, rms = sinad(aud, 50e3, ftone=ftone)
+        s, rms = sinad(aud, 100e3, ftone=ftone)
         zr = ref_rds(mpx)
         bits = rds_backend(zr, 1e6 / 53)
         r = rds_decode(bits, truth)
@@ -682,13 +704,14 @@ def main():
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--n-chan", type=int, default=4)
     ap.add_argument("--lo-offset", type=float, default=31.25e3)
+    ap.add_argument("--lo", default="tri3")
     ap.add_argument("--receivers", default="pe,ref,ideal")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     RES.mkdir(exist_ok=True)
     if a.cmd == "run":
         o = run(a.cnr, a.scenario, a.rel_db, a.seconds, seed=a.seed, n_chan=a.n_chan,
-                lo_offset=a.lo_offset, receivers=tuple(a.receivers.split(",")))
+                lo_offset=a.lo_offset, lo=a.lo, receivers=tuple(a.receivers.split(",")))
         print(fmt(o))
         print(json.dumps(o, indent=1))
         if a.out:
@@ -697,7 +720,7 @@ def main():
         sweep()
 
 
-SWEEP = [("single", c, 0.0) for c in (3, 6, 9, 12, 15, 18, 21, 25, 30, 40)] + \
+SWEEP = [("single", c, 0.0) for c in (6, 9, 12, 15, 18, 21, 24, 27, 30, 40)] + \
         [("multi", 30.0, r) for r in (0, 10, 20, 30, 40)]
 
 
@@ -722,7 +745,7 @@ def sweep(seconds=3.0):
 
 def table():
     rows = [json.loads(l) for l in (RES / "fm_sweep.jsonl").read_text().splitlines()]
-    L = ["Demo A sweep (fm_rx.py sweep). SINAD: 1 kHz tone at 22.5 kHz deviation, 50 us",
+    L = ["Demo A sweep (fm_rx.py sweep). SINAD: 1 kHz tone at 22.5 kHz deviation, 75 us",
          "pre-emphasis, 15 kHz band. BLER: RDS blocks failing the CRC after block sync (1.000 = never",
          "synchronised). CNR: target carrier to noise in 200 kHz; antenna level assumes 3 dB noise figure.",
          "multi: 7 stations, target 'rel' dB below the strongest, an equal neighbour 400 kHz away, CNR 30 dB.",

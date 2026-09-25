@@ -109,7 +109,7 @@ def main():
     w2 = F.World(1.0, cnr, F.SCEN["multi"](rel), 30.0, 7)
     freqs, wf = scanner(w2, 24)
     info = dict(fc=world.stations[0]["fc"], cnr=cnr, rel=rel)
-    img = render(freqs, wf, kd["pe_audio"], 50e3, o["pe"]["rds"], info)
+    img = render(freqs, wf, kd["pe_audio"], 100e3, o["pe"]["rds"], info)
     img.save(OUT / "fm_tv_source.png")
     import tv
     tv.FS = 60e6
