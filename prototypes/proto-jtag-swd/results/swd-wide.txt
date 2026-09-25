@@ -1,0 +1,28 @@
+SWD engine: 221 words (store: 256 per thread)
+directed bring-up (switch, DPIDR, power-up, SELECT, CSW, 3 writes, 3 posted reads, AP IDR):
+  interpreter PASS; RTL PASS; 23209 clocks compared, 0 differ; 1307 SWCLK cycles, 25 packets
+FAULT and recovery (bad write parity -> WDATAERR -> FAULT -> ABORT; bad request parity -> no ACK -> line reset):
+  interpreter PASS; RTL PASS; 17325 clocks compared, 0 differ; target log tail: protocol-error: bad stop/park bit, request dropped, no response; protocol-error: bad stop/park bit, request dropped, no response; line-reset; dpidr read complete: DP now honouring transactions
+constrained random: 40/40 sessions pass on both cores (random addresses and data, WAIT injected
+  with p in [0,0.5), sync 0-3, target delay 0-3, host stalls); 2293 packets, 829 WAITs retried;
+  2312232 clocks compared, 0 differ; 124657 SWCLK cycles
+controls (each must fail on both cores, on random traffic):
+  request parity flipped (one packet)      caught 10/10  (e.g. w00000020: ACK none(111))
+  write-data parity flipped (one packet)   caught 10/10  (e.g. packet: ACK FAULT)
+  turnaround before ACK missing            caught 10/10  (e.g. 532 clocks of SWDIO contention)
+  turnaround after write ACK missing       caught 10/10  (e.g. w00000020: ACK FAULT)
+  sampling after the rising edge           caught 10/10  (e.g. 477 clocks of SWDIO contention)
+  one wrong bit in the switch sequence     caught 10/10  (e.g. dpidr: ACK none(111))
+SWCLK at a 60 MHz core clock (directed scenario, interpreter and RTL):
+  lo 1 hi 1 sync 0 tco 0: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: pass
+  lo 1 hi 1 sync 2 tco 0: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: pass
+  lo 1 hi 1 sync 3 tco 3: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: pass
+  lo 1 hi 1 sync 2 tco 8: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: pass
+  lo 1 hi 1 sync 2 tco 9: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: FAIL dpidr: ACK none(110) | abort: ACK none(111) | pwrup: ACK none(110)
+  lo 1 hi 1 sync 2 tco 10: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: FAIL dpidr: ACK none(110) | abort: ACK none(111) | pwrup: ACK none(110)
+  lo 1 hi 1 sync 2 tco 12: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: FAIL dpidr: ACK none(110) | abort: ACK none(111) | pwrup: ACK none(110)
+  lo 1 hi 2: programme too long: 262 words, store holds 256
+  lo 1 hi 2: programme too long: 262 words, store holds 256
+  lo 1 hi 2: programme too long: 262 words, store holds 256
+  lo 1 hi 3: programme too long: 280 words, store holds 256
+ALL PASS

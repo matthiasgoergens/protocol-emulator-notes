@@ -1,0 +1,3 @@
+(executable
+ (name selftest)
+ (modules jtag_tap swd_target selftest))
