@@ -8,3 +8,8 @@
  (name lockstep2)
  (modules lockstep2)
  (libraries hardcaml seqv2))
+
+(executable
+ (name emit2)
+ (modules emit2)
+ (libraries hardcaml seqv2))
