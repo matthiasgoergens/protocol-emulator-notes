@@ -9,7 +9,7 @@ open Hardcaml
 
 type t = {
   sim : Cyclesim.t_port_list;
-  mem : int array;                 (* programme store, Isa2.store_len words *)
+  fetch : int -> int;              (* programme store read, by 10-bit address *)
   bankmem : int array;
   inp : string -> Bits.t ref;
   before : string -> Bits.t ref;
@@ -28,13 +28,16 @@ let circuit ?bug () =
 
 let set (r : Bits.t ref) ~width v = r := Bits.of_int ~width v
 
-let make ?bug ?(boot = Array.make Isa2.n_threads (0, 0)) ?bank (mem : int array) =
+let rec make ?bug ?boot ?bank (mem : int array) =
   assert (Array.length mem = Isa2.store_len);
+  make_f ?bug ?boot ?bank ~fetch:(Array.get mem) ()
+
+and make_f ?bug ?(boot = Array.make Isa2.n_threads (0, 0)) ?bank ~fetch () =
   let sim = Cyclesim.create (circuit ?bug ()) in
   let inp n = Cyclesim.in_port sim n in
   let before n = Cyclesim.out_port ~clock_edge:Before sim n in
   let after n = Cyclesim.out_port ~clock_edge:After sim n in
-  let s = { sim; mem; bankmem = (match bank with Some b -> Array.copy b | None -> Array.make Isa2.bank_len 0); inp; before; after; fetch_addr = 0;
+  let s = { sim; fetch; bankmem = (match bank with Some b -> Array.copy b | None -> Array.make Isa2.bank_len 0); inp; before; after; fetch_addr = 0;
             rdata = 0; cycles = 0 } in
   let bp = Array.fold_left (fun (acc, i) (pg, _) -> (acc lor ((pg land 3) lsl (2 * i)), i + 1)) (0, 0) boot |> fst in
   let bpc = Array.fold_left (fun (acc, i) (_, pc) -> (acc lor ((pc land 0xFF) lsl (8 * i)), i + 1)) (0, 0) boot |> fst in
@@ -58,7 +61,7 @@ let onehot_index v = let rec f i = if i >= 4 then None else if (v lsr i) land 1 
 
 let cycle s (io : Isa2.io) =
   let g r = Bits.to_int !r in
-  set (s.inp "imem_data") ~width:16 s.mem.(s.fetch_addr);
+  set (s.inp "imem_data") ~width:16 (s.fetch s.fetch_addr);
   set (s.inp "bank_rdata") ~width:8 s.rdata;
   set (s.inp "pin_in") ~width:8 io.pin_in;
   s.inp "pin_in4" := Bits.of_int ~width:32 io.pin_in4;

@@ -183,12 +183,17 @@ type effects = {
   fine_out : int option;
 }
 
-let fetch st ~(mem : int array) t = mem.((st.pages.(t) lsl pc_bits) lor st.pcs.(t))
+let fetch_addr st t = (st.pages.(t) lsl pc_bits) lor st.pcs.(t)
+let fetch st ~(mem : int array) t = mem.(fetch_addr st t)
 
-let step st ~(mem : int array) (io : io) =
+(* [step_f] reads the store through [fetch] (a function of the 10-bit address), so a programme
+   can be translated word by word as it is fetched (compat.ml); [step] reads an array. *)
+let rec step st ~(mem : int array) (io : io) = step_f st ~fetch:(Array.get mem) io
+
+and step_f st ~(fetch : int -> int) (io : io) =
   let t = st.thread in
   let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
-  let instr = fetch st ~mem t in
+  let instr = fetch (fetch_addr st t) in
   let opc = (instr lsr 12) land 0xF in
   let imm12 = instr land 0xFFF and imm8 = instr land 0xFF in
   let pin = (instr lsr 9) land 7 and pin_val = (instr lsr 8) land 1 in

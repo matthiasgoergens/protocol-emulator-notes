@@ -1,7 +1,7 @@
 (library
  (name seqv2)
  (wrapped false)
- (modules isa2 sequencer2 harness2)
+ (modules isa2 sequencer2 harness2 compat)
  (libraries hardcaml))
 
 (executable

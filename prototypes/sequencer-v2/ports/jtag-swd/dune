@@ -1,0 +1,11 @@
+; ../../../proto-jtag-swd/wide: JTAG and SWD host firmware and their suites, unchanged
+; (symlinks), on v2. main.exe's "lockstep" part now compares the v2 RTL with the v2 interpreter
+; on random wide-variant programmes (translated at fetch).
+(rule
+ (with-stdout-to
+  isa_enc.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
+
+(executable
+ (name main)
+ (libraries hardcaml seqv2))
