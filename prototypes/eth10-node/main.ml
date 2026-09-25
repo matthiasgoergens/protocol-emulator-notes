@@ -103,4 +103,7 @@ let tx () =
 
 let () =
   let what = if Array.length Sys.argv > 1 then Sys.argv.(1) else "all" in
-  if what = "tx" || what = "all" then tx ()
+  if what = "tx" || what = "all" then tx ();
+  if what = "crc" || what = "all" then ignore (Rx_tests.crc ());
+  if what = "sampler" || what = "all" then ignore (Rx_tests.sampler ());
+  if what = "rx" || what = "all" then ignore (Rx_tests.rx ())
