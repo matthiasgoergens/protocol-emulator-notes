@@ -5,7 +5,7 @@ that reconciles the seven proposals made by six workstreams. Until now it existe
 (gap G2). This directory implements it and checks it:
 
 - `isa2.ml`, the executable specification: assembler, interpreter, disassembler;
-- `sequencer2.ml`, the Hardcaml RTL, with 27 bugs that can be planted on request;
+- `sequencer2.ml`, the Hardcaml RTL, with 28 bugs that can be planted on request;
 - `lockstep2.ml`, random programmes on interpreter and RTL in lockstep, comparing every clock;
 - `ports/`, the landed suites of seven prototypes run on v2;
 - `synth/`, one Yosys synthesis of the core.
@@ -112,9 +112,9 @@ Results:
 - The coverage table in the same file counts, for 20 programmes, each MBX outcome (done,
   fail-branch, stay, for inbox and port, send and receive), each WAITC condition in each outcome,
   each EXT operation and each SHO mode combination. All are exercised hundreds of times.
-- **27 planted bugs**, one or more per new instruction and mode: 8-bit pc, page, host-control
+- **28 planted bugs**, one or more per new instruction and mode: 8-bit pc, page, host-control
   bypass, pair and psel, cap, OUT tag and src, SEND, RECV, ports, lsend, WAITC 8, 9, 11 and the
-  flag group, SKNE, SKEQ, FINE, CNTA, LDB (two), STB, BANK, round latch (two). The biased
+  flag group, SKNE, SKEQ, FINE, CNTA, LDB (three), STB, BANK, round latch (two). The biased
   generator catches every one. The uniform generator catches some far less often: WAITC 8 in 2
   of 30 programmes, SKEQ in 0, STB in 15, the round latch in 3. That is why the generator is
   biased. SKEQ is the weakest catch even when biased (6 of 30), because it needs acc equal to a

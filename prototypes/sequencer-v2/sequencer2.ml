@@ -23,7 +23,7 @@ type bug =
   | Send_ignores_full | Recv_no_fail | Port_index | Lsend_on_success_only
   | Waitc_byte_4bits | Waitc_space_own | Waitc_flag_thread0 | Waitc_host_inverted
   | Skne_inverted | Skeq_skip_one | Fine_no_disarm | Cnta_7bits
-  | Ldb_no_increment | Ldb_wrong_thread | Stb_data_cnt | Bank_hi_ignored | Cfg_latch_ignored | Latch_every_clock
+  | Ldb_no_increment | Ldb_wrong_thread | Ldb_reads_next | Stb_data_cnt | Bank_hi_ignored | Cfg_latch_ignored | Latch_every_clock
 
 let bugs =
   [ Pc6, "pc wraps at 6 bits"; Page_ignored, "page bits not in the fetch address";
@@ -39,7 +39,8 @@ let bugs =
     Waitc_host_inverted, "WAITC 9 inverted";
     Skne_inverted, "SKNE skips on equal"; Skeq_skip_one, "SKEQ skip lands on pc+1";
     Fine_no_disarm, "FINE not disarmed by the pin write"; Cnta_7bits, "CNTA drops acc bit 7";
-    Ldb_no_increment, "LDB does not increment bp"; Ldb_wrong_thread, "LDB byte lands in the next thread's acc"; Stb_data_cnt, "STB writes cnt[7:0]";
+    Ldb_no_increment, "LDB does not increment bp"; Ldb_wrong_thread, "LDB byte lands in the next thread's acc";
+    Ldb_reads_next, "LDB reads bp + 1"; Stb_data_cnt, "STB writes cnt[7:0]";
     Bank_hi_ignored, "BANK ignores imm"; Cfg_latch_ignored, "CFG round latch ignored";
     Latch_every_clock, "round latch loads every clock" ]
 
@@ -277,7 +278,7 @@ let create ?bug ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_in ~host_in_vali
     host_in_ready = host_in_ready.value;
     port_out_data = port_out_data.value; port_out_valid = port_out_valid.value;
     port_in_ready = port_in_ready.value;
-    bank_addr = bp; bank_we = bank_we.value; bank_re = bank_re.value;
+    bank_addr = (if is Ldb_reads_next then mux2 bank_re.value (bp +:. 1) bp else bp); bank_we = bank_we.value; bank_re = bank_re.value;
     bank_wdata = (if is Stb_data_cnt then select cnt 7 0 else acc);
     fine_out = fine_out.value; fine_valid = fine_valid.value; cfg_out = cat (values cfgs); dbg }
 
