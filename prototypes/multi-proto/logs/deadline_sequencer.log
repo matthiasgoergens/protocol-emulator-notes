@@ -817,7 +817,7 @@ Extracted 782 gates and 986 wires to a netlist network with 203 inputs and 93 ou
 Running ABC script: <abc-temp-dir>/abc.script
 ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
 ABC: + read_blif <abc-temp-dir>/input.blif 
-ABC: + read_library /tmp/yosys-abc-oslhK8/stdcells.genlib 
+ABC: + read_library /tmp/yosys-abc-UpXyVs/stdcells.genlib 
 ABC: + strash 
 ABC: + dretime 
 ABC: + map 
@@ -1073,6 +1073,6 @@ Removed 0 unused cells and 1205 unused wires.
    Chip area for module '\deadline_sequencer': 17262.730800
      of which used for sequential elements: 8768.995200 (50.80%)
 
-End of script. Logfile hash: 59380806c1, CPU: user 0.27s system 0.05s, MEM: 31.36 MB peak
+End of script. Logfile hash: 7bbab86e55, CPU: user 0.28s system 0.05s, MEM: 31.17 MB peak
 Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
-Time spent: 57% 2x abc (0 sec), 10% 21x opt_clean (0 sec), ...
+Time spent: 56% 2x abc (0 sec), 10% 21x opt_clean (0 sec), ...

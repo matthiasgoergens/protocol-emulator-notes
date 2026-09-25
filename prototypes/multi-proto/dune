@@ -1,7 +1,7 @@
 (library
  (name mpcore)
  (wrapped false)
- (modules isa compiler decoders sequencer harness isa_mb sequencer_mb harness_mb eth_tx eth_rx eth_rx_fixed eth_model asm dual video)
+ (modules isa compiler decoders sequencer harness isa_mb sequencer_mb harness_mb eth_tx eth_rx eth_rx_fixed eth_model asm dual video video_fw can_standin)
  (libraries hardcaml))
 
 (executable
@@ -17,4 +17,9 @@
 (executable
  (name bridges)
  (modules bridges)
+ (libraries hardcaml unix mpcore))
+
+(executable
+ (name cantv)
+ (modules cantv)
  (libraries hardcaml unix mpcore))
