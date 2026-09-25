@@ -1,0 +1,10 @@
+(library
+ (name ps2can)
+ (wrapped false)
+ (modules isa_v sequencer_v harness_v sim)
+ (libraries hardcaml))
+
+(executable
+ (name lockstep)
+ (modules lockstep)
+ (libraries hardcaml ps2can))
