@@ -259,6 +259,25 @@ BUDGET=1 _build/default/main_fw.exe
 YOSYS=... LIB=.../sg13g2_stdcell_typ_1p20V_25C.lib ./synth_sg13g2.sh
 ```
 
+## Independent review
+
+An adversarial pass by another model family (`run-codex-review.txt`, codex with a small model,
+read-only) tried to refute five claims:
+
+1. T0 is original-ISA and 64 words, and runs on the original interpreter and RTL.
+2. The CRC arming is a sound data PID check.
+3. The lockstep compares every clock.
+4. The turnaround and contention checks work.
+5. The encodings do not collide with master's.
+
+It found claims 1, 3, 4 and 5 supported, and raised two low-severity points.
+
+- **(a) It suggested T1 might miss a data packet's PID.** It does not: every T1 path returns to
+  the SOP wait at an EOP (drain, data keep, ACK check, after its own replies), and it re-arms
+  at each PID.
+- **(b) A "must be ignored" check passes for a device that never answers.** It does. These checks
+  are only meaningful next to the required replies around them, which every run has.
+
 ## Not done, and open questions
 
 - **No real host.** The FPGA with a Linux host is the next check. No place and route either.
