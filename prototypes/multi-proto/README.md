@@ -98,6 +98,13 @@ measured here, others are proposals):
 | systolic matcher ✓ in `../systolic-matcher` | pattern and filter matching per byte, without thread branches | Ethernet header and SFD, USB SYNC/PID, CAN ID filters, I2C slave address |
 | NCO chroma pins + memory streamer + lookup table ✓ (`video.ml`) | composite colour video with 1 thread | NTSC/PAL; with other lookup tables, 4b5b/8b10b-style line codes |
 | saturating counters (one generic PE each) ✓ | statistics and rates for analysers | CAN analyser bars; packet counters |
+| memory streamer with a per-line descriptor list (a display list) ✓ modelled | video from a few rows instead of a frame buffer | playback of precomputed waveforms; scatter-gather transmit (Ethernet, USB); test patterns |
+| ring-mode memory row (write pointer wraps, reads start at the oldest) ✓ modelled | a scrolling trace with no thread arithmetic | logic-analyser capture, receive FIFOs, trace buffers |
+| expanding write port (a byte becomes eight 1-bit pixels) ✓ modelled | bit fields displayed without shifting in a thread | bitmaps and fonts, register dumps, oscilloscope-style traces |
+
+The last three, and the stage around the NCO pins, exist here only as behavioural models (§6,
+open questions). Each is a register or a counter next to memory, which is why they are proposed as
+generic rather than video-specific.
 
 On this evidence the few units that buy the most concurrency are:
 
