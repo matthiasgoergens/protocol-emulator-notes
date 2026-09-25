@@ -1,0 +1,1054 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Running command `read_liberty -lib /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; read_verilog -sv rtl/latch_rf.v; hierarchy -check -top latch_rf; synth -top latch_rf -flatten; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/latch_rf_8x16.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Liberty frontend: /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib
+Imported 84 cell types from liberty file.
+
+2. Executing Verilog-2005 frontend: rtl/latch_rf.v
+Parsing SystemVerilog input from `rtl/latch_rf.v' to AST representation.
+Generating RTLIL representation for module `\latch_rf'.
+Successfully finished Verilog frontend.
+
+3. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1. Analyzing design hierarchy..
+Top module:  \latch_rf
+
+3.2. Analyzing design hierarchy..
+Top module:  \latch_rf
+Removed 0 unused modules.
+
+4. Executing SYNTH pass.
+
+4.1. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1.1. Analyzing design hierarchy..
+Top module:  \latch_rf
+
+4.1.2. Analyzing design hierarchy..
+Top module:  \latch_rf
+Removed 0 unused modules.
+
+4.2. Executing PROC pass (convert processes to netlists).
+
+4.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed 1 dead cases from process $proc$rtl/latch_rf.v:28$290 in module latch_rf.
+Marked 1 switch rules as full_case in process $proc$rtl/latch_rf.v:28$290 in module latch_rf.
+Removed a total of 1 dead cases.
+
+4.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 129 assignments to connections.
+
+4.2.4. Executing PROC_INIT pass (extract init attributes).
+
+4.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~1 debug messages>
+
+4.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$420'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$419'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$418'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$417'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$416'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$415'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$414'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$413'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$412'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$411'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$410'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$409'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$408'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$407'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$406'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$405'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$404'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$403'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$402'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$401'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$400'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$399'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$398'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$397'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$396'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$395'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$394'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$393'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$392'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$391'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$390'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$389'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$388'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$387'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$386'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$385'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$384'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$383'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$382'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$381'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$380'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$379'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$378'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$377'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$376'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$375'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$374'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$373'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$372'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$371'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$370'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$369'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$368'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$367'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$366'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$365'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$364'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$363'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$362'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$361'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$360'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$359'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$358'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$357'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$356'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$355'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$354'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$353'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$352'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$351'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$350'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$349'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$348'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$347'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$346'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$345'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$344'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$343'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$342'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$341'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$340'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$339'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$338'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$337'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$336'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$335'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$334'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$333'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$332'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$331'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$330'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$329'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$328'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$327'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$326'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$325'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$324'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$323'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$322'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$321'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$320'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$319'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$318'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$317'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$316'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$315'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$314'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$313'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$312'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$311'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$310'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$309'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$308'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$307'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$306'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$305'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$304'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$303'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$302'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$301'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$300'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$299'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$298'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$297'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$296'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$295'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$294'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:24$293'.
+Creating decoders for process `\latch_rf.$proc$rtl/latch_rf.v:28$290'.
+     1/1: $1$mem2reg_rd$\q$rtl/latch_rf.v:28$257_DATA[15:0]$292
+
+4.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\latch_rf.\q[7] [15]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$420'.
+No latch inferred for signal `\latch_rf.\q[7] [14]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$419'.
+No latch inferred for signal `\latch_rf.\q[7] [13]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$418'.
+No latch inferred for signal `\latch_rf.\q[7] [12]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$417'.
+No latch inferred for signal `\latch_rf.\q[7] [11]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$416'.
+No latch inferred for signal `\latch_rf.\q[7] [10]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$415'.
+No latch inferred for signal `\latch_rf.\q[7] [9]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$414'.
+No latch inferred for signal `\latch_rf.\q[7] [8]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$413'.
+No latch inferred for signal `\latch_rf.\q[7] [7]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$412'.
+No latch inferred for signal `\latch_rf.\q[7] [6]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$411'.
+No latch inferred for signal `\latch_rf.\q[7] [5]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$410'.
+No latch inferred for signal `\latch_rf.\q[7] [4]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$409'.
+No latch inferred for signal `\latch_rf.\q[7] [3]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$408'.
+No latch inferred for signal `\latch_rf.\q[7] [2]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$407'.
+No latch inferred for signal `\latch_rf.\q[7] [1]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$406'.
+No latch inferred for signal `\latch_rf.\q[7] [0]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$405'.
+No latch inferred for signal `\latch_rf.\q[6] [15]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$404'.
+No latch inferred for signal `\latch_rf.\q[6] [14]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$403'.
+No latch inferred for signal `\latch_rf.\q[6] [13]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$402'.
+No latch inferred for signal `\latch_rf.\q[6] [12]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$401'.
+No latch inferred for signal `\latch_rf.\q[6] [11]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$400'.
+No latch inferred for signal `\latch_rf.\q[6] [10]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$399'.
+No latch inferred for signal `\latch_rf.\q[6] [9]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$398'.
+No latch inferred for signal `\latch_rf.\q[6] [8]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$397'.
+No latch inferred for signal `\latch_rf.\q[6] [7]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$396'.
+No latch inferred for signal `\latch_rf.\q[6] [6]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$395'.
+No latch inferred for signal `\latch_rf.\q[6] [5]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$394'.
+No latch inferred for signal `\latch_rf.\q[6] [4]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$393'.
+No latch inferred for signal `\latch_rf.\q[6] [3]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$392'.
+No latch inferred for signal `\latch_rf.\q[6] [2]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$391'.
+No latch inferred for signal `\latch_rf.\q[6] [1]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$390'.
+No latch inferred for signal `\latch_rf.\q[6] [0]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$389'.
+No latch inferred for signal `\latch_rf.\q[5] [15]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$388'.
+No latch inferred for signal `\latch_rf.\q[5] [14]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$387'.
+No latch inferred for signal `\latch_rf.\q[5] [13]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$386'.
+No latch inferred for signal `\latch_rf.\q[5] [12]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$385'.
+No latch inferred for signal `\latch_rf.\q[5] [11]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$384'.
+No latch inferred for signal `\latch_rf.\q[5] [10]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$383'.
+No latch inferred for signal `\latch_rf.\q[5] [9]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$382'.
+No latch inferred for signal `\latch_rf.\q[5] [8]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$381'.
+No latch inferred for signal `\latch_rf.\q[5] [7]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$380'.
+No latch inferred for signal `\latch_rf.\q[5] [6]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$379'.
+No latch inferred for signal `\latch_rf.\q[5] [5]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$378'.
+No latch inferred for signal `\latch_rf.\q[5] [4]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$377'.
+No latch inferred for signal `\latch_rf.\q[5] [3]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$376'.
+No latch inferred for signal `\latch_rf.\q[5] [2]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$375'.
+No latch inferred for signal `\latch_rf.\q[5] [1]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$374'.
+No latch inferred for signal `\latch_rf.\q[5] [0]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$373'.
+No latch inferred for signal `\latch_rf.\q[4] [15]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$372'.
+No latch inferred for signal `\latch_rf.\q[4] [14]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$371'.
+No latch inferred for signal `\latch_rf.\q[4] [13]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$370'.
+No latch inferred for signal `\latch_rf.\q[4] [12]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$369'.
+No latch inferred for signal `\latch_rf.\q[4] [11]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$368'.
+No latch inferred for signal `\latch_rf.\q[4] [10]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$367'.
+No latch inferred for signal `\latch_rf.\q[4] [9]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$366'.
+No latch inferred for signal `\latch_rf.\q[4] [8]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$365'.
+No latch inferred for signal `\latch_rf.\q[4] [7]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$364'.
+No latch inferred for signal `\latch_rf.\q[4] [6]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$363'.
+No latch inferred for signal `\latch_rf.\q[4] [5]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$362'.
+No latch inferred for signal `\latch_rf.\q[4] [4]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$361'.
+No latch inferred for signal `\latch_rf.\q[4] [3]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$360'.
+No latch inferred for signal `\latch_rf.\q[4] [2]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$359'.
+No latch inferred for signal `\latch_rf.\q[4] [1]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$358'.
+No latch inferred for signal `\latch_rf.\q[4] [0]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$357'.
+No latch inferred for signal `\latch_rf.\q[3] [15]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$356'.
+No latch inferred for signal `\latch_rf.\q[3] [14]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$355'.
+No latch inferred for signal `\latch_rf.\q[3] [13]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$354'.
+No latch inferred for signal `\latch_rf.\q[3] [12]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$353'.
+No latch inferred for signal `\latch_rf.\q[3] [11]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$352'.
+No latch inferred for signal `\latch_rf.\q[3] [10]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$351'.
+No latch inferred for signal `\latch_rf.\q[3] [9]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$350'.
+No latch inferred for signal `\latch_rf.\q[3] [8]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$349'.
+No latch inferred for signal `\latch_rf.\q[3] [7]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$348'.
+No latch inferred for signal `\latch_rf.\q[3] [6]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$347'.
+No latch inferred for signal `\latch_rf.\q[3] [5]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$346'.
+No latch inferred for signal `\latch_rf.\q[3] [4]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$345'.
+No latch inferred for signal `\latch_rf.\q[3] [3]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$344'.
+No latch inferred for signal `\latch_rf.\q[3] [2]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$343'.
+No latch inferred for signal `\latch_rf.\q[3] [1]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$342'.
+No latch inferred for signal `\latch_rf.\q[3] [0]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$341'.
+No latch inferred for signal `\latch_rf.\q[2] [15]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$340'.
+No latch inferred for signal `\latch_rf.\q[2] [14]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$339'.
+No latch inferred for signal `\latch_rf.\q[2] [13]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$338'.
+No latch inferred for signal `\latch_rf.\q[2] [12]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$337'.
+No latch inferred for signal `\latch_rf.\q[2] [11]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$336'.
+No latch inferred for signal `\latch_rf.\q[2] [10]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$335'.
+No latch inferred for signal `\latch_rf.\q[2] [9]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$334'.
+No latch inferred for signal `\latch_rf.\q[2] [8]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$333'.
+No latch inferred for signal `\latch_rf.\q[2] [7]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$332'.
+No latch inferred for signal `\latch_rf.\q[2] [6]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$331'.
+No latch inferred for signal `\latch_rf.\q[2] [5]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$330'.
+No latch inferred for signal `\latch_rf.\q[2] [4]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$329'.
+No latch inferred for signal `\latch_rf.\q[2] [3]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$328'.
+No latch inferred for signal `\latch_rf.\q[2] [2]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$327'.
+No latch inferred for signal `\latch_rf.\q[2] [1]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$326'.
+No latch inferred for signal `\latch_rf.\q[2] [0]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$325'.
+No latch inferred for signal `\latch_rf.\q[1] [15]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$324'.
+No latch inferred for signal `\latch_rf.\q[1] [14]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$323'.
+No latch inferred for signal `\latch_rf.\q[1] [13]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$322'.
+No latch inferred for signal `\latch_rf.\q[1] [12]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$321'.
+No latch inferred for signal `\latch_rf.\q[1] [11]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$320'.
+No latch inferred for signal `\latch_rf.\q[1] [10]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$319'.
+No latch inferred for signal `\latch_rf.\q[1] [9]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$318'.
+No latch inferred for signal `\latch_rf.\q[1] [8]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$317'.
+No latch inferred for signal `\latch_rf.\q[1] [7]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$316'.
+No latch inferred for signal `\latch_rf.\q[1] [6]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$315'.
+No latch inferred for signal `\latch_rf.\q[1] [5]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$314'.
+No latch inferred for signal `\latch_rf.\q[1] [4]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$313'.
+No latch inferred for signal `\latch_rf.\q[1] [3]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$312'.
+No latch inferred for signal `\latch_rf.\q[1] [2]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$311'.
+No latch inferred for signal `\latch_rf.\q[1] [1]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$310'.
+No latch inferred for signal `\latch_rf.\q[1] [0]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$309'.
+No latch inferred for signal `\latch_rf.\q[0] [15]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$308'.
+No latch inferred for signal `\latch_rf.\q[0] [14]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$307'.
+No latch inferred for signal `\latch_rf.\q[0] [13]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$306'.
+No latch inferred for signal `\latch_rf.\q[0] [12]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$305'.
+No latch inferred for signal `\latch_rf.\q[0] [11]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$304'.
+No latch inferred for signal `\latch_rf.\q[0] [10]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$303'.
+No latch inferred for signal `\latch_rf.\q[0] [9]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$302'.
+No latch inferred for signal `\latch_rf.\q[0] [8]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$301'.
+No latch inferred for signal `\latch_rf.\q[0] [7]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$300'.
+No latch inferred for signal `\latch_rf.\q[0] [6]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$299'.
+No latch inferred for signal `\latch_rf.\q[0] [5]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$298'.
+No latch inferred for signal `\latch_rf.\q[0] [4]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$297'.
+No latch inferred for signal `\latch_rf.\q[0] [3]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$296'.
+No latch inferred for signal `\latch_rf.\q[0] [2]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$295'.
+No latch inferred for signal `\latch_rf.\q[0] [1]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$294'.
+No latch inferred for signal `\latch_rf.\q[0] [0]' from process `\latch_rf.$proc$rtl/latch_rf.v:24$293'.
+No latch inferred for signal `\latch_rf.$mem2reg_rd$\q$rtl/latch_rf.v:28$257_DATA' from process `\latch_rf.$proc$rtl/latch_rf.v:28$290'.
+
+4.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+4.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$420'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$419'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$418'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$417'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$416'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$415'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$414'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$413'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$412'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$411'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$410'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$409'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$408'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$407'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$406'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$405'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$404'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$403'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$402'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$401'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$400'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$399'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$398'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$397'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$396'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$395'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$394'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$393'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$392'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$391'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$390'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$389'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$388'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$387'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$386'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$385'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$384'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$383'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$382'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$381'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$380'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$379'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$378'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$377'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$376'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$375'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$374'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$373'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$372'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$371'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$370'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$369'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$368'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$367'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$366'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$365'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$364'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$363'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$362'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$361'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$360'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$359'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$358'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$357'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$356'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$355'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$354'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$353'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$352'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$351'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$350'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$349'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$348'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$347'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$346'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$345'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$344'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$343'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$342'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$341'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$340'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$339'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$338'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$337'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$336'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$335'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$334'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$333'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$332'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$331'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$330'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$329'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$328'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$327'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$326'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$325'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$324'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$323'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$322'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$321'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$320'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$319'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$318'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$317'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$316'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$315'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$314'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$313'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$312'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$311'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$310'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$309'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$308'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$307'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$306'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$305'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$304'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$303'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$302'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$301'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$300'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$299'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$298'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$297'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$296'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$295'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$294'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:24$293'.
+Found and cleaned up 1 empty switch in `\latch_rf.$proc$rtl/latch_rf.v:28$290'.
+Removing empty process `latch_rf.$proc$rtl/latch_rf.v:28$290'.
+Cleaned up 1 empty switch.
+
+4.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+<suppressed ~2 debug messages>
+
+4.3. Executing FLATTEN pass (flatten design).
+
+4.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+Removed 0 unused cells and 397 unused wires.
+<suppressed ~1 debug messages>
+
+4.6. Executing CHECK pass (checking for obvious problems).
+Checking module latch_rf...
+Found and reported 0 problems.
+
+4.7. Executing OPT pass (performing simple optimizations).
+
+4.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 177 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Computing hashes of 170 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+<suppressed ~21 debug messages>
+Removed a total of 7 cells.
+
+4.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \latch_rf..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+4.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \latch_rf.
+Performed a total of 0 changes.
+
+4.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 170 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Removed a total of 0 cells.
+
+4.7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+Removed 0 unused cells and 7 unused wires.
+<suppressed ~1 debug messages>
+
+4.7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.7.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.7.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \latch_rf..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+4.7.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \latch_rf.
+Performed a total of 0 changes.
+
+4.7.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 170 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Removed a total of 0 cells.
+
+4.7.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.7.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+
+4.7.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.7.16. Finished fast OPT passes. (There is nothing left to do.)
+
+4.8. Executing FSM pass (extract and optimize FSM).
+
+4.8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+4.8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+4.8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+4.8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+
+4.8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+4.8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+4.8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+4.8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+4.9. Executing OPT pass (performing simple optimizations).
+
+4.9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 170 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Removed a total of 0 cells.
+
+4.9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \latch_rf..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+4.9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \latch_rf.
+Performed a total of 0 changes.
+
+4.9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 170 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Removed a total of 0 cells.
+
+4.9.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+
+4.9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.9.9. Finished fast OPT passes. (There is nothing left to do.)
+
+4.10. Executing WREDUCE pass (reducing word size of cells).
+Removed top 2 bits (of 3) from port B of cell latch_rf.$eq$rtl/latch_rf.v:21$262 ($eq).
+Removed top 1 bits (of 3) from port B of cell latch_rf.$eq$rtl/latch_rf.v:21$266 ($eq).
+Removed top 1 bits (of 3) from port B of cell latch_rf.$eq$rtl/latch_rf.v:21$270 ($eq).
+Removed top 1 bits (of 3) from port B of cell latch_rf.$procmux$426_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell latch_rf.$procmux$427_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell latch_rf.$procmux$428_CMP0 ($eq).
+
+4.11. Executing PEEPOPT pass (run peephole optimizers).
+
+4.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+
+4.13. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module latch_rf:
+  created 0 $alu and 0 $macc cells.
+
+4.14. Executing SHARE pass (SAT-based resource sharing).
+
+4.15. Executing OPT pass (performing simple optimizations).
+
+4.15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 170 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Removed a total of 0 cells.
+
+4.15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \latch_rf..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+4.15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \latch_rf.
+Performed a total of 0 changes.
+
+4.15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 170 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Removed a total of 0 cells.
+
+4.15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+
+4.15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.15.9. Finished fast OPT passes. (There is nothing left to do.)
+
+4.16. Executing MEMORY pass.
+
+4.16.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+4.16.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+4.16.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+4.16.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+4.16.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+4.16.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+
+4.16.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+4.16.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+4.16.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+
+4.16.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+4.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+
+4.18. Executing OPT pass (performing simple optimizations).
+
+4.18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+<suppressed ~1 debug messages>
+
+4.18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 170 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Removed a total of 0 cells.
+
+4.18.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.18.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+Removed 1 unused cells and 1 unused wires.
+<suppressed ~2 debug messages>
+
+4.18.5. Finished fast OPT passes.
+
+4.19. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+4.20. Executing OPT pass (performing simple optimizations).
+
+4.20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 169 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Removed a total of 0 cells.
+
+4.20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \latch_rf..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+4.20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \latch_rf.
+Performed a total of 0 changes.
+
+4.20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 169 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Removed a total of 0 cells.
+
+4.20.6. Executing OPT_SHARE pass.
+
+4.20.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.20.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+
+4.20.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.20.10. Finished fast OPT passes. (There is nothing left to do.)
+
+4.21. Executing TECHMAP pass (map to technology primitives).
+
+4.21.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+4.21.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $eq.
+Using template $paramod$504d7726e493b7d5a8a8ac16f387eb0143f8a853\_90_pmux for cells of type $pmux.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $mux.
+No more expansions possible.
+<suppressed ~148 debug messages>
+
+4.22. Executing OPT pass (performing simple optimizations).
+
+4.22.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+<suppressed ~42 debug messages>
+
+4.22.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 452 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Computing hashes of 433 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Computing hashes of 427 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+<suppressed ~75 debug messages>
+Removed a total of 25 cells.
+
+4.22.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.22.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+Removed 0 unused cells and 120 unused wires.
+<suppressed ~1 debug messages>
+
+4.22.5. Finished fast OPT passes.
+
+4.23. Executing ABC pass (technology mapping using ABC).
+
+4.23.1. Extracting gate netlist of module `\latch_rf' to `<abc-temp-dir>/input.blif'..
+
+4.23.1.1. Executed ABC.
+Extracted 291 gates and 435 wires to a netlist network with 144 inputs and 33 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library /tmp/yosys-abc-0KiVmu/stdcells.genlib 
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+4.23.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        9
+ABC RESULTS:            ANDNOT cells:      122
+ABC RESULTS:               MUX cells:       16
+ABC RESULTS:              NAND cells:        4
+ABC RESULTS:               NOT cells:        3
+ABC RESULTS:                OR cells:      113
+ABC RESULTS:             ORNOT cells:        5
+ABC RESULTS:        internal signals:      258
+ABC RESULTS:           input signals:      144
+ABC RESULTS:          output signals:       33
+Removing temp directory.
+Removing global temp directory.
+
+4.24. Executing OPT pass (performing simple optimizations).
+
+4.24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module latch_rf.
+
+4.24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\latch_rf'.
+Computing hashes of 408 cells of `\latch_rf'.
+Finding duplicate cells in `\latch_rf'.
+Removed a total of 0 cells.
+
+4.24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+Removed 0 unused cells and 252 unused wires.
+<suppressed ~1 debug messages>
+
+4.24.5. Finished fast OPT passes.
+
+4.25. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `latch_rf'. Setting top module to latch_rf.
+
+4.25.1. Analyzing design hierarchy..
+Top module:  \latch_rf
+
+4.25.2. Analyzing design hierarchy..
+Top module:  \latch_rf
+Removed 0 unused modules.
+
+4.26. Printing statistics.
+
+=== latch_rf ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      278 wires
+      432 wire bits
+       30 public wires
+      184 public wire bits
+        6 ports
+       40 port bits
+      408 cells
+      122   $_ANDNOT_
+        9   $_AND_
+       16   $_MUX_
+        4   $_NAND_
+        3   $_NOT_
+        5   $_ORNOT_
+      113   $_OR_
+      136   sg13g2_dlhq_1
+
+4.27. Executing CHECK pass (checking for obvious problems).
+Checking module latch_rf...
+Found and reported 0 problems.
+
+5. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+5.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\latch_rf':
+
+6. Executing ABC pass (technology mapping using ABC).
+
+6.1. Extracting gate netlist of module `\latch_rf' to `<abc-temp-dir>/input.blif'..
+
+6.1.1. Executed ABC.
+Extracted 272 gates and 416 wires to a netlist network with 144 inputs and 33 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.02 sec
+ABC: Memory =    2.85 MB. Time =     0.02 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+6.1.2. Re-integrating ABC results.
+ABC RESULTS:    sg13g2_a22oi_1 cells:       64
+ABC RESULTS:     sg13g2_and2_1 cells:       10
+ABC RESULTS:      sg13g2_inv_1 cells:        4
+ABC RESULTS:    sg13g2_nand2_1 cells:        2
+ABC RESULTS:   sg13g2_nand2b_1 cells:        3
+ABC RESULTS:    sg13g2_nand4_1 cells:       16
+ABC RESULTS:     sg13g2_nor2_1 cells:        6
+ABC RESULTS:    sg13g2_nor2b_1 cells:        1
+ABC RESULTS:     sg13g2_nor3_1 cells:        8
+ABC RESULTS:        internal signals:      239
+ABC RESULTS:           input signals:      144
+ABC RESULTS:          output signals:       33
+Removing temp directory.
+Removing global temp directory.
+
+7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \latch_rf..
+Removed 0 unused cells and 416 unused wires.
+<suppressed ~1 debug messages>
+
+8. Printing statistics.
+
+=== latch_rf ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      120        - wires
+      274        - wire bits
+       30        - public wires
+      184        - public wire bits
+        6        - ports
+       40        - port bits
+      250 5.34E+03 cells
+       64   694.31   sg13g2_a22oi_1
+       10    90.72   sg13g2_and2_1
+      136 4.19E+03   sg13g2_dlhq_1
+        4   21.773   sg13g2_inv_1
+        2   14.515   sg13g2_nand2_1
+        3   27.216   sg13g2_nand2b_1
+       16  174.182   sg13g2_nand4_1
+        6   43.546   sg13g2_nor2_1
+        1    9.072   sg13g2_nor2b_1
+        8   72.576   sg13g2_nor3_1
+
+   Chip area for module '\latch_rf': 5342.803200
+     of which used for sequential elements: 0.000000 (0.00%)
+
+End of script. Logfile hash: 03a7aecf0a, CPU: user 0.15s system 0.05s, MEM: 30.87 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 61% 2x abc (0 sec), 9% 3x read_verilog (0 sec), ...

@@ -1,0 +1,25 @@
+# cell area from `stat -liberty` (typical 1.2 V liberty); flops = dfrbpq_1, latches = dlhq_1
+# suffix -y069: Yosys 0.69+77 (oss-cad-suite); none: Yosys 0.62 (LibreLane 3.0.14 container)
+report                               area um2   seq um2  cells  flops latches
+gc_periph_128x38                         8363       441    670      9      38
+gc_periph_32x21                          3028       343    216      7      21
+gc_periph_32x64                          5369       343    345      7      64
+gc_periph_8x21                           1784       245    109      5      21
+latch_rf_8x16                            5343         0    250      0     136
+mac16-y069                              23130      3135   2004     64       0
+mac16                                   23437      3135   2044     64       0
+mac16_booth-y069                        17104      3135   1376     64       0
+mac16_booth                             17004      3135   1363     64       0
+minplus16-y069                           4251      2351    250     48       0
+minplus16                                4443      2351    271     48       0
+pe16-y069                                6085      2743    330     56       0
+pe16                                     6586      2743    356     56       0
+pe16_row8-y069                          48283     21947   2578    448       0
+pe16_row8                               52474     21947   3022    448       0
+ring_cell16-y069                         6072      1960    442     40       0
+ring_cell16                              6481      1960    490     40       0
+ring_cell24-y069                         8762      2743    661     56       0
+ring_cell24                              9339      2743    706     56       0
+semiring_ring-y069-oldlib              169641     62559  11623   1277       0
+semiring_ring-y069                     169641     62559  11623   1277       0
+semiring_ring                          176496     62559  12323   1277       0

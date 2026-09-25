@@ -1,0 +1,14 @@
+{
+  "DESIGN_NAME": "pe16_row8",
+  "VERILOG_FILES": ["dir::pe16_row8.v"],
+  "CLOCK_PORT": "clock",
+  "CLOCK_PERIOD": 20,
+  "FP_SIZING": "relative",
+  "FP_CORE_UTIL": 90,
+  "PL_TARGET_DENSITY_PCT": 95,
+  "RUN_KLAYOUT_XOR": false,
+  "RUN_MAGIC_DRC": false,
+  "RUN_KLAYOUT_DRC": false,
+  "RUN_LVS": false,
+  "RUN_IRDROP_REPORT": false
+}

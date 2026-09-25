@@ -1,0 +1,43 @@
+
+7. Printing statistics.
+
+=== mac16 ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1995        - wires
+     2193        - wire bits
+       15        - public wires
+      213        - public wire bits
+        9        - ports
+      100        - port bits
+     2044 2.34E+04 cells
+       45  571.536   sg13g2_a21o_1
+      123 1.12E+03   sg13g2_a21oi_1
+        8  116.122   sg13g2_a221oi_1
+       42  455.641   sg13g2_a22oi_1
+       89  807.408   sg13g2_and2_1
+       10  127.008   sg13g2_and3_1
+       12  174.182   sg13g2_and4_1
+       64 3.14E+03   sg13g2_dfrbpq_1
+       83  451.786   sg13g2_inv_1
+        1   18.144   sg13g2_mux2_1
+      321  2329.69   sg13g2_nand2_1
+      126 1.14E+03   sg13g2_nand2b_1
+       54  489.888   sg13g2_nand3_1
+        1   12.701   sg13g2_nand3b_1
+       11   119.75   sg13g2_nand4_1
+      137  994.291   sg13g2_nor2_1
+       80   725.76   sg13g2_nor2b_1
+       34  308.448   sg13g2_nor3_1
+        1   10.886   sg13g2_nor4_1
+      166 1.51E+03   sg13g2_o21ai_1
+       68  616.896   sg13g2_or2_1
+       21  266.717   sg13g2_or3_1
+      315 4.57E+03   sg13g2_xnor2_1
+      232 3.37E+03   sg13g2_xor2_1
+
+   Chip area for module '\mac16': 23436.831600
+     of which used for sequential elements: 3135.283200 (13.38%)
+

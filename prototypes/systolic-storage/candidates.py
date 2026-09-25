@@ -1,6 +1,11 @@
 """Candidate systolic arrays with storage inside, at a fixed 200k um2 budget (array + storage).
 
-uv run candidates.py > results/candidates.txt
+uv run candidates.py > results/candidates.txt                  # the original estimates
+uv run candidates.py synth > results/candidates-synth.txt      # synthesised cell areas
+uv run candidates.py placed > results/candidates-placed.txt    # placed-and-routed areas
+
+The bases are described at BASES below; the synthesised and placed numbers come from
+../pe-synth (results/areas.txt, results/pnr.txt).
 
 PE area is an ESTIMATE: a 16-bit PE (add/sub/min/max with saturation, one neighbour input, a
 16-bit state and a 16-bit pipeline register, about 24 configuration flops), scaled from the
@@ -13,8 +18,31 @@ import math
 import storage_options as so
 
 BUDGET = 200_000
-A_PE = 5_000            # estimate, see docstring
 GUARD = 0.8
+
+# Area bases. Each gives the PE area, the 8x16 latch register file, the gain-cell bank periphery
+# as a function of (rows, columns), and a factor applied to standard-cell storage (latch RF and
+# bank periphery; not to the drawn gain-cell array or the SRAM macro).
+#   estimate: the original numbers (PE scaled from the ring, storage from LEF cell sums)
+#   synth:    Yosys 0.62 cell area (../pe-synth/results/areas.txt): PE = pe16_row8 / 8
+#             = 52,474 / 8; latch_rf_8x16; gc_periph_128x38 and gc_periph_32x21
+#   placed:   LibreLane core area per PE of pe16_row8 at 72 % target, 90 % final utilisation
+#             (../pe-synth/results/pnr.txt: 78,814 / 8); standard-cell storage scaled by the
+#             same placed/synthesised ratio as the PE (9,852 / 6,559), which is an assumption:
+#             the periphery and latch file were synthesised but not placed
+SYNTH_PERIPH = {(128, 38): 8363.0, (32, 21): 3028.0}   # gc_periph_<rows>x<cols>
+BASES = {
+    "estimate": dict(pe=5_000.0, rf=None, periph=None, std=1.0),
+    "synth": dict(pe=52_474 / 8, rf=5343.0, periph=SYNTH_PERIPH, std=1.0),
+    "placed": dict(pe=78_814 / 8, rf=5343.0, periph=SYNTH_PERIPH, std=(78_814 / 8) / (52_474 / 8)),
+}
+BASIS = "estimate"
+A_PE = BASES[BASIS]["pe"]
+
+
+def set_basis(name):
+    global BASIS, A_PE
+    BASIS, A_PE = name, BASES[name]["pe"]
 
 
 def berger(w):
@@ -24,17 +52,21 @@ def berger(w):
 def gbank(rows, width, kind):
     cols = width + berger(width)
     cell = so.GC_THICK if kind == "thick" else so.GC_THIN
-    return so.gain_array(rows, cols, cell), rows * width
+    b = BASES[BASIS]
+    if b["periph"] is None:
+        return so.gain_array(rows, cols, cell), rows * width
+    return rows * cols * cell + b["std"] * b["periph"][(rows, cols)], rows * width
 
 
 # storage blocks: (name, area, bits, kind, port width in bits); one port per block
 def designs():
     out = []
     # D0: uniform, no storage beyond each PE's two registers
-    n = BUDGET // A_PE
+    n = int(BUDGET // A_PE)
     out.append(("D0 uniform, no storage", n, [], "pipeline registers only: 32 flop bits per PE"))
     # D1: uniform, an 8x16 latch register file in every PE
-    rf = so.latch_regfile(8, 16)
+    b = BASES[BASIS]
+    rf = so.latch_regfile(8, 16) if b["rf"] is None else b["std"] * b["rf"]
     n = int(BUDGET // (A_PE + rf))
     out.append(("D1 uniform, 8x16 latch RF per PE", n, [("local RF", rf, 128, "static", 16)] * n,
                 "every PE can hold 8 words"))
@@ -63,7 +95,7 @@ def designs():
                 [("local thin bank", ta, tbits, "thin", 16)] * nt + [("thick bank", ka, kbits, "thick", 32)] * nk,
                 "dense short-lived storage near producers, long-lived at the edge"))
     # D4: the array itself as a delay line (recirculate through pipeline registers)
-    n = BUDGET // A_PE
+    n = int(BUDGET // A_PE)
     out.append(("D4 array as delay line", n, [], "any PE can be switched to pass-through: 32 bits of delay per PE"))
     return out
 
@@ -177,7 +209,11 @@ def verdict(design, w):
 
 
 def main():
-    print(f"# budget {BUDGET} um2 for PEs + storage; PE {A_PE} um2 (estimate); guard {GUARD}")
+    import sys
+    set_basis(sys.argv[1] if len(sys.argv) > 1 else "estimate")
+    b = BASES[BASIS]
+    print(f"# basis {BASIS}: budget {BUDGET} um2 for PEs + storage; PE {A_PE:.0f} um2; standard-cell"
+          f" storage x {b['std']:.3f}; guard {GUARD}")
     print("# verdicts per condition tt27/tt85/ff85: Y fits without refresh, R<x>% needs refresh"
           " at x% of the busiest bank's port cycles, N does not fit (capacity, or port over 100%)\n")
     ds = designs()
@@ -185,7 +221,7 @@ def main():
         name, npe, blocks, note = d
         sa = sum(b[1] for b in blocks)
         bits = sum(b[2] for b in blocks)
-        print(f"{name}: {npe} PEs ({npe*A_PE} um2) + storage {sa:.0f} um2 = {npe*A_PE+sa:.0f} um2;"
+        print(f"{name}: {npe} PEs ({npe*A_PE:.0f} um2) + storage {sa:.0f} um2 = {npe*A_PE+sa:.0f} um2;"
               f" {bits} storage bits in {len(blocks)} blocks; {note}")
         kinds = {}
         for b in blocks:
