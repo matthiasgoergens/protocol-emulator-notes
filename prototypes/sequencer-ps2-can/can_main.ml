@@ -62,10 +62,13 @@ let bus_order r = List.rev_map (fun (_, f, _, _) -> f) r.Can_model.received
 let fr id dlc = { Can_model.id; rtr = false; dlc; data = List.init (min dlc 8) (fun i -> (id * 7 + i * 29) land 0xFF) }
 
 let () =
-  let t = timing_500k in
+  (match Sys.argv with
+   | [| _; _; n; sp; sjw |] -> timing := { Can_fw.n = int_of_string n; sp = int_of_string sp; sjw = int_of_string sjw }
+   | _ -> ());
+  let t = !timing in
   let _, rxl, _ = Can_fw.rx pins_a t and _, txl, _ = Can_fw.tx pins_a t in
-  Printf.printf "CAN firmware, 500 kbit/s at 60 MHz (N=%d SP=%d SJW=%d slots): RX thread %d words, TX thread %d words\n"
-    t.n t.sp t.sjw rxl txl;
+  Printf.printf "CAN firmware, %.0f kbit/s at 60 MHz (N=%d SP=%d SJW=%d slots): RX thread %d words, TX thread %d words\n"
+    (bit_rate () /. 1e3) t.n t.sp t.sjw rxl txl;
   print_endline "Scenarios:";
   (* S1: two nodes on one sequencer and a reference node; A and B start together, B has the
      lower identifier and must win; A retransmits; then the reference node sends a remote frame *)
@@ -109,6 +112,47 @@ let () =
     let p = p @ (if ids = [ 0x3A4; 0x3A5; 0x3A6 ] then [] else [ "bus order " ^ pp_frames order ]) in
     ignore (result "two sequencers at +0.5% / -0.5%, ref +0.2%, 3-way arbitration" p [ s1; s2 ]);
     Printf.printf "      bus order: %s (ids 3A4 < 3A5 < 3A6)\n" (String.concat " " (List.map (Printf.sprintf "%03X") ids))
+  end;
+  (* S3: the raw sample interface (for an analyser): node B reports every sampled bit, stuff bits
+     marked; needs one more slot after each sample, so the sample point moves one slot earlier *)
+  begin
+    let tr = { t with Can_fw.sp = t.sp - 1 } in
+    let bus = Can_model.Bus.create [| Sim.ns 50.; Sim.ns 80.; Sim.ns 40. |] in
+    let a = make_node ~name:"A" ~pins:pins_a ~bus_idx:0 and b = make_node ~name:"B" ~pins:pins_b ~bus_idx:1 in
+    let s = seq_agent ~bus ~hz:(clock_hz *. 0.997) ~name:"seq" [ (0, 1, a, None); (2, 3, b, None) ]
+        [ 0, (let p, _, _ = Can_fw.rx pins_a t in p); 1, (let p, _, _ = Can_fw.tx pins_a t in p);
+          2, (let p, _, _ = Can_fw.rx ~raw:true pins_b tr in p); 3, (let p, _, _ = Can_fw.tx pins_b tr in p) ] in
+    let r = Can_model.create ~bus ~idx:2 () in
+    let f = { Can_model.id = 0x000; rtr = false; dlc = 8; data = [ 0x00; 0xFF; 0x00; 0xFF; 0x0F; 0xF0; 0x00; 0x00 ] } in
+    r.queue <- [ f ];
+    ignore (Sim.run ~until:(us 500.) [ s.agent; ref_agent ~ppm:3000. r ]);
+    let rf = List.find_opt (fun x -> x.frame = Some f) (frames_of b) in
+    let expect = Can_model.ref_bits f in
+    let p = match rf with
+      | None -> [ "B did not receive the frame" ]
+      | Some x ->
+        let rec destuff = function 2 :: rest -> destuff rest | v :: rest -> v :: destuff rest | [] -> [] in
+        (* the raw stream must be the reference bits stuffed, with every stuff bit marked: stuff
+           them here (a third, minimal stuffer) and compare the whole sequence *)
+        let marked bits =
+          let out = ref [] and last = ref (-1) and run = ref 0 in
+          List.iter (fun v ->
+            out := v :: !out;
+            if v = !last then incr run else (last := v; run := 1);
+            if !run = 5 then (out := 2 :: !out; last := 1 - v; run := 1)) bits;
+          List.rev !out in
+        let check _ raw = raw = marked expect in
+        let destuff _ l = destuff l in
+        let str l = String.concat "" (List.map string_of_int l) in
+        ignore str;
+        let nst = List.length (List.filter (( = ) 2) x.raw) in
+        (if destuff 1 x.raw <> expect then [ Printf.sprintf "raw stream destuffed (%d bits) differs from the reference encoder's (%d bits)"
+                                               (List.length (destuff 1 x.raw)) (List.length expect) ] else [])
+        @ (if nst = 0 || not (check 1 x.raw) then [ Printf.sprintf "stuff markers wrong (%d)" nst ] else [])
+        @ (if x.end_code <> Some 0 then [ "not ok" ] else []) in
+    let nst = match rf with Some x -> List.length (List.filter (( = ) 2) x.raw) | None -> 0 in
+    total_frames := !total_frames + 1;
+    ignore (result (Printf.sprintf "raw sample stream from B (SP %d): %d stuff bits marked, destuffed = reference bits" tr.sp nst) p [ s ])
   end;
   (* ---- controls *)
   print_endline "Controls (each must be caught):";

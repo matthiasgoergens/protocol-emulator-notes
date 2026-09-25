@@ -27,7 +27,9 @@
      2 CRC        1 = CRC matched, 0 = CRC error
      3 ACK        bit 0 = bus level in the ACK slot (0 = acknowledged)
      4 END        0 ok, 1 stuff error, 2 CRC error, 3 form error, 5 extended frame (unsupported)
-     6 RAW        (option raw) every sampled bit: bit 0 = level; value 0x80 marks a stuff bit
+     6 RAW        (option raw) every sampled data bit: bit 0 = level
+     7 STUFF      (option raw) a stuff bit was sampled here (its level is the complement of the
+                  bit before it; a stuff error is reported by END 1)
    TX output: tag 5, value 1 acknowledged, 2 no acknowledge, 3 lost arbitration or bit error,
      4 error during EOF. *)
 
@@ -37,6 +39,7 @@ type pins = { rx : int; txd : int; txe : int; flag : int }
 type timing = { n : int; sp : int; sjw : int }
 
 let tag_data = 0 and tag_sof = 1 and tag_crc = 2 and tag_ack = 3 and tag_end = 4 and tag_tx = 5 and tag_raw = 6
+and tag_stuff = 7
 
 (* faults for the controls *)
 type faults = { no_resync : bool; bad_poly : bool; no_arbitration_check : bool }
@@ -55,7 +58,7 @@ let rx ?(faults = no_faults) ?(raw = false) (p : pins) (t : timing) =
   let shi_stuff = W (Isa_v.shi ~stf:1 ~norec:1 ~pin:p.rx ~msb:1 ()) in
   let shi_plain = W (Isa_v.shi ~pin:p.rx ~msb:1 ()) in
   let raw_bit = if raw then [ W (Isa_v.out ~tag:tag_raw ()) ] else [] in
-  let raw_stuff = if raw then [ W (Isa_v.outi ~tag:tag_raw 0x80) ] else [] in
+  let raw_stuff = if raw then [ W (Isa_v.out ~tag:tag_stuff ()) ] else [] in
   let r = List.length raw_bit in   (* slots the raw option adds after each sample *)
   (* The front end for the bit after a sample (p = 0 at the previous SHI, nominal start nb):
      three paths join label [dst] at B' + SP - k, where B' is the resynchronised bit start. The

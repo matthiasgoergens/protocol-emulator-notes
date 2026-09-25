@@ -7,6 +7,10 @@ let clock_hz = 60e6
 (* 500 kbit/s at 60 MHz: 30 slots per bit, sample at 23 (77 %), SJW 3 slots (10 %) *)
 let timing_500k = { Can_fw.n = 30; sp = 23; sjw = 3 }
 
+(* the timing the benches use; main may change it for the bit-rate sweep *)
+let timing = ref timing_500k
+let bit_rate () = clock_hz /. 4. /. float !timing.n
+
 (* ---------------------------------------------------------------- host driver *)
 
 (* The receive interface: what the RX thread reports, decoded. This is the interface other
@@ -45,7 +49,8 @@ let rx_event st ~now (tag, v) =
   end else if tag = Can_fw.tag_data then st.bytes <- st.bytes @ [ v ]
   else if tag = Can_fw.tag_crc then upd (fun c -> { c with crc_ok = Some (v = 1); frame = decode_bytes st.bytes })
   else if tag = Can_fw.tag_ack then upd (fun c -> { c with ack_level = Some (v land 1) })
-  else if tag = Can_fw.tag_raw then upd (fun c -> { c with raw = c.raw @ [ (if v = 0x80 then 2 else v land 1) ] })
+  else if tag = Can_fw.tag_raw then upd (fun c -> { c with raw = c.raw @ [ v land 1 ] })
+  else if tag = Can_fw.tag_stuff then upd (fun c -> { c with raw = c.raw @ [ 2 ] })
   else if tag = Can_fw.tag_end then begin
     upd (fun c -> { c with end_code = Some v; frame = (match c.frame with Some f -> Some f | None -> decode_bytes st.bytes) });
     (match st.cur with Some c -> st.frames <- c :: st.frames | None -> ());
@@ -120,15 +125,17 @@ let pins_a = { Can_fw.rx = 0; txd = 1; txe = 2; flag = 3 }
 let pins_b = { Can_fw.rx = 4; txd = 5; txe = 6; flag = 7 }
 
 (* one sequencer with node A on threads 0/1 and optionally node B on threads 2/3 *)
-let make_seq ?(rtl = true) ?(faults = Can_fw.no_faults) ?(raw = false) ?(timing = timing_500k) ~bus ~hz ~name ~a ?b () =
+let make_seq ?(rtl = true) ?(faults = Can_fw.no_faults) ?(raw = false) ?timing:(tm = !timing) ~bus ~hz ~name ~a ?b () =
+  let timing = tm in
   let rx p = let prog, _, _ = Can_fw.rx ~faults ~raw p timing in prog in
   let tx p = let prog, _, _ = Can_fw.tx ~faults p timing in prog in
   let nodes = (0, 1, a, None) :: (match b with Some b -> [ (2, 3, b, None) ] | None -> []) in
   let mems = [ 0, rx a.pins; 1, tx a.pins ] @ (match b with Some b -> [ 2, rx b.pins; 3, tx b.pins ] | None -> []) in
   seq_agent ~rtl ~bus ~hz ~name nodes mems
 
-(* a reference node as an agent: tq clock 8 MHz (16 tq per bit at 500 kbit/s) *)
-let ref_agent ?(ppm = 0.) ?(phase = 0) ?(tq_hz = 8e6) node =
+(* a reference node as an agent: 16 time quanta per bit (8 MHz at 500 kbit/s) *)
+let ref_agent ?(ppm = 0.) ?(phase = 0) ?tq_hz node =
+  let tq_hz = match tq_hz with Some h -> h | None -> 16. *. bit_rate () in
   Sim.agent ~phase ~name:node.Can_model.name ~hz:(tq_hz *. (1. +. ppm /. 1e6)) (fun now -> Can_model.tick node now)
 
 let frames_of nd = List.rev (match nd.rx.cur with Some c -> c :: nd.rx.frames | None -> nd.rx.frames)
