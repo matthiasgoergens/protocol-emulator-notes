@@ -1,10 +1,15 @@
 (library
  (name ps2can)
  (wrapped false)
- (modules isa_v sequencer_v harness_v sim)
+ (modules isa_v sequencer_v harness_v sim ps2_fw ps2_model ps2_bench)
  (libraries hardcaml))
 
 (executable
  (name lockstep)
  (modules lockstep)
+ (libraries hardcaml ps2can))
+
+(executable
+ (name ps2_main)
+ (modules ps2_main)
  (libraries hardcaml ps2can))

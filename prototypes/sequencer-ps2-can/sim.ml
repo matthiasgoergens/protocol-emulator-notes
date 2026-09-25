@@ -96,6 +96,9 @@ module Asm = struct
   let jnz l = R (l, Isa_v.jnz)
   let waitp ~pin ~value l = R (l, fun a -> Isa_v.waitp ~pin ~value ~fail:a)
   let jc ~cond l = R (l, fun a -> Isa_v.jc ~cond a)
+  (* WAITP is an immediate branch only while dl = 0; after a wait that can end early (LDD n;
+     WAITP), dl is still counting, so a branch must clear it first *)
+  let br ~pin ~value l = [ W (Isa_v.ldd 0); waitp ~pin ~value l ]
   (* exactly n slots of delay: LDD k; WAITD takes k + 2 slots *)
   let delay n =
     if n < 0 then failwith (Printf.sprintf "negative delay %d" n)
