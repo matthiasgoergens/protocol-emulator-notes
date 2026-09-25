@@ -18,3 +18,8 @@
  (name can_main)
  (modules can_main)
  (libraries hardcaml ps2can))
+
+(executable
+ (name emit_v)
+ (modules emit_v)
+ (libraries hardcaml ps2can))

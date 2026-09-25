@@ -22,11 +22,13 @@ let run ~seed ~cycles =
   m.mismatches
 
 let () =
+  if Array.length Sys.argv > 2 && Sys.argv.(2) = "shared" then Isa_v.shared_cfg := true;
   let runs = int_of_string (try Sys.argv.(1) with _ -> "300") and cycles = 2000 in
   let total = ref 0 and bad = ref 0 in
   for seed = 1 to runs do
     let n = run ~seed ~cycles in
     total := !total + n; if n > 0 then incr bad
   done;
-  Printf.printf "variant lockstep: %d programmes x %d cycles, %d mismatching cycles in %d programmes\n" runs cycles !total !bad;
+  Printf.printf "variant lockstep (%s configuration): %d programmes x %d cycles, %d mismatching cycles in %d programmes\n"
+    (if !Isa_v.shared_cfg then "shared" else "per-thread") runs cycles !total !bad;
   exit (if !total = 0 then 0 else 1)

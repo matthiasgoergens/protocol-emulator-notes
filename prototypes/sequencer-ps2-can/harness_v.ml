@@ -1,7 +1,9 @@
 (* Cyclesim harness for the variant RTL, one-cycle-latency instruction memory, as ../deadline-sequencer/harness.ml. *)
 open Hardcaml
 
-let circuit = Sequencer_v.circuit ~debug:true ()
+let circuit_per = lazy (Sequencer_v.circuit ~debug:true ())
+let circuit_shared = lazy (Sequencer_v.circuit ~debug:true ~shared_cfg:true ())
+let circuit () = Lazy.force (if !Isa_v.shared_cfg then circuit_shared else circuit_per)
 
 type t = {
   sim : Cyclesim.t_port_list; mem : int array array;
@@ -13,7 +15,7 @@ type t = {
 }
 
 let make mem =
-  let sim = Cyclesim.create circuit in
+  let sim = Cyclesim.create (circuit ()) in
   let i n = Cyclesim.in_port sim n and o n = Cyclesim.out_port sim n in
   let s = { sim; mem; imem_data = i "imem_data"; pin_in = i "pin_in"; host_in = i "host_in";
             host_in_valid = i "host_in_valid"; clear = i "clear"; imem_addr = o "imem_addr";

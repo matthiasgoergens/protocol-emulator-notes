@@ -62,6 +62,7 @@ let bus_order r = List.rev_map (fun (_, f, _, _) -> f) r.Can_model.received
 let fr id dlc = { Can_model.id; rtr = false; dlc; data = List.init (min dlc 8) (fun i -> (id * 7 + i * 29) land 0xFF) }
 
 let () =
+  if Sys.getenv_opt "SHARED_CFG" = Some "1" then Isa_v.shared_cfg := true;
   (match Sys.argv with
    | [| _; _; n; sp; sjw |] -> timing := { Can_fw.n = int_of_string n; sp = int_of_string sp; sjw = int_of_string sjw }
    | _ -> ());
@@ -115,7 +116,9 @@ let () =
   end;
   (* S3: the raw sample interface (for an analyser): node B reports every sampled bit, stuff bits
      marked; needs one more slot after each sample, so the sample point moves one slot earlier *)
-  begin
+  (match Can_fw.rx ~raw:true pins_b { t with Can_fw.sp = t.sp - 1 } with
+   | exception Failure e -> Printf.printf "  raw sample stream: not possible at this timing (%s)\n" e
+   | _ ->
     let tr = { t with Can_fw.sp = t.sp - 1 } in
     let bus = Can_model.Bus.create [| Sim.ns 50.; Sim.ns 80.; Sim.ns 40. |] in
     let a = make_node ~name:"A" ~pins:pins_a ~bus_idx:0 and b = make_node ~name:"B" ~pins:pins_b ~bus_idx:1 in
@@ -152,8 +155,7 @@ let () =
         @ (if x.end_code <> Some 0 then [ "not ok" ] else []) in
     let nst = match rf with Some x -> List.length (List.filter (( = ) 2) x.raw) | None -> 0 in
     total_frames := !total_frames + 1;
-    ignore (result (Printf.sprintf "raw sample stream from B (SP %d): %d stuff bits marked, destuffed = reference bits" tr.sp nst) p [ s ])
-  end;
+    ignore (result (Printf.sprintf "raw sample stream from B (SP %d): %d stuff bits marked, destuffed = reference bits" tr.sp nst) p [ s ]));
   (* ---- controls *)
   print_endline "Controls (each must be caught):";
   let caught name ok = Printf.printf "  %-78s %s\n" name (if ok then "caught" else "MISSED"); if not ok then incr fails in

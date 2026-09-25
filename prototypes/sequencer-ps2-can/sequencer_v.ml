@@ -7,14 +7,16 @@ open Signal
 let n_threads = Isa_v.n_threads
 let pc_bits = Isa_v.pc_bits
 
-let create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
+let create ~shared_cfg ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
   let spec = Reg_spec.create ~clock ~clear () in
   let open Always in
   let thread = Variable.reg spec ~width:2 in
   let regs width = Array.init n_threads (fun _ -> Variable.reg spec ~width) in
   let pcs = regs pc_bits and accs = regs 8 and cnts = regs 12 and dls = regs 12 in
-  let crcs = regs 16 and polys = regs 16 and runs = regs 3 and lasts = regs 1 in
-  let limits = regs 3 and modes = regs 1 in
+  let crcs = regs 16 and runs = regs 3 and lasts = regs 1 in
+  (* configuration: per thread, or one set shared by all threads (see Isa_v.shared_cfg) *)
+  let cfg_regs width = if shared_cfg then [| Variable.reg spec ~width |] else regs width in
+  let polys = cfg_regs 16 and limits = cfg_regs 3 and modes = cfg_regs 1 in
   let pin_out = Variable.reg spec ~width:8 in
   let pin_oe = Variable.reg spec ~width:8 in
   let host_out = Variable.reg spec ~width:8 in
@@ -24,8 +26,9 @@ let create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
   let values arr = Array.to_list (Array.map (fun (v : Variable.t) -> v.value) arr) in
   let sel arr = mux thread.value (values arr) in
   let pc = sel pcs and acc = sel accs and cnt = sel cnts and dl = sel dls in
-  let crc = sel crcs and poly = sel polys and run = sel runs and last = sel lasts in
-  let limit = sel limits and mode = sel modes in
+  let sel_cfg arr = if shared_cfg then arr.(0).Variable.value else sel arr in
+  let crc = sel crcs and poly = sel_cfg polys and run = sel runs and last = sel lasts in
+  let limit = sel_cfg limits and mode = sel_cfg modes in
   let instr = imem_data in
   let op = select instr 15 12 in
   let imm12 = select instr 11 0 and imm8 = select instr 7 0 in
@@ -102,11 +105,14 @@ let create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
                        ; of_int ~width:2 3, [ cnt_next <-- uresize acc 12 ] ] ] ]
     ; proc (List.init n_threads (fun t ->
         when_ (thread.value ==:. t)
-          [ pcs.(t) <-- pc_next.value; accs.(t) <-- acc_next.value
-          ; cnts.(t) <-- cnt_next.value; dls.(t) <-- dl_next.value
-          ; crcs.(t) <-- crc_next.value; polys.(t) <-- poly_next.value
-          ; runs.(t) <-- run_next.value; lasts.(t) <-- last_next.value
-          ; limits.(t) <-- limit_next.value; modes.(t) <-- mode_next.value ]))
+          ([ pcs.(t) <-- pc_next.value; accs.(t) <-- acc_next.value
+           ; cnts.(t) <-- cnt_next.value; dls.(t) <-- dl_next.value
+           ; crcs.(t) <-- crc_next.value
+           ; runs.(t) <-- run_next.value; lasts.(t) <-- last_next.value ]
+           @ (if shared_cfg then []
+              else [ polys.(t) <-- poly_next.value; limits.(t) <-- limit_next.value; modes.(t) <-- mode_next.value ]))))
+    ; (if shared_cfg then proc [ polys.(0) <-- poly_next.value; limits.(0) <-- limit_next.value; modes.(0) <-- mode_next.value ]
+       else proc [])
     ];
   let tnext = thread.value +:. 1 in
   let imem_addr = concat_msb [ tnext; mux tnext (values pcs) ] in
@@ -116,13 +122,13 @@ let create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
   imem_addr, pin_out.value, pin_oe.value, host_out.value, host_out_tag.value, host_out_valid.value,
   host_in_ready.value, pcs_out, dbg
 
-let circuit ?(debug = false) () =
+let circuit ?(debug = false) ?(shared_cfg = false) () =
   let clock = input "clock" 1 and clear = input "clear" 1 in
   let imem_data = input "imem_data" 16 and pin_in = input "pin_in" 8 in
   let host_in = input "host_in" 8 and host_in_valid = input "host_in_valid" 1 in
   let imem_addr, pin_out, pin_oe, host_out, host_out_tag, host_out_valid, host_in_ready, pcs, dbg =
-    create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid in
-  Circuit.create_exn ~name:"deadline_sequencer_v"
+    create ~shared_cfg ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid in
+  Circuit.create_exn ~name:(if shared_cfg then "deadline_sequencer_vs" else "deadline_sequencer_v")
     ([ output "imem_addr" imem_addr; output "pin_out" pin_out; output "pin_oe" pin_oe
     ; output "host_out" host_out; output "host_out_tag" host_out_tag
     ; output "host_out_valid" host_out_valid

@@ -91,6 +91,12 @@ let init () =
 
 type effects = { host_out : (int * int) option; host_in_ready : bool }   (* (tag, byte) *)
 
+(* Configuration sharing: with [shared_cfg], poly, limit and mode are one set of registers for
+   all four threads (written by whichever thread executes CFG); crc, run and last stay per thread.
+   Halves the cost of the assists; CAN, USB and HDLC nodes on one core then share a polynomial
+   unless they reload it. *)
+let shared_cfg = ref false
+
 let crc_step ~crc ~poly b =
   let fb = b lxor ((crc lsr 15) land 1) in
   ((crc lsl 1) land 0xFFFF) lxor (if fb = 1 then poly else 0)
@@ -101,6 +107,7 @@ let stuff_step ~mode ~run ~last b =
 
 let step st ~(mem : int array array) ~pin_in ~host_in ~host_in_valid =
   let t = st.thread in
+  let tc = if !shared_cfg then 0 else t in   (* index of the configuration registers *)
   let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
   let instr = mem.(t).(pc) in
   let op = op_of_code ((instr lsr 12) land 0xF) in
@@ -118,9 +125,9 @@ let step st ~(mem : int array array) ~pin_in ~host_in ~host_in_valid =
   let stay () = pc_next := pc in
   let set_pin_bit v = st.pin_out <- (st.pin_out land lnot (1 lsl pin)) lor (v lsl pin) in
   let feed b =
-    if fcrc = 1 then st.crcs.(t) <- crc_step ~crc:st.crcs.(t) ~poly:st.polys.(t) b;
+    if fcrc = 1 then st.crcs.(t) <- crc_step ~crc:st.crcs.(t) ~poly:st.polys.(tc) b;
     if fstf = 1 then begin
-      let r, l = stuff_step ~mode:st.modes.(t) ~run:st.runs.(t) ~last:st.lasts.(t) b in
+      let r, l = stuff_step ~mode:st.modes.(tc) ~run:st.runs.(t) ~last:st.lasts.(t) b in
       st.runs.(t) <- r; st.lasts.(t) <- l
     end in
   (match op with
@@ -160,7 +167,7 @@ let step st ~(mem : int array array) ~pin_in ~host_in ~host_in_valid =
      let taken =
        if c < 8 then (acc lsr c) land 1 = 1
        else if c = 8 then st.crcs.(t) = 0
-       else if c = 9 then st.runs.(t) >= st.limits.(t)
+       else if c = 9 then st.runs.(t) >= st.limits.(tc)
        else if c = 10 then cnt land 7 = 0
        else if c = 11 then st.lasts.(t) = 1
        else false in
@@ -169,9 +176,9 @@ let step st ~(mem : int array array) ~pin_in ~host_in ~host_in_valid =
      (match (instr lsr 10) land 3 with
       | 0 ->
         st.crcs.(t) <- 0; st.runs.(t) <- 0; st.lasts.(t) <- (instr lsr 9) land 1;
-        st.modes.(t) <- (instr lsr 8) land 1; st.limits.(t) <- instr land 7
-      | 1 -> st.polys.(t) <- (st.polys.(t) land 0xFF00) lor imm8
-      | 2 -> st.polys.(t) <- (st.polys.(t) land 0x00FF) lor (imm8 lsl 8)
+        st.modes.(tc) <- (instr lsr 8) land 1; st.limits.(tc) <- instr land 7
+      | 1 -> st.polys.(tc) <- (st.polys.(tc) land 0xFF00) lor imm8
+      | 2 -> st.polys.(tc) <- (st.polys.(tc) land 0x00FF) lor (imm8 lsl 8)
       | _ -> cnt_next := acc));
   st.pcs.(t) <- !pc_next; st.accs.(t) <- !acc_next; st.cnts.(t) <- !cnt_next; st.dls.(t) <- !dl_next;
   st.thread <- (t + 1) mod n_threads;
