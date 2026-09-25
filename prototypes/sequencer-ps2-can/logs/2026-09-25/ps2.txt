@@ -1,0 +1,34 @@
+PS/2 firmware: device 161 words, host 147 words; base instructions only: true true
+Scenarios:
+  device fw vs model host: hello, 4 commands, 2 inhibits     PASS  (1472809 cycles, 0 lockstep mismatches)
+      responses seen by the host: [fa aa fa fa ee]; LED arguments at the keyboard: [02]; aborts reported: 6
+  host fw vs model device (13 kHz): hello, 3 commands        PASS  (1244820 cycles, 0 lockstep mismatches)
+      model device LEDs [07]
+  device fw vs host fw, one sequencer, two threads           PASS  (1261113 cycles, 0 lockstep mismatches)
+      responses at the host firmware: [fa aa fa fa]
+Controls (each must be caught):
+  model device sends byte 3 with even parity -> host fw flags [1c]       caught
+  model host sends a command with even parity -> device fw flags [ed], replies [fe] caught
+  device fw mutated to even parity -> model host: 4 bytes with bad parity caught
+  host fw mutated to even parity -> model device: parity verdicts not as expected caught
+  device fw clocked at 25 kHz -> model host: host model: 81.6us clock low 21.0us; 100.7us clock caught
+  device fw without the inhibit check -> host model: 2864.8us clock high 89.7us; 3505.3us s caught
+Constrained random (8 seeds per role):
+  device fw, seed 1: 15 bytes, 3 commands, 3 inhibits, rise 4.6us PASS  (1368981 cycles, 0 lockstep mismatches)
+  host fw, seed 1: 10 bytes, 4 commands, device 12.6 kHz, rise 0.8us PASS  (1386084 cycles, 0 lockstep mismatches)
+  device fw, seed 2: 11 bytes, 4 commands, 2 inhibits, rise 3.4us PASS  (1529509 cycles, 0 lockstep mismatches)
+  host fw, seed 2: 7 bytes, 2 commands, device 11.1 kHz, rise 1.7us PASS  (691554 cycles, 0 lockstep mismatches)
+  device fw, seed 3: 14 bytes, 1 commands, 2 inhibits, rise 4.1us PASS  (1011733 cycles, 0 lockstep mismatches)
+  host fw, seed 3: 12 bytes, 4 commands, device 12.0 kHz, rise 2.6us PASS  (1292952 cycles, 0 lockstep mismatches)
+  device fw, seed 4: 14 bytes, 2 commands, 2 inhibits, rise 1.4us PASS  (1239433 cycles, 0 lockstep mismatches)
+  host fw, seed 4: 12 bytes, 3 commands, device 10.6 kHz, rise 3.4us PASS  (1251426 cycles, 0 lockstep mismatches)
+  device fw, seed 5: 6 bytes, 2 commands, 2 inhibits, rise 4.4us PASS  (920801 cycles, 0 lockstep mismatches)
+  host fw, seed 5: 9 bytes, 2 commands, device 10.7 kHz, rise 2.1us PASS  (845538 cycles, 0 lockstep mismatches)
+  device fw, seed 6: 6 bytes, 4 commands, 3 inhibits, rise 0.6us PASS  (1514317 cycles, 0 lockstep mismatches)
+  host fw, seed 6: 12 bytes, 3 commands, device 15.8 kHz, rise 3.2us PASS  (1080642 cycles, 0 lockstep mismatches)
+  device fw, seed 7: 7 bytes, 1 commands, 3 inhibits, rise 1.3us PASS  (930276 cycles, 0 lockstep mismatches)
+  host fw, seed 7: 8 bytes, 4 commands, device 15.7 kHz, rise 4.9us PASS  (1163622 cycles, 0 lockstep mismatches)
+  device fw, seed 8: 11 bytes, 4 commands, 1 inhibits, rise 1.1us PASS  (1402821 cycles, 0 lockstep mismatches)
+  host fw, seed 8: 15 bytes, 1 commands, device 12.7 kHz, rise 3.5us PASS  (983154 cycles, 0 lockstep mismatches)
+random: 16 of 16 runs pass, 18612843 cycles in lockstep
+PS/2: ALL PASS
