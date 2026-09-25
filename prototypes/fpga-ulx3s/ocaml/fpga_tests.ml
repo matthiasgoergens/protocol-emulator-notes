@@ -128,8 +128,12 @@ let replay t (arr : cyc array) =
 let compare_prediction t ~mode (arr : cyc array) =
   let pred, env = predict t in
   let n = min (Array.length arr) (Array.length pred) in
-  let outputs_eq a b = a.pin_out = b.pin_out && a.pin_oe = b.pin_oe && hov a = hov b && (not (hov a) || a.host_out = b.host_out) in
-  let full_eq a b = outputs_eq a b && a.pin_in = b.pin_in && a.flags = b.flags && (not (hiv a) || a.host_in = b.host_in) in
+  (* On the board the values of host bytes can come from real parts (a flash's ID, an ACK), which
+     the model does not know; the replay checks those values exactly and the expectations judge
+     them, so here the board is held to the pins and to when bytes are emitted. *)
+  let outputs_eq a b = a.pin_out = b.pin_out && a.pin_oe = b.pin_oe && hov a = hov b in
+  let full_eq a b = outputs_eq a b && (not (hov a) || a.host_out = b.host_out)
+                    && a.pin_in = b.pin_in && a.flags = b.flags && (not (hiv a) || a.host_in = b.host_in) in
   let first_diff eq =
     let r = ref None in
     for c = n - 1 downto 0 do if not (eq arr.(c) pred.(c)) then r := Some c done; !r in
@@ -226,13 +230,13 @@ let manifest () =
     let _, env = predict t in
     let flash_cmds = List.rev env.Env.flash.commands in
     let imem = Array.to_list (Array.concat (Array.to_list t.mem)) in
-    Printf.sprintf "{\"name\":%s,\"doc\":%s,\"cycles\":%d,\"ctrl\":%d,\"cfg\":%s,\"host_in\":%s,\"stream\":%s,\"needs\":%s,\"wiring\":{\"jumper_0_7\":%b,\"header_i2c_slave\":%b},\"flash_allowed\":%s,\"flash_cmds_predicted\":%s,\"imem\":%s}"
+    Printf.sprintf "{\"name\":%s,\"doc\":%s,\"cycles\":%d,\"ctrl\":%d,\"cfg\":%s,\"host_in\":%s,\"stream\":%s,\"needs\":%s,\"wiring\":{\"jumper_0_7\":%b,\"header_i2c_slave\":%b,\"header_slave_addr\":%d,\"header_flash\":%b,\"rtc_addr\":%d},\"flash_allowed\":%s,\"flash_cmds_predicted\":%s,\"imem\":%s}"
       (json_str t.name) (json_str t.doc) t.cycles t.ctrl
       (json_list (fun (r, v) -> Printf.sprintf "[%d,%d]" r v) t.cfg)
       (json_list string_of_int t.host_in)
       (json_list (fun (c, w) -> Printf.sprintf "[%d,%d]" c w) t.stream)
       (json_list json_str t.needs)
-      t.wiring.jumper_0_7 t.wiring.header_i2c_slave
+      t.wiring.jumper_0_7 t.wiring.header_i2c_slave t.wiring.header_slave_addr t.wiring.header_flash t.wiring.rtc_addr
       (match t.forbid_flash_cmds_except with None -> "null" | Some l -> json_list string_of_int l)
       (json_list string_of_int flash_cmds)
       (json_list string_of_int imem) in

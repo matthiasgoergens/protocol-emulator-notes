@@ -124,6 +124,13 @@ module emu_core #(
   output wire running_o,
   output wire trace_ovf_o,
   output wire host_activity
+`ifdef EMU_MULTIPHASE
+  // four-phase variant (ulx3s_top_multiphase.v): needs the sequencer with the sub-slot ISA
+  // extension (master after the multiphase merge), which has pin_sub and pin_in4
+  , output wire [31:0] seq_pin_sub
+  , input wire [7:0] quad_pins            // which pins take their samples from quad_samples
+  , input wire [31:0] quad_samples        // bit 4i+p: pin i at quarter p, already retimed to clk
+`endif
 );
   localparam TRACE_DEPTH = 1 << TRACE_AW;
   localparam [7:0] TAW8 = TRACE_AW;
@@ -243,7 +250,18 @@ module emu_core #(
 
   // ---------------------------------------------------------------- the sequencer
   wire [7:0] host_out; wire host_out_valid; wire [23:0] pcs;
+`ifdef EMU_MULTIPHASE
+  // pins without a quad sampler see their one sample in all four quarters
+  wire [31:0] pin_in4;
+  genvar qi;
+  generate for (qi = 0; qi < 8; qi = qi + 1) begin : quad
+    assign pin_in4[4*qi+3:4*qi] = quad_pins[qi] ? quad_samples[4*qi+3:4*qi] : {4{pin_s2[qi]}};
+  end endgenerate
+`endif
   deadline_sequencer seq (
+`ifdef EMU_MULTIPHASE
+    .pin_in4(pin_in4), .pin_sub(seq_pin_sub),
+`endif
     .clock(clk), .clear(in_clear),
     .imem_data(imem_q), .imem_addr(core_imem_addr),
     .pin_in(pin_s2), .pin_out(core_pin_out), .pin_oe(core_pin_oe),

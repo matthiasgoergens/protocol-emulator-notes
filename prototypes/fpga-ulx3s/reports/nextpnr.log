@@ -90,7 +90,7 @@ Info:     Derived frequency constraint of 48.0 MHz for net clk48
 Info: Promoting globals...
 Info:     promoting clock net clk60 to global network
 Info:     promoting clock net clk48 to global network
-Info: Checksum: 0x01a2a906
+Info: Checksum: 0xf340e443
 
 Info: Device utilisation:
 Info: 	          TRELLIS_IO:      46/    365    12%
@@ -129,25 +129,25 @@ Info:     at initial placer iter 1, wirelen = 3911
 Info:     at initial placer iter 2, wirelen = 3884
 Info:     at initial placer iter 3, wirelen = 3597
 Info: Running main analytical placer, max placement attempts per cell = 2723778.
-Info:     at iteration #1, type ALL: wirelen solved = 3791, spread = 26753, legal = 30487; time = 0.09s
-Info:     at iteration #2, type ALL: wirelen solved = 5046, spread = 20690, legal = 23584; time = 0.07s
-Info:     at iteration #3, type ALL: wirelen solved = 6189, spread = 20968, legal = 25960; time = 0.08s
-Info:     at iteration #4, type ALL: wirelen solved = 7309, spread = 21527, legal = 27287; time = 0.06s
-Info:     at iteration #5, type ALL: wirelen solved = 8474, spread = 20536, legal = 23390; time = 0.07s
-Info:     at iteration #6, type ALL: wirelen solved = 9131, spread = 21033, legal = 22612; time = 0.08s
-Info:     at iteration #7, type ALL: wirelen solved = 10241, spread = 20021, legal = 22772; time = 0.14s
-Info:     at iteration #8, type ALL: wirelen solved = 10594, spread = 20984, legal = 22672; time = 0.07s
-Info:     at iteration #9, type ALL: wirelen solved = 11604, spread = 20327, legal = 22847; time = 0.07s
-Info:     at iteration #10, type ALL: wirelen solved = 11921, spread = 19957, legal = 22040; time = 0.08s
-Info:     at iteration #11, type ALL: wirelen solved = 12196, spread = 20783, legal = 23179; time = 0.07s
-Info:     at iteration #12, type ALL: wirelen solved = 13000, spread = 20927, legal = 23297; time = 0.07s
-Info:     at iteration #13, type ALL: wirelen solved = 13374, spread = 19325, legal = 22591; time = 0.07s
-Info:     at iteration #14, type ALL: wirelen solved = 13253, spread = 19760, legal = 23192; time = 0.08s
-Info:     at iteration #15, type ALL: wirelen solved = 13496, spread = 19037, legal = 22346; time = 0.07s
-Info: HeAP Placer Time: 1.84s
-Info:   of which solving equations: 1.02s
-Info:   of which spreading cells: 0.25s
-Info:   of which strict legalisation: 0.08s
+Info:     at iteration #1, type ALL: wirelen solved = 3791, spread = 26753, legal = 30487; time = 0.41s
+Info:     at iteration #2, type ALL: wirelen solved = 5046, spread = 20690, legal = 23584; time = 0.28s
+Info:     at iteration #3, type ALL: wirelen solved = 6189, spread = 20968, legal = 25960; time = 0.13s
+Info:     at iteration #4, type ALL: wirelen solved = 7309, spread = 21527, legal = 27287; time = 0.12s
+Info:     at iteration #5, type ALL: wirelen solved = 8474, spread = 20536, legal = 23390; time = 0.28s
+Info:     at iteration #6, type ALL: wirelen solved = 9131, spread = 21033, legal = 22612; time = 0.14s
+Info:     at iteration #7, type ALL: wirelen solved = 10241, spread = 20021, legal = 22772; time = 0.11s
+Info:     at iteration #8, type ALL: wirelen solved = 10594, spread = 20984, legal = 22672; time = 0.11s
+Info:     at iteration #9, type ALL: wirelen solved = 11604, spread = 20327, legal = 22847; time = 0.10s
+Info:     at iteration #10, type ALL: wirelen solved = 11921, spread = 19957, legal = 22040; time = 0.11s
+Info:     at iteration #11, type ALL: wirelen solved = 12196, spread = 20783, legal = 23179; time = 0.13s
+Info:     at iteration #12, type ALL: wirelen solved = 13000, spread = 20927, legal = 23297; time = 0.10s
+Info:     at iteration #13, type ALL: wirelen solved = 13374, spread = 19325, legal = 22591; time = 0.24s
+Info:     at iteration #14, type ALL: wirelen solved = 13253, spread = 19760, legal = 23192; time = 0.11s
+Info:     at iteration #15, type ALL: wirelen solved = 13496, spread = 19037, legal = 22346; time = 0.13s
+Info: HeAP Placer Time: 4.51s
+Info:   of which solving equations: 2.97s
+Info:   of which spreading cells: 0.40s
+Info:   of which strict legalisation: 0.12s
 
 Info: Running simulated annealing placer for refinement.
 Info:   at iteration #1: temp = 0.000000, timing cost = 577, wirelen = 22040
@@ -156,7 +156,7 @@ Info:   at iteration #10: temp = 0.000000, timing cost = 401, wirelen = 17246
 Info:   at iteration #15: temp = 0.000000, timing cost = 410, wirelen = 16906
 Info:   at iteration #20: temp = 0.000000, timing cost = 392, wirelen = 16535
 Info:   at iteration #23: temp = 0.000000, timing cost = 363, wirelen = 16489 
-Info: SA placement time 5.54s
+Info: SA placement time 10.60s
 
 Info: Max frequency for clock '$glbnet$clk48': 81.92 MHz (PASS at 48.00 MHz)
 Info: Max frequency for clock '$glbnet$clk60': 63.49 MHz (PASS at 60.00 MHz)
@@ -190,7 +190,7 @@ Info: [ 16243,  17201) |*************+
 Info: [ 17201,  18159) |**+
 Info: [ 18159,  19117) |***+
 Info: [ 19117,  20075) |*****+
-Info: Checksum: 0xb46644e6
+Info: Checksum: 0x8f18b4af
 Info: Routing globals...
 Info:     routing clock net $glbnet$clk48 using global 0
 Info:     routing clock net $glbnet$clk60 using global 1
@@ -200,27 +200,27 @@ Info: Setting up routing queue.
 Info: Routing 13563 arcs.
 Info:            |   (re-)routed arcs  |   delta    | remaining|       time spent     |
 Info:    IterCnt |  w/ripup   wo/ripup |  w/r  wo/r |      arcs| batch(sec) total(sec)|
-Info:       1000 |       87        912 |   87   912 |     12665|       0.38       0.38|
-Info:       2000 |      204       1795 |  117   883 |     11792|       0.22       0.59|
-Info:       3000 |      373       2626 |  169   831 |     11030|       0.25       0.84|
-Info:       4000 |      618       3381 |  245   755 |     10354|       0.25       1.10|
-Info:       5000 |      838       4161 |  220   780 |      9682|       0.24       1.34|
-Info:       6000 |     1074       4913 |  236   752 |      8980|       0.24       1.58|
-Info:       7000 |     1279       5684 |  205   771 |      8261|       0.24       1.82|
-Info:       8000 |     1506       6416 |  227   732 |      7511|       0.20       2.02|
-Info:       9000 |     1722       7166 |  216   750 |      6750|       0.24       2.26|
-Info:      10000 |     1954       7878 |  232   712 |      6018|       0.22       2.48|
-Info:      11000 |     2140       8643 |  186   765 |      5222|       0.23       2.71|
-Info:      12000 |     2307       9406 |  167   763 |      4396|       0.22       2.94|
-Info:      13000 |     2501      10176 |  194   770 |      3601|       0.28       3.22|
-Info:      14000 |     2627      11004 |  126   828 |      2740|       0.27       3.49|
-Info:      15000 |     2712      11855 |   85   851 |      1831|       0.18       3.68|
-Info:      16000 |     2822      12676 |  110   821 |       957|       0.18       3.86|
-Info:      17000 |     2890      13481 |   68   805 |        31|       0.20       4.05|
-Info:      17030 |     2890      13505 |    0    24 |         0|       0.02       4.07|
+Info:       1000 |       87        912 |   87   912 |     12665|       0.52       0.52|
+Info:       2000 |      204       1795 |  117   883 |     11792|       0.30       0.82|
+Info:       3000 |      373       2626 |  169   831 |     11030|       0.30       1.11|
+Info:       4000 |      618       3381 |  245   755 |     10354|       0.31       1.43|
+Info:       5000 |      838       4161 |  220   780 |      9682|       0.30       1.73|
+Info:       6000 |     1074       4913 |  236   752 |      8980|       0.28       2.00|
+Info:       7000 |     1279       5684 |  205   771 |      8261|       0.30       2.30|
+Info:       8000 |     1506       6416 |  227   732 |      7511|       0.27       2.56|
+Info:       9000 |     1722       7166 |  216   750 |      6750|       0.31       2.87|
+Info:      10000 |     1954       7878 |  232   712 |      6018|       0.27       3.14|
+Info:      11000 |     2140       8643 |  186   765 |      5222|       0.28       3.42|
+Info:      12000 |     2307       9406 |  167   763 |      4396|       0.29       3.71|
+Info:      13000 |     2501      10176 |  194   770 |      3601|       0.33       4.03|
+Info:      14000 |     2627      11004 |  126   828 |      2740|       0.31       4.34|
+Info:      15000 |     2712      11855 |   85   851 |      1831|       0.25       4.59|
+Info:      16000 |     2822      12676 |  110   821 |       957|       0.29       4.88|
+Info:      17000 |     2890      13481 |   68   805 |        31|       0.33       5.21|
+Info:      17030 |     2890      13505 |    0    24 |         0|       0.04       5.25|
 Info: Routing complete.
-Info: Router1 time 4.07s
-Info: Checksum: 0x62fe9963
+Info: Router1 time 5.25s
+Info: Checksum: 0xac2a52c9
 
 Info: Critical path report for clock '$glbnet$clk48' (posedge -> posedge):
 Info:       type curr  total name
@@ -361,7 +361,7 @@ Info:     source  0.00  0.00 Source btn[1]$tr_io.O
 Info:    routing  3.98  3.98 Net btn[1]$TRELLIS_IO_IN (4,95) -> (4,40)
 Info:                          Sink btn_LUT4_D.D
 Info:                          Defined in:
-Info:                               /home/matthias/prog/janestreet/emulator-wt-fpga-ulx3s/prototypes/fpga-ulx3s/rtl/ulx3s_top.v:23.21-23.24
+Info:                               /home/matthias/prog/janestreet/emulator-wt-fpga-ulx3s/prototypes/fpga-ulx3s/rtl/ulx3s_top.v:29.21-29.24
 Info:      logic  0.24  4.21 Source btn_LUT4_D.F
 Info:    routing  3.54  7.75 Net btn_LUT4_D_Z (4,40) -> (39,25)
 Info:                          Sink usb._383_LUT4_D_Z_TRELLIS_FF_Q_DI_TRELLIS_FF_Q_DI_TRELLIS_FF_Q.LSR
@@ -374,7 +374,7 @@ Info:     source  0.00  0.00 Source btn[1]$tr_io.O
 Info:    routing  3.98  3.98 Net btn[1]$TRELLIS_IO_IN (4,95) -> (4,40)
 Info:                          Sink btn_LUT4_D.D
 Info:                          Defined in:
-Info:                               /home/matthias/prog/janestreet/emulator-wt-fpga-ulx3s/prototypes/fpga-ulx3s/rtl/ulx3s_top.v:23.21-23.24
+Info:                               /home/matthias/prog/janestreet/emulator-wt-fpga-ulx3s/prototypes/fpga-ulx3s/rtl/ulx3s_top.v:29.21-29.24
 Info:      logic  0.24  4.21 Source btn_LUT4_D.F
 Info:    routing  2.74  6.95 Net btn_LUT4_D_Z (4,40) -> (35,26)
 Info:                          Sink core.tx_kick_LUT4_C_Z_LUT4_D_1_Z_TRELLIS_FF_Q_DI_TRELLIS_FF_Q_DI_TRELLIS_FF_Q_DI_TRELLIS_FF_Q.LSR
@@ -409,7 +409,7 @@ Info:   clk-to-q  0.52  0.52 Source core.r_flash_TRELLIS_FF_Q.Q
 Info:    routing  1.76  2.29 Net led[7]$TRELLIS_IO_OUT (48,12) -> (41,16)
 Info:                          Sink usrmclk_USRMCLKI_LUT4_Z.C
 Info:                          Defined in:
-Info:                               /home/matthias/prog/janestreet/emulator-wt-fpga-ulx3s/prototypes/fpga-ulx3s/rtl/ulx3s_top.v:24.21-24.24
+Info:                               /home/matthias/prog/janestreet/emulator-wt-fpga-ulx3s/prototypes/fpga-ulx3s/rtl/ulx3s_top.v:30.21-30.24
 Info:      logic  0.24  2.52 Source usrmclk_USRMCLKI_LUT4_Z.F
 Info:    routing  7.20  9.72 Net usrmclk_USRMCLKI (41,16) -> (0,95)
 Info:                          Sink usrmclk.PADDO

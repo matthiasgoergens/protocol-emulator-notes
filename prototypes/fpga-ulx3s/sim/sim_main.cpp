@@ -7,7 +7,8 @@
 // ocaml/env.ml, statement for statement: a simulated run must match the OCaml prediction exactly.
 //
 // Options: --clks-per-bit N (must match the -G value it was built with), --jumper-0-7,
-//          --header-i2c-slave, --jumper-stream, --flash-id HEX6, --max-cycles N, --vcd FILE
+//          --header-i2c-slave, --header-i2c-addr HEX, --header-flash, --jumper-stream,
+//          --flash-id HEX6, --rtc-addr HEX, --max-cycles N, --vcd FILE
 #include "Vemu_core.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
@@ -72,7 +73,8 @@ struct Flash {
 };
 
 int main(int argc, char** argv) {
-  int cpb = 8; bool jumper07 = false, hslave = false, jstream = false;
+  int cpb = 8; bool jumper07 = false, hslave = false, jstream = false; int rtc_addr = 0x6F;
+  int hslave_addr = -1; bool hflash_on = false;
   long long max_cycles = 2000000000LL;
   const char* vcd = nullptr;
   Flash flash; flash.id = {0xEF, 0x40, 0x18};
@@ -84,6 +86,9 @@ int main(int argc, char** argv) {
     else if (a == "--jumper-stream") jstream = true;
     else if (a == "--max-cycles" && i + 1 < argc) max_cycles = atoll(argv[++i]);
     else if (a == "--vcd" && i + 1 < argc) vcd = argv[++i];
+    else if (a == "--rtc-addr" && i + 1 < argc) rtc_addr = (int)strtoul(argv[++i], nullptr, 16);
+    else if (a == "--header-i2c-addr" && i + 1 < argc) hslave_addr = (int)strtoul(argv[++i], nullptr, 16);
+    else if (a == "--header-flash") hflash_on = true;
     else if (a == "--flash-id" && i + 1 < argc) {
       unsigned v = strtoul(argv[++i], nullptr, 16);
       flash.id = {(int)((v >> 16) & 0xFF), (int)((v >> 8) & 0xFF), (int)(v & 0xFF)};
@@ -95,7 +100,8 @@ int main(int argc, char** argv) {
   VerilatedVcdC* tfp = nullptr;
   if (vcd) { Verilated::traceEverOn(true); tfp = new VerilatedVcdC; top->trace(tfp, 99); tfp->open(vcd); }
 
-  Slave hdr(-1), rtc(0x6F);
+  Slave hdr(hslave_addr), rtc(rtc_addr);
+  Flash hflash; hflash.id = {0xEF, 0x40, 0x17};
   std::deque<unsigned char> inq;
   // host -> fpga serialiser
   int tx_bit = -1, tx_cnt = 0; unsigned tx_frame = 0;
@@ -123,6 +129,10 @@ int main(int argc, char** argv) {
       int sda = (bit(oe, 4) && bit(out, 4) == 0) ? 0 : hdr.pull ? 0 : bit(oe, 4) ? bit(out, 4) : 1;
       hdr.update(sda, scl);
       pad[4] = sda; pad[5] = scl;
+    }
+    if (hflash_on) {
+      hflash.update(pad[1], pad[2], pad[3]);
+      if (!bit(oe, 6)) pad[6] = hflash.miso;
     }
     if (jumper07 && !bit(oe, 7)) pad[7] = pad[0];
     unsigned padv = 0;

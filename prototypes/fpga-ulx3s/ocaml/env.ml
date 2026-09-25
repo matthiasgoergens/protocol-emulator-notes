@@ -13,10 +13,17 @@ let ctrl_usb = 0x10
 
 type wiring = {
   jumper_0_7 : bool;        (* a wire from header seq pin 0 to seq pin 7 *)
-  header_i2c_slave : bool;  (* an I2C slave that acknowledges every byte on seq pins 4 (sda), 5 (scl) *)
+  header_i2c_slave : bool;  (* an I2C slave on seq pins 4 (sda), 5 (scl) *)
+  header_slave_addr : int;  (* its 7-bit address, or -1: acknowledge everything (demo.ml's slave) *)
+  header_flash : bool;      (* an SPI flash on seq pins 1 (sclk), 2 (mosi), 3 (cs), 6 (miso) *)
+  rtc_addr : int;           (* 7-bit address of the RTC on the board's I2C bus *)
 }
 
-let no_wiring = { jumper_0_7 = false; header_i2c_slave = false }
+(* The ULX3S schematic (power.sch) fits an MCP7940NT at 0x6F, with a PCF8523T (0x68) as the
+   alternative part, so a given board has one or the other. *)
+let rtc_mcp7940n = 0x6F and rtc_pcf8523 = 0x68
+let no_wiring = { jumper_0_7 = false; header_i2c_slave = false; header_slave_addr = -1;
+                  header_flash = false; rtc_addr = rtc_mcp7940n }
 
 (* I2C slave on a resolved bus. [addr = None] acknowledges everything (the demo's slave);
    [Some a] acknowledges only its 7-bit address and the bytes that follow it. *)
@@ -82,18 +89,20 @@ let flash_update f ~sclk ~mosi ~csn =
   end;
   f.p_sclk <- sclk; f.p_csn <- csn
 
-(* The simulated board's flash reports a Winbond W25Q128JV; see BRINGUP.md for real parts. *)
+(* The simulated board's flash reports a Winbond W25Q128JV; see BRINGUP.md for real parts. The
+   header breakout is a W25Q64. *)
 let sim_flash_id = [ 0xEF; 0x40; 0x18 ]
-let rtc_address = 0x6F   (* MCP7940N *)
+let header_flash_id = [ 0xEF; 0x40; 0x17 ]
 
 type t = {
   ctrl : int; wiring : wiring;
-  header_slave : i2c_slave; rtc : i2c_slave; flash : flash;
+  header_slave : i2c_slave; rtc : i2c_slave; flash : flash; hflash : flash;
 }
 
 let create ~ctrl ~wiring =
-  { ctrl; wiring; header_slave = new_slave None; rtc = new_slave (Some rtc_address);
-    flash = new_flash sim_flash_id }
+  { ctrl; wiring;
+    header_slave = new_slave (if wiring.header_slave_addr < 0 then None else Some wiring.header_slave_addr);
+    rtc = new_slave (Some wiring.rtc_addr); flash = new_flash sim_flash_id; hflash = new_flash header_flash_id }
 
 let bit v i = (v lsr i) land 1
 
@@ -113,6 +122,10 @@ let step e ~pin_out ~pin_oe =
       else if drv 4 then bit pin_out 4 else 1 in
     slave_update sl ~sda ~scl;
     pad.(4) <- sda; pad.(5) <- scl
+  end;
+  if e.wiring.header_flash then begin
+    flash_update e.hflash ~sclk:pad.(1) ~mosi:pad.(2) ~csn:pad.(3);
+    if not (driven 6) then pad.(6) <- e.hflash.miso
   end;
   if e.wiring.jumper_0_7 && not (driven 7) then pad.(7) <- pad.(0);
   let raw = Array.copy pad in

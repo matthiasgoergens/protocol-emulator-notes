@@ -192,14 +192,21 @@ def write_capture(path: Path, entries: list[bytes]) -> None:
             f.write(f"{e[0]:x} {(e[1] << 8) | e[2]:04x}\n")
 
 
-def sim_args(test: dict, cpb: int) -> list[str]:
+def sim_args(test: dict, cpb: int, flash_id: str | None) -> list[str]:
     a = ["--clks-per-bit", str(cpb)]
+    if flash_id:
+        a += ["--flash-id", flash_id]
     if test["wiring"]["jumper_0_7"]:
         a.append("--jumper-0-7")
     if test["wiring"]["header_i2c_slave"]:
         a.append("--header-i2c-slave")
+        if test["wiring"]["header_slave_addr"] >= 0:
+            a += ["--header-i2c-addr", f"{test['wiring']['header_slave_addr']:x}"]
+    if test["wiring"]["header_flash"]:
+        a.append("--header-flash")
     if "jumpers-streamer-to-sampler" in test["needs"]:
         a.append("--jumper-stream")
+    a += ["--rtc-addr", f"{test['wiring']['rtc_addr']:x}"]
     return a
 
 
@@ -263,6 +270,10 @@ def main() -> int:
     ap.add_argument("--only", default="", help="comma-separated test names")
     ap.add_argument("--controls", action="store_true", help="also run negative controls, which must fail")
     ap.add_argument("--out", default=None, help="results directory (default results/<timestamp>-<mode>)")
+    ap.add_argument("--judge", choices=["sim", "board"], default=None,
+                    help="checker mode; default sim for --sim, board for --port. '--sim --judge board' rehearses "
+                         "a board whose parts differ from the model (e.g. with --sim-flash-id)")
+    ap.add_argument("--sim-flash-id", default=None, help="simulation: JEDEC ID of the configuration flash, 6 hex digits")
     a = ap.parse_args()
 
     if not CHECKER.exists():
@@ -272,7 +283,7 @@ def main() -> int:
     if a.only:
         want = set(a.only.split(","))
         tests = [t for t in tests if t["name"] in want]
-    mode = "sim" if a.sim else "board"
+    mode = a.judge or ("sim" if a.sim else "board")
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     outdir = Path(a.out) if a.out else ROOT / "results" / f"{stamp}-{mode}"
     outdir.mkdir(parents=True, exist_ok=True)
@@ -302,7 +313,7 @@ def main() -> int:
         link = None
         try:
             if a.sim:
-                link = SimLink(sim_bin, sim_args(t, a.cpb), outdir / f"{t['name']}.sim.log")
+                link = SimLink(sim_bin, sim_args(t, a.cpb, a.sim_flash_id), outdir / f"{t['name']}.sim.log")
                 emu = Emu(link, slow=20.0)
                 emu.identify()
             else:

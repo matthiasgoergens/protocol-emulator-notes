@@ -14,6 +14,12 @@
 //   led[7:0]  0 heartbeat, 1 running, 2 trace overflow, 3 host link activity,
 //             4 USB configured, 5 PLL locked, 6 USB address nonzero, 7 flash route on
 //   btn[1] (FIRE1)  reset
+//
+// With EMU_MULTIPHASE defined (build_multiphase.sh), sequencer pins 0 and 1 go through the
+// four-phase output and input stage of prototypes/multiphase (lanes clocked on 0/90/180/270
+// degree phases, XORed onto the pin; one sampler per phase): a second EHXPLLL makes the four
+// phases of 60 MHz and the core runs on phase 0. Needs the sequencer with the sub-slot ISA
+// extension (pin_sub, pin_in4), i.e. master after the multiphase merge.
 `default_nettype none
 
 module ulx3s_top (
@@ -39,7 +45,14 @@ module ulx3s_top (
 );
   // ------------------------------------------------------------------ clocks and resets
   wire clk60, clk48, locked;
+`ifdef EMU_MULTIPHASE
+  wire clk60_unused, locked48, ph1, ph2, ph3, locked_ph;
+  pll_60_48 pll (.reset(1'b0), .clk25(clk_25mhz), .clk60(clk60_unused), .clk48(clk48), .locked(locked48));
+  pll_4phase pllq (.clkin(clk_25mhz), .clkout0(clk60), .clkout1(ph1), .clkout2(ph2), .clkout3(ph3), .locked(locked_ph));
+  assign locked = locked48 & locked_ph;
+`else
   pll_60_48 pll (.reset(1'b0), .clk25(clk_25mhz), .clk60(clk60), .clk48(clk48), .locked(locked));
+`endif
 
   wire rst_async = !locked | btn[1];
   reg [3:0] rst60_sr = 4'hF, rst48_sr = 4'hF;
@@ -60,6 +73,10 @@ module ulx3s_top (
   wire running, trace_ovf, activity;
   reg  [7:0] usb_status_s1 = 8'd0, usb_status_s2 = 8'd0;
   wire [7:0] usb_status;
+`ifdef EMU_MULTIPHASE
+  wire [31:0] pin_sub;
+  wire [7:0] quad;
+`endif
 
   emu_core #(.CLKS_PER_BIT(60), .TRACE_AW(11)) core (
     .clk(clk60), .rst(rst60),
@@ -69,11 +86,29 @@ module ulx3s_top (
     .aux_sda_low(sda_low), .aux_scl_low(scl_low), .aux_sda_in(gpdi_sda), .aux_scl_in(gpdi_scl),
     .str_pad_out(str_out), .str_pad_oe(str_oe), .smp_pad_in(gn[7:4]),
     .board_status(usb_status_s2), .ctrl(ctrl),
-    .running_o(running), .trace_ovf_o(trace_ovf), .host_activity(activity));
+    .running_o(running), .trace_ovf_o(trace_ovf), .host_activity(activity)
+`ifdef EMU_MULTIPHASE
+    , .seq_pin_sub(pin_sub), .quad_pins(8'b0000_0011), .quad_samples({24'd0, quad})
+`endif
+    );
 
   genvar i;
+`ifdef EMU_MULTIPHASE
+  // pins 0 and 1 through the four-phase stage; the stage delays the pin by one clock and carries
+  // the output enable along with it
+  wire [1:0] mp_pin, mp_oe;
+  multiphase_stage stage (
+    .ph0(clk60), .ph1(ph1), .ph2(ph2), .ph3(ph3), .clear(rst60),
+    .sub(pin_sub[7:0]), .oe(seq_oe[1:0]), .pads(gp[1:0]),
+    .pin(mp_pin), .pin_oe(mp_oe), .samples(quad));
+  assign gp[0] = mp_oe[0] ? mp_pin[0] : 1'bz;
+  assign gp[1] = mp_oe[1] ? mp_pin[1] : 1'bz;
+  localparam FIRST_PLAIN = 2;
+`else
+  localparam FIRST_PLAIN = 0;
+`endif
   generate
-    for (i = 0; i < 8; i = i + 1) begin : seq_pads
+    for (i = FIRST_PLAIN; i < 8; i = i + 1) begin : seq_pads
       assign gp[i] = seq_oe[i] ? seq_out[i] : 1'bz;
     end
     for (i = 0; i < 4; i = i + 1) begin : str_pads

@@ -27,7 +27,9 @@ type test = {
   stream : (int * int) list;          (* stream buffer: (count, word) *)
   wiring : Env.wiring;                (* what the simulator attaches; the board must match *)
   needs : string list;                (* external parts or wires the board needs for this test *)
-  board_only_lenient : bool;          (* on the board, input-dependent outputs may shift in time *)
+  board_only_lenient : bool;          (* on the board, outputs depend on when an external edge
+                                         arrives relative to the clock (a wire into WAITP), so they
+                                         may shift by a cycle; only the replay is exact then *)
   expects : expect list;
   forbid_flash_cmds_except : int list option;
 }
@@ -109,11 +111,11 @@ let spi_read ~sclk ~mosi ~cs ~miso ~p ~cmd ~n_read =
 let ok_bytes = [ 0x4F; 0x4B; 0x21 ]   (* "OK!", as in demo.ml *)
 let bit_slots = 16
 
-let uart_pair ~ctrl ~wiring ~name ~doc ~needs =
+let uart_pair ~ctrl ~wiring ~name ~doc ~needs ~lenient =
   let tx, _ = uart_tx { upin = 0; bit_slots; ubytes = ok_bytes; stretch = None } in
   let rx, _ = uart_rx ~pin:7 ~bit_slots in
   { name; doc; mem = image [ (0, tx); (1, rx) ]; cycles = 2600; ctrl; cfg = []; host_in = [];
-    stream = []; wiring; needs; board_only_lenient = true;
+    stream = []; wiring; needs; board_only_lenient = lenient;
     expects = [ Uart_on_pin { pin = 0; bit_cycles = bit_slots * slot; bytes = ok_bytes };
                 Uart_on_pin { pin = 7; bit_cycles = bit_slots * slot; bytes = ok_bytes };
                 Host_bytes ok_bytes ];
@@ -130,33 +132,34 @@ let demo3 ~slave =
     mem = image [ (0, u); (1, sp); (2, ic) ]; cycles = 6000; ctrl = 0; cfg = []; host_in = []; stream = [];
     wiring = { Env.no_wiring with header_i2c_slave = slave };
     needs = (if slave then [ "i2c-slave-on-4-5" ] else []);
-    board_only_lenient = true;
+    board_only_lenient = false;
     expects = [ Uart_on_pin { pin = 0; bit_cycles = 64; bytes = ok_bytes };
                 Spi_bytes { sclk = 1; mosi = 2; cs = 3; bytes = [ 0xA5; 0x3C ] };
                 I2c_bytes { sda = 4; scl = 5; bytes = [ 0xA0; 0x5A ]; acks = (if slave then Some [ true; true ] else None) } ]
                @ (if slave then [ Host_bytes [ 0; 0 ] ] else []);
     forbid_flash_cmds_except = None }
 
-(* The RTC (MCP7940N, 7-bit address 0x6F) on the ULX3S's I2C bus. The write only sets its register
-   pointer: no register is changed. Quarter period 40 slots = 160 cycles, about 94 kHz at 60 MHz,
-   inside the part's 100 kHz standard mode. *)
-let rtc ~addr_byte ~bytes ~acks =
+(* The RTC on the ULX3S's I2C bus: an MCP7940N (0x6F) or, as the schematic's alternative part, a
+   PCF8523 (0x68). The write only sets its register pointer: no register is changed. Quarter
+   period 40 slots = 160 cycles, about 94 kHz at 60 MHz, inside both parts' 100 kHz standard mode. *)
+let rtc ~name ~rtc_addr ~needs ~addr_byte ~bytes ~acks =
   let ic, _ = i2c_write { sda = 4; scl = 5; q = 40; ibytes = addr_byte :: bytes } in
   let n = 1 + List.length bytes in
-  { name = (if List.for_all Fun.id acks then "rtc_ack" else "rtc_nack");
-    doc = Printf.sprintf "I2C write to 0x%02x on the on-board RTC bus; expected %s" addr_byte
-            (if List.for_all Fun.id acks then "acknowledged (MCP7940N at 0x6F)" else "not acknowledged (no device)");
+  { name;
+    doc = Printf.sprintf "I2C write to 0x%02x (7-bit 0x%02x) on the on-board RTC bus; expected %s" addr_byte (addr_byte lsr 1)
+            (if List.for_all Fun.id acks then "acknowledged" else "not acknowledged (no device there)");
     mem = image [ (2, ic) ]; cycles = 700 + (n * 9 * 160 * 4) + 3000; ctrl = Env.ctrl_i2c; cfg = [];
-    host_in = []; stream = []; wiring = Env.no_wiring; needs = []; board_only_lenient = true;
+    host_in = []; stream = []; wiring = { Env.no_wiring with rtc_addr }; needs; board_only_lenient = false;
     expects = [ I2c_bytes { sda = 4; scl = 5; bytes = addr_byte :: bytes; acks = Some acks };
                 Host_bytes (List.map (fun a -> if a then 0 else 1) acks) ];
     forbid_flash_cmds_except = None }
 
 (* JEDEC ID of the configuration flash, through USRMCLK on the board. The runner refuses to load
    any flash-routed programme whose command byte is not a read-only command. *)
-let known_flash_ids = [ [ 0xEF; 0x40; 0x18 ] (* Winbond W25Q128JV *); [ 0x9D; 0x60; 0x18 ] (* ISSI IS25LP128 *);
-                        [ 0xEF; 0x70; 0x18 ] (* W25Q128JV-M *); [ 0xC2; 0x20; 0x18 ] (* Macronix MX25L128 *);
-                        [ 0x20; 0xBA; 0x18 ] (* Micron N25Q128 *) ]
+(* flash.sch lists IS25LP128F (first), IS25LP032D, W25Q128JVSIM/JVSIQ and S25FL128L *)
+let known_flash_ids = [ [ 0x9D; 0x60; 0x18 ] (* ISSI IS25LP128F *); [ 0x9D; 0x60; 0x16 ] (* ISSI IS25LP032D *);
+                        [ 0xEF; 0x40; 0x18 ] (* Winbond W25Q128JV-IQ *); [ 0xEF; 0x70; 0x18 ] (* W25Q128JV-IM *);
+                        [ 0x01; 0x60; 0x18 ] (* Cypress S25FL128L *) ]
 let flash_id () =
   let prog, _ = spi_read ~sclk:1 ~mosi:2 ~cs:3 ~miso:6 ~p:24 ~cmd:0x9F ~n_read:3 in
   { name = "flash_id"; doc = "JEDEC READ ID (0x9F) from the configuration flash via USRMCLK";
@@ -222,18 +225,57 @@ let host_echo () =
     expects = [ Host_bytes bytes; Uart_on_pin { pin = 0; bit_cycles = bit_slots * slot; bytes } ];
     forbid_flash_cmds_except = None }
 
+(* Parts on the header (see BRINGUP.md for what to buy). An I2C EEPROM (24LC256 / AT24C256
+   breakout, address 0x50): the write sends one of the two address-pointer bytes and stops, which
+   writes nothing (a three-byte write does not fit in 64 words), at the
+   same 94 kHz as the RTC test, because demo3's roughly 1 MHz bus is beyond a 24LC256's 400 kHz. *)
+let eeprom () =
+  let bytes = [ 0xA0; 0x00 ] in
+  let ic, _ = i2c_write { sda = 4; scl = 5; q = 40; ibytes = bytes } in
+  { name = "eeprom_ack"; doc = "I2C write of the first address byte (no data, so nothing is written) to a 24LC256 EEPROM (0x50) on header pins 4/5";
+    mem = image [ (2, ic) ]; cycles = 700 + (2 * 9 * 160 * 4) + 3000; ctrl = 0; cfg = []; host_in = []; stream = [];
+    wiring = { Env.no_wiring with header_i2c_slave = true; header_slave_addr = 0x50 };
+    needs = [ "eeprom-on-4-5" ]; board_only_lenient = false;
+    expects = [ I2c_bytes { sda = 4; scl = 5; bytes; acks = Some [ true; true ] }; Host_bytes [ 0; 0 ] ];
+    forbid_flash_cmds_except = None }
+
+(* A W25Q64 SPI flash breakout on the header: sclk 1, mosi 2, cs 3, miso 6, JEDEC ID read *)
+let header_flash () =
+  let prog, _ = spi_read ~sclk:1 ~mosi:2 ~cs:3 ~miso:6 ~p:24 ~cmd:0x9F ~n_read:3 in
+  { name = "spi_flash_header"; doc = "JEDEC READ ID from a W25Q64 breakout on header pins 1 (sclk), 2 (mosi), 3 (cs), 6 (miso)";
+    mem = image [ (0, prog) ]; cycles = 4 * 24 * 4 * 8 + 400; ctrl = 0; cfg = []; host_in = []; stream = [];
+    wiring = { Env.no_wiring with header_flash = true }; needs = [ "w25q64-on-header" ]; board_only_lenient = false;
+    expects = [ Spi_bytes { sclk = 1; mosi = 2; cs = 3; bytes = [ 0x9F ] };
+                Host_bytes_one_of [ [ 0xEF; 0x40; 0x17 ] (* W25Q64JV-IQ *); [ 0xEF; 0x70; 0x17 ] (* W25Q64JV-IM *);
+                                    [ 0xEF; 0x40; 0x18 ] (* W25Q128 fitted instead *) ] ];
+    forbid_flash_cmds_except = None }
+
+(* UART to a USB-serial adapter (CP2102 or FT232) at 115,384 baud: 130 slots per bit, 0.16 %
+   from 115,200. The decoder checks the pin; the adapter's terminal should show the text. *)
+let uart_adapter () =
+  let text = List.map Char.code [ 'O'; 'K'; '!'; '\r'; '\n' ] in
+  let tx, _ = uart_tx { upin = 0; bit_slots = 130; ubytes = text; stretch = None } in
+  { name = "uart_adapter"; doc = "UART at 115,384 baud on header pin 0 into a USB-serial adapter (terminal shows OK!)";
+    mem = image [ (0, tx) ]; cycles = (5 * 10 + 2) * 130 * 4 + 400; ctrl = 0; cfg = []; host_in = []; stream = [];
+    wiring = Env.no_wiring; needs = [ "usb-serial-rx-on-0" ]; board_only_lenient = false;
+    expects = [ Uart_on_pin { pin = 0; bit_cycles = 130 * 4; bytes = text } ]; forbid_flash_cmds_except = None }
+
 let all () = [
-  uart_pair ~ctrl:Env.ctrl_uloop ~wiring:Env.no_wiring ~name:"uart_loop" ~needs:[]
+  uart_pair ~ctrl:Env.ctrl_uloop ~wiring:Env.no_wiring ~name:"uart_loop" ~needs:[] ~lenient:false
     ~doc:"UART transmitter (thread 0, pin 0) into UART receiver (thread 1, pin 7) through the internal loop";
-  uart_pair ~ctrl:0 ~wiring:{ Env.no_wiring with jumper_0_7 = true } ~name:"uart_jumper" ~needs:[ "jumper-0-7" ]
+  uart_pair ~ctrl:0 ~wiring:{ Env.no_wiring with jumper_0_7 = true } ~name:"uart_jumper" ~needs:[ "jumper-0-7" ] ~lenient:true
     ~doc:"as uart_loop, through a wire from header seq pin 0 to seq pin 7";
   demo3 ~slave:false;
   demo3 ~slave:true;
-  rtc ~addr_byte:(Env.rtc_address lsl 1) ~bytes:[ 0x00 ] ~acks:[ true; true ];
-  rtc ~addr_byte:0x90 ~bytes:[] ~acks:[ false ];
+  rtc ~name:"rtc_ack" ~rtc_addr:Env.rtc_mcp7940n ~needs:[] ~addr_byte:(Env.rtc_mcp7940n lsl 1) ~bytes:[ 0x00 ] ~acks:[ true; true ];
+  rtc ~name:"rtc_ack_pcf8523" ~rtc_addr:Env.rtc_pcf8523 ~needs:[ "rtc-pcf8523" ] ~addr_byte:(Env.rtc_pcf8523 lsl 1) ~bytes:[ 0x00 ] ~acks:[ true; true ];
+  rtc ~name:"rtc_nack" ~rtc_addr:Env.rtc_mcp7940n ~needs:[] ~addr_byte:0x90 ~bytes:[] ~acks:[ false ];
   flash_id ();
   stream ~loop:true;
   stream ~loop:false;
   overflow ();
   host_echo ();
+  eeprom ();
+  header_flash ();
+  uart_adapter ();
 ]
