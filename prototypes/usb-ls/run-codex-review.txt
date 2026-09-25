@@ -1,0 +1,1920 @@
+Reading additional input from stdin...
+OpenAI Codex v0.157.0
+--------
+workdir: /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+model: gpt-6-luna
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a0d73e-d940-79c2-85a9-462e5d6aad0a
+--------
+user
+You are an adversarial reviewer. In this directory is a low-speed USB prototype (README.md, firmware.ml, isa_ls.ml, sequencer_ls.ml, controller.ml, bench.ml, ls_host.ml, crc_unit.ml, fw_sys.ml, main_fw.ml, and logs run-fw-8seeds.log, run-hard-8seeds.log). Try to REFUTE specific README claims by reading the code and logs. Focus on: (1) T0 (Firmware.t0) uses only instructions of the ORIGINAL ISA (../deadline-sequencer/isa.ml) and fits 64 words, and main_fw really runs it on the original interpreter and RTL; (2) the claim that T1 arming the CRC unit after every PID and disarming it for non-DATA PIDs makes a bad data PID fail the CRC check - look for a path where a non-DATA PID leaves the CRC armed, or where T1 is not reading when a data packet arrives; (3) the interpreter-vs-RTL lockstep really compares every clock and would detect a divergence; (4) the bench's turnaround and contention checks, and whether any test could pass vacuously (e.g. expect_silence when the device never answers anything); (5) the encodings claim of no collision with master's four-phase ISA extension (master: SETP/SHO bits [1:0] sub-slot, SHI bit 7 quad). Report concrete findings with file:line and a severity; say plainly where the claims hold. Be concise (under 600 words).
+2026-09-25T06:26:56.478526Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when UnexpectedServerResponse("HTTP 401: {\"errors\":[\"Unauthorized\"]}")
+2026-09-25T06:26:57.294097Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/\"" })
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+I’ll trace the README claims into the implementation and both seed logs, then report only concrete counterexamples or confirm the claims where the code supports them.
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c3 rg -n "T0|T1|64|lockstep|turnaround|contention|silence|SETP|SHO|SHI|CRC|original|four.phase|quad" README.md firmware.ml isa_ls.ml sequencer_ls.ml controller.ml bench.ml ls_host.ml crc_unit.ml fw_sys.ml main_fw.ml ../deadline-sequencer/isa.ml run-fw-8seeds.log run-hard-8seeds.log' in /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+ succeeded in 0ms:
+README.md:6:answer: the whole device runs as firmware. The bit layer needs nothing beyond the original
+README.md:8:generic CRC unit. Replies are precomputed and fetched through a FIFO in front of the host port.
+README.md:23:  - Controls it can generate: a corrupted CRC5 or CRC16, a missing stuff bit, keep-alives and
+README.md:28:  - bytes and CRC equal to the reference;
+README.md:30:  - a turnaround of 2 to 6.5 bit times, measured from the SE0-to-J edge of the host's EOP;
+README.md:31:  - no bus contention;
+README.md:40:    - bad CRC5 and bad CRC16;
+README.md:49:**Firmware, interpreter and RTL in lockstep.** Two complete systems run side by side, fed the
+README.md:51:program counters). One is the interpreter with models of the synchroniser and the CRC unit. The
+README.md:52:other is the RTL of the sequencer variant, synchroniser and CRC unit. Each has its own
+README.md:57:| | hardened block | firmware (interpreter and RTL in lockstep) |
+README.md:63:| packets the device had to ignore (bad CRC5, bad CRC16, missing stuff bit, other address) | 214, all ignored | 214, all ignored |
+README.md:64:| keep-alives / bus resets | 209 / 64 | 213 / 63 |
+README.md:65:| turnaround, all replies | 3.23 to 3.40 bits | 2.51 to 6.00 bits (front padding; see the budget) |
+README.md:67:| bit layer alone on the ORIGINAL sequencer (T0; interpreter and RTL in lockstep) | | 13 host clock errors from -1.5 % to +1.5 %, 60 random packets each (0xFF, 0x00, 0x55, 0xAA heavy): all bit-exact, 2.2 million clocks, 0 mismatches; passes -4 % to +2 %, fails at -5 % and +3 % |
+README.md:69:| CRC assist, model against RTL | | USB CRC16, USB CRC5, CAN CRC15, fixed and programmable: 6 x 200,000 clocks, 0 mismatches (random stimulus never reaches the CRC16 residue, so its good-packet case is checked separately on real packets) |
+README.md:76:| reply 4 bit times late | caught: turnaround 7.3 bits | caught: turnaround 6.9 bits |
+README.md:77:| reply early | caught: turnaround 1.8 bits | caught: bus contention with the host's EOP |
+README.md:78:| CRC16 check disabled | caught: ACKs a corrupted SETUP | caught: ACKs a corrupted SETUP |
+README.md:80:Among the stimuli, bad CRC5, bad CRC16 and missing stuff bits must be met with silence. They
+README.md:83:## The firmware: what it does and how far the original ISA gets
+README.md:88:- **T0, the bit layer: original instruction set, 63 of 64 words** (`firmware.ml`).
+README.md:93:  - The same programme runs on the original sequencer's interpreter and RTL, through the
+README.md:94:    original files (symlinked), decoding random packets bit-exact:
+README.md:99:- **T1: IN tokens and the host's ACK.** 180 words.
+README.md:101:    (address, endpoint and CRC5 included) using SKNE.
+README.md:103:  - It also arms the CRC assist after every PID and disarms it for anything but DATA0/1, so a
+README.md:104:    packet with a bad PID can never pass the CRC check. That is the data PID check, done in
+README.md:109:  - At the EOP it checks the abort flag and CRC_OK, and answers ACK or STALL.
+README.md:113:  - It keeps the USB state and precomputes every reply as a symbol stream (`fw_codec.ml`: CRC16,
+README.md:123:| gap in the original ISA | measured or counted consequence | fix | cost |
+README.md:126:| 6-bit pc, 64 words per thread | T1 and T2 need 180 and 186 words | **8-bit pc** (256 words per thread, what the README plans for the SRAM); address fields grow into unused bits | 8 flip-flops, wider muxes |
+README.md:127:| SETP writes one value to all masked pins; D+ and D- must change together | one thread cannot drive J or K glitch-free; two threads could, with one clock of skew and a pin to coordinate them | **SHO pair mode**: two pins from two acc bits at once | a second output mux; SHO bit 6 |
+README.md:129:| no CRC | a CRC16 has 65,536 states; no programme can hold them | **the CRC assist** (below) | 1,854 µm² fixed, 3,621 µm² programmable |
+README.md:131:Measured area (Yosys, sg13g2 typical, `synth/results.txt`): the original sequencer is 17,266 µm²
+README.md:133:2,510 µm² (+14.5 %). The encodings were checked against master's four-phase extension. Master
+README.md:134:uses SETP/SHO bits [1:0] and SHI bit 7. This variant uses SHO bit 6, OUT bit 8, WAITP/JMP/JNZ bits
+README.md:135:[7:6] and opcode E, so the two do not collide. The variant here is built on the pre-four-phase
+README.md:138:### The generic assist: a programmable CRC unit (`crc_unit.ml`)
+README.md:145:- USB CRC5 and CRC16;
+README.md:146:- CAN CRC15, MSB first;
+README.md:147:- SMBus PEC and 1-Wire CRC8;
+README.md:148:- HDLC and SD CRC16-CCITT, and SD CRC7;
+README.md:151:The model and RTL agree over 200,000 random clocks for USB CRC16, USB CRC5 and CAN CRC15, both as
+README.md:163:  bits, HDLC 5 ones). It would free T0 and the three pins between T0 and the consumers. At low
+README.md:172:  starts when a word arrives, and a choice among queued replies (NAK, STALL, data). SHO pair
+README.md:173:  mode in T1/T2 does this with no new block.
+README.md:175:  - Fed one sample per decoded bit, with T0's strobe as a clock enable the prototype lacks, a
+README.md:187:Measured on one SETUP (answered ACK by T2) and one IN (answered with FIFO data by T1). The host
+README.md:190:| clock | SETUP data, answered ACK by T2 | clock | IN token, answered with FIFO data by T1 |
+README.md:193:| 12 | T0 raises IDLE: end of packet seen | 16 | T0 raises IDLE |
+README.md:194:| 40 | T0's end-of-packet strobe (after the 6-slot low) | 44 | T0's end-of-packet strobe |
+README.md:195:| 46 | T2 has checked abort and CRC_OK and chosen ACK | 65 | T1 has checked the token's end and RDY and chosen the data |
+README.md:196:| 80 | host's SE0-to-J (turnaround reference) | 80 | host's SE0-to-J |
+README.md:198:| 186 | device's first K: turnaround 2.65 bits | 189 | first K: turnaround 2.73 bits (one pad symbol) |
+README.md:207:- The rest is symbol timing. The first K lands at 186 to 189 for handshakes, a turnaround of
+README.md:210:  turnarounds measured 2.51 to 6.00 bits, inside the 2 to 6.5 limit.
+README.md:214:clocks for T0 to see the SE0, through the two-flop synchroniser and a 4-clock poll, plus a
+README.md:233:  - it does only SHI and JNZ per bit;
+README.md:243:  - `crc_unit.ml`, `fw_sys.ml`: the CRC assist and the system;
+README.md:246:  - `main_fw.ml` runs the ISA lockstep, the CRC lockstep, T0 on the original sequencer, the
+README.md:248:- **The original sequencer** (`isa.ml`, `sequencer.ml`, `harness.ml`) is symlinked, not
+README.md:265:- **The data turnaround varies with padding (2.6 to 5.9 bits).** The firmware could read a pad
+README.md:271:- **The reply FIFO has no RTL yet.** The CRC unit's configuration registers are not in its area.
+README.md:274:- **The variant is not merged with master's four-phase ISA.** It should be merged
+run-hard-8seeds.log:47:    IN with a bad CRC5           no reply
+run-hard-8seeds.log:49:    SETUP data with a bad CRC16  no reply
+run-hard-8seeds.log:66:  hardened ppm +0: 931487 clocks, 113 packets sent, 55 replies (turnaround 3.33..3.33 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:67:  hardened ppm -15000: 928683 clocks, 113 packets sent, 55 replies (turnaround 3.40..3.40 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:68:  hardened ppm +15000: 934302 clocks, 113 packets sent, 55 replies (turnaround 3.25..3.25 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:70:  hardened ppm +14147: 1075407 clocks, 302 packets sent, 153 replies (turnaround 3.25..3.25 bits), 0 NAKs while preparing, 22 silences as required, 26 keep-alives, 5 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:71:  hardened ppm +5255: 1079786 clocks, 321 packets sent, 158 replies (turnaround 3.28..3.31 bits), 0 NAKs while preparing, 29 silences as required, 29 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:72:  hardened ppm +2438: 1088410 clocks, 322 packets sent, 153 replies (turnaround 3.29..3.32 bits), 0 NAKs while preparing, 26 silences as required, 28 keep-alives, 8 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:73:  hardened ppm +588: 1233075 clocks, 360 packets sent, 184 replies (turnaround 3.32..3.32 bits), 0 NAKs while preparing, 20 silences as required, 31 keep-alives, 8 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:74:  hardened ppm -7765: 1161731 clocks, 328 packets sent, 158 replies (turnaround 3.35..3.38 bits), 0 NAKs while preparing, 25 silences as required, 20 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:75:  hardened ppm +7772: 1234908 clocks, 357 packets sent, 169 replies (turnaround 3.27..3.30 bits), 0 NAKs while preparing, 30 silences as required, 19 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:76:  hardened ppm +14185: 1087294 clocks, 311 packets sent, 147 replies (turnaround 3.23..3.25 bits), 0 NAKs while preparing, 31 silences as required, 24 keep-alives, 5 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:77:  hardened ppm +8555: 1306124 clocks, 389 packets sent, 198 replies (turnaround 3.27..3.30 bits), 0 NAKs while preparing, 19 silences as required, 23 keep-alives, 8 resets, lockstep mismatches 0, errors 0
+run-hard-8seeds.log:80:  reply 4 bit times late                       caught (21 errors; first: [late clk 6507] turnaround 7.33 bit times outside 2..6.5)
+run-hard-8seeds.log:81:  reply 1.5 bit times early                    caught (21 errors; first: [early clk 6287] turnaround 1.82 bit times outside 2..6.5)
+run-hard-8seeds.log:82:  CRC16 check disabled                         caught (1 errors; first: [no-crc clk 847156] SETUP data with a bad CRC16: expected silence, got d2 (3.33 bits))
+../deadline-sequencer/isa.ml:13:     1 SETP  mask[11:4] val[3] oe[2]   masked pins <- val, their output enables <- oe
+../deadline-sequencer/isa.ml:20:     7 SHO   pin[11:9] msb[8] od[7]    pin_out[pin] <- acc bit (msb ? bit 7 : bit 0); acc shifts;
+../deadline-sequencer/isa.ml:23:     8 SHI   pin[11:9] msb[8]          pin_in[pin] shifts into acc (msb ? at bit 0 : at bit 7);
+../deadline-sequencer/isa.ml:37:type op = NOP | SETP | LDC | LDD | LDA | WAITP | WAITD | SHO | SHI | JMP | JNZ | OUT | IN | HALT
+../deadline-sequencer/isa.ml:40:  | 1 -> SETP | 2 -> LDC | 3 -> LDD | 4 -> LDA | 5 -> WAITP | 6 -> WAITD | 7 -> SHO | 8 -> SHI
+../deadline-sequencer/isa.ml:44:  | NOP -> 0 | SETP -> 1 | LDC -> 2 | LDD -> 3 | LDA -> 4 | WAITP -> 5 | WAITD -> 6 | SHO -> 7
+../deadline-sequencer/isa.ml:45:  | SHI -> 8 | JMP -> 9 | JNZ -> 10 | OUT -> 11 | IN -> 12 | HALT -> 13
+../deadline-sequencer/isa.ml:50:let setp ~mask ~value ~oe = enc SETP ((mask land 0xFF) lsl 4 lor (value lsl 3) lor (oe lsl 2))
+../deadline-sequencer/isa.ml:56:let sho ?(od = 0) ~pin ~msb () = enc SHO ((pin lsl 9) lor (msb lsl 8) lor (od lsl 7))
+../deadline-sequencer/isa.ml:57:let shi ~pin ~msb = enc SHI ((pin lsl 9) lor (msb lsl 8))
+../deadline-sequencer/isa.ml:97:   | SETP ->
+../deadline-sequencer/isa.ml:105:   | SHO ->
+../deadline-sequencer/isa.ml:113:   | SHI ->
+main_fw.ml:3:   2. The CRC assist: model against RTL on random stimulus and three configurations.
+main_fw.ml:4:   3. The bit layer (T0) on the ORIGINAL sequencer, interpreter and RTL, decoding random packets
+main_fw.ml:6:   4. The whole device (T0-T2, CRC assist, controller) on the variant, interpreter and RTL in
+main_fw.ml:7:      lockstep: directed enumeration and reports, constrained random sessions, and controls that
+main_fw.ml:15:(* ---------- 1. ISA variant lockstep ---------- *)
+main_fw.ml:16:let isa_lockstep ~seed ~cycles =
+main_fw.ml:49:(* ---------- 2. CRC assist lockstep ---------- *)
+main_fw.ml:50:let crc_lockstep ?(prog = false) cfg ~seed ~cycles =
+main_fw.ml:98:(* ---------- 3. T0 on the original sequencer ---------- *)
+main_fw.ml:163:  if Sys.getenv_opt "T0DEBUG" <> None then begin
+main_fw.ml:194:        if (dp, dm) = (0, 1) && !prev_line = (0, 0) then mark "host EOP: SE0 to J (turnaround reference)" rel;
+main_fw.ml:195:        if (po lsr Fw_sys.p_idle) land 1 = 1 && (!prev_out lsr Fw_sys.p_idle) land 1 = 0 then mark "T0 raises IDLE (end of packet seen)" rel;
+main_fw.ml:196:        if (po lsr Fw_sys.p_stb) land 1 = 1 && (!prev_out lsr Fw_sys.p_stb) land 1 = 0 && (po lsr Fw_sys.p_idle) land 1 = 1 then mark "T0 end-of-packet strobe" rel;
+main_fw.ml:199:        if not !t1_decided && (at1 "p_ep0_rdy" || at1 "p_ep1_rdy" || at1 "nr0" || at1 "nr1") then (t1_decided := true; mark "T1 reply chosen (token and RDY checked)" rel);
+main_fw.ml:200:        if at2 "p_hs" then mark "T2 reply chosen (CRC checked)" rel;
+main_fw.ml:222:  run "IN token, answered with data from the FIFO by T1" (fun b ->
+main_fw.ml:233:  (match Sys.getenv_opt "T0DEBUG" with
+main_fw.ml:238:  let m = List.fold_left (fun acc seed -> acc + isa_lockstep ~seed ~cycles:4000) 0 (List.init 200 Fun.id) in
+main_fw.ml:240:  print_endline "== 2. CRC assist: model against RTL";
+main_fw.ml:242:    let mm, oks = crc_lockstep cfg ~seed:3 ~cycles:200_000 in
+main_fw.ml:244:    let mm, oks = crc_lockstep ~prog:true cfg ~seed:4 ~cycles:200_000 in
+main_fw.ml:246:    [ "USB CRC16 (reflected)", Crc_unit.usb_crc16;
+main_fw.ml:247:      "USB CRC5 (reflected)", { Crc_unit.width = 5; poly = 0x14; init = 0x1F; check = 0x06; skip = 0; msb_first = false };
+main_fw.ml:248:      "CAN CRC15 (MSB first)", { Crc_unit.width = 15; poly = 0x4599; init = 0; check = 0; skip = 0; msb_first = true } ];
+main_fw.ml:249:  check "USB CRC16 residue on a good packet, not on a corrupted one, and on a zero-length one" (crc_on_packets ());
+main_fw.ml:250:  print_endline "== 3. bit layer (T0) on the ORIGINAL sequencer, interpreter and RTL";
+main_fw.ml:254:    check (Printf.sprintf "host %+6d ppm: %d words, %d/60 packets bit-exact, %d reset, %d clocks, %d lockstep mismatches"
+main_fw.ml:255:             ppm used (if good then n else 0) resets clocks mism) (good && mism = 0 && used <= 64 && resets = 1))
+main_fw.ml:264:  Printf.printf "== programme sizes: T0 %d, T1 %d, T2 %d words (of 256 per thread; T0 fits the original 64)\n" img.p0.used img.p1.used img.p2.used;
+main_fw.ml:265:  print_endline "== 4. the device, interpreter and RTL in lockstep: directed";
+main_fw.ml:306:  control "CRC_OK not checked" ~t12cfg:{ t12 with skip_crc = true } ();
+fw_sys.ml:2:   input, and the CRC assist, as RTL and as an executable model built from the interpreter.
+fw_sys.ml:5:   driven by the bit-layer thread and read back by the others), 5 CRC_EN (driven by the SETUP/OUT thread), 6 CRC_OK (from
+fw_sys.ml:6:   the CRC assist), 7 RDY (the reply FIFO in front of host_in is non-empty).
+fw_sys.ml:9:   are the bus on pins 0 and 1, the CRC assist's ok on pin 6 and the FIFO's non-empty flag on
+fw_sys.ml:10:   pin 7. The CRC assist reads VALUE, STB and CRC_EN straight from pin_out. *)
+crc_unit.ml:1:(* A generic serial CRC checker, the one hardware assist the low-speed firmware needs.
+crc_unit.ml:4:   frame leaves, bit order, and how many leading bits to skip. It serves USB (CRC5 0x05 and
+crc_unit.ml:5:   CRC16 0x8005, reflected, residues 0x0C and 0x800D), CAN (CRC15 0x4599, MSB first, no
+crc_unit.ml:6:   residue: the check value is 0), SMBus PEC and 1-Wire (CRC8), HDLC and SD (CRC16-CCITT,
+crc_unit.ml:7:   CRC7), and at width 32 Ethernet's FCS.
+crc_unit.ml:27:(* USB data packets: CRC16 over what follows the PID (the firmware arms the unit after the
+run-fw-8seeds.log:3:== 2. CRC assist: model against RTL
+run-fw-8seeds.log:4:  USB CRC16 (reflected): 200,000 clocks, 0 mismatches (ok seen 0 times) ok
+run-fw-8seeds.log:6:  USB CRC5 (reflected): 200,000 clocks, 0 mismatches (ok seen 3110 times) ok
+run-fw-8seeds.log:8:  CAN CRC15 (MSB first): 200,000 clocks, 0 mismatches (ok seen 100822 times) ok
+run-fw-8seeds.log:10:  USB CRC16 residue on a good packet, not on a corrupted one, and on a zero-length one ok
+run-fw-8seeds.log:11:== 3. bit layer (T0) on the ORIGINAL sequencer, interpreter and RTL
+run-fw-8seeds.log:12:  host -15000 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 175727 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:13:  host -12500 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 165268 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:14:  host -10000 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 165183 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:15:  host  -7500 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 167986 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:16:  host  -5000 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 179666 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:17:  host  -2500 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 176601 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:18:  host     +0 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 174922 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:19:  host  +2500 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 160288 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:20:  host  +5000 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 188990 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:21:  host  +7500 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 158557 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:22:  host +10000 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 169675 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:23:  host +12500 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 169734 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:24:  host +15000 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 181617 clocks, 0 lockstep mismatches ok
+run-fw-8seeds.log:26:== programme sizes: T0 63, T1 180, T2 186 words (of 256 per thread; T0 fits the original 64)
+run-fw-8seeds.log:27:== 4. the device, interpreter and RTL in lockstep: directed
+run-fw-8seeds.log:72:    IN with a bad CRC5           no reply
+run-fw-8seeds.log:74:    SETUP data with a bad CRC16  no reply
+run-fw-8seeds.log:91:  firmware ppm +0: 931250 clocks, 113 packets sent, 55 replies (turnaround 2.62..5.88 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:93:  firmware ppm -15000: 928424 clocks, 113 packets sent, 55 replies (turnaround 2.69..5.99 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:94:  firmware ppm +15000: 934148 clocks, 113 packets sent, 55 replies (turnaround 2.56..5.71 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:96:  firmware(latency 558, prepare 0) ppm -15000: 1050629 clocks, 302 packets sent, 153 replies (turnaround 2.64..5.94 bits), 0 NAKs while preparing, 22 silences as required, 26 keep-alives, 5 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:97:  firmware(latency 373, prepare 0) ppm +15000: 1084429 clocks, 321 packets sent, 158 replies (turnaround 2.54..5.81 bits), 0 NAKs while preparing, 29 silences as required, 29 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:98:  firmware(latency 1100, prepare 0) ppm +2438: 1085853 clocks, 322 packets sent, 153 replies (turnaround 2.59..5.86 bits), 0 NAKs while preparing, 26 silences as required, 28 keep-alives, 8 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:99:  firmware(latency 313, prepare 5000) ppm +588: 1582934 clocks, 500 packets sent, 325 replies (turnaround 2.60..5.87 bits), 156 NAKs while preparing, 20 silences as required, 35 keep-alives, 7 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:100:  firmware(latency 318, prepare 0) ppm -7765: 1159281 clocks, 328 packets sent, 158 replies (turnaround 2.65..6.00 bits), 0 NAKs while preparing, 25 silences as required, 20 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:101:  firmware(latency 27, prepare 0) ppm +7772: 1232353 clocks, 357 packets sent, 169 replies (turnaround 2.51..5.90 bits), 0 NAKs while preparing, 30 silences as required, 19 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:102:  firmware(latency 561, prepare 0) ppm +14185: 1084457 clocks, 311 packets sent, 147 replies (turnaround 2.54..5.67 bits), 0 NAKs while preparing, 31 silences as required, 24 keep-alives, 5 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:103:  firmware(latency 147, prepare 0) ppm +8555: 1303482 clocks, 389 packets sent, 198 replies (turnaround 2.55..5.87 bits), 0 NAKs while preparing, 19 silences as required, 23 keep-alives, 8 resets, lockstep mismatches 0, errors 0
+run-fw-8seeds.log:107:      12  T0 raises IDLE (end of packet seen)
+run-fw-8seeds.log:108:      40  T0 end-of-packet strobe
+run-fw-8seeds.log:109:      46  T2 reply chosen (CRC checked)
+run-fw-8seeds.log:110:      80  host EOP: SE0 to J (turnaround reference)
+run-fw-8seeds.log:113:  IN token, answered with data from the FIFO by T1 (clocks from the first SE0 clock of the host's EOP; 40 clocks = 1 bit):
+run-fw-8seeds.log:114:      16  T0 raises IDLE (end of packet seen)
+run-fw-8seeds.log:115:      44  T0 end-of-packet strobe
+run-fw-8seeds.log:116:      65  T1 reply chosen (token and RDY checked)
+run-fw-8seeds.log:117:      80  host EOP: SE0 to J (turnaround reference)
+run-fw-8seeds.log:121:  J and K swapped                              caught (19 errors; first: [J and K swapped clk 6324] turnaround 1.75 bit times outside 2..6.5)
+run-fw-8seeds.log:122:  reply 4 bit times late                       caught (21 errors; first: [reply 4 bit times late clk 6488] turnaround 6.85 bit times outside 2..6.5)
+run-fw-8seeds.log:123:  reply 1 bit time early (drives into the host's EOP) caught (21 errors; first: [reply 1 bit time early (drives into the host's EOP) clk 5479] bus contention: host and device drive together)
+run-fw-8seeds.log:124:  CRC_OK not checked                           caught (1 errors; first: [CRC_OK not checked clk 846824] SETUP data with a bad CRC16: expected silence, got d2 (2.60 bits))
+sequencer_ls.ml:2:   four changes: 8-bit pc, SKNE, SHO pair mode, OUT event mode. Instruction memory is external
+sequencer_ls.ml:55:        [ opc SETP, [ pin_out <-- ((pin_out.value &: ~:mask8) |: (mask8 &: repeat setv 8))
+sequencer_ls.ml:62:        ; opc SHO, [ pin_out <-- sho_out; pin_oe <-- sho_oe
+sequencer_ls.ml:65:        ; opc SHI, [ acc_next <-- mux2 pin_val (concat_msb [ select acc 6 0; pin_bit ])
+bench.ml:5:   device's; both at once is contention and an error; neither is idle J (the device's pull-up on
+bench.ml:10:   about two bits); a turnaround between 2 and 6.5 of the host's bit times, measured from the
+bench.ml:19:  mismatches : unit -> int;              (* lockstep mismatches between two models, if any *)
+bench.ml:30:  mutable turnarounds : float list;
+bench.ml:42:    turnarounds = []; naks_tolerated = 0; replies = 0; packets_sent = 0; keep_alives = 0; resets = 0; silent_ok = 0; verbose }
+bench.ml:62:    | Some s, Some _ -> error b "bus contention: host and device drive together"; Ls_host.phy s in
+bench.ml:119:    b.turnarounds <- ta :: b.turnarounds;
+bench.ml:120:    if ta < 2.0 || ta > 6.5 then error b (Printf.sprintf "turnaround %.2f bit times outside 2..6.5" ta);
+bench.ml:131:  | Nak -> "NAK" | Stall -> "STALL" | Ack -> "ACK" | Silent -> "silence"
+bench.ml:219:let expect_silence b what =
+bench.ml:222:  | r -> error b (Printf.sprintf "%s: expected silence, got %s" what (show_reply r))
+bench.ml:228:  control_read b ~addr:0 (get_descriptor ~typ:1 ~len:64 ());
+bench.ml:237:  control_read b ~addr (get_descriptor ~req:0x81 ~typ:0x22 ~len:(List.length Descriptors.report + 64) ())
+bench.ml:240:  let tas = b.turnarounds in
+bench.ml:242:  Printf.sprintf "%s ppm %+d: %d clocks, %d packets sent, %d replies (turnaround %.2f..%.2f bits), %d NAKs while preparing, %d silences as required, %d keep-alives, %d resets, lockstep mismatches %d, errors %d"
+isa_ls.ml:3:   original ISA that stays within 64 words per thread runs identically.
+isa_ls.ml:6:   1. pc widened from 6 to 8 bits (256 words per thread, the size the original README plans for
+isa_ls.ml:10:      the original lacks: compare a received byte with a constant.
+isa_ls.ml:11:   3. SHO pair mode, bit 6: pins p and p+1 (mod 8) take two accumulator bits at once, p from the
+isa_ls.ml:18:   Encodings checked against master's ISA (the four-phase extension): it uses SETP/SHO bits
+isa_ls.ml:19:   [1:0] for a sub-slot and SHI bit 7 for quad sampling. This variant uses SHO bit 6, OUT bit 8,
+isa_ls.ml:26:type op = NOP | SETP | LDC | LDD | LDA | WAITP | WAITD | SHO | SHI | JMP | JNZ | OUT | IN | HALT | SKNE
+isa_ls.ml:29:  | 1 -> SETP | 2 -> LDC | 3 -> LDD | 4 -> LDA | 5 -> WAITP | 6 -> WAITD | 7 -> SHO | 8 -> SHI
+isa_ls.ml:33:  | NOP -> 0 | SETP -> 1 | LDC -> 2 | LDD -> 3 | LDA -> 4 | WAITP -> 5 | WAITD -> 6 | SHO -> 7
+isa_ls.ml:34:  | SHI -> 8 | JMP -> 9 | JNZ -> 10 | OUT -> 11 | IN -> 12 | HALT -> 13 | SKNE -> 14
+isa_ls.ml:39:let setp ~mask ~value ~oe = enc SETP ((mask land 0xFF) lsl 4 lor (value lsl 3) lor (oe lsl 2))
+isa_ls.ml:45:let sho ?(od = 0) ?(pair = 0) ~pin ~msb () = enc SHO ((pin lsl 9) lor (msb lsl 8) lor (od lsl 7) lor (pair lsl 6))
+isa_ls.ml:46:let shi ~pin ~msb = enc SHI ((pin lsl 9) lor (msb lsl 8))
+isa_ls.ml:90:   | SETP ->
+isa_ls.ml:98:   | SHO ->
+isa_ls.ml:108:   | SHI ->
+firmware.ml:3:   T0, the bit layer, uses only the original instruction set and fits the original 64 words:
+firmware.ml:9:   T1 answers IN tokens (data from the reply FIFO, NAK or STALL) and reports the host's ACK.
+firmware.ml:11:   CRC through the assist and replies ACK or STALL. T3 is free for the application.
+firmware.ml:12:   T1 and T2 listen to the same bits; each ignores packets that are not its business.
+firmware.ml:16:   bytes with precomputed bytes (address, endpoint and CRC5 included), which the controller
+firmware.ml:35:(* ---------------- T0: the bit layer ---------------- *)
+firmware.ml:43:  stock_events : bool; (* LDA+OUT instead of the OUT event mode, for the original ISA *)
+firmware.ml:111:(* ---------------- shared pieces for T1 and T2 ---------------- *)
+firmware.ml:124:   high during a low, which jumps to [e]. After seeing a bit's strobe the loop does only SHI
+firmware.ml:169:(* ---------------- T1: IN tokens and the host's ACK ---------------- *)
+firmware.ml:173:     J-drive (SETP) at 4 + v + 2 *)
+firmware.ml:181:  (* T1 also owns the CRC assist: it clears it at every SOP and arms it right after every PID,
+firmware.ml:182:     so the CRC covers what follows the PID. Only a data packet leaves it armed to its end,
+firmware.ml:183:     where T2 reads CRC_OK; any other PID disarms it, so a packet whose PID is not DATA0/1
+firmware.ml:184:     can never show a good CRC. That is T2's PID check, done in time. *)
+firmware.ml:209:     needs WAITP VALUE, WAITP CRC_OK, the OUT event, LDD: J-drive at 3.5 + 3 + v + 2 slots
+firmware.ml:210:     after the low, which puts it with T1's (the strobe is 5 slots after the low, T1 drives 23
+firmware.ml:214:  (* the second token byte (endpoint high bits and CRC5), end of packet, then the event *)
+firmware.ml:233:  (* the data packet: wait for its SOP; the PID is forwarded as the first byte (T1 checks it
+firmware.ml:234:     through the CRC assist) *)
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c3 nl -ba README.md' in /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+ succeeded in 0ms:
+     1	# Low-speed USB: a hardened block, and firmware on the deadline sequencer
+     2	
+     3	The competition's stretch goal, 1.5 Mbit/s USB, built twice and checked against one independent
+     4	host model: once as a hardened block adapted from `../usb-fs-device`, once as firmware on the
+     5	deadline sequencer with one small generic assist. The question was how far firmware gets. The
+     6	answer: the whole device runs as firmware. The bit layer needs nothing beyond the original
+     7	instruction set. The packet layer needs four small, backwards-compatible ISA changes and a
+     8	generic CRC unit. Replies are precomputed and fetched through a FIFO in front of the host port.
+     9	
+    10	Both devices are HID boot keyboards: GET_DESCRIPTOR (device, configuration, HID report),
+    11	SET_ADDRESS, SET_CONFIGURATION and SET_IDLE on endpoint 0, and STALL for anything else. Endpoint
+    12	1 is an interrupt IN endpoint that returns 8-byte reports with data toggles, or NAK. Both
+    13	detect a bus reset and ignore keep-alives.
+    14	
+    15	## Verification
+    16	
+    17	- **`ls_host.ml`: an independent host model, written from the specification.**
+    18	  - Encoding: sync, NRZI, bit stuffing and EOP.
+    19	  - The host clock is off by a chosen amount (up to ±1.5 %), with symbol edges on the nearest
+    20	    clock.
+    21	  - Decoding is by run length in the host's own bit time. It checks EOP width, stuffing and
+    22	    whole bytes.
+    23	  - Controls it can generate: a corrupted CRC5 or CRC16, a missing stuff bit, keep-alives and
+    24	    bus resets.
+    25	- **`ref_device.ml`: a reference keyboard at transaction level.** It says what a correct device
+    26	  answers. It shares only the descriptor bytes with the implementations.
+    27	- **`bench.ml`: the bus and a transaction-level host.** Every reply is checked for:
+    28	  - bytes and CRC equal to the reference;
+    29	  - a clean decode;
+    30	  - a turnaround of 2 to 6.5 bit times, measured from the SE0-to-J edge of the host's EOP;
+    31	  - no bus contention;
+    32	  - no reply where none is due.
+    33	- **`scenario.ml`: the same scenarios for every device.**
+    34	  - Directed: the enumeration a host performs (with a 10 ms reset), reports, packets that must
+    35	    be ignored, and a stalled request.
+    36	  - Constrained random, 120 transactions per session:
+    37	    - requests of random types and lengths;
+    38	    - random OUT data;
+    39	    - lost ACKs;
+    40	    - bad CRC5 and bad CRC16;
+    41	    - missing stuff bits;
+    42	    - other addresses;
+    43	    - SET_ADDRESS changes;
+    44	    - bus resets of 5 to 105 µs;
+    45	    - keep-alives and gaps at random.
+    46	  - Each session runs at a random host clock error within ±1.5 %. The first two firmware
+    47	    sessions run at -1.5 % and +1.5 %.
+    48	
+    49	**Firmware, interpreter and RTL in lockstep.** Two complete systems run side by side, fed the
+    50	same bus every clock and compared on every clock (pins, output enables, host port, all four
+    51	program counters). One is the interpreter with models of the synchroniser and the CRC unit. The
+    52	other is the RTL of the sequencer variant, synchroniser and CRC unit. Each has its own
+    53	programme memory and its own controller.
+    54	
+    55	Results (`run-hard-8seeds.log`, `run-fw-8seeds.log`; numbers below from those runs):
+    56	
+    57	| | hardened block | firmware (interpreter and RTL in lockstep) |
+    58	|---|---|---|
+    59	| directed enumeration and reports, host at -1.5 %, 0, +1.5 % | 3 of 3 pass | 3 of 3 pass |
+    60	| constrained random sessions (8 seeds, host clock random within ±1.5 %; for firmware seeds 1 and 2 at -1.5 % and +1.5 %) | 8 of 8 pass | 8 of 8 pass, controller latency 20 to 1,100 clocks; one session with 5,000 clocks to prepare each reply (156 NAKs while preparing, all tolerated, none where not allowed) |
+    61	| clocks simulated in these 11 runs | 12.1 million | 12.4 million, compared between interpreter and RTL on every clock: 0 mismatches |
+    62	| host packets / device replies | 3,029 / 1,485 | 3,169 / 1,626 |
+    63	| packets the device had to ignore (bad CRC5, bad CRC16, missing stuff bit, other address) | 214, all ignored | 214, all ignored |
+    64	| keep-alives / bus resets | 209 / 64 | 213 / 63 |
+    65	| turnaround, all replies | 3.23 to 3.40 bits | 2.51 to 6.00 bits (front padding; see the budget) |
+    66	| beyond the specification, directed | not run | -3 % to +3 % pass; -4 % fails |
+    67	| bit layer alone on the ORIGINAL sequencer (T0; interpreter and RTL in lockstep) | | 13 host clock errors from -1.5 % to +1.5 %, 60 random packets each (0xFF, 0x00, 0x55, 0xAA heavy): all bit-exact, 2.2 million clocks, 0 mismatches; passes -4 % to +2 %, fails at -5 % and +3 % |
+    68	| ISA variant, interpreter against RTL | | 200 random programmes x 4,000 clocks: 0 mismatches |
+    69	| CRC assist, model against RTL | | USB CRC16, USB CRC5, CAN CRC15, fixed and programmable: 6 x 200,000 clocks, 0 mismatches (random stimulus never reaches the CRC16 residue, so its good-packet case is checked separately on real packets) |
+    70	
+    71	Controls, each of which must fail and does:
+    72	
+    73	| control | hardened | firmware |
+    74	|---|---|---|
+    75	| J and K swapped (full-speed polarity) | caught: the host cannot decode the reply's sync | caught: no ACK to SETUP, and a stray transmission 1.8 bits after a host packet |
+    76	| reply 4 bit times late | caught: turnaround 7.3 bits | caught: turnaround 6.9 bits |
+    77	| reply early | caught: turnaround 1.8 bits | caught: bus contention with the host's EOP |
+    78	| CRC16 check disabled | caught: ACKs a corrupted SETUP | caught: ACKs a corrupted SETUP |
+    79	
+    80	Among the stimuli, bad CRC5, bad CRC16 and missing stuff bits must be met with silence. They
+    81	are, in every run. They are stimuli, not device mutants.
+    82	
+    83	## The firmware: what it does and how far the original ISA gets
+    84	
+    85	The chip clock is 60 MHz. A low-speed bit is 40 clocks, so one thread gets 10 instructions per
+    86	bit. The threads divide the work as follows.
+    87	
+    88	- **T0, the bit layer: original instruction set, 63 of 64 words** (`firmware.ml`).
+    89	  - It follows the line with deadline waits: a software DPLL that re-times on every edge.
+    90	  - It also decodes NRZI, removes stuff bits, detects EOP (SE0) and bus reset, and treats a
+    91	    seventh one as an abort.
+    92	  - It publishes each bit as VALUE plus a rising STB on internal pins.
+    93	  - The same programme runs on the original sequencer's interpreter and RTL, through the
+    94	    original files (symlinked), decoding random packets bit-exact:
+    95	    - 13 host clock errors from -1.5 % to +1.5 %, 60 packets each;
+    96	    - it keeps working from -4 % to +2 %.
+    97	  - Pure firmware therefore covers everything below the byte: clock recovery, line code,
+    98	    stuffing, framing.
+    99	- **T1: IN tokens and the host's ACK.** 180 words.
+   100	  - It reads the PID and the token's two bytes and compares them with precomputed bytes
+   101	    (address, endpoint and CRC5 included) using SKNE.
+   102	  - It answers with data streamed from the reply FIFO, or with NAK or STALL from immediates.
+   103	  - It also arms the CRC assist after every PID and disarms it for anything but DATA0/1, so a
+   104	    packet with a bad PID can never pass the CRC check. That is the data PID check, done in
+   105	    time.
+   106	- **T2: SETUP and OUT.** 186 words.
+   107	  - It checks the token, then forwards the data packet to the controller (tagged events plus
+   108	    bytes).
+   109	  - At the EOP it checks the abort flag and CRC_OK, and answers ACK or STALL.
+   110	- **T3 is free** for the application.
+   111	- **The controller (`controller.ml`) is off the real-time path.** It stands in for software on
+   112	  the chip's host side.
+   113	  - It keeps the USB state and precomputes every reply as a symbol stream (`fw_codec.ml`: CRC16,
+   114	    stuffing, NRZI, EOP, packed four symbols per byte).
+   115	  - It patches the programme: the token bytes after SET_ADDRESS, and per state the reply
+   116	    choices (data, NAK or STALL on IN; ACK or STALL after OUT data).
+   117	  - It needs to answer an event within the shortest data packet (1,280 clocks). The tests use
+   118	    latencies of 20 to 1,100 clocks, plus one session where it takes 5,000 clocks to prepare
+   119	    each reply and the firmware NAKs meanwhile.
+   120	
+   121	### What pure firmware could not do, and the smallest fix for each
+   122	
+   123	| gap in the original ISA | measured or counted consequence | fix | cost |
+   124	|---|---|---|---|
+   125	| no data-dependent branch except on a pin | a token check as a WAITP decision tree over bits costs about 3 words per bit (estimated, not built): about 70 words per 24-bit token path, and the device needs four such paths | **SKNE imm8**: skip next if acc ≠ imm (or = imm) | one 8-bit comparator and pc+2; opcode E (free) |
+   126	| 6-bit pc, 64 words per thread | T1 and T2 need 180 and 186 words | **8-bit pc** (256 words per thread, what the README plans for the SRAM); address fields grow into unused bits | 8 flip-flops, wider muxes |
+   127	| SETP writes one value to all masked pins; D+ and D- must change together | one thread cannot drive J or K glitch-free; two threads could, with one clock of skew and a pin to coordinate them | **SHO pair mode**: two pins from two acc bits at once | a second output mux; SHO bit 6 |
+   128	| OUT sends acc with no framing | the controller cannot tell forwarded bytes from events | **OUT event mode**: an immediate with a tag bit | a tag flip-flop, a mux; OUT bit 8 |
+   129	| no CRC | a CRC16 has 65,536 states; no programme can hold them | **the CRC assist** (below) | 1,854 µm² fixed, 3,621 µm² programmable |
+   130	
+   131	Measured area (Yosys, sg13g2 typical, `synth/results.txt`): the original sequencer is 17,266 µm²
+   132	and 179 flip-flops; the variant is 19,777 µm² and 188 flip-flops, so the four ISA changes cost
+   133	2,510 µm² (+14.5 %). The encodings were checked against master's four-phase extension. Master
+   134	uses SETP/SHO bits [1:0] and SHI bit 7. This variant uses SHO bit 6, OUT bit 8, WAITP/JMP/JNZ bits
+   135	[7:6] and opcode E, so the two do not collide. The variant here is built on the pre-four-phase
+   136	`isa.ml`, and merging the two is left to a deliberate change.
+   137	
+   138	### The generic assist: a programmable CRC unit (`crc_unit.ml`)
+   139	
+   140	The firmware drives three signals on sequencer pins (bit strobe, value, enable) and reads one
+   141	back (ok). A frame signal qualifies the strobes. Protocol knowledge is configuration: polynomial,
+   142	initial value, residue, bit order (LSB or MSB first) and how many leading bits to skip, at widths
+   143	up to 16 (32 for Ethernet is a wider register). The same unit serves:
+   144	
+   145	- USB CRC5 and CRC16;
+   146	- CAN CRC15, MSB first;
+   147	- SMBus PEC and 1-Wire CRC8;
+   148	- HDLC and SD CRC16-CCITT, and SD CRC7;
+   149	- at width 32, Ethernet's FCS.
+   150	
+   151	The model and RTL agree over 200,000 random clocks for USB CRC16, USB CRC5 and CAN CRC15, both as
+   152	the fixed unit and as the programmable one. It needs no USB-specific logic. The PID skip is done
+   153	by the firmware arming it after the PID.
+   154	
+   155	The reply FIFO is the other piece of hardware. It is a 4-byte FIFO in front of the sequencer's
+   156	host port, with its non-empty flag on a pin, and it is generic: any protocol with a response
+   157	deadline needs its first bytes on chip. It is modelled in OCaml and shared by both systems; there
+   158	is no RTL for it yet. The pin streamer's FIFO is the obvious implementation.
+   159	
+   160	### What the other generic pieces would buy
+   161	
+   162	- **Bit stuffing and NRZI unit** (programmable run length and polarity: USB 6 ones, CAN 5 equal
+   163	  bits, HDLC 5 ones). It would free T0 and the three pins between T0 and the consumers. At low
+   164	  speed firmware does this, so the unit is not needed here. At full speed (4 clocks per bit)
+   165	  it is.
+   166	- **Pin sampler.** Its timed mode samples every period after a trigger, with no re-timing on
+   167	  edges. Over a 100-bit packet at ±1.5 % that slips by more than a bit, so it cannot receive
+   168	  USB. Its clocked mode could capture VALUE on STB into a FIFO, for the host. The sequencer
+   169	  cannot read that FIFO.
+   170	- **Pin streamer.** It could send the precomputed replies (width 2, period 40, idle = released).
+   171	  It would need a trigger input so that firmware starts it at the right clock, since today it
+   172	  starts when a word arrives, and a choice among queued replies (NAK, STALL, data). SHO pair
+   173	  mode in T1/T2 does this with no new block.
+   174	- **Systolic matcher** (`matcher_exp.ml`, on its closed-form specification):
+   175	  - Fed one sample per decoded bit, with T0's strobe as a clock enable the prototype lacks, a
+   176	    16-cell template of the 16 bits after an IN token's PID found all 13 target tokens in
+   177	    159,016 bits of random traffic.
+   178	  - It also hit 46 OUT/SETUP tokens with the same tail (the PID lies outside the template) and
+   179	    1 chance match in data (2.4 expected).
+   180	  - So it can recognise tokens, but only framed (right after a PID) and one matcher per endpoint
+   181	    (10,015 µm² each). SKNE does the same job for part of 2,510 µm².
+   182	  - The matcher's place is sync and delimiter search in raw oversampled streams at higher
+   183	    rates. There the offset is unknown and there is no bit clock yet.
+   184	
+   185	## The reply path in clocks
+   186	
+   187	Measured on one SETUP (answered ACK by T2) and one IN (answered with FIFO data by T1). The host
+   188	clock is exact. Clocks are counted from the first SE0 clock of the host's EOP; 40 clocks = 1 bit.
+   189	
+   190	| clock | SETUP data, answered ACK by T2 | clock | IN token, answered with FIFO data by T1 |
+   191	|---:|---|---:|---|
+   192	| 0 | host's EOP begins (SE0) | 0 | host's EOP begins (SE0) |
+   193	| 12 | T0 raises IDLE: end of packet seen | 16 | T0 raises IDLE |
+   194	| 40 | T0's end-of-packet strobe (after the 6-slot low) | 44 | T0's end-of-packet strobe |
+   195	| 46 | T2 has checked abort and CRC_OK and chosen ACK | 65 | T1 has checked the token's end and RDY and chosen the data |
+   196	| 80 | host's SE0-to-J (turnaround reference) | 80 | host's SE0-to-J |
+   197	| 138 | device drives J (host released at 120) | 141 | device drives J |
+   198	| 186 | device's first K: turnaround 2.65 bits | 189 | first K: turnaround 2.73 bits (one pad symbol) |
+   199	
+   200	The window the specification allows is from the SE0-to-J edge (clock 80) plus 2 bits to plus
+   201	6.5 bits: first K between clocks 160 and 340.
+   202	
+   203	- **The firmware has decided within 46 to 65 clocks**, before the host's EOP has even ended
+   204	  (clock 80).
+   205	- It then waits on purpose: the host drives its final J until clock 120, and the device may
+   206	  drive J only after that. At 1.5 % slow the host ends at clock 122.
+   207	- The rest is symbol timing. The first K lands at 186 to 189 for handshakes, a turnaround of
+   208	  2.6 to 2.7 bits.
+   209	- Data replies are front-padded with 1 to 4 J symbols to whole bytes. Over all the runs,
+   210	  turnarounds measured 2.51 to 6.00 bits, inside the 2 to 6.5 limit.
+   211	
+   212	Of the 340-clock budget the firmware's own work takes under 65 clocks; the constraint that binds
+   213	is the host's bus release. Where the firmware spends its time is detection: about 12 to 16
+   214	clocks for T0 to see the SE0, through the two-flop synchroniser and a 4-clock poll, plus a
+   215	deliberate 6-slot low before the end-of-packet strobe.
+   216	
+   217	## What went wrong on the way (all found by the random and tolerance tests)
+   218	
+   219	- **The sample point walked off the end of the bit.**
+   220	  - A one took 7 slots to publish, and an edge arriving meanwhile was timed late. That late
+   221	    edge set the next sample point late, and every one-zero pair added more.
+   222	  - A later version assumed such an edge was at its nominal place. That kept a late sample point
+   223	    late, and 0xFF bytes (stuff bits every 7 bits) then drifted it out of the bit with the host
+   224	    1 % fast.
+   225	  - The fix: an edge seen during the publication of a one is placed in the middle of the window
+   226	    in which it must have happened. That pulls the sample point back.
+   227	- **Runs of zeros were never timed.** Coming back from a zero took a full bit (10 slots). With
+   228	  the host fast, each edge had already happened when the thread began waiting for it. The zero
+   229	  path is now 8 slots (9 from K).
+   230	- **Consumers lost the first bit of a byte.** The strobe protocol and the byte loops were
+   231	  reworked three times:
+   232	  - the consumer waits for the low first;
+   233	  - it does only SHI and JNZ per bit;
+   234	  - the end of packet is IDLE raised before a 6-slot low, so a consumer busy with a byte still
+   235	    sees it.
+   236	
+   237	## Files and running
+   238	
+   239	- **Hardened device:** `ls_rx.ml`, `ls_tx.ml`, `ls_sie.ml`, `ls_dev.ml`, `descriptors.ml`;
+   240	  `main_hard.ml` runs it. It writes `usb_ls_device.v`.
+   241	- **Firmware:**
+   242	  - `isa_ls.ml`, `sequencer_ls.ml`: the ISA variant and its RTL;
+   243	  - `crc_unit.ml`, `fw_sys.ml`: the CRC assist and the system;
+   244	  - `firmware.ml`: the programmes; `asm.ml`: the assembler;
+   245	  - `fw_codec.ml`, `controller.ml`, `dut_fw.ml`;
+   246	  - `main_fw.ml` runs the ISA lockstep, the CRC lockstep, T0 on the original sequencer, the
+   247	    device, the budget and the controls.
+   248	- **The original sequencer** (`isa.ml`, `sequencer.ml`, `harness.ml`) is symlinked, not
+   249	  modified.
+   250	- **`emit.ml` and `synth_sg13g2.sh`** produce the area figures.
+   251	- **`matcher_exp.ml`** is the systolic matcher experiment (`run-matcher-exp.log`).
+   252	- **`dbg2.ml`** runs a control read with a per-slot trace of one thread, for debugging.
+   253	
+   254	```
+   255	opam exec --switch=5.3.0 -- dune build
+   256	_build/default/main_hard.exe 8     # seeds for the random sessions
+   257	_build/default/main_fw.exe 8
+   258	BUDGET=1 _build/default/main_fw.exe
+   259	YOSYS=... LIB=.../sg13g2_stdcell_typ_1p20V_25C.lib ./synth_sg13g2.sh
+   260	```
+   261	
+   262	## Not done, and open questions
+   263	
+   264	- **No real host.** The FPGA with a Linux host is the next check. No place and route either.
+   265	- **The data turnaround varies with padding (2.6 to 5.9 bits).** The firmware could read a pad
+   266	  count from the FIFO and shift its start by it.
+   267	- **Some patching is time-bound.** The handshake after OUT/SETUP data is patched on the token's
+   268	  event. That holds for controller latency under 1,280 clocks; beyond it, a SETUP arriving while
+   269	  endpoint 0 is stalled would be STALLed. With spare words in T2 (70), separate SETUP and OUT data
+   270	  paths would remove the bound for SETUP.
+   271	- **The reply FIFO has no RTL yet.** The CRC unit's configuration registers are not in its area.
+   272	- **Unsupported:** suspend and resume, remote wakeup, string descriptors, SET_REPORT (STALLed),
+   273	  and the PRE packet (full-speed hubs).
+   274	- **The variant is not merged with master's four-phase ISA.** It should be merged
+   275	  deliberately.
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c3 nl -ba firmware.ml' in /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+ succeeded in 0ms:
+     1	(* Low-speed USB device firmware for the deadline sequencer.
+     2	
+     3	   T0, the bit layer, uses only the original instruction set and fits the original 64 words:
+     4	   it follows the line with deadline waits, recovers the bit clock from every edge (a software
+     5	   DPLL), decodes NRZI, drops stuff bits, suppresses the sync pattern, detects EOP and bus
+     6	   reset, and publishes each bit as VALUE plus a rising edge on STB, with BUSY high during a
+     7	   packet. An EOP is a strobe with BUSY low and VALUE 0; a stuff error is the same with VALUE 1.
+     8	
+     9	   T1 answers IN tokens (data from the reply FIFO, NAK or STALL) and reports the host's ACK.
+    10	   T2 handles SETUP and OUT transactions: it forwards the data to the controller, checks the
+    11	   CRC through the assist and replies ACK or STALL. T3 is free for the application.
+    12	   T1 and T2 listen to the same bits; each ignores packets that are not its business.
+    13	
+    14	   Everything protocol-specific that can be computed ahead is: the reply waveforms are symbol
+    15	   streams precomputed by the controller (fw_codec.ml); the token checks compare the received
+    16	   bytes with precomputed bytes (address, endpoint and CRC5 included), which the controller
+    17	   patches into the programme when the address changes; the reply choices per state are JMP
+    18	   targets the controller patches.
+    19	
+    20	   Timing, in slots (one slot = one instruction of one thread = 4 clocks at 60 MHz; a low-speed
+    21	   bit is 10 slots). LDD n at slot u makes dl reach 0 at slot u + 1 + n, where a WAITD proceeds
+    22	   or a waiting WAITP gives up. *)
+    23	
+    24	open Asm
+    25	module I = Isa_ls
+    26	
+    27	let p_dp = Fw_sys.p_dp and p_dm = Fw_sys.p_dm and p_value = Fw_sys.p_value and p_stb = Fw_sys.p_stb
+    28	let p_idle = Fw_sys.p_idle and p_crc_en = Fw_sys.p_crc_en and p_crc_ok = Fw_sys.p_crc_ok and p_rdy = Fw_sys.p_rdy
+    29	let bit n = 1 lsl n
+    30	
+    31	(* events to the controller *)
+    32	let ev_reset = 1 and ev_sent = 2 and ev_ack = 3 and ev_setup = 4 and ev_out = 5 and ev_ok = 6 and ev_bad = 7
+    33	let ev_out1 = 8 and ev_data = 9
+    34	
+    35	(* ---------------- T0: the bit layer ---------------- *)
+    36	
+    37	type t0_cfg = {
+    38	  zero : int;          (* LDD after an edge: the next sample 1.5 bits after it *)
+    39	  one : int;           (* LDD after a one: the next sample one bit later *)
+    40	  late : int;          (* LDD after an edge that came while a one was being published *)
+    41	  reset_slots : int;   (* SE0 this long after it is seen is a bus reset *)
+    42	  jk_swap : bool;      (* control: full-speed polarity *)
+    43	  stock_events : bool; (* LDA+OUT instead of the OUT event mode, for the original ISA *)
+    44	}
+    45	
+    46	(* Slot arithmetic (s: the slot whose WAITP saw the edge, about one slot after it; f: the slot
+    47	   whose WAITP gave up at the deadline, the sample point):
+    48	   - after an edge, LDD at s+4, sample at s+14: 1.5 bits after the edge, the middle of the
+    49	     next bit. The path back to the edge wait is 8 slots (9 from K), shorter than a bit even
+    50	     for a host 1.5 % fast (9.85 slots), so every edge is timed by a waiting WAITP;
+    51	   - after a one, LDD at f+6, sample at f+10;
+    52	   - an edge that arrives while a one is being published is not timed: the line was still at
+    53	     its old level at the sample (f) and has changed by the check at f+5, so the edge is taken
+    54	     to be in the middle of that window (f+2), and LDD at f+8 puts the next sample at f+17.
+    55	     This pulls a sample point that has drifted late back towards the middle of the bit.
+    56	   Three earlier versions failed the random tests with the host 1 % fast: one published a one
+    57	   in 7 slots and let the late detection feed into the next sample point, so alternating bits
+    58	   walked it off the end of the bit; one took a full bit (10 slots) to come back from a zero,
+    59	   so in a run of zeros it never timed an edge at all; one took an untimed edge to be at its
+    60	   nominal place, which kept a late sample point late, and long runs of ones with stuff bits
+    61	   (0xFF bytes) then drifted it out of the bit. *)
+    62	let t0_default = { zero = 9; one = 3; late = 8; reset_slots = 40; jk_swap = false; stock_events = false }
+    63	
+    64	let t0 ?(cfg = t0_default) () =
+    65	  let dp, dm = if cfg.jk_swap then p_dm, p_dp else p_dp, p_dm in
+    66	  let setp m v = i (I.setp ~mask:m ~value:v ~oe:1) in
+    67	  let waitp p v l = (fun a -> I.waitp ~pin:p ~value:v ~fail:a) @@@ l in
+    68	  let jmp l = I.jmp @@@ l and jnz l = I.jnz @@@ l in
+    69	  let ev e = if cfg.stock_events then [ i (I.lda e); i I.out ] else [ i (I.oute e) ] in
+    70	  let vs = bit p_value lor bit p_stb in
+    71	  [ L "init"; setp (bit p_idle) 1;
+    72	    (* idle at J: D- falls for a SOP (to K) or for SE0 (keep-alive or reset); both are sorted
+    73	       out as an edge from J *)
+    74	    L "iw"; waitp dm 0 "iw"; jmp "zj";
+    75	    (* ---- line at J ---- *)
+    76	    (* a one: publish it (VALUE and a rising STB), then check the stuff count *)
+    77	    L "one_j"; setp (bit p_stb) 0; setp vs 1; jnz "one_j2";
+    78	    (* seventh one: stuff error. Keep VALUE 1, wait for the SE0, and end the packet with it:
+    79	       an end of packet with VALUE 1 is an abort *)
+    80	    L "stufferr"; setp (bit p_value lor bit p_idle) 1; setp (bit p_stb) 0;
+    81	    L "se"; waitp dp 0 "se"; waitp dm 0 "se"; jmp "eop2";
+    82	    L "one_j2"; i (I.shi ~pin:0 ~msb:0); waitp dm 1 "late_j"; i (I.ldd cfg.one);
+    83	    L "wj"; waitp dm 0 "one_j";
+    84	    (* D- fell: K (a zero or a stuff bit), or SE0 (end of packet) *)
+    85	    L "zj"; i (I.ldd 0); waitp dp 1 "eop"; setp (vs lor bit p_idle) 0; i (I.ldd cfg.zero);
+    86	    L "zjc"; jnz "zj2";
+    87	    i (I.ldc 6); jmp "wk";                       (* a stuff bit: not published *)
+    88	    L "zj2"; setp (bit p_stb) 1; i (I.ldc 6);
+    89	    (* ---- line at K ---- *)
+    90	    L "wk"; waitp dp 0 "one_k";
+    91	    L "zk"; i (I.ldd 0); waitp dm 1 "eop"; setp vs 0; i (I.ldd cfg.zero);
+    92	    L "zkc"; jnz "zk2";
+    93	    i (I.ldc 6); jmp "wj";
+    94	    L "zk2"; setp (bit p_stb) 1; i (I.ldc 6); jmp "wj";
+    95	    L "one_k"; setp (bit p_stb) 0; setp vs 1; jnz "one_k2"; jmp "stufferr";
+    96	    L "one_k2"; i (I.shi ~pin:0 ~msb:0); waitp dp 1 "late_k"; i (I.ldd cfg.one); jmp "wk";
+    97	    (* an edge during the publication of a one *)
+    98	    L "late_j"; waitp dp 1 "eop"; setp (vs lor bit p_idle) 0; i (I.ldd cfg.late); jmp "zjc";
+    99	    L "late_k"; waitp dm 1 "eop"; setp vs 0; i (I.ldd cfg.late); jmp "zkc";
+   100	    (* end of packet: IDLE rises, then STB falls and stays low for six slots, then a strobe
+   101	       with VALUE low. A byte reader notices IDLE during the low; a token checker waits for the
+   102	       strobe. The long low matters: a consumer that has just finished a byte is busy for
+   103	       several slots, and a one-slot low here was missed (the host's ACK after a SETUP was
+   104	       then not seen). SE0 for longer than [reset_slots] is a bus reset. *)
+   105	    L "eop"; setp (bit p_idle) 1; setp vs 0;
+   106	    L "eop2"; i (I.ldd 3); i I.waitd; setp (bit p_stb) 1;
+   107	    L "ew"; i (I.ldd cfg.reset_slots); waitp dm 1 "rst";
+   108	    L "ew2"; setp (bit p_stb) 0; jmp "iw";
+   109	    L "rst" ] @ ev ev_reset @ [ L "rw"; waitp dm 1 "rw"; jmp "ew2" ]
+   110	
+   111	(* ---------------- shared pieces for T1 and T2 ---------------- *)
+   112	
+   113	let waitp p v l = (fun a -> I.waitp ~pin:p ~value:v ~fail:a) @@@ l
+   114	let jmp l = I.jmp @@@ l and jnz l = I.jnz @@@ l
+   115	
+   116	(* skip the published sync bits (zeros) up to the first one; [arm] runs on it; a packet that
+   117	   ends first goes to [gone] *)
+   118	let sync_skip ~gone ~arm =
+   119	  let s = fresh "sync" and z = fresh "syncz" and k = fresh "synck" in
+   120	  [ L s; waitp p_stb 1 s; waitp p_idle 0 gone; waitp p_value 1 z ] @ arm
+   121	  @ [ jmp k; L z; waitp p_stb 0 z; jmp s; L k ]
+   122	
+   123	(* Read one byte, LSB first. Each bit is STB low, then high. The end of the packet is IDLE
+   124	   high during a low, which jumps to [e]. After seeing a bit's strobe the loop does only SHI
+   125	   and JNZ, so it leaves a byte 3.5 slots after the strobe; the next strobe can come 9 slots
+   126	   after the last (a host 1.5 % fast), which leaves 4 instructions for the caller's work
+   127	   between bytes (storing the byte, a compare, the next LDC) before it must be back waiting for
+   128	   the low. Two earlier versions had more work per bit or per byte and lost the first bit of a
+   129	   byte when the next strobe came quickly. [rb_body] is the loop without its LDC, so that a
+   130	   caller can load the counter before its compares. *)
+   131	let rb_body e =
+   132	  let l = fresh "rb" and l2 = fresh "rb2" in
+   133	  [ L l2; waitp p_stb 0 l2; waitp p_idle 0 e; L l; waitp p_stb 1 l; i (I.shi ~pin:p_value ~msb:0); jnz l2 ]
+   134	
+   135	let rb e = i (I.ldc 8) :: rb_body e
+   136	
+   137	(* the next strobe must be a clean end of packet *)
+   138	let eopchk ~more ~abort =
+   139	  let l = fresh "eop" and l0 = fresh "eop0" in
+   140	  [ L l0; waitp p_stb 0 l0; L l; waitp p_stb 1 l; waitp p_idle 1 more; waitp p_value 0 abort ]
+   141	
+   142	(* a compare whose immediate the controller patches, under a label *)
+   143	let skne_p label imm target = [ L label; i (I.skne imm); jmp target ]
+   144	
+   145	(* Transmitting. The caller has set the deadline; at it the line is driven J (D- first, so the
+   146	   line never leaves J), and the first symbol follows two slots later. Symbols come four to a
+   147	   byte from immediates (handshakes) or from the reply FIFO (data), one every 10 slots. *)
+   148	let drive_j = [ i (I.setp ~mask:(bit p_dm) ~value:1 ~oe:1); i (I.setp ~mask:(bit p_dp) ~value:0 ~oe:1) ]
+   149	let release = i (I.setp ~mask:(bit p_dp lor bit p_dm) ~value:0 ~oe:0)
+   150	let sho2 = i (I.sho ~pair:1 ~pin:p_dp ~msb:0 ())
+   151	
+   152	let handshake ~label ~after ?jk_swap pid =
+   153	  match Fw_codec.reply ?jk_swap [ pid ] with
+   154	  | [] -> assert false
+   155	  | b0 :: rest ->
+   156	    let l0 = fresh "hs" in
+   157	    [ L label; i (I.lda b0); i (I.ldc 4); i I.waitd ] @ drive_j @ [ sho2; i (I.ldd 7); jnz l0;
+   158	      L l0; i I.waitd; sho2; i (I.ldd 7); jnz l0 ]
+   159	    @ List.concat_map (fun b -> let l = fresh "hs" in [ i (I.lda b); i (I.ldc 4); L l; i I.waitd; sho2; i (I.ldd 7); jnz l ]) rest
+   160	    @ [ i I.waitd; release; jmp after ]
+   161	
+   162	(* J-drive happens [drive] slots after the EOP strobe is seen. The host releases the bus three
+   163	   of its bits after its SE0 begins, about 1.9 bits (19 slots) after we see the EOP; 23 leaves
+   164	   margin for a host 1.5 % slow. The first K then follows 2 slots and 1 to 4 pad symbols later:
+   165	   2.5 to 5.5 bit times after the host's EOP, inside the 2 to 6.5 the specification allows. *)
+   166	type t12_cfg = { drive : int; data_timeout : int; skip_crc : bool; jk_swap12 : bool }
+   167	let t12_default = { drive = 23; data_timeout = 120; skip_crc = false; jk_swap12 = false }
+   168	
+   169	(* ---------------- T1: IN tokens and the host's ACK ---------------- *)
+   170	
+   171	let t1 ?(cfg = t12_default) () =
+   172	  (* EOPCHK success is slot 0; after it: WAITP RDY (3), LDD (4), JMP (5), IN/LDA, LDC, WAITD ->
+   173	     J-drive (SETP) at 4 + v + 2 *)
+   174	  let v = cfg.drive - 6 in
+   175	  let in_ep ep =
+   176	    let e = Printf.sprintf "ti%d" ep and ee = Printf.sprintf "ti%de" ep and nr = Printf.sprintf "nr%d" ep in
+   177	    [ L e ] @ rb_body "idle1" @ skne_p (Printf.sprintf "p_ic%d" ep) 0 ee @ [ jmp "drain1" ]
+   178	    @ [ L ee ] @ eopchk ~more:"drain1" ~abort:"idle1"
+   179	    @ [ waitp p_rdy 1 nr; i (I.ldd v); L (Printf.sprintf "p_ep%d_rdy" ep); jmp "send_nak";
+   180	        L nr; i (I.ldd v); L (Printf.sprintf "p_ep%d_nr" ep); jmp "send_nak" ] in
+   181	  (* T1 also owns the CRC assist: it clears it at every SOP and arms it right after every PID,
+   182	     so the CRC covers what follows the PID. Only a data packet leaves it armed to its end,
+   183	     where T2 reads CRC_OK; any other PID disarms it, so a packet whose PID is not DATA0/1
+   184	     can never show a good CRC. That is T2's PID check, done in time. *)
+   185	  let en v = i (I.setp ~mask:(bit p_crc_en) ~value:v ~oe:1) in
+   186	  [ L "init"; release;
+   187	    L "idle1"; waitp p_idle 0 "idle1"; en 0 ] @ sync_skip ~gone:"idle1" ~arm:[] @ rb "idle1"
+   188	  @ [ en 1; i (I.ldc 8); i (I.skne ~inv:1 0x69); jmp "notin";
+   189	      (* IN token: address and endpoint bit *)
+   190	      L "tin" ] @ rb_body "idle1"
+   191	  @ [ i (I.ldc 8) ] @ skne_p "p_ia0" 0 "ti0" @ skne_p "p_ia1" 0x80 "ti1" @ [ jmp "drain1" ]
+   192	  @ in_ep 0 @ in_ep 1
+   193	  @ [ L "notin"; i (I.skne 0xD2); jmp "gack"; i (I.skne 0xC3); jmp "dkeep"; i (I.skne 0x4B); jmp "dkeep";
+   194	      L "drain1"; en 0; L "d1"; waitp p_idle 1 "d1"; jmp "idle1";
+   195	      L "dkeep"; waitp p_idle 1 "dkeep"; jmp "idle1";
+   196	      L "gack" ] @ eopchk ~more:"drain1" ~abort:"idle1" @ [ i (I.oute ev_ack); jmp "idle1" ]
+   197	  @ [ L "send_data"; i I.in_; i (I.ldc 4); i I.waitd ] @ drive_j @ [ sho2; i (I.ldd 7); jnz "dl";
+   198	      L "dloop"; i I.in_; i (I.skne Fw_codec.terminator); jmp "dend"; i (I.ldc 4);
+   199	      L "dl"; i I.waitd; sho2; i (I.ldd 7); jnz "dl"; jmp "dloop";
+   200	      L "dend"; i I.waitd; release; i (I.oute ev_sent); jmp "idle1" ]
+   201	  @ handshake ~label:"send_nak" ~after:"idle1" ~jk_swap:cfg.jk_swap12 0x5A
+   202	  @ handshake ~label:"send_stall" ~after:"idle1" ~jk_swap:cfg.jk_swap12 0x1E
+   203	
+   204	(* ---------------- T2: SETUP and OUT ---------------- *)
+   205	
+   206	let t2 ?(cfg = t12_default) () =
+   207	  (* The forwarder learns of the end of the packet when IDLE rises during the low before the
+   208	     end strobe, about five slots before a token checker sees the strobe; its handler then
+   209	     needs WAITP VALUE, WAITP CRC_OK, the OUT event, LDD: J-drive at 3.5 + 3 + v + 2 slots
+   210	     after the low, which puts it with T1's (the strobe is 5 slots after the low, T1 drives 23
+   211	     after seeing it). *)
+   212	  let v = cfg.drive - 2 in
+   213	  let crc_check bad = if cfg.skip_crc then [] else [ waitp p_crc_ok 1 bad ] in
+   214	  (* the second token byte (endpoint high bits and CRC5), end of packet, then the event *)
+   215	  let tail ~l ~p_c ~ev =
+   216	    let c = fresh "tail" in
+   217	    [ L l ] @ rb_body "w2" @ skne_p p_c 0 c @ [ jmp "drain2"; L c ] @ eopchk ~more:"drain2" ~abort:"w2"
+   218	    @ [ i (I.oute ev); jmp "data" ] in
+   219	  (* One data path for all three tokens. The token's event reaches the controller while the
+   220	     data packet is still arriving (at least 32 bit times, 1,280 clocks), in time for it to
+   221	     patch the handshake: ACK after SETUP; ACK or STALL after OUT to endpoint 0 by the state
+   222	     of the control transfer; STALL after OUT to endpoint 1, which has no OUT direction. *)
+   223	  [ L "init";
+   224	    L "w2"; waitp p_idle 0 "w2" ] @ sync_skip ~gone:"w2" ~arm:[] @ rb "w2"
+   225	  @ [ i (I.ldc 8); i (I.skne 0x2D); jmp "ts"; i (I.skne 0xE1); jmp "to";
+   226	      L "drain2"; waitp p_idle 1 "drain2"; jmp "w2";
+   227	      L "bad2"; i (I.oute ev_bad); jmp "w2";
+   228	      L "ts" ] @ rb_body "w2" @ [ i (I.ldc 8) ] @ skne_p "p_sa0" 0 "s_b2" @ [ jmp "drain2" ]
+   229	  @ tail ~l:"s_b2" ~p_c:"p_sc0" ~ev:ev_setup
+   230	  @ [ L "to" ] @ rb_body "w2" @ [ i (I.ldc 8) ] @ skne_p "p_oa0" 0 "o0_b2" @ skne_p "p_oa1" 0x80 "o1_b2" @ [ jmp "drain2" ]
+   231	  @ tail ~l:"o0_b2" ~p_c:"p_oc0" ~ev:ev_out
+   232	  @ tail ~l:"o1_b2" ~p_c:"p_oc1" ~ev:ev_out1
+   233	  (* the data packet: wait for its SOP; the PID is forwarded as the first byte (T1 checks it
+   234	     through the CRC assist) *)
+   235	  @ [ L "data"; i (I.ldd cfg.data_timeout); waitp p_idle 0 "w2"; i (I.ldd 0) ]
+   236	  @ sync_skip ~gone:"w2" ~arm:[ i (I.oute ev_data) ] @ [ i (I.ldc 8); L "fwd" ] @ rb_body "fwd_e"
+   237	  @ [ i I.out; i (I.ldc 8); jmp "fwd";
+   238	      L "fwd_e"; waitp p_value 0 "bad2" ] @ crc_check "bad2"
+   239	  @ [ i (I.oute ev_ok); i (I.ldd v); L "p_hs"; jmp "send_ack" ]
+   240	  @ handshake ~label:"send_ack" ~after:"w2" ~jk_swap:cfg.jk_swap12 0xD2
+   241	  @ handshake ~label:"send_stall2" ~after:"w2" ~jk_swap:cfg.jk_swap12 0x1E
+   242	
+   243	let t3 = [ L "t3"; i I.halt ]
+   244	
+   245	type images = { mem : int array array; p0 : prog; p1 : prog; p2 : prog }
+   246	
+   247	let build ?t0cfg ?t12cfg () =
+   248	  let p0 = assemble (t0 ?cfg:t0cfg ()) and p1 = assemble (t1 ?cfg:t12cfg ()) and p2 = assemble (t2 ?cfg:t12cfg ()) in
+   249	  let p3 = assemble t3 in
+   250	  { mem = [| Array.copy p0.words; Array.copy p1.words; Array.copy p2.words; Array.copy p3.words |]; p0; p1; p2 }
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c3 nl -ba main_fw.ml' in /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+ succeeded in 0ms:
+     1	(* Low-speed USB as firmware on the deadline sequencer.
+     2	   1. The ISA variant: interpreter against RTL on random programmes.
+     3	   2. The CRC assist: model against RTL on random stimulus and three configurations.
+     4	   3. The bit layer (T0) on the ORIGINAL sequencer, interpreter and RTL, decoding random packets
+     5	      from the host model with the host clock off by up to 1.5 %.
+     6	   4. The whole device (T0-T2, CRC assist, controller) on the variant, interpreter and RTL in
+     7	      lockstep: directed enumeration and reports, constrained random sessions, and controls that
+     8	      must fail.
+     9	   5. The reply path's timing budget, clock by clock. *)
+    10	open Hardcaml
+    11	
+    12	let ok = ref true
+    13	let check name c = Printf.printf "  %-60s %s\n" name (if c then "ok" else "FAIL"); if not c then ok := false
+    14	
+    15	(* ---------- 1. ISA variant lockstep ---------- *)
+    16	let isa_lockstep ~seed ~cycles =
+    17	  Random.init seed;
+    18	  let mem = Array.init Isa_ls.n_threads (fun _ -> Array.init Isa_ls.prog_len (fun _ ->
+    19	      (* bias towards the new and the branching instructions, and short deadlines *)
+    20	      let w = Random.int 0x10000 in
+    21	      match Random.int 6 with
+    22	      | 0 -> (0xE lsl 12) lor (w land 0x1FF)
+    23	      | 1 -> (0x7 lsl 12) lor (w land 0xFFF)
+    24	      | 2 -> (0xB lsl 12) lor (w land 0x1FF)
+    25	      | 3 -> (0x3 lsl 12) lor (w land 0x1F)
+    26	      | _ -> w)) in
+    27	  let sim = Cyclesim.create (Sequencer_ls.circuit ()) in
+    28	  let i n = Cyclesim.in_port sim n and o n = Cyclesim.out_port sim n in
+    29	  let clear = i "clear" in
+    30	  clear := Bits.vdd; Cyclesim.cycle sim; clear := Bits.gnd;
+    31	  let cur = ref 0 and pend = ref (Bits.to_int !(o "imem_addr")) in
+    32	  let st = Isa_ls.init () in
+    33	  let mism = ref 0 in
+    34	  for _ = 1 to cycles do
+    35	    let pin_in = Random.int 256 and host_in = Random.int 256 and host_in_valid = Random.bool () in
+    36	    let eff = Isa_ls.step st ~mem ~pin_in ~host_in ~host_in_valid in
+    37	    (i "imem_data") := Bits.of_int ~width:16 mem.(!cur lsr Isa_ls.pc_bits).(!cur land 255);
+    38	    (i "pin_in") := Bits.of_int ~width:8 pin_in; (i "host_in") := Bits.of_int ~width:8 host_in;
+    39	    (i "host_in_valid") := Bits.of_int ~width:1 (if host_in_valid then 1 else 0);
+    40	    Cyclesim.cycle sim;
+    41	    cur := !pend; pend := Bits.to_int !(o "imem_addr");
+    42	    let ho = if Bits.to_int !(o "host_out_valid") = 1 then Some (Bits.to_int !(o "host_out"), Bits.to_int !(o "host_out_tag") = 1) else None in
+    43	    let pcs = let v = Bits.to_int !(o "pcs") in List.init 4 (fun t -> (v lsr (8 * t)) land 255) in
+    44	    if not (Bits.to_int !(o "pin_out") = st.pin_out && Bits.to_int !(o "pin_oe") = st.pin_oe && ho = eff.host_out
+    45	            && (Bits.to_int !(o "host_in_ready") = 1) = eff.host_in_ready && pcs = Array.to_list st.pcs) then incr mism
+    46	  done;
+    47	  !mism
+    48	
+    49	(* ---------- 2. CRC assist lockstep ---------- *)
+    50	let crc_lockstep ?(prog = false) cfg ~seed ~cycles =
+    51	  Random.init seed;
+    52	  let circ =
+    53	    let open Signal in
+    54	    let clock = input "clock" 1 and clear = input "clear" 1 in
+    55	    let en = input "en" 1 and frame = input "frame" 1 and stb = input "stb" 1 and value = input "value" 1 in
+    56	    let c w x = of_int ~width:w x in
+    57	    let ok =
+    58	      if prog then
+    59	        (* the programmable unit, its configuration inputs driven with this configuration *)
+    60	        Crc_unit.create_prog ~clock ~clear ~poly:(c 16 cfg.Crc_unit.poly) ~init:(c 16 cfg.init) ~check:(c 16 cfg.check)
+    61	          ~mask:(c 16 ((1 lsl cfg.width) - 1)) ~top:(c 4 (cfg.width - 1)) ~skip_n:(c 5 cfg.skip)
+    62	          ~msb_first:(if cfg.msb_first then vdd else gnd) ~en ~frame ~stb ~value
+    63	      else Crc_unit.create ~cfg ~clock ~clear ~en ~frame ~stb ~value in
+    64	    Circuit.create_exn ~name:"crc" [ output "ok" ok ] in
+    65	  let sim = Cyclesim.create circ in
+    66	  let i n = Cyclesim.in_port sim n in
+    67	  let m = Crc_unit.Model.create cfg in
+    68	  let mism = ref 0 and oks = ref 0 in
+    69	  (i "clear") := Bits.vdd; Cyclesim.cycle sim; (i "clear") := Bits.gnd;
+    70	  let en = ref 0 in
+    71	  for _ = 1 to cycles do
+    72	    if Random.int 200 = 0 then en := 1 - !en;
+    73	    let frame = if Random.int 50 = 0 then 0 else 1 and stb = Random.int 2 and value = Random.int 2 in
+    74	    List.iter2 (fun n v -> (i n) := Bits.of_int ~width:1 v) [ "en"; "frame"; "stb"; "value" ] [ !en; frame; stb; value ];
+    75	    let before = Crc_unit.Model.ok m in
+    76	    Cyclesim.cycle sim;
+    77	    Crc_unit.Model.step m ~en:!en ~frame ~stb ~value;
+    78	    ignore before;
+    79	    let rtl_ok = Bits.to_int !(Cyclesim.out_port sim "ok") = 1 in
+    80	    if rtl_ok <> Crc_unit.Model.ok m then incr mism;
+    81	    if rtl_ok then incr oks
+    82	  done;
+    83	  !mism, !oks
+    84	
+    85	(* the model on real USB data packets: a good packet leaves the residue, a corrupted one not *)
+    86	let crc_on_packets () =
+    87	  let feed bytes_after_pid =
+    88	    let m = Crc_unit.Model.create { Crc_unit.usb_crc16 with skip = 0 } in
+    89	    Crc_unit.Model.step m ~en:0 ~frame:1 ~stb:0 ~value:0;
+    90	    List.iter (fun byte -> for k = 0 to 7 do
+    91	        Crc_unit.Model.step m ~en:1 ~frame:1 ~stb:0 ~value:0;
+    92	        Crc_unit.Model.step m ~en:1 ~frame:1 ~stb:1 ~value:((byte lsr k) land 1) done) bytes_after_pid;
+    93	    Crc_unit.Model.ok m in
+    94	  let good = List.tl (Ls_host.data_packet Ls_host.pid_data0 [ 0x80; 0x06; 0x00; 0x01; 0x00; 0x00; 0x40; 0x00 ]) in
+    95	  let bad = List.tl (Ls_host.data_packet ~corrupt_crc:true Ls_host.pid_data0 [ 0x80; 0x06; 0x00; 0x01; 0x00; 0x00; 0x40; 0x00 ]) in
+    96	  feed good && not (feed bad) && feed (List.tl (Ls_host.data_packet Ls_host.pid_data1 []))
+    97	
+    98	(* ---------- 3. T0 on the original sequencer ---------- *)
+    99	let t0_stock ?ppm ~seed ~packets () =
+   100	  let rng = Random.State.make [| seed |] in
+   101	  let ppm = match ppm with Some p -> p | None -> Random.State.int rng 30001 - 15000 in
+   102	  let cfg = { Firmware.t0_default with stock_events = true } in
+   103	  let p0 = Asm.assemble ~size:Isa.prog_len ~fill:Isa.halt (Firmware.t0 ~cfg ()) in
+   104	  let mem = Array.init Isa.n_threads (fun t -> if t = 0 then Array.copy p0.words else Array.make Isa.prog_len Isa.halt) in
+   105	  let rtl = Harness.make mem in
+   106	  let st = Isa.init () in
+   107	  (* the pad and synchroniser model around each: pin_in = two flops of (oe ? out : external) *)
+   108	  let sync_m = [| 0; 0 |] and sync_r = [| 0; 0 |] in
+   109	  let rtl_pins = ref (0, 0) in
+   110	  let mism = ref 0 and now = ref 0 in
+   111	  let decoded = ref [] and cur = ref [] and prev_stb = ref 0 and events = ref [] in
+   112	  let clock line =
+   113	    let dp, dm = Ls_host.phy line in
+   114	    let ext = dp lor (dm lsl 1) in
+   115	    let raw po poe = (poe land po) lor (lnot poe land ext) land 0xFF in
+   116	    let pin_m = sync_m.(1) and pin_r = sync_r.(1) in
+   117	    let raw_m = raw st.pin_out st.pin_oe and raw_r = raw (fst !rtl_pins) (snd !rtl_pins) in
+   118	    let eff = Isa.step st ~mem ~pin_in:pin_m ~host_in:0 ~host_in_valid:false in
+   119	    let o = Harness.cycle rtl ~pin_in:pin_r ~host_in:0 ~host_in_valid:false in
+   120	    rtl_pins := (o.pin_out, o.pin_oe);
+   121	    sync_m.(1) <- sync_m.(0); sync_m.(0) <- raw_m; sync_r.(1) <- sync_r.(0); sync_r.(0) <- raw_r;
+   122	    if o.pin_out <> st.pin_out || o.pin_oe <> st.pin_oe || o.host_out <> eff.host_out || o.pcs <> Array.to_list st.pcs then incr mism;
+   123	    (match eff.host_out with Some e -> events := e :: !events | None -> ());
+   124	    (* the published bits: VALUE at each rising STB; BUSY low with the strobe ends a packet *)
+   125	    let stb = (st.pin_out lsr Fw_sys.p_stb) land 1 in
+   126	    if stb = 1 && !prev_stb = 0 then begin
+   127	      if (st.pin_out lsr Fw_sys.p_idle) land 1 = 0 then cur := ((st.pin_out lsr Fw_sys.p_value) land 1) :: !cur
+   128	      else begin
+   129	        (* an end of packet with no bits is a keep-alive or a reset *)
+   130	        if !cur <> [] then decoded := (List.rev !cur, (st.pin_out lsr Fw_sys.p_value) land 1) :: !decoded;
+   131	        cur := []
+   132	      end
+   133	    end;
+   134	    prev_stb := stb;
+   135	    incr now in
+   136	  let send states =
+   137	    let sched, fin = Ls_host.schedule ~ppm ~start:!now states in
+   138	    let n = Array.length sched in
+   139	    Array.iteri (fun k (c0, s) -> let c1 = if k + 1 < n then fst sched.(k + 1) else fin in for _ = c0 to c1 - 1 do clock s done) sched in
+   140	  let idle n = for _ = 1 to n do clock Ls_host.J done in
+   141	  idle 200;
+   142	  let sent = ref [] in
+   143	  for _ = 1 to packets do
+   144	    let len = 1 + Random.State.int rng 11 in
+   145	    let bytes = List.init len (fun _ -> match Random.State.int rng 8 with
+   146	        | 0 | 1 -> 0xFF | 2 -> 0x00 | 3 -> 0x55 | 4 -> 0xAA | 5 -> [| 0x7F; 0xFE; 0x3F; 0xFC |].(Random.State.int rng 4)
+   147	        | _ -> Random.State.int rng 256) in
+   148	    sent := bytes :: !sent;
+   149	    send (Ls_host.encode bytes);
+   150	    idle (80 + Random.State.int rng 400 + Random.State.int rng 40);
+   151	    if Random.State.int rng 4 = 0 then (send Ls_host.keep_alive; idle (80 + Random.State.int rng 200))
+   152	  done;
+   153	  (* one bus reset: SE0 for 20 us *)
+   154	  for _ = 1 to 1200 do clock Ls_host.SE0 done;
+   155	  idle 400;
+   156	  let to_bytes bits =
+   157	    let n = List.length bits / 8 in
+   158	    (List.length bits mod 8 = 0, List.init n (fun k -> List.fold_left (fun acc i -> acc lor (List.nth bits (8 * k + i) lsl i)) 0 (List.init 8 Fun.id))) in
+   159	  (* the sync is published too: zeros up to its final one *)
+   160	  let rec strip = function 0 :: r -> strip r | 1 :: r -> r | [] -> [] | _ -> [] in
+   161	  let got = List.rev_map (fun (bits, abort) -> (abort, to_bytes (strip bits))) !decoded in
+   162	  let want = List.rev !sent in
+   163	  if Sys.getenv_opt "T0DEBUG" <> None then begin
+   164	    let hex l = String.concat " " (List.map (Printf.sprintf "%02x") l) in
+   165	    List.iteri (fun k w -> Printf.printf "    sent %s\n" (hex w);
+   166	      match List.nth_opt got k with Some (ab, (wh, bs)) -> Printf.printf "    got  %s%s%s\n" (hex bs) (if wh then "" else " (partial)") (if ab = 1 then " ABORT" else "") | None -> ()) want
+   167	  end;
+   168	  let good = List.length got = List.length want
+   169	             && List.for_all2 (fun (abort, (whole, bs)) w -> abort = 0 && whole && bs = w) got want in
+   170	  let resets = List.length (List.filter (fun e -> e = Firmware.ev_reset) !events) in
+   171	  ppm, p0.used, good, List.length got, !mism, !now, resets
+   172	
+   173	(* ---------- 4. the device ---------- *)
+   174	let fw_directed ?(verbose = false) ~ppm ?t0cfg ?t12cfg ?jk_swap ?latency name =
+   175	  let dut, a, _ = Dut_fw.make ~name ?t0cfg ?t12cfg ?jk_swap ?latency () in
+   176	  let b = Bench.create ~verbose ~ppm dut in
+   177	  Scenario.directed b ~addr:42;
+   178	  b, a
+   179	
+   180	(* ---------- 5. the reply path, clock by clock ---------- *)
+   181	(* One IN (data queued) and one SETUP at the exact host clock: the clocks, from the start of the
+   182	   host's EOP (its first SE0 clock), at which each stage of the reply happens. *)
+   183	let budget () =
+   184	  let events = ref [] in
+   185	  let mark name c = if not (List.mem_assoc name !events) then events := (name, c) :: !events in
+   186	  let armed = ref false and se0_at = ref 0 and prev_line = ref (0, 1) and prev_out = ref 0 and prev_oe = ref 0 in
+   187	  let t1_decided = ref false in
+   188	  let trace cyc ~dp ~dm (m : Fw_sys.Model.t) (sys : Dut_fw.sys) =
+   189	    let po = m.st.pin_out and poe = m.st.pin_oe in
+   190	    if !armed then begin
+   191	      if (dp, dm) = (0, 0) && !prev_line <> (0, 0) && !se0_at = 0 then se0_at := cyc;
+   192	      let rel = cyc - !se0_at in
+   193	      if !se0_at > 0 then begin
+   194	        if (dp, dm) = (0, 1) && !prev_line = (0, 0) then mark "host EOP: SE0 to J (turnaround reference)" rel;
+   195	        if (po lsr Fw_sys.p_idle) land 1 = 1 && (!prev_out lsr Fw_sys.p_idle) land 1 = 0 then mark "T0 raises IDLE (end of packet seen)" rel;
+   196	        if (po lsr Fw_sys.p_stb) land 1 = 1 && (!prev_out lsr Fw_sys.p_stb) land 1 = 0 && (po lsr Fw_sys.p_idle) land 1 = 1 then mark "T0 end-of-packet strobe" rel;
+   197	        let pc1 = m.st.pcs.(1) and pc2 = m.st.pcs.(2) in
+   198	        let at1 l = pc1 = Asm.addr sys.img.p1 l and at2 l = pc2 = Asm.addr sys.img.p2 l in
+   199	        if not !t1_decided && (at1 "p_ep0_rdy" || at1 "p_ep1_rdy" || at1 "nr0" || at1 "nr1") then (t1_decided := true; mark "T1 reply chosen (token and RDY checked)" rel);
+   200	        if at2 "p_hs" then mark "T2 reply chosen (CRC checked)" rel;
+   201	        if poe land 3 <> 0 && !prev_oe land 3 = 0 then mark "device drives J" rel;
+   202	        if poe land 3 <> 0 && po land 3 = 1 then mark "device's first K (SOP)" rel
+   203	      end
+   204	    end;
+   205	    prev_line := (dp, dm); prev_out := po; prev_oe := poe in
+   206	  let dut, _, _ = Dut_fw.make ~name:"budget" ~trace () in
+   207	  let b = Bench.create ~ppm:0 dut in
+   208	  let run name f =
+   209	    events := []; se0_at := 0; t1_decided := false;
+   210	    f b;
+   211	    let evs = List.sort (fun (_, a) (_, c) -> compare a c) !events in
+   212	    Printf.printf "  %s (clocks from the first SE0 clock of the host's EOP; 40 clocks = 1 bit):\n" name;
+   213	    List.iter (fun (n, c) -> Printf.printf "    %4d  %s\n" c n) evs in
+   214	  Bench.idle b 200;
+   215	  (* SETUP: arm at the data packet *)
+   216	  Bench.send b (Ls_host.token Ls_host.pid_setup ~addr:0 ~ep:0); Bench.idle_bits b 3.0;
+   217	  armed := true;
+   218	  run "SETUP data, answered ACK by T2" (fun b ->
+   219	      Bench.send b (Ls_host.data_packet Ls_host.pid_data0 (Bench.get_descriptor ~typ:1 ~len:18 ())); ignore (Bench.receive b));
+   220	  armed := false; Bench.idle_bits b 400.0;
+   221	  armed := true;
+   222	  run "IN token, answered with data from the FIFO by T1" (fun b ->
+   223	      Bench.send b (Ls_host.token Ls_host.pid_in ~addr:0 ~ep:0); ignore (Bench.receive b));
+   224	  armed := false
+   225	
+   226	let report b =
+   227	  print_endline ("  " ^ Bench.summary b);
+   228	  List.iter (fun e -> print_endline ("    " ^ e)) (List.rev b.Bench.errors);
+   229	  b.Bench.errors = [] && b.dut.mismatches () = 0
+   230	
+   231	let () =
+   232	  if Sys.getenv_opt "BUDGET" <> None then (budget (); exit 0);
+   233	  (match Sys.getenv_opt "T0DEBUG" with
+   234	   | Some sd -> let ppm, _, good, _, _, _, resets = t0_stock ~seed:(int_of_string sd) ~packets:40 () in
+   235	     Printf.printf "ppm %d good %b resets %d\n" ppm good resets; exit 0
+   236	   | None -> ());
+   237	  print_endline "== 1. ISA variant: interpreter against RTL, random programmes";
+   238	  let m = List.fold_left (fun acc seed -> acc + isa_lockstep ~seed ~cycles:4000) 0 (List.init 200 Fun.id) in
+   239	  check (Printf.sprintf "200 programmes x 4000 clocks: %d mismatching clocks" m) (m = 0);
+   240	  print_endline "== 2. CRC assist: model against RTL";
+   241	  List.iter (fun (name, cfg) ->
+   242	    let mm, oks = crc_lockstep cfg ~seed:3 ~cycles:200_000 in
+   243	    check (Printf.sprintf "%s: 200,000 clocks, %d mismatches (ok seen %d times)" name mm oks) (mm = 0);
+   244	    let mm, oks = crc_lockstep ~prog:true cfg ~seed:4 ~cycles:200_000 in
+   245	    check (Printf.sprintf "  same, programmable unit: %d mismatches (ok seen %d times)" mm oks) (mm = 0))
+   246	    [ "USB CRC16 (reflected)", Crc_unit.usb_crc16;
+   247	      "USB CRC5 (reflected)", { Crc_unit.width = 5; poly = 0x14; init = 0x1F; check = 0x06; skip = 0; msb_first = false };
+   248	      "CAN CRC15 (MSB first)", { Crc_unit.width = 15; poly = 0x4599; init = 0; check = 0; skip = 0; msb_first = true } ];
+   249	  check "USB CRC16 residue on a good packet, not on a corrupted one, and on a zero-length one" (crc_on_packets ());
+   250	  print_endline "== 3. bit layer (T0) on the ORIGINAL sequencer, interpreter and RTL";
+   251	  List.iteri (fun k ppm ->
+   252	    let seed = 100 + k in
+   253	    let ppm, used, good, n, mism, clocks, resets = t0_stock ~ppm ~seed ~packets:60 () in
+   254	    check (Printf.sprintf "host %+6d ppm: %d words, %d/60 packets bit-exact, %d reset, %d clocks, %d lockstep mismatches"
+   255	             ppm used (if good then n else 0) resets clocks mism) (good && mism = 0 && used <= 64 && resets = 1))
+   256	    [ -15000; -12500; -10000; -7500; -5000; -2500; 0; 2500; 5000; 7500; 10000; 12500; 15000 ];
+   257	  (* beyond the specification: where does the software DPLL stop working? *)
+   258	  let margin = List.map (fun ppm ->
+   259	      let ok = List.for_all (fun seed -> let _, _, good, _, _, _, _ = t0_stock ~ppm ~seed ~packets:60 () in good) [ 1; 2; 3 ] in
+   260	      Printf.sprintf "%+d%%:%s" (ppm / 10000) (if ok then "ok" else "FAIL"), ok)
+   261	      [ -60000; -50000; -40000; -30000; -20000; 20000; 30000; 40000; 50000; 60000 ] in
+   262	  Printf.printf "  beyond +-1.5 %% (3 x 60 packets each): %s\n" (String.concat " " (List.map fst margin));
+   263	  let img = Firmware.build () in
+   264	  Printf.printf "== programme sizes: T0 %d, T1 %d, T2 %d words (of 256 per thread; T0 fits the original 64)\n" img.p0.used img.p1.used img.p2.used;
+   265	  print_endline "== 4. the device, interpreter and RTL in lockstep: directed";
+   266	  let b, a = fw_directed ~verbose:true ~ppm:0 "firmware" in
+   267	  ok := report b && !ok;
+   268	  Printf.printf "  controller: %d programme patches, FIFO peak %d bytes\n" a.ctl.patches a.ctl.max_fifo;
+   269	  List.iter (fun ppm -> let b, _ = fw_directed ~ppm "firmware" in ok := report b && !ok) [ -15000; 15000 ];
+   270	  print_endline "== 4. constrained random sessions";
+   271	  let nseeds = try int_of_string Sys.argv.(1) with _ -> 8 in
+   272	  for seed = 1 to nseeds do
+   273	    let rng = Random.State.make [| seed; 77 |] in
+   274	    (* the first two seeds at the extremes of the tolerance, the rest anywhere in it *)
+   275	    let ppm = match seed with 1 -> -15000 | 2 -> 15000 | _ -> Random.State.int rng 30001 - 15000 in
+   276	    (* controller latency: seed 3 near the bound the design assumes (a token's event must
+   277	       reach the controller before the data packet ends, 1,280 clocks), so that the firmware
+   278	       has to NAK while the controller prepares *)
+   279	    let latency = if seed = 3 then 1100 else 20 + Random.State.int rng 600 in
+   280	    (* seed 4: a controller that takes 5,000 clocks to prepare each reply; the firmware NAKs *)
+   281	    let prepare = if seed = 4 then 5000 else 0 in
+   282	    let dut, _, _ = Dut_fw.make ~name:(Printf.sprintf "firmware(latency %d, prepare %d)" latency prepare) ~latency ~prepare () in
+   283	    let b = Bench.create ~seed ~ppm dut in
+   284	    Scenario.random_session b ~n:120;
+   285	    ok := report b && !ok
+   286	  done;
+   287	  (* beyond the specification, directed enumeration only *)
+   288	  let beyond = List.map (fun ppm ->
+   289	      let b, _ = fw_directed ~ppm "firmware" in
+   290	      Printf.sprintf "%+d%%:%s" (ppm / 10000) (if b.Bench.errors = [] then "ok" else "FAIL"))
+   291	      [ -40000; -30000; -20000; 20000; 30000 ] in
+   292	  Printf.printf "  device beyond +-1.5 %% (directed): %s\n" (String.concat " " beyond);
+   293	  print_endline "== 5. the reply path, clock by clock";
+   294	  budget ();
+   295	  print_endline "== controls: each must FAIL";
+   296	  let control name ?t0cfg ?t12cfg ?jk_swap () =
+   297	    let b, _ = fw_directed ~ppm:0 ?t0cfg ?t12cfg ?jk_swap name in
+   298	    let failed = b.Bench.errors <> [] in
+   299	    Printf.printf "  %-44s %s (%d errors; first: %s)\n" name (if failed then "caught" else "NOT CAUGHT")
+   300	      (List.length b.errors) (match List.rev b.errors with e :: _ -> e | [] -> "-");
+   301	    if not failed then ok := false in
+   302	  let t12 = Firmware.t12_default and t0d = Firmware.t0_default in
+   303	  control "J and K swapped" ~t0cfg:{ t0d with jk_swap = true } ~t12cfg:{ t12 with jk_swap12 = true } ~jk_swap:true ();
+   304	  control "reply 4 bit times late" ~t12cfg:{ t12 with drive = t12.drive + 40 } ();
+   305	  control "reply 1 bit time early (drives into the host's EOP)" ~t12cfg:{ t12 with drive = t12.drive - 10 } ();
+   306	  control "CRC_OK not checked" ~t12cfg:{ t12 with skip_crc = true } ();
+   307	  print_endline (if !ok then "FIRMWARE LS DEVICE PASS" else "FIRMWARE LS DEVICE FAIL");
+   308	  exit (if !ok then 0 else 1)
+
+codex
+I’ve confirmed T0’s stock mode is explicitly assembled with the original ISA and checked against its interpreter/RTL. I’m now following the CRC gating and bench receive logic, where the main risks are stale CRC enable state and assertions that accept missing replies.
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c3 nl -ba bench.ml' in /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+ succeeded in 0ms:
+     1	(* The test bench: a low-speed bus between the host model and a device under test, with a
+     2	   transaction-level host that judges every reply against the reference device.
+     3	
+     4	   Bus: when the host drives, the line is the host's state; when the device drives (oe), the
+     5	   device's; both at once is contention and an error; neither is idle J (the device's pull-up on
+     6	   D-). The device sees the resolved line, including its own transmissions, as on real wires.
+     7	
+     8	   Every reply is checked for: bytes equal to the reference device's answer (a slower device may
+     9	   NAK where data is due, if [nak_ok]); a clean decode (sync, NRZI, stuffing, whole bytes, EOP of
+    10	   about two bits); a turnaround between 2 and 6.5 of the host's bit times, measured from the
+    11	   SE0-to-J edge of the host's EOP to the device's SOP; no transmission when none is due. *)
+    12	
+    13	type dut = {
+    14	  name : string;
+    15	  step : dp:int -> dm:int -> unit;       (* one clock with the resolved line *)
+    16	  out : unit -> int * int * int;         (* dp, dm, oe driven now *)
+    17	  offer_report : int list -> unit;       (* the application offers an 8-byte report *)
+    18	  nak_ok : bool;
+    19	  mismatches : unit -> int;              (* lockstep mismatches between two models, if any *)
+    20	}
+    21	
+    22	type t = {
+    23	  dut : dut;
+    24	  ppm : int;
+    25	  rng : Random.State.t;
+    26	  refd : Ref_device.t;
+    27	  mutable now : int;
+    28	  mutable errors : string list;
+    29	  mutable last_eop_j : int;
+    30	  mutable turnarounds : float list;
+    31	  mutable naks_tolerated : int;
+    32	  mutable replies : int;
+    33	  mutable packets_sent : int;
+    34	  mutable keep_alives : int;
+    35	  mutable resets : int;
+    36	  mutable silent_ok : int;
+    37	  verbose : bool;
+    38	}
+    39	
+    40	let create ?(verbose = false) ?(seed = 1) ~ppm dut =
+    41	  { dut; ppm; rng = Random.State.make [| seed |]; refd = Ref_device.create (); now = 0; errors = []; last_eop_j = 0;
+    42	    turnarounds = []; naks_tolerated = 0; replies = 0; packets_sent = 0; keep_alives = 0; resets = 0; silent_ok = 0; verbose }
+    43	
+    44	let error b s =
+    45	  if List.length b.errors < 20 then b.errors <- Printf.sprintf "[%s clk %d] %s" b.dut.name b.now s :: b.errors
+    46	  else if List.length b.errors = 20 then b.errors <- "(more errors suppressed)" :: b.errors
+    47	
+    48	let t_bit b = Ls_host.bit_period b.ppm
+    49	
+    50	let device_state b =
+    51	  let dp, dm, oe = b.dut.out () in
+    52	  if oe = 1 then Ls_host.of_pins dp dm else None
+    53	
+    54	(* one clock; [host] is the host's drive, if any. Returns the device's driven state, if any. *)
+    55	let tick b host =
+    56	  let dev = let dp, dm, oe = b.dut.out () in if oe = 1 then Some (dp, dm) else None in
+    57	  let dp, dm =
+    58	    match host, dev with
+    59	    | Some s, None -> Ls_host.phy s
+    60	    | None, Some p -> p
+    61	    | None, None -> Ls_host.phy Ls_host.J
+    62	    | Some s, Some _ -> error b "bus contention: host and device drive together"; Ls_host.phy s in
+    63	  b.dut.step ~dp ~dm;
+    64	  b.now <- b.now + 1;
+    65	  dev
+    66	
+    67	(* host idle for [clocks]; the device must stay silent unless [allow] *)
+    68	let idle ?(allow = false) b clocks =
+    69	  for _ = 1 to clocks do
+    70	    match tick b None with
+    71	    | Some _ when not allow -> error b "device transmits when no reply is due"
+    72	    | _ -> ()
+    73	  done
+    74	
+    75	let idle_bits b bits = idle b (int_of_float (Float.round (bits *. t_bit b)))
+    76	
+    77	let send_states b states =
+    78	  let sched, fin = Ls_host.schedule ~ppm:b.ppm ~start:b.now states in
+    79	  let n = Array.length sched in
+    80	  Array.iteri (fun i (c0, s) ->
+    81	    let c1 = if i + 1 < n then fst sched.(i + 1) else fin in
+    82	    if i = n - 1 then b.last_eop_j <- c0;
+    83	    for _ = c0 to c1 - 1 do ignore (tick b (Some s)) done) sched
+    84	
+    85	let send ?skip_stuff b bytes = b.packets_sent <- b.packets_sent + 1; send_states b (Ls_host.encode ?skip_stuff bytes)
+    86	
+    87	let keep_alive b = b.keep_alives <- b.keep_alives + 1; send_states b Ls_host.keep_alive
+    88	
+    89	let bus_reset b clocks =
+    90	  b.resets <- b.resets + 1;
+    91	  for _ = 1 to clocks do ignore (tick b (Some Ls_host.SE0)) done;
+    92	  Ref_device.reset b.refd
+    93	
+    94	(* wait for the device's reply: up to 18 bit times after our EOP for SOP, then capture until it
+    95	   releases the bus *)
+    96	type rx = No_reply | Reply of Ls_host.rx_result * float
+    97	
+    98	let receive b =
+    99	  let limit = b.last_eop_j + int_of_float (18.0 *. t_bit b) in
+   100	  let rec wait_sop () =
+   101	    if b.now >= limit then None
+   102	    else match tick b None with
+   103	      | Some (1, 0) -> Some (b.now - 1)          (* K: the device's SOP *)
+   104	      | Some (0, 1) | None -> wait_sop ()        (* J before SOP is allowed (the bus idles J) *)
+   105	      | Some _ -> error b "device drives SE0 before SOP"; wait_sop () in
+   106	  match wait_sop () with
+   107	  | None -> No_reply
+   108	  | Some sop ->
+   109	    let runs = ref [] and cur = ref Ls_host.K and len = ref 1 in
+   110	    let rec capture () =
+   111	      match tick b None with
+   112	      | Some (dp, dm) ->
+   113	        let s = match Ls_host.of_pins dp dm with Some s -> s | None -> error b "device drives SE1"; Ls_host.SE0 in
+   114	        if s = !cur then incr len else (runs := (!len, !cur) :: !runs; cur := s; len := 1);
+   115	        capture ()
+   116	      | None -> runs := (!len, !cur) :: !runs in
+   117	    capture ();
+   118	    let ta = float_of_int (sop - b.last_eop_j) /. t_bit b in
+   119	    b.turnarounds <- ta :: b.turnarounds;
+   120	    if ta < 2.0 || ta > 6.5 then error b (Printf.sprintf "turnaround %.2f bit times outside 2..6.5" ta);
+   121	    b.replies <- b.replies + 1;
+   122	    Reply (Ls_host.decode_runs ~t:(t_bit b) (List.rev !runs), ta)
+   123	
+   124	let show_reply = function
+   125	  | No_reply -> "no reply"
+   126	  | Reply (Ls_host.Bad e, _) -> "undecodable: " ^ e
+   127	  | Reply (Ls_host.Packet bs, ta) -> Printf.sprintf "%s (%.2f bits)" (String.concat " " (List.map (Printf.sprintf "%02x") bs)) ta
+   128	
+   129	let show_ref = function
+   130	  | Ref_device.Data (p, d) -> Printf.sprintf "data %02x [%s]" p (String.concat " " (List.map (Printf.sprintf "%02x") d))
+   131	  | Nak -> "NAK" | Stall -> "STALL" | Ack -> "ACK" | Silent -> "silence"
+   132	
+   133	let classify = function
+   134	  | No_reply -> Some Ref_device.Silent
+   135	  | Reply (Ls_host.Bad _, _) -> None
+   136	  | Reply (Ls_host.Packet [ p ], _) when p = Ls_host.pid_ack -> Some Ack
+   137	  | Reply (Ls_host.Packet [ p ], _) when p = Ls_host.pid_nak -> Some Nak
+   138	  | Reply (Ls_host.Packet [ p ], _) when p = Ls_host.pid_stall -> Some Stall
+   139	  | Reply (Ls_host.Packet (p :: rest), _) when (p = Ls_host.pid_data0 || p = Ls_host.pid_data1) && List.length rest >= 2 ->
+   140	    if Ls_host.crc16_ok rest then Some (Data (p, List.filteri (fun i _ -> i < List.length rest - 2) rest)) else None
+   141	  | Reply (Ls_host.Packet _, _) -> None
+   142	
+   143	let gap b = idle_bits b (2.0 +. Random.State.float b.rng 4.0)
+   144	
+   145	(* compare a reply with the reference. Returns the classified reply. *)
+   146	let judge b what ~expect r =
+   147	  let got = classify r in
+   148	  let ok = match got, expect with
+   149	    | Some g, e when g = e -> true
+   150	    | Some Nak, Ref_device.Data _ when b.dut.nak_ok -> b.naks_tolerated <- b.naks_tolerated + 1; true
+   151	    | _ -> false in
+   152	  if b.verbose then Printf.printf "    %-28s %s%s\n" what (show_reply r) (if ok then "" else "  <- expected " ^ show_ref expect);
+   153	  if not ok then error b (Printf.sprintf "%s: got %s, expected %s" what (show_reply r) (show_ref expect));
+   154	  got
+   155	
+   156	(* ---------- transactions ---------- *)
+   157	
+   158	let setup_stage b ~addr setup =
+   159	  let rec attempt n =
+   160	    send b (Ls_host.token Ls_host.pid_setup ~addr ~ep:0); gap b;
+   161	    send b (Ls_host.data_packet Ls_host.pid_data0 setup);
+   162	    let r = receive b in
+   163	    match classify r with
+   164	    | Some Ack -> ignore (Ref_device.setup b.refd setup); if b.verbose then Printf.printf "    %-28s %s\n" "SETUP" (show_reply r); true
+   165	    | _ when n > 1 -> gap b; attempt (n - 1)
+   166	    | _ -> ignore (judge b "SETUP" ~expect:Ack r); false in
+   167	  attempt 3
+   168	
+   169	(* one IN transaction; [ack] = whether the host acknowledges data. Returns the classified reply. *)
+   170	let in_tx ?(ack = true) b ~addr ~ep =
+   171	  let expect = Ref_device.in_ b.refd ~ep in
+   172	  send b (Ls_host.token Ls_host.pid_in ~addr ~ep);
+   173	  let r = receive b in
+   174	  let got = judge b (Printf.sprintf "IN ep%d" ep) ~expect r in
+   175	  (match got with
+   176	   | Some (Data _) when got = Some expect ->
+   177	     gap b;
+   178	     if ack then (send b [ Ls_host.pid_ack ]; Ref_device.ack b.refd)
+   179	   | _ -> ());
+   180	  gap b; got
+   181	
+   182	let out_tx b ~addr ~ep ~pid data =
+   183	  send b (Ls_host.token Ls_host.pid_out ~addr ~ep); gap b;
+   184	  send b (Ls_host.data_packet pid data);
+   185	  let expect = Ref_device.out b.refd ~ep in
+   186	  let r = receive b in
+   187	  let got = judge b (Printf.sprintf "OUT ep%d" ep) ~expect r in
+   188	  gap b; got
+   189	
+   190	(* retry INs that are NAKed (a slower device may NAK while it prepares) *)
+   191	let in_until_data ?(tries = 200) b ~addr ~ep =
+   192	  let rec go n =
+   193	    match in_tx b ~addr ~ep with
+   194	    | Some Nak when n > 0 -> idle_bits b 10.0; go (n - 1)
+   195	    | Some Nak -> error b "gave up after repeated NAKs"; Some Ref_device.Nak
+   196	    | r -> r in
+   197	  go tries
+   198	
+   199	let control_read b ~addr setup =
+   200	  if setup_stage b ~addr setup then begin
+   201	    let rec data_stage () =
+   202	      match b.refd.Ref_device.ep0 with
+   203	      | Ref_device.Data_in _ -> (match in_until_data b ~addr ~ep:0 with Some (Data _) -> data_stage () | _ -> ())
+   204	      | Stalled -> ignore (in_tx b ~addr ~ep:0)
+   205	      | _ -> () in
+   206	    data_stage ();
+   207	    if b.refd.ep0 = Ref_device.Status_out then ignore (out_tx b ~addr ~ep:0 ~pid:Ls_host.pid_data1 [])
+   208	  end
+   209	
+   210	let control_nodata b ~addr setup =
+   211	  if setup_stage b ~addr setup then begin
+   212	    match b.refd.Ref_device.ep0 with
+   213	    | Ref_device.Status_in _ -> ignore (in_until_data b ~addr ~ep:0)
+   214	    | Stalled -> ignore (in_tx b ~addr ~ep:0)
+   215	    | _ -> ()
+   216	  end
+   217	
+   218	(* a packet the device must ignore: no reply, and no change of state *)
+   219	let expect_silence b what =
+   220	  match receive b with
+   221	  | No_reply -> b.silent_ok <- b.silent_ok + 1; if b.verbose then Printf.printf "    %-28s no reply\n" what
+   222	  | r -> error b (Printf.sprintf "%s: expected silence, got %s" what (show_reply r))
+   223	
+   224	let get_descriptor ?(req = 0x80) ~typ ~len () = [ req; 0x06; 0x00; typ; 0x00; 0x00; len land 0xFF; len lsr 8 ]
+   225	
+   226	(* the enumeration a host performs *)
+   227	let enumerate b ~addr =
+   228	  control_read b ~addr:0 (get_descriptor ~typ:1 ~len:64 ());
+   229	  bus_reset b 600_000; idle_bits b 20.0;
+   230	  control_nodata b ~addr:0 [ 0x00; 0x05; addr; 0x00; 0x00; 0x00; 0x00; 0x00 ];
+   231	  idle_bits b 20.0;
+   232	  control_read b ~addr (get_descriptor ~typ:1 ~len:18 ());
+   233	  control_read b ~addr (get_descriptor ~typ:2 ~len:9 ());
+   234	  control_read b ~addr (get_descriptor ~typ:2 ~len:255 ());
+   235	  control_nodata b ~addr [ 0x00; 0x09; 0x01; 0x00; 0x00; 0x00; 0x00; 0x00 ];
+   236	  control_nodata b ~addr [ 0x21; 0x0A; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00 ];
+   237	  control_read b ~addr (get_descriptor ~req:0x81 ~typ:0x22 ~len:(List.length Descriptors.report + 64) ())
+   238	
+   239	let summary b =
+   240	  let tas = b.turnarounds in
+   241	  let mn = List.fold_left min infinity tas and mx = List.fold_left max neg_infinity tas in
+   242	  Printf.sprintf "%s ppm %+d: %d clocks, %d packets sent, %d replies (turnaround %.2f..%.2f bits), %d NAKs while preparing, %d silences as required, %d keep-alives, %d resets, lockstep mismatches %d, errors %d"
+   243	    b.dut.name b.ppm b.now b.packets_sent b.replies mn mx b.naks_tolerated b.silent_ok b.keep_alives b.resets (b.dut.mismatches ()) (List.length b.errors)
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c3 nl -ba fw_sys.ml' in /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+ succeeded in 0ms:
+     1	(* The firmware system: the sequencer (ISA variant), a two-flop synchroniser on every pin
+     2	   input, and the CRC assist, as RTL and as an executable model built from the interpreter.
+     3	
+     4	   Pins: 0 D+, 1 D- (the bus, bidirectional), 2 VALUE, 3 STB, 4 IDLE (low during a packet;
+     5	   driven by the bit-layer thread and read back by the others), 5 CRC_EN (driven by the SETUP/OUT thread), 6 CRC_OK (from
+     6	   the CRC assist), 7 RDY (the reply FIFO in front of host_in is non-empty).
+     7	
+     8	   Pad model: pin_in[i] = pin_oe[i] ? pin_out[i] : external[i], then two flops. External inputs
+     9	   are the bus on pins 0 and 1, the CRC assist's ok on pin 6 and the FIFO's non-empty flag on
+    10	   pin 7. The CRC assist reads VALUE, STB and CRC_EN straight from pin_out. *)
+    11	open Hardcaml
+    12	open Signal
+    13	
+    14	let p_dp = 0 and p_dm = 1 and p_value = 2 and p_stb = 3 and p_idle = 4 and p_crc_en = 5 and p_crc_ok = 6 and p_rdy = 7
+    15	
+    16	let circuit ?(crc = Crc_unit.usb_crc16) () =
+    17	  let clock = input "clock" 1 and clear = input "clear" 1 in
+    18	  let spec = Reg_spec.create ~clock ~clear () in
+    19	  let imem_data = input "imem_data" 16 in
+    20	  let dp_in = input "dp_in" 1 and dm_in = input "dm_in" 1 and rdy = input "rdy" 1 in
+    21	  let host_in = input "host_in" 8 and host_in_valid = input "host_in_valid" 1 in
+    22	  let pin_in = wire 8 in
+    23	  let imem_addr, pin_out, pin_oe, host_out, host_out_tag, host_out_valid, host_in_ready, pcs =
+    24	    Sequencer_ls.create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid in
+    25	  let crc_ok = Crc_unit.create ~cfg:crc ~clock ~clear ~en:(bit pin_out p_crc_en) ~frame:(~:(bit pin_out p_idle)) ~stb:(bit pin_out p_stb) ~value:(bit pin_out p_value) in
+    26	  let ext = concat_lsb [ dp_in; dm_in; gnd; gnd; gnd; gnd; crc_ok; rdy ] in
+    27	  let raw = (pin_oe &: pin_out) |: (~:pin_oe &: ext) in
+    28	  pin_in <== reg spec (reg spec raw);
+    29	  Circuit.create_exn ~name:"usb_ls_firmware_system"
+    30	    [ output "imem_addr" imem_addr; output "pin_out" pin_out; output "pin_oe" pin_oe
+    31	    ; output "host_out" host_out; output "host_out_tag" host_out_tag; output "host_out_valid" host_out_valid
+    32	    ; output "host_in_ready" host_in_ready; output "pcs" pcs; output "crc_ok" crc_ok ]
+    33	
+    34	(* the same system as a model *)
+    35	module Model = struct
+    36	  type t = { st : Isa_ls.state; crc : Crc_unit.Model.t; mutable s1 : int; mutable s2 : int }
+    37	  let create ?(crc = Crc_unit.usb_crc16) () = { st = Isa_ls.init (); crc = Crc_unit.Model.create crc; s1 = 0; s2 = 0 }
+    38	  let bitv x i = (x lsr i) land 1
+    39	  (* one clock; returns the interpreter's effects. Register semantics: everything samples the
+    40	     values from before the clock edge. *)
+    41	  let step t ~mem ~dp ~dm ~rdy ~host_in ~host_in_valid =
+    42	    let st = t.st in
+    43	    let po = st.pin_out and poe = st.pin_oe in
+    44	    let ok = if Crc_unit.Model.ok t.crc then 1 else 0 in
+    45	    let ext = dp lor (dm lsl 1) lor (ok lsl p_crc_ok) lor (rdy lsl p_rdy) in
+    46	    let raw = (poe land po) lor (lnot poe land ext) land 0xFF in
+    47	    let eff = Isa_ls.step st ~mem ~pin_in:t.s2 ~host_in ~host_in_valid in
+    48	    Crc_unit.Model.step t.crc ~en:(bitv po p_crc_en) ~frame:(1 - bitv po p_idle) ~stb:(bitv po p_stb) ~value:(bitv po p_value);
+    49	    t.s2 <- t.s1; t.s1 <- raw;
+    50	    eff
+    51	end
+    52	
+    53	(* the RTL in Cyclesim with a one-cycle-latency instruction memory (as ../deadline-sequencer's
+    54	   harness) *)
+    55	module Rtl_sim = struct
+    56	  type t = {
+    57	    sim : Cyclesim.t_port_list;
+    58	    imem_data : Bits.t ref; dp_in : Bits.t ref; dm_in : Bits.t ref; rdy : Bits.t ref;
+    59	    host_in : Bits.t ref; host_in_valid : Bits.t ref;
+    60	    imem_addr : Bits.t ref; pin_out : Bits.t ref; pin_oe : Bits.t ref; host_out : Bits.t ref; host_out_tag : Bits.t ref;
+    61	    host_out_valid : Bits.t ref; host_in_ready : Bits.t ref; pcs : Bits.t ref;
+    62	    mutable current_addr : int; mutable pending_addr : int;
+    63	  }
+    64	  let create ?crc () =
+    65	    let sim = Cyclesim.create (circuit ?crc ()) in
+    66	    let i n = Cyclesim.in_port sim n and o n = Cyclesim.out_port sim n in
+    67	    let s = { sim; imem_data = i "imem_data"; dp_in = i "dp_in"; dm_in = i "dm_in"; rdy = i "rdy"; host_in = i "host_in";
+    68	              host_in_valid = i "host_in_valid"; imem_addr = o "imem_addr"; pin_out = o "pin_out"; pin_oe = o "pin_oe";
+    69	              host_out = o "host_out"; host_out_tag = o "host_out_tag"; host_out_valid = o "host_out_valid";
+    70	              host_in_ready = o "host_in_ready"; pcs = o "pcs"; current_addr = 0; pending_addr = 0 } in
+    71	    let clear = i "clear" in
+    72	    clear := Bits.vdd; Cyclesim.cycle sim; clear := Bits.gnd;
+    73	    s.current_addr <- 0; s.pending_addr <- Bits.to_int !(s.imem_addr);
+    74	    s
+    75	  let step s ~(mem : int array array) ~dp ~dm ~rdy ~host_in ~host_in_valid =
+    76	    let a = s.current_addr in
+    77	    s.imem_data := Bits.of_int ~width:16 mem.(a lsr Isa_ls.pc_bits).(a land (Isa_ls.prog_len - 1));
+    78	    s.dp_in := Bits.of_int ~width:1 dp; s.dm_in := Bits.of_int ~width:1 dm; s.rdy := Bits.of_int ~width:1 rdy;
+    79	    s.host_in := Bits.of_int ~width:8 host_in; s.host_in_valid := Bits.of_int ~width:1 (if host_in_valid then 1 else 0);
+    80	    Cyclesim.cycle s.sim;
+    81	    s.current_addr <- s.pending_addr; s.pending_addr <- Bits.to_int !(s.imem_addr);
+    82	    { Isa_ls.host_out = (if Bits.to_int !(s.host_out_valid) = 1 then Some (Bits.to_int !(s.host_out), Bits.to_int !(s.host_out_tag) = 1) else None);
+    83	      host_in_ready = Bits.to_int !(s.host_in_ready) = 1 }
+    84	  let pins s = Bits.to_int !(s.pin_out), Bits.to_int !(s.pin_oe)
+    85	  let pcs s = let v = Bits.to_int !(s.pcs) in List.init Isa_ls.n_threads (fun t -> (v lsr (t * Isa_ls.pc_bits)) land (Isa_ls.prog_len - 1))
+    86	end
+
+hook: PreToolUse
+hook: PreToolUse
+2026-09-25T06:27:54.105236Z ERROR codex_core::tools::router: error=Command blocked by PreToolUse hook: Use '| tee <file> | head/tail' instead of bare '| head/tail' to avoid discarding data. Append '# no-tee' to override.. Command: nice ionice -c3 nl -ba isa_ls.ml | head -80
+hook: PreToolUse Blocked
+hook: PreToolUse Completed
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c3 nl -ba isa_ls.ml' in /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+ succeeded in 0ms:
+     1	(* A proposed variant of the deadline sequencer ISA (../deadline-sequencer/isa.ml), written for
+     2	   low-speed USB in firmware. Everything not listed below is unchanged, and a programme for the
+     3	   original ISA that stays within 64 words per thread runs identically.
+     4	
+     5	   Changes, each backwards compatible:
+     6	   1. pc widened from 6 to 8 bits (256 words per thread, the size the original README plans for
+     7	      a 1024 x 16 SRAM). Address fields grow into unused bits: WAITP fail[7:0], JMP/JNZ addr[7:0].
+     8	   2. SKNE (opcode E) imm[7:0] inv[8]: skip the next instruction if acc <> imm (inv = 0) or if
+     9	      acc = imm (inv = 1). A skip costs the one slot of SKNE itself. The one data-dependent branch
+    10	      the original lacks: compare a received byte with a constant.
+    11	   3. SHO pair mode, bit 6: pins p and p+1 (mod 8) take two accumulator bits at once, p from the
+    12	      lower of the two (lsb mode: acc[0] to p, acc[1] to p+1, acc >>= 2; msb mode: acc[7] to p,
+    13	      acc[6] to p+1, acc <<= 2); cnt <- cnt - 1. Two pins that must change together (D+ and D-,
+    14	      SCK and MOSI, any differential pair) change on the same clock. od applies to both pins.
+    15	   4. OUT event mode, bit 8: host_out <- imm[7:0] with host_out_tag = 1 (acc untouched); plain
+    16	      OUT sends acc with tag 0. The host can then tell framing events from data bytes.
+    17	
+    18	   Encodings checked against master's ISA (the four-phase extension): it uses SETP/SHO bits
+    19	   [1:0] for a sub-slot and SHI bit 7 for quad sampling. This variant uses SHO bit 6, OUT bit 8,
+    20	   WAITP bits [7:6], JMP/JNZ bits [7:6] and opcode E, none of which master uses. *)
+    21	
+    22	let n_threads = 4
+    23	let pc_bits = 8
+    24	let prog_len = 1 lsl pc_bits
+    25	
+    26	type op = NOP | SETP | LDC | LDD | LDA | WAITP | WAITD | SHO | SHI | JMP | JNZ | OUT | IN | HALT | SKNE
+    27	
+    28	let op_of_code = function
+    29	  | 1 -> SETP | 2 -> LDC | 3 -> LDD | 4 -> LDA | 5 -> WAITP | 6 -> WAITD | 7 -> SHO | 8 -> SHI
+    30	  | 9 -> JMP | 10 -> JNZ | 11 -> OUT | 12 -> IN | 13 -> HALT | 14 -> SKNE | _ -> NOP
+    31	
+    32	let code_of_op = function
+    33	  | NOP -> 0 | SETP -> 1 | LDC -> 2 | LDD -> 3 | LDA -> 4 | WAITP -> 5 | WAITD -> 6 | SHO -> 7
+    34	  | SHI -> 8 | JMP -> 9 | JNZ -> 10 | OUT -> 11 | IN -> 12 | HALT -> 13 | SKNE -> 14
+    35	
+    36	let amask = prog_len - 1
+    37	let enc op f = (code_of_op op lsl 12) lor (f land 0xFFF)
+    38	let nop = enc NOP 0
+    39	let setp ~mask ~value ~oe = enc SETP ((mask land 0xFF) lsl 4 lor (value lsl 3) lor (oe lsl 2))
+    40	let ldc n = assert (n >= 0 && n < 4096); enc LDC n
+    41	let ldd n = assert (n >= 0 && n < 4096); enc LDD n
+    42	let lda n = enc LDA (n land 0xFF)
+    43	let waitp ~pin ~value ~fail = enc WAITP ((pin lsl 9) lor (value lsl 8) lor (fail land amask))
+    44	let waitd = enc WAITD 0
+    45	let sho ?(od = 0) ?(pair = 0) ~pin ~msb () = enc SHO ((pin lsl 9) lor (msb lsl 8) lor (od lsl 7) lor (pair lsl 6))
+    46	let shi ~pin ~msb = enc SHI ((pin lsl 9) lor (msb lsl 8))
+    47	let jmp a = enc JMP (a land amask)
+    48	let jnz a = enc JNZ (a land amask)
+    49	let out = enc OUT 0
+    50	let oute ev = enc OUT ((1 lsl 8) lor (ev land 0xFF))
+    51	let in_ = enc IN 0
+    52	let halt = enc HALT 0
+    53	let skne ?(inv = 0) imm = enc SKNE ((inv lsl 8) lor (imm land 0xFF))
+    54	
+    55	type state = {
+    56	  pcs : int array; accs : int array; cnts : int array; dls : int array;
+    57	  mutable pin_out : int; mutable pin_oe : int; mutable thread : int;
+    58	}
+    59	
+    60	let init () = {
+    61	  pcs = Array.make n_threads 0; accs = Array.make n_threads 0; cnts = Array.make n_threads 0;
+    62	  dls = Array.make n_threads 0; pin_out = 0; pin_oe = 0; thread = 0;
+    63	}
+    64	
+    65	type effects = { host_out : (int * bool) option; host_in_ready : bool }
+    66	
+    67	let step st ~(mem : int array array) ~pin_in ~host_in ~host_in_valid =
+    68	  let t = st.thread in
+    69	  let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
+    70	  let instr = mem.(t).(pc) in
+    71	  let op = op_of_code ((instr lsr 12) land 0xF) in
+    72	  let imm12 = instr land 0xFFF and imm8 = instr land 0xFF in
+    73	  let pin = (instr lsr 9) land 7 and pin_val = (instr lsr 8) land 1 in
+    74	  let addr = instr land amask in
+    75	  let od = (instr lsr 7) land 1 and pair = (instr lsr 6) land 1 in
+    76	  let mask8 = (instr lsr 4) land 0xFF and setv = (instr lsr 3) land 1 and seto = (instr lsr 2) land 1 in
+    77	  let pin_bit = (pin_in lsr pin) land 1 in
+    78	  let pc_next = ref ((pc + 1) land amask) in
+    79	  let acc_next = ref acc and cnt_next = ref cnt in
+    80	  let dl_next = ref (if dl = 0 then 0 else dl - 1) in
+    81	  let host_out = ref None and host_in_ready = ref false in
+    82	  let stay () = pc_next := pc in
+    83	  let set_bit p v =
+    84	    if od = 1 then begin
+    85	      st.pin_out <- st.pin_out land lnot (1 lsl p);
+    86	      st.pin_oe <- (st.pin_oe land lnot (1 lsl p)) lor ((1 - v) lsl p)
+    87	    end else st.pin_out <- (st.pin_out land lnot (1 lsl p)) lor (v lsl p) in
+    88	  (match op with
+    89	   | NOP -> ()
+    90	   | SETP ->
+    91	     st.pin_out <- (st.pin_out land lnot mask8) lor (if setv = 1 then mask8 else 0);
+    92	     st.pin_oe <- (st.pin_oe land lnot mask8) lor (if seto = 1 then mask8 else 0)
+    93	   | LDC -> cnt_next := imm12
+    94	   | LDD -> dl_next := imm12
+    95	   | LDA -> acc_next := imm8
+    96	   | WAITP -> if pin_bit <> pin_val then (if dl = 0 then pc_next := addr else stay ())
+    97	   | WAITD -> if dl <> 0 then stay ()
+    98	   | SHO ->
+    99	     if pair = 1 then begin
+   100	       let b0, b1 = if pin_val = 1 then (acc lsr 7) land 1, (acc lsr 6) land 1 else acc land 1, (acc lsr 1) land 1 in
+   101	       set_bit pin b0; set_bit ((pin + 1) land 7) b1;
+   102	       acc_next := (if pin_val = 1 then (acc lsl 2) land 0xFF else acc lsr 2)
+   103	     end else begin
+   104	       set_bit pin (if pin_val = 1 then (acc lsr 7) land 1 else acc land 1);
+   105	       acc_next := (if pin_val = 1 then (acc lsl 1) land 0xFF else acc lsr 1)
+   106	     end;
+   107	     cnt_next := (cnt - 1) land 0xFFF
+   108	   | SHI ->
+   109	     acc_next := (if pin_val = 1 then ((acc lsl 1) land 0xFF) lor pin_bit else (acc lsr 1) lor (pin_bit lsl 7));
+   110	     cnt_next := (cnt - 1) land 0xFFF
+   111	   | JMP -> pc_next := addr
+   112	   | JNZ -> if cnt <> 0 then pc_next := addr
+   113	   | OUT -> host_out := Some (if pin_val = 1 then (imm8, true) else (acc, false))
+   114	   | IN -> if host_in_valid then (acc_next := host_in; host_in_ready := true) else stay ()
+   115	   | HALT -> stay ()
+   116	   | SKNE -> if (acc <> imm8) = (pin_val = 0) then pc_next := (pc + 2) land amask);
+   117	  st.pcs.(t) <- !pc_next; st.accs.(t) <- !acc_next; st.cnts.(t) <- !cnt_next; st.dls.(t) <- !dl_next;
+   118	  st.thread <- (t + 1) mod n_threads;
+   119	  { host_out = !host_out; host_in_ready = !host_in_ready }
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c3 nl -ba ../deadline-sequencer/isa.ml' in /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+ succeeded in 0ms:
+     1	(* The deadline sequencer ISA: executable specification.
+     2	
+     3	   Four hardware threads issue round-robin, one instruction per cycle, so thread t executes on
+     4	   every cycle congruent to t mod 4 and every instruction takes exactly one slot. Timing is exact
+     5	   by construction: nothing stalls, nothing is shared except the pins.
+     6	
+     7	   Per-thread state: pc (6 bits), acc (8-bit shift register), cnt (12-bit loop counter),
+     8	   dl (12-bit deadline, decrements once per slot while non-zero).
+     9	   Shared state: pin_out and pin_oe (8 bits each).
+    10	
+    11	   16-bit instruction, opcode in bits 15..12:
+    12	     0 NOP
+    13	     1 SETP  mask[11:4] val[3] oe[2]   masked pins <- val, their output enables <- oe
+    14	     2 LDC   imm[11:0]                 cnt <- imm
+    15	     3 LDD   imm[11:0]                 dl  <- imm (no decrement this slot)
+    16	     4 LDA   imm[7:0]                  acc <- imm
+    17	     5 WAITP pin[11:9] val[8] fail[5:0]
+    18	              proceed when pin_in[pin] = val; else if dl = 0 jump to fail; else stay
+    19	     6 WAITD                           proceed when dl = 0, else stay
+    20	     7 SHO   pin[11:9] msb[8] od[7]    pin_out[pin] <- acc bit (msb ? bit 7 : bit 0); acc shifts;
+    21	                                       cnt <- cnt - 1. With od set (open drain): pin_out[pin] <- 0
+    22	                                       and pin_oe[pin] <- not bit, i.e. drive low for 0, release for 1
+    23	     8 SHI   pin[11:9] msb[8]          pin_in[pin] shifts into acc (msb ? at bit 0 : at bit 7);
+    24	                                       cnt <- cnt - 1
+    25	     9 JMP   addr[5:0]
+    26	     A JNZ   addr[5:0]                 jump if cnt <> 0
+    27	     B OUT                             host_out <- acc, host_out_valid for one cycle
+    28	     C IN                              if host_in_valid: acc <- host_in, host_in_ready for one
+    29	                                       cycle, proceed; else stay
+    30	     D HALT                            stay forever
+    31	     E, F NOP *)
+    32	
+    33	let n_threads = 4
+    34	let pc_bits = 6
+    35	let prog_len = 1 lsl pc_bits
+    36	
+    37	type op = NOP | SETP | LDC | LDD | LDA | WAITP | WAITD | SHO | SHI | JMP | JNZ | OUT | IN | HALT
+    38	
+    39	let op_of_code = function
+    40	  | 1 -> SETP | 2 -> LDC | 3 -> LDD | 4 -> LDA | 5 -> WAITP | 6 -> WAITD | 7 -> SHO | 8 -> SHI
+    41	  | 9 -> JMP | 10 -> JNZ | 11 -> OUT | 12 -> IN | 13 -> HALT | _ -> NOP
+    42	
+    43	let code_of_op = function
+    44	  | NOP -> 0 | SETP -> 1 | LDC -> 2 | LDD -> 3 | LDA -> 4 | WAITP -> 5 | WAITD -> 6 | SHO -> 7
+    45	  | SHI -> 8 | JMP -> 9 | JNZ -> 10 | OUT -> 11 | IN -> 12 | HALT -> 13
+    46	
+    47	(* Assembler helpers: each returns the 16-bit word. *)
+    48	let enc op f = (code_of_op op lsl 12) lor (f land 0xFFF)
+    49	let nop = enc NOP 0
+    50	let setp ~mask ~value ~oe = enc SETP ((mask land 0xFF) lsl 4 lor (value lsl 3) lor (oe lsl 2))
+    51	let ldc n = enc LDC n
+    52	let ldd n = enc LDD n
+    53	let lda n = enc LDA (n land 0xFF)
+    54	let waitp ~pin ~value ~fail = enc WAITP ((pin lsl 9) lor (value lsl 8) lor (fail land 0x3F))
+    55	let waitd = enc WAITD 0
+    56	let sho ?(od = 0) ~pin ~msb () = enc SHO ((pin lsl 9) lor (msb lsl 8) lor (od lsl 7))
+    57	let shi ~pin ~msb = enc SHI ((pin lsl 9) lor (msb lsl 8))
+    58	let jmp a = enc JMP (a land 0x3F)
+    59	let jnz a = enc JNZ (a land 0x3F)
+    60	let out = enc OUT 0
+    61	let in_ = enc IN 0
+    62	let halt = enc HALT 0
+    63	
+    64	(* Interpreter. *)
+    65	type state = {
+    66	  pcs : int array; accs : int array; cnts : int array; dls : int array;
+    67	  mutable pin_out : int; mutable pin_oe : int; mutable thread : int;
+    68	}
+    69	
+    70	let init () = {
+    71	  pcs = Array.make n_threads 0; accs = Array.make n_threads 0; cnts = Array.make n_threads 0;
+    72	  dls = Array.make n_threads 0; pin_out = 0; pin_oe = 0; thread = 0;
+    73	}
+    74	
+    75	type effects = { host_out : int option; host_in_ready : bool }
+    76	
+    77	(* One cycle: the current thread executes one instruction from [mem.(thread).(pc)]. *)
+    78	let step st ~(mem : int array array) ~pin_in ~host_in ~host_in_valid =
+    79	  let t = st.thread in
+    80	  let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
+    81	  let instr = mem.(t).(pc) in
+    82	  let op = op_of_code ((instr lsr 12) land 0xF) in
+    83	  let imm12 = instr land 0xFFF and imm8 = instr land 0xFF in
+    84	  let pin = (instr lsr 9) land 7 and pin_val = (instr lsr 8) land 1 in
+    85	  let addr6 = instr land 0x3F in
+    86	  let od = (instr lsr 7) land 1 in
+    87	  let mask8 = (instr lsr 4) land 0xFF and setv = (instr lsr 3) land 1 and seto = (instr lsr 2) land 1 in
+    88	  let pin_bit = (pin_in lsr pin) land 1 in
+    89	  let pc_next = ref ((pc + 1) land (prog_len - 1)) in
+    90	  let acc_next = ref acc and cnt_next = ref cnt in
+    91	  let dl_next = ref (if dl = 0 then 0 else dl - 1) in
+    92	  let host_out = ref None and host_in_ready = ref false in
+    93	  let stay () = pc_next := pc in
+    94	  let set_pin_bit v = st.pin_out <- (st.pin_out land lnot (1 lsl pin)) lor (v lsl pin) in
+    95	  (match op with
+    96	   | NOP -> ()
+    97	   | SETP ->
+    98	     st.pin_out <- (st.pin_out land lnot mask8) lor (if setv = 1 then mask8 else 0);
+    99	     st.pin_oe <- (st.pin_oe land lnot mask8) lor (if seto = 1 then mask8 else 0)
+   100	   | LDC -> cnt_next := imm12
+   101	   | LDD -> dl_next := imm12
+   102	   | LDA -> acc_next := imm8
+   103	   | WAITP -> if pin_bit <> pin_val then (if dl = 0 then pc_next := addr6 else stay ())
+   104	   | WAITD -> if dl <> 0 then stay ()
+   105	   | SHO ->
+   106	     let b = if pin_val = 1 then (acc lsr 7) land 1 else acc land 1 in
+   107	     if od = 1 then begin
+   108	       set_pin_bit 0;
+   109	       st.pin_oe <- (st.pin_oe land lnot (1 lsl pin)) lor ((1 - b) lsl pin)
+   110	     end else set_pin_bit b;
+   111	     acc_next := (if pin_val = 1 then (acc lsl 1) land 0xFF else acc lsr 1);
+   112	     cnt_next := (cnt - 1) land 0xFFF
+   113	   | SHI ->
+   114	     acc_next := (if pin_val = 1 then ((acc lsl 1) land 0xFF) lor pin_bit else (acc lsr 1) lor (pin_bit lsl 7));
+   115	     cnt_next := (cnt - 1) land 0xFFF
+   116	   | JMP -> pc_next := addr6
+   117	   | JNZ -> if cnt <> 0 then pc_next := addr6
+   118	   | OUT -> host_out := Some acc
+   119	   | IN -> if host_in_valid then (acc_next := host_in; host_in_ready := true) else stay ()
+   120	   | HALT -> stay ());
+   121	  st.pcs.(t) <- !pc_next; st.accs.(t) <- !acc_next; st.cnts.(t) <- !cnt_next; st.dls.(t) <- !dl_next;
+   122	  st.thread <- (t + 1) mod n_threads;
+   123	  { host_out = !host_out; host_in_ready = !host_in_ready }
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c3 rg -n "let (directed|random_session)|expect_silence|crc_en|frame|silent_ok|contention|No_reply|bad PID|bad CRC" scenario.ml bench.ml README.md' in /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+ succeeded in 0ms:
+README.md:31:  - no bus contention;
+README.md:40:    - bad CRC5 and bad CRC16;
+README.md:63:| packets the device had to ignore (bad CRC5, bad CRC16, missing stuff bit, other address) | 214, all ignored | 214, all ignored |
+README.md:77:| reply early | caught: turnaround 1.8 bits | caught: bus contention with the host's EOP |
+README.md:80:Among the stimuli, bad CRC5, bad CRC16 and missing stuff bits must be met with silence. They
+README.md:104:    packet with a bad PID can never pass the CRC check. That is the data PID check, done in
+README.md:141:back (ok). A frame signal qualifies the strobes. Protocol knowledge is configuration: polynomial,
+README.md:180:  - So it can recognise tokens, but only framed (right after a PID) and one matcher per endpoint
+scenario.ml:9:let directed b ~addr =
+scenario.ml:22:  send b (Ls_host.token ~corrupt_crc:true Ls_host.pid_in ~addr ~ep:0); expect_silence b "IN with a bad CRC5";
+scenario.ml:24:  send b (Ls_host.token Ls_host.pid_in ~addr:((addr + 1) land 0x7F) ~ep:0); expect_silence b "IN to another address";
+scenario.ml:28:  expect_silence b "SETUP data with a bad CRC16";
+scenario.ml:34:  expect_silence b "SETUP data missing a stuff bit";
+scenario.ml:43:let random_session b ~n =
+scenario.ml:80:       expect_silence b "token with a bad CRC5"
+scenario.ml:83:       expect_silence b "token to another address"
+scenario.ml:88:       expect_silence b "SETUP data with a bad CRC16"
+scenario.ml:94:       expect_silence b "SETUP data missing a stuff bit"
+bench.ml:5:   device's; both at once is contention and an error; neither is idle J (the device's pull-up on
+bench.ml:36:  mutable silent_ok : int;
+bench.ml:42:    turnarounds = []; naks_tolerated = 0; replies = 0; packets_sent = 0; keep_alives = 0; resets = 0; silent_ok = 0; verbose }
+bench.ml:62:    | Some s, Some _ -> error b "bus contention: host and device drive together"; Ls_host.phy s in
+bench.ml:96:type rx = No_reply | Reply of Ls_host.rx_result * float
+bench.ml:107:  | None -> No_reply
+bench.ml:125:  | No_reply -> "no reply"
+bench.ml:134:  | No_reply -> Some Ref_device.Silent
+bench.ml:219:let expect_silence b what =
+bench.ml:221:  | No_reply -> b.silent_ok <- b.silent_ok + 1; if b.verbose then Printf.printf "    %-28s no reply\n" what
+bench.ml:243:    b.dut.name b.ppm b.now b.packets_sent b.replies mn mx b.naks_tolerated b.silent_ok b.keep_alives b.resets (b.dut.mismatches ()) (List.length b.errors)
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c3 nl -ba scenario.ml' in /home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls
+ succeeded in 0ms:
+     1	(* Test scenarios, written against Bench and so run unchanged on every device under test. *)
+     2	open Bench
+     3	
+     4	let report_of rng = List.init 8 (fun i -> if i = 1 then 0 else if i = 0 then Random.State.int rng 256 land 0x0F else Random.State.int rng 0x66)
+     5	
+     6	let offer b r = b.dut.offer_report r; Queue.push r b.refd.Ref_device.reports
+     7	
+     8	(* the full enumeration, reports, and the packets a device must ignore *)
+     9	let directed b ~addr =
+    10	  if b.verbose then print_endline "  -- enumeration (with a 10 ms bus reset after the first descriptor read)";
+    11	  enumerate b ~addr;
+    12	  if b.verbose then print_endline "  -- keep-alives, then interrupt IN on endpoint 1";
+    13	  for _ = 1 to 3 do keep_alive b; idle_bits b 30.0 done;
+    14	  ignore (in_tx b ~addr ~ep:1);                          (* nothing pending: NAK *)
+    15	  let r1 = [ 0x02; 0x00; 0x0B; 0x00; 0x00; 0x00; 0x00; 0x00 ] and r2 = [ 0x00; 0x00; 0x08; 0x0F; 0x00; 0x00; 0x00; 0x00 ] in
+    16	  offer b r1; idle_bits b 10.0;
+    17	  ignore (in_until_data b ~addr ~ep:1);
+    18	  offer b r2; idle_bits b 10.0;
+    19	  ignore (in_until_data b ~addr ~ep:1);
+    20	  ignore (in_tx b ~addr ~ep:1);
+    21	  if b.verbose then print_endline "  -- packets the device must ignore";
+    22	  send b (Ls_host.token ~corrupt_crc:true Ls_host.pid_in ~addr ~ep:0); expect_silence b "IN with a bad CRC5";
+    23	  gap b;
+    24	  send b (Ls_host.token Ls_host.pid_in ~addr:((addr + 1) land 0x7F) ~ep:0); expect_silence b "IN to another address";
+    25	  gap b;
+    26	  send b (Ls_host.token Ls_host.pid_setup ~addr ~ep:0); gap b;
+    27	  send b (Ls_host.data_packet ~corrupt_crc:true Ls_host.pid_data0 (get_descriptor ~typ:1 ~len:18 ()));
+    28	  expect_silence b "SETUP data with a bad CRC16";
+    29	  gap b;
+    30	  let stuffed = get_descriptor ~typ:1 ~len:0xFF () in      (* 0xFF in wLength forces a stuff bit *)
+    31	  assert (Ls_host.stuff_count (Ls_host.data_packet Ls_host.pid_data0 stuffed) > 0);
+    32	  send b (Ls_host.token Ls_host.pid_setup ~addr ~ep:0); gap b;
+    33	  send ~skip_stuff:0 b (Ls_host.data_packet Ls_host.pid_data0 stuffed);
+    34	  expect_silence b "SETUP data missing a stuff bit";
+    35	  gap b;
+    36	  (* the device must still work after all that *)
+    37	  control_read b ~addr (get_descriptor ~typ:1 ~len:18 ());
+    38	  if b.verbose then print_endline "  -- an unsupported request is stalled";
+    39	  control_read b ~addr [ 0x80; 0x06; 0x00; 0x03; 0x00; 0x00; 0xFF; 0x00 ];   (* string descriptor: none *)
+    40	  control_read b ~addr (get_descriptor ~typ:2 ~len:34 ())
+    41	
+    42	(* constrained random traffic *)
+    43	let random_session b ~n =
+    44	  let rng = b.rng in
+    45	  let addr = ref (1 + Random.State.int rng 127) in
+    46	  let short_reset () = bus_reset b (300 + Random.State.int rng 6000); idle_bits b 20.0 in
+    47	  let set_address a = control_nodata b ~addr:0 [ 0x00; 0x05; a; 0x00; 0x00; 0x00; 0x00; 0x00 ] in
+    48	  let bring_up () =
+    49	    set_address !addr; idle_bits b 20.0;
+    50	    control_nodata b ~addr:!addr [ 0x00; 0x09; 0x01; 0x00; 0x00; 0x00; 0x00; 0x00 ] in
+    51	  short_reset (); bring_up ();
+    52	  for _ = 1 to n do
+    53	    let a = !addr in
+    54	    (match Random.State.int rng 20 with
+    55	     | 0 | 1 -> keep_alive b
+    56	     | 2 -> idle_bits b (Random.State.float rng 300.0)
+    57	     | 3 | 4 ->
+    58	       let typ = [| 1; 2; 0x22; 3; 7 |].(Random.State.int rng 5) in
+    59	       let req = if typ = 0x22 then 0x81 else 0x80 in
+    60	       control_read b ~addr:a (get_descriptor ~req ~typ ~len:(Random.State.int rng 256) ())
+    61	     | 5 ->
+    62	       (* a random request: supported ones behave, the rest are stalled *)
+    63	       let s = List.init 8 (fun _ -> Random.State.int rng 256) in
+    64	       let s = List.mapi (fun i x -> if i = 0 then [| 0x00; 0x80; 0x21; 0xA1; 0x02; 0x82 |].(Random.State.int rng 6) else if i = 1 then [| 0x00; 0x01; 0x03; 0x06; 0x08; 0x0A; 0x0B; 0x0C |].(Random.State.int rng 8) else x) s in
+    65	       (* keep SET_ADDRESS out of here: it is exercised on purpose below *)
+    66	       if not (List.nth s 0 = 0x00 && List.nth s 1 = 0x05) then
+    67	         (if List.nth s 0 land 0x80 <> 0 then control_read b ~addr:a s else control_nodata b ~addr:a s)
+    68	     | 6 -> control_nodata b ~addr:a [ 0x21; 0x0A; Random.State.int rng 256; 0x00; 0x00; 0x00; 0x00; 0x00 ]
+    69	     | 7 | 8 | 9 ->
+    70	       if Queue.is_empty b.refd.reports && Random.State.bool rng then (offer b (report_of rng); idle_bits b 5.0);
+    71	       ignore (in_tx b ~addr:a ~ep:1)
+    72	     | 10 ->
+    73	       (* the host's ACK is lost: the device must send the same data again *)
+    74	       if Queue.is_empty b.refd.reports then (offer b (report_of rng); idle_bits b 5.0);
+    75	       (match in_tx ~ack:false b ~addr:a ~ep:1 with
+    76	        | Some (Ref_device.Data _) -> idle_bits b 20.0; ignore (in_until_data b ~addr:a ~ep:1)
+    77	        | _ -> ())
+    78	     | 11 ->
+    79	       send b (Ls_host.token ~corrupt_crc:true [| Ls_host.pid_in; Ls_host.pid_setup; Ls_host.pid_out |].(Random.State.int rng 3) ~addr:a ~ep:(Random.State.int rng 2));
+    80	       expect_silence b "token with a bad CRC5"
+    81	     | 12 ->
+    82	       send b (Ls_host.token Ls_host.pid_in ~addr:((a + 1 + Random.State.int rng 126) land 0x7F) ~ep:(Random.State.int rng 2));
+    83	       expect_silence b "token to another address"
+    84	     | 13 ->
+    85	       let s = get_descriptor ~typ:1 ~len:(Random.State.int rng 256) () in
+    86	       send b (Ls_host.token Ls_host.pid_setup ~addr:a ~ep:0); gap b;
+    87	       send b (Ls_host.data_packet ~corrupt_crc:true Ls_host.pid_data0 s);
+    88	       expect_silence b "SETUP data with a bad CRC16"
+    89	     | 14 ->
+    90	       let s = get_descriptor ~typ:2 ~len:0xFF () in
+    91	       let p = Ls_host.data_packet Ls_host.pid_data0 s in
+    92	       send b (Ls_host.token Ls_host.pid_setup ~addr:a ~ep:0); gap b;
+    93	       send ~skip_stuff:(Random.State.int rng (Ls_host.stuff_count p)) b p;
+    94	       expect_silence b "SETUP data missing a stuff bit"
+    95	     | 15 ->
+    96	       (* OUT data to endpoint 0 outside a transfer, random payload *)
+    97	       ignore (out_tx b ~addr:a ~ep:0 ~pid:Ls_host.pid_data0 (List.init (Random.State.int rng 9) (fun _ -> Random.State.int rng 256)))
+    98	     | 16 -> ignore (out_tx b ~addr:a ~ep:1 ~pid:Ls_host.pid_data0 [ Random.State.int rng 256 ])
+    99	     | 17 -> addr := 1 + Random.State.int rng 127; control_nodata b ~addr:a [ 0x00; 0x05; !addr; 0x00; 0x00; 0x00; 0x00; 0x00 ]; idle_bits b 20.0
+   100	     | 18 -> short_reset (); bring_up ()
+   101	     | _ -> ignore (in_tx b ~addr:a ~ep:0));
+   102	    (* random gap between transactions, sometimes with a keep-alive in it *)
+   103	    idle_bits b (2.0 +. Random.State.float rng 40.0);
+   104	    if Random.State.int rng 8 = 0 then (keep_alive b; idle_bits b (2.0 +. Random.State.float rng 10.0))
+   105	  done
+
+codex
+### Findings
+
+- **Low — bad non-DATA PID can leave CRC armed.** T1 enables CRC after *every* PID at [firmware.ml:187–188](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/firmware.ml:187). For non-IN PIDs, `notin` drains the packet without disarming CRC; only the `drain1` path does so ([firmware.ml:193–195](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/firmware.ml:193)). In particular, DATA0/DATA1 fall through to `dkeep`, which waits for IDLE and returns to `idle1` without clearing CRC_EN. T1 then clears it at the next SOP, but T2’s data receiver waits for IDLE to fall before syncing for the next packet ([firmware.ml:235–236](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/firmware.ml:235)). So a host data packet arriving immediately after that non-DATA packet can be missed by T1’s PID check while T2 processes it; the claim that this path guarantees a bad PID cannot pass CRC is unsupported. The logs exercise bad-CRC SETUP data, but don’t establish this back-to-back PID case.
+
+- **Low — silence assertions can pass vacuously for a missing response.** `expect_silence` treats `No_reply` as success ([bench.ml:219–222](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/bench.ml:219)); it does not check that the device answered preceding valid traffic. Directed enumeration and report checks do require replies, so the overall directed run is not wholly vacuous, but a broken device could still pass an individual “must ignore” assertion by never answering that packet.
+
+### Claims that hold
+
+- **T0 / original ISA:** T0 uses the original instruction constructors; `stock_events = true` selects `LDA`+`OUT` in place of the variant’s event instruction ([firmware.ml:64–69](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/firmware.ml:64)). `t0_stock` assembles it to `Isa.prog_len`, then runs the original `Isa` interpreter and `Harness` RTL ([main_fw.ml:99–105](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/main_fw.ml:99)); it checks size ≤64 and lockstep. The firmware log reports 64 words used, 60/60 packets per clock offset, zero mismatches ([run-fw-8seeds.log:12–24](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/run-fw-8seeds.log:12)). **Supported.**
+
+- **Lockstep:** The full-system bench compares pins, host-port effects/readiness, and PCs every clock ([dut_fw.ml](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/dut_fw.ml), `step` comparison); T0’s original-sequencer harness also compares outputs and PCs each clock ([main_fw.ml:117–122](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/main_fw.ml:117)). These checks would detect those compared-state divergences. **Supported, with comparison scope as stated.**
+
+- **Turnaround/contention:** `receive` measures SOP from the host EOP J edge and flags values outside 2–6.5 bit times ([bench.ml:98–120](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/bench.ml:98)); `tick` flags simultaneous host/device drive ([bench.ml:55–65](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/bench.ml:55)). The logs show late/early controls caught, including contention for early firmware response ([run-fw-8seeds.log:121–124](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/run-fw-8seeds.log:121)). **Supported.**
+
+- **Encoding collision:** The variant uses SHO bit 6, OUT bit 8, WAITP/JMP/JNZ bits [7:6], and opcode E ([isa_ls.ml:18–20](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/isa_ls.ml:18)); the cited master extension uses SETP/SHO bits [1:0] and SHI bit 7. No collision is evident in these fields. **Supported for the stated extension.**
+tokens used
+54,120
+### Findings
+
+- **Low — bad non-DATA PID can leave CRC armed.** T1 enables CRC after *every* PID at [firmware.ml:187–188](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/firmware.ml:187). For non-IN PIDs, `notin` drains the packet without disarming CRC; only the `drain1` path does so ([firmware.ml:193–195](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/firmware.ml:193)). In particular, DATA0/DATA1 fall through to `dkeep`, which waits for IDLE and returns to `idle1` without clearing CRC_EN. T1 then clears it at the next SOP, but T2’s data receiver waits for IDLE to fall before syncing for the next packet ([firmware.ml:235–236](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/firmware.ml:235)). So a host data packet arriving immediately after that non-DATA packet can be missed by T1’s PID check while T2 processes it; the claim that this path guarantees a bad PID cannot pass CRC is unsupported. The logs exercise bad-CRC SETUP data, but don’t establish this back-to-back PID case.
+
+- **Low — silence assertions can pass vacuously for a missing response.** `expect_silence` treats `No_reply` as success ([bench.ml:219–222](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/bench.ml:219)); it does not check that the device answered preceding valid traffic. Directed enumeration and report checks do require replies, so the overall directed run is not wholly vacuous, but a broken device could still pass an individual “must ignore” assertion by never answering that packet.
+
+### Claims that hold
+
+- **T0 / original ISA:** T0 uses the original instruction constructors; `stock_events = true` selects `LDA`+`OUT` in place of the variant’s event instruction ([firmware.ml:64–69](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/firmware.ml:64)). `t0_stock` assembles it to `Isa.prog_len`, then runs the original `Isa` interpreter and `Harness` RTL ([main_fw.ml:99–105](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/main_fw.ml:99)); it checks size ≤64 and lockstep. The firmware log reports 64 words used, 60/60 packets per clock offset, zero mismatches ([run-fw-8seeds.log:12–24](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/run-fw-8seeds.log:12)). **Supported.**
+
+- **Lockstep:** The full-system bench compares pins, host-port effects/readiness, and PCs every clock ([dut_fw.ml](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/dut_fw.ml), `step` comparison); T0’s original-sequencer harness also compares outputs and PCs each clock ([main_fw.ml:117–122](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/main_fw.ml:117)). These checks would detect those compared-state divergences. **Supported, with comparison scope as stated.**
+
+- **Turnaround/contention:** `receive` measures SOP from the host EOP J edge and flags values outside 2–6.5 bit times ([bench.ml:98–120](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/bench.ml:98)); `tick` flags simultaneous host/device drive ([bench.ml:55–65](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/bench.ml:55)). The logs show late/early controls caught, including contention for early firmware response ([run-fw-8seeds.log:121–124](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/run-fw-8seeds.log:121)). **Supported.**
+
+- **Encoding collision:** The variant uses SHO bit 6, OUT bit 8, WAITP/JMP/JNZ bits [7:6], and opcode E ([isa_ls.ml:18–20](/home/matthias/prog/janestreet/emulator-wt-proto-usb-ls/prototypes/usb-ls/isa_ls.ml:18)); the cited master extension uses SETP/SHO bits [1:0] and SHI bit 7. No collision is evident in these fields. **Supported for the stated extension.**

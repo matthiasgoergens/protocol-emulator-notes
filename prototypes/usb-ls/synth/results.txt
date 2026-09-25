@@ -1,0 +1,6 @@
+usb_ls_device: cells=2111 area_um2=31642.947000 flops=310
+deadline_sequencer: cells=1072 area_um2=17266.397400 flops=179
+deadline_sequencer_ls: cells=1280 area_um2=19776.582000 flops=188
+crc_usb16: cells=110 area_um2=1854.316800 flops=22
+crc_prog: cells=281 area_um2=3621.353400 flops=22
+usb_ls_firmware_system: cells=1429 area_um2=22515.759000 flops=226
