@@ -1,0 +1,29 @@
+parser vs pynmea2 1.19.0: 701 RMC sentences compared, 0 disagree
+  our parser: {'sentences': 5616, 'bad_checksum': 1, 'rmc': 701, 'gga': 702, 'other': 4212}
+  pynmea2 checksum rejections: 1; ours: 1
+  control, checksum test disabled: 702 RMC accepted (vs 701); so the checksum is what rejects the corrupted one
+  PARSER PASS
+
+precision, 5-decimal minutes, 1-500 m, 4000 random pairs per latitude:
+  lat   0.00: distance err arith max   1.22 cm p99   0.98 cm | total max   2.97 cm | bearing (>5 m) arith max 0.0720 deg, total max 0.188 deg
+  lat   1.34: distance err arith max   1.14 cm p99   0.93 cm | total max   2.59 cm | bearing (>5 m) arith max 0.0705 deg, total max 0.223 deg
+  lat  30.00: distance err arith max   1.29 cm p99   0.98 cm | total max   2.74 cm | bearing (>5 m) arith max 0.0646 deg, total max 0.181 deg
+  lat  45.00: distance err arith max   1.63 cm p99   0.99 cm | total max   2.61 cm | bearing (>5 m) arith max 0.0704 deg, total max 0.194 deg
+  lat  60.00: distance err arith max   2.12 cm p99   1.17 cm | total max   2.60 cm | bearing (>5 m) arith max 0.0616 deg, total max 0.162 deg
+  lat  75.00: distance err arith max   3.30 cm p99   2.04 cm | total max   3.83 cm | bearing (>5 m) arith max 0.0579 deg, total max 0.161 deg
+
+precision, 4-decimal minutes, 1-500 m, 4000 random pairs per latitude:
+  lat   0.00: distance err arith max   1.28 cm p99   0.98 cm | total max  22.73 cm | bearing (>5 m) arith max 0.0559 deg, total max 1.704 deg
+  lat   1.34: distance err arith max   1.15 cm p99   0.93 cm | total max  23.51 cm | bearing (>5 m) arith max 0.0695 deg, total max 2.186 deg
+  lat  30.00: distance err arith max   1.29 cm p99   0.95 cm | total max  22.46 cm | bearing (>5 m) arith max 0.0648 deg, total max 2.178 deg
+  lat  45.00: distance err arith max   1.56 cm p99   0.96 cm | total max  19.44 cm | bearing (>5 m) arith max 0.0693 deg, total max 1.680 deg
+  lat  60.00: distance err arith max   2.04 cm p99   1.11 cm | total max  19.11 cm | bearing (>5 m) arith max 0.0604 deg, total max 1.581 deg
+  lat  75.00: distance err arith max   3.42 cm p99   1.99 cm | total max  17.94 cm | bearing (>5 m) arith max 0.0569 deg, total max 1.670 deg
+
+control: kx from cos(0) instead of cos(target latitude) (should fail at high latitude):
+  lat   0.00: distance err arith max   1.13 cm p99   0.90 cm | total max   2.44 cm | bearing (>5 m) arith max 0.0542 deg, total max 0.132 deg
+  lat   1.34: distance err arith max  13.28 cm p99  10.41 cm | total max  13.87 cm | bearing (>5 m) arith max 0.0514 deg, total max 0.153 deg
+  lat  30.00: distance err arith max 7234.48 cm p99 5417.97 cm | total max 7233.79 cm | bearing (>5 m) arith max 4.2242 deg, total max 4.272 deg
+  lat  45.00: distance err arith max 18568.41 cm p99 15852.80 cm | total max 18569.00 cm | bearing (>5 m) arith max 9.9882 deg, total max 10.066 deg
+  lat  60.00: distance err arith max 36995.43 cm p99 30526.07 cm | total max 36995.66 cm | bearing (>5 m) arith max 19.6189 deg, total max 19.637 deg
+  lat  75.00: distance err arith max 139280.17 cm p99 104040.31 cm | total max 139280.70 cm | bearing (>5 m) arith max 36.2078 deg, total max 36.209 deg
