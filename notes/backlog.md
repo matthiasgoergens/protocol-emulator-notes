@@ -134,6 +134,24 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
   Each needs its fence written down: which interfaces re-synchronise, what the verifier may
   assume, and how a run is still replayed.
+- **Learn from other public entries' verification** (study of 15 repositories on 2026-09-25,
+  private notes in `~/prog/janestreet/competitor-notes/`). Adopt, with credit:
+  - **Mutation against formal proofs:** plant a broken deadline arm and require the BMC proof to
+    reject it. At least six entries do some form of this; examples are MarcosAsh's SVA "teeth",
+    WilliamZhang20's named RTL mutants, and fjpolo's equivalence-checking miter.
+  - **A programme verifier by abstract interpretation:** MarcosAsh/protocol-emulator
+    `src/analyser.ml` (OCaml, intervals over phase, period and cycles since an edge). It refuses
+    firmware that could miss a deadline. Read it before building ours.
+  - **A non-interference miter for pin and port arbitration between threads**, after
+    umerimran-10xe's `protoemu_arb_miter.v`: assume equal inputs for the owner, assert equal
+    outputs. It is the formal form of "ports never double-booked" and of the isolation proof in
+    the bridges work.
+  - **A verification-record format:** hash-pinned inputs, a "what this is NOT" section and honest
+    non-closure reports (2AMLogic).
+  - **A cocotb layer against the hardened netlist**, as Tiny Tapeout's own CI expects; several
+    entries have one.
+  - **An audit of our specification by formal methods,** as TejasDasa's `docs/formal.md`
+    documents: five specification gaps found that 100 %-coverage random testing had missed.
 - **A programme verifier**, built before the showpieces: deadlines met, every read inside its
   row's lifetime at the chosen temperature bin, ports never double-booked.
 - **A pessimising scheduler** as a test oracle (after Knuth's SHOAP).
