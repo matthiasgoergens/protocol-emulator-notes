@@ -72,9 +72,19 @@ def main():
     lines.append(f"direct reception, gain per carrier count: " + " ".join(f"{x:.1f}" for x in direct))
     lines.append(f"image through the LO's third harmonic: {img:.1f} per count = {ratio:.3f} of direct "
                  f"({20*np.log10(abs(ratio)):.1f} dB; a square wave's third harmonic is 1/3, -9.5 dB)")
+    if len(sys.argv) > 3 and sys.argv[3] == "--expect-fault":
+        own = [fit(ys[k], T0 + np.arange(len(ys[k])) * 5 * 240 / 60e6, k)[1] for k in range(4)]
+        ok = all(np.isfinite(c) and abs(c) < 0.1 for c in own)
+        lines.append(f"fault control: own-station correlations {' '.join(f'{c:+.3f}' for c in own)}; "
+                     + ("PASS (all below 0.1)" if ok else "FAIL"))
+    else:
+        own = [fit(ys[k], T0 + np.arange(len(ys[k])) * 5 * 240 / 60e6, k)[1] for k in range(4)]
+        ok = all(c > 0.95 for c in own)
+        lines.append(f"own-station correlations {' '.join(f'{c:+.3f}' for c in own)}: " + ("PASS (all above 0.95)" if ok else "FAIL"))
     out.write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
     plot(ys, d)
+    sys.exit(0 if ok else 1)
 
 
 def plot(ys, d):

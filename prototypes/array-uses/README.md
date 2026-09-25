@@ -26,14 +26,20 @@ models only (the host machine was loaded), run one at a time under `nice ionice`
   It is prototyped (`ddc.ml`), and each channel recovers its station with correlation 0.985–0.999.
   It is still DSP at the pins, the fourth known use, fed by an ADC rather than a 1-bit pin. It
   needs eight input pins, and it inherits a −9.5 dB image from mixing with a square wave.
+  The case is conditional: the chip's pin stage must deliver eight parallel ADC bits per clock
+  into a segment feed, which the architecture does not yet provide. The model is a synthetic
+  scene (three stations, Gaussian noise); it shows the configuration demodulates, not how
+  sensitive or robust a real receiver would be.
 - **Everything else in the brief runs on the host.** For each candidate, one of three things holds:
   - the application's rate is a small fraction of what the RP2350 does (Viterbi for GNSS
     navigation data, PDM microphones, cellular automata, shortest paths);
   - a better host algorithm removes the brute force the array would do (Myers bit-vectors for
     edit distance, synchronous averaging for time-domain reflectometry, the GCD method for CRC
     recovery, hash chains for LZ);
-  - the problem does not fit a PE with one 16-bit link and a static operation (dynamic time
-    warping, Viterbi's add-compare-select, raycasting, Mandelbrot).
+  - no mapping at a useful rate was found for a PE with one 16-bit link and a static operation
+    (dynamic time warping, edit distance, Viterbi's add-compare-select), or the problem needs a
+    multiplier or branches (Mandelbrot, raycasting). Bank-streamed, multi-pass mappings of the
+    dynamic programmes probably exist; they are slow, and none was shown here to be impossible.
 - **The prior art's two strongest small-array problems, Viterbi and Reed-Solomon, rank low
   on *our* PE.**
   - Viterbi's add-compare-select needs two operands per step and shuffle wiring. On upe_v0 it
@@ -46,12 +52,13 @@ models only (the host machine was loaded), run one at a time under `nice ionice`
 - **At its best, the array is 1–4× the host on plain word arithmetic**, because 16 PEs × 60 MHz is
   about 1 G simple operations per second against 0.3–0.8 G for the RP2350. An order of magnitude
   appears only in three cases:
-  - an operation the M33 lacks: ±1 multiply-accumulate on multi-bit samples, 9.6×; top-K
-    insertion, 26×;
+  - an operation the M33 lacks: ±1 multiply-accumulate on multi-bit samples, 9.6×; top-16
+    insertion, 26× but only on rising data (on ordinary data the host's threshold test wins);
   - brute force that a better algorithm makes pointless: CRC search, 32×;
   - data at 60 MS/s that the host cannot touch: the receiver, 13.6×.
 - **Verdict on size: these problems justify no growth beyond 16 PEs, and on their own about 8.**
-  - Eight PEs keep a two-channel receiver, or the synthesiser at two voices plus noise.
+  - Eight PEs keep a two-channel receiver, or the synthesiser at two square voices without
+    noise (3 + 3 + offset + sigma-delta; two voices plus noise take 10).
   - Twelve or sixteen are justified, if at all, by the uses §4a already lists (video, GPS
     tracking), not by anything found here.
   - The architecture's fallback of cutting to 12 or 8 PEs if placement forces it (decision
@@ -76,9 +83,9 @@ Throughputs are rounded; the file has the exact figures.
 | **HF AM receiver, 8-bit ADC at 60 MS/s** (prototyped) | 4 PEs per channel: NCO + accumulating square-LO mixer, for I and Q | 240 M sample-ch/s | 17.6 M | 13.6 | 60 M per channel | **array** | high: shortwave radio from a Tiny Tapeout chip | done as a model; needs the ADC on 8 input pins |
 | 1-bit correlation (GPS tracking, binary NN) | designed (gps) | 960 M MAC/s | 768 M | 1.2 | 236 M (GPS) | host on paper, see note | known use | done elsewhere |
 | multi-bit × ±1 code (DSSS) | designed | 960 M | 100 M | 9.6 | none found | host | low | low |
-| edit distance | needs a second link; est | 7.5 M rows | 10.3 M (Myers) | 0.7 | none found | host | low | high |
+| edit distance | no direct mapping found (one link); est | 7.5 M rows | 10.3 M (Myers) | 0.7 | none found | host | low | high |
 | **Viterbi K=7 (CCSDS)** | no direct fit: bank streaming, two passes, per-word control bits; est | 18 M butterflies/s (bank-bound) | 8.3 M | 2.2 | 32 M at 1 Mbit/s; 8 k for GNSS | neither at 1 Mbit/s; host for GNSS | medium (the prior-art favourite) | high, and it needs extensions |
-| dynamic time warping | does not map (one link, static op) | 192 M with a second link (est) | 14.3 M | 13.4 | none at a rate | host | low–medium (timing fingerprints) | high |
+| dynamic time warping | no direct mapping found (one link, static op) | 192 M with a second link (est) | 14.3 M | 13.4 | none at a rate | host | low–medium (timing fingerprints) | high |
 | min-plus relaxation | designed, 2 PEs | 240 M | 30 M | 8.0 | 6.6 M (est) | host | low | low |
 | polyphonic synthesis (prototyped) | 3 PEs per 32-bit square voice, 2 per noise voice, 1 sigma-delta | 4 voices + noise at 60 MHz | 568 voices at 48 kHz | — | 16 voices | host could; array is self-contained | medium: audible, chiptune | done as a model |
 | 1-D cellular automaton | GF(2), est | 80 M | 16.7 M | 4.8 | 0.125 M | host | medium on a TV | medium |
@@ -88,7 +95,7 @@ Throughputs are rounded; the file has the exact figures.
 | raycaster | no fit (branchy DDA) | — | 27 M steps/s | — | 0.26 M | host (+ a bank line buffer) | high | medium, but no array |
 | LZ77 match | 32-byte window, est | 480 M | 30 M | 16 | — | host (hash chains) | low | — |
 | PDM decimation | designed | 40 M bytes/s | 37.5 M | 1.1 | 0.38 M | host | low | low |
-| top-16 of a stream | designed | 960 M | 37.5 M | 25.6 | 60 M | array only for rising data | low | low |
+| top-16 of a stream, rising data (worst case) | designed | 60 M samples/s | 2.3 M (16 steps each) | 25.6 | 60 M | array only for rising data; ordinary data: host (threshold test, est 100–150 M) | low | low |
 
 **Candidates added and dropped without a host kernel:**
 - **Spread-spectrum time-domain reflectometry** (a cable-fault finder on the Ethernet pins):
@@ -141,7 +148,9 @@ against each station's programme):
 | 3 | 6.150 MHz, an empty frequency | the 18.450 MHz station, 0.999 | 0.003 |
 
 - **Planted fault:** with the model's "negate by g" disabled, every channel's correlation with
-  every station falls to at most 0.05 (`results/ddc_fault_check.txt`). The check can fail.
+  its own station falls below 0.1 over a window that contains all four programmes
+  (`results/ddc_fault_check.txt`, which `analyse_ddc.py --expect-fault` turns into PASS or FAIL
+  and an exit status; the normal run must show all four above 0.95). The check can fail.
 - **The price of mixing without a multiplier, measured:**
   - The 18.450 MHz station appears on the empty channel 3 at 0.336 of the gain of a directly
     received one, per carrier count: −9.5 dB, the square wave's third harmonic (1/3).
@@ -173,7 +182,10 @@ against each station's programme):
 - **The tune:** 4 s, with notes and envelopes changed every 4 ms by reloading the configuration
   (`out/synth-*.wav`, `out/synth-spectrogram.png`).
 
-**Independent check** (`analyse_synth.py` → `results/synth_check.txt`):
+**Check** (`analyse_synth.py` → `results/synth_check.txt`). Its reference is built from the
+schedule the simulator logged and from the pause length that `synth.ml`'s reload loop implies, so
+it checks that the pin output follows that schedule, not that the schedule or the link timing is
+realistic. `synth.ml` exits with an error if any reload leaves a wrong configuration.
 - The WAV is fitted by least squares against four floating-point square-wave voices synthesised
   from the schedule that the run logged.
 - Every voice comes out at 29,720–30,017 against an ideal 30,000.
@@ -255,3 +267,22 @@ Build: `opam exec --switch=5.3.0 -- dune build`. Analyses: `uv run --with numpy 
 - The receiver assumes the ADC's pins feed a segment directly. The architecture's pin stage and
   feed would have to allow 8 parallel input bits per clock.
 - The Viterbi and DTW mappings are sketches with estimated clock counts, not models.
+
+## Review
+
+A codex-luna (gpt-6-luna) adversarial review of this README and its files is in
+`results/codex-review.txt`. What changed because of it:
+- **The eight-PE synthesiser claim was wrong.** Two voices plus noise take 10 PEs; eight give two
+  square voices without noise. Corrected.
+- **The receiver's planted-fault control analysed a window in which one station was silent.**
+  It was re-run over 0.35 s, and both analyses now end in PASS or FAIL with an exit status.
+- **The top-16 row compared steps with samples.** It now counts samples: worst case, rising
+  data.
+- **"Does not fit" was stronger than the evidence** for DTW and edit distance. It now reads "no
+  mapping at a useful rate found".
+- **The receiver's case is now stated as conditional** on an 8-bit parallel feed.
+- **`synth.ml` now fails on a wrong reload** instead of only reporting it.
+
+Two points were accepted as stated limits rather than fixed: the host figures are static
+models that an RP2350 run should replace; and the synthesiser's check follows the simulator's
+own schedule.

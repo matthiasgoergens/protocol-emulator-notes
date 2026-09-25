@@ -108,11 +108,12 @@ let cands = [
     kernel = "k16_pdm"; host_items_per_iter = 1.; pe_clocks = 24.;
     pe_note = "CIC integrators, one PE per stage (designed)"; port_bound = None;
     need = 3.072e6 /. 8.; verdict_override = None; need_note = "one microphone at 3.072 MHz" };
-  { name = "streaming top-16 / insertion sort"; item = "compare-shift step";
-    kernel = "k17_insert"; host_items_per_iter = 1.; pe_clocks = 1.;
-    pe_note = "S <- max(S, A), P <- loser (designed)"; port_bound = None;
-    need = 60e6; verdict_override = Some "marginal: array, but only for adversarial (rising) data";
-    need_note = "one 60 MS/s stream; on ordinary data the host tests each sample against the 16th largest first (est 2-3 cycles, 40-60 % of both cores) and inserts rarely; rising data needs 16 steps per sample (960M/s)" };
+  { name = "streaming top-16, rising data (worst case)"; item = "sample";
+    kernel = "k17_insert"; host_items_per_iter = 1. /. 16.; pe_clocks = 16.;
+    pe_note = "S <- max(S, A), P <- loser (designed): 16 PEs hold the 16 largest and take one sample per clock";
+    port_bound = None;
+    verdict_override = Some "marginal: array only for rising data; ordinary data: host";
+    need = 60e6; need_note = "one 60 MS/s stream. Host per sample: 16 compare-shift steps for rising data (the row), but on ordinary data a threshold test against the 16th largest first, est 2-3 cycles, 100-150 M samples/s, and rare insertions" };
 ]
 
 let fmt x =

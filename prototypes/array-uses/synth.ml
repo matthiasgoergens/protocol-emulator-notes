@@ -152,6 +152,7 @@ let run ?(hold = `Show) ~mode ~seconds ~out () =
   write_wav out 48000 wav;
   let oc = open_out (Filename.remove_extension out ^ "-schedule.txt") in
   Buffer.output_buffer oc log; close_out oc;
+  if !bad_loads > 0 then (Printf.eprintf "FAIL: %d configurations wrong after a chain reload\n" !bad_loads; exit 1);
   Printf.printf "%s: %d PE configurations differed from the intended one after a chain reload\n"
     (match mode with `Chain -> "chain" | `Direct -> "direct") !bad_loads;
   Printf.printf "%s: %d clocks (%.2f s), %d configuration changes, %d clocks paused for reloads (%.3f %%), pin density %.4f -> %s\n"
