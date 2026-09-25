@@ -105,6 +105,13 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
 ## Verification (Jane Street's emphasis)
 
+- **Sign-off DRC must run IHP's maximal deck ourselves.** Tiny Tapeout's precheck runs only the
+  deck's main table, which does not check the thick-oxide keep-outs (TGO.a–e), the poly end cap
+  (Gat.c), n-well enclosures, pSD rules or contact-to-gate spacing (verified in the deck
+  source; `prototypes/rule-breaks/deck/`). An accidental violation of those would pass the
+  precheck unnoticed. Deliberate breaks (`prototypes/rule-breaks/README.md`) remain our own
+  risk.
+
 - **A programme verifier**, built before the showpieces: deadlines met, every read inside its
   row's lifetime at the chosen temperature bin, ports never double-booked.
 - **A pessimising scheduler** as a test oracle (after Knuth's SHOAP).
