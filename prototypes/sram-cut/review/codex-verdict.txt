@@ -1,0 +1,146 @@
+The README’s strongest conclusions do not survive adversarial review. The drawn 6T cell is credible and DRC-clean, but the claimed near-optimality is unproved; the Monte Carlo protocol is materially broken; and the all-NMOS dismissal overstates the available simulations.
+
+## Critical findings
+
+### Monte Carlo rows do not represent one physical mismatch sample
+
+Both simulation drivers use:
+
+```spice
+.control
+set rndseed=N
+...
+source netlist.cir
+```
+
+at [sram6t.py:55](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/sim/sram6t.py:55) and [cellsim.py:92](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/sim/cellsim.py:92). They then label hold, read and write results with the same seed as though they used the same six device draws.
+
+That assumption is false:
+
+- Two saved runs with identical seed-1 `.cir` and driver `.sp` files produced different data.
+- Seed-1 hold SNM was 486.378 mV in `smoke-mc` and 477.502 mV in `mc-lay-tt-27`.
+- Across the committed MC datasets, correlations between same-row hold/read/write results are essentially zero, roughly −0.10 to +0.09.
+
+The ngspice manual documents `setseed N` as the control command for changing the generator seed. `rndseed` is principally a startup option; ngspice’s own historical issue tracker specifically documents `set rndseed` inside a control section failing to produce reproducible sequences. [ngspice manual](https://ngspice.sourceforge.io/docs/ngspice-manual.pdf), [ngspice issue #311](https://sourceforge.net/p/ngspice/bugs/311/).
+
+Consequences:
+
+- Each process appears to get fresh random draws, but the requested numeric seed does not control them.
+- Hold, read and write in one printed row are three different virtual cells.
+- Marginal mean and sigma estimates may remain approximately useful.
+- Per-seed comparisons, joint yield, worst-mode correlation and reproducibility are invalid.
+- Any fix using `setseed` must be verified by repeating identical netlists and confirming identical raw data.
+
+This alone refutes claim (3).
+
+### The all-NMOS 4T lifetime statement contradicts the raw data
+
+The README says the cell is dynamic for “3–10 µs at tt/27”. But [4tn-d0.30-a0.15-kick.txt](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/sim/results/4tn-d0.30-a0.15-kick.txt:2) shows, before the kick:
+
+- 10 µs: Q/QB = 0.703/0
+- 30 µs: 0.624/0
+- 100 µs: 0.384/0
+
+Thus it still exceeds the code’s 0.2 V retention criterion at 100 µs. The failure beginning at 10 µs is caused by the blind kick destroying or equalising the state, not passive retention. There is no committed `retention`-mode result supporting 3–10 µs.
+
+### Leakage numbers are not calculated consistently
+
+The normal 6T implementation sums VDD and both bit-line sources at [sram6t.py:84](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/sim/sram6t.py:84). The topology driver also sums the cell-supply and word-line sources at [cellsim.py:133](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/sim/cellsim.py:133).
+
+For the nominally identical 6T, this changes reported leakage by up to about 12% across the stored results. Summing currents from rails at different voltages is also not a power metric. The comparison table is therefore not strictly like-for-like, particularly for cells with a positively biased idle word line.
+
+## Layout claims
+
+The arithmetic for the actual point-symmetric construction is correct.
+
+From the [rule deck](/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.tech/klayout/tech/drc/rule_decks/sg13g2_tech_default.json):
+
+- `Act_b = 0.21`
+- `Cnt_a = 0.16`, `Cnt_c = 0.07`
+- `NW_c = NW_d = 0.31`
+- `Gat_b = Gat_c = 0.18`
+- `M1_a = 0.16`, `M1_b = 0.18`
+- Via1 landing on Metal1 is 0.21
+
+The implemented half-width at [sram6t.py:35](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/layout/sram6t.py:35) is:
+
+```text
+0.105 + 0.300 + 0.310 + 0.310 + 0.300 + 0.180 + 0.090
+= 1.595 µm
+```
+
+Hence the 3.190 µm pitch is correct.
+
+The full Metal1 height decomposition is likewise:
+
+```text
+0.105 + 0.18 + 0.16 + 0.18 + 0.16 + 0.18 + 0.105
+= 1.07 µm
+```
+
+The 4×4 array passes the maximal DRC deck with zero violations. Extraction contains the expected 24 devices for four cells.
+
+What is not established is the lower bound. A DRC pass proves that this layout is legal, not that a smaller legal arrangement does not exist. The README itself admits an undrawn one-well-crossing topology that might be about 12% narrower at [README.md:128](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/README.md:128). The result is therefore “tight for this feature ordering and routing assignment”, not “cannot be much smaller”.
+
+There is also a tap-row accounting discrepancy:
+
+- The tap generator uses a 1.20 µm height at [sram6t.py:121](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/layout/sram6t.py:121).
+- Its status message incorrectly calls these 1.07 µm tap rows at [sram6t.py:178](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/layout/sram6t.py:178).
+- The README’s 3.52 µm² figure assumes one 1.20 µm tap row amortised over 36 data rows.
+- The generated standalone array has two tap rows, giving approximately 3.626 µm²/bit for 36 rows. Reaching 3.52 requires shared tap rows between adjacent blocks, which is not implemented or stated.
+
+## Removed-transistor area claims
+
+The argument is plausible within the exact placement:
+
+- 5T retains two PMOS load strips and both NMOS driver strips.
+- Loadless 4T replaces the PMOS load strips with PMOS access strips.
+- Neither obviously removes an x-determining well crossing.
+
+But both areas are explicitly estimates, with no drawn or DRC-checked 5T/4T layout. Removing gates can change contact placement, routing, symmetry and possible supercell sharing. Therefore “buys no area” has not been demonstrated. The defensible statement is that transistor removal does not remove an x-determining strip in the chosen placement.
+
+## Other simulation findings
+
+- The Seevinck rotation agrees with the supplied brute-force test to a few millivolts for nominal symmetric 6T. The lobe signs are plausible. However, [check_snm.py](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/sim/check_snm.py:7) checks only one positive nominal lobe. It does not validate asymmetric or nearly closed mismatch lobes.
+- The reported 149/200 loadless-4T failures use `SNM <= 0` on a 5 mV sweep. Many samples lie within ±5–10 mV, so the exact count needs a finer sweep or independent square search. The qualitative mismatch failure remains convincing.
+- `.ic` without `uic` is not an obvious error here: it selects an initial stable basin while retaining the normal operating-point solve. The write results should nevertheless be checked against ramp rate and initial-settling variations.
+- The kick test uses one polarity, nominal devices only, one isolated kick and ideal clamped bit lines at [cellsim.py:157](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/sim/cellsim.py:157). It does not establish reliable repeated refresh under mismatch.
+- No explicit storage or extracted interconnect capacitance is present. Retention and kick times therefore depend only on intrinsic device capacitances and are pre-layout estimates.
+- Device terminal ordering appears correct. In particular, the 6n leakage load at [cellsim.py:70](/home/matthias/prog/janestreet/emulator-wt-sram-cut/prototypes/sram-cut/sim/cellsim.py:70) has drain at Vcell, gate and source on the storage node, and body at ground, giving the intended nominal `VGS = 0`.
+
+## Electrical conclusions
+
+The tested loadless 4T design is genuinely poor:
+
+- At idle WL = 1.2 V, nominal fs is monostable.
+- At tt/27 nominal hold SNM is only 3.7 mV.
+- The stored high node is only 0.145 V.
+- The mismatch experiment is overwhelmingly bad despite uncertainty in the exact 149/200 threshold count.
+- Biasing idle WL to 1.0 V costs roughly 21–35× the baseline leakage at the three headline conditions.
+- The thick-driver version needs distinct read and write word-line levels; its 0.7 V read configuration has no write crossing.
+
+The all-NMOS conclusion is less secure:
+
+- Only one 4T sizing and idle-WL values 0.3–0.6 V were tested.
+- Access width/length ratios and higher bias levels were not exhausted.
+- Thin 6n with a stronger load holds nominally across corners but was not mismatch-tested.
+- Thin 6n plus an isolated read port remains an unclosed topology. The thick-oxide keep-out objection does not apply to that thin-device candidate.
+- The README’s own one-well-crossing 6T remains undrawn.
+
+Drowsy current reduction is supported for the three quoted points:
+
+- tt/27: 2.87×
+- tt/85: 1.91×
+- ff/85: 1.84×
+
+So “about 2–3× current” is fair after rounding. This is an ideal-rail result only: there is no header/regulator model, quiescent current, supply-distribution loss, wake-up energy or mismatch run at 0.4 V.
+
+## Verdicts
+
+1. **UNVERIFIABLE.** The exact 3.19 × 1.07 µm construction, rule values and arithmetic are confirmed, but “cannot be much smaller” is not proved and the README admits an undrawn approximately 12%-narrower topology. Tap-row accounting also needs qualification.
+
+2. **UNVERIFIABLE.** Keeping the same strips and well crossings is plausible for the chosen placement, but no 5T or loadless-4T layout was drawn or DRC-checked, and alternative asymmetric/supercell arrangements remain open.
+
+3. **REFUTED.** The same-seed hold/read/write Monte Carlo correlation is false: `set rndseed` is ineffective in this protocol, identical seed/netlist reruns differ, and printed rows combine independent mismatch realisations. Kick coverage and leakage accounting also fall short of the stated method.
+
+4. **REFUTED.** The tested loadless 4T is indeed unattractive and drowsy current falls only about 1.84–2.87×, but the claimed 3–10 µs all-NMOS 4T lifetime contradicts the raw data, and the broad dismissal of all-NMOS and alternative lower-area cells is not supported by the limited sizing, bias, layout and mismatch search.

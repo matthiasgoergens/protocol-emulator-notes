@@ -1,6 +1,6 @@
 """Static-latch variants that cut corners on the 6T cell: hold/read SNM, write, leakage, retention.
 
-  ./run.sh RUN cellsim.py CELL [key=value ...] [mode=corners|mc:N:CORNER:TEMP|retention|vsweep]
+  ./run.sh RUN cellsim.py CELL [key=value ...] [mode=corners|mc:N:CORNER:TEMP|vsweep|kick]
 
 CELL:
   6t   the usual cell (for the supply sweep); keys pd pg pu
@@ -19,11 +19,11 @@ read, default 1.2), wlon (active word-line level; default 0 for 4tp, 1.2 otherwi
 (comma list), temps (comma list).
 
 Methods as in sram6t.py (Seevinck butterfly, DC 5 mV steps; transient write with a 400 ns bit-line
-ramp; leakage = total current from the supply and both bit lines at the DC operating point).
-Retention (mode=retention, for cells whose hold butterfly has lost a lobe): transient in hold from
-the state a write leaves (Q = cell high level, QB = 0, set by .ic with the cell in hold, so the
-operating point is computed with those nodes held, not charge-shared), reporting when Q - QB
-falls below 0.2 V.
+ramp; leakage = current delivered by all non-zero sources at the DC operating point, see leakage()).
+Passive decay and refresh (mode=kick): write a 1 through the access transistors, hold, then pulse the
+word line with the bit lines at VDD and check the state; the node levels just before the kick
+give the passive decay. (A separate retention mode was removed: its crossing measurement never
+triggered, so it reported nothing.)
 """
 import sys, os, math, statistics
 from common import *
@@ -92,7 +92,7 @@ def head(corner, temp, mm, what):
 def go(name, ckt, body, seed):
     if seed is not None:
         open(f"/work/{name}.cir", "w").write(ckt + ".end\n")
-        return run(name, f"* mc driver\n.control\nset rndseed={seed}\npre_osdi /osdi/psp103.osdi\n"
+        return run(name, f"* mc driver\n.control\nsetseed {seed}\npre_osdi /osdi/psp103.osdi\n"
                          f"source /work/{name}.cir\n{body}\n.endc\n.end\n")
     return run(name, ckt + control(body))
 
@@ -131,27 +131,20 @@ def HOLDBL():
 
 
 def leakage(corner, temp):
+    """Current delivered by every source that is not at 0 V (VDD, the cell supply, the bit lines,
+    and the idle word line when it is biased): with one 1.2 V rail, any lower level is made from
+    it by a linear drop, so this is the current drawn from the rail. Sources at 0 V are excluded
+    (they deliver no power; including them, as an earlier version did, shifted the 6T figure by
+    about 5 %)."""
     name = f"lk_{TAG}_{corner}_{temp}"
     ckt = (head(corner, temp, False, "leakage") +
            f"vwl wl 0 {WLIDLE}\nvbl bl 0 {HOLDBL()}\nvblb blb 0 {HOLDBL()}\n" + cell("q", "qb") +
            f".nodeset v(q)={VCELL} v(qb)=0\n")
     out = run(name, ckt + control(
-        "op\nprint v(q) v(qb)\nlet itot = -i(vdd)-i(vcellsrc)-i(vbl)-i(vblb)-i(vwl)\nprint itot"))
+        "op\nprint v(q) v(qb)\nlet itot = " + "".join(
+            f"-i({src})" for src, v in (("vdd", VDD), ("vcellsrc", VCELL), ("vbl", HOLDBL()),
+                                        ("vblb", HOLDBL()), ("vwl", WLIDLE)) if v != 0) + "\nprint itot"))
     return meas(out, "itot"), meas(out, "v\\(q\\)"), meas(out, "v\\(qb\\)")
-
-
-def retention(corner, temp):
-    """Hold transient from a written state; returns the time (s) at which Q - QB < 0.2 V, or inf."""
-    name = f"rt_{TAG}_{corner}_{temp}"
-    ckt = (head(corner, temp, False, "retention") +
-           f"vwl wl 0 {WLIDLE}\nvbl bl 0 {VDD}\nvblb blb 0 {VDD}\n" + cell("q", "qb") +
-           f".ic v(q)={VCELL if CELL in ('6t', '5t') else VDD} v(qb)=0\n")
-    out = run(name, ckt + control(
-        "tran 1u 100m\nmeas tran tfail when v(q)=v(qb)+0.2 cross=1\n"
-        "meas tran q1u find v(q) at=1u\nmeas tran q1m find v(q) at=1m\nmeas tran q100m find v(q) at=99m\n"
-        "meas tran qb100m find v(qb) at=99m"))
-    t = meas(out, "tfail")
-    return (t if not math.isnan(t) else math.inf), meas(out, "q1m"), meas(out, "q100m"), meas(out, "qb100m")
 
 
 def kick(corner, temp, hold, wkick=10e-9, seed=None, mm=False):
@@ -199,12 +192,6 @@ if MODE == "corners":
     for c, t, h, r, w0, w1, lk, q, qb in pmap(one, [(c, t) for c in CORN for t in TMPS]):
         print(f"{c:7s} {t:3d}  {1e3*h[2]:8.1f}     {1e3*r[2]:8.1f}      {1e3*w0:8.1f}        {1e3*w1:8.1f}     "
               f"{1e12*lk:10.2f}   {q:.3f}/{qb:.3f}", flush=True)
-elif MODE == "retention":
-    print(f"{CELL} {desc}: hold transient (100 ms) from Q=1, QB=0; WL idle {WLIDLE} V")
-    for (c, t), (tf, q1m, q100m, qb100m) in zip([(c, t) for c in CORN for t in TMPS],
-                                                 pmap(lambda ct: retention(*ct), [(c, t) for c in CORN for t in TMPS])):
-        print(f"{c:7s} {t:3d}  fails at {tf*1e3 if tf != math.inf else math.inf:10.4g} ms   Q(1ms) {q1m:.3f}  "
-              f"Q(99ms) {q100m:.3f}  QB(99ms) {qb100m:.3f}", flush=True)
 elif MODE == "vsweep":
     # hold SNM against the cell supply: the data-retention voltage and the leakage it buys
     vs = [float(v) for v in K.get("vlist", "1.2,1.0,0.8,0.7,0.6,0.5,0.4,0.3,0.25,0.2").split(",")]

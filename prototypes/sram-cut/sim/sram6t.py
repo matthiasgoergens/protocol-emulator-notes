@@ -54,7 +54,7 @@ def butterfly(corner, temp, mode, seed=None, mm=False):
     if seed is not None:
         # the seed has to be set before the netlist is parsed, since agauss() is evaluated then
         open(f"/work/{name}.cir", "w").write(ckt + ".end\n")
-        run(name, f"* mc driver\n.control\nset rndseed={seed}\npre_osdi /osdi/psp103.osdi\n"
+        run(name, f"* mc driver\n.control\nsetseed {seed}\npre_osdi /osdi/psp103.osdi\n"
                   f"source /work/{name}.cir\n{body}\n.endc\n.end\n")
     else:
         run(name, ckt + control(body))
@@ -73,7 +73,7 @@ def write_margin(corner, temp, seed=None, mm=False):
             "meas tran wm find v(bl) when v(q)=v(qb) cross=1\n")
     if seed is not None:
         open(f"/work/{name}.cir", "w").write(ckt + ".end\n")
-        out = run(name, f"* mc driver\n.control\nset rndseed={seed}\npre_osdi /osdi/psp103.osdi\n"
+        out = run(name, f"* mc driver\n.control\nsetseed {seed}\npre_osdi /osdi/psp103.osdi\n"
                         f"source /work/{name}.cir\n{body}\n.endc\n.end\n")
     else:
         out = run(name, ckt + control(body))

@@ -175,4 +175,4 @@ if __name__ == "__main__":
     a, w, h = array(lib, cols, rows)
     lib.write_gds("sram6t.gds")
     print(f"6T at standard rules: pitch {2*XB:.3f} x {2*YB:.3f} um = {4*XB*YB:.3f} um2 per bit; "
-          f"array {cols}x{rows}: {w:.2f} x {h:.2f} um plus a 1.07 um tap row top and bottom")
+          f"array {cols}x{rows}: {w:.2f} x {h:.2f} um plus a 1.20 um tap row top and bottom")

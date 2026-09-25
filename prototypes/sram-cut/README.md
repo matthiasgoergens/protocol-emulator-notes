@@ -8,11 +8,13 @@ the compiler guaranteeing whatever access discipline the cell needs?
 rules, not by the transistor count or sizes: two n-well crossings per cell (0.62 µm each), contact
 pads (Cnt.c) and poly end caps (Gat.c) set the width, and Metal1 sets the height. A 6T drawn at
 those rules is 3.41 µm², 13 % larger than the PDK's bit cell, which only passes DRC because its
-SRAM marker layer relaxes those rules. Removing transistors (5T, loadless 4T) does not remove a
-diffusion strip or a well crossing in this topology, so it buys no area. The electrical corner cuts
-work or fail as below, but none of them gets under ~3.4 µm². Only removing the n-well altogether
-would, and every all-NMOS static cell I tried either does not hold its state across corners and
-mismatch or needs a separate read port. **For density, the gain cells stay the only option; SRAM
+SRAM marker layer relaxes those rules. That is tight for this topology and routing, not a proven
+lower bound: an undrawn arrangement with one well crossing per cell might be ~10 % narrower.
+Removing transistors (5T, loadless 4T) does not remove a diffusion strip or a well crossing in this
+placement, so by the rule budget it buys no area (not drawn). None of the electrical corner cuts
+gets under ~3.4 µm². Only removing the n-well altogether would, and every all-NMOS static cell I
+simulated either does not hold its state across corners and mismatch or cannot be read through
+its access transistors (so needs a read port, which I have not drawn or simulated). **For density, the gain cells stay the only option; SRAM
 corner cuts buy power, not area.**
 
 All numbers below are simulations (ngspice 44.2, PSP 103, PDK corner and mismatch decks) or
@@ -20,22 +22,24 @@ DRC-checked layout, unless marked *estimate*.
 
 ## Comparison
 
-Leakage is the total current drawn from the supply and both bit lines in hold, per bit, at tt/27 °C,
-tt/85 °C and ff/85 °C.
+Leakage is the current delivered by every non-zero source in hold (VDD, cell supply, bit lines,
+a biased idle word line), per bit, at tt/27 °C, tt/85 °C and ff/85 °C. With one 1.2 V rail, lower
+levels come from it through a linear drop, so this is the current drawn from the rail. Monte Carlo
+figures are mean/σ over 300 (6T) or 200 (others) samples of the PDK mismatch decks.
 
 | cell | area µm²/bit | holds? | leakage pA (tt27 / tt85 / ff85) | what the compiler must guarantee | verdict |
 |---|---|---|---|---|---|
 | PDK bit cell (SRAM marker rules) | 3.01 (3.19 with its tap rows) | static | 20 / 212 / 1680 (same sizes as ours) | nothing | only via the macros; its rules are not ours to use |
-| **6T, standard rules (drawn, DRC-clean)** | **3.41** (3.52 with a tap row per 36 rows) | static; worst MC read SNM μ/σ 13.8 | 20 / 212 / 1680 | nothing | the baseline |
+| **6T, standard rules (drawn, DRC-clean)** | **3.41** (3.52 with one 1.2 µm tap row per 36 rows, shared between blocks) | static; worst MC read SNM μ/σ 13.2 | 20 / 212 / 1680 | nothing | the baseline |
 | 6T minimum size (all W 0.15) | ≥ 3.41 (*estimate*: a dogbone NMOS strip makes it 3.06 × 1.14) | static; MC read μ/σ 8.7 | 12 / 164 / 1665 | nothing | sizing buys nothing at these rules |
 | 6T at 0.4 V cell supply in idle ("drowsy") | 3.41 + a supply switch per row or column | static, hold SNM ≥ 129 mV | 7 / 111 / 909 (bit lines at 0.4 V too) | rows are idle, or returned to 1.2 V, before any access | 2–3× less current; a linear drop from the one rail saves current, not V² |
 | 6T thick oxide (all devices) | ~7.4 (*estimate*: L 0.45, NW.c1/d1 0.62) | static | 0.12 / 6.5 / 49 | nothing (slower) | 30–170× less leakage for 2.2× the area |
-| 5T (one bit line) | ≈ 3.4 (*estimate*: same strips and wells) | static | 14 / 131 / 1180 | write 1 only with the column's cell supply lowered to ≤ 0.6 V | no area gain; needs a write assist |
-| loadless 4T (PMOS access, Noda), word line idle at 1.2 V | ≈ 3.4 (*estimate*) | **no**: fails at fs; 149 of 200 MC samples monostable at tt/27 | 4 / 77 / 1030 | a "kick" (word-line pulse, bit lines precharged) every ≤ 10 µs | dead: no area gain, mismatch kills it |
-| loadless 4T, word line idle at 1.0 V | ≈ 3.4 (*estimate*) | static at all corners; MC fs/85 μ/σ 4.3 | 575 / 4490 / 58400 | a regulated 1.0 V idle word-line level; map out a few bits per 64 k | dead: 30× the leakage, no area gain |
+| 5T (one bit line) | ≈ 3.4 (*estimate*: same strips and wells) | static | 15 / 132 / 1180 | write 1 only with the column's cell supply lowered to ≤ 0.6 V | no area gain; needs a write assist |
+| loadless 4T (PMOS access, Noda), word line idle at 1.2 V | ≈ 3.4 (*estimate*) | **no**: fails at fs; 145 of 200 MC samples monostable at tt/27 | 4 / 77 / 1030 | a "kick" (word-line pulse, bit lines precharged) every ≤ 10 µs | dead: no area gain, mismatch kills it |
+| loadless 4T, word line idle at 1.0 V | ≈ 3.4 (*estimate*) | static at all corners; MC fs/85 hold SNM μ/σ 3.9 | 575 / 4490 / 58400 | a regulated 1.0 V idle word-line level; map out a few bits per 64 k | dead: 30× the leakage, no area gain |
 | loadless 4T, thick-oxide drivers | > 3.4 (*estimate*: TGO and NW.d1 0.62) | static, hold SNM ≥ 69 mV | 2 / 43 / 655 | read with the word line at 0.7 V, not 0 V (full-on reads destroy) | larger than the 6T |
-| all-NMOS 4T (no PMOS, no n-well) | ~2.2 (*estimate*: the 6T's two NMOS strips, no well) | never bistable (word line idle 0.3–0.6 V); dynamic 3–10 µs at tt/27 | – | refresh through sense amplifiers; a blind kick loses the data | worse than the thin-oxide gain cell |
-| all-NMOS 6T with leakage loads (gate tied to node) | ~2.9–3 (*estimate*; + a read port) | thin: hold SNM 23–64 mV; thick drivers: MC ss/85 6 of 200 fail | 7–20 at tt/27 | never read through the access transistors (read SNM ≤ 12 mV at word lines of 0.8 and 1.2 V) | dead |
+| all-NMOS 4T (no PMOS, no n-well) | ~2.2 (*estimate*: the 6T's two NMOS strips, no well) | never bistable (word line idle 0.3–0.6 V); as a dynamic cell the written 0.85 V falls to 0.38 V in 100 µs at tt/27, to 0.05 V in 3 µs at ff/85 | – | refresh through sense amplifiers; a blind kick loses the data after 10 µs at tt/27, at once at ff | worse than the thin-oxide gain cell |
+| all-NMOS 6T with leakage loads (gate tied to node) | ~2.9–3 (*estimate*) + a read port | thin: hold SNM 23–64 mV, MC (k 1.2, ff/27) 2 of 200 fail; thick drivers: MC ss/85 6 of 200 fail | 7–40 at tt/27 | never read through the access transistors (read SNM ≤ 12 mV at word lines of 0.8 and 1.2 V) | dead as simulated; a thin version with a read port is untested |
 | standard-cell latch sg13g2_dlhq_1 | 30.8 (+ a read mux) | static | 288 / 2330 / 14000 | nothing | reference only: 9× the area, 14× the leakage |
 | gain cell, thin-oxide write (`../gain-cell`) | 2.20 | 1.2 µs worst lifetime | – | refresh within 1.2 µs | the density option |
 | gain cell, thick-oxide write | 2.88 | ≥ 3 ms | – | refresh within 3 ms | |
@@ -72,7 +76,7 @@ and VSS in Metal2, word line in Metal3) at the standard rules.
 - **Margins** (`sim/results/6t-pdk-sizes-corners.txt`, layout sizes PD/PG 0.30, PU 0.15): hold
   SNM ≥ 438 mV, read SNM ≥ 163 mV (fs/85), write margin ≥ 367 mV (sf/27, bit-line voltage at which
   the cell flips). **Mismatch** (300 samples of the PDK mismatch model per corner,
-  `6t-0.30,0.30,0.15-mc-*.txt`): read SNM mean/σ 13.8 at fs/85, write 17.5 at sf/27. Minimum size
+  `6t-0.30,0.30,0.15-mc-*.txt`): read SNM mean/σ 13.2 at fs/85, write 16.5 at sf/27. Minimum size
   (all 0.15): read mean/σ 8.7 at fs/85 (`6t-0.15,0.15,0.15-mc-*.txt`).
 - **A real read** (`6t-0.30,0.30,0.15-read.txt`): 64 cells on 10 fF bit lines, the 63 others
   storing the opposite value; the bit lines split fully within 1 ns and the low node peaks at
@@ -81,38 +85,45 @@ and VSS in Metal2, word line in Metal3) at the standard rules.
   (`6t-pdk-sizes-corners.txt`).
 
 **Caveat on mismatch.** The PDK's mismatch deck uses A_VT = 3.9 mV·µm (NMOS) and 2.2 mV·µm (PMOS)
-(`sg13g2_moslv_mismatch.lib`), low for 130 nm. With twice that, the worst mean/σ would be about 7:
-still enough for a 6T, not for the marginal cells below.
+(`sg13g2_moslv_mismatch.lib`), low for 130 nm. With twice that, the worst mean/σ would be
+roughly 7 (*estimate*): still enough for a 6T, not for the marginal cells below.
 
 ## 3. The corner cuts
 
 - **Loadless 4T** (NMOS drivers, PMOS access, the access leakage from the precharged bit lines is
   the only load; `cellsim.py 4tp`). With the word line idling at VDD it is not bistable at fs, and
   barely at tt (hold SNM 3.7 mV, the stored 1 settles at 0.15 V; `4tp-d0.30-a0.15-corners.txt`);
-  with mismatch, 149 of 200 samples at tt/27 are monostable (`4tp-wlidle1.2-mc-tt-27.txt`).
-  Biasing the idle word line to 1.0 V makes it static everywhere, but the leakage rises 30-fold and
-  the fs/85 mean/σ is 4.3, i.e. a few failing bits per 64 k (`4tp-*-wlidle*`,
+  with mismatch, 145 of 200 samples at tt/27 are monostable (hold SNM ≤ 0 on a 5 mV sweep; the
+  exact count is uncertain by the samples within a few mV of zero) (`4tp-wlidle1.2-mc-tt-27.txt`).
+  Biasing the idle word line to 1.0 V makes it static everywhere, but the leakage rises 20–35-fold and
+  the fs/85 hold SNM mean/σ is 3.9, about 3 failing bits per 64 k if the tail is Gaussian (`4tp-*-wlidle*`,
   `4tp-wlidle1.0-mc-fs-85.txt`). As a **kick** cell (word line idle at VDD, periodically pulsed
   with the bit lines precharged, which recharges whichever node is high) it survives 100 ms at tt
   and ss but fails between 10 and 100 µs at fs/85 and between 0.1 and 1 ms at fs/27
-  (`4tp-d0.30-a0.15-kick.txt`, nominal devices, no mismatch).
+  (`4tp-d0.30-a0.15-kick.txt`: nominal devices, no mismatch, one stored polarity, one kick, bit
+  lines ideal sources; no extracted wiring capacitance).
   Thick-oxide drivers make it static at every corner, but a read with the word line fully on
   destroys it (read with 0.7 V instead: read SNM ≥ 381 mV), and thick oxide next to the n-well
   costs NW.d1 = 0.62 (`4tp-hvd-*`). In none of these forms is it smaller than the 6T: the PMOS
   access strips take the place of the PMOS load strips.
-- **All-NMOS 4T** (`4tn`): no idle word-line level between 0.3 and 0.6 V makes it bistable (the
-  stored 1 cannot rise above the word line); as a dynamic cell the 1 decays in 3–10 µs at tt/27 and
-  a kick flips or equalises it at most corners (`4tn-*`).
+- **All-NMOS 4T** (`4tn`, one sizing: drivers 0.30, access 0.15): no idle word-line level between
+  0.3 and 0.6 V makes it bistable (the stored 1 cannot rise above the word line). As a dynamic cell
+  (`4tn-d0.30-a0.15-kick.txt`) the written 1 (0.77–0.97 V, an NMOS passes VDD minus a threshold)
+  falls to 0.38 V in 100 µs at tt/27 and to 0.05 V in 3 µs at ff/85, and a blind kick loses the
+  data after 10 µs at tt/27 and even after 0.1 µs at ff: the node that should stay low is pulled up
+  through its access transistor while its driver's gate is only at the weak written 1.
 - **All-NMOS 6T with leakage loads** (`6n`: an NMOS from VDD to each node with its gate on the
   node, so it only ever leaks, and the driver-to-load leakage ratio is set by width, not by corner).
   Bistable at every corner, but with the thin-oxide driver the stored 1 is only 0.33–0.57 V and the
-  hold SNM 23–64 mV; with thick-oxide drivers the hold SNM is 58–146 mV but mismatch leaves 6 of
+  hold SNM 23–64 mV (2 of 200 mismatch samples monostable at ff/27 with k = 1.2,
+  `6n-d0.30-k1.2-mc-ff-27.txt`); with thick-oxide drivers the hold SNM is 58–146 mV but mismatch leaves 6 of
   200 samples monostable at ss/85, and reads through the access transistors are destructive (read
   SNM ≤ 12 mV at word lines of 0.8 and 1.2 V, `6n-*`). It would need a separate read port and TGO keep-outs: no gain.
 - **5T** (`5t`): hold and read as the 6T; a 1 cannot be written through the single NMOS at any
   corner. Lowering the column's cell supply (VDD already runs per column in Metal2) to 0.6 V during
   the write fixes that at every corner (`5t-*-vcell*`). No area gain in this topology.
-- **Drowsy idle** (`6t-0.30,0.30,0.15-vsweep-blcell.txt`): the 6T holds at 0.4 V at every corner
+- **Drowsy idle** (`6t-0.30,0.30,0.15-vsweep-blcell.txt`, ideal supplies: no header, regulator,
+  wake-up energy or mismatch at 0.4 V modelled): the 6T holds at 0.4 V at every corner
   (hold SNM ≥ 129 mV; ≥ 31 mV at 0.2 V). The leakage current falls only 2–3× (the thin-oxide
   subthreshold leakage barely depends on the drain voltage), so from a single 1.2 V rail through a
   linear header the power saving is 2–3×, not the 5–9× that V × I would suggest.
@@ -129,6 +140,23 @@ still enough for a 6T, not for the marginal cells below.
   neighbours share the n-well): on paper up to ~12 % narrower, but it needs four gate contacts per
   cell instead of two, and the pull-down end caps meet in the middle; not drawn.
 - A second supply or an on-chip boost, for word-line or cell-supply assists.
+
+## Method notes and known limits
+
+- Monte Carlo seeds: the first runs set `rndseed` inside `.control`, which ngspice ignores there;
+  every process drew fresh, uncontrolled values, so each metric was still an independent sample,
+  but the hold, read and write numbers on one row were not the same cell. All mismatch results
+  cited here were rerun with `setseed`, which reproduces identical draws for identical netlists
+  (`results/check-setseed.txt`); hold, read and write of one seed share the device instance order,
+  so they should see the same draws (not independently verified).
+- The SNM routine agrees with a brute-force square search on the nominal symmetric 6T
+  (`results/check-snm.txt`); it is not separately checked on strongly asymmetric lobes.
+- The leakage accounting was corrected once: an earlier version of `cellsim.py` also counted
+  sources at 0 V (the idle word line), which shifted results by up to ~5 %; all cited cellsim
+  leakage figures are from the corrected version and match `sram6t.py` for the 6T (20.59 pA).
+- An independent review by another model family (`review/codex-verdict.txt`) found the seed
+  problem, a wrong all-NMOS 4T lifetime in an earlier draft and the tap-row accounting; all three
+  are fixed above. It confirmed the layout arithmetic and rule values.
 
 ## Files
 
