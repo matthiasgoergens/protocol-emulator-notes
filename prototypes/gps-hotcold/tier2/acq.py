@@ -268,9 +268,11 @@ def timing():
         lines.append(f"{K:>4} {pes:>4} {passes:>10} {r['per_blk_ms']:>13.1f} {r['all32_n1']:>11.1f} s {r['all32_n5']:>11.1f} s "
                      f"{r['warm8_n5']:>14.2f} s {r['area_synth']:>12,.0f} {r['area_placed']:>9,.0f}")
     lines.append(f"plus two 4 kbit sample banks (double buffer): {2 * bank:,} um2 placed (SRAM 1P_256x16 equivalent)")
-    lines.append("tracking: one channel = E, P, L on both arms = 2*3 + 5 = 11 PEs for one pass of "
-                 f"{BLK + 3 + 3 + 3 * 5} clocks; {int(f_clk * 1e-3 // (BLK + 3 + 3 + 3 * 5))} passes fit in 1 ms, so 12 channels "
-                 f"use {12 * (BLK + 3 + 3 + 15) / (f_clk * 1e-3) * 100:.0f} % of an 11-PE array")
+    tpass = BLK + 3 + 3 + 3 * 8
+    lines.append("tracking: one channel = E, P, L on both arms (6 PEs) + a mixer per arm (2) + 32-bit carrier NCO per arm "
+                 f"(2 x 2 PEs) + 32-bit code NCO (2 PEs) = 14 PEs, one pass of about {tpass} clocks per code period; "
+                 f"{int(f_clk * 1e-3 // tpass)} passes fit in 1 ms, so 12 channels use "
+                 f"{12 * tpass / (f_clk * 1e-3) * 100:.0f} % of a 14-PE array's time")
     txt = "\n".join(lines)
     print(txt)
     open(f"{OUT}/acq_timing.txt", "w").write(txt + "\n")

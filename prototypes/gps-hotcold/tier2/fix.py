@@ -101,7 +101,7 @@ class Channel:
         self.cp = cp0 + n_to_epoch * k_nom - 1023             # chips at sample S (just past 0)
         self.f = f0                                           # carrier Doppler estimate (Hz, incl. LO)
         self.f_int = f0
-        self.phase = 0.0                                      # host carrier phase (cycles) at S
+        self.phase_q = 0                                      # 32-bit carrier NCO phase at S
         self.code_rate = 1.023e6
         self.dll_int = 0.0
         self.epoch = 0
@@ -109,22 +109,25 @@ class Channel:
         self.log = []                                         # per epoch: S, cp, I_P, Q_P, E, L, f, code_rate
 
     def step(self):
-        kc = int(round(self.code_rate / FS * 65536))
-        cp_q = int(round(self.cp * 65536))
-        n = int(math.ceil((1023 * 65536 - cp_q) / kc))         # samples to the next epoch
+        # 32-bit NCOs: two PEs each, the low word's carry into the high word through the tag lane
+        kc = int(round(self.code_rate / FS * 2 ** 32))
+        cp_q = int(round(self.cp * 2 ** 32))
+        n = int(-(-(1023 * 2 ** 32 - cp_q) // kc))               # samples to the next epoch
         S = self.S
         if S + n + 2 > len(self.x):
             return False
         x = self.x[S - 1:S + n + 1].astype(np.int64)
         idx = np.arange(-1, n + 1, dtype=np.int64)
-        chips = ((cp_q + idx * kc) >> 16) % 1023
+        chips = ((cp_q + idx * kc) >> 32) % 1023                  # int64 is exact here (< 2^44)
         code = self.ca[chips]                                   # code for sample S-1 .. S+n
-        k = int(round((acq.F_ALIAS + self.f) * 65536 / FS))
-        ph0 = int(round((self.phase % 1.0) * 65536)) & 0xFFFF
-        ci = pa.carrier_sign(ph0, k, n, 16384)
-        sq = pa.carrier_sign(ph0, k, n, 0)
+        k = int(round((acq.F_ALIAS + self.f) * 2 ** 32 / FS))
+        ph0 = self.phase_q
+        phs = (ph0 + k * np.arange(n, dtype=np.int64)) & 0xFFFFFFFF
+        ci = 1 - 2 * (((phs + (1 << 30)) & 0xFFFFFFFF) >> 31)    # cos sign: a quarter turn ahead
+        sq = 1 - 2 * (phs >> 31)
         xs = x[1:n + 1]
-        wi, wq = xs * ci, xs * sq
+        # x * (cos - j sin): Q takes the negated sine arm, so arg(I + jQ) = received - local phase
+        wi, wq = xs * ci, -(xs * sq)
         # prompt: code(n); early: code(n+1); late: code(n-1)
         cP, cE, cL = code[1:n + 1], code[2:n + 2], code[0:n]
         IP, QP = int(wi @ cP), int(wq @ cP)
@@ -156,8 +159,8 @@ class Channel:
         aid = 1.023e6 * (self.f - LO_EST) / g.F_L1
         self.log.append((S, self.cp, IP, QP, E, L, self.f, self.code_rate, e_ph))
         # ---- advance to the next epoch
-        self.phase = (int(ph0 + k * n) & 0xFFFF) / 65536.0                 # exactly the NCO's phase
-        self.cp = (cp_q + n * kc) / 65536 - 1023
+        self.phase_q = (ph0 + k * n) & 0xFFFFFFFF                          # exactly the NCO's phase
+        self.cp = (cp_q + n * kc - 1023 * 2 ** 32) / 2 ** 32
         self.S = S + n
         self.f = f_nco
         self.code_rate = 1.023e6 + aid + self.dll_int + 1.414 * w0c * e_c
@@ -207,8 +210,8 @@ def t_tx_at(ch, nav, S_meas):
         S, cp = ch.log[e][0], ch.log[e][1]
         S2 = ch.log[e + 1][0]
         if S <= S_meas < S2:
-            kc = int(round(ch.log[e][7] / FS * 65536))
-            chips = cp + (S_meas - S) * kc / 65536
+            kc = int(round(ch.log[e][7] / FS * 2 ** 32))
+            chips = cp + (S_meas - S) * kc / 2 ** 32
             return nav["t_sf"] + (e - nav["epoch_sf"]) * 1e-3 + chips / 1.023e6
     return None
 
@@ -281,7 +284,7 @@ def main():
     ephs = {s["prn"]: s["eph"] for s in truth["sats"]}
     # position fixes every 100 ms over the last 1.5 s, all channels with a decoded subframe
     errs, fixes = [], []
-    S_end = min(ch.log[-2][0] for ch, _ in navs.values())
+    S_end = min((ch.log[-2][0] for ch, _ in navs.values()), default=0)
     for S_meas in range(S_end - int(1.5 * FS), S_end, int(0.1 * FS)):
         prns = [p for p, (ch, nav) in navs.items() if nav["epoch_sf"] < len(ch.log)]
         tt = [t_tx_at(navs[p][0], navs[p][1], S_meas) for p in prns]
@@ -295,6 +298,17 @@ def main():
         fixes.append(dict(S=S_meas, prns=prns, east=d[0], north=d[1], up=d[2], clock_m=b,
                           hdop=float(math.sqrt(Qe[0, 0] + Qe[1, 1])), vdop=float(math.sqrt(Qe[2, 2])),
                           res_rms=float(np.sqrt((res ** 2).mean()))))
+    # ranging accuracy against the truth: transmit-time error per satellite, common mode removed
+    rerr = {p: [] for p in navs}
+    for S_meas in range(S_end - int(1.5 * FS), S_end, int(0.1 * FS)):
+        t_true = truth["t0"] + S_meas / FS
+        e = {p: g.C * (t_tx_at(navs[p][0], navs[p][1], S_meas) - (t_true - g.light_time(ephs[p], rx, t_true))) for p in navs}
+        cm = np.mean(list(e.values()))
+        for p in navs:
+            rerr[p].append(e[p] - cm)
+    for p, v in rerr.items():
+        v = np.array(v)
+        lines.append(f"  PRN {p:2d} range error (common mode removed): mean {v.mean():+.2f} m, sd {v.std():.2f} m")
     E = np.array(errs)
     if len(E):
         h = np.hypot(E[:, 0], E[:, 1])

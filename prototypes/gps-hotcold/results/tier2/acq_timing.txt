@@ -7,4 +7,4 @@ pass = 3274 + K + 3 clocks of replay + K readout + 3(K+2) configuration clocks; 
   32   69        103         113.7         3.6 s        18.2 s           1.95 s      491,261   736,073
   64  133         52          60.1         1.9 s         9.6 s           1.03 s      943,677 1,415,561
 plus two 4 kbit sample banks (double buffer): 56,254 um2 placed (SRAM 1P_256x16 equivalent)
-tracking: one channel = E, P, L on both arms = 2*3 + 5 = 11 PEs for one pass of 3295 clocks; 19 passes fit in 1 ms, so 12 channels use 60 % of an 11-PE array
+tracking: one channel = E, P, L on both arms (6 PEs) + a mixer per arm (2) + 32-bit carrier NCO per arm (2 x 2 PEs) + 32-bit code NCO (2 PEs) = 14 PEs, one pass of about 3304 clocks per code period; 19 passes fit in 1 ms, so 12 channels use 61 % of a 14-PE array's time
