@@ -397,12 +397,12 @@ just to draw a title screen, none of them would have sold as they did. **That is
 chip fails on purpose.** We are deliberately building a machine whose *baseline* is what these
 five treat as their demoscene tail: an ordinary program on our chip already requires the kind of
 timing discipline that the 2600, C64, NES, Spectrum and Amiga only ever demanded from their most
-obsessive virtuosi, decades after launch. That trade is survivable for us for two reasons neither
-of those machines had: our market is not "tens of millions of ordinary programmers" but one
-competition's judges plus us, and our programmers are not limited to the Nathers, Tings and
-1985-vintage Amiga democoders who could give it a summer or a career — they include tireless
-agents for whom exhaustive, superoptimising, cycle-exact work is routine rather than exceptional
-(see below).
+obsessive virtuosi, decades after launch. That trade is viable in 2026 for one reason neither of those machines had: the demoscene
+tail no longer needs demosceners. Tireless agents make exhaustive, superoptimising, cycle-exact
+work routine rather than exceptional, and good simulators (cycle-exact models, verifiers,
+visualisers) keep that work honest and make it legible. The narrowness of our audience (one
+competition's judges, plus us) is not what makes it viable; if the bet is right, it holds for
+any market, which is the more interesting claim (see below).
 
 ---
 
