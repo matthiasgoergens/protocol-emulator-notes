@@ -2,43 +2,53 @@ allocation: 24 tiles x 31,318 = 751,641 um2
 PE (upe_v0, synthesised): 14,312 um2
 
 block                                                           synth um2  source
-sequencer v1 (proxy: CAN variant, shared config, measured)         29,428  sequencer-ps2-can/synth (master); includes 8-bit pc, JC, CFG, tagged OUT
+sequencer, ISA v2 (est from measured parts)                        30,600  usb-ls variant 19,777 + multi-proto mailbox +5,305 + est 5,500; architecture-v0 2.1
+programmable CRC unit, <= 32 bits, with config registers (est)      7,000  eth10-node/synth/area.txt 6,956 without config; est
 segment interconnect, 4 segments, lean                             11,090  unified-pe/reports/xbarlean16k4
 feed registers, 4 x 18 flops (est)                                  3,527  LEF flop area x count, est
 four-phase pin stage, 8 out + 8 in (scaled)                        10,532  multiphase/sta/synth.log x 4, est
 pin streamer                                                       11,359  pin-streamer/README.md
 pin sampler (also the byte packer)                                 12,639  pin-sampler/README.md
-edge-tracking sampler, 4 samples/clock                              9,184  eth10-node/synth/area.txt (master)
-edge-tracking sampler, 1 sample/clock                               2,991  eth10-node/synth/area.txt (master)
+edge-tracking sampler, 4 samples/clock                              9,184  eth10-node/synth/area.txt
+edge-tracking sampler, 1 sample/clock                               2,991  eth10-node/synth/area.txt
 stuff tracker x 2                                                   1,626  unified-pe/reports/stuff
 line coder x 2                                                        954  unified-pe/reports/linecode
-systolic matcher with enable                                       11,422  eth10-node/synth/area.txt (master)
+systolic matcher with enable                                       11,422  eth10-node/synth/area.txt
 pin NCO, 24 bit, four points per clock                              6,678  unified-pe/reports/pin_nco
 host link (est)                                                     3,000  est
 gain-cell refresh, Berger and canary control (est)                  3,000  est
 reset synchronisers, phase control (est)                            1,000  est
-sum of logic other than PEs                                       118,431
+sum of logic other than PEs                                       126,603
 gain-cell banks, 2 x 128x32 thick + Berger, placed                 53,236  systolic-storage/results/candidates-placed.txt (placed/drawn)
 fine delay: DTC on 2 pins + one TDC line (est)                     15,473  multiphase/README.md cheap point; sta/dtc_area.txt; est (placed/drawn)
 
 placed total = (logic + N x PE) x factor + (macros + SRAM) x halo
 factor 1.5: pe-synth row of 8 PEs, core/synth at 90 % utilisation; 2.0: pessimistic, est
  N PEs     SRAM factor  placed um2 of alloc  slack um2
-    12   256x16    1.5     541,791    72.1%    209,850
-    12   256x16    2.0     686,881    91.4%     64,760
-    12   512x16    1.5     560,691    74.6%    190,950
-    12   512x16    2.0     705,781    93.9%     45,860
-    12  1024x16    1.5     598,492    79.6%    153,148
-    12  1024x16    2.0     743,583    98.9%      8,058
-    16   256x16    1.5     627,665    83.5%    123,975
-    16   256x16    2.0     801,381   106.6%    -49,740
-    16   512x16    1.5     646,566    86.0%    105,075
-    16   512x16    2.0     820,281   109.1%    -68,640
-    16  1024x16    1.5     684,367    91.0%     67,273
-    16  1024x16    2.0     858,082   114.2%   -106,442
-    20   256x16    1.5     713,540    94.9%     38,100
-    20   256x16    2.0     915,881   121.9%   -164,240
-    20   512x16    1.5     732,440    97.4%     19,200
-    20   512x16    2.0     934,781   124.4%   -183,140
-    20  1024x16    1.5     770,242   102.5%    -18,601
-    20  1024x16    2.0     972,582   129.4%   -220,942
+     8   256x16    1.5     468,174    62.3%    283,467
+     8   256x16    2.0     588,725    78.3%    162,916
+     8   512x16    1.5     487,074    64.8%    264,567
+     8   512x16    2.0     607,625    80.8%    144,015
+     8  1024x16    1.5     524,875    69.8%    226,765
+     8  1024x16    2.0     645,427    85.9%    106,214
+    12   256x16    1.5     554,049    73.7%    197,592
+    12   256x16    2.0     703,225    93.6%     48,416
+    12   512x16    1.5     572,949    76.2%    178,692
+    12   512x16    2.0     722,125    96.1%     29,516
+    12  1024x16    1.5     610,750    81.3%    140,890
+    12  1024x16    2.0     759,927   101.1%     -8,286
+    16   256x16    1.5     639,923    85.1%    111,717
+    16   256x16    2.0     817,725   108.8%    -66,084
+    16   512x16    1.5     658,824    87.7%     92,817
+    16   512x16    2.0     836,625   111.3%    -84,984
+    16  1024x16    1.5     696,625    92.7%     55,015
+    16  1024x16    2.0     874,426   116.3%   -122,786
+    20   256x16    1.5     725,798    96.6%     25,842
+    20   256x16    2.0     932,225   124.0%   -180,584
+    20   512x16    1.5     744,698    99.1%      6,942
+    20   512x16    2.0     951,125   126.5%   -199,484
+    20  1024x16    1.5     782,500   104.1%    -30,859
+    20  1024x16    2.0     988,926   131.6%   -237,286
+no array, 512x16, factor 1.5: 293,398 um2, 39.0%, free 458,243
+no array, 512x16, factor 2.0: 349,390 um2, 46.5%, free 402,250
+the array alone (16 PEs + interconnect), synthesised: 243,617 um2; x1.5: 365,426
