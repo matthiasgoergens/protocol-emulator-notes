@@ -9,6 +9,13 @@
 let m16 = 0xffff
 let bit v i = (v lsr i) land 1
 
+(* ---- the op word, as named in upe.v ---- *)
+type op = {
+  fn : int; xs : int; ys : int; ym : int; gs : int; sw : int; pw : int; sins : int;
+  ix : int; stream : int; bsel : int; drop : int; bcast : int; pairlo : int; outs : int;
+  ib : int; cinb : int; zf : int; k : int;
+}
+
 type state = {
   c : int array;          (* configuration chain c[0..7]; op = c7..c2, K = {c1, c0} *)
   mutable s : int;
@@ -17,6 +24,7 @@ type state = {
   mutable f : int;
   mutable b1 : int;       (* lane register *)
   mutable cr : int;       (* carry-out register *)
+  mutable dec : op option; (* decoded configuration, dropped whenever the chain shifts *)
 }
 
 type inputs = {
@@ -32,20 +40,13 @@ type outputs = {
   s15_out : int; g_out : int; flag : int; s_out : int;
 }
 
-let create () = { c = Array.make 8 0; s = 0; p = 0; pv = 0; f = 0; b1 = 0; cr = 0 }
-
-(* ---- the op word, as named in upe.v ---- *)
-type op = {
-  fn : int; xs : int; ys : int; ym : int; gs : int; sw : int; pw : int; sins : int;
-  ix : int; stream : int; bsel : int; drop : int; bcast : int; pairlo : int; outs : int;
-  ib : int; cinb : int; zf : int; k : int;
-}
+let create () = { c = Array.make 8 0; s = 0; p = 0; pv = 0; f = 0; b1 = 0; cr = 0; dec = None }
 
 let op_word st =
   let c = st.c in
   (c.(7) lsl 40) lor (c.(6) lsl 32) lor (c.(5) lsl 24) lor (c.(4) lsl 16) lor (c.(3) lsl 8) lor c.(2)
 
-let decode st =
+let decode_raw st =
   let o = op_word st in
   let fld lo w = (o lsr lo) land ((1 lsl w) - 1) in
   { fn = fld 0 3; xs = fld 3 2; ys = fld 5 2; ym = fld 7 2; gs = fld 9 3; sw = fld 12 2;
@@ -53,6 +54,11 @@ let decode st =
     bsel = (fld 41 1 lsl 1) lor fld 31 1; drop = fld 32 1; bcast = fld 33 1; pairlo = fld 34 1;
     outs = fld 35 1; ib = fld 36 4; cinb = fld 40 1; zf = fld 42 1;
     k = (st.c.(1) lsl 8) lor st.c.(0) }
+
+let decode st =
+  match st.dec with
+  | Some d -> d
+  | None -> let d = decode_raw st in st.dec <- Some d; d
 
 (* the 48-bit op word and K as the 8 bytes to shift in, first byte first (it ends in c[7]) *)
 let cfg_bytes ?(fn = 0) ?(xs = 0) ?(ys = 0) ?(ym = 0) ?(gs = 0) ?(sw = 0) ?(pw = 0) ?(sins = 0)
@@ -149,9 +155,11 @@ let clock st (i : inputs) =
   (* the configuration chain shifts independently of clear and step *)
   if i.cfg_strobe = 1 then begin
     for j = 7 downto 1 do st.c.(j) <- st.c.(j - 1) done;
-    st.c.(0) <- i.cfg_in land 0xff
+    st.c.(0) <- i.cfg_in land 0xff;
+    st.dec <- None
   end
 
 (* load a configuration directly (what 8 strobed clocks leave behind) *)
 let load st bytes =
-  List.iteri (fun j b -> st.c.(7 - j) <- b) bytes
+  List.iteri (fun j b -> st.c.(7 - j) <- b) bytes;
+  st.dec <- None
