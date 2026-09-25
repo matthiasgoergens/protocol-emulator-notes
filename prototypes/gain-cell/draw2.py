@@ -34,7 +34,8 @@ LY = {"Activ": (1, 0), "GatPoly": (5, 0), "Cont": (6, 0), "Metal1": (8, 0), "Via
       "Metal2": (10, 0), "ThickGateOx": (44, 0), "pSD": (14, 0)}
 PX = 1.03
 
-# A variant of the cell: kind "3T" or "2T"; ox "thick" or "thin" for the write transistor; its
+# A variant of the cell: kind "3T" or "2T"; ox "thick" or "thin" for the write transistor, or
+# "allthick" for thick oxide in all three transistors (storage and read L 0.45); the write transistor's
 # gate length lmw (thick-oxide minimum 0.45, thin 0.13); and, if narrow, a channel width of 0.15
 # instead of the strip's 0.30 (a dogbone: the strip narrows under the gate only).
 # Thick oxide costs a keep-out: ThickGateOx reaches 0.27 past strip B (TGO.a) and must clear the
@@ -54,7 +55,19 @@ def geometry(v):
     upk = lambda p: tuple(round(x + d + k, 3) for x in p)
     g = dict(b_top=0.98 + d, sn_c=up((0.75, 0.91)), wwl=(0.19 + n, 0.64 + d - n), tgo_top=1.25 + d,
              bar=upk((1.52, 1.82)), ms=upk((1.89, 2.02)), pad=upk((1.89, 2.19)),
-             pad_c=upk((1.96, 2.12)), thick=v["ox"] == "thick", narrow=v["narrow"])
+             pad_c=upk((1.96, 2.12)), thick=v["ox"] != "thin", narrow=v["narrow"])
+    if v["ox"] == "allthick":
+        # all three transistors thick oxide (L 0.45): no keep-out between strip B and the bar,
+        # and the storage and read gates grow by 0.32 each; ThickGateOx covers the whole tile
+        g.update(ms=upk((1.89, 2.34)), pad=upk((1.89, 2.34)), pad_c=upk((2.035, 2.195)))
+        if v["kind"] == "3T":
+            g["rwl"] = upk((2.59, 3.04))      # Gat.b1: 0.25 between thick-oxide gates
+            g["H"] = round(3.23 + d + k, 3)
+        else:
+            g["H"] = round(2.70 + d + k, 3)
+        g["tgo_top"] = g["H"]
+        g["allthick"] = True
+        return g
     if v["kind"] == "3T":
         g["rwl"] = upk((2.37, 2.50))
         g["H"] = round(2.69 + d + k, 3)
@@ -125,7 +138,10 @@ def strap(lib, v):
         if "rwl" in g:
             r("GatPoly", 0, g["rwl"][0], SW, g["rwl"][1])
             ym = (g["bar"][0] + g["bar"][1]) / 2
-            r("pSD", -0.20, g["bar"][0] - 0.10, 0.44, g["bar"][1] + 0.10)   # abutted tie
+            if g.get("allthick"):     # pSD.j1: 0.40 from thick-oxide NMOS gates
+                r("pSD", -0.12, g["bar"][0] - 0.12, 0.36, g["bar"][1] + 0.12)   # pSD.k: area 0.26
+            else:
+                r("pSD", -0.20, g["bar"][0] - 0.10, 0.44, g["bar"][1] + 0.10)   # abutted tie
             r("Cont", 0.04, ym - 0.08, 0.20, ym + 0.08)
             r("Metal1", 0.015, ym - 0.215, 0.225, ym + 0.215)
             r("Via1", 0.025, ym - 0.095, 0.215, ym + 0.095)
@@ -169,7 +185,11 @@ def array(lib, name, pairs, cols, every):
             a.add(gdstk.Reference(t, (x0, yc)))
         for x0 in straps:
             a.add(gdstk.Reference(st, (x0, yc)))
-        if g["thick"]:
+        if g.get("allthick"):
+            # the whole row pair is thick oxide: ThickGateOx reaches 0.27 past the bars' Activ at
+            # both ends of the row (TGO.a) and 0.34 past the gates (TGO.c)
+            R(a, "ThickGateOx", -0.34, yc - g["tgo_top"], width + 0.34, yc + g["tgo_top"])
+        elif g["thick"]:
             # ThickGateOx must extend 0.34 past the leftmost gates (TGO.c)
             R(a, "ThickGateOx", -0.16, yc - g["tgo_top"], 0, yc + g["tgo_top"])
         y += 2 * H
@@ -183,6 +203,10 @@ def array(lib, name, pairs, cols, every):
     for x0 in straps:
         for y0, y1 in ((-0.15, 0), (top, top + 0.15)):
             R(a, "Metal2", x0 + 0.02, y0, x0 + 0.22, y1)
+    if any(cells[vname(v)][2].get("allthick") for v in (pairs[0], pairs[-1])):
+        # ThickGateOx past the strip A end-caps at the array's top and bottom (TGO.a)
+        R(a, "ThickGateOx", -0.34, -0.15 - 0.34, width + 0.34, 0)
+        R(a, "ThickGateOx", -0.34, top, width + 0.34, top + 0.15 + 0.34)
     return a, width, top
 
 def per_bit(v, every):
