@@ -1,0 +1,58 @@
+# commit 319cfb9, wide/: opam exec --switch=5.3.0 -- dune build --root . ./main.exe && ./_build/default/main.exe
+wide variant lockstep: 300 programmes x 2000 cycles, 0 mismatching cycles
+JTAG firmware: driver 22 words, sampler 26 words (store: 256 per thread)
+directed chain (IDCODE 0x4BA00477, a device without IDCODE, IDCODE 0x06413041; BSR 20/7/100):
+  interpreter: PASS; RTL: PASS; 8914 clocks compared, 0 differ; 424 TCKs
+constrained random: 60/60 sessions pass on both cores (chains of 1-4 TAPs, IR 2-8, BSR 1-300,
+  random data, sync 0-3, target delay 0-3, host stalls); 660632 clocks compared, 0 differ; 29760 TCKs; 189085 stalled clocks
+controls (each must fail on both cores):
+  control TMS raised one bit early (scan exit)         caught 20/20
+  control one TMS=1 missing on the way to Shift-IR     caught 20/20
+  control TMS and TDI pins swapped in the driver       caught 20/20
+  control TDO sampled two slots late (after falling)   caught 20/20
+TCK at a 60 MHz core clock (characterisation, not gated: min high/low and period in core clocks; 8 random sessions each):
+  lo 0 hi 1 sample+0, sync 0, tco 0: high 8 low 12 period 20-24 -> max 3.00 MHz, mean 2.86 MHz: pass
+  lo 0 hi 1 sample+0, sync 2, tco 0: high 8 low 12 period 20-24 -> max 3.00 MHz, mean 2.86 MHz: pass
+  lo 0 hi 1 sample+0, sync 3, tco 3: high 8 low 12 period 20-24 -> max 3.00 MHz, mean 2.86 MHz: pass
+  lo 0 hi 1 sample+0, sync 2, tco 8: high 8 low 12 period 20-24 -> max 3.00 MHz, mean 2.86 MHz: pass
+  lo 0 hi 1 sample+0, sync 2, tco 16: high 8 low 12 period 20-24 -> max 3.00 MHz, mean 2.86 MHz: pass
+  lo 0 hi 1 sample+0, sync 2, tco 18: high 8 low 12 period 20-24 -> max 3.00 MHz, mean 2.86 MHz: pass
+  lo 0 hi 1 sample+0, sync 2, tco 19: high 8 low 12 period 20-24 -> max 3.00 MHz, mean 2.86 MHz: FAIL 8/8
+  lo 0 hi 1 sample+0, sync 2, tco 20: high 8 low 12 period 20-24 -> max 3.00 MHz, mean 2.86 MHz: FAIL 8/8
+  lo 0 hi 1 sample+0, sync 2, tco 22: high 8 low 12 period 20-24 -> max 3.00 MHz, mean 2.86 MHz: FAIL 8/8
+  lo 1 hi 1 sample+0, sync 2, tco 22: high 8 low 16 period 24-28 -> max 2.50 MHz, mean 2.40 MHz: pass
+  lo 1 hi 1 sample+0, sync 2, tco 23: high 8 low 16 period 24-28 -> max 2.50 MHz, mean 2.40 MHz: FAIL 8/8
+  lo 1 hi 1 sample+0, sync 2, tco 24: high 8 low 16 period 24-28 -> max 2.50 MHz, mean 2.40 MHz: FAIL 8/8
+  lo 1 hi 1 sample+0, sync 2, tco 26: high 8 low 16 period 24-28 -> max 2.50 MHz, mean 2.40 MHz: FAIL 8/8
+  lo 3 hi 1 sample+0, sync 2, tco 30: high 8 low 24 period 32-36 -> max 1.88 MHz, mean 1.82 MHz: pass
+  lo 3 hi 1 sample+0, sync 2, tco 32: high 8 low 24 period 32-36 -> max 1.88 MHz, mean 1.82 MHz: FAIL 8/8
+  lo 3 hi 1 sample+0, sync 2, tco 34: high 8 low 24 period 32-36 -> max 1.88 MHz, mean 1.82 MHz: FAIL 8/8
+SWD engine: 221 words (store: 256 per thread)
+directed bring-up (switch, DPIDR, power-up, SELECT, CSW, 3 writes, 3 posted reads, AP IDR):
+  interpreter PASS; RTL PASS; 23209 clocks compared, 0 differ; 1307 SWCLK cycles, 25 packets
+FAULT and recovery (bad write parity -> WDATAERR -> FAULT -> ABORT; bad request parity -> no ACK -> line reset):
+  interpreter PASS; RTL PASS; 17325 clocks compared, 0 differ; target log tail: protocol-error: bad stop/park bit, request dropped, no response; protocol-error: bad stop/park bit, request dropped, no response; line-reset; dpidr read complete: DP now honouring transactions
+constrained random: 40/40 sessions pass on both cores (random addresses and data, WAIT injected
+  with p in [0,0.5), sync 0-3, target delay 0-3, host stalls); 2293 packets, 829 WAITs retried;
+  2312232 clocks compared, 0 differ; 124657 SWCLK cycles
+controls (each must fail on both cores, on random traffic):
+  request parity flipped (one packet)      caught 10/10  (e.g. w00000020: ACK none(111))
+  write-data parity flipped (one packet)   caught 10/10  (e.g. packet: ACK FAULT)
+  turnaround before ACK missing            caught 10/10  (e.g. 532 clocks of SWDIO contention)
+  turnaround after write ACK missing       caught 10/10  (e.g. w00000020: ACK FAULT)
+  sampling after the rising edge           caught 10/10  (e.g. 477 clocks of SWDIO contention)
+  one wrong bit in the switch sequence     caught 10/10  (e.g. dpidr: ACK none(111))
+SWCLK at a 60 MHz core clock (characterisation, not gated; directed scenario, interpreter and RTL):
+  lo 1 hi 1 sync 0 tco 0: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: pass
+  lo 1 hi 1 sync 2 tco 0: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: pass
+  lo 1 hi 1 sync 3 tco 3: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: pass
+  lo 1 hi 1 sync 2 tco 8: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: pass
+  lo 1 hi 1 sync 2 tco 9: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: FAIL dpidr: ACK none(110) | abort: ACK none(111) | pwrup: ACK none(110)
+  lo 1 hi 1 sync 2 tco 10: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: FAIL dpidr: ACK none(110) | abort: ACK none(111) | pwrup: ACK none(110)
+  lo 1 hi 1 sync 2 tco 12: high >= 8, low >= 8, period 16-28 clocks -> 3.75 MHz max: FAIL dpidr: ACK none(110) | abort: ACK none(111) | pwrup: ACK none(110)
+  lo 1 hi 2: programme too long: 262 words, store holds 256
+  lo 1 hi 2: programme too long: 262 words, store holds 256
+  lo 1 hi 2: programme too long: 262 words, store holds 256
+  lo 1 hi 3: programme too long: 280 words, store holds 256
+ALL PASS
+exit 0
