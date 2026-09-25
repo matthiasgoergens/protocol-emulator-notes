@@ -1,0 +1,56 @@
+The claim is not established as stated. The saved hold curves reproduce the quoted numbers only after being joined to a read sweep for the wrong WBL voltage, and the proposed \(V_{GS}\) mechanism is directly contradicted by the saved voltages.
+
+I did not run ngspice; I inspected the source and reran only Python post-processing over saved outputs.
+
+## Load-bearing refutations
+
+1. **The 1.21 ms / 137 µs calculation uses mismatched read conditions.**
+
+   Read behaviour depends on `VLO`: [cell.py:207](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/cell.py:207) drives WBL to `VLO` throughout the read preparation. Nevertheless, [matrix.py:25](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/matrix.py:25) indexes read files only by `VBAR`, then reuses those thresholds for every VLO at [matrix.py:66](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/matrix.py:66).
+
+   The actual header of [read-nlv-bar0.1.txt:1](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/results/read-nlv-bar0.1.txt:1) says `VLO=0.1`, whereas the headline hold files use `VLO=0.3`. Thus the claimed 0.30/0.10 V cell was judged using thresholds from a 0.10/0.10 V read circuit.
+
+   There is a VLO=0.3/VBAR=0.1 read file, but [read-nlv-bar0.1-rbar0.txt:1](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/results/read-nlv-bar0.1-rbar0.txt:1) pulls the selected bar to 0 V during read, so it is not the fixed-0.1 V configuration either.
+
+   Consequently, no saved read sweep validates either 1.21 ms or 137 µs for the claimed circuit. They might remain close, but that requires a matching read run.
+
+2. **“Every unselected write transistor has \(V_{GS}\le -VLO\)” is false in the simulated cell.**
+
+   [cell.py:73](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/cell.py:73) connects the write NMOS as D=WBL, G=WWL, S=SN. Therefore its model \(V_{GS}\) is \(V_{WWL}-V_{SN}\), not \(V_{WWL}-V_{WBL}\).
+
+   In the headline parked case, [hold-lv-vlo0.3-bar0.1-park-v2.txt:10](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/results/hold-lv-vlo0.3-bar0.1-park-v2.txt:10) has the ff/85 °C stored zero at 0.195 V after writing and below 0.3 V throughout the 50 ms run. Its write transistor therefore begins around \(V_{GS}=-0.195\) V, not \(\le-0.3\) V. Other corners show the same counterexample.
+
+   Parking WBL high can still reduce leakage, but the blanket \(V_{GS}\) explanation is wrong for stored-zero cells.
+
+3. **The gate-drain-tunnelling attribution characterises the opposite D/S orientation.**
+
+   The real cell uses D=WBL and S=SN at [cell.py:73](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/cell.py:73). In contrast, the leakage experiments explicitly use D=SN and S=WBL at [leakdc.py:14](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/leakdc.py:14) and [leakterm.py:28](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/leakterm.py:28).
+
+   That may preserve total leakage if the compact model is perfectly symmetric, but it does not establish that the actual cell’s limiting current is specifically gate-*drain* overlap tunnelling. Moreover, the full transient was not decomposed: [leakdc.txt:7](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/results/leakdc.txt:7) shows substantial storage-transistor gate current as well. “The remaining floor is the write gate” is therefore unsupported.
+
+## What the saved outputs do support
+
+- Reprocessing [hold-lv-vlo0.txt](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/results/hold-lv-vlo0.txt:1) with the existing code reproduces the baseline **1.31 µs**.
+- Joining the v2 holds to the mismatched VLO=0.1 read sweep reproduces **1.21 ms parked** and **137 µs busy**. The arithmetic and log-time interpolation themselves are coherent.
+- The Monte Carlo TT/85 °C summaries support the quoted calculations:
+  - untricked: **0.630–0.714 µs**;
+  - level-shifted idle: **1.65–1.79 ms**.
+  
+  These appear in [mc-base-summary.txt:6](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/results/mc-base-summary.txt:6) and [mc-ls-summary.txt:21](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/results/mc-ls-summary.txt:21). Unlike `cell.py`, `mc.py` forces SN until immediately before each read, so it avoids the specific unmatched deterministic read sweep.
+
+The Monte Carlo result remains conditional on a lognormal, effectively iid-cell extrapolation from 200 samples to probability \(1.06\times10^{-5}\). [mcstat.py:35](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/mcstat.py:35) supplies no tail-fit diagnostics or uncertainty interval; the two quoted fits reuse the same observations and are not independent validation.
+
+## Concrete defects
+
+- [matrix.py:20](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/matrix.py:20): read thresholds are keyed only by bar and sense time, omitting VLO even though VLO changes the read netlist.
+- [matrix.py:35](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/matrix.py:35): prefers the old non-v2 hold filename. Consequently [matrix.txt:9](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/results/matrix.txt:9) reports 154.73 µs, not README’s 137 µs. The latter exists only in [v2-check.txt:1](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/results/v2-check.txt:1).
+- [cell.py:29](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/cell.py:29): documents an invalid universal \(V_{GS}\le -VLO\) inference; SN can remain below VLO.
+- [leakdc.py:14](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/leakdc.py:14) and [leakterm.py:28](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/leakterm.py:28): leakage characterisation reverses the write transistor’s D/S pins relative to [cell.py:73](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/cell.py:73).
+- [life.py:75](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/life.py:75) and [mc.py:128](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/mc.py:128): report absolute simulation crossing time rather than time since the end of the write. This adds roughly 30 ns—small for milliseconds, but about 2% of the 1.31 µs baseline.
+- [mcstat.py:48](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/mcstat.py:48): the first-percentile index is correct for exactly 200 samples, but uses `floor(0.01n)-1` rather than the nearest-rank `ceil(0.01n)-1` generally.
+- [mc.py:146](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/mc.py:146): ignores ngspice’s return code and stderr and accepts a run whenever only `vw1` and `vw0` exist; partial failures can silently become `nan` or `inf`.
+- [mc-ls-summary.txt:11](/home/matthias/prog/janestreet/emulator-wt-gc-thin/prototypes/gain-cell/tricks-thin/results/mc-ls-summary.txt:11): stale relative to the current raw SS/27 °C file—summary says 176 samples, while the raw file now contains 200 seed records and reprocessing reports 200.
+
+I found no definite bulk, storage-bar, RBL, or read-transistor connectivity error, and the post-25 ns crossing filter removes the visible start-up crossings. The evidence still indicates a large benefit from level shifting, especially in the matched TT/85 °C Monte Carlo run; it does not substantiate the complete claim or its stated mechanism.
+
+**VERDICT: REFUTED — the headline deterministic lifetimes use read thresholds from the wrong VLO configuration, the universal \(V_{GS}\) inequality is demonstrably false, and the claimed write-gate tunnelling floor was characterised with reversed D/S connectivity.**

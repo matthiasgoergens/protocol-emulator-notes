@@ -1,0 +1,30 @@
+mc-ls-ff85.txt [life]: 200 samples (0 infinite or zero)
+  median 132 us, min 7.87 us, 1st percentile 15.6 us (sample 2 of 200), max 1.45 ms
+  the stored 0 fails first in 188 of 200; written 1: 0.783..0.927 V; L1 0.283..0.388 V; H0 0.229..0.335 V
+  lognormal, all samples: median 128 us, sigma(ln t) 1.032 (x2.81 per sigma); 64 kbit worst cell (z -4.25) 1.58 us; 90 % array yield (z -4.66) 1.04 us
+  lognormal, lower-half probit fit: median 114 us, sigma 0.904; 64 kbit worst cell 2.44 us; 90 % array yield 1.7 us
+mc-ls-tt85.txt [life]: 200 samples (0 infinite or zero)
+  median 3.15 ms, min 1.83 ms, 1st percentile 2.12 ms (sample 2 of 200), max 4.36 ms
+  the stored 0 fails first in 0 of 200; written 1: 0.709..0.853 V; L1 0.367..0.472 V; H0 0.321..0.427 V
+  lognormal, all samples: median 3.12 ms, sigma(ln t) 0.130 (x1.14 per sigma); 64 kbit worst cell (z -4.25) 1.79 ms; 90 % array yield (z -4.66) 1.7 ms
+  lognormal, lower-half probit fit: median 3.19 ms, sigma 0.155; 64 kbit worst cell 1.65 ms; 90 % array yield 1.55 ms
+mc-ls-ss27.txt [life]: 200 samples (7 infinite or zero)
+  median 4.85 ms, min 0 us, 1st percentile 0 us (sample 2 of 200), max 11.4 ms
+  the stored 0 fails first in 0 of 200; written 1: 0.550..0.708 V; L1 0.499..0.604 V; H0 0.464..0.570 V
+  lognormal, all samples: median 4.09 ms, sigma(ln t) 1.072 (x2.92 per sigma); 64 kbit worst cell (z -4.25) 42.9 us; 90 % array yield (z -4.66) 27.8 us
+  lognormal, lower-half probit fit: median 10.2 ms, sigma 1.768; 64 kbit worst cell 5.51 us; 90 % array yield 2.7 us
+mc-ls-ff85.txt [lifepark]: 200 samples (0 infinite or zero)
+  median 1.04 ms, min 18.9 us, 1st percentile 35.4 us (sample 2 of 200), max 1.8 ms
+  the stored 0 fails first in 65 of 200; written 1: 0.783..0.927 V; L1 0.283..0.388 V; H0 0.229..0.335 V
+  lognormal, all samples: median 578 us, sigma(ln t) 1.078 (x2.94 per sigma); 64 kbit worst cell (z -4.25) 5.89 us; 90 % array yield (z -4.66) 3.81 us
+  lognormal, lower-half probit fit: median 988 us, sigma 1.660; 64 kbit worst cell 0.848 us; 90 % array yield 0.434 us
+mc-ls-tt85.txt [lifepark]: 200 samples (0 infinite or zero)
+  median 3.15 ms, min 1.83 ms, 1st percentile 2.12 ms (sample 2 of 200), max 4.36 ms
+  the stored 0 fails first in 0 of 200; written 1: 0.709..0.853 V; L1 0.367..0.472 V; H0 0.321..0.427 V
+  lognormal, all samples: median 3.12 ms, sigma(ln t) 0.130 (x1.14 per sigma); 64 kbit worst cell (z -4.25) 1.79 ms; 90 % array yield (z -4.66) 1.7 ms
+  lognormal, lower-half probit fit: median 3.19 ms, sigma 0.155; 64 kbit worst cell 1.65 ms; 90 % array yield 1.55 ms
+mc-ls-ss27.txt [lifepark]: 200 samples (7 infinite or zero)
+  median 4.85 ms, min 0 us, 1st percentile 0 us (sample 2 of 200), max 11.4 ms
+  the stored 0 fails first in 0 of 200; written 1: 0.550..0.708 V; L1 0.499..0.604 V; H0 0.464..0.570 V
+  lognormal, all samples: median 4.09 ms, sigma(ln t) 1.072 (x2.92 per sigma); 64 kbit worst cell (z -4.25) 42.9 us; 90 % array yield (z -4.66) 27.8 us
+  lognormal, lower-half probit fit: median 10.2 ms, sigma 1.768; 64 kbit worst cell 5.51 us; 90 % array yield 2.7 us

@@ -31,7 +31,7 @@ import sys
 import gdstk
 
 LY = {"Activ": (1, 0), "GatPoly": (5, 0), "Cont": (6, 0), "Metal1": (8, 0), "Via1": (19, 0),
-      "Metal2": (10, 0), "ThickGateOx": (44, 0), "pSD": (14, 0)}
+      "Metal2": (10, 0), "ThickGateOx": (44, 0), "pSD": (14, 0), "NWell": (31, 0)}
 PX = 1.03
 
 # A variant of the cell: kind "3T" or "2T"; ox "thick" or "thin" for the write transistor, or
@@ -40,20 +40,33 @@ PX = 1.03
 # instead of the strip's 0.30 (a dogbone: the strip narrows under the gate only).
 # Thick oxide costs a keep-out: ThickGateOx reaches 0.27 past strip B (TGO.a) and must clear the
 # thin-oxide bar by another 0.27 (TGO.b); thin oxide needs only the Activ spacing of 0.21.
-def V(kind="3T", ox="thick", lmw=None, narrow=True):
+# Two further options (tricks-thin/, 2026-09-25): stack=2 puts a second write gate in series on
+# strip B (both are WWL lines; they join at the array edge), at the gate space of 0.18; pms=True
+# makes strip A and the bar P+ in an n-well (a PMOS storage and read transistor, bar = VDD):
+# the n-well must clear strip B by 0.31 (NW.d) and enclose the bar by 0.31 (NW.c), so the bar
+# moves up by 0.41; the strap column then carries a VDD track and an abutted n-well tie on the
+# bar, and a separate P+ substrate tie at the WBL contact row.
+def V(kind="3T", ox="thick", lmw=None, narrow=True, stack=1, pms=False):
     return dict(kind=kind, ox=ox, lmw=lmw if lmw is not None else (0.45 if ox == "thick" else 0.13),
-                narrow=narrow)
+                narrow=narrow, stack=stack, pms=pms)
 
 def vname(v):
-    return f"{v['kind']}_{v['ox']}_L{int(round(v['lmw'] * 100))}{'n' if v['narrow'] else 'w'}"
+    return (f"{v['kind']}_{v['ox']}_L{int(round(v['lmw'] * 100))}{'n' if v['narrow'] else 'w'}"
+            f"{'_S2' if v.get('stack', 1) == 2 else ''}{'_P' if v.get('pms') else ''}")
 
 def geometry(v):
     n = 0.03 if v["narrow"] else 0    # the dogbone's width steps keep 0.07 from the gate (Gat.d)
-    d = round(v["lmw"] - 0.45 + 2 * n, 3)   # everything above the write gate moves up by this
+    sx = (v.get("stack", 1) - 1) * (v["lmw"] + 0.18)     # a second write gate, at Gat.b
+    d = round(v["lmw"] - 0.45 + 2 * n + sx, 3)   # everything above the write gate moves up by this
     k = 0 if v["ox"] == "thick" else round(0.21 - 0.54, 3)   # and the bar and strip A by this
+    k = round(k + (0.41 if v.get("pms") else 0), 3)          # n-well clearance (NW.c + NW.d)
     up = lambda p: tuple(round(x + d, 3) for x in p)
     upk = lambda p: tuple(round(x + d + k, 3) for x in p)
-    g = dict(b_top=0.98 + d, sn_c=up((0.75, 0.91)), wwl=(0.19 + n, 0.64 + d - n), tgo_top=1.25 + d,
+    w0 = 0.19 + n
+    wwls = [(round(w0 + j * (v["lmw"] + 0.18), 3), round(w0 + j * (v["lmw"] + 0.18) + v["lmw"], 3))
+            for j in range(v.get("stack", 1))]
+    g = dict(b_top=0.98 + d, sn_c=up((0.75, 0.91)), wwl=wwls[0], wwls=wwls, tgo_top=1.25 + d,
+             pms=v.get("pms", False),
              bar=upk((1.52, 1.82)), ms=upk((1.89, 2.02)), pad=upk((1.89, 2.19)),
              pad_c=upk((1.96, 2.12)), thick=v["ox"] != "thin", narrow=v["narrow"])
     if v["ox"] == "allthick":
@@ -93,7 +106,11 @@ def tile(lib, v):
             r("Activ", 0.18, g["sn_c"][0] - 0.07, 0.48, g["b_top"])
         else:
             r("Activ", 0.18, 0, 0.48, g["b_top"])                   # strip B
-        r("GatPoly", 0, g["wwl"][0], PX, g["wwl"][1])                # WWL
+        for w in g["wwls"]:
+            r("GatPoly", 0, w[0], PX, w[1])                          # WWL (one or two gates)
+        if g["pms"]:
+            r("NWell", 0, g["bar"][0] - 0.31, PX, H)
+            r("pSD", 0, g["bar"][0] - 0.18, PX, H)
         r("Cont", 0.25, g["sn_c"][0], 0.41, g["sn_c"][1])            # SN on strip B
         if g["thick"]:
             r("ThickGateOx", 0, 0, PX, g["tgo_top"])
@@ -119,6 +136,10 @@ def tile(lib, v):
     return c, H
 
 SW = 0.60      # strap column: a GND track in Metal2 and a substrate tie per row
+SWP = 0.85     # the same with an n-well: GND and VDD tracks
+
+def swidth(v):
+    return SWP if v.get("pms") else SW
 
 def strap(lib, v):
     """Strap column, as a tile of the same height. Word lines, the bars and ThickGateOx run
@@ -127,11 +148,14 @@ def strap(lib, v):
     g = geometry(v)
     H = g["H"]
     c = lib.new_cell(f"STRAP_{vname(v)}")
+    if g["pms"]:
+        return strap_pms(c, g, H)
     for s in (1, -1):
         def r(layer, x0, y0, x1, y1):
             a, b = sorted((s * y0, s * y1))
             R(c, layer, x0, a, x1, b)
-        r("GatPoly", 0, g["wwl"][0], SW, g["wwl"][1])
+        for w in g["wwls"]:
+            r("GatPoly", 0, w[0], SW, w[1])
         if g["thick"]:
             r("ThickGateOx", 0, 0, SW, g["tgo_top"])
         r("Activ", 0, g["bar"][0], SW, g["bar"][1])
@@ -156,6 +180,35 @@ def strap(lib, v):
     R(c, "Metal2", 0.02, -H, 0.22, H)                                # GND
     return c
 
+def strap_pms(c, g, H):
+    """strap for n-well rows: the bar is N+ here (an abutted n-well tie, VDD track at x 0.45),
+    except a pSD sliver at the right edge that encloses the next tile's PMOS gates (pSD.i); a
+    P+ substrate tie at y = 0 on the GND track at x 0.02"""
+    sw = SWP
+    for s in (1, -1):
+        def r(layer, x0, y0, x1, y1):
+            a, b = sorted((s * y0, s * y1))
+            R(c, layer, x0, a, x1, b)
+        for w in g["wwls"]:
+            r("GatPoly", 0, w[0], sw, w[1])
+        r("Activ", 0, g["bar"][0], sw, g["bar"][1])
+        r("NWell", 0, g["bar"][0] - 0.31, sw, H)
+        r("pSD", sw - 0.15, g["bar"][0] - 0.18, sw, H)
+        if "rwl" in g:
+            r("GatPoly", 0, g["rwl"][0], sw, g["rwl"][1])
+        ym = (g["bar"][0] + g["bar"][1]) / 2
+        r("Cont", 0.47, ym - 0.08, 0.63, ym + 0.08)
+        r("Metal1", 0.445, ym - 0.215, 0.655, ym + 0.215)
+        r("Via1", 0.455, ym - 0.095, 0.645, ym + 0.095)
+    R(c, "Activ", -0.03, -0.15, 0.38, 0.15)             # substrate tie (Act.d: area 0.123)
+    R(c, "pSD", -0.20, -0.32, 0.55, 0.32)
+    R(c, "Cont", 0.04, -0.08, 0.20, 0.08)
+    R(c, "Metal1", 0.015, -0.215, 0.225, 0.215)
+    R(c, "Via1", 0.025, -0.095, 0.215, 0.095)
+    R(c, "Metal2", 0.02, -H, 0.22, H)                    # GND
+    R(c, "Metal2", 0.45, -H, 0.65, H)                    # VDD
+    return c
+
 CELLS = {}     # tiles and straps already in a library, by variant name
 
 def array(lib, name, pairs, cols, every):
@@ -169,10 +222,11 @@ def array(lib, name, pairs, cols, every):
     a = lib.new_cell(name)
     xs, x = [], 0.0
     straps = []
+    sw = max(swidth(v) for v in pairs)
     for k in range(cols):
         if k and k % every == 0:
             straps.append(x)
-            x += SW
+            x += sw
         xs.append(x)
         x += PX
     width = x
@@ -192,6 +246,13 @@ def array(lib, name, pairs, cols, every):
         elif g["thick"]:
             # ThickGateOx must extend 0.34 past the leftmost gates (TGO.c)
             R(a, "ThickGateOx", -0.16, yc - g["tgo_top"], 0, yc + g["tgo_top"])
+        if g["pms"]:
+            # n-well and pSD past the array's left and right ends (NW.c, pSD.c, pSD.i)
+            for s in (1, -1):
+                for x0, x1, lay, e in ((-0.31, 0, "NWell", 0.31), (width, width + 0.31, "NWell", 0.31),
+                                       (-0.18, 0, "pSD", 0.18), (width, width + 0.18, "pSD", 0.18)):
+                    y0, y1 = sorted((yc + s * (g["bar"][0] - e), yc + s * H))
+                    R(a, lay, x0, y0, x1, y1)
         y += 2 * H
     top = y
     for x0 in xs:
@@ -203,14 +264,20 @@ def array(lib, name, pairs, cols, every):
     for x0 in straps:
         for y0, y1 in ((-0.15, 0), (top, top + 0.15)):
             R(a, "Metal2", x0 + 0.02, y0, x0 + 0.22, y1)
+            if sw == SWP:
+                R(a, "Metal2", x0 + 0.45, y0, x0 + 0.65, y1)
     if any(cells[vname(v)][2].get("allthick") for v in (pairs[0], pairs[-1])):
         # ThickGateOx past the strip A end-caps at the array's top and bottom (TGO.a)
         R(a, "ThickGateOx", -0.34, -0.15 - 0.34, width + 0.34, 0)
         R(a, "ThickGateOx", -0.34, top, width + 0.34, top + 0.15 + 0.34)
+    for (v, y0, y1) in ((pairs[0], -0.46, 0), (pairs[-1], top, top + 0.46)):
+        if geometry(v)["pms"]:      # n-well and pSD past the end-caps of strip A
+            R(a, "NWell", -0.31, y0, width + 0.31, y1)
+            R(a, "pSD", -0.18, max(y0, -0.33) if y0 < 0 else y0, width + 0.18, min(y1, top + 0.33) if y0 >= 0 else y1)
     return a, width, top
 
 def per_bit(v, every):
-    return (PX + SW / every) * geometry(v)["H"]
+    return (PX + swidth(v) / every) * geometry(v)["H"]
 
 if __name__ == "__main__":
     # uv run draw2.py COLS PAIRS EVERY [ox lmw narrow|wide] ...: one uniform array per variant
@@ -218,8 +285,10 @@ if __name__ == "__main__":
     # two variants' row pairs; writes gain_v2.gds
     cols, npairs, every = (int(x) for x in sys.argv[1:4]) if len(sys.argv) > 3 else (8, 2, 4)
     rest = sys.argv[4:]
-    variants = [V("3T", rest[i], float(rest[i + 1]), rest[i + 2] == "narrow") for i in range(0, len(rest), 3)] \
-        or [V("3T", "thick", 0.45, True)]
+    # the third word may carry options: narrow+s2 (two write gates), narrow+p (PMOS strip A)
+    variants = [V("3T", rest[i], float(rest[i + 1]), rest[i + 2].split("+")[0] == "narrow",
+                  stack=2 if "s2" in rest[i + 2].split("+") else 1, pms="p" in rest[i + 2].split("+"))
+                for i in range(0, len(rest), 3)] or [V("3T", "thick", 0.45, True)]
     lib = gdstk.Library(unit=1e-6, precision=5e-9)
     for v in variants:
         for kind in ("3T", "2T"):

@@ -1,0 +1,16 @@
+# 2026-09-25T11:15:18+08:00 run read-plv-bar1.0: cell.py  --env MODE=read --env MS=plv --env VBAR=1.0   (commit 162c494)
+read: MW=lv MS=plv VLO=0.0 VBAR=1.0 RBAR=None N=32 CBL=10f SN1=0.85; RBL at 5/10/20 ns after RWL falls; SN before/during/after
+mos_tt   27C SN 0.000: RBL  1.000  1.000  1.000   SN  0.000  0.000  0.000
+mos_tt   27C SN 0.025: RBL  1.000  1.000  1.000   SN  0.025  0.025  0.025
+mos_tt   27C SN 0.050: RBL  1.000  1.000  1.000   SN  0.050  0.050  0.050
+mos_tt   27C SN 0.075: RBL  1.000  1.000  1.000   SN  0.075  0.075  0.075
+mos_tt   27C SN 0.100: RBL  1.000  1.000  1.000   SN  0.100  0.100  0.100
+mos_tt   27C SN 0.125: RBL  1.000  1.000  1.000   SN  0.125  0.125  0.125
+mos_tt   27C SN 0.150: RBL  1.000  1.000  1.000   SN  0.150  0.150  0.150
+mos_tt   27C SN 0.175: RBL  1.000  1.000  1.000   SN  0.175  0.175  0.175
+mos_tt   27C SN 0.200: RBL  1.000  1.000  1.000   SN  0.200  0.200  0.200
+mos_tt   27C SN 0.225: RBL  1.000  1.000  1.000   SN  0.225  0.225  0.225
+mos_tt   27C SN 0.250: RBL  1.000  1.000  1.000   SN  0.250  0.250  0.250
+mos_tt   27C SN 0.275: RBL  0.999  1.000  1.000   SN  0.275  0.275  0.275
+mos_tt   27C SN 0.300: RBL  0.999  1.000  1.000   SN  0.300  0.300  0.300
+mos_tt   27C SN 0.325: RBL  0.997  1.000  1.000   SN  0.325  0.325  0.325

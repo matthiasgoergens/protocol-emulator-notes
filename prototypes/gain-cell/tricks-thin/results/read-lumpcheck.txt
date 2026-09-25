@@ -1,0 +1,14 @@
+# 2026-09-25T11:20:14+08:00 run read-lumpcheck: cell.py  --env MODE=read --env LUMP=1 --env CORNERS=mos_tt,mos_ff --env TEMPS=27,85 --env SNSWEEP=0.2:0.4:0.1   (commit 530b0ea)
+read: MW=lv MS=nlv VLO=0.0 VBAR=0.0 RBAR=None N=32 CBL=10f SN1=0.85; RBL at 5/10/20 ns after RWL rises; SN before/during/after
+mos_tt   27C SN 0.200: RBL  1.116  1.030  0.870   SN  0.200  0.422  0.256
+mos_tt   27C SN 0.300: RBL  0.863  0.573  0.367   SN  0.300  0.478  0.300
+mos_tt   27C SN 0.400: RBL  0.419  0.208  0.086   SN  0.400  0.467  0.400
+mos_tt   85C SN 0.200: RBL  1.019  0.846  0.585   SN  0.198  0.413  0.210
+mos_tt   85C SN 0.300: RBL  0.681  0.403  0.246   SN  0.298  0.426  0.295
+mos_tt   85C SN 0.400: RBL  0.296  0.110  0.014   SN  0.398  0.433  0.395
+mos_ff   27C SN 0.200: RBL  0.892  0.631  0.442   SN  0.199  0.398  0.200
+mos_ff   27C SN 0.300: RBL  0.475  0.279  0.158   SN  0.298  0.389  0.297
+mos_ff   27C SN 0.400: RBL  0.158  0.026  0.000   SN  0.398  0.407  0.397
+mos_ff   85C SN 0.200: RBL  0.774  0.521  0.367   SN  0.183  0.344  0.165
+mos_ff   85C SN 0.300: RBL  0.405  0.223  0.104   SN  0.281  0.348  0.264
+mos_ff   85C SN 0.400: RBL  0.115  0.009  0.000   SN  0.381  0.379  0.364

@@ -1,0 +1,40 @@
+# 2026-09-25T10:57:17+08:00 run leakterm: leakterm.py    (commit 2b09a94)
+write transistor, SN (drain) at 0.7 V, gate 0: current out of each terminal source (A); positive at vd = SN loses charge
+mos_tt  27C vs 0.0: drain  2.564e-12 gate -2.446e-14 source -2.539e-12 bulk -1.540e-16
+mos_tt  27C vs 0.2: drain  2.809e-14 gate -2.544e-14 source -2.433e-15 bulk -2.082e-16
+mos_tt  27C vs 0.3: drain  2.511e-14 gate -2.691e-14 source  2.035e-15 bulk -2.299e-16
+mos_tt  27C vs 0.4: drain  2.491e-14 gate -2.941e-14 source  4.746e-15 bulk -2.504e-16
+mos_tt  27C vs 0.7: drain  2.461e-14 gate -4.891e-14 source  2.461e-14 bulk -3.080e-16
+mos_tt  85C vs 0.0: drain  4.615e-11 gate -4.037e-14 source -4.610e-11 bulk -1.136e-14
+mos_tt  85C vs 0.2: drain  1.906e-13 gate -4.203e-14 source -1.329e-13 bulk -1.571e-14
+mos_tt  85C vs 0.3: drain  5.961e-14 gate -4.447e-14 source  2.163e-15 bulk -1.730e-14
+mos_tt  85C vs 0.4: drain  5.243e-14 gate -4.860e-14 source  1.493e-14 bulk -1.877e-14
+mos_tt  85C vs 0.7: drain  5.173e-14 gate -8.075e-14 source  5.173e-14 bulk -2.272e-14
+mos_ff  27C vs 0.0: drain  3.214e-11 gate -1.026e-13 source -3.204e-11 bulk -1.668e-16
+mos_ff  27C vs 0.2: drain  1.462e-13 gate -1.073e-13 source -3.867e-14 bulk -2.254e-16
+mos_ff  27C vs 0.3: drain  1.047e-13 gate -1.140e-13 source  9.537e-15 bulk -2.490e-16
+mos_ff  27C vs 0.4: drain  1.031e-13 gate -1.250e-13 source  2.211e-14 bulk -2.712e-16
+mos_ff  27C vs 0.7: drain  1.028e-13 gate -2.052e-13 source  1.028e-13 bulk -3.335e-16
+mos_ff  85C vs 0.0: drain  3.915e-10 gate -1.695e-13 source -3.914e-10 bulk -1.230e-14
+mos_ff  85C vs 0.2: drain  1.479e-12 gate -1.774e-13 source -1.285e-12 bulk -1.701e-14
+mos_ff  85C vs 0.3: drain  2.559e-13 gate -1.885e-13 source -4.862e-14 bulk -1.874e-14
+mos_ff  85C vs 0.4: drain  1.863e-13 gate -2.067e-13 source  4.074e-14 bulk -2.032e-14
+mos_ff  85C vs 0.7: drain  1.818e-13 gate -3.391e-13 source  1.818e-13 bulk -2.460e-14
+mos_ss  27C vs 0.0: drain  7.823e-14 gate -5.828e-15 source -7.226e-14 bulk -1.431e-16
+mos_ss  27C vs 0.2: drain  6.524e-15 gate -6.036e-15 source -2.947e-16 bulk -1.934e-16
+mos_ss  27C vs 0.3: drain  6.373e-15 gate -6.359e-15 source  1.996e-16 bulk -2.136e-16
+mos_ss  27C vs 0.4: drain  6.271e-15 gate -6.925e-15 source  8.863e-16 bulk -2.327e-16
+mos_ss  27C vs 0.7: drain  5.971e-15 gate -1.166e-14 source  5.971e-15 bulk -2.862e-16
+mos_ss  85C vs 0.0: drain  2.558e-12 gate -9.616e-15 source -2.537e-12 bulk -1.056e-14
+mos_ss  85C vs 0.2: drain  2.610e-14 gate -9.963e-15 source -1.534e-15 bulk -1.460e-14
+mos_ss  85C vs 0.3: drain  2.082e-14 gate -1.050e-14 source  5.763e-15 bulk -1.609e-14
+mos_ss  85C vs 0.4: drain  2.049e-14 gate -1.144e-14 source  8.397e-15 bulk -1.745e-14
+mos_ss  85C vs 0.7: drain  2.017e-14 gate -1.923e-14 source  2.017e-14 bulk -2.112e-14
+
+gate current, storage transistor W 0.30 L 0.13, |Vgs| = V (A, magnitude)
+mos_tt  27C  0.3V n  3.87e-15 p  7.39e-14   0.5V n  2.25e-14 p  1.97e-13   0.7V n  1.55e-13 p  5.30e-13   0.9V n  7.61e-13 p  1.25e-12   1.2V n  5.31e-12 p  3.54e-12
+mos_tt  85C  0.3V n  6.49e-15 p  1.10e-13   0.5V n  3.71e-14 p  2.92e-13   0.7V n  2.23e-13 p  7.47e-13   0.9V n  1.05e-12 p  1.71e-12   1.2V n  7.33e-12 p  4.79e-12
+mos_ff  27C  0.3V n  1.86e-14 p  2.98e-13   0.5V n  1.11e-13 p  7.77e-13   0.7V n  6.41e-13 p  1.90e-12   0.9V n  2.89e-12 p  4.17e-12   1.2V n  1.90e-11 p  1.12e-11
+mos_ff  85C  0.3V n  3.18e-14 p  4.45e-13   0.5V n  1.81e-13 p  1.15e-12   0.7V n  9.58e-13 p  2.72e-12   0.9V n  4.17e-12 p  5.87e-12   1.2V n  2.70e-11 p  1.56e-11
+mos_ss  27C  0.3V n  8.19e-16 p  1.85e-14   0.5V n  4.18e-15 p  4.84e-14   0.7V n  3.50e-14 p  1.47e-13   0.9V n  1.87e-13 p  3.73e-13   1.2V n  1.38e-12 p  1.11e-12
+mos_ss  85C  0.3V n  1.35e-15 p  2.72e-14   0.5V n  7.07e-15 p  7.26e-14   0.7V n  4.84e-14 p  2.04e-13   0.9V n  2.48e-13 p  4.98e-13   1.2V n  1.85e-12 p  1.47e-12
