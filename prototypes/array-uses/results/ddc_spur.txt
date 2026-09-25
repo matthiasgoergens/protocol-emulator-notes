@@ -1,0 +1,7 @@
+# spur check (script: /var/tmp/array-uses/spur.py, copied here)
+channel 0: strongest line 2.5-10 kHz at 3027 Hz, 36.9 dB below the largest peak
+channel 1: strongest line 2.5-10 kHz at 2930 Hz, 13.5 dB below the largest peak
+channel 2: strongest line 2.5-10 kHz at 2501 Hz, 2.1 dB below the largest peak
+channel 1 LO: K = 6554, 6000366 Hz (+366 Hz from the carrier)
+LO harmonic 9 sampled at 60 MS/s aliases to 5996704 Hz; the 6 MHz carrier lands at 3296 Hz, beating with the main image at 366 Hz: 2930 Hz
+LO harmonic 11 sampled at 60 MS/s aliases to 6004028 Hz; the 6 MHz carrier lands at 4028 Hz, beating with the main image at 366 Hz: 3662 Hz

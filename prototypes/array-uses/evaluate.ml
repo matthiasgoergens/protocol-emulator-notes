@@ -54,10 +54,11 @@ let cands = [
     kernel = "k2_pm1_smlad"; host_items_per_iter = 2.; pe_clocks = 1.;
     pe_note = "same configuration, multi-bit A"; port_bound = None;
     need = nan; verdict_override = None; need_note = "no application found beyond GPS" };
-  { name = "HF direct-sampling DDC (8-bit ADC, I/Q, CIC3)"; item = "ADC sample";
-    kernel = "k3_cic_ddc"; host_items_per_iter = 1.; pe_clocks = 16.;
-    pe_note = "32-bit NCO (2), square-LO mixers (2), 3 x 32-bit integrators per arm (12); est; needs an 8x8 mixer for image rejection"; port_bound = None;
-    need = 60e6; verdict_override = None; need_note = "0-30 MHz needs >= 60 MS/s (Nyquist)" };
+  { name = "HF AM receiver, 8-bit ADC at 60 MS/s (ddc.ml)"; item = "sample x channel";
+    kernel = "k3b_ddc_cic1"; host_items_per_iter = 1.; pe_clocks = 4.;
+    pe_note = "per channel: 16-bit NCO, accumulator S <- S + (g ? -A : A) with g = the LO sign, for I and for Q; the host differences the accumulators every 240 clocks (designed and simulated: ddc.ml). Square-wave LO: the third harmonic leaks in at 1/3; an 8x8 mixer would fix it (not in upe_v0). Also needs the ADC's 8 pins as a segment feed";
+    port_bound = None; verdict_override = None;
+    need = 60e6; need_note = "one channel of the whole 0-30 MHz band needs 60 MS/s; the prototype runs four (240M). Host best case with SIMD, est 3-4 cycles: 75-100M, one channel at most" };
   { name = "edit distance (Myers on host)"; item = "text char x 32 cells";
     kernel = "k5_myers"; host_items_per_iter = 1.; pe_clocks = 128.;
     pe_note = "about 4 PE-ops per DP cell, est; needs two links (see DTW)"; port_bound = None;

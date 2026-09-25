@@ -1,0 +1,5 @@
+ddc: 3 of 72000000 ADC samples clipped
+ddc: 72000000 clocks (1.20 s) through 16 PEs, 300000 decimated I/Q frames at 250000 S/s; channels 5.950, 6.000, 6.055, 6.150 MHz -> out/ddc-ch*.txt
+# control: UPE_FAULT=negate (mixers never negate), 0.2 s, into /var/tmp/array-uses/ddc-fault
+ddc: 0 of 12000000 ADC samples clipped
+ddc: 12000000 clocks (0.20 s) through 16 PEs, 50000 decimated I/Q frames at 250000 S/s; channels 5.950, 6.000, 6.055, 6.150 MHz -> /var/tmp/array-uses/ddc-fault/ddc-ch*.txt

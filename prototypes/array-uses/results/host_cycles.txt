@@ -20,6 +20,7 @@ k14_dda                     10           11.00               13.00
 k15_lz_match                 8           10.00               12.00
 k16_pdm                      6            8.00               10.00
 k17_insert                   7            8.00               10.00
+k3b_ddc_cic1                17           17.00               19.00
 
 Timed assembly (the innermost loop of each function):
 
@@ -315,4 +316,23 @@ Timed assembly (the innermost loop of each function):
 	subs.w	lr, lr, #1
 	mov	r12, r1
 	bgt	.LBB17_2
+
+--- k3b_ddc_cic1
+	ldrsb	lr, [r11, #1]!
+	sxth.w	r12, r4
+	mov	r6, lr
+	rsb.w	r0, lr, #0
+	cmp.w	r12, #0
+	it	mi
+	movmi	r6, r0
+	add	r10, r6
+	sxth	r6, r5
+	cmp	r6, #0
+	it	mi
+	movmi	lr, r0
+	add	r9, lr
+	add	r4, r2
+	subs	r7, #1
+	add	r5, r2
+	bne	.LBB18_2
 

@@ -1,4 +1,4 @@
 (executable
  (name main)
- (modules upe lockstep row synth evaluate main)
+ (modules upe lockstep row synth evaluate ddc main)
  (libraries unix))

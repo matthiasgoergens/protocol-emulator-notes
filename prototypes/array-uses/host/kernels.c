@@ -212,3 +212,17 @@ void k17_insert(int16_t *a, int n, int16_t v) {
   while (j > 0 && a[j - 1] > v) { a[j] = a[j - 1]; j--; }
   a[j] = v;
 }
+
+/* K3b item: one 8-bit ADC sample for one channel of the prototype receiver (ddc.ml): a 16-bit
+   NCO per arm, square-wave LO sign, one accumulator per arm (mixing and the first CIC
+   integrator in one step). Four channels are four passes over the samples. */
+void k3b_ddc_cic1(const int8_t *x, int n, uint16_t k, uint16_t *ph, int32_t *acc) {
+  uint16_t pi = ph[0], pq = ph[1]; int32_t ai = acc[0], aq = acc[1];
+  for (int j = 0; j < n; j++) {
+    int32_t v = x[j];
+    ai += (pi & 0x8000) ? -v : v;
+    aq += (pq & 0x8000) ? -v : v;
+    pi += k; pq += k;
+  }
+  ph[0] = pi; ph[1] = pq; acc[0] = ai; acc[1] = aq;
+}
