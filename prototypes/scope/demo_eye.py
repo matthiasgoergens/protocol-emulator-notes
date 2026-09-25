@@ -86,7 +86,7 @@ slope = (line_v(tc + 1e-12) - line_v(tc - 1e-12)) / 2e-12
 tc_pad = tc + noise.threshold(rng, len(tc)) / slope + 0.6e-9
 trig = tb.timestamp(tc_pad, rng)
 say(f"trigger: {len(rise_idx)} rises to +1, {len(pat)} match the pattern -1, 0, +1 ({len(pat)/(N_SYM*UI)/1e6:.2f} M/s); "
-    f"slope at the threshold {np.median(slope)/1e9:.2f} V/ns, so {noise.threshold(rng, 1).std() if False else np.sqrt((noise.dvt_dvdd*noise.vdd_noise)**2+noise.thermal**2)*1e3:.1f} mV of threshold noise "
+    f"slope at the threshold {np.median(slope)/1e9:.2f} V/ns, so {np.sqrt((noise.dvt_dvdd*noise.vdd_noise)**2+noise.thermal**2)*1e3:.1f} mV of threshold noise "
     f"is {np.sqrt((noise.dvt_dvdd*noise.vdd_noise)**2+noise.thermal**2)/np.median(slope)*1e12:.1f} ps")
 # the symbol period from the trigger timestamps: edges sit on the symbol grid
 k_est = np.concatenate([[0], np.cumsum(np.round(np.diff(trig) / 8e-9))])
@@ -133,7 +133,7 @@ for j, L in enumerate(tiles):
     ok = np.isfinite(m) & (m >= cal_m[0]) & (m <= cal_m[-1]) & (u > U_LO) & (u < U_HI)
     v_est = (kl.base + u - off) / K_S
     t_eff = tb.estimate(n, k) + d_kout + centroid - np.repeat(tr, KICKS)   # after the trigger edge
-    t_true = ta + centroid - np.repeat(tc, KICKS)[:0] if False else ta + centroid
+    t_true = ta + centroid                               # the physical instant the kick's aperture weighs
     samples_t.append(t_eff[ok]); samples_v.append(v_est[ok])
     samples_truth.append(line_v(t_true[ok]))
 st = np.concatenate(samples_t); sv = np.concatenate(samples_v); tv = np.concatenate(samples_truth)
@@ -146,8 +146,6 @@ err = sv - tv
 say(f"per-sample voltage error against the line at the sampled instant: rms {np.std(err)*1e3:.1f} mV, mean {np.mean(err)*1e3:+.1f} mV")
 
 # truth eye: dense samples of the true line folded the same way (true times relative to true crossings)
-tt_ref = rng.choice(tc, 20000) + rng.uniform(LAT * T, (LAT + 2 * KICKS) * T, 20000)
-ph_true = np.mod(tt_ref - tc[0] * 0 - np.interp(tt_ref, tc, tc, left=np.nan) * 0, 1)  # placeholder, replaced below
 idx = rng.integers(0, len(tc), 60000)
 dt = rng.uniform(LAT * T, (LAT + 2 * KICKS) * T, 60000)
 tt_ref = tc[idx] + dt

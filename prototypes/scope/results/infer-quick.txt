@@ -1,0 +1,58 @@
+# infer.exe quick (seed 7); stop at posterior >= 1 - 1e-3; errors counted against the true candidate
+S1. Which of K frames? 125 Mbit/s NRZ, 64-bit frames sharing a 16-bit sync; the matcher triggers on the
+    sync, the TDC timestamps its last edge (20 ps rms), one sample per repetition at a chosen bit centre.
+    Candidates differ from a base frame in 1..6 random bits (like register addresses or status flags).
+   frames, strong (300 mV)            K=2 greedy   mean    2.0 samples (max    2), errors 0/60
+   frames, strong (300 mV)            K=2 random   mean   36.9 samples (max  140), errors 0/60
+   frames, strong (300 mV)            K=2 decode   mean   21.0 samples (max   21), errors 0/60
+   frames, strong (300 mV)            K=4 greedy   mean    3.2 samples (max    4), errors 0/60
+   frames, strong (300 mV)            K=4 random   mean   44.2 samples (max  167), errors 0/60
+   frames, strong (300 mV)            K=4 decode   mean   38.2 samples (max   40), errors 0/60
+   frames, strong (300 mV)            K=8 greedy   mean    4.7 samples (max    9), errors 0/60
+   frames, strong (300 mV)            K=8 random   mean   63.7 samples (max  199), errors 0/60
+   frames, strong (300 mV)            K=8 decode   mean   62.5 samples (max  102), errors 0/60
+   frames, weak (3 mV)                K=2 greedy   mean    4.0 samples (max   10), errors 0/60
+   frames, weak (3 mV)                K=2 random   mean   68.9 samples (max  283), errors 0/60
+   frames, weak (3 mV)                K=2 decode   mean   52.6 samples (max  147), errors 0/60
+   frames, weak (3 mV)                K=4 greedy   mean    6.2 samples (max   13), errors 0/60
+   frames, weak (3 mV)                K=4 random   mean  147.4 samples (max  577), errors 0/60
+   frames, weak (3 mV)                K=4 decode   mean  122.5 samples (max  285), errors 0/60
+   frames, weak (3 mV)                K=8 greedy   mean    9.7 samples (max   34), errors 0/60
+   frames, weak (3 mV)                K=8 random   mean   93.5 samples (max  254), errors 0/60
+   frames, weak (3 mV)                K=8 decode   mean   86.4 samples (max  231), errors 0/60
+    decode = read all 64 bits in order (repeating the frame as often as needed), then decide.
+
+S2. Which of K UART baud rates? 8N1 with unknown data; trigger on a falling edge that is a start bit
+    (the line idled first); one sample per trigger at a chosen delay; data bits are nuisance (marginalised).
+   baud rate                          K=2 greedy   mean    2.0 samples (max    2), errors 0/60
+   baud rate                          K=2 random   mean    5.8 samples (max   18), errors 0/60
+   baud rate                          K=4 greedy   mean   10.4 samples (max   17), errors 0/60
+   baud rate                          K=4 random   mean   34.9 samples (max  128), errors 0/60
+   baud rate                          K=8 greedy   mean   16.0 samples (max   24), errors 0/60
+   baud rate                          K=8 random   mean   76.7 samples (max  184), errors 0/60
+    decode instead: capture at 4 samples per bit of the fastest candidate for one frame of the slowest
+    (10 bits at 9600 = 1.04 ms at 3.7 MS/s) = 3,840 samples, then decide offline.
+
+S3. Which of K protocols is on this line? One sample per falling edge at a chosen delay; each candidate
+    is a generative model with random data; the table is P(high at delay | a falling edge at 0).
+   protocol (first 2 of the list)     K=2 greedy   mean    2.0 samples (max    2), errors 0/40
+   protocol (first 2 of the list)     K=2 random   mean   15.5 samples (max   49), errors 0/40
+   protocol (first 4 of the list)     K=4 greedy   mean    8.0 samples (max   11), errors 0/40
+   protocol (first 4 of the list)     K=4 random   mean   31.4 samples (max   67), errors 0/40
+   protocol (first 8 of the list)     K=8 greedy   mean   10.1 samples (max   16), errors 0/40
+   protocol (first 8 of the list)     K=8 random   mean   25.5 samples (max   68), errors 0/40
+    candidates in order: UART 115200, I2C SCL 100 kHz, SPI SCK 1 MHz, CAN 500 kbit/s, UART 9600, I2C SCL 400 kHz, WS2812, PWM 20 kHz 30 %
+    decode instead: capture ~1 ms at 4 MS/s (4,000 samples) and classify offline.
+
+S4. Is this I2C rise within the fast-mode limit (30-70 % in 300 ns)? K = 2 with an indifference zone:
+    rise 250 ns (pass) against 350 ns (fail); actions: (instant, threshold) pairs; noise on the threshold
+    from the pad (2.3 mV) and on the instant (TDC, 20 ps); one sample per released edge.
+   edge within spec                   K=2 greedy   mean    2.0 samples (max    2), errors 0/100
+   edge within spec                   K=2 random   mean   19.4 samples (max   88), errors 0/100
+   true rise 280 ns: decided pass 25, fail 0, mean 2.5 samples
+   true rise 300 ns: decided pass 0, fail 25, mean 2.0 samples
+   true rise 320 ns: decided pass 0, fail 25, mean 2.0 samples
+    reconstruct instead: demo_i2c.py used 1.8 M one-bit samples for the whole waveform.
+
+CRC consistency has no such shortcut: a CRC check needs every bit it covers (any unread bit can flip the
+answer), so it is a decode question, and the chip's CRC unit on the bit path answers it at line rate.

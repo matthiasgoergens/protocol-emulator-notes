@@ -1,0 +1,35 @@
+# rx.exe quick (seed 3): 20000 bits per cell; +100 ppm, 0.2 UI sinusoidal wander at 100 kHz, random jitter per edge
+
+1. One locked sample per bit against 4x oversampling (bit errors / bits read)
+   rate        RJ rms   4x oversampling            1x locked (TDC + DTC)
+      30 Mb/s  0.02 UI        0 / 19991            0 / 19992    
+      30 Mb/s  0.05 UI        0 / 19991            0 / 19992    
+      30 Mb/s  0.08 UI        0 / 19991            0 / 19992    
+      30 Mb/s  0.11 UI        1 / 19991            0 / 19992    
+      60 Mb/s  0.02 UI        0 / 19991            0 / 19992    
+      60 Mb/s  0.05 UI        0 / 19991            0 / 19992    
+      60 Mb/s  0.08 UI        0 / 19991            0 / 19992    
+      60 Mb/s  0.11 UI        2 / 19991            0 / 19992    
+     125 Mb/s  0.02 UI     impossible              0 / 19992    
+     125 Mb/s  0.05 UI     impossible              0 / 19992    
+     125 Mb/s  0.08 UI     impossible              0 / 19992    
+     125 Mb/s  0.11 UI     impossible              0 / 19992    
+     240 Mb/s  0.02 UI     impossible              0 / 19985     (7 bits beyond 4 per clock)
+     240 Mb/s  0.05 UI     impossible              0 / 19961     (31 bits beyond 4 per clock)
+     240 Mb/s  0.08 UI     impossible              0 / 19949     (43 bits beyond 4 per clock)
+     240 Mb/s  0.11 UI     impossible             17 / 19943     (49 bits beyond 4 per clock)
+   storage per bit: 4x keeps 4 samples (or a decision after a tracker); 1x keeps 1, plus the timestamps the
+   tracker consumes and discards. The 4x centre is quantised to T/4 = 4.17 ns; the 1x centre to a 130 ps bin.
+
+2. Skip predictable fields: sample only the bits a known frame format leaves open
+   Ethernet/IPv4/UDP, 16-byte payload, known peer      560 bits,  208 open ( 37 %): IPv4 identification 16, IPv4 header checksum 16, UDP checksum 16, payload 128, FCS (read it: it is the integrity check) 32
+   CAN 2.0A frame from a known ID, 8 data bytes        108 bits,   79 open ( 73 %): data 64, CRC 15
+   SPI flash status poll (0x05 then 1 byte)             16 bits,    8 open ( 50 %): status 8
+   simulated: 200 such frames back to back at 125 Mbit/s, 0.05 UI RJ, reading only the open bits: 41600 reads, 0 errors
+   (tracking still uses every edge's timestamp; the saving is in samples stored, decided and shipped)
+
+3. Faster than the clock: a repeating frame at more than 240 Mbit/s, read over several repetitions
+    250 Mbit/s: a 256-bit frame read completely in 2 repetitions, 0 bit errors (0.04 UI RJ)
+    400 Mbit/s: a 256-bit frame read completely in 2 repetitions, 0 bit errors (0.04 UI RJ)
+   the pad is the limit above that: SPICE shows full-swing inputs clean at 200 MHz (IHP's own report),
+   i.e. 400 Mbit/s; the kicked-sampling aperture is 0.8 GHz.

@@ -95,6 +95,8 @@ let rx4 ln st =
    the bit count since the last edge is the receiver's own (rounded elapsed time / period);
    [want i] says whether bit i is read at all (skip predictable fields: the receiver knows the frame
    layout from its own count); lanes limit reads to 4 per clock *)
+let total_slips = ref 0
+
 let rx1 ?(want = fun _ -> true) ln st =
   let n = Array.length ln.bits in
   let per = 1.0 /. 60e6 in
@@ -125,7 +127,7 @@ let rx1 ?(want = fun _ -> true) ln st =
       end
     end
   done;
-  if !slips > 0 then Printf.eprintf "rx1: %d bit-count slips (counted as re-synchronised)\n" !slips;
+  total_slips := !total_slips + !slips;
   (!errs + (8 * !slips), !reads, !missed)
 
 let () =
@@ -196,5 +198,8 @@ let () =
         (rate /. 1e6) bits_per_frame !reps !errs) [ 250e6; 400e6 ];
   say "   the pad is the limit above that: SPICE shows full-swing inputs clean at 200 MHz (IHP's own report),";
   say "   i.e. 400 Mbit/s; the kicked-sampling aperture is 0.8 GHz.";
+  say "";
+  say "bit-count slips of the 1x receiver over all runs: %d (the receiver's own count of bits since the last edge";
+  say "disagreeing with the transmitted index; each is charged as 8 bit errors and re-synchronised)" !total_slips;
   let oc = open_out (if quick then "../results/rx-quick.txt" else "../results/rx.txt") in
   output_string oc (Buffer.contents out); close_out oc
