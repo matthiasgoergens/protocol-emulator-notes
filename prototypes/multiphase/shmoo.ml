@@ -26,7 +26,7 @@
 
    Output: results/shmoo.txt *)
 
-let tap = (match Sys.getenv_opt "TAP_PS" with Some s -> float_of_string s | None -> 75.0) *. 1e-12
+let tap = (match Sys.getenv_opt "TAP_PS" with Some s -> float_of_string s | None -> 63.2) *. 1e-12   (* sg13g2_buf_1 fanout-of-one, typical corner: sta/liberty_delays.txt *)
 let mismatch = 0.03            (* per-stage delay sigma, relative *)
 let period = 1.0 /. 60e6
 let rng = Random.State.make [| 2026; 9; 25 |]

@@ -1,0 +1,48 @@
+FM on the third harmonic (99.75 MHz) through the four-phase stage RTL; receiver and metric from fm_sim.py
+SINAD: fm_sim.py's metric (22 dB ceiling, an artefact it documents); SINAD*: the same receiver made circular
+source                                           SINAD  tone rms  SINAD*  tone rms
+fm_sim ideal edges                               22.2dB   53.3kHz   68.0dB   53.0kHz
+fm_sim clock grid                               -22.8dB    0.7kHz  -78.2dB    0.0kHz
+fm_sim clk/2 grid                                19.2dB   17.7kHz   22.0dB   17.6kHz
+fm_sim clk/4 grid                                21.8dB   53.2kHz   31.5dB   53.0kHz
+RTL: NCO -> stage pin, clock grid               -22.7dB    0.7kHz -115.3dB    0.0kHz
+RTL: NCO -> stage pin, both clock edges          19.2dB   17.7kHz   22.0dB   17.6kHz
+RTL: NCO -> stage pin, four-phase stage          21.8dB   53.2kHz   31.5dB   53.0kHz
+RTL quarter pin vs fm_sim clk/4 wave: 2 of 1064000 quarters differ at the best shift (12 quarters)
+edge re-rendering of the RTL quarter pin: 266000 edges, 0 samples differ from the RTL wave by more than 1e-6 (max 7.5e-09)
+edges per lane: 71054, 71050, 61948, 61948
+
+Four-phase stage: static per-lane timing offsets (phase-clock skew plus lane-to-pin delay mismatch)
+  lanes 1 and 3 late by    0 ps                  21.8dB   53.2kHz   31.5dB   53.0kHz
+  lanes 1 and 3 late by   50 ps                  21.7dB   53.2kHz   31.3dB   53.0kHz
+  lanes 1 and 3 late by  100 ps                  21.7dB   53.2kHz   31.1dB   53.0kHz
+  lanes 1 and 3 late by  200 ps                  21.7dB   53.2kHz   30.7dB   53.0kHz
+  lanes 1 and 3 late by  400 ps                  21.6dB   53.2kHz   29.9dB   53.0kHz
+  lanes 1 and 3 late by  800 ps                  21.3dB   53.2kHz   28.5dB   52.9kHz
+  random lane offsets within +-100 ps, worst of 4                     31.1dB
+  random lane offsets within +-200 ps, worst of 4                     30.7dB
+  random lane offsets within +-400 ps, worst of 4                     29.9dB
+  rising edges 500 ps later than falling         21.8dB   53.2kHz   31.5dB   53.0kHz
+  random edge jitter 20 ps rms                   21.8dB   53.2kHz   31.5dB   53.0kHz
+  random edge jitter 50 ps rms                   21.8dB   53.2kHz   31.5dB   53.0kHz
+  random edge jitter 100 ps rms                  21.8dB   53.2kHz   31.5dB   53.0kHz
+
+Delay-line DTC: exact edge times quantised to the next tap (coarse part from the clock)
+  266000 exact edges; sum of deltas 0 (must be 0 for a periodic wave)
+  exact edges, no quantisation                   22.2dB   53.3kHz  126.9dB   53.0kHz
+  tap   25 ps                                    22.2dB   53.3kHz  103.0dB   53.0kHz
+  tap   50 ps                                    22.2dB   53.3kHz   91.3dB   53.0kHz
+  tap  100 ps                                    22.2dB   53.3kHz   85.4dB   53.0kHz
+  tap  200 ps                                    22.2dB   53.3kHz   69.9dB   53.0kHz
+  tap  470 ps                                    22.2dB   53.3kHz   87.1dB   53.0kHz
+  tap  940 ps                                    22.2dB   53.3kHz   50.2dB   53.0kHz
+  tap 50 ps, INL walk 5 ps/stage, jitter 0 ps, scale error 0%   22.2dB   53.3kHz   59.2dB   53.0kHz
+  tap 50 ps, INL walk 10 ps/stage, jitter 0 ps, scale error 0%   22.2dB   53.3kHz   53.1dB   53.0kHz
+  tap 50 ps, INL walk 0 ps/stage, jitter 20 ps, scale error 0%   22.2dB   53.3kHz   85.5dB   53.0kHz
+  tap 50 ps, INL walk 0 ps/stage, jitter 0 ps, scale error 2%   22.2dB   53.3kHz   50.1dB   53.0kHz
+  tap 50 ps, INL walk 0 ps/stage, jitter 0 ps, scale error 10%   22.1dB   53.3kHz   36.2dB   53.1kHz
+  tap 50 ps, INL walk 5 ps/stage, jitter 10 ps, scale error 2%   22.2dB   53.3kHz   47.9dB   53.1kHz
+
+# produced by (in prototypes/multiphase):
+#   opam exec --switch=5.3.0 -- dune exec ./fm.exe /var/tmp/multiphase/fm/stage_wave.bin
+#   uv run --with numpy python fm_eval.py /var/tmp/multiphase/fm/stage_wave.bin results/fm.txt
