@@ -1,0 +1,52 @@
+* Extracted by KLayout with SG13G2 LVS runset on : 25/09/2026 03:17
+
+.SUBCKT ARRAY6T
+M$1 \$5 \$4 \$6 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.1095p AD=0.057p PS=1.33u
++ PD=0.68u
+M$2 \$6 \$9 \$1 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.057p AD=0.0645p PS=0.68u
++ PD=0.73u
+M$3 \$1 \$11 \$16 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.0645p AD=0.057p PS=0.73u
++ PD=0.68u
+M$4 \$16 \$15 \$5 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.057p AD=0.1095p PS=0.68u
++ PD=1.33u
+M$5 \$1 \$6 \$9 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.1095p AD=0.057p PS=1.33u
++ PD=0.68u
+M$6 \$9 \$4 \$12 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.057p AD=0.0645p PS=0.68u
++ PD=0.73u
+M$7 \$12 \$15 \$11 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.0645p AD=0.057p
++ PS=0.73u PD=0.68u
+M$8 \$11 \$16 \$1 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.057p AD=0.1095p PS=0.68u
++ PD=1.33u
+M$9 \$1 \$7 \$10 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.1095p AD=0.057p PS=1.33u
++ PD=0.68u
+M$10 \$10 \$4 \$13 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.057p AD=0.0645p
++ PS=0.68u PD=0.73u
+M$11 \$13 \$15 \$14 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.0645p AD=0.057p
++ PS=0.73u PD=0.68u
+M$12 \$14 \$17 \$1 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.057p AD=0.1095p
++ PS=0.68u PD=1.33u
+M$13 \$8 \$4 \$7 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.1095p AD=0.057p PS=1.33u
++ PD=0.68u
+M$14 \$7 \$10 \$1 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.057p AD=0.0645p PS=0.68u
++ PD=0.73u
+M$15 \$1 \$14 \$17 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.0645p AD=0.057p
++ PS=0.73u PD=0.68u
+M$16 \$17 \$15 \$8 \$1 sg13_lv_nmos L=0.13u W=0.3u AS=0.057p AD=0.1095p
++ PS=0.68u PD=1.33u
+M$17 \$2 \$6 \$9 \$2 sg13_lv_pmos L=0.13u W=0.15u AS=0.1005p AD=0.12075p
++ PS=1.34u PD=1.61u
+M$18 \$3 \$7 \$10 \$3 sg13_lv_pmos L=0.13u W=0.15u AS=0.1005p AD=0.12075p
++ PS=1.34u PD=1.61u
+M$19 \$6 \$9 \$2 \$2 sg13_lv_pmos L=0.13u W=0.15u AS=0.12075p AD=0.0555p
++ PS=1.61u PD=0.74u
+M$20 \$2 \$11 \$16 \$2 sg13_lv_pmos L=0.13u W=0.15u AS=0.0555p AD=0.12075p
++ PS=0.74u PD=1.61u
+M$21 \$7 \$10 \$3 \$3 sg13_lv_pmos L=0.13u W=0.15u AS=0.12075p AD=0.0555p
++ PS=1.61u PD=0.74u
+M$22 \$3 \$14 \$17 \$3 sg13_lv_pmos L=0.13u W=0.15u AS=0.0555p AD=0.12075p
++ PS=0.74u PD=1.61u
+M$23 \$11 \$16 \$2 \$2 sg13_lv_pmos L=0.13u W=0.15u AS=0.12075p AD=0.1005p
++ PS=1.61u PD=1.34u
+M$24 \$14 \$17 \$3 \$3 sg13_lv_pmos L=0.13u W=0.15u AS=0.12075p AD=0.1005p
++ PS=1.61u PD=1.34u
+.ENDS ARRAY6T
