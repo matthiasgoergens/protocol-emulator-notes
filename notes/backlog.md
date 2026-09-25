@@ -232,6 +232,16 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
 
   The deliberate nondeterminism (random source, equivalent-time sampling, expiring memory) then
   appears as fenced and named, while everything else stays exactly reproducible.
+- **...and with compilers.** Jane Street is an OCaml shop with its own compiler work (OxCaml
+  and the OCaml compiler team), and Hardcaml is itself a compiler of sorts. Our design puts the
+  compiler at the centre:
+  - protocol compilers produce sequencer programmes;
+  - the scheduler handles memory lifetimes, as rows with deadlines;
+  - programmes are placed on array segments;
+  - the verifier proves deadlines;
+  - agents write code that the exact interpreter judges.
+
+  Show the compiler stack as a first-class part of the entry, in OCaml.
 
 - Jane Street's hardware taste; tools to port (**running**).
 - Public competitors and the winners of Jane Street's recent challenges (**running**).
