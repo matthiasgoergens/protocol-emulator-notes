@@ -9,6 +9,6 @@ stage output equals the interpreter's pin_sub                            PASS
 10BASE-T transmit firmware through the stage: 0 of 13824 quarters differ from the model encoder
 10BASE-T transmit through the stage                                      PASS
   control: one half-bit flipped in the host stream: 12 quarters differ -> caught
-fine edge train (SETP with q = 0,1,2,3 on thread 0): spacings in quarters: 17 x141
+fine edge train (SETP with q = 0,1,2,3, rotating over all four threads): spacings in quarters: 17 x141
 every edge 17 quarters after the previous one                            PASS
 ALL PASS

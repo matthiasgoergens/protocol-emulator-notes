@@ -196,7 +196,7 @@ let () =
   let sp = fine_edge_train () in
   let hist = Hashtbl.create 4 in
   Array.iter (fun d -> Hashtbl.replace hist d (1 + Option.value ~default:0 (Hashtbl.find_opt hist d))) sp;
-  Printf.printf "fine edge train (SETP with q = 0,1,2,3 on thread 0): spacings in quarters:%s\n"
+  Printf.printf "fine edge train (SETP with q = 0,1,2,3, rotating over all four threads): spacings in quarters:%s\n"
     (String.concat "" (List.map (fun (d, n) -> Printf.sprintf " %d x%d" d n) (List.sort compare (Hashtbl.fold (fun d n l -> (d, n) :: l) hist []))));
   check "every edge 17 quarters after the previous one" (Array.length sp > 100 && Array.for_all (( = ) 17) sp);
   print_endline (if !ok then "ALL PASS" else "FAILURES");

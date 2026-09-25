@@ -32,7 +32,7 @@ stated where they are used.
 | `isa_controls.sh` | Planted faults in the sequencer's new ISA logic → `results/isa-controls.txt` |
 | `sta/` | Liberty delays, synthesis and static timing in the LibreLane container → `sta/*.txt` |
 
-Build and run: `opam exec --switch=5.3.0 -- dune build`, then `dune exec ./main.exe`,
+Build and run: `opam exec --switch=5.3.0 -- dune build`, then `dune exec` each of `./main.exe`,
 `./rx_jitter.exe`, `./shmoo.exe`, and `./fm.exe <file>` followed by `uv run --with numpy python
 fm_eval.py <file> results/fm.txt`; `iverilog/run.sh`; `sta/run.sh`.
 
@@ -79,7 +79,9 @@ Each input pin has:
   asynchronous to every phase);
 - a retiming flip-flop on ph0.
 
-The core sees the four samples of clock j at clock j + 2, as `pin_in4`. SHI's new quad bit (bit 7)
+The core sees the four samples of clock j at clock j + 2, as `pin_in4`. Each first-stage flip-flop
+has a full clock to resolve before the second samples it. The ph3 → ph0 retiming step is a
+synchronous transfer with a quarter period, which is covered by STA. No MTBF was computed. SHI's new quad bit (bit 7)
 shifts a pin's four samples into the accumulator in time order. A hardware receiver takes the
 nibble directly (`eth_rxn.ml`).
 
@@ -106,7 +108,9 @@ The NCO RTL drives the stage RTL. The stage's pins are rendered and demodulated 
 edges, and the four-phase stage.
 
 The RTL's quarter-grid pin equals `fm_sim.py`'s ideal clk/4 quantisation in all but 2 of 1,064,000
-quarters (inc rounding). So the note's "clk/4 is essentially ideal" row is now a property of the
+quarters (inc rounding), at one fixed shift of 12 quarters (the pipeline latency) over the whole
+run. Because the fm_sim wave is periodic over the window by construction, this also shows the RTL
+wave is, which the circular metric below needs. So the note's "clk/4 is essentially ideal" row is now a property of the
 real circuit.
 
 fm_sim's SINAD saturates at 22 dB, an artefact the note documents. The window here holds whole
@@ -178,7 +182,10 @@ quantisation:
 - 2x: about ±8 ns;
 - 4x: about ±10 ns (the boundary side limits: 70.5 ns versus 50 ns + 2J).
 
-Moving the one-sample threshold barely helps, because quantisation consumes the margin. Both clock
+Moving the one-sample threshold barely helps, because quantisation consumes the margin. Twenty
+frames per cell is coarse (no confidence bounds), and the jitter is uniform and independent per
+edge; the agreement with the bound is what makes the ±10 ns figure credible, not the sample
+size. Both clock
 edges recover most of it, and four phases most of the rest. A ±1 ns phase error costs little.
 
 ### Shmoo: the chip as a timing debugger (`shmoo.ml`, `results/shmoo.txt`)
@@ -268,9 +275,11 @@ plus uncertainty for the phase error.
 - worst setup slack +2.05 ns (slow, 15 ns), worst hold +0.10 ns (fast);
 - the tightest real transfer is ph0 → ph1: a quarter period for clock-to-Q, one XOR and setup,
   about 0.6 ns at the slow corner (0.27 + 0.13 + 0.19) against 3.75 ns;
-- the reported worst path starts at `clear` with a 1 ns input delay into a quarter-period domain.
-  That is an artefact of treating the reset as a ph0 input; in silicon each phase domain gets its
-  own reset synchroniser.
+- the reported worst path starts at `clear` with a 1 ns input delay into a ph1 flip-flop: a
+  quarter-period budget. The RTL has one synchronous clear shared by all four phase domains (yosys
+  ties the flip-flops' asynchronous resets high). It meets timing here, but a silicon version
+  should give each phase domain its own reset synchroniser, which is not built. Keep the pins'
+  output enables low during reset, because the lanes leave reset on different phases.
 
 **Lane-to-pin mismatch.** Clock-to-Q plus the XOR tree, the spread over the four lanes including
 rise and fall: 18 ps fast, 35 ps typ, 48 ps slow. That is small against the ±400 ps the FM test
@@ -281,7 +290,9 @@ the four phase trees (no CTS was run) and the pad.
 
 - **One lane changes at a time.** A lane changes only at its own phase edge, and the four phases
   are a quarter period apart (3.75 to 4.7 ns). So the XOR never sees two inputs change within its
-  own delay: there is no glitch from the combiner by construction. The rule to keep: lanes of one
+  own delay: there is no glitch from the combiner by construction. This is an argument from the
+  structure and the STA numbers, not a simulation result: both simulations are zero-delay and only
+  look at the pin between edges, so neither could see a glitch. The rule to keep: lanes of one
   pin must change at distinct phases, and the phase-to-phase skew must stay well under a quarter
   period, or edges reorder. A quarter pulse would then invert and become a runt of the skew's
   width.
