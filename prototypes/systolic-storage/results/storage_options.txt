@@ -1,0 +1,42 @@
+# Storage options per PE, IHP SG13G2. Areas in um2 from the PDK LEF unless marked.
+# dfrbpq_1 48.99  dlhq_1 30.84  mux2 18.14  mux4 38.10  buf_1 7.26  ebufn_2 18.14
+
+option                                         bits      area  um2/bit  note
+flop delay line 1x16                             16       784    48.99  LEF
+flop delay line 8x16                            128      6271    48.99  LEF
+flop delay line 16x16                           256     12541    48.99  LEF
+flop delay line 32x16                           512     25082    48.99  LEF
+flop register file 8x16                         128     10233    79.95  estimate from LEF cells
+flop register file 16x16                        256     20495    80.06  estimate from LEF cells
+flop register file 32x16                        512     41281    80.63  estimate from LEF cells
+flop register file 64x16                       1024     82591    80.66  estimate from LEF cells
+latch register file 8x16                        128      5835    45.59  estimate from LEF cells
+latch register file 16x16                       256     11699    45.70  estimate from LEF cells
+latch register file 32x16                       512     23689    46.27  estimate from LEF cells
+latch register file 64x16                      1024     47407    46.30  estimate from LEF cells
+gain-cell thick 16x16                           256      2569    10.03  cells drawn, periphery estimate
+gain-cell thick 32x16                           512      3802     7.43  cells drawn, periphery estimate
+gain-cell thick 32x32                          1024      6153     6.01  cells drawn, periphery estimate
+gain-cell thick 64x32                          2048     10099     4.93  cells drawn, periphery estimate
+gain-cell thick 128x32                         4096     17992     4.39  cells drawn, periphery estimate
+gain-cell thick 256x32                         8192     33777     4.12  cells drawn, periphery estimate
+gain-cell thin 16x16                            256      2392     9.34  cells drawn, periphery estimate
+gain-cell thin 32x16                            512      3449     6.74  cells drawn, periphery estimate
+gain-cell thin 32x32                           1024      5446     5.32  cells drawn, periphery estimate
+gain-cell thin 64x32                           2048      8686     4.24  cells drawn, periphery estimate
+gain-cell thin 128x32                          4096     15166     3.70  cells drawn, periphery estimate
+gain-cell thin 256x32                          8192     28125     3.43  cells drawn, periphery estimate
+SRAM RM_IHPSG13_1P_256x8_c3_bm_bist            2048     17547     8.57  LEF (smallest 1P macros)
+SRAM RM_IHPSG13_1P_512x8_c3_bm_bist            4096     26138     6.38  LEF (smallest 1P macros)
+SRAM RM_IHPSG13_1P_256x16_c2_bm_bist           4096     28127     6.87  LEF (smallest 1P macros)
+SRAM RM_IHPSG13_1P_512x16_c2_bm_bist           8192     45309     5.53  LEF (smallest 1P macros)
+SRAM RM_IHPSG13_1P_1024x8_c2_bm_bist           8192     49419     6.03  LEF (smallest 1P macros)
+SRAM RM_IHPSG13_1P_256x32_c2_bm_bist           8192     49488     6.04  LEF (smallest 1P macros)
+
+# lifetimes of a stored 1 (10 ns sense), in us and in 50 MHz cycles
+gain-cell thick tt27:    12060.0 us =     603000 cycles
+gain-cell thick tt85:    12210.0 us =     610500 cycles
+gain-cell thick ff85:     3100.0 us =     155000 cycles
+gain-cell thin  tt27:      118.8 us =       5940 cycles
+gain-cell thin  tt85:        8.0 us =        400 cycles
+gain-cell thin  ff85:        1.2 us =         60 cycles
