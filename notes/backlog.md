@@ -161,6 +161,19 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
 
 ## hwfuzz and testing research
 
+- **Ideas from Antithesis**, which Jane Street uses and led a funding round for ("now leading their
+  next funding round", blog.janestreet.com/getting-from-tested-to-battle-tested/, 2025-12-03).
+  Research notes are in `/var/tmp/js-network/report.md`.
+  - Snapshot and branch exploration: save simulator state at interesting moments and explore
+    from there. hwfuzz currently rebuilds the simulator on every run.
+  - "Sometimes" assertions and tuple coverage (SOMETIMES_EACH/ALL, EVER_SINCE) as observer
+    features.
+  - Metastability injection for clock-domain crossings, which already has hardware precedent
+    (Kumar, Khan and Mittra, DVCon Europe 2023, arXiv:2406.06533). Apply it to the four-phase
+    stage.
+  - Fault injection of rare interleavings across sequencer threads and bridges.
+  - Heat maps of explored state.
+
 - Hardcaml assertions as oracles; automatic mutants and a mutation score.
 - LLM-island experiments: the checksum ladder, including random networks.
 - `~/prog/testing`: hill-climbing experiments on how to test, measured by mutation score.
