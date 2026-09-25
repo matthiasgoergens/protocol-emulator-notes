@@ -4,6 +4,6 @@
  (modules chain linalg))
 
 (executables
- (names padcheck cs)
- (modules padcheck cs)
+ (names padcheck cs infer rx fri)
+ (modules padcheck cs infer rx fri)
  (libraries chain))
