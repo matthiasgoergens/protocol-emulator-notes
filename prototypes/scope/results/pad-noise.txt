@@ -1,0 +1,9 @@
+# 2026-09-25T13:55:52+08:00 pad.py noise  (commit 32cc26a)
+# RSRC=50.0 ohm, p2c load 10f
+## at the threshold: input capacitance at 100 MHz, input-referred noise 100 kHz..20 GHz
+tt 25: input-referred noise integrated 100 kHz..fmax: 0.1 GHz 0.215 mV, 0.3 GHz 0.360 mV, 1 GHz 0.681 mV, 3 GHz 1.153 mV
+tt 25: v0=0.5887 v(core)=0.6044585 cin=1.066521e-13 F small-signal gain=718.7444 f3dB=1625531.0 Hz onoise_total=0.03175685 V_rms -> input-referred onoise/gain=4.41837877275983e-05 V_rms (ngspice inoise_total over 100k..20G, inflated beyond the bandwidth: 0.003383654)
+ss 125: input-referred noise integrated 100 kHz..fmax: 0.1 GHz 0.235 mV, 0.3 GHz 0.393 mV, 1 GHz 0.750 mV, 3 GHz 1.318 mV
+ss 125: v0=0.6135 v(core)=0.5950475 cin=1.09769e-13 F small-signal gain=753.629 f3dB=1802735.0 Hz onoise_total=0.03645755 V_rms -> input-referred onoise/gain=4.837599136975886e-05 V_rms (ngspice inoise_total over 100k..20G, inflated beyond the bandwidth: 0.004064735)
+ff -40: input-referred noise integrated 100 kHz..fmax: 0.1 GHz 0.147 mV, 0.3 GHz 0.246 mV, 1 GHz 0.464 mV, 3 GHz 0.790 mV
+ff -40: v0=0.5680 v(core)=0.6104019 cin=1.045034e-13 F small-signal gain=927.1972 f3dB=1924628.0 Hz onoise_total=0.02933794 V_rms -> input-referred onoise/gain=3.164153213577435e-05 V_rms (ngspice inoise_total over 100k..20G, inflated beyond the bandwidth: 0.002380137)

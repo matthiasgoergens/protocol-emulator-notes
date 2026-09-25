@@ -1,0 +1,22 @@
+# 2026-09-25T13:54:30+08:00 pad.py dc  (commit 32cc26a)
+# RSRC=50.0 ohm, p2c load 10f
+## threshold: v(pad) where p2c crosses vdd/2 (DC sweep, rising)
+corner temp vdd vt_V
+tt 25 1.08 0.5357
+tt 25 1.14 0.5627
+tt 25 1.20 0.5887
+tt 25 1.26 0.6139
+tt 25 1.32 0.6383
+ss 125 1.08 0.5606
+ss 125 1.14 0.5872
+ss 125 1.20 0.6135
+ss 125 1.26 0.6393
+ss 125 1.32 0.6648
+ff -40 1.08 0.5174
+ff -40 1.14 0.5435
+ff -40 1.20 0.5680
+ff -40 1.26 0.5913
+ff -40 1.32 0.6137
+dvt/dvdd tt 25: 0.427 V/V
+dvt/dvdd ss 125: 0.434 V/V
+dvt/dvdd ff -40: 0.398 V/V

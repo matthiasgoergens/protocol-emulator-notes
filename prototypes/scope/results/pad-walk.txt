@@ -1,0 +1,39 @@
+# 2026-09-25T13:56:05+08:00 pad.py walk  (commit 32cc26a)
+# RSRC=50.0 ohm, p2c load 10f
+## overdrive-dependent delay: 10 ps step from vt -/+ 0.2 V to vt +/- delta; delay to p2c = vdd/2
+tt 25 rise delta=1mV delay=nanps
+tt 25 rise delta=3mV delay=nanps
+tt 25 rise delta=10mV delay=nanps
+tt 25 rise delta=30mV delay=nanps
+tt 25 rise delta=100mV delay=2507.8ps
+tt 25 rise delta=300mV delay=431.6ps
+tt 25 fall delta=1mV delay=nanps
+tt 25 fall delta=3mV delay=nanps
+tt 25 fall delta=10mV delay=nanps
+tt 25 fall delta=30mV delay=nanps
+tt 25 fall delta=100mV delay=4414.2ps
+tt 25 fall delta=300mV delay=907.3ps
+ss 125 rise delta=1mV delay=nanps
+ss 125 rise delta=3mV delay=nanps
+ss 125 rise delta=10mV delay=nanps
+ss 125 rise delta=30mV delay=nanps
+ss 125 rise delta=100mV delay=2692.8ps
+ss 125 rise delta=300mV delay=597.2ps
+ss 125 fall delta=1mV delay=nanps
+ss 125 fall delta=3mV delay=nanps
+ss 125 fall delta=10mV delay=nanps
+ss 125 fall delta=30mV delay=nanps
+ss 125 fall delta=100mV delay=3782.3ps
+ss 125 fall delta=300mV delay=997.5ps
+ff -40 rise delta=1mV delay=nanps
+ff -40 rise delta=3mV delay=nanps
+ff -40 rise delta=10mV delay=nanps
+ff -40 rise delta=30mV delay=6197.3ps
+ff -40 rise delta=100mV delay=1424.1ps
+ff -40 rise delta=300mV delay=277.9ps
+ff -40 fall delta=1mV delay=nanps
+ff -40 fall delta=3mV delay=nanps
+ff -40 fall delta=10mV delay=nanps
+ff -40 fall delta=30mV delay=nanps
+ff -40 fall delta=100mV delay=3022.3ps
+ff -40 fall delta=300mV delay=671.2ps
