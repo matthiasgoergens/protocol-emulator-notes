@@ -1,0 +1,27 @@
+# budget 200000 um2 for PEs + storage; PE 5000 um2 (estimate); guard 0.8
+# verdicts per condition tt27/tt85/ff85: Y fits without refresh, R<x>% needs refresh at x% of one port's cycles, N does not fit
+
+D0 uniform, no storage: 40 PEs (200000 um2) + storage 0 um2 = 200000 um2; 0 storage bits in 0 blocks; pipeline registers only: 32 flop bits per PE
+D1 uniform, 8x16 latch RF per PE: 18 PEs (90000 um2) + storage 105032 um2 = 195032 um2; 2304 storage bits in 18 blocks; every PE can hold 8 words
+    18 x latch RF: 5835 um2 each, 128 bits, 45.59 um2/bit
+D2 edge column, 2 thick banks 128x32: 31 PEs (155000 um2) + storage 41076 um2 = 196076 um2; 8192 storage bits in 2 blocks; storage at the array's edge, one port per bank
+    2 x thick bank: 20538 um2 each, 4096 bits, 5.01 um2/bit
+D2s edge column, 2 SRAM 256x16 macros: 28 PEs (140000 um2) + storage 56254 um2 = 196254 um2; 8192 storage bits in 2 blocks; same idea with PDK macros
+    2 x SRAM 256x16: 28127 um2 each, 4096 bits, 6.87 um2/bit
+D3 graded: thin 32x16 per 4 PEs + 2 thick 128x32 at the edge: 26 PEs (130000 um2) + storage 69587 um2 = 199587 um2; 11776 storage bits in 9 blocks; dense short-lived storage near producers, long-lived at the edge
+    7 x thin bank: 4073 um2 each, 512 bits, 7.96 um2/bit
+    2 x thick bank: 20538 um2 each, 4096 bits, 5.01 um2/bit
+D4 array as delay line: 40 PEs (200000 um2) + storage 0 um2 = 200000 um2; 0 storage bits in 0 blocks; any PE can be switched to pass-through: 32 bits of delay per PE
+
+workload                                                     D0                    D1                    D2                    D2s                   D3                    D4 
+vertical 3-tap filter, 256x8-bit lines            N (no storage)         N (2304 bits)                 Y/Y/Y                 Y/Y/Y                 Y/Y/Y        N (no storage)
+vertical 2-tap filter                             N (no storage)                 Y/Y/Y                 Y/Y/Y                 Y/Y/Y                 Y/Y/Y        N (no storage)
+Ethernet line buffer, 5 lines/packet              N (no storage)         N (2304 bits)                 Y/Y/Y                 Y/Y/Y                 Y/Y/Y        N (no storage)
+Ethernet line buffer, 20 lines/packet             N (no storage)         N (2304 bits)         N (8192 bits)         N (8192 bits)         N (8704 bits)        N (no storage)
+USB FS packet buffer, 64 bytes                    N (no storage)                 Y/Y/Y                 Y/Y/Y                 Y/Y/Y                 Y/Y/Y  Y* (16 PEs as delay)
+sequencer programme store, 4x64x16                N (no storage)         N (2304 bits)     R0.1%/R0.1%/R0.2%                 Y/Y/Y     R0.1%/R0.1%/R0.2%        N (no storage)
+8x8 16-bit product, weights in 8 PEs              N (no storage)                 Y/Y/Y           N (2 ports)           N (2 ports)           N (4 ports)        N (no storage)
+next-frame ring config (double buffer)            N (no storage)                 Y/Y/Y     R0.0%/R0.0%/R0.0%                 Y/Y/Y     R0.0%/R0.0%/R0.0%        N (no storage)
+systolic matcher / sorting network                             Y                     Y                     Y                     Y                     Y                     Y
+16-PE merge, local runs, 4 words/cycle            N (no storage)                 Y/Y/Y           N (2 ports)           N (2 ports)            Y/R40.0%/N        N (no storage)
+8x8 corner turn, 2 words/cycle                    N (no storage)                 Y/Y/Y                 Y/Y/Y                 Y/Y/Y                 Y/Y/Y  Y* (32 PEs as delay)
