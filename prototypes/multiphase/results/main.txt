@@ -1,0 +1,14 @@
+stage vs model, 4 out + 4 in pins, 50000 random clocks: 0 wrong output quarters, 0 wrong sample words
+stage matches the model                                                  PASS
+  control lane 2 on phase 3             33858 wrong output quarters,      0 wrong sample words -> caught
+  control no previous-quarter register 187592 wrong output quarters,      0 wrong sample words -> caught
+  control OR instead of XOR            179674 wrong output quarters,      0 wrong sample words -> caught
+  control sampler 1 on phase 2              0 wrong output quarters,  46887 wrong sample words -> caught
+sequencer RTL -> stage, 100 random programmes x 2000 clocks: 0 wrong quarters; 1668 pin-vector changes, 1152 of them off quarter 0
+stage output equals the interpreter's pin_sub                            PASS
+10BASE-T transmit firmware through the stage: 0 of 13824 quarters differ from the model encoder
+10BASE-T transmit through the stage                                      PASS
+  control: one half-bit flipped in the host stream: 12 quarters differ -> caught
+fine edge train (SETP with q = 0,1,2,3 on thread 0): spacings in quarters: 17 x141
+every edge 17 quarters after the previous one                            PASS
+ALL PASS
