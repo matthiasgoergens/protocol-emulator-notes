@@ -40,6 +40,7 @@ type cand = {
   port_bound : float option;(* items per second a bank port allows, if lower *)
   need : float;             (* items per second the application needs; nan = none found *)
   need_note : string;
+  verdict_override : string option;
 }
 
 let nan = Float.nan
@@ -48,68 +49,69 @@ let cands = [
   { name = "1-bit correlation (GPS tracking, binary NN)"; item = "1x1-bit MAC";
     kernel = "k1b_corr_harley_seal"; host_items_per_iter = 64.; pe_clocks = 1.;
     pe_note = "S <- S + (g ? -A : A), g = broadcast lane (designed, gps)"; port_bound = None;
-    need = 235.7e6; need_note = "12 ch x 6 corr x 3.27 MS/s (gps-hotcold README)" };
+    need = 235.7e6; verdict_override = None; need_note = "12 ch x 6 corr x 3.27 MS/s (gps-hotcold README)" };
   { name = "multi-bit x +-1 code (DSSS, soft matcher)"; item = "16x1-bit MAC";
     kernel = "k2_pm1_smlad"; host_items_per_iter = 2.; pe_clocks = 1.;
     pe_note = "same configuration, multi-bit A"; port_bound = None;
-    need = nan; need_note = "no application found beyond GPS" };
+    need = nan; verdict_override = None; need_note = "no application found beyond GPS" };
   { name = "HF direct-sampling DDC (8-bit ADC, I/Q, CIC3)"; item = "ADC sample";
     kernel = "k3_cic_ddc"; host_items_per_iter = 1.; pe_clocks = 16.;
     pe_note = "32-bit NCO (2), square-LO mixers (2), 3 x 32-bit integrators per arm (12); est; needs an 8x8 mixer for image rejection"; port_bound = None;
-    need = 60e6; need_note = "0-30 MHz needs >= 60 MS/s (Nyquist)" };
+    need = 60e6; verdict_override = None; need_note = "0-30 MHz needs >= 60 MS/s (Nyquist)" };
   { name = "edit distance (Myers on host)"; item = "text char x 32 cells";
     kernel = "k5_myers"; host_items_per_iter = 1.; pe_clocks = 128.;
     pe_note = "about 4 PE-ops per DP cell, est; needs two links (see DTW)"; port_bound = None;
-    need = nan; need_note = "none found at a rate the host misses" };
-  { name = "Viterbi K=7 r=1/2"; item = "butterfly (2 ACS)";
-    kernel = "k6_viterbi_step"; host_items_per_iter = 1.; pe_clocks = 8.;
-    pe_note = "add, add, min per ACS (2 PEs + min), est; the trellis shuffle goes through a bank";
-    port_bound = Some (fclk /. 2.);
-    need = 8000.; need_note = "Galileo E1-B / SBAS: 250 bit/s x 32 butterflies" };
+    need = nan; verdict_override = None; need_note = "none found at a rate the host misses" };
+  { name = "Viterbi K=7 r=1/2 (CCSDS)"; item = "butterfly (2 ACS)";
+    kernel = "k6_viterbi_step"; host_items_per_iter = 1.; pe_clocks = 53.;
+    pe_note = "no direct mapping: one link and a static op give 2 words per ACS through a bank, two passes per bit, per-word control bits and a half-word label write; est about 10 PEs and 5.3 clocks per butterfly per chain, at most one chain per bank (2)";
+    port_bound = Some (2. *. fclk /. 5.3);
+    need = 32e6; verdict_override = None; need_note = "CCSDS K=7 at 1 Mbit/s (upper end of cubesat downlinks, est); 250 bit/s for Galileo E1-B / SBAS is 8,000/s" };
   { name = "dynamic time warping"; item = "DP cell";
     kernel = "k7_dtw_row"; host_items_per_iter = 1.; pe_clocks = 5.;
     pe_note = "does not map on upe_v0 (one link, static op); est 5 PE-clocks with a second link"; port_bound = None;
-    need = nan; need_note = "offline trace matching: latency, not a rate" };
+    need = nan; verdict_override = None; need_note = "offline trace matching: latency, not a rate" };
   { name = "min-plus relaxation (shortest paths)"; item = "2 relaxations";
     kernel = "k8_minplus"; host_items_per_iter = 1.; pe_clocks = 4.;
     pe_note = "P <- A + K, then S <- min(S, A): 2 PEs per relaxation (designed)"; port_bound = None;
-    need = 6.6e6; need_note = "Floyd-Warshall n = 64 at 50 frames/s, est" };
+    need = 6.6e6; verdict_override = None; need_note = "Floyd-Warshall n = 64 at 50 frames/s, est" };
   { name = "wavetable voice at 48 kHz"; item = "voice sample";
     kernel = "k9_voices"; host_items_per_iter = 1.; pe_clocks = nan;
     pe_note = "the array makes 60 MHz square/noise voices, not 48 kHz samples (synth.ml)"; port_bound = None;
-    need = 48e3 *. 16.; need_note = "16 voices at 48 kHz" };
+    need = 48e3 *. 16.; verdict_override = None; need_note = "16 voices at 48 kHz" };
   { name = "1-D cellular automaton, 256 cells per line"; item = "32 cells";
     kernel = "k10_rule110"; host_items_per_iter = 1.; pe_clocks = 12.;
     pe_note = "16 cells per word, about 6 GF(2) ops per word, est"; port_bound = None;
-    need = 125e3; need_note = "256 cells x 15,625 lines/s" };
+    need = 125e3; verdict_override = None; need_note = "256 cells x 15,625 lines/s" };
   { name = "Mandelbrot"; item = "iteration";
     kernel = "k11_mandel"; host_items_per_iter = 1.; pe_clocks = 52.;
     pe_note = "no multiplier: 3 shift-add multiplies of 16 steps, est"; port_bound = None;
-    need = 49e6; need_note = "256 x 192 x 50 frames x 20 iterations" };
+    need = 49e6; verdict_override = None; need_note = "256 x 192 x 50 frames x 20 iterations" };
   { name = "Reed-Solomon syndromes"; item = "symbol x syndrome";
     kernel = "k12_rs_syndrome"; host_items_per_iter = 1.; pe_clocks = 9.;
     pe_note = "GF(256) constant multiply as 8 gated XORs, one K per PE, est"; port_bound = None;
-    need = nan; need_note = "no reachable link above 7 Mbit/s" };
+    need = nan; verdict_override = None; need_note = "no reachable link above 7 Mbit/s" };
   { name = "CRC polynomial search, brute force"; item = "candidate x bit";
     kernel = "k13_crc_bitwise"; host_items_per_iter = 1.; pe_clocks = 1.;
     pe_note = "CRC mode, one candidate per PE (designed)"; port_bound = None;
-    need = nan; need_note = "a one-off; the GCD method (CRC RevEng) needs no search" };
+    need = nan; verdict_override = None; need_note = "a one-off; the GCD method (CRC RevEng) needs no search" };
   { name = "raycaster (column DDA)"; item = "DDA step";
     kernel = "k14_dda"; host_items_per_iter = 1.; pe_clocks = nan;
     pe_note = "data-dependent loop with a map lookup: no fit"; port_bound = None;
-    need = 256. *. 20. *. 50.; need_note = "256 rays x 20 steps x 50 frames" };
+    need = 256. *. 20. *. 50.; verdict_override = None; need_note = "256 rays x 20 steps x 50 frames" };
   { name = "LZ77 longest match"; item = "position x byte";
     kernel = "k15_lz_match"; host_items_per_iter = 1.; pe_clocks = 2.;
     pe_note = "a window of 32 bytes in 16 PEs: too small to matter, est"; port_bound = None;
-    need = nan; need_note = "host hash chains visit few positions" };
+    need = nan; verdict_override = None; need_note = "host hash chains visit few positions" };
   { name = "PDM microphone decimation (CIC3)"; item = "8 PDM bits";
     kernel = "k16_pdm"; host_items_per_iter = 1.; pe_clocks = 24.;
     pe_note = "CIC integrators, one PE per stage (designed)"; port_bound = None;
-    need = 3.072e6 /. 8.; need_note = "one microphone at 3.072 MHz" };
+    need = 3.072e6 /. 8.; verdict_override = None; need_note = "one microphone at 3.072 MHz" };
   { name = "streaming top-16 / insertion sort"; item = "compare-shift step";
     kernel = "k17_insert"; host_items_per_iter = 1.; pe_clocks = 1.;
     pe_note = "S <- max(S, A), P <- loser (designed)"; port_bound = None;
-    need = 60e6; need_note = "one 60 MS/s stream, 1 step per sample typical (the host tests the threshold first)" };
+    need = 60e6; verdict_override = Some "marginal: array, but only for adversarial (rising) data";
+    need_note = "one 60 MS/s stream; on ordinary data the host tests each sample against the 16th largest first (est 2-3 cycles, 40-60 % of both cores) and inserts rarely; rising data needs 16 steps per sample (960M/s)" };
 ]
 
 let fmt x =
@@ -137,6 +139,7 @@ let main _ =
       let ratio = a16 /. host in
       let host_ok = Float.is_nan c.need || c.need <= 0.5 *. host2 in
       let verdict =
+        match c.verdict_override with Some v -> v | None ->
         if Float.is_nan c.pe_clocks then "host (no fit on the array)"
         else if host_ok && Float.is_nan c.need then "host (no need beyond it)"
         else if host_ok then Printf.sprintf "host (need is %.1f%% of host)" (100. *. c.need /. host2)

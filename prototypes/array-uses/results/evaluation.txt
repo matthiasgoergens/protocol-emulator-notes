@@ -1,0 +1,38 @@
+Evaluation (evaluate.ml). Array: upe_v0 at 60 MHz; host: 2 x Cortex-M33 at 150 MHz, llvm-mca cycles.
+items/s for 8, 16 array PEs; host items/s (mca, mca+2); ratio = 16 PEs / host (mca); need = application rate
+
+workload                                       item                        arr8     arr16      host    host+2   ratio      need verdict
+1-bit correlation (GPS tracking, binary NN)    1x1-bit MAC               480.0M    960.0M    768.0M    711.1M     1.2    235.7M host (need is 33.1% of host)
+multi-bit x +-1 code (DSSS, soft matcher)      16x1-bit MAC              480.0M    960.0M    100.0M     75.0M     9.6         - host (no need beyond it)
+HF direct-sampling DDC (8-bit ADC, I/Q, CIC3)  ADC sample                 30.0M     60.0M     16.7M     15.0M     3.6     60.0M ARRAY (host short; array meets need)
+edit distance (Myers on host)                  text char x 32 cells        3.8M      7.5M     10.3M      9.7M     0.7         - host (no need beyond it)
+Viterbi K=7 r=1/2 (CCSDS)                      butterfly (2 ACS)           9.1M     18.1M      8.3M      7.9M     2.2     32.0M neither meets the need at 16 PEs
+dynamic time warping                           DP cell                    96.0M    192.0M     14.3M     13.0M    13.4         - host (no need beyond it)
+min-plus relaxation (shortest paths)           2 relaxations             120.0M    240.0M     30.0M     25.0M     8.0      6.6M host (need is 26.4% of host)
+wavetable voice at 48 kHz                      voice sample                   -         -     27.3M     23.1M       -    768.0k host (no fit on the array)
+1-D cellular automaton, 256 cells per line     32 cells                   40.0M     80.0M     16.7M     15.0M     4.8    125.0k host (need is 0.8% of host)
+Mandelbrot                                     iteration                   9.2M     18.5M     14.3M     13.0M     1.3     49.0M neither meets the need at 16 PEs
+Reed-Solomon syndromes                         symbol x syndrome          53.3M    106.7M     30.0M     25.0M     3.6         - host (no need beyond it)
+CRC polynomial search, brute force             candidate x bit           480.0M    960.0M     30.0M     25.0M    32.0         - host (no need beyond it)
+raycaster (column DDA)                         DDA step                       -         -     27.3M     23.1M       -    256.0k host (no fit on the array)
+LZ77 longest match                             position x byte           240.0M    480.0M     30.0M     25.0M    16.0         - host (no need beyond it)
+PDM microphone decimation (CIC3)               8 PDM bits                 20.0M     40.0M     37.5M     30.0M     1.1    384.0k host (need is 1.3% of host)
+streaming top-16 / insertion sort              compare-shift step        480.0M    960.0M     37.5M     30.0M    25.6     60.0M marginal: array, but only for adversarial (rising) data
+
+Mappings and sources of the need:
+- 1-bit correlation (GPS tracking, binary NN): S <- S + (g ? -A : A), g = broadcast lane (designed, gps). Need: 12 ch x 6 corr x 3.27 MS/s (gps-hotcold README).
+- multi-bit x +-1 code (DSSS, soft matcher): same configuration, multi-bit A. Need: no application found beyond GPS.
+- HF direct-sampling DDC (8-bit ADC, I/Q, CIC3): 32-bit NCO (2), square-LO mixers (2), 3 x 32-bit integrators per arm (12); est; needs an 8x8 mixer for image rejection. Need: 0-30 MHz needs >= 60 MS/s (Nyquist).
+- edit distance (Myers on host): about 4 PE-ops per DP cell, est; needs two links (see DTW). Need: none found at a rate the host misses.
+- Viterbi K=7 r=1/2 (CCSDS): no direct mapping: one link and a static op give 2 words per ACS through a bank, two passes per bit, per-word control bits and a half-word label write; est about 10 PEs and 5.3 clocks per butterfly per chain, at most one chain per bank (2). Need: CCSDS K=7 at 1 Mbit/s (upper end of cubesat downlinks, est); 250 bit/s for Galileo E1-B / SBAS is 8,000/s.
+- dynamic time warping: does not map on upe_v0 (one link, static op); est 5 PE-clocks with a second link. Need: offline trace matching: latency, not a rate.
+- min-plus relaxation (shortest paths): P <- A + K, then S <- min(S, A): 2 PEs per relaxation (designed). Need: Floyd-Warshall n = 64 at 50 frames/s, est.
+- wavetable voice at 48 kHz: the array makes 60 MHz square/noise voices, not 48 kHz samples (synth.ml). Need: 16 voices at 48 kHz.
+- 1-D cellular automaton, 256 cells per line: 16 cells per word, about 6 GF(2) ops per word, est. Need: 256 cells x 15,625 lines/s.
+- Mandelbrot: no multiplier: 3 shift-add multiplies of 16 steps, est. Need: 256 x 192 x 50 frames x 20 iterations.
+- Reed-Solomon syndromes: GF(256) constant multiply as 8 gated XORs, one K per PE, est. Need: no reachable link above 7 Mbit/s.
+- CRC polynomial search, brute force: CRC mode, one candidate per PE (designed). Need: a one-off; the GCD method (CRC RevEng) needs no search.
+- raycaster (column DDA): data-dependent loop with a map lookup: no fit. Need: 256 rays x 20 steps x 50 frames.
+- LZ77 longest match: a window of 32 bytes in 16 PEs: too small to matter, est. Need: host hash chains visit few positions.
+- PDM microphone decimation (CIC3): CIC integrators, one PE per stage (designed). Need: one microphone at 3.072 MHz.
+- streaming top-16 / insertion sort: S <- max(S, A), P <- loser (designed). Need: one 60 MS/s stream; on ordinary data the host tests each sample against the 16th largest first (est 2-3 cycles, 40-60 % of both cores) and inserts rarely; rising data needs 16 steps per sample (960M/s).
