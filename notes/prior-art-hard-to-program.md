@@ -263,6 +263,21 @@ interacts with a platform's price, timing and first-party support. The cleanest 
 Sega's own Saturn and Dreamcast: one notoriously hard, one praised as easy, and both died. The
 difficulty changed *how* each died, not *whether*.
 
+**A caveat on all of this: the signal is small and the noise is large.** Nine platforms, and
+each outcome was driven by much besides the computing hardware:
+- **Media:** CDs against cartridges. The N64's cartridges were expensive and small, and that is
+  why Square took Final Fantasy VII to the PlayStation.
+- **Price, launch timing and reputation:** Sega's surprise early US launch of the Saturn, after
+  the 32X had already cost it trust.
+- **The games library** and exclusive third-party deals.
+- **Other factors:** piracy (the Dreamcast), marketing, controllers, and the installed base.
+
+The PS2 "counter-example" is itself confounded. It played DVDs and PS1 games, so developers had
+a huge installed base to write for however hard the vector units were. Read the console record as
+anecdotes consistent with the causal chain, not as evidence that isolates it [inference]. What
+does carry over to us is the mechanism, not the statistics: difficulty costs time-to-fluency, and
+anything that shortens that time (agents, simulators, libraries) removes most of the harm.
+
 Sourcing note: this section is built mostly from Wikipedia's own citations (fetched directly, not
 via search, since the session's web-search budget was exhausted before this note; see
 `/var/tmp/hard-to-program-2/sources-log.md` for the exact pages and what came from each). Quotes
