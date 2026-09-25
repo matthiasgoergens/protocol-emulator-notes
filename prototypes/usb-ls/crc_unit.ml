@@ -49,6 +49,26 @@ let create ~cfg ~clock ~clear ~en ~frame ~stb ~value =
   skip <== reg spec (mux2 en (mux2 (rise &: (skip <>:. 0)) (skip -:. 1) skip) (of_int ~width:5 cfg.skip));
   crc ==: c cfg.check
 
+(* The same unit with its configuration as inputs (on the chip: configuration registers loaded
+   by the host), for the area of the programmable version. [mask] has the low [width] bits set;
+   [top] selects the register's top bit (width - 1) for MSB-first operation. *)
+let create_prog ~clock ~clear ~poly ~init ~check ~mask ~top ~skip_n ~msb_first ~en ~frame ~stb ~value =
+  let stb = stb &: frame in
+  let spec = Reg_spec.create ~clock ~clear () in
+  let w = max_width in
+  let crc = wire w and skip = wire 5 in
+  let stb_prev = reg spec stb in
+  let rise = stb &: ~:stb_prev in
+  let fb_lsb = bit crc 0 ^: value in
+  let next_lsb = srl crc 1 ^: mux2 fb_lsb poly (zero w) in
+  let fb_msb = mux top (bits_lsb crc) ^: value in
+  let next_msb = (sll crc 1 ^: mux2 fb_msb poly (zero w)) &: mask in
+  let next = mux2 msb_first next_msb next_lsb in
+  let take = en &: rise &: (skip ==:. 0) in
+  crc <== reg spec (mux2 en (mux2 take next crc) init);
+  skip <== reg spec (mux2 en (mux2 (rise &: (skip <>:. 0)) (skip -:. 1) skip) skip_n);
+  crc ==: check
+
 (* executable specification *)
 module Model = struct
   type t = { cfg : cfg; mutable crc : int; mutable skip : int; mutable stb_prev : int }

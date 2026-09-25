@@ -6,10 +6,10 @@
 type t0cfg = Firmware.t0_cfg
 type sys = { img : Firmware.images; ctl : Controller.t }
 
-let make ?(name = "firmware") ?trace ?t0cfg ?t12cfg ?(jk_swap = false) ?latency ?refill ?depth ?(verbose_mismatch = true) () =
+let make ?(name = "firmware") ?trace ?t0cfg ?t12cfg ?(jk_swap = false) ?latency ?refill ?depth ?prepare ?(verbose_mismatch = true) () =
   let mk () =
     let img = Firmware.build ?t0cfg ?t12cfg () in
-    let ctl = Controller.create ~jk_swap ?latency ?refill ?depth img in
+    let ctl = Controller.create ~jk_swap ?latency ?refill ?depth ?prepare img in
     Controller.init ctl; { img; ctl } in
   let a = mk () and b = mk () in
   let model = Fw_sys.Model.create () in

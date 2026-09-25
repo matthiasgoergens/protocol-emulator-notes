@@ -9,9 +9,12 @@
 
    Timing model: each event reaches the controller [latency] clocks after the sequencer emits
    it, and the controller moves one byte into the FIFO every [refill] clocks while the FIFO has
-   room ([depth] bytes). The firmware NAKs IN tokens until a reply is in the FIFO, so latency
-   costs retries, never correctness; only the FIFO must not run dry mid-reply, which one byte
-   per four bit times (160 clocks) guarantees. *)
+   room ([depth] bytes), after [prepare] clocks for the first byte of a new reply. The firmware
+   NAKs IN tokens until a reply is in the FIFO, so slow preparation costs retries, never
+   correctness; the FIFO must not run dry mid-reply, which one byte per four bit times (160
+   clocks) guarantees. One bound is real: the handshake after a data packet is patched on the
+   token's event, so an event must reach the controller within the shortest data packet
+   (32 bit times, 1,280 clocks); the tests use up to 1,100. *)
 
 module F = Firmware
 
@@ -28,6 +31,7 @@ type t = {
   img : F.images;
   jk_swap : bool;
   latency : int; refill : int; depth : int;
+  prepare : int;                        (* clocks to compute a reply before its first byte is ready *)
   fifo : int Queue.t;                  (* the hardware FIFO in front of host_in *)
   staged : int Queue.t;                (* bytes of the queued reply not yet in the FIFO *)
   mutable next_refill : int;
@@ -50,8 +54,8 @@ type t = {
   log : Buffer.t;
 }
 
-let create ?(jk_swap = false) ?(latency = 200) ?(refill = 40) ?(depth = 4) img =
-  let c = { img; jk_swap; latency; refill; depth; fifo = Queue.create (); staged = Queue.create (); next_refill = 0;
+let create ?(jk_swap = false) ?(latency = 200) ?(refill = 40) ?(depth = 4) ?(prepare = 0) img =
+  let c = { img; jk_swap; latency; refill; depth; prepare; fifo = Queue.create (); staged = Queue.create (); next_refill = 0;
             events = Queue.create (); now = 0; addr = 0; configured = false; ep0 = Idle; ep1_toggle = 0;
             reports = Queue.create (); queued = None; sent = None; sent_at = 0; token = `None; rx = None; patches = 0; max_fifo = 0; popped = 0; forget = false;
             log = Buffer.create 256 } in
@@ -104,7 +108,7 @@ let queue_reply c ~ep ~pid payload =
   c.popped <- 0;
   patch_choices c;
   List.iter (fun b -> Queue.push b c.staged) bytes;
-  c.next_refill <- c.now + c.refill
+  c.next_refill <- c.now + c.refill + c.prepare
 
 (* decide what should be queued next *)
 let schedule c =

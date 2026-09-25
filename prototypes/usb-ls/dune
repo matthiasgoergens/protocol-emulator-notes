@@ -16,11 +16,16 @@
  (libraries hardcaml usbls))
 
 (executable
- (name dbg1)
- (modules dbg1)
+ (name dbg2)
+ (modules dbg2)
  (libraries hardcaml usbls))
 
 (executable
- (name dbg2)
- (modules dbg2)
+ (name emit)
+ (modules emit)
+ (libraries hardcaml usbls))
+
+(executable
+ (name matcher_exp)
+ (modules matcher_model matcher_exp)
  (libraries hardcaml usbls))

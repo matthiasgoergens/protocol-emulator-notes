@@ -5,7 +5,8 @@
       from the host model with the host clock off by up to 1.5 %.
    4. The whole device (T0-T2, CRC assist, controller) on the variant, interpreter and RTL in
       lockstep: directed enumeration and reports, constrained random sessions, and controls that
-      must fail. *)
+      must fail.
+   5. The reply path's timing budget, clock by clock. *)
 open Hardcaml
 
 let ok = ref true
@@ -46,13 +47,21 @@ let isa_lockstep ~seed ~cycles =
   !mism
 
 (* ---------- 2. CRC assist lockstep ---------- *)
-let crc_lockstep cfg ~seed ~cycles =
+let crc_lockstep ?(prog = false) cfg ~seed ~cycles =
   Random.init seed;
   let circ =
     let open Signal in
     let clock = input "clock" 1 and clear = input "clear" 1 in
     let en = input "en" 1 and frame = input "frame" 1 and stb = input "stb" 1 and value = input "value" 1 in
-    Circuit.create_exn ~name:"crc" [ output "ok" (Crc_unit.create ~cfg ~clock ~clear ~en ~frame ~stb ~value) ] in
+    let c w x = of_int ~width:w x in
+    let ok =
+      if prog then
+        (* the programmable unit, its configuration inputs driven with this configuration *)
+        Crc_unit.create_prog ~clock ~clear ~poly:(c 16 cfg.Crc_unit.poly) ~init:(c 16 cfg.init) ~check:(c 16 cfg.check)
+          ~mask:(c 16 ((1 lsl cfg.width) - 1)) ~top:(c 4 (cfg.width - 1)) ~skip_n:(c 5 cfg.skip)
+          ~msb_first:(if cfg.msb_first then vdd else gnd) ~en ~frame ~stb ~value
+      else Crc_unit.create ~cfg ~clock ~clear ~en ~frame ~stb ~value in
+    Circuit.create_exn ~name:"crc" [ output "ok" ok ] in
   let sim = Cyclesim.create circ in
   let i n = Cyclesim.in_port sim n in
   let m = Crc_unit.Model.create cfg in
@@ -168,12 +177,59 @@ let fw_directed ?(verbose = false) ~ppm ?t0cfg ?t12cfg ?jk_swap ?latency name =
   Scenario.directed b ~addr:42;
   b, a
 
+(* ---------- 5. the reply path, clock by clock ---------- *)
+(* One IN (data queued) and one SETUP at the exact host clock: the clocks, from the start of the
+   host's EOP (its first SE0 clock), at which each stage of the reply happens. *)
+let budget () =
+  let events = ref [] in
+  let mark name c = if not (List.mem_assoc name !events) then events := (name, c) :: !events in
+  let armed = ref false and se0_at = ref 0 and prev_line = ref (0, 1) and prev_out = ref 0 and prev_oe = ref 0 in
+  let t1_decided = ref false in
+  let trace cyc ~dp ~dm (m : Fw_sys.Model.t) (sys : Dut_fw.sys) =
+    let po = m.st.pin_out and poe = m.st.pin_oe in
+    if !armed then begin
+      if (dp, dm) = (0, 0) && !prev_line <> (0, 0) && !se0_at = 0 then se0_at := cyc;
+      let rel = cyc - !se0_at in
+      if !se0_at > 0 then begin
+        if (dp, dm) = (0, 1) && !prev_line = (0, 0) then mark "host EOP: SE0 to J (turnaround reference)" rel;
+        if (po lsr Fw_sys.p_idle) land 1 = 1 && (!prev_out lsr Fw_sys.p_idle) land 1 = 0 then mark "T0 raises IDLE (end of packet seen)" rel;
+        if (po lsr Fw_sys.p_stb) land 1 = 1 && (!prev_out lsr Fw_sys.p_stb) land 1 = 0 && (po lsr Fw_sys.p_idle) land 1 = 1 then mark "T0 end-of-packet strobe" rel;
+        let pc1 = m.st.pcs.(1) and pc2 = m.st.pcs.(2) in
+        let at1 l = pc1 = Asm.addr sys.img.p1 l and at2 l = pc2 = Asm.addr sys.img.p2 l in
+        if not !t1_decided && (at1 "p_ep0_rdy" || at1 "p_ep1_rdy" || at1 "nr0" || at1 "nr1") then (t1_decided := true; mark "T1 reply chosen (token and RDY checked)" rel);
+        if at2 "p_hs" then mark "T2 reply chosen (CRC checked)" rel;
+        if poe land 3 <> 0 && !prev_oe land 3 = 0 then mark "device drives J" rel;
+        if poe land 3 <> 0 && po land 3 = 1 then mark "device's first K (SOP)" rel
+      end
+    end;
+    prev_line := (dp, dm); prev_out := po; prev_oe := poe in
+  let dut, _, _ = Dut_fw.make ~name:"budget" ~trace () in
+  let b = Bench.create ~ppm:0 dut in
+  let run name f =
+    events := []; se0_at := 0; t1_decided := false;
+    f b;
+    let evs = List.sort (fun (_, a) (_, c) -> compare a c) !events in
+    Printf.printf "  %s (clocks from the first SE0 clock of the host's EOP; 40 clocks = 1 bit):\n" name;
+    List.iter (fun (n, c) -> Printf.printf "    %4d  %s\n" c n) evs in
+  Bench.idle b 200;
+  (* SETUP: arm at the data packet *)
+  Bench.send b (Ls_host.token Ls_host.pid_setup ~addr:0 ~ep:0); Bench.idle_bits b 3.0;
+  armed := true;
+  run "SETUP data, answered ACK by T2" (fun b ->
+      Bench.send b (Ls_host.data_packet Ls_host.pid_data0 (Bench.get_descriptor ~typ:1 ~len:18 ())); ignore (Bench.receive b));
+  armed := false; Bench.idle_bits b 400.0;
+  armed := true;
+  run "IN token, answered with data from the FIFO by T1" (fun b ->
+      Bench.send b (Ls_host.token Ls_host.pid_in ~addr:0 ~ep:0); ignore (Bench.receive b));
+  armed := false
+
 let report b =
   print_endline ("  " ^ Bench.summary b);
   List.iter (fun e -> print_endline ("    " ^ e)) (List.rev b.Bench.errors);
   b.Bench.errors = [] && b.dut.mismatches () = 0
 
 let () =
+  if Sys.getenv_opt "BUDGET" <> None then (budget (); exit 0);
   (match Sys.getenv_opt "T0DEBUG" with
    | Some sd -> let ppm, _, good, _, _, _, resets = t0_stock ~seed:(int_of_string sd) ~packets:40 () in
      Printf.printf "ppm %d good %b resets %d\n" ppm good resets; exit 0
@@ -184,7 +240,9 @@ let () =
   print_endline "== 2. CRC assist: model against RTL";
   List.iter (fun (name, cfg) ->
     let mm, oks = crc_lockstep cfg ~seed:3 ~cycles:200_000 in
-    check (Printf.sprintf "%s: 200,000 clocks, %d mismatches (ok seen %d times)" name mm oks) (mm = 0))
+    check (Printf.sprintf "%s: 200,000 clocks, %d mismatches (ok seen %d times)" name mm oks) (mm = 0);
+    let mm, oks = crc_lockstep ~prog:true cfg ~seed:4 ~cycles:200_000 in
+    check (Printf.sprintf "  same, programmable unit: %d mismatches (ok seen %d times)" mm oks) (mm = 0))
     [ "USB CRC16 (reflected)", Crc_unit.usb_crc16;
       "USB CRC5 (reflected)", { Crc_unit.width = 5; poly = 0x14; init = 0x1F; check = 0x06; skip = 0; msb_first = false };
       "CAN CRC15 (MSB first)", { Crc_unit.width = 15; poly = 0x4599; init = 0; check = 0; skip = 0; msb_first = true } ];
@@ -215,8 +273,13 @@ let () =
     let rng = Random.State.make [| seed; 77 |] in
     (* the first two seeds at the extremes of the tolerance, the rest anywhere in it *)
     let ppm = match seed with 1 -> -15000 | 2 -> 15000 | _ -> Random.State.int rng 30001 - 15000 in
-    let latency = 20 + Random.State.int rng 600 in
-    let dut, _, _ = Dut_fw.make ~name:(Printf.sprintf "firmware(lat %d)" latency) ~latency () in
+    (* controller latency: seed 3 near the bound the design assumes (a token's event must
+       reach the controller before the data packet ends, 1,280 clocks), so that the firmware
+       has to NAK while the controller prepares *)
+    let latency = if seed = 3 then 1100 else 20 + Random.State.int rng 600 in
+    (* seed 4: a controller that takes 5,000 clocks to prepare each reply; the firmware NAKs *)
+    let prepare = if seed = 4 then 5000 else 0 in
+    let dut, _, _ = Dut_fw.make ~name:(Printf.sprintf "firmware(latency %d, prepare %d)" latency prepare) ~latency ~prepare () in
     let b = Bench.create ~seed ~ppm dut in
     Scenario.random_session b ~n:120;
     ok := report b && !ok
@@ -227,6 +290,8 @@ let () =
       Printf.sprintf "%+d%%:%s" (ppm / 10000) (if b.Bench.errors = [] then "ok" else "FAIL"))
       [ -40000; -30000; -20000; 20000; 30000 ] in
   Printf.printf "  device beyond +-1.5 %% (directed): %s\n" (String.concat " " beyond);
+  print_endline "== 5. the reply path, clock by clock";
+  budget ();
   print_endline "== controls: each must FAIL";
   let control name ?t0cfg ?t12cfg ?jk_swap () =
     let b, _ = fw_directed ~ppm:0 ?t0cfg ?t12cfg ?jk_swap name in

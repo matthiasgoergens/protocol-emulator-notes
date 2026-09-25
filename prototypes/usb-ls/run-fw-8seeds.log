@@ -2,8 +2,11 @@
   200 programmes x 4000 clocks: 0 mismatching clocks           ok
 == 2. CRC assist: model against RTL
   USB CRC16 (reflected): 200,000 clocks, 0 mismatches (ok seen 0 times) ok
+    same, programmable unit: 0 mismatches (ok seen 0 times)    ok
   USB CRC5 (reflected): 200,000 clocks, 0 mismatches (ok seen 3110 times) ok
+    same, programmable unit: 0 mismatches (ok seen 2976 times) ok
   CAN CRC15 (MSB first): 200,000 clocks, 0 mismatches (ok seen 100822 times) ok
+    same, programmable unit: 0 mismatches (ok seen 106061 times) ok
   USB CRC16 residue on a good packet, not on a corrupted one, and on a zero-length one ok
 == 3. bit layer (T0) on the ORIGINAL sequencer, interpreter and RTL
   host -15000 ppm: 64 words, 60/60 packets bit-exact, 1 reset, 175727 clocks, 0 lockstep mismatches ok
@@ -90,14 +93,34 @@
   firmware ppm -15000: 928424 clocks, 113 packets sent, 55 replies (turnaround 2.69..5.99 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
   firmware ppm +15000: 934148 clocks, 113 packets sent, 55 replies (turnaround 2.56..5.71 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
 == 4. constrained random sessions
-  firmware(lat 558) ppm -15000: 1050629 clocks, 302 packets sent, 153 replies (turnaround 2.64..5.94 bits), 0 NAKs while preparing, 22 silences as required, 26 keep-alives, 5 resets, lockstep mismatches 0, errors 0
-  firmware(lat 373) ppm +15000: 1084429 clocks, 321 packets sent, 158 replies (turnaround 2.54..5.81 bits), 0 NAKs while preparing, 29 silences as required, 29 keep-alives, 9 resets, lockstep mismatches 0, errors 0
-  firmware(lat 296) ppm +2438: 1085853 clocks, 322 packets sent, 153 replies (turnaround 2.59..5.86 bits), 0 NAKs while preparing, 26 silences as required, 28 keep-alives, 8 resets, lockstep mismatches 0, errors 0
-  firmware(lat 313) ppm +588: 1229922 clocks, 360 packets sent, 184 replies (turnaround 2.60..5.77 bits), 0 NAKs while preparing, 20 silences as required, 31 keep-alives, 8 resets, lockstep mismatches 0, errors 0
+  firmware(latency 558, prepare 0) ppm -15000: 1050629 clocks, 302 packets sent, 153 replies (turnaround 2.64..5.94 bits), 0 NAKs while preparing, 22 silences as required, 26 keep-alives, 5 resets, lockstep mismatches 0, errors 0
+  firmware(latency 373, prepare 0) ppm +15000: 1084429 clocks, 321 packets sent, 158 replies (turnaround 2.54..5.81 bits), 0 NAKs while preparing, 29 silences as required, 29 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+  firmware(latency 1100, prepare 0) ppm +2438: 1085853 clocks, 322 packets sent, 153 replies (turnaround 2.59..5.86 bits), 0 NAKs while preparing, 26 silences as required, 28 keep-alives, 8 resets, lockstep mismatches 0, errors 0
+  firmware(latency 313, prepare 5000) ppm +588: 1582934 clocks, 500 packets sent, 325 replies (turnaround 2.60..5.87 bits), 156 NAKs while preparing, 20 silences as required, 35 keep-alives, 7 resets, lockstep mismatches 0, errors 0
+  firmware(latency 318, prepare 0) ppm -7765: 1159281 clocks, 328 packets sent, 158 replies (turnaround 2.65..6.00 bits), 0 NAKs while preparing, 25 silences as required, 20 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+  firmware(latency 27, prepare 0) ppm +7772: 1232353 clocks, 357 packets sent, 169 replies (turnaround 2.51..5.90 bits), 0 NAKs while preparing, 30 silences as required, 19 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+  firmware(latency 561, prepare 0) ppm +14185: 1084457 clocks, 311 packets sent, 147 replies (turnaround 2.54..5.67 bits), 0 NAKs while preparing, 31 silences as required, 24 keep-alives, 5 resets, lockstep mismatches 0, errors 0
+  firmware(latency 147, prepare 0) ppm +8555: 1303482 clocks, 389 packets sent, 198 replies (turnaround 2.55..5.87 bits), 0 NAKs while preparing, 19 silences as required, 23 keep-alives, 8 resets, lockstep mismatches 0, errors 0
   device beyond +-1.5 % (directed): -4%:FAIL -3%:ok -2%:ok +2%:ok +3%:ok
+== 5. the reply path, clock by clock
+  SETUP data, answered ACK by T2 (clocks from the first SE0 clock of the host's EOP; 40 clocks = 1 bit):
+      12  T0 raises IDLE (end of packet seen)
+      40  T0 end-of-packet strobe
+      46  T2 reply chosen (CRC checked)
+      80  host EOP: SE0 to J (turnaround reference)
+     138  device drives J
+     186  device's first K (SOP)
+  IN token, answered with data from the FIFO by T1 (clocks from the first SE0 clock of the host's EOP; 40 clocks = 1 bit):
+      16  T0 raises IDLE (end of packet seen)
+      44  T0 end-of-packet strobe
+      65  T1 reply chosen (token and RDY checked)
+      80  host EOP: SE0 to J (turnaround reference)
+     141  device drives J
+     189  device's first K (SOP)
 == controls: each must FAIL
   J and K swapped                              caught (19 errors; first: [J and K swapped clk 6324] turnaround 1.75 bit times outside 2..6.5)
   reply 4 bit times late                       caught (21 errors; first: [reply 4 bit times late clk 6488] turnaround 6.85 bit times outside 2..6.5)
   reply 1 bit time early (drives into the host's EOP) caught (21 errors; first: [reply 1 bit time early (drives into the host's EOP) clk 5479] bus contention: host and device drive together)
   CRC_OK not checked                           caught (1 errors; first: [CRC_OK not checked clk 846824] SETUP data with a bad CRC16: expected silence, got d2 (2.60 bits))
 FIRMWARE LS DEVICE PASS
+exit 0
