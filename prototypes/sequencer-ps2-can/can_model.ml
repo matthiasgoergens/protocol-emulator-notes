@@ -88,7 +88,6 @@ type t = {
   mutable tx_bit : int;                   (* level driven during the current bit *)
   mutable tx_stuffing : bool;
   mutable ack_drive : bool;
-  mutable arb_bits : int;                 (* destuffed bits in the arbitration field so far *)
   (* logs *)
   mutable received : (int * frame * bool * bool) list;  (* time, frame, crc ok, own *)
   mutable errors : (int * err) list;
@@ -105,7 +104,7 @@ let create ~bus ~idx ?(name = "ref") ?(prop = 5) ?(ph1 = 6) ?(ph2 = 4) ?(sjw = 3
     synced = false; last_sample = 1; phase = Integrating 0; rbits = []; nrb = 0; run = 0; rlast = 1;
     stuff_next = false; expect = max_int; crc_ok = false; pending_err = None; queue = []; tx_on = false;
     tx_bits = [||]; tx_i = 0; tx_run = 0; tx_last = 1; tx_bit = 1; tx_stuffing = false; ack_drive = false;
-    arb_bits = 0; received = []; errors = []; sent = []; lost = 0; retries = 0; now = 0; fault_skip_ack = skip_ack }
+    received = []; errors = []; sent = []; lost = 0; retries = 0; now = 0; fault_skip_ack = skip_ack }
 
 let nominal n = 1 + n.prop + n.ph1 + n.ph2
 
@@ -139,7 +138,7 @@ let rx_bit n v =
 
 let start_frame n =
   n.phase <- Stuffed; n.rbits <- []; n.nrb <- 0; n.run <- 0; n.rlast <- 1; n.stuff_next <- false;
-  n.expect <- max_int; n.arb_bits <- 0
+  n.expect <- max_int
 
 (* the sampled level at the sample point *)
 let on_sample n v =

@@ -1,8 +1,10 @@
 # PS/2 and CAN as firmware on the deadline sequencer
 
 The competition post lists PS/2 and CAN among the "other interesting protocols to consider". Both
-now run as firmware on the deadline sequencer (`../deadline-sequencer`), checked end to end
-against models written separately, with the interpreter and the RTL in lockstep throughout.
+now run as firmware on the deadline sequencer (`../deadline-sequencer`). They are checked end to
+end against models I wrote separately from the firmware and in a different style, with the
+interpreter and the RTL in lockstep throughout. The last section says what that independence does
+and does not cover.
 
 - **PS/2, both roles**, uses only base-ISA instructions. What it needs beyond the base core is
   programme space: 161 words for the device and 147 for the host, against 64 words per thread
@@ -214,7 +216,8 @@ and two nodes use all four threads. The firmware's own constraints are:
 - the post-sample path must fit before the window opens: N - SP >= SJW + 4;
 - the TX thread needs N - SP >= 6;
 
-so N >= 2·SJW + 20. Sweep results (full suite, 12 random runs each):
+so N >= 2·SJW + 20. Sweep results (the full suite; 20 random runs at 500 kbit/s, 12 at the
+other rates):
 
 | N slots | kbit/s | SP | SJW | RX words | result |
 |---|---|---|---|---|---|
@@ -224,7 +227,9 @@ so N >= 2·SJW + 20. Sweep results (full suite, 12 random runs each):
 | 23 | 652 | 17 (74 %) | 1 | 208 | random runs pass; the worst-case tolerance control fails *with* resynchronisation |
 | <= 22 | >= 682 | | | | the generator refuses: no slack for the DLC tree |
 
-- **The maximum is 625 kbit/s** (N = 24, SJW 2, sample point 75 %).
+- **The fastest usable rate is 625 kbit/s** (N = 24, SJW 2, sample point 75 %). "Usable" means
+  it passes everything, including the worst-case tolerance control at ±0.5 % per node. It is the
+  maximum of this firmware structure, not a bound for every possible programme.
 - At 652 kbit/s the only possible SJW is 1 slot. The random runs pass there, but the worst-case
   control (clocks 1 % apart, a long frame with few edges) fails even *with* resynchronisation, so
   that rate is not usable at ±0.5 % tolerance.
@@ -232,11 +237,16 @@ so N >= 2·SJW + 20. Sweep results (full suite, 12 random runs each):
   already about 13 slots before any timing slack: sample, stuff check, last-bit check, window
   set-up, a window of 2·SJW + 1 slots, bookkeeping, jump.
 
-**What needs more than firmware:**
-- **CRC-15.** The base ISA has no XOR or ALU, and a CRC in the pc would need 2^15 states. This
-  needs the generic CRC engine.
-- **Destuffing.** A run-length state machine in the pc would need 10 states for every field and
-  every field transition, far beyond 256 words. This needs the generic stuff tracker.
+**What needs more than firmware.** For CRC-15 and destuffing this is an argument, not a proof;
+no size search over alternative encodings was done.
+- **CRC-15.** The base ISA has no ALU. Its only data state is the 8-bit accumulator, which can
+  only be filled by shifting in pin levels (even levels the thread drives itself on a spare pin),
+  plus the pc and the counters. A 15-bit CRC state therefore needs at least 7 bits held in the pc,
+  and each of those 128 states needs its own code for every bit step. That is far beyond 256
+  words. This needs the generic CRC engine.
+- **Destuffing.** A run-length state machine in the pc needs 10 states (last bit times run
+  length) replicated for every field and every field exit, which is again far beyond 256 words.
+  This needs the generic stuff tracker.
 - **Branching on data** (DLC, RTR, IDE). This needs JC. Otherwise it is firmware, as a
   constant-time tree.
 - **Length from data** (TX stream length). This needs `cnt <- acc`.
@@ -322,6 +332,12 @@ count should follow how many threads will run CRC-protected protocols at once.
   pull, the byte is reported as sent while the host voids it. Real PS/2 has the same window. The
   random runs have not hit it.
 - **Shared assumptions.** Every encoder, stuffer and CRC here is mine. The CRC catalogue value, the
-  three independently written stuffers and the time-quantum reference node reduce the risk of a
-  shared misreading, but a test against a real CAN controller (for example on the FPGA board with
-  a transceiver and a USB-CAN adapter) would remove it.
+  three separately written stuffers and the time-quantum reference node reduce the risk of a
+  shared misreading. A test against a real CAN controller would remove it, for example on the FPGA
+  board with a transceiver and a USB-CAN adapter.
+- **What the reference node does not cover.** It is a cross-check, not a complete CAN
+  conformance oracle. It has no error counters or error-passive behaviour, no overload frames, and
+  no extended frames, and the malformed-frame cases tested are the five controls above. Its
+  resynchronisation follows the ISO phase-error rules in time quanta. The firmware's discrete
+  window is exact to one slot for phase errors up to SJW, and is tested (not proved) against it
+  under ±0.5 % clocks.
