@@ -27,7 +27,7 @@ let create ~clock ~clear ~h ~rx ~rx_active =
   compile
     [ since <-- mux2 (since.value ==:. 63) since.value (since.value +:. 1)
     ; if_ (~:(in_frame.value))
-        [ when_ (act_q &: transition) [ in_frame <-- vdd; first <-- vdd; synced <-- gnd; since <--. 0; bitcnt <--. 0; crc <--. 0xFFFFFFFF ] ]
+        [ when_ (act_q &: transition) [ in_frame <-- vdd; first <-- vdd; synced <-- gnd; since <--. 0; bitcnt <--. 0; crc <--. 0xFFFFFFFF; shift <--. 0 ] ]
         [ (* end of frame: no activity, or no transition for two bit times *)
           when_ ((quiet >=:. (2 * h - 1)) |: (since.value >=:. (4 * h))) [ in_frame <-- gnd; frame_end <-- vdd; crc_ok <-- (crc.value ==:. residual) ]
         ; when_ transition
