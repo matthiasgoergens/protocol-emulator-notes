@@ -1,7 +1,7 @@
 (library
  (name eth10)
  (wrapped false)
- (modules isa sequencer harness eth_model eth_tx eth_rx eth_rxn model tx_fw clause14 crc_unit edge_sampler matcher_en rx_path line rx_tests)
+ (modules isa sequencer harness eth_model eth_tx eth_rx eth_rxn model tx_fw clause14 crc_unit edge_sampler matcher_en rx_path line rx_tests engine node node_demo)
  (libraries hardcaml))
 
 (executable

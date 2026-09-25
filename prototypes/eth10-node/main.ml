@@ -106,4 +106,18 @@ let () =
   if what = "tx" || what = "all" then tx ();
   if what = "crc" || what = "all" then ignore (Rx_tests.crc ());
   if what = "sampler" || what = "all" then ignore (Rx_tests.sampler ());
-  if what = "rx" || what = "all" then ignore (Rx_tests.rx ())
+  if what = "rx" || what = "all" then ignore (Rx_tests.rx ());
+  if what = "node" then begin
+    pr "== node demo (node.ml): requests %s -> replies %s" Sys.argv.(2) Sys.argv.(3);
+    let ok, _, _ = Node_demo.run ~requests:Sys.argv.(2) ~replies_out:Sys.argv.(3) () in
+    pr "node (simulation side): %s" (verdict ok)
+  end;
+  if what = "node-busy" then begin
+    pr "== node with requests %s us apart (faster than replies go out; in half duplex these would collide with the replies, the model ignores that)" Sys.argv.(4);
+    let ok, _, _ = Node_demo.run ~subset:true ~gap_us:(float_of_string Sys.argv.(4)) ~tail_ms:1.0 ~requests:Sys.argv.(2) ~replies_out:Sys.argv.(3) () in
+    pr "node-busy: %s" (verdict ok)
+  end;
+  if what = "node-controls" then begin
+    let res = Node_demo.controls ~requests:Sys.argv.(2) ~dir:Sys.argv.(3) in
+    List.iter (fun (name, ok, out) -> pr "control %-52s simulation-side checks %s; replies in %s" name (if ok then "pass" else "FAIL") out) res
+  end

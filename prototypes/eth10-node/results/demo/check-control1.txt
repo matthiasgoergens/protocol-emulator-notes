@@ -1,0 +1,22 @@
+5 of 29 expected replies correct; 10 requests correctly unanswered: 10
+  FAIL ping-0: IPs 10.0.0.1->10.0.0.2
+  FAIL ping-1: IPs 10.0.0.1->10.0.0.2
+  FAIL ping-18: IPs 10.0.0.1->10.0.0.2
+  FAIL ping-56: IPs 10.0.0.1->10.0.0.2
+  FAIL ping-100: IPs 10.0.0.1->10.0.0.2
+  FAIL ping-200: IPs 10.0.0.1->10.0.0.2
+  FAIL ping-df: IPs 10.0.0.1->10.0.0.2
+  FAIL rand-ping-0-86: IPs 10.0.140.249->10.0.0.2
+  FAIL rand-ping-2-174: IPs 10.0.252.29->10.0.0.2
+  FAIL rand-ping-3-49: IPs 10.0.229.100->10.0.0.2
+  FAIL rand-ping-5-149: IPs 10.0.246.27->10.0.0.2
+  FAIL rand-ping-6-125: IPs 10.0.205.184->10.0.0.2
+  FAIL rand-ping-7-23: IPs 10.0.52.77->10.0.0.2
+  FAIL rand-ping-9-139: IPs 10.0.10.65->10.0.0.2
+  FAIL rand-ping-10-185: IPs 10.0.97.180->10.0.0.2
+  FAIL rand-ping-11-149: IPs 10.0.37.125->10.0.0.2
+  FAIL rand-ping-12-155: IPs 10.0.174.60->10.0.0.2
+  FAIL rand-ping-13-160: IPs 10.0.77.35->10.0.0.2
+  FAIL rand-ping-14-165: IPs 10.0.155.218->10.0.0.2
+  FAIL rand-ping-15-75: IPs 10.0.49.112->10.0.0.2
+host stack verdict: FAIL
