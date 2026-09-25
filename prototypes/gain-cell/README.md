@@ -1,7 +1,10 @@
 # Gain-cell dynamic memory for IHP SG13G2
 
 The goal is on-chip memory denser than SRAM, with no SRAM macro at all. The SRAM bit cell in
-the PDK is 2.96 × 1.18 µm = 3.50 µm², and the macros spend 3.6 to 8.6 µm² per bit including
+the PDK is 2.81 × 1.07 µm = 3.01 µm², measured from its placement in the macro GDS
+(`prototypes/sram-cut/pdk-cell/refs.txt`; an earlier 3.50 µm² here was wrong). That cell
+passes DRC only under the SRAM marker layer's relaxed rules; a 6T drawn at the standard rules
+is 3.41 µm² (`prototypes/sram-cut/`). The macros spend 3.6 to 8.6 µm² per bit including
 their periphery. A gain cell stores a bit as charge on a transistor gate. Reading it does not
 destroy it, and the cell needs no capacitor, so it can be built in a plain logic process. The
 price is that the charge leaks away, so every bit has a lifetime. The compiler must schedule a
@@ -111,7 +114,8 @@ retention.
 **The choice is W 0.15 / L 0.45:** a dogbone strip at the thick-oxide minimum length, with a
 20 ns sense or a 100 ns write. It holds a bit for at least 3 ms in every corner, and for 12 to
 20 ms at tt. Its cell is 1.03 × 2.75 µm = 2.83 µm² per bit; with a strap every 32 columns,
-2.89 µm². That is **1.21 times the density of the SRAM bit cell**. It is not the large win the
+2.89 µm². That is **1.04 times the density of the PDK's SRAM bit cell**, and 1.18 times a 6T
+drawn at the standard rules. It is not the large win the
 core pitch first suggested, because thick oxide costs 0.54 µm of keep-out per row pair.
 
 **The longer gates leak more, not less,** hot: at tt and 85 °C, L 0.60 lasts 0.8 ms against
@@ -131,7 +135,8 @@ it, not silicon.
 - **Thin-oxide write transistor:** its own channel leaks
   (`results/lifetimes-3t-thin.txt`, `results/v6-*.txt`). The lifetime of a 1 is 1.2 µs at
   ff/85 °C, 8 µs at tt/85 °C, 120 µs at tt/27 °C, and about 2 ms at ss/27 °C. Its cell is
-  1.03 × 2.10 µm = 2.16 µm² (2.20 µm² with straps), 1.59× the SRAM bit cell's density.
+  1.03 × 2.10 µm = 2.16 µm² (2.20 µm² with straps), 1.37× the PDK SRAM bit cell's density (1.55× a
+  standard-rule 6T).
 - **Mixed arrays:** thick and thin row pairs mix in one array on shared bit lines. DRC is clean
   (`drc/v3-ARRAY_MIXED.log`), and extraction shows the intended devices and nets
   (`lvs/mixed/extracted.cir`).

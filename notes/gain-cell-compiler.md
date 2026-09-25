@@ -7,10 +7,13 @@ SPICE on the IHP PDK models, not silicon.
 
 ## What the cells measured (worst case unless stated)
 
+The PDK SRAM bit cell is 3.01 µm² (under relaxed SRAM rules); a standard-rule 6T is 3.41 µm²
+(`prototypes/sram-cut/`).
+
 | row type | area per bit (strap every 32 columns) | lifetime of a stored 1 |
 |---|---|---|
-| thick-oxide write, 3T | 2.88 µm² (1.21× SRAM density) | ≥ 3 ms; 12–20 ms at tt |
-| thin-oxide write, 3T | 2.20 µm² (1.59× SRAM density) | 1.2 µs ff/85 °C; 8 µs tt/85 °C; 120 µs tt/27 °C; about 2 ms ss/27 °C |
+| thick-oxide write, 3T | 2.88 µm² (1.04× the PDK SRAM bit cell) | ≥ 3 ms; 12–20 ms at tt |
+| thin-oxide write, 3T | 2.20 µm² (1.37× the PDK SRAM bit cell) | 1.2 µs ff/85 °C; 8 µs tt/85 °C; 120 µs tt/27 °C; about 2 ms ss/27 °C |
 | thick write and thick storage transistor | about 3.1 µm² (not drawn) | droop about 2 mV/ms, but needs a sense amplifier to read |
 
 Both drawn row types pass IHP's DRC in one mixed array on shared bit lines
