@@ -1,7 +1,7 @@
 (library
  (name ps2can)
  (wrapped false)
- (modules isa_v sequencer_v harness_v sim ps2_fw ps2_model ps2_bench)
+ (modules isa_v sequencer_v harness_v sim ps2_fw ps2_model ps2_bench can_fw can_model can_bench)
  (libraries hardcaml))
 
 (executable
@@ -12,4 +12,9 @@
 (executable
  (name ps2_main)
  (modules ps2_main)
+ (libraries hardcaml ps2can))
+
+(executable
+ (name can_main)
+ (modules can_main)
  (libraries hardcaml ps2can))
