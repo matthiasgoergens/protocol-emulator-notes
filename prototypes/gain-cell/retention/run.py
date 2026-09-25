@@ -18,16 +18,27 @@ W = os.environ.get("W", "0.15")
 WMW = os.environ.get("WMW", W)
 LMW = os.environ.get("LMW")
 TOPO = os.environ.get("TOPO", "3T")
+MS = os.environ.get("MS", "lv")    # storage transistor: lv (thin oxide, L 0.13) or hv (thick, L 0.45)
+MSL = "0.13" if MS == "lv" else "0.45"
 TWRITE = float(os.environ.get("TWRITE", "20"))    # ns
+# DVT shifts the write transistor's threshold (volts, negative = leakier), to place it n sigma
+# out in the mismatch distribution. It needs a model copy whose subcircuits take a dvt parameter
+# (the stock ones hardcode delvto=0): MODELS=/models, see mkmodels.sh.
+MODELS = os.environ.get("MODELS", "/pdk/libs.tech/ngspice/models")
+DVT = os.environ.get("DVT")
+TSTOP = os.environ.get("TSTOP", "50m")             # simulated hold time
+TSTEP = os.environ.get("TSTEP", "100n")            # maximum time step
 LEVELS1 = [0.45, 0.40, 0.35, 0.30, 0.25]          # a stored 1 is reported falling past each
 LEVELS0 = [0.25, 0.30, 0.35, 0.40]                # a stored 0 rising past each
 cases = []
 only = sys.argv[1:] or ["lv_nmos", "lv_pmos", "hv_pmos", "hv_nmos"]
 for wt, corner, temp, bit in itertools.product(only, ["mos_tt", "mos_ff", "mos_ss"], [27, 85], [1, 0]):
+    if os.environ.get("CASES") and f"{corner[4:]}{temp}{bit}" not in os.environ["CASES"].split(","):
+        continue           # CASES=tt851,ss270 runs only those (corner, temperature, stored bit)
     cases.append((wt, corner, temp, bit))
 
 def netlist(wt, corner, temp, bit):
-    lib = "cornerMOShv.lib" if wt.startswith("hv") else "cornerMOSlv.lib"
+    lib = "cornerMOShv.lib" if wt.startswith("hv") or MS == "hv" else "cornerMOSlv.lib"
     L = "0.45u" if wt.startswith("hv") else "0.13u"
     if LMW:
         L = LMW + "u"
@@ -38,11 +49,11 @@ def netlist(wt, corner, temp, bit):
     if TOPO == "2T":
         ms_lines = f"XMS rbl sn vdd 0 sg13_lv_nmos w={W}u l=0.13u"
     else:
-        ms_lines = (f"XMS mid sn {MS_SOURCE} 0 sg13_lv_nmos w={W}u l=0.13u\n"
+        ms_lines = (f"XMS mid sn {MS_SOURCE} 0 sg13_{MS}_nmos w={W}u l={MSL}u\n"
                     f"XMR rbl rwl mid 0 sg13_lv_nmos w={W}u l=0.13u")
     return f"""* gain cell retention {wt} {corner} {temp}C
-.lib /pdk/libs.tech/ngspice/models/cornerMOSlv.lib {corner}
-{'.lib /pdk/libs.tech/ngspice/models/cornerMOShv.lib ' + corner if lib == 'cornerMOShv.lib' else ''}
+.lib {MODELS}/cornerMOSlv.lib {corner}
+{f'.lib {MODELS}/cornerMOShv.lib ' + corner if lib == 'cornerMOShv.lib' else ''}
 .temp {temp}
 .options reltol=1e-4 abstol=1e-18 vntol=1e-7
 vdd vdd 0 {VDD}
@@ -55,11 +66,11 @@ vwbl wbl 0 pwl(0 {VDD if bit else 0} {TWRITE + 10}n {VDD if bit else 0} {TWRITE 
 vwwl wwl 0 pwl(0 {won} {TWRITE}n {won} {TWRITE + 1}n {woff})
 vrwl rwl 0 0
 vrbl rbl 0 {VDD}
-XMW wbl wwl sn {body} sg13_{wt} w={WMW}u l={L}
+XMW wbl wwl sn {body} sg13_{wt} w={WMW}u l={L}{f" dvt={DVT}" if DVT else ""}
 {ms_lines}
 .control
 pre_osdi /work/osdi/psp103.osdi
-tran 100n 50m 0 100n
+tran {TSTEP} {TSTOP} 0 {TSTEP}
 let v0 = v(sn)[0]
 meas tran vw find v(sn) at={TWRITE + 5}n
 meas tran v1u find v(sn) at=1u

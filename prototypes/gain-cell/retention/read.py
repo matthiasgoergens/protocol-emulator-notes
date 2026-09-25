@@ -18,6 +18,8 @@
 import itertools, os, re, subprocess
 VDD = 1.2
 TOPO = os.environ.get("TOPO", "2T")
+MS = os.environ.get("MS", "lv")    # storage transistor: lv (thin oxide, L 0.13) or hv (thick, L 0.45)
+MSL = "0.13" if MS == "lv" else "0.45"
 N = int(os.environ.get("N", "32"))
 WMW, LMW, W = os.environ.get("WMW", "0.15"), os.environ.get("LMW", "0.60"), os.environ.get("W", "0.30")
 CBL = os.environ.get("CBL", "10f")      # Metal2 wire, about 0.15 fF/um over N x 2.6 um
@@ -33,10 +35,10 @@ def netlist(corner, temp, bit, sn_unsel, sn_given=None):
     else:
         cells = "\n".join(
             f"XMW{i} 0 0 sn{i} 0 sg13_hv_nmos w={WMW}u l={LMW}u\n"
-            f"XMS{i} mid{i} sn{i} 0 0 sg13_lv_nmos w={W}u l=0.13u\n"
+            f"XMS{i} mid{i} sn{i} 0 0 sg13_{MS}_nmos w={W}u l={MSL}u\n"
             f"XMR{i} rbl 0 mid{i} 0 sg13_lv_nmos w={W}u l=0.13u\n"
             f".ic v(sn{i})={sn_unsel}" for i in range(1, N))
-        sel = (f"XMS0 mid0 sn0 0 0 sg13_lv_nmos w={W}u l=0.13u\n"
+        sel = (f"XMS0 mid0 sn0 0 0 sg13_{MS}_nmos w={W}u l={MSL}u\n"
                f"XMR0 rbl rwl mid0 0 sg13_lv_nmos w={W}u l=0.13u")
         rwl = f"pwl(0 0 40n 0 40.1n {VDD} 60n {VDD} 60.1n 0)"
     return f"""* {TOPO} read {corner} {temp}C bit {bit}
