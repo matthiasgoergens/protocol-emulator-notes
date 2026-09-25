@@ -72,6 +72,34 @@ let extension ~seed ~cycles =
   done;
   !bad
 
+(* The same at pc_bits = 7, which holds only for programmes whose unused address bits are zero, as
+   the assembler writes them: bit 6 of JMP/JNZ/WAITP words must be 0 (a base programme with garbage
+   there jumps elsewhere under 7 bits; the independent review pointed this out). Memory is the base
+   programme twice, so running on past word 63 executes the same words, and pcs compare mod 64. *)
+let extension7 ~seed ~cycles =
+  Random.init seed;
+  let c = Isa_mb.cfg ~pc_bits:7 ~depth:2 () in
+  let strip w =
+    let op = w lsr 12 in
+    if op >= 14 then w land 0x0FFF
+    else if op = 7 then w land lnot 0x40
+    else if op = 5 || op = 9 || op = 10 then w land lnot 0x40
+    else w in
+  let base = Array.init 4 (fun _ -> Array.init 64 (fun _ -> strip (Random.int 0x10000))) in
+  let mem = Array.map (fun p -> Array.append p p) base in
+  let s = Harness_mb.make c mem in
+  let st = Isa.init () in
+  let bad = ref 0 in
+  for _ = 0 to cycles - 1 do
+    let io = random_io () in
+    let e = Isa.step st ~mem:base ~pin_in:io.pin_in ~host_in:io.host_in ~host_in_valid:io.host_in_valid in
+    let o = Harness_mb.cycle s io in
+    if not (o.pin_out = st.pin_out && o.pin_oe = st.pin_oe && o.host_out = e.host_out
+            && o.host_in_ready = e.host_in_ready && List.map (fun p -> p land 63) o.pcs = Array.to_list st.pcs)
+    then incr bad
+  done;
+  !bad
+
 let emit (c : Isa_mb.cfg) =
   let name = Printf.sprintf "rtl/seq_mb_p%d_d%d.v" c.pc_bits c.depth in
   let oc = open_out name in
@@ -98,12 +126,20 @@ let () =
   for seed = 1 to runs do ext := !ext + extension ~seed ~cycles done;
   Printf.printf "strict extension (variant RTL, pc_bits=6, vs the BASE interpreter on programmes without E/F): %d mismatching cycles\n" !ext;
   if !ext <> 0 then ok := false;
+  let ext7 = ref 0 in
+  for seed = 1 to runs do ext7 := !ext7 + extension7 ~seed ~cycles done;
+  Printf.printf "extension at pc_bits=7 (programmes with bit 6 of every address field zero, pcs mod 64): %d mismatching cycles\n" !ext7;
+  if !ext7 <> 0 then ok := false;
   (* control: the planted bug must be caught *)
   let c = Isa_mb.cfg ~pc_bits:7 ~depth:2 () in
   let cov = { push = 0; pop = 0; full_cycles = 0; pport = 0; qport = 0 } in
   let caught = ref 0 and m = ref 0 in
   for seed = 1 to 50 do let b = lockstep ~mutant:`Full_never ~c ~seed ~cycles cov in if b > 0 then incr caught; m := !m + b done;
   Printf.printf "control (inbox never reports full, RTL only): caught in %d of 50 programmes, %d mismatching cycles\n" !caught !m;
+  if !caught = 0 then ok := false;
+  let caught = ref 0 and m = ref 0 in
+  for seed = 1 to 50 do let b = lockstep ~mutant:`Wrong_slot ~c ~seed ~cycles cov in if b > 0 then incr caught; m := !m + b done;
+  Printf.printf "control (a push lands one slot past the tail, RTL only): caught in %d of 50 programmes, %d mismatching cycles\n" !caught !m;
   if !caught = 0 then ok := false;
   print_endline (if !ok then "LOCKSTEP PASS" else "LOCKSTEP FAIL");
   exit (if !ok then 0 else 1)

@@ -9,4 +9,4 @@ isolation: bridge pins identical without the neighbour true, with a random neigh
 control: mailbox drops push 30 (interp)      FAIL: 28 response frames (28 expected), I2C bus bytes as expected false (101 bytes), device registers WRONG, RTL mismatches 0, 675201 cycles
 control: two pushes swapped at 31 (interp)   FAIL: 28 response frames (28 expected), I2C bus bytes as expected false (101 bytes), device registers WRONG, RTL mismatches 0, 675201 cycles
 I2C-CAN PASS
-elapsed 5 s
+elapsed 6 s

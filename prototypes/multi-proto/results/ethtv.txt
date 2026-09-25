@@ -29,4 +29,4 @@ finding: the shared receiver (../ethernet-10base-t/eth_rx.ml, no shift-register 
   lines not received with a matching header: 70 113
 reordered pair (91 before 90), thin-oxide rows, 120 us: RTL/interpreter mismatching cycles 0; frames matched 119, dropped by header 1, commits 118, pixel bytes written 3808; lines played 240, underruns 4; buffer reads 7552, max write-to-read 264.1 us, lifetime violations 32
 reordered pair (91 before 90), thick-oxide rows, 3 ms: RTL/interpreter mismatching cycles 0; frames matched 119, dropped by header 1, commits 118, pixel bytes written 3808; lines played 240, underruns 4; buffer reads 7552, max write-to-read 264.1 us, lifetime violations 0
-elapsed 25 s
+elapsed 20 s

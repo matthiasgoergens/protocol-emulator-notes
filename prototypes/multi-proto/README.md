@@ -60,8 +60,8 @@ against an independent model; "branch" means another agent's branch that is not 
 | I2C master, with clock stretching | 1 | 2 | 4q + 6, q ≥ 2 | 1 MHz (Fast-mode Plus) | ≈ 12 of 37 at 400 kHz | measured (q = 6) |
 | I2C slave | 1 | 2 | ≈ 6 per edge pair; it may stretch the clock | 400 kHz easily | – | estimate |
 | PS/2 device or host | 1 | 2 | – | 16.7 kHz clock | under 1 % | branch proto-ps2-can |
-| CAN node (RX and TX threads) | 2 | 3–4 | 30 slots per bit at 500 kbit/s | 1 Mbit/s with the CRC and stuffing assists | – | branch proto-ps2-can |
-| CAN analyser (receive only) | 1 | 1–3 | as the RX thread | – | – | branch, plus the stand-in here |
+| CAN node (RX and TX threads) | 2 | 3–4 | 24 slots per bit at 625 kbit/s, the branch's fastest | 625 kbit/s with its CRC and stuffing assists | 30 slots per bit at 500 kbit/s | master (sequencer-ps2-can) |
+| CAN analyser (receive only, raw stream) | 1 (+1 holding TXD) | 1 (+2 TXD probes) | as the RX thread, one slot more per bit | 500 kbit/s (the raw stream does not fit at 625) | – | measured with master's RX firmware |
 | JTAG or SWD master | 1 | 4 or 2 | ≈ 6 (with the capture option) | ≈ 2.5 MHz | – | estimate; branch proto-jtag-swd pending |
 | USB low speed | 1–2 | 2 | 10 slots per bit at 1.5 Mbit/s; NRZI, stuffing, CRC-5/16 | – | – | estimate; branch proto-usb-ls pending |
 | 10BASE-T transmit, firmware only | **4** | 1–2 | 3 clocks per half-bit, spread over all four threads | – | 100 % of all four | measured (`../sequencer-ethernet`) |
@@ -78,8 +78,8 @@ proto-eth10 probably does too, unless the sampler and the systolic array take th
 | UART ↔ I2C bridge (3) + SPI master (1) | 4 | 8 | measured, isolation proven (§5) |
 | UART ↔ SPI bridge (3) + I2C master (1) | 4 | 8 | measured, isolation proven |
 | 10BASE-T receive (¼ of T0) + NTSC (T1) + SPI master (T2) + UART transmit (T3) | 4 | 4 + 4 on the sequencer; video and Ethernet on the stage and receiver pins | measured |
-| CAN analyser: CAN RX (T3) + bit renderer (T0) + frame renderer (T2) + NTSC (T1) | 4 | 1–3 CAN + video | measured with the CAN stand-in; CAN RX pending the ISA merge (§6) |
-| I2C ↔ CAN: CAN RX + CAN TX + bridge + I2C master | 4 | 4 + 2 | measured with a stand-in for the CAN node. It fits in four threads only if the translator and the assembler are merged, which works because they run one after the other (§6). As built here they take two threads |
+| CAN analyser: CAN RX (T3) + bit renderer (T0) + frame renderer (T2) + NTSC (T1) | 4, plus a TXD-holding thread or pin default | 1–3 CAN + video | measured with master's RX firmware on its own core, joined by a log; one core awaits the ISA merge (§6) |
+| I2C ↔ CAN: CAN RX + CAN TX + bridge + I2C master | 4 | 4 + 2 | measured with master's RX and TX firmware in three passes. It fits in four threads only if the translator and the assembler are merged, which works because they run one after the other (§6). As built here they take two threads |
 | JTAG + SWD + UART console (3) | 3–4 | 8–9 | estimate |
 | 10BASE-T transmit in firmware + anything | 5+ | – | does not fit |
 
@@ -135,8 +135,11 @@ slots, and the inbox buffers.
 
 ### The ISA proposal
 
-It is a strict extension of the base ISA. Opcodes 0xE and 0xF were NOP; SHO bits 6..3 were
-unused.
+It is a strict extension of the base ISA, with one qualification. Opcodes 0xE and 0xF were NOP,
+and SHO bits 6..3 were unused. At `pc_bits = 6` any base programme behaves identically. At
+`pc_bits = 7`, bit 6 of JMP, JNZ and WAITP becomes an address bit. A base programme that happens to
+carry garbage there then jumps elsewhere; programmes the assembler writes have it zero. The
+independent review (below) pointed this out.
 
 - **Parameters.**
   - `pc_bits`: 6 is the base; 7 gives 128 words per thread.
@@ -176,13 +179,27 @@ F  WAITC  val[11] cond[10:7] fail[pc_bits-1:0]
 **Verification of the variant** (`results/lockstep.txt`):
 
 - **Lockstep of the RTL against the interpreter:** 300 random programmes × 2,000 cycles for each
-  of four configurations, 0 mismatching cycles. Half the programmes are mailbox-heavy. Coverage
-  per configuration: 1,286–1,987 inbox pushes, 980–1,257 pops, 138,555–375,689 cycles with a
-  full inbox, and 1,997–3,062 port transfers in each direction.
-- **Strict extension:** with `pc_bits = 6`, the variant's RTL matches the base interpreter on
-  programmes without the new fields. 0 mismatches.
-- **Planted bug:** an inbox that never reports full is caught in 14 of 50 programmes (22,534
-  cycles). Only programmes that fill an inbox can show it.
+  of four configurations, 0 mismatching cycles. Half the programmes are mailbox-heavy.
+  - **What is compared, every cycle:** pins, enables, host and port handshakes, all four pcs,
+    accumulators, counters, deadlines, the thread index, and every inbox's contents in order.
+    The first version compared only outputs, pcs and occupancy; the review asked for the rest.
+  - **Coverage per configuration:** 1,286–1,987 inbox pushes, 980–1,257 pops, 138,555–375,689
+    cycles with a full inbox, and 1,997–3,062 port transfers in each direction.
+- **Strict extension:** 0 mismatching cycles against the base interpreter in both cases:
+  - with `pc_bits = 6`, on programmes without the new fields;
+  - with `pc_bits = 7`, on programmes whose address bit 6 is zero (the programme is stored twice,
+    and pcs are compared mod 64).
+- **Planted bugs**, each caught:
+  - an inbox that never reports full: in 14 of 50 programmes, 26,357 cycles;
+  - a push landing one slot past the tail, which corrupts only inbox contents until the byte is
+    popped: in 30 of 50 programmes, 52,950 cycles.
+- **Every demonstration below steps the RTL with the same full comparison.** None has a mismatch.
+- **Independent review:** a `codex-luna` read-only review tried to refute the claims.
+  - **Found:** the pc_bits = 7 qualification above; the pin-ownership condition of §5; and that
+    lockstep compared too little state. All three are fixed.
+  - **Not found:** any interpreter/RTL disagreement in SEND, RECV, WAITC or capture, including
+    depth 1, the fail address at 6 and 7 bits, and `dl = 0` against `dl > 0`.
+  - **Log:** `/var/tmp/multi-proto/codex-review.txt`.
 
 **Area** (Yosys 0.62, sg13g2 typical, flattened, instruction memory external; the base
 re-synthesised with the same Yosys):
@@ -273,7 +290,7 @@ to 3 ns of jitter. Clearing the register fixes it. The fix is in a local copy,
 `eth_rx_fixed.ml`, which the demo uses; `rx_shared` in `results/ethtv.txt` reproduces the bug.
 The shared file is left for its owner (the proto-eth10 branch).
 
-### CAN bus to TV: a standalone analyser (`cantv.ml`, `can_standin.ml`)
+### CAN bus to TV: a standalone analyser (`cantv.ml`, `can_events.ml`, `can_standin.ml`)
 
 - **Header:** flashes red for 30 fields after an error frame.
 - **Waveform:** the last 64 bus bits scrolling, as three two-level traces (bus, node A's TXD,
@@ -290,20 +307,54 @@ The shared file is left for its owner (the proto-eth10 branch).
 - **T2:** renders frame events. It uses a branch tree on the ID and keeps two bytes in its own
   inbox while it branches, so the mailbox doubles as scratch memory. 74 words.
 - **T1:** the video-timing thread, identical to Ethernet to TV.
-- **T3:** the slot for the CAN RX thread. Here it runs an unrelated UART, and a stand-in supplies
-  the events.
+- **T3:** the slot for the CAN RX thread. On one core it would hold master's RX thread. Its ISA
+  variant cannot share a core with this one yet (§6), so the events come from a log. Here T3 runs
+  an unrelated UART, to show isolation.
+
+**The CAN front end is master's real firmware** (`prototypes/sequencer-ps2-can`, merged
+2026-09-25).
+
+- **How it runs:** `can_events.sh` exports that directory with `git archive` into `/var/tmp`,
+  builds `can_events.ml` against it, and runs the branch's RX thread there.
+  - The thread runs in raw mode, at 500 kbit/s with the sample point one slot earlier, with
+    interpreter and RTL in lockstep, as a listening node on the branch's bus model.
+  - Two of its reference nodes transmit.
+  - There are ten arbitration contests, and a 3 µs glitch that breaks one frame.
+- **What the log holds:** the thread's tagged reports (SOF, DATA, END, RAW and STUFF), plus two
+  probes an analyser would wire to the transceivers' TXD pins. From the probes the log marks the
+  bit where a node that drove SOF first reads dominant while sending recessive.
+- **The adapter:** turns the reports into the renderers' in-port format.
+  - The first three DATA bytes become `0xA1 c1 c2 c3`.
+  - END v becomes `0xA2 v`.
+  - Each RAW or STUFF report becomes a bit code.
+- **The stand-in** (`can_standin.ml`) is kept as a second, independent source.
+
+**Interface lessons from the real firmware:**
+
+- **A listening node needs a thread that holds TXD recessive.** Without one, TXD resets to 0 and
+  the node holds the bus dominant: the first run saw no frames at all.
+- **The first DATA byte carries three bits, SOF ID10 ID9, above five left-over accumulator bits**
+  (0xF8–0xFB here). Consumers must mask them, as the branch's own decoder does. Unmasked, the ID
+  table showed five white pixels per row, and the reference agreed, because it read the same
+  bytes.
+- **END reports a CRC error as 2.** The renderer first flashed only on odd codes; it now flashes
+  on any non-zero code.
+- **The raw stream does not fit at the branch's fastest rate, 625 kbit/s** (the branch's README).
+  So the analyser's waveform view runs at 500 kbit/s or below.
 
 **Stage:** memory rows plus a per-line descriptor list (row, palette bank, bar), which is a
 display list as DMA engines have.
 
-**Results:** 79 transmissions, 12 of them arbitration contests, one error frame.
+**Results.** From the real firmware: 75 frames (10 contests, one error frame). A second log
+without the glitch has 74 frames. The stand-in gives 79 transmissions (12 contests):
 
-- **Stage against the reference analyser:** the stage's output matches an independent reference
-  analyser, which sees only the event history, on **15,360 of 15,360 pixels**. The counters and
-  the flash state are also equal.
+- **Stage against the reference analyser:** in all three runs the stage matches an independent
+  reference analyser, which sees only the event history, on **15,360 of 15,360 pixels**. The
+  counters and the flash state are also equal.
 - **Through the software TV:** it decodes **15,360 of 15,360 pixels** to the expected palette
-  colour, both with the error frame and without it (then no flash).
-- **RTL against the interpreter:** 0 mismatches.
+  colour in all three runs. The header flashes only when there was an error frame.
+- **RTL against the interpreter:** 0 mismatches, on both cores: this one, and the branch's for
+  the RX thread.
 - **Isolation:** holds.
 - **Lifetime:** display rows are re-read once per field, so the longest interval is **15.95 ms**.
   That fits thick-oxide rows at tt (12–20 ms) only at the upper end, and fails at the worst case
@@ -365,13 +416,33 @@ The fix lowers RTS on the normal path whenever there is room.
 - **T1:** the unchanged I2C master.
 - **T2, assembler:** returns response frames.
 
-**Results:**
+**Results against the frame-level stand-in** (`can_bridge.exe`):
 
 - **Six seeds pass:** 25–28 responses each. The responses, I2C bus bytes and device registers
   equal the reference, with the RTL in lockstep.
 - **Corrupted requests** (1 in 10) never reach the bus.
 - **Isolation:** holds.
 - **Mailbox faults:** a dropped push and a swapped pair are both caught.
+
+**Results with master's real CAN firmware** (`can_bridge.sh`; `results/can_bridge_fw.txt`). The
+two ISA variants cannot share a core yet, so the run is three passes joined by logs:
+
+1. **The branch's RX thread receives 40 requests** from a reference node, with its RTL in
+   lockstep. Four 6 µs glitches break three frames, which the requester retransmits, as CAN does:
+   43 reports, 40 good.
+2. **This bridge answers every request exactly once**, dropping the broken attempts. 40 of 40
+   responses; bus bytes and device registers equal the reference. The adapter realigns the RX
+   thread's data (7 bits, then 8-bit chunks) into bytes.
+3. **The branch's TX thread sends the 40 responses** while the requester replays the requests at
+   the same instants. Every response defers to a request (delivered 291–331 µs after submission),
+   and all 40 arrive, equal and in order.
+
+Bitwise arbitration between our TX thread and a reference node is not provoked here: the TX
+thread waits for an idle bus rather than joining another node's SOF. The branch's own scenarios
+cover arbitration.
+
+The first glitches, 50 µs into each frame, sat on the address byte (0x90 or 0x42), which is mostly
+dominant already, and broke nothing. The run reports the error count, which is how that showed.
 
 ## 4. Budgets are exact: the receive-slack edge
 
@@ -398,9 +469,18 @@ margin per byte; the first version of this test missed that.
 ## 5. Isolation: the proof
 
 A thread's next state depends only on its own registers, its instruction, the pins it reads, and
-the inboxes or ports it names. The schedule never depends on data. So a protocol whose thread
-names no shared channel has the same pin trace whatever its neighbours do. Each demo checks this
-directly:
+the inboxes or ports it names. The schedule never depends on data. So a protocol keeps the same
+pin trace whatever its neighbours do, provided two things hold:
+
+- its thread names no shared channel;
+- no other thread writes its pins.
+
+The second condition is pin ownership. The hardware does not enforce it: pins are shared state,
+and a SETP or SHO from any thread can change any pin. So the compiler must check it, and the
+random neighbours below are confined to their own pins for exactly that reason. The review
+pointed out that the first version of this section left the condition unstated.
+
+Each demo checks isolation directly:
 
 - the protocol's pins are identical cycle for cycle with and without the neighbour;
 - they are identical under 3–6 random neighbour programmes (random instructions confined to the
@@ -415,9 +495,11 @@ directly:
 | UART ↔ SPI | yes / 6 of 6 | yes |
 | I2C ↔ CAN | yes / 1 of 1 | – |
 
-## 6. The CAN bridges when proto-ps2-can lands: plan and interfaces
+## 6. CAN on the same core: plan and interfaces
 
-**The clash.** That branch's ISA variant (`isa_v.ml`) also takes the two free opcodes:
+proto-ps2-can is on master now, and both CAN demos above already run with its firmware, joined
+through logs. What still blocks one core is the ISA. That variant (`isa_v.ml`) also takes the two
+free opcodes:
 
 - **E = JC:** jump if a condition holds (acc bit, CRC = 0, stuff, byte boundary, last bit).
 - **F = CFG:** CRC and stuffing configuration, and `cnt <- acc`.
@@ -455,13 +537,19 @@ programmes expressible:
   fits only if the translator and the assembler become one thread. They already run strictly one
   after the other: the translator waits for the assembler's done token.
 - **The analyser:** the CAN RX thread's raw bit and stuff reports feed the bit renderer, and its
-  SOF, header and END reports the frame renderer. Exactly the stand-in's events.
+  SOF, header and END reports the frame renderer. This is exactly what `cantv.ml` now consumes
+  from the firmware log. On one core the adapter's three jobs move into the RX thread:
+  - a tag with each message;
+  - masking the first header byte;
+  - aligning the data.
+- **A listen-only mode:** the RX thread acknowledges and flags errors, which a passive analyser
+  should not do. The demo accepts it, since the analyser is then the acknowledging node.
 
 ## Open questions
 
-- **Merging the ISAs** (§6). Also the four-phase sub-slot fields now on master (SETP/SHO q[1:0],
-  SHI quad[7]): there is no clash with this variant (WAITP 7:6, SHO 6:3, opcodes E and F), but
-  there is one with proto-ps2-can's SHO bits.
+- **Merging the ISAs** (§6). The four-phase sub-slot fields on master (SETP/SHO q[1:0], SHI
+  quad[7]) do not clash with this variant, which uses opcodes E and F, SHO bits 6..3, and address
+  bit 6 at `pc_bits = 7`. proto-ps2-can's SHO bits 6..5 do clash with it.
 - **Inbox storage:** latches or a shared pool instead of flops (§2), to be measured.
 - **A refresh sweep for persistent display memory** (the analyser), or SRAM for it; the row type
   for the Ethernet buffer should follow the reorder window.
