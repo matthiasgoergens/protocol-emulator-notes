@@ -16,7 +16,8 @@
    The host changes notes and envelopes by reloading the segment's configuration chain. Two
    ways are modelled, and the difference between them is a finding:
      chain   the realistic one: 128 bytes at one byte per 8 clocks (the host link's estimated
-             7.5 MB/s), with the segment's enable low while they shift (1,024 clocks, 17 us);
+             7.5 MB/s), with the segment's enable low for 1,017 clocks (17 us) on each of the
+             999 reloads after the initial configuration;
      direct  an idealised double-buffered configuration: the new bytes appear at once.
    The pin stream is filtered by two RC poles at 20 kHz (the board's filter) and sampled at
    48 kHz into a 16-bit WAV. *)

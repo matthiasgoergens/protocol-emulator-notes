@@ -16,12 +16,12 @@ models only (the host machine was loaded), run one at a time under `nice ionice`
 
 ## The short answer
 
-- **Beyond the four known uses, only one candidate makes the array earn its area: a
-  direct-sampling shortwave receiver.** An external 8-bit ADC is clocked at 60 MS/s, so it sees
-  the whole 0–30 MHz band. Four PEs make one AM channel:
-  - 16 PEs give four channels, which is 240 M sample-channels per second;
-  - two Cortex-M33 cores manage 17.6 M, not even one channel at 60 MS/s (`results/evaluation.txt`,
-    `results/host_cycles.txt`).
+- **Under the evaluation table's stated rate-and-need test, the only general candidate for
+  which the array earns its area is a direct-sampling shortwave receiver.** An external 8-bit
+  ADC is clocked at 60 MS/s, so it sees the whole 0–30 MHz band. Four PEs make one AM channel:
+  - the table gives 16 PEs four channels, or 240 M sample-channels per second;
+  - its static two-core Cortex-M33 estimate is 17.6 M, not even one channel at 60 MS/s
+    (`results/evaluation.txt`, `results/host_cycles.txt`).
 
   It is prototyped (`ddc.ml`), and each channel recovers its station with correlation 0.985–0.999.
   It is still DSP at the pins, the fourth known use, fed by an ADC rather than a 1-bit pin. It
@@ -30,7 +30,8 @@ models only (the host machine was loaded), run one at a time under `nice ionice`
   into a segment feed, which the architecture does not yet provide. The model is a synthetic
   scene (three stations, Gaussian noise); it shows the configuration demodulates, not how
   sensitive or robust a real receiver would be.
-- **Everything else in the brief runs on the host.** For each candidate, one of three things holds:
+- **The table recommends the host for 12 of its 16 rows, the array for two, and neither for
+  two.** Those recommendations have one of three bases:
   - the application's rate is a small fraction of what the RP2350 does (Viterbi for GNSS
     navigation data, PDM microphones, cellular automata, shortest paths);
   - a better host algorithm removes the brute force the array would do (Myers bit-vectors for
@@ -40,22 +41,23 @@ models only (the host machine was loaded), run one at a time under `nice ionice`
     (dynamic time warping, edit distance, Viterbi's add-compare-select), or the problem needs a
     multiplier or branches (Mandelbrot, raycasting). Bank-streamed, multi-pass mappings of the
     dynamic programmes probably exist; they are slow, and none was shown here to be impossible.
-- **The prior art's two strongest small-array problems, Viterbi and Reed-Solomon, rank low
-  on *our* PE.**
+
+  The two "neither" rows are Viterbi at the stated 1 Mbit/s need and Mandelbrot at its stated
+  rate. These are recommendations from a static table, not end-to-end RP2350 race results.
+- **In the table's estimates, the prior art's two strongest small-array problems, Viterbi and
+  Reed-Solomon, rank low on *our* PE.**
   - Viterbi's add-compare-select needs two operands per step and shuffle wiring. On upe_v0 it
     becomes a streaming design through the banks, of about 5 clocks per butterfly: about
-    2× the host, and short of a 1 Mbit/s CCSDS link (est).
-  - Reed-Solomon syndromes run about 3.6× the host (est), but no link we can reach needs them
-    faster than the host computes them.
+    2.2× the table's host estimate, and short of a 1 Mbit/s CCSDS link (est).
+  - Reed-Solomon syndromes have a modelled ratio of 3.6, but no link we can reach needs them
+    faster than the host estimate.
   - So neither is prototyped. Shipped ACS arrays are dedicated arrays of one ACS per state
     (`notes/prior-art-systolic-uses.md` §4), which ours is not.
-- **At its best, the array is 1–4× the host on plain word arithmetic**, because 16 PEs × 60 MHz is
-  about 1 G simple operations per second against 0.3–0.8 G for the RP2350. An order of magnitude
-  appears only in three cases:
-  - an operation the M33 lacks: ±1 multiply-accumulate on multi-bit samples, 9.6×; top-16
-    insertion, 26× but only on rising data (on ordinary data the host's threshold test wins);
-  - brute force that a better algorithm makes pointless: CRC search, 32×;
-  - data at 60 MS/s that the host cannot touch: the receiver, 13.6×.
+- **The table's ratios are modelled item-rate ratios, not application speed-ups.** Its 14
+  numeric ratios range from 0.7 to 32.0. Five exceed 10: DTW at 13.4 (est, with a second
+  link), the receiver at 13.6, LZ77 at 16 (est), rising-data top-16 at 25.6, and brute-force
+  CRC search at 32. Only the receiver and rising-data top-16 receive an array verdict; the
+  others remain host or neither because of the stated need, fit, or algorithm choice.
 - **Verdict on size: these problems justify no growth beyond 16 PEs, and on their own about 8.**
   - Eight PEs keep a two-channel receiver, or the synthesiser at two square voices without
     noise (3 + 3 + offset + sigma-delta; two voices plus noise take 10).
@@ -78,7 +80,7 @@ models only (the host machine was loaded), run one at a time under `nice ionice`
 The host figures are a pipeline model with single-cycle SRAM, not a measurement on an RP2350.
 Throughputs are rounded; the file has the exact figures.
 
-| workload | fit to upe_v0 | array, 16 PEs | host | ratio | need | who should do it | demo value | effort |
+| workload | fit to upe_v0 | array rate, 16 PEs | static host rate | modelled ratio | need | table verdict | demo value | effort |
 |---|---|---|---|---|---|---|---|---|
 | **HF AM receiver, 8-bit ADC at 60 MS/s** (prototyped) | 4 PEs per channel: NCO + accumulating square-LO mixer, for I and Q | 240 M sample-ch/s | 17.6 M | 13.6 | 60 M per channel | **array** | high: shortwave radio from a Tiny Tapeout chip | done as a model; needs the ADC on 8 input pins |
 | 1-bit correlation (GPS tracking, binary NN) | designed (gps) | 960 M MAC/s | 768 M | 1.2 | 236 M (GPS) | host on paper, see note | known use | done elsewhere |
@@ -193,22 +195,24 @@ realistic. `synth.ml` exits with an error if any reload leaves a wrong configura
 
 **A finding for the architecture: reconfiguring a running segment is not free.**
 - **The setup:** the host changes K (pitch or amplitude) by shifting the whole segment chain, 128
-  bytes at the link's estimated 7.5 MB/s. The segment is stopped meanwhile: 1,017 clocks
-  (17 µs) per change, 0.42 % of the time at 250 changes per second (`results/synth.txt`). Every
-  reload leaves exactly the intended configuration (0 mismatches, `results/synth-hold.txt`, `synth-toggle.txt`).
-- **The cost:** 1,000 stops of 17 µs cost 16 dB in tonal signal against residual (25.0 dB
+  bytes at the link's estimated 7.5 MB/s. There are 1,000 configurations: the initial load does
+  not pause a running segment, and each of the remaining 999 reloads pauses it for 1,017 clocks
+  (17 µs), 0.42 % of the time at 250 configurations per second (`results/synth.txt`). Every one
+  of those 999 reloads leaves exactly the intended configuration (0 mismatches,
+  `results/synth-hold.txt`, `synth-toggle.txt`).
+- **The cost:** those 999 reload pauses cost 16 dB in tonal signal against residual (25.0 dB
   when the change is instant, 8.8 dB when the pin shows whatever the half-shifted configuration
   produces, 7.3 dB when the pin holds its last bit). The loss comes from the pin's full-scale
   level during the stop.
 - **A pin that toggles while its segment is paused** (the modulator's zero) recovers 22.5 dB
   (`results/synth_check.txt`). The same variants are audible in `out/synth-chain*.wav`.
-- **The phase slip remains:** the stopped NCOs lose 17 µs of phase per change. The reference
+- **The phase slip remains:** the stopped NCOs lose 17 µs of phase per reload. The reference
   must model it: without it the fit collapses to −18.8 dB.
 - **Suggestion, est:** a shadow K register per PE with a segment-wide commit strobe, 16 flops
   ≈ 0.8k µm² synthesised per PE, would make pitch, amplitude, NCO and receiver retuning free. It
   is cheaper than double-buffering the whole 64-bit configuration (≈ 3.1k µm²).
 
-**Against the host:** the RP2350 synthesises hundreds of voices at 48 kHz (`k9_voices`, 11
+**Against the host:** the table's static estimate is 568 voices at 48 kHz (`k9_voices`, 11
 cycles per voice-sample). The array's case here is only that the chip plays music by itself, at
 a 60 MHz one-bit output that needs no DAC. It is a good, cheap demo, not an area argument.
 
@@ -242,8 +246,9 @@ them needed per-word behaviour that the static op word cannot give:
   metric and writes half-words, with two passes per decoded bit.
 
 A cheap extension would be a second input link, or a lane bit that selects between two op
-words (est +2.4k µm² per PE). It would bring DTW to about 13× the host (est). But no rate-bound
-application for DTW was found, so this study does not recommend that extension.
+words (est +2.4k µm² per PE). It would bring DTW to the table's estimated 13.4× host ratio.
+But no rate-bound application for DTW was found, so this study does not recommend that
+extension.
 
 ## Files
 
