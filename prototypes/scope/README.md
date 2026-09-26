@@ -28,8 +28,8 @@ right, and it applies to every row of the table below. In particular:
 | 125 Mbaud MLT-3 eye | impossible | full eye, 7.2 ns width at the mid level as the truth, 425 mV height (truth 497); **5.8 ms** | per-sample noise, host link |
 | I2C rise | coarse | 9.7 mV rms; tau 937 ns (940); 199 pF inferred; 30-70 % rise 783 ns (796) | fine for slow edges; the threshold sweep cannot see the 10 ns fall |
 | non-repetitive sparse spectrum | 30 MHz | **K ≤ 4 tones anywhere in 5-700 MHz** from 100 random kicks (30 MS/s); K = 8 from 800 | sparsity; aperture known in the atoms |
-| which of K (frames, baud rates, protocols, spec) | decode: 64-4,000 samples | **2-16 samples** at 0 errors in hundreds of trials | the question's entropy, not the bandwidth |
-| receive NRZ | 60 Mbit/s (4x oversampling) | **240 Mbit/s** one locked sample per bit; repeated frames read at 400 Mbit/s | 4 lanes per clock; the pad's full-swing limit, about 400 Mbit/s |
+| which of K (frames, baud rates, protocols, spec) | capture/decode references: 64-4,000 samples (not a uniform baseline) | **2-16 samples in many matched-model cells; not zero-error overall** | finite model tables and trials; one K=8 frame cell averages 163 samples and errors 50/400 |
+| receive NRZ | 60 Mbit/s (4x oversampling) | **oracle-assisted model at 240 Mbit/s**; hidden schedule reads repeated frames at 400 Mbit/s | hidden transmitted index and bits; no observable-only recovery is implemented |
 
 ## 1. The pad, as SPICE sees it (`spice/`, `padmodel.py`)
 
@@ -217,30 +217,33 @@ timestamp. A comparator plus a timestamp *is* an FRI sampler with an ideal kerne
 no comparator sees the event: pulses below the pad's decision overdrive, or amplitude and time
 wanted jointly from a slow, averaged channel.
 
-## 7. Receiving below the sample budget (`ocaml/rx.ml`, `results/rx.txt`)
+## 7. Oracle-assisted receiving below the sample budget (`ocaml/rx.ml`, `results/rx.txt`)
 
 The line is NRZ with +100 ppm, 0.2 UI of wander at 100 kHz and random jitter.
 
-- **Locked 1x against 4x.** The 4x receiver is the four-phase sampler with a tracker; its centre
-  is quantised to 4.17 ns, and it can only reach 60 Mbit/s. The 1x receiver takes the TDC
-  timestamp of every edge, runs a PI loop, and places one sample per bit per lane through the
-  DTC. That takes it to 240 Mbit/s at 4 bits per clock, storing a quarter of the samples. Error
-  rates against jitter are in `results/rx.txt`.
-- **What the 1x model knows that a chip would not:** the TDC sees every true edge, which is
-  realistic. When the receiver's own bit count since the last edge disagrees with the true index,
-  the model counts a slip, charges it 8 bit errors and re-synchronises it from the truth; the slip
-  total is printed. A real receiver would need a framing check to recover from a slip.
+- **These are oracle-assisted experiments, not deployable receive results.** The model iterates over
+  transmitted bit positions, injects the timestamp of every edge found in the hidden bit sequence,
+  selects reads by the hidden frame/repetition index, and scores them against hidden transmitted
+  bits. When its own bit count since the last edge disagrees with that hidden index, it charges a
+  slip and repairs the state from truth. It therefore does not implement or verify observable-only
+  clock recovery, framing, false/missed edge handling, or slip recovery.
+- **What the matched model measures.** The 4x path is the four-phase sampler with a tracker and is
+  limited to 60 Mbit/s. The oracle-assisted 1x path places one DTC sample per selected bit through
+  four lanes and reaches 240 Mbit/s in the model. The fresh full run is in `results/rx.txt`; at
+  240 Mbit/s and 0.11 UI random jitter it reports 52 errors in 199,254 reads, 738 bit positions
+  beyond the four-lane budget, and 28,584 oracle-repaired slips across all cells.
 - **Skip predictable fields.** For a known frame format, read only the open bits:
   - Ethernet/IPv4/UDP with a 16-byte payload from a known peer: 208 of 560 bits (37 %), keeping
     the FCS as the integrity check;
   - CAN from a known ID: 79 of 108;
   - an SPI status poll: 8 of 16.
 
-  Simulated: 200 such Ethernet frames at 125 Mbit/s, reading only the open bits, 41,600 reads,
-  0 errors. Tracking still uses every edge; the saving is in samples stored, decided and shipped.
-- **Faster than the clock.** A repeating 256-bit frame at 250 or 400 Mbit/s is read completely
-  in 2 repetitions with 0 errors; each lane reads a different subset. Above that the pad limits
-  (full-swing inputs, about 400 Mbit/s).
+  Oracle-assisted simulation: 200 such Ethernet frames at 125 Mbit/s, 41,600 selected reads and
+  0 scored errors. The hidden frame index chooses those reads, so this is not evidence that a chip
+  can acquire and maintain that schedule.
+- **Faster than the clock.** The hidden schedule assigns different frame positions to the lanes and
+  reports a 256-bit frame read in 2 repetitions at 250 and 400 Mbit/s, with 0 scored errors. This
+  assumes perfect repetition/position knowledge; it is not observable-only recovery.
 
 ## 8. Asking the question instead of reconstructing (`ocaml/infer.ml`, `results/infer.txt`)
 
@@ -250,20 +253,29 @@ keeps a posterior over them, and stops at 1 - 1e-3 (Davenport et al. 2010 do thi
 measurements). The tables come from generative models with unknown data, jitter and noise. The
 observations are drawn from fresh simulations of the true candidate, not from the table.
 
-| question | K | greedy (mean samples) | random instants | decode instead |
+The fresh full run (`results/infer.txt`) does **not** support a universal zero-error 2-16-sample
+headline. Several matched-model cells need 2-16 greedy samples, but the strong K=8 frame cell
+averages 163.1 samples, hits the 640-sample cap, and has 50 errors in 400 trials. A weak K=2 frame
+cell has 1/400 greedy errors. The remaining zero-error counts are finite simulation counts, not
+calibrated guarantees.
+
+| question | K | greedy mean samples (errors/trials) | random mean samples | comparison reference |
 |---|---|---|---|---|
-| which frame, 125 Mbit/s, strong | 2 / 4 / 8 | see `results/infer.txt` | | 64 samples |
-| which frame, weak (per-sample errors 10 %) | 2 / 4 / 8 | | | ~320 |
-| which UART baud rate (data unknown) | 2 / 4 / 8 | | | 3,840 |
-| which protocol (UART, I2C, SPI, CAN, WS2812, PWM, ...) | 2 / 4 / 8 | | | ~4,000 |
-| is the I2C rise within 300 ns (250 against 350 ns) | 2 | | | 1.8 M (demo c) |
+| which frame, 125 Mbit/s, strong | 2 / 4 / 8 | 2.0 (0/400) / 3.8 (0/400) / **163.1 (50/400)** | 32.0 / 99.3 / 230.7 | 64-bit full-frame read; in-order stopping row is simulated but not a controlled decode baseline |
+| which frame, weak (per-sample errors 10 %) | 2 / 4 / 8 | 3.7 (1/400) / 8.3 (0/400) / 11.6 (0/400) | 136.3 / 94.9 / 211.5 | about 320 for a five-sample majority decode (estimate) |
+| which UART baud rate (data unknown) | 2 / 4 / 8 | 2.0 / 10.4 / 16.2 (0/400 each) | 6.4 / 36.8 / 76.5 | 3,840-sample capture estimate |
+| which protocol (UART, I2C, SPI, CAN, WS2812, PWM, ...) | 2 / 4 / 8 | 2.0 / 8.1 / 10.5 (0/200 each) | 14.3 / 30.2 / 26.6 | about 4,000-sample capture estimate |
+| is the I2C rise within 300 ns (250 against 350 ns) | 2 | 2.0 (0/1000) | 18.4 | 1.8 M samples to reconstruct in demo (c) |
 
 - **Caveats:**
-  - the tables come from finite Monte Carlo (150-4,000 draws per entry, clamped to
-    [0.001, 0.999]), and the posterior treats them as exact;
-  - "0 errors in N trials" bounds the error rate only to about 3/N, not to the 1e-3 target;
-  - only "which frame" has a simulated baseline (in-order reading with the same stopping rule);
-    the other decode figures are capture-size estimates.
+  - the tables are finite Monte Carlo point estimates (150-4,000 draws per entry) clamped to
+    [0.001, 0.999]; the posterior treats them as exact and does not carry table-estimation
+    uncertainty. The clamp avoids `log 0`; it is not a probability interval;
+  - the 0.999 stopping threshold is a heuristic operating point, not a calibrated 0.1 % error
+    guarantee. For example, 0/400 errors still has an approximate 95 % upper bound of 0.75 % by
+    the rule of three;
+  - only the frame experiment includes an in-order row with the same stopping rule. The other
+    comparison figures are rough capture sizes, not matched end-to-end baselines.
 - **CRC consistency has no such shortcut.** Every covered bit can flip the answer, so it is a
   decode question, and the CRC unit on the bit path answers it at line rate.
 - **Hardware mapping:**
@@ -319,15 +331,17 @@ answers to a PC over USB, where a small tool plots them (the plots here come fro
 3. **The eye trigger uses the true symbols.** Agreed. Matcher misses and false fires are not
    modelled (section 4b). The dead expression it found is removed; the per-sample truth
    deliberately uses the physical kick instant.
-4. **The receiver knows the true bit index.** Partly: the TDC seeing true edges is realistic. The
-   re-synchronisation to the true index is now counted and reported as slips (section 7).
-5. **Finite tables make the inference overconfident.** Agreed, stated in section 8; the full runs
-   use more draws and trials than the quick ones it read.
+4. **The receiver knows the true bit index.** Confirmed, and stronger than merely repairing slips:
+   edge events, scheduling, selection and scoring use transmitted truth. Every receive claim is now
+   labelled oracle-assisted; no deployable or observable-only recovery is claimed (section 7).
+5. **Finite tables make the inference overconfident.** Confirmed. The output and section 8 now say
+   the clamped Monte Carlo posterior is heuristic and its 0.999 stop is not calibrated. The fresh
+   full run also disproves the universal zero-error 2-16-sample headline.
 6. **Decode baselines.** Agreed, stated in section 8.
 7. **The random demodulator's front end is idealised.** Agreed; the dither is an ASSUMPTION
    (section 5).
-8. **The full result files were missing.** At review time they were; they are now committed
-   (`results/rx.txt`, `results/infer.txt`).
+8. **The full result files were missing.** Regenerated from the current source and committed
+   (`results/rx.txt`, `results/infer.txt`), with quick artefacts regenerated separately.
 
 ## Files
 
@@ -335,17 +349,42 @@ answers to a PC over USB, where a small tool plots them (the plots here come fro
 |---|---|
 | `spice/pad.py`, `pad2.py`, `run.sh`, `run2.sh` | ngspice characterisation of `sg13g2_IOPadIn` (container `spice-retention`) |
 | `padmodel.py` | fitted comparator ODE, fit and validation |
+| `validate_artifacts.py`, `results/validation.txt` | self-contained consistency checks for the checked-in reduced artefacts |
 | `pad_kick.py` | kicked sampling: V-to-T curve and aperture |
 | `scopemodel.py`, `acq.py` | probe, DAC, time base and TDC, the T and K engines |
 | `demo_sck.py`, `demo_eye.py`, `demo_i2c.py` | demonstrations (a) to (c) |
 | `export_tables.py`, `ocaml/data/` | SPICE-derived tables for OCaml |
 | `ocaml/chain.ml` | OCaml port of the chain (pad ODE, time base, TDC, kick) |
 | `ocaml/cs.ml`, `linalg.ml` | compressed sensing, OMP |
-| `ocaml/fri.ml`, `rx.ml`, `infer.ml` | FRI edges, locked receive, question-driven inference |
+| `ocaml/fri.ml`, `rx.ml`, `infer.ml` | FRI edges, oracle-assisted receive model, question-driven inference |
+
+### Reproducibility boundary
+
+A fresh checkout cannot replay the raw SPICE-to-summary pipeline. The missing and external inputs
+are specific:
+
+- `spice/pad.py` constructs a flattened deck, but it requires the IHP SG13G2 PDK at
+  `$HOME/.ciel/ihp-sg13g2/ihp-sg13g2`, including `libs.tech/ngspice/models/corner*.lib`.
+- `spice/run.sh` and `spice/run2.sh` copy the untracked PSP 103 OSDI model from
+  `/var/tmp/scope/osdi/psp103.osdi`, and run ngspice 44.2 in the external Podman image
+  `spice-retention:latest`.
+- `padmodel.py pack` expects raw `iv_tt.txt`, `iv_ss.txt`, and `iv_ff.txt` under
+  `/var/tmp/scope/spice2/iv`. `fit` and `validate` expect raw `w_*.txt` waveforms under
+  `/var/tmp/scope/spice2/step`, `sck`, `kick`, and `aper`. None of those raw generated waveforms
+  or extracted PDK netlists is tracked here.
+
+What is checked in is reduced evidence: `results/pad-iv.npz`, `results/kick.npz`, the text
+summaries, and the OCaml CSV exports. `validate_artifacts.py` checks their shapes, finiteness,
+cross-format agreement, fitted-parameter agreement, and the Python differential fixture without
+requiring raw SPICE. This is a reproducibility/consistency check, **not** an independent validation
+against SPICE or silicon. The OCaml `padcheck.exe` separately checks the ported pad model against
+the committed Python fixture.
 
 Run the Python files with `uv run --with numpy --with scipy --with matplotlib python <file>`.
 Build the OCaml with `opam exec --switch=5.3.0 -- dune build` in `ocaml/`, then run
 `./_build/default/<name>.exe` from there.
+Run the reduced-artefact checks with `uv run --with numpy python validate_artifacts.py` from
+`prototypes/scope`.
 
 **To port to OCaml:** the three demonstrations and the pad fit are still Python. The chain they
 use is already ported and checked.
