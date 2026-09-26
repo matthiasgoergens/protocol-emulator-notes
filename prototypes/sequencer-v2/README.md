@@ -111,7 +111,8 @@ Results:
   16-bit words, as the base prototype's did.
 - The coverage table in the same file counts, for 20 programmes, each MBX outcome (done,
   fail-branch, stay, for inbox and port, send and receive), each WAITC condition in each outcome,
-  each EXT operation and each SHO mode combination. All are exercised hundreds of times.
+  each EXT operation and each SHO mode combination. Every listed case occurs; the totals range
+  from 5 (`WAITC 04 stay`) to 1,674 (`MBX recv inbox fail-branch`).
 - **28 planted bugs**, one or more per new instruction and mode: 8-bit pc, page, host-control
   bypass, pair and psel, cap, OUT tag and src, SEND, RECV, ports, lsend, WAITC 8, 9, 11 and the
   flag group, SKNE, SKEQ, FINE, CNTA, LDB (three), STB, BANK, round latch (two). The biased
@@ -201,6 +202,11 @@ Yosys 0.62 in the LibreLane 3.0.14 container, IHP SG13G2 typical liberty, area-m
 flattened. This is the script of `../multi-proto/synth.sh`, whose re-synthesis of the base core
 with the same Yosys is the like-for-like baseline. Debug ports removed; programme store and bank
 outside.
+
+`synth/synth.sh` has two machine-specific inputs: the IHP SG13G2 checkout under
+`/home/matthias/.ciel`, and Docker configuration at `/var/tmp/claude-notes/dockercfg`. Another
+machine must point `LIB` and `DOCKER_CONFIG` at its own installations. The IHP toolchain contract
+is unchanged: LibreLane 3.0.14, Yosys 0.62 and the SG13G2 typical-corner liberty.
 
 | | µm² | flip-flops | source |
 |---|---|---|---|
