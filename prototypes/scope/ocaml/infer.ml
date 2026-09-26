@@ -6,11 +6,12 @@
    design, greedy in expected information gain) and each costs one repetition of a trigger.
 
    Engine: hypotheses h = 1..K; for every candidate action a (instant, threshold) a table
-   p.(h).(a) = P(bit = 1 | h, a) is precomputed by Monte Carlo from a generative model of each
-   candidate (with its unknown data, jitter and noise). Observations are drawn from a FRESH
-   simulation of the true candidate, not from the table. Policies: greedy information gain, random
-   actions, and "decode" (read the whole thing, then decide). Stop when max posterior >= 1 - eps,
-   or at a sample cap.
+   p.(h).(a) = P(bit = 1 | h, a) is precomputed by finite Monte Carlo from a generative model of
+   each candidate (with its unknown data, jitter and noise). The estimates are clamped to avoid
+   log(0), then treated as exact by the update. Observations are drawn from a FRESH simulation of the
+   true candidate, not from the table. Policies: greedy information gain, random actions, and an
+   in-order reference. The posterior and its stopping threshold are heuristic; they do not integrate
+   uncertainty in the Monte Carlo table and are not calibrated confidence guarantees.
 
    Scenarios: which of K frames (a 125 Mbit/s NRZ line, strong and weak signal); which of K UART
    baud rates (unknown data); which of K line protocols; is this edge within spec (K = 2).
@@ -22,7 +23,7 @@ let quick = Array.length Sys.argv > 1 && Sys.argv.(1) = "quick"
 let out = Buffer.create 4096
 let say fmt = Printf.ksprintf (fun s -> print_endline s; Buffer.add_string out (s ^ "\n")) fmt
 
-let clamp p = Float.min 0.999 (Float.max 0.001 p)
+let clamp_mc p = Float.min 0.999 (Float.max 0.001 p)  (* avoid log(0); not a confidence interval *)
 let h2 p = if p <= 0.0 || p >= 1.0 then 0.0 else -.((p *. log p) +. ((1.0 -. p) *. log (1.0 -. p)))
 
 type policy = Greedy | Random_action | Fixed of int array   (* a fixed schedule of actions *)
@@ -84,7 +85,7 @@ let table st k na ~mc draw =
   Array.init k (fun h -> Array.init na (fun a ->
       let c = ref 0 in
       for _ = 1 to mc do if draw st h a then incr c done;
-      clamp (float_of_int !c /. float_of_int mc)))
+      clamp_mc (float_of_int !c /. float_of_int mc)))
 
 let noise = Noise.default
 let sig_v = Noise.threshold_sigma noise
@@ -280,10 +281,14 @@ let edge_spec st =
 
 let () =
   let st = Random.State.make [| 7 |] in
-  say "# infer.exe%s (seed 7); stop at posterior >= 1 - 1e-3; errors counted against the true candidate" (if quick then " quick" else "");
+  say "# infer.exe%s (seed 7); heuristic stop at posterior >= 1 - 1e-3; errors counted against the true candidate" (if quick then " quick" else "");
   frames st; bauds st; protocols st; edge_spec st;
   say "";
   say "CRC consistency has no such shortcut: a CRC check needs every bit it covers (any unread bit can flip the";
   say "answer), so it is a decode question, and the chip's CRC unit on the bit path answers it at line rate.";
+  say "";
+  say "CAUTION: action probabilities are finite-Monte-Carlo point estimates clamped to [0.001, 0.999]. The";
+  say "posterior treats them as exact, so the 0.999 stop is not a calibrated 0.1 %% error guarantee. The reported";
+  say "trial errors measure these simulations only; zero errors in finite trials is not evidence of zero error rate.";
   let oc = open_out (if quick then "../results/infer-quick.txt" else "../results/infer.txt") in
   output_string oc (Buffer.contents out); close_out oc

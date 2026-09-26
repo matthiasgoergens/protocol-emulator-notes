@@ -1,6 +1,8 @@
-(* Receiving below the naive sample budget: a locked receiver that takes ONE sample per bit, at the
-   bit centre, instead of oversampling; skipping predictable fields; and reading faster than the
-   clock when the line repeats.
+(* Oracle-assisted receiving below the naive sample budget: a receiver model that takes ONE sample
+   per bit, at the bit centre, instead of oversampling; skipping predictable fields; and reading
+   faster than the clock when the line repeats. This is a diagnostic upper-bound experiment, not an
+   observable-only or deployable receiver: scheduling, edge detection, slip recovery and scoring use
+   hidden transmitted indices and bits.
 
    Line: NRZ at rate R, the transmitter's clock off by +100 ppm and wandering (sinusoidal jitter,
    0.2 UI at 100 kHz), plus random jitter per edge; 1 ns edges; threshold noise from the pad.
@@ -91,10 +93,10 @@ let rx4 ln st =
   done;
   align_errors ln.bits (Array.of_list (List.rev !got))
 
-(* 1x locked receiver: timestamps every edge, samples each wanted bit once at its predicted centre;
-   the bit count since the last edge is the receiver's own (rounded elapsed time / period);
-   [want i] says whether bit i is read at all (skip predictable fields: the receiver knows the frame
-   layout from its own count); lanes limit reads to 4 per clock *)
+(* 1x oracle-assisted receiver: uses the transmitted bit sequence to inject one timestamp per true
+   edge and to select/score transmitted bit index i. The receiver's own count since the last edge is
+   rounded elapsed time / period, but any disagreement with the hidden index is repaired from truth.
+   [want i] says whether hidden bit index i is read; lanes limit reads to 4 per clock. *)
 let total_slips = ref 0
 
 let rx1 ?(want = fun _ -> true) ln st =
@@ -135,17 +137,18 @@ let () =
   let n = if quick then 20_000 else 200_000 in
   say "# rx.exe%s (seed 3): %d bits per cell; +100 ppm, 0.2 UI sinusoidal wander at 100 kHz, random jitter per edge" (if quick then " quick" else "") n;
   say "";
-  say "1. One locked sample per bit against 4x oversampling (bit errors / bits read)";
-  say "   rate        RJ rms   4x oversampling            1x locked (TDC + DTC)";
+  say "1. Oracle-assisted one-sample-per-bit model against 4x oversampling (bit errors / bits read)";
+  say "   rate        RJ rms   4x oversampling       1x oracle-assisted (TDC + DTC)";
   List.iter (fun rate ->
       List.iter (fun rj_ui ->
           let ln = make_line st ~rate ~n ~rj:(rj_ui /. rate) ~sj_ui:0.2 ~sj_f:100e3 in
           let c4 = if rate <= 60e6 then (let e, b = rx4 ln st in Printf.sprintf "%7d / %-9d" e b) else "   impossible      " in
           let e1, r1, m1 = rx1 ln st in
-          say "   %5.0f Mb/s  %4.2f UI  %s  %7d / %-9d%s" (rate /. 1e6) rj_ui c4 e1 r1
+          say "   %5.0f Mb/s  %4.2f UI  %s  %7d / %d%s" (rate /. 1e6) rj_ui c4 e1 r1
             (if m1 > 0 then Printf.sprintf " (%d bits beyond 4 per clock)" m1 else "")) [ 0.05; 0.11; 0.14; 0.17; 0.20 ]) [ 30e6; 60e6; 125e6; 240e6 ];
-  say "   storage per bit: 4x keeps 4 samples (or a decision after a tracker); 1x keeps 1, plus the timestamps the";
-  say "   tracker consumes and discards. The 4x centre is quantised to T/4 = 4.17 ns; the 1x centre to a 130 ps bin.";
+  say "   storage per bit: the model's 1x path keeps one decided bit plus consumed timestamps; this is not an";
+  say "   end-to-end storage result because its tracker receives hidden true-edge events and repairs index slips";
+  say "   from the transmitted sequence. The 4x centre is quantised to T/4 = 4.17 ns; the 1x centre to a 130 ps bin.";
   say "";
   say "2. Skip predictable fields: sample only the bits a known frame format leaves open";
   let frames = [
@@ -170,16 +173,17 @@ let () =
     (snd (List.hd frames));
   let ln = make_line st ~rate:125e6 ~n:(560 * 200) ~rj:(0.05 /. 125e6) ~sj_ui:0.2 ~sj_f:100e3 in
   let e, r, m = rx1 ~want:(fun i -> open_mask.(i mod 560)) ln st in
-  say "   simulated: 200 such frames back to back at 125 Mbit/s, 0.05 UI RJ, reading only the open bits: %d reads, %d errors%s"
+  say "   oracle-assisted simulation: 200 such frames back to back at 125 Mbit/s, 0.05 UI RJ, selecting and reading";
+  say "   only the open bits by hidden frame index: %d reads, %d errors%s"
     r e (if m > 0 then Printf.sprintf ", %d beyond the lanes" m else "");
-  say "   (tracking still uses every edge's timestamp; the saving is in samples stored, decided and shipped)";
+  say "   (edge-event injection and scheduling also use transmitted truth; this does not demonstrate observable recovery)";
   say "";
-  say "3. Faster than the clock: a repeating frame at more than 240 Mbit/s, read over several repetitions";
+  say "3. Oracle-assisted faster-than-clock schedule: a hidden repeating frame at more than 240 Mbit/s";
   List.iter (fun rate ->
       let bits_per_frame = 256 in
       let ln = make_line st ~rate ~n:(bits_per_frame * 40) ~rj:(0.04 /. rate) ~sj_ui:0.0 ~sj_f:1.0 in
-      (* the frame repeats (same content); the lanes read up to 4 bits per clock, a different subset each
-         repetition, until every bit of the frame has been read once *)
+      (* Oracle aid: the simulation knows the hidden frame period and transmitted index, so it assigns a
+         different subset to the lanes on each repetition until every frame position has been read. *)
       let ln = { ln with bits = Array.mapi (fun i _ -> ln.bits.(i mod bits_per_frame)) ln.bits } in
       let got = Array.make bits_per_frame false in
       let reps = ref 0 and errs = ref 0 and done_ = ref false in
@@ -194,12 +198,13 @@ let () =
         incr reps;
         done_ := Array.for_all (fun x -> x) got
       done;
-      say "   %4.0f Mbit/s: a %d-bit frame read completely in %d repetitions, %d bit errors (0.04 UI RJ)"
+      say "   %4.0f Mbit/s: oracle schedule reads the hidden %d-bit frame in %d repetitions, %d bit errors (0.04 UI RJ)"
         (rate /. 1e6) bits_per_frame !reps !errs) [ 250e6; 400e6 ];
   say "   the pad is the limit above that: SPICE shows full-swing inputs clean at 200 MHz (IHP's own report),";
   say "   i.e. 400 Mbit/s; the kicked-sampling aperture is 0.8 GHz.";
   say "";
-  say "bit-count slips of the 1x receiver over all runs: %d (the receiver's own count of bits since the last edge" !total_slips;
-  say "disagreeing with the transmitted index; each is charged as 8 bit errors and re-synchronised)";
+  say "oracle-recovered bit-count slips over all runs: %d (the model's count since the last injected edge disagreed" !total_slips;
+  say "with the hidden transmitted index; each is charged as 8 bit errors and repaired from truth; reads and scoring";
+  say "also use hidden transmitted bits). No observable-only framing or slip-recovery algorithm is implemented here.";
   let oc = open_out (if quick then "../results/rx-quick.txt" else "../results/rx.txt") in
   output_string oc (Buffer.contents out); close_out oc
