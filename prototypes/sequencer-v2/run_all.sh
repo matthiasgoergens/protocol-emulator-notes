@@ -10,6 +10,8 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 cd "$HERE"
 B=$HERE/_build/default
 P=$HERE/..
+SCRATCH=$(mktemp --directory --tmpdir isa-v2.XXXXXX)
+trap 'rm -rf "$SCRATCH"' EXIT
 wait_load() {
   while :; do
     l=$(cut --delimiter=' ' --fields=1 /proc/loadavg)
@@ -27,7 +29,10 @@ run() {   # name, recorded-result-or-empty, command...
   local name=$1 rec=$2; shift 2
   wait_load
   local out=results/ports/$name.txt
-  { header "$*"; (cd /var/tmp/isa-v2 && nice ionice "$@") 2>&1; echo "exit $?"; } > "$out" || true
+  { header "$*"; (
+      cd "$SCRATCH"
+      nice ionice "$@"
+    ) 2>&1; echo "exit $?"; } > "$out" || true
   if [ -n "$rec" ]; then
     { echo; echo "# diff against the recorded result $rec (lines starting # and exit lines ignored):";
       diff <(grep --invert-match --extended-regexp '^#|^exit' "$rec") <(grep --invert-match --extended-regexp '^#|^exit' "$out" | sed '/^$/d') \
@@ -47,4 +52,5 @@ run sequencer-ethernet results/ports/original-sequencer-ethernet.txt "$B/ports/s
 run jtag-swd "$P/proto-jtag-swd/results/wide-all.txt" "$B/ports/jtag-swd/main.exe"
 run usb-ls "$P/usb-ls/run-fw-8seeds.log" "$B/ports/usb-ls/main_fw.exe"
 run ps2 "$P/sequencer-ps2-can/logs/2026-09-25/ps2.txt" "$B/ports/ps2/ps2_main.exe" 8
+run can-tx "" "$B/ports/can/can_tx.exe"
 run multi-proto-bridge_a "" "$B/ports/multi-proto/bridge_a.exe" all
