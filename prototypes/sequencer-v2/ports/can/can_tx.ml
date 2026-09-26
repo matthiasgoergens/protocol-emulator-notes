@@ -85,8 +85,8 @@ let () =
     let s = tx_seq ~bus ~hz:clock_hz ~name:"seq" [ (0, 1, a) ] in
     let r1 = Can_model.create ~bus ~idx:1 ~name:"ref1" () and r2 = Can_model.create ~bus ~idx:2 ~name:"ref2" () in
     let fa = fr 0x123 3 and fb = fr 0x0F0 8 in
-    submit a ~at:(us 40.) [ fa ];
-    let inject = Sim.agent ~name:"inj" ~hz:1e5 (fun now -> if now >= us 40. && now < us 50. && r1.sent = [] then r1.queue <- [ fb ]) in
+    submit a ~at:0 [ fa ];
+    let inject = Sim.agent ~name:"inj" ~hz:1e5 (fun now -> if now >= us 20. && now < us 30. && r1.sent = [] && r1.queue = [] then r1.queue <- [ fb ]) in
     ignore (Sim.run ~until:(us 900.) [ s.agent; ref_agent ~ppm:3000. r1; ref_agent r2; inject ]);
     let order = List.map (fun (f : Can_model.frame) -> f.id) (bus_order r2) in
     total_frames := !total_frames + List.length order;
