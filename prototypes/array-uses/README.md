@@ -253,12 +253,22 @@ application for DTW was found, so this study does not recommend that extension.
 | `lockstep.ml`, `rtl/tb_upe.v` | lockstep against `../unified-pe/rtl/upe.v` (`main.exe lockstep 20000`) |
 | `synth.ml`, `analyse_synth.py` | prototype 2 (`main.exe synth 4.0 out`; `SYNTH_ONLY=direct\|chain\|hold\|toggle`) |
 | `ddc.ml`, `analyse_ddc.py`, `spur_check.py` | prototype 1 (`main.exe ddc 1.2 out`) |
+| `generate_ddc.py` | clean-checkout regeneration of the DDC traces and checks |
 | `evaluate.ml` | the table (`main.exe evaluate`) |
 | `host/kernels.c`, `host/mca.py` | host inner loops and their llvm-mca cycle counts |
 
-Build: `opam exec --switch=5.3.0 -- dune build`. Analyses: `uv run --with numpy --with scipy
---with matplotlib analyse_synth.py out results/synth_check.txt`, and the same for
-`analyse_ddc.py`.
+Build: `opam exec --switch=5.3.0 -- dune build`.
+
+From a clean checkout, `uv run generate_ddc.py` regenerates the four plain-text channel traces
+`out/ddc-ch0.txt` … `ddc-ch3.txt`, their WAV/spectrogram renders, and both independent checks.
+It runs the deterministic 1.2 s receiver scene and the 0.35 s planted-fault control; the latter
+is long enough for the analysis to contain every station programme. The plain-text traces are
+about 0.5 MB per channel and are generated rather than committed. The script also records the
+two simulator commands in `results/ddc.txt`.
+
+Other analyses: `uv run --with numpy --with scipy --with matplotlib analyse_synth.py out
+results/synth_check.txt`, and `uv run --with numpy --with matplotlib analyse_ddc.py out
+results/ddc_check.txt`.
 
 ## Open
 

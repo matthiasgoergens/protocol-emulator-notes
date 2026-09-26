@@ -4,3 +4,4 @@ channel 2: 5.950 MHz, melody: corr +0.002, gain 3, S/R -53.6 dB, lag 4; 6.000 MH
 channel 3: 5.950 MHz, melody: corr -0.003, gain -2, S/R -50.6 dB, lag 3; 6.000 MHz, two tones: corr +0.001, gain 0, S/R -64.4 dB, lag 22; 6.055 MHz, chirp: corr -0.001, gain -0, S/R -63.8 dB, lag 51; 18.450 MHz, beeps: corr +0.999, gain 970, S/R +29.6 dB, lag 4
 direct reception, gain per carrier count: 122.0 122.0 116.8
 image through the LO's third harmonic: 40.4 per count = 0.336 of direct (-9.5 dB; a square wave's third harmonic is 1/3, -9.5 dB)
+own-station correlations +0.999 +0.985 +0.998 +0.999: PASS (all above 0.95)
