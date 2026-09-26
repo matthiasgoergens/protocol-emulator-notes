@@ -19,7 +19,7 @@ import numpy as np
 FS_REF = 960_000
 FS_OUT = 48_000
 FCLK = 60e6
-PAUSE = 1017  # clocks per reload: 128 bytes, the first at the tick and one per 8 clocks (synth.ml); results/synth.txt: 1,015,983 paused over 999 reloads
+PAUSE = 1017  # clocks per chain reload; 1,000 configurations include the initial load and 999 reload pauses
 
 
 def read_wav(p):
@@ -28,9 +28,12 @@ def read_wav(p):
 
 
 def reference(schedule, n_out, pause_clocks=0):
-    """pause_clocks: the chain mode stops the segment for this many clocks after every tick but
-    the first; the phases then advance only while the segment runs"""
+    """Load a schedule and model a chain pause after every configuration except the first."""
     rows = np.loadtxt(schedule)
+    return reference_rows(rows, n_out, pause_clocks)
+
+
+def reference_rows(rows, n_out, pause_clocks=0):
     t_clk = rows[:, 0]
     n_ref = n_out * (FS_REF // FS_OUT)
     t = np.arange(n_ref) / FS_REF
@@ -103,8 +106,7 @@ def main():
 def shifted(schedule, n_out, v, pc=0):
     rows = np.loadtxt(schedule).copy()
     rows[:, 1 + 2 * v] *= 2 ** (1 / 12)
-    tmp = Path("/var/tmp/array-uses/sched_shift.txt"); np.savetxt(tmp, rows)
-    return reference(tmp, n_out, pc)[v]
+    return reference_rows(rows, n_out, pc)[v]
 
 
 def plot(specs, d):

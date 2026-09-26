@@ -73,7 +73,7 @@ def main():
             res.append((name, None, None, 0, "no loop found")); continue
         a, b = min(sp, key=lambda s: s[1] - s[0])
         code = instrs(body[a:b + 1])
-        src = "\n".join(code) + "\n"
+        src = "\n".join(code)
         tmp = Path(f"/var/tmp/array-uses/{name}.s"); tmp.write_text(src)
         r = subprocess.run(MCA + [str(tmp)], capture_output=True, text=True)
         m = re.search(r"Total Cycles:\s+(\d+)", r.stdout)
@@ -86,7 +86,9 @@ def main():
     for name, c, c2, n, _ in res:
         lines.append(f"{name:24} {n:5d} {c if c is not None else float('nan'):15.2f} {c2 if c2 is not None else float('nan'):19.2f}")
     lines += ["", "Timed assembly (the innermost loop of each function):", ""]
-    for name, c, _, n, src in res:
+    for index, (name, c, _, n, src) in enumerate(res):
+        if index:
+            lines.append("")
         lines += [f"--- {name}", src]
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text("\n".join(lines) + "\n")

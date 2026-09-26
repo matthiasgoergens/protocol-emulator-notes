@@ -8,10 +8,9 @@
    Every output is compared on every cycle. With UPE_FAULT=negate the model drops the
    "negate Y by g" mode, and the check must then fail. *)
 
-let run ~cycles ~seed =
+let run ~cycles ~seed ~dir =
   Random.init seed;
-  let dir = "/var/tmp/array-uses/lockstep" in
-  ignore (Sys.command ("mkdir --parents " ^ dir));
+  ignore (Sys.command ("mkdir --parents " ^ Filename.quote dir));
   let stim = Filename.concat dir (Printf.sprintf "stim_%d.txt" seed) in
   let oc = open_out stim in
   let ins = Array.make cycles Upe.idle in
@@ -33,11 +32,13 @@ let run ~cycles ~seed =
   done;
   close_out oc;
   let vvp = Filename.concat dir "tb.vvp" and out = Filename.concat dir (Printf.sprintf "rtl_%d.txt" seed) in
-  let cmd =
+  let compile =
     Printf.sprintf
       "nice ionice iverilog -g2012 -DNO_POP -DNO_LUT -DBITSEL '-DSTIM=\"%s\"' -o %s rtl/tb_upe.v \
-       ../unified-pe/rtl/upe.v && nice ionice vvp -n %s > %s" stim vvp vvp out in
-  if Sys.command cmd <> 0 then failwith "iverilog/vvp failed";
+       ../unified-pe/rtl/upe.v" stim (Filename.quote vvp) in
+  if Sys.command compile <> 0 then failwith "iverilog failed";
+  let simulate = Printf.sprintf "nice ionice vvp -n %s > %s" (Filename.quote vvp) (Filename.quote out) in
+  if Sys.command simulate <> 0 then failwith "vvp failed";
   let ic = open_in out in
   let st = Upe.create () in
   let unknown = ref 0 in
@@ -69,11 +70,15 @@ let run ~cycles ~seed =
   (!rows, !mism, !first)
 
 let main args =
-  let cycles = match args with n :: _ -> int_of_string n | [] -> 20000 in
+  let cycles, dir =
+    match args with
+    | [] -> 20000, Filename.concat (Filename.get_temp_dir_name ()) "array-uses-lockstep"
+    | [ n ] -> int_of_string n, Filename.concat (Filename.get_temp_dir_name ()) "array-uses-lockstep"
+    | n :: dir :: _ -> int_of_string n, dir in
   let seeds = [ 1; 2; 3 ] in
   let total = ref 0 and bad = ref 0 in
   List.iter (fun seed ->
-      let rows, mism, first = run ~cycles ~seed in
+      let rows, mism, first = run ~cycles ~seed ~dir in
       total := !total + rows; bad := !bad + mism;
       Printf.printf "seed %d: %d cycles compared, %d with a differing output%s\n" seed rows mism
         (match first with Some (t, l) -> Printf.sprintf " (first at cycle %d: rtl %s)" t l | None -> ""))
