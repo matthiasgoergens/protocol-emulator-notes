@@ -1,27 +1,27 @@
-# rx.exe quick (seed 3): 20000 bits per cell; +100 ppm, 0.2 UI sinusoidal wander at 100 kHz, random jitter per edge
+# rx.exe (seed 3): 200000 bits per cell; +100 ppm, 0.2 UI sinusoidal wander at 100 kHz, random jitter per edge
 
 1. Oracle-assisted one-sample-per-bit model against 4x oversampling (bit errors / bits read)
    rate        RJ rms   4x oversampling       1x oracle-assisted (TDC + DTC)
-      30 Mb/s  0.05 UI        0 / 19991            0 / 19992
-      30 Mb/s  0.11 UI        0 / 19991            0 / 19992
-      30 Mb/s  0.14 UI       15 / 19991          238 / 19992
-      30 Mb/s  0.17 UI     9177 / 19995         1207 / 19992
-      30 Mb/s  0.20 UI     6945 / 19992         5198 / 19992
-      60 Mb/s  0.05 UI        0 / 19991            0 / 19992
-      60 Mb/s  0.11 UI        2 / 19991            0 / 19992
-      60 Mb/s  0.14 UI       31 / 19991          170 / 19992
-      60 Mb/s  0.17 UI     4110 / 19990         1345 / 19992
-      60 Mb/s  0.20 UI     3618 / 19990         4553 / 19992
-     125 Mb/s  0.05 UI     impossible              0 / 19992
-     125 Mb/s  0.11 UI     impossible              0 / 19992
-     125 Mb/s  0.14 UI     impossible            323 / 19992
-     125 Mb/s  0.17 UI     impossible           1273 / 19992
-     125 Mb/s  0.20 UI     impossible           4736 / 19992
-     240 Mb/s  0.05 UI     impossible              0 / 19972 (20 bits beyond 4 per clock)
-     240 Mb/s  0.11 UI     impossible             16 / 19933 (59 bits beyond 4 per clock)
-     240 Mb/s  0.14 UI     impossible            187 / 19901 (91 bits beyond 4 per clock)
-     240 Mb/s  0.17 UI     impossible           1637 / 19835 (157 bits beyond 4 per clock)
-     240 Mb/s  0.20 UI     impossible           4066 / 19775 (217 bits beyond 4 per clock)
+      30 Mb/s  0.05 UI        0 / 199991           0 / 199992
+      30 Mb/s  0.11 UI       12 / 199991          68 / 199992
+      30 Mb/s  0.14 UI    22657 / 199990        2150 / 199992
+      30 Mb/s  0.17 UI    67265 / 199995       13472 / 199992
+      30 Mb/s  0.20 UI    90618 / 199987       48930 / 199992
+      60 Mb/s  0.05 UI        0 / 199991           0 / 199992
+      60 Mb/s  0.11 UI       29 / 199991          85 / 199992
+      60 Mb/s  0.14 UI    26302 / 199993        2100 / 199992
+      60 Mb/s  0.17 UI    64338 / 199992       12867 / 199992
+      60 Mb/s  0.20 UI    81719 / 199999       45730 / 199992
+     125 Mb/s  0.05 UI     impossible              0 / 199992
+     125 Mb/s  0.11 UI     impossible             34 / 199992
+     125 Mb/s  0.14 UI     impossible           1593 / 199992
+     125 Mb/s  0.17 UI     impossible          12512 / 199992
+     125 Mb/s  0.20 UI     impossible          43193 / 199992
+     240 Mb/s  0.05 UI     impossible              0 / 199675 (317 bits beyond 4 per clock)
+     240 Mb/s  0.11 UI     impossible             52 / 199254 (738 bits beyond 4 per clock)
+     240 Mb/s  0.14 UI     impossible           1853 / 198971 (1021 bits beyond 4 per clock)
+     240 Mb/s  0.17 UI     impossible          13418 / 198544 (1448 bits beyond 4 per clock)
+     240 Mb/s  0.20 UI     impossible          45297 / 197561 (2431 bits beyond 4 per clock)
    storage per bit: the model's 1x path keeps one decided bit plus consumed timestamps; this is not an
    end-to-end storage result because its tracker receives hidden true-edge events and repairs index slips
    from the transmitted sequence. The 4x centre is quantised to T/4 = 4.17 ns; the 1x centre to a 130 ps bin.
@@ -40,6 +40,6 @@
    the pad is the limit above that: SPICE shows full-swing inputs clean at 200 MHz (IHP's own report),
    i.e. 400 Mbit/s; the kicked-sampling aperture is 0.8 GHz.
 
-oracle-recovered bit-count slips over all runs: 2926 (the model's count since the last injected edge disagreed
+oracle-recovered bit-count slips over all runs: 28584 (the model's count since the last injected edge disagreed
 with the hidden transmitted index; each is charged as 8 bit errors and repaired from truth; reads and scoring
 also use hidden transmitted bits). No observable-only framing or slip-recovery algorithm is implemented here.

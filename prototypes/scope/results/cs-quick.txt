@@ -1,35 +1,58 @@
 # cs.exe quick (seed 20260925)
+A. random-time kicked sampling (architecture-v0 time base, INL after code density 12.3 ps)
+   aperture |H| at 300 MHz 0.953, 700 MHz 0.761 (known to the host from characterisation)
+   example: K=4, M=300 over 10.0 us (300 valid kicks), residual 29.1 mV rms
+     true   44.4570 MHz   136 mV
+     true  134.3930 MHz    69 mV
+     true  156.5067 MHz    95 mV
+     true  524.5811 MHz   200 mV
+     est   524.5803 MHz   201 mV
+     est    44.4570 MHz   135 mV
+     est   156.5046 MHz   103 mV
+     est   134.3916 MHz    71 mV
+   success = every tone found within 1/W and within 25 % in amplitude; 5 trials per cell
+   K \ M                  100               200               400               800
+   K=1       5/ 5   10kHz 0.00s   5/ 5    2kHz 0.01s   5/ 5    0kHz 0.02s   5/ 5    0kHz 0.08s
+   K=2       5/ 5   11kHz 0.00s   5/ 5    3kHz 0.01s   5/ 5    1kHz 0.05s   5/ 5    0kHz 0.16s
+   K=4       5/ 5   21kHz 0.01s   5/ 5    7kHz 0.03s   5/ 5    2kHz 0.09s   4/ 5    1kHz 0.33s
+   K=8       1/ 5   11kHz 0.01s   5/ 5   11kHz 0.05s   5/ 5    5kHz 0.19s   3/ 5    1kHz 0.67s
+   K=16      0/ 5    0kHz 0.03s   0/ 5    0kHz 0.12s   3/ 5    7kHz 0.39s   3/ 5    3kHz 1.38s
+   (cell: successes, worst frequency error among successes, host time per recovery on this machine)
+   work for K=4, M=400 (13.3 us of signal): 118.6 M correlation MACs, 1.9 M other flops (least squares and refinement); 0.09 s here
+   RP2350 at an assumed 50 M float MACs/s: 2.41 s; the correlation share of the work is 98 %
 
 B. random demodulator: 1-bit four-phase samples (240 MS/s) + random dither, XOR with an LFSR, PE sums over L
    host correlation by four interleaved FFTs (one per sampling phase, with the calibrated phase offsets)
    noise folding: each sum carries L chips of dither-quantisation noise (variance ~1 per chip) but only the
    diagonal of the signal, so the tone SNR after correlation falls as 1/sqrt(L) against L = 1
    example: K=4, L=32, 3748 sums over 500 us, dither +-100 mV at the pin, ideal comparator; host 0.64 s (84 M FFT flops)
-     true   25.5514 MHz   211 mV
-     true   35.6290 MHz   231 mV
-     true   44.0425 MHz   164 mV
-     true   86.1856 MHz   194 mV
-     est    35.6289 MHz   232 mV
-     est    25.5515 MHz   212 mV
-     est    44.0425 MHz   187 mV
-     est    86.1854 MHz   189 mV
-   example: K=4, L=32, 3748 sums over 500 us, dither +-100 mV at the pin, SPICE-fitted pad comparator; host 0.64 s (84 M FFT flops)
-     true   53.5801 MHz   229 mV
-     true   61.7890 MHz   228 mV
-     true   66.6931 MHz   221 mV
-     true   97.8624 MHz   122 mV
-     est    53.5801 MHz   209 mV
-     est    61.7890 MHz   157 mV
-     est    66.6932 MHz   122 mV
-     est    48.8792 MHz   104 mV
+     true    3.9869 MHz   245 mV
+     true   61.6665 MHz   208 mV
+     true   91.8188 MHz   100 mV
+     true  111.5719 MHz   247 mV
+     est     3.9870 MHz   251 mV
+     est   111.5717 MHz   250 mV
+     est    61.6665 MHz   223 mV
+     est    91.8186 MHz   112 mV
+   example: K=4, L=32, 3748 sums over 500 us, dither +-100 mV at the pin, SPICE-fitted pad comparator; host 0.65 s (84 M FFT flops)
+     true    2.9268 MHz   105 mV
+     true   11.9696 MHz   199 mV
+     true   22.6034 MHz   253 mV
+     true   29.0960 MHz   243 mV
+     est    11.9696 MHz   414 mV
+     est    22.6035 MHz   380 mV
+     est    29.0960 MHz   291 mV
+     est     2.9267 MHz   269 mV
    success rate (2 trials per cell, 3 for the pad), W = 500 us (120000 chips)
    ideal dither +-100 mV  L=1    (240.000 MS/s of sums, M=120000): K=1 2/2  K=2 2/2  K=4 2/2  K=8 2/2
-   ideal dither +-100 mV  L=8    (30.000 MS/s of sums, M= 15000): K=1 2/2  K=2 2/2  K=4 2/2  K=8 1/2
-   ideal dither +-100 mV  L=32   ( 7.500 MS/s of sums, M=  3750): K=1 2/2  K=2 2/2  K=4 2/2  K=8 0/2
+   ideal dither +-100 mV  L=8    (30.000 MS/s of sums, M= 15000): K=1 2/2  K=2 2/2  K=4 2/2  K=8 0/2
+   ideal dither +-100 mV  L=32   ( 7.500 MS/s of sums, M=  3750): K=1 2/2  K=2 2/2  K=4 1/2  K=8 0/2
    ideal dither +-100 mV  L=128  ( 1.875 MS/s of sums, M=   937): K=1 2/2  K=2 2/2  K=4 0/2  K=8 0/2
    ideal dither +-300 mV  L=8    (30.000 MS/s of sums, M= 15000): K=1 2/2  K=2 2/2  K=4 2/2  K=8 0/2
-   ideal dither +-300 mV  L=32   ( 7.500 MS/s of sums, M=  3750): K=1 1/2  K=2 1/2  K=4 1/2  K=8 0/2
-   pad   dither +-100 mV  L=8    (30.000 MS/s of sums, M= 15000): K=1 1/2  K=2 0/2  K=4 0/2  K=8 0/2
-   pad   dither +-100 mV  L=32   ( 7.500 MS/s of sums, M=  3750): K=1 1/2  K=2 0/2  K=4 0/2  K=8 0/2
+   ideal dither +-300 mV  L=32   ( 7.500 MS/s of sums, M=  3750): K=1 2/2  K=2 0/2  K=4 0/2  K=8 0/2
+   pad   dither +-100 mV  L=8    (30.000 MS/s of sums, M= 15000): K=1 0/2  K=2 0/2  K=4 0/2  K=8 0/2
+   pad   dither +-100 mV  L=32   ( 7.500 MS/s of sums, M=  3750): K=1 2/2  K=2 0/2  K=4 0/2  K=8 0/2
+   pad   dither +-300 mV  L=8    (30.000 MS/s of sums, M= 15000): K=1 0/2  K=2 0/2  K=4 0/2  K=8 0/2
+   pad   dither +-300 mV  L=32   ( 7.500 MS/s of sums, M=  3750): K=1 0/2  K=2 0/2  K=4 0/2  K=8 0/2
    data rate: raw bits 240 Mbit/s (L=1); sums at L=8: 30 MS/s x 4 bits = 120 Mbit/s; L=32: 7.5 MS/s x 6 bits = 45 Mbit/s;
    L=128: 1.9 MS/s x 8 bits = 15 Mbit/s = 1.9 MB/s, inside the 7.5 MB/s host link
