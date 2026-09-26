@@ -1,0 +1,15 @@
+# ./_build/default/main.exe lockstep 20000 (then UPE_FAULT=negate); 3ca7673; Icarus Verilog version 13.0 (stable) (v13_0-dirty)
+  8 rows skipped: RTL outputs unknown (x) while the first configuration shifts in
+seed 1: 19992 cycles compared, 0 with a differing output
+  8 rows skipped: RTL outputs unknown (x) while the first configuration shifts in
+seed 2: 19992 cycles compared, 0 with a differing output
+  8 rows skipped: RTL outputs unknown (x) while the first configuration shifts in
+seed 3: 19992 cycles compared, 0 with a differing output
+fault=none: 0 of 59976 cycles differ
+  8 rows skipped: RTL outputs unknown (x) while the first configuration shifts in
+seed 1: 19992 cycles compared, 2972 with a differing output (first at cycle 64: rtl 64 26 1d 2d12 1 1 0 0 1 0 2d12)
+  8 rows skipped: RTL outputs unknown (x) while the first configuration shifts in
+seed 2: 19992 cycles compared, 3024 with a differing output (first at cycle 151: rtl 151 e5 00 acbc 1 0 0 0 0 0 acbc)
+  8 rows skipped: RTL outputs unknown (x) while the first configuration shifts in
+seed 3: 19992 cycles compared, 3513 with a differing output (first at cycle 49: rtl 49 e6 6b 9eab 1 0 0 0 1 0 9eab)
+fault=negate: 9509 of 59976 cycles differ
