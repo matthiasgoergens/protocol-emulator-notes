@@ -1,0 +1,49 @@
+# padmodel.py validate: model p2c edge times against SPICE (tt 25 C); none of these waveforms was used in the fit
+# params C_a=2.091e-14 C_m=4.698e-16 tau_in=1.452e-11
+step  step_f100      spice edges  1 model  1  errors ps: -62
+step  step_f200      spice edges  1 model  1  errors ps: -78
+step  step_f300      spice edges  1 model  1  errors ps: -69
+step  step_f50       spice edges  1 model  1  errors ps: +38
+step  step_f500      spice edges  1 model  1  errors ps: -50
+step  step_r100      spice edges  1 model  1  errors ps: -13
+step  step_r200      spice edges  1 model  1  errors ps: -33
+step  step_r300      spice edges  1 model  1  errors ps: -29
+step  step_r50       spice edges  1 model  1  errors ps: +95
+step  step_r500      spice edges  1 model  1  errors ps: -18
+sck   sck_L1650      spice edges  3 model  2  errors ps: -23 +266
+sck   sck_L2800      spice edges  0 model  0  errors ps: 
+sck   sck_L3300      spice edges  0 model  0  errors ps: 
+sck   sck_L3600      spice edges  0 model  0  errors ps: 
+sck   sck_L500       spice edges  3 model  2  errors ps: -17 +270
+kick  kick_-10       spice edges  1 model  1  errors ps: -38
+kick  kick_-20       spice edges  1 model  1  errors ps: -40
+kick  kick_-30       spice edges  1 model  1  errors ps: -41
+kick  kick_-40       spice edges  1 model  1  errors ps: -43
+kick  kick_-50       spice edges  1 model  1  errors ps: -46
+kick  kick_-60       spice edges  1 model  1  errors ps: -48
+kick  kick_0         spice edges  1 model  1  errors ps: -36
+kick  kick_10        spice edges  1 model  1  errors ps: -35
+kick  kick_20        spice edges  1 model  1  errors ps: -33
+kick  kick_30        spice edges  1 model  1  errors ps: -32
+kick  kick_40        spice edges  1 model  1  errors ps: -31
+kick  kick_50        spice edges  1 model  1  errors ps: -29
+kick  kick_60        spice edges  1 model  1  errors ps: -28
+aper  aper_-100      spice edges  1 model  1  errors ps: -34
+aper  aper_-200      spice edges  1 model  1  errors ps: -35
+aper  aper_-300      spice edges  1 model  1  errors ps: -35
+aper  aper_-400      spice edges  1 model  1  errors ps: -35
+aper  aper_-500      spice edges  1 model  1  errors ps: -36
+aper  aper_-600      spice edges  1 model  1  errors ps: -36
+aper  aper_-700      spice edges  1 model  1  errors ps: -36
+aper  aper_-800      spice edges  1 model  1  errors ps: -36
+aper  aper_0         spice edges  1 model  1  errors ps: -34
+aper  aper_100       spice edges  1 model  1  errors ps: -37
+aper  aper_200       spice edges  1 model  1  errors ps: -36
+aper  aper_300       spice edges  1 model  1  errors ps: -36
+aper  aper_400       spice edges  1 model  1  errors ps: -37
+aper  aper_500       spice edges  1 model  1  errors ps: -37
+aper  aper_600       spice edges  1 model  1  errors ps: -35
+aper  aper_700       spice edges  1 model  1  errors ps: -34
+aper  aper_800       spice edges  1 model  1  errors ps: -36
+aper  aper_none      spice edges  1 model  1  errors ps: -36
+# over the non-step waveforms: 35 matched edges, median |error| 36.0 ps, max 270.0 ps

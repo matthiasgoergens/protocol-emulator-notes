@@ -1,0 +1,45 @@
+# rx.exe (seed 3): 200000 bits per cell; +100 ppm, 0.2 UI sinusoidal wander at 100 kHz, random jitter per edge
+
+1. Oracle-assisted one-sample-per-bit model against 4x oversampling (bit errors / bits read)
+   rate        RJ rms   4x oversampling       1x oracle-assisted (TDC + DTC)
+      30 Mb/s  0.05 UI        0 / 199991           0 / 199992
+      30 Mb/s  0.11 UI       12 / 199991          68 / 199992
+      30 Mb/s  0.14 UI    22657 / 199990        2150 / 199992
+      30 Mb/s  0.17 UI    67265 / 199995       13472 / 199992
+      30 Mb/s  0.20 UI    90618 / 199987       48930 / 199992
+      60 Mb/s  0.05 UI        0 / 199991           0 / 199992
+      60 Mb/s  0.11 UI       29 / 199991          85 / 199992
+      60 Mb/s  0.14 UI    26302 / 199993        2100 / 199992
+      60 Mb/s  0.17 UI    64338 / 199992       12867 / 199992
+      60 Mb/s  0.20 UI    81719 / 199999       45730 / 199992
+     125 Mb/s  0.05 UI     impossible              0 / 199992
+     125 Mb/s  0.11 UI     impossible             34 / 199992
+     125 Mb/s  0.14 UI     impossible           1593 / 199992
+     125 Mb/s  0.17 UI     impossible          12512 / 199992
+     125 Mb/s  0.20 UI     impossible          43193 / 199992
+     240 Mb/s  0.05 UI     impossible              0 / 199675 (317 bits beyond 4 per clock)
+     240 Mb/s  0.11 UI     impossible             52 / 199254 (738 bits beyond 4 per clock)
+     240 Mb/s  0.14 UI     impossible           1853 / 198971 (1021 bits beyond 4 per clock)
+     240 Mb/s  0.17 UI     impossible          13418 / 198544 (1448 bits beyond 4 per clock)
+     240 Mb/s  0.20 UI     impossible          45297 / 197561 (2431 bits beyond 4 per clock)
+   storage per bit: the model's 1x path keeps one decided bit plus consumed timestamps; this is not an
+   end-to-end storage result because its tracker receives hidden true-edge events and repairs index slips
+   from the transmitted sequence. The 4x centre is quantised to T/4 = 4.17 ns; the 1x centre to a 130 ps bin.
+
+2. Skip predictable fields: sample only the bits a known frame format leaves open
+   Ethernet/IPv4/UDP, 16-byte payload, known peer      560 bits,  208 open ( 37 %): IPv4 identification 16, IPv4 header checksum 16, UDP checksum 16, payload 128, FCS (read it: it is the integrity check) 32
+   CAN 2.0A frame from a known ID, 8 data bytes        108 bits,   79 open ( 73 %): data 64, CRC 15
+   SPI flash status poll (0x05 then 1 byte)             16 bits,    8 open ( 50 %): status 8
+   oracle-assisted simulation: 200 such frames back to back at 125 Mbit/s, 0.05 UI RJ, selecting and reading
+   only the open bits by hidden frame index: 41600 reads, 0 errors
+   (edge-event injection and scheduling also use transmitted truth; this does not demonstrate observable recovery)
+
+3. Oracle-assisted faster-than-clock schedule: a hidden repeating frame at more than 240 Mbit/s
+    250 Mbit/s: oracle schedule reads the hidden 256-bit frame in 2 repetitions, 0 bit errors (0.04 UI RJ)
+    400 Mbit/s: oracle schedule reads the hidden 256-bit frame in 2 repetitions, 0 bit errors (0.04 UI RJ)
+   the pad is the limit above that: SPICE shows full-swing inputs clean at 200 MHz (IHP's own report),
+   i.e. 400 Mbit/s; the kicked-sampling aperture is 0.8 GHz.
+
+oracle-recovered bit-count slips over all runs: 28584 (the model's count since the last injected edge disagreed
+with the hidden transmitted index; each is charged as 8 bit errors and repaired from truth; reads and scoring
+also use hidden transmitted bits). No observable-only framing or slip-recovery algorithm is implemented here.

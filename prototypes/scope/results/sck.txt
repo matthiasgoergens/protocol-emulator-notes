@@ -1,0 +1,16 @@
+# demo_sck.py (seed 7)
+time base (architecture v0 fine delay): 4 phases x 32 dlygate taps, 128 bins per 16.67 ns clock (mean 130 ps); phase skews +0, -34, -41, -79 ps; INL after code density with 2e6 hits 11.1 ps; TDC Vernier step 15 ps
+probe: target->pin 0.1, DAC->pin 0.19, compensation error 5 %, residual pole 1.5 GHz; pad threshold 0.5887 V (SPICE, tt)
+noise: core supply 5 mV rms (threshold 2.1 mV, delay line 0.54 % of its delay), pad thermal 0.7 mV, clock period jitter 10 ps, output pad launch jitter 10 ps
+instants: 139 distinct bins over -2.0..16.0 ns (mean spacing 131 ps)
+K calibration: 25 trim levels x 64 kicks on a static pin, averaged into a V-to-T table; single-kick scatter 5.49 mV rms at the pin (55 mV at the target)
+K acquisition: 4 DAC tiles x 139 instants x 16 kicks = 8896 kicks; offset removed by the idle-low anchor +25 mV; 0 s of simulation
+T acquisition: 176 levels (24 mV steps at the target) x 139 instants x 8 = 195712 one-bit samples; 1 s of simulation
+through probe and aperture: ringing 332 mV, 306 MHz, tau 3.40 ns
+truth at these instants: 10-90 % rise 894 ps (through probe and aperture 951 ps); ringing fit 400 mV, 300 MHz, tau 3.00 ns
+K kicked: after aligning the time axis by -10 ps, rms error 20 mV against the probed target through the aperture
+K kicked: 139/139 instants; rms error 125 mV against the target, 27 mV against the probed target, 22 mV against the probed target through the kick aperture; noise on the flat part 7.3 mV rms; 10-90 % rise 943 ps; 50 % crossing +80 ps from the truth; ringing 322 mV, 302.1 MHz, tau 3.30 ns
+T threshold: after aligning the time axis by -300 ps, rms error 733 mV against the probed target through the aperture
+T threshold: 139/139 instants; rms error 821 mV against the target, 864 mV against the probed target, 856 mV against the probed target through the kick aperture; noise on the flat part 5.3 mV rms; 10-90 % rise 6157 ps; 50 % crossing +882 ps from the truth; ringing 4888 mV, 0.0 MHz, tau 3.50 ns
+chip time: K 0.94 ms including calibration (10496 kicks); T 13.82 ms (48928 shots of 4 samples, 176 DAC settles)
+to the host: K 18 kB of 16-bit TDC readings (or 2.2 kB if a PE sums per instant); T 24 kB of counts

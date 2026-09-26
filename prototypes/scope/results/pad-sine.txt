@@ -1,0 +1,8 @@
+# 2026-09-25T13:58:04+08:00 pad.py sine  (commit 32cc26a)
+# RSRC=50.0 ohm, p2c load 10f
+## sine sensitivity: input vt + 20 mV + A sin(2 pi f t); smallest A (bisection, 7 steps) that toggles p2c
+tt f=0.1GHz Amin=152.3mV (bracket 148.4..152.3) -> |H|~0.131
+tt f=0.5GHz Amin=394.5mV (bracket 390.6..394.5) -> |H|~0.051
+tt f=1.0GHz Amin=500.0mV (bracket 496.1..500.0) -> |H|~0.040
+tt f=2.0GHz Amin=500.0mV (bracket 496.1..500.0) -> |H|~0.040
+tt f=4.0GHz Amin=500.0mV (bracket 496.1..500.0) -> |H|~0.040
