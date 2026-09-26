@@ -1,0 +1,41 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-isa-v2/prototypes/sequencer-v2/_build/default/ports/can/can_tx.exe
+# commit: 715f4febbcf8c09b871e78c96e07e76ded9919b9 (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-09-26T16:19:44+08:00
+CAN TX on v2, 500 kbit/s at 60 MHz (N=30 SP=23 SJW=3 slots): TX thread 60 words
+Scenarios:
+  A sends 3 frames (one remote) to two reference nodes at +0.3% / -0.2%  PASS (72001 cycles, 0 mismatches)
+  A (0x123) and ref1 (0x0F0) start together: A lost 1 time(s), retransmitted PASS (54000 cycles, 0 mismatches)
+  one sequencer, nodes A (0x123) and B (0x0F0) start together, ref +0.3% PASS (54001 cycles, 0 mismatches)
+  two sequencers at +0.5% / -0.5%, refs +0.2% / -0.1%, 3-way arbitration PASS (120000 cycles, 0 mismatches)
+  A alone, reference not acknowledging: 2 attempts, all 'no ACK'         PASS (24000 cycles, 0 mismatches)
+Controls (each must be caught by the reference nodes):
+  A's stream missing its first stuff bit: ref errors [stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff,stuff], ref good frames 0, A tx [3,3,3,3,3,3,3,3,3,3] caught
+  A's CRC with its last bit flipped: ref errors [crc,crc], ref good frames 0, A tx [2,2,2] caught
+  no arbitration check, A and B start together: ref errors [stuff,stuff,stuff], ref good frames 0 caught
+Constrained random (20 runs): two sequencer instances (1 or 2 TX nodes each) and two reference nodes,
+  clocks within +-0.5 %, delays 10-150 ns, random frames, often submitted simultaneously:
+  seed  1: 5 frames, spread, clocks -3703/-91/-941/+1563 ppm, 0 lost arbitrations PASS (148798 cycles, 0 mismatches)
+  seed  2: 6 frames, spread, clocks +1213/-1711/-10/-349 ppm, 5 lost arbitrations PASS (163807 cycles, 0 mismatches)
+  seed  3: 5 frames, simultaneous, clocks +604/-3082/-2451/-3497 ppm, 3 lost arbitrations PASS (105068 cycles, 0 mismatches)
+  seed  4: 4 frames, spread, clocks -3448/-1612/-4234/-3868 ppm, 0 lost arbitrations PASS (102962 cycles, 0 mismatches)
+  seed  5: 4 frames, spread, clocks -2106/-2857/-719/+362 ppm, 0 lost arbitrations PASS (104110 cycles, 0 mismatches)
+  seed  6: 6 frames, simultaneous, clocks +3456/-1360/+4034/-93 ppm, 3 lost arbitrations PASS (156997 cycles, 0 mismatches)
+  seed  7: 4 frames, simultaneous, clocks +2124/+4805/-2019/+4215 ppm, 3 lost arbitrations PASS (112616 cycles, 0 mismatches)
+  seed  8: 6 frames, simultaneous, clocks +1068/-2077/-4678/-2744 ppm, 5 lost arbitrations PASS (139061 cycles, 0 mismatches)
+  seed  9: 5 frames, simultaneous, clocks +549/+4258/+3406/-3946 ppm, 4 lost arbitrations PASS (128048 cycles, 0 mismatches)
+  seed 10: 4 frames, simultaneous, clocks +2705/+2716/+4023/-889 ppm, 3 lost arbitrations PASS (82685 cycles, 0 mismatches)
+  seed 11: 4 frames, simultaneous, clocks -2767/-3395/-1111/+3450 ppm, 3 lost arbitrations PASS (91776 cycles, 0 mismatches)
+  seed 12: 3 frames, spread, clocks -2754/+1192/-2867/+3390 ppm, 0 lost arbitrations PASS (101439 cycles, 0 mismatches)
+  seed 13: 5 frames, simultaneous, clocks +2958/+1416/-3953/+798 ppm, 1 lost arbitrations PASS (127959 cycles, 0 mismatches)
+  seed 14: 5 frames, spread, clocks -3406/-2247/-4858/-1816 ppm, 0 lost arbitrations PASS (128295 cycles, 0 mismatches)
+  seed 15: 5 frames, simultaneous, clocks +2727/+924/-671/+4127 ppm, 1 lost arbitrations PASS (122517 cycles, 0 mismatches)
+  seed 16: 4 frames, simultaneous, clocks -1569/-3946/+1961/-3334 ppm, 1 lost arbitrations PASS (90685 cycles, 0 mismatches)
+  seed 17: 6 frames, simultaneous, clocks -4389/+36/+3478/+2440 ppm, 3 lost arbitrations PASS (138442 cycles, 0 mismatches)
+  seed 18: 4 frames, spread, clocks -2026/-3234/-3526/-4529 ppm, 0 lost arbitrations PASS (105013 cycles, 0 mismatches)
+  seed 19: 6 frames, simultaneous, clocks -521/+1302/-2671/+766 ppm, 3 lost arbitrations PASS (125961 cycles, 0 mismatches)
+  seed 20: 4 frames, simultaneous, clocks +3535/-4716/+3624/-4504 ppm, 1 lost arbitrations PASS (108630 cycles, 0 mismatches)
+random: 20 of 20 runs pass; 39 arbitration losses resolved
+totals: 107 frames on the bus, 2798871 cycles compared in lockstep, 0 mismatches
+CAN TX: ALL PASS
+exit 0

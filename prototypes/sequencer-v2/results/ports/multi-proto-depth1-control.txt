@@ -1,0 +1,9 @@
+# The ORIGINAL multi-proto code (copy of prototypes/multi-proto with symlinks dereferenced, bridges.ml given a
+# mode "depth1ctl"), not v2: the "receiver over budget by 6 slots" control at depth 2 and at depth 1.
+programme T0 UART receive (RTS)   29 words of 128
+programme T1 I2C master           99 words of 128
+programme T1 SPI master           41 words of 128
+programme T2 UART transmit        14 words of 128
+control A over budget by 6, depth 2 (original)     FAIL: 150 bytes in, answers 4/71 in agreement before the first difference (answer 4: got 255 expected 0); device WRONG, bus WRONG; RTL mismatches 0; T0 reports 62; 498234 cycles; RTS high 1 cycles; host waited on CTS 0 cycles; max inbox fill 1; slave stretched 4268 cycles; receive slack -3 slots
+control A over budget by 6, depth 1                PASS: 150 bytes in, answers 71/71 in agreement before the first difference (none); device ok, bus ok; RTL mismatches 0; T0 reports 0; 123136 cycles; RTS high 41469 cycles; host waited on CTS 4885 cycles; max inbox fill 1; slave stretched 13463 cycles; receive slack -3 slots
+elapsed 0 s

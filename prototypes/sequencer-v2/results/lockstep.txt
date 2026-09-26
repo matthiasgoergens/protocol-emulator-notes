@@ -1,0 +1,124 @@
+# command: lockstep2.exe 1000 5000
+# commit: 715f4febbcf8c09b871e78c96e07e76ded9919b9 (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-09-26T16:14:03+08:00
+lockstep biased   1000 programmes x 5000 clocks: 0 mismatching clocks
+lockstep uniform  1000 programmes x 5000 clocks: 0 mismatching clocks
+coverage of the biased generator (interpreter, 20 programmes x 3000 clocks):
+  ext bank                            1230
+  ext cfg                              934
+  ext cnta                             931
+  ext ext10                             93
+  ext ext11                            150
+  ext ext12                             94
+  ext ext13                             79
+  ext ext14                             69
+  ext ext15                             70
+  ext ext8                             180
+  ext ext9                              77
+  ext fine                             935
+  ext ldb                             1252
+  ext skeq                            1127
+  ext skne                            1188
+  ext stb                              923
+  fine carried by a pin write          802
+  mbx recv inbox done                  538
+  mbx recv inbox fail-branch          1674
+  mbx recv inbox stay                  607
+  mbx recv port done                   849
+  mbx recv port fail-branch            804
+  mbx recv port stay                    72
+  mbx send inbox done                  580
+  mbx send inbox fail-branch          1301
+  mbx send inbox stay                  468
+  mbx send port done                   959
+  mbx send port fail-branch            777
+  mbx send port stay                   111
+  out acc                             1325
+  out imm                             1430
+  sho pair=0 psel=0 cap=0             1134
+  sho pair=0 psel=0 cap=1              661
+  sho pair=0 psel=1 cap=0              973
+  sho pair=0 psel=1 cap=1              753
+  sho pair=1 psel=0 cap=0             1028
+  sho pair=1 psel=0 cap=1              823
+  sho pair=1 psel=1 cap=0              947
+  sho pair=1 psel=1 cap=1              753
+  waitc 00 branch                      319
+  waitc 00 holds                       125
+  waitc 00 stay                        852
+  waitc 01 branch                      244
+  waitc 01 holds                       146
+  waitc 01 stay                       1166
+  waitc 02 branch                      402
+  waitc 02 holds                       104
+  waitc 02 stay                        692
+  waitc 03 branch                      476
+  waitc 03 holds                        70
+  waitc 03 stay                        836
+  waitc 04 branch                      165
+  waitc 04 holds                        52
+  waitc 04 stay                          5
+  waitc 05 branch                      279
+  waitc 05 holds                       118
+  waitc 05 stay                        226
+  waitc 06 branch                      625
+  waitc 06 holds                        80
+  waitc 06 stay                         29
+  waitc 07 branch                      242
+  waitc 07 holds                       187
+  waitc 07 stay                         25
+  waitc 08 branch                      622
+  waitc 08 holds                        53
+  waitc 08 stay                         29
+  waitc 09 branch                      147
+  waitc 09 holds                       188
+  waitc 09 stay                          8
+  waitc 10 branch                      241
+  waitc 10 holds                       175
+  waitc 10 stay                         37
+  waitc 11 branch                      232
+  waitc 11 holds                       191
+  waitc 11 stay                         45
+  waitc 12 branch                      167
+  waitc 12 holds                       153
+  waitc 12 stay                         27
+  waitc 13 branch                      154
+  waitc 13 holds                       199
+  waitc 13 stay                         25
+  waitc 14 branch                      175
+  waitc 14 holds                       235
+  waitc 14 stay                         33
+  waitc 15 branch                      198
+  waitc 15 holds                       189
+  waitc 15 stay                         21
+planted bugs (30 programmes x up to 3000 clocks each; seeds that caught it):
+  pc wraps at 6 bits                               biased 30/30  uniform 30/30  caught  (seed 1001 clock 10: pc)
+  page bits not in the fetch address               biased 30/30  uniform 30/30  caught  (seed 1001 clock 2: host_out,pc)
+  host pc write not bypassed into the fetch        biased 26/30  uniform 27/30  caught  (seed 1001 clock 589: cfg_out,full,cfg,acc)
+  SHO pair psel 0 drives b0, not its complement    biased 30/30  uniform 27/30  caught  (seed 1001 clock 24: pin_sub,pin_out)
+  SHO pair psel 1 shifts by one                    biased 30/30  uniform 26/30  caught  (seed 1001 clock 8: acc)
+  SHO cap samples pin, not pin XOR 1               biased 30/30  uniform 26/30  caught  (seed 1001 clock 96: acc)
+  SHO cap (msb) enters bit 1                       biased 30/30  uniform 26/30  caught  (seed 1001 clock 19: acc)
+  OUT tag always 0                                 biased 30/30  uniform 30/30  caught  (seed 1001 clock 14: host_out)
+  OUT src 1 sends acc                              biased 30/30  uniform 30/30  caught  (seed 1001 clock 40: host_out)
+  SEND overwrites a full inbox                     biased 30/30  uniform 16/30  caught  (seed 1001 clock 541: inbox,pc)
+  RECV on an empty inbox stays at dl = 0           biased 30/30  uniform 20/30  caught  (seed 1001 clock 20: pc)
+  MBX port channel off by one                      biased 30/30  uniform 30/30  caught  (seed 1001 clock 47: port_pop,acc,pc)
+  lsend only set by a successful SEND              biased 30/30  uniform 23/30  caught  (seed 1001 clock 166: lsend)
+  WAITC 8 tests cnt[3:0]                           biased 17/30  uniform  2/30  caught  (seed 1001 clock 655: pc)
+  WAITC 11 tests the own inbox                     biased 28/30  uniform 10/30  caught  (seed 1001 clock 689: pc)
+  WAITC flags read from thread 0's group           biased 30/30  uniform 22/30  caught  (seed 1001 clock 385: pc)
+  WAITC 9 inverted                                 biased 30/30  uniform 17/30  caught  (seed 1001 clock 145: pc)
+  SKNE skips on equal                              biased 30/30  uniform 13/30  caught  (seed 1001 clock 36: pc)
+  SKEQ skip lands on pc+1                          biased  6/30  uniform  0/30  caught  (seed 1005 clock 9: pc)
+  FINE not disarmed by the pin write               biased 30/30  uniform 11/30  caught  (seed 1001 clock 468: armed)
+  CNTA drops acc bit 7                             biased 30/30  uniform  7/30  caught  (seed 1001 clock 71: cnt)
+  LDB does not increment bp                        biased 30/30  uniform 14/30  caught  (seed 1001 clock 4: bp)
+  LDB byte lands in the next thread's acc          biased 30/30  uniform 14/30  caught  (seed 1001 clock 5: acc)
+  LDB reads bp + 1                                 biased 30/30  uniform 14/30  caught  (seed 1001 clock 4: bank_read,acc)
+  STB writes cnt[7:0]                              biased 30/30  uniform 15/30  caught  (seed 1001 clock 107: bank_write,bank)
+  BANK ignores imm                                 biased 30/30  uniform 13/30  caught  (seed 1001 clock 461: bp)
+  CFG round latch ignored                          biased 28/30  uniform  3/30  caught  (seed 1001 clock 258: acc)
+  round latch loads every clock                    biased 30/30  uniform 30/30  caught  (seed 1001 clock 1: latch)
+ALL PASS

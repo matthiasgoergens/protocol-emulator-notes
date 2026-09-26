@@ -1,0 +1,1632 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Running command `read_verilog -sv rtl/deadline_sequencer_v2.v; hierarchy -check -top deadline_sequencer_v2; synth -top deadline_sequencer_v2 -flatten; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/deadline_sequencer_v2.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Verilog-2005 frontend: rtl/deadline_sequencer_v2.v
+Parsing SystemVerilog input from `rtl/deadline_sequencer_v2.v' to AST representation.
+Generating RTLIL representation for module `\deadline_sequencer_v2'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_v2
+
+2.2. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_v2
+Removed 0 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_v2
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_v2
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2507$527 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2492$525 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2443$503 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2398$480 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2351$458 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2345$457 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2336$454 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2321$447 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2287$431 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2275$430 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2248$413 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2233$406 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2218$399 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2194$392 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2187$391 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2179$389 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2171$387 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2163$385 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2148$382 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2131$381 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2104$377 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2088$375 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2082$374 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2067$368 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2059$366 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2051$364 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2041$360 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:2004$356 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1955$351 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1927$348 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1916$343 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1905$338 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1858$328 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1835$326 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1829$325 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1805$311 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1797$309 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1789$307 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1775$305 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1757$303 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1751$302 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1739$297 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1731$295 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1723$293 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1708$290 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1691$289 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1673$288 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1652$285 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1646$284 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1630$277 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1622$275 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1614$273 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1594$266 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1567$250 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1460$195 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1397$178 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1381$172 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1250$109 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1238$105 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1227$102 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1214$96 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1202$90 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1157$71 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1151$70 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1126$58 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1118$56 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1110$54 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1096$48 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1077$41 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1071$40 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1051$28 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1043$26 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1035$24 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1020$22 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:1014$21 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:997$17 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:991$16 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:983$14 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:975$12 in module deadline_sequencer_v2.
+Marked 1 switch rules as full_case in process $proc$rtl/deadline_sequencer_v2.v:963$7 in module deadline_sequencer_v2.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 80 redundant assignments.
+Promoted 8 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~80 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2507$527'.
+     1/1: $0\_143[1:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2492$525'.
+     1/1: $0\_1125[1:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2489$524'.
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2480$519'.
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2471$514'.
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2462$509'.
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2443$503'.
+     1/1: $0\_1127[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2440$502'.
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2398$480'.
+     1/1: $0\_995[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2395$479'.
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2386$474'.
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2377$469'.
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2351$458'.
+     1/1: $0\_235[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2345$457'.
+     1/1: $0\_225[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2336$454'.
+     1/1: $0\_732[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2321$447'.
+     1/1: $0\_735[1:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2287$431'.
+     1/1: $0\_836[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2275$430'.
+     1/1: $0\_830[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2248$413'.
+     1/1: $0\_823[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2233$406'.
+     1/1: $0\_814[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2218$399'.
+     1/1: $0\_805[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2194$392'.
+     1/1: $0\_859[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2187$391'.
+     1/1: $0\_797[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2179$389'.
+     1/1: $0\_789[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2171$387'.
+     1/1: $0\_781[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2163$385'.
+     1/1: $0\_773[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2148$382'.
+     1/1: $0\_285[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2131$381'.
+     1/1: $0\_861[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2104$377'.
+     1/1: $0\_882[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2088$375'.
+     1/1: $0\_761[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2082$374'.
+     1/1: $0\_133[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2067$368'.
+     1/1: $0\_130[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2059$366'.
+     1/1: $0\_127[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2051$364'.
+     1/1: $0\_124[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2041$360'.
+     1/1: $0\_755[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2004$356'.
+     1/1: $0\_896[3:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1955$351'.
+     1/1: $0\_921[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1927$348'.
+     1/1: $0\_228[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1916$343'.
+     1/1: $0\_231[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1905$338'.
+     1/1: $0\_234[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1858$328'.
+     1/1: $0\_1053[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1835$326'.
+     1/1: $0\_715[11:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1829$325'.
+     1/1: $0\_714[11:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1805$311'.
+     1/1: $0\_704[11:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1797$309'.
+     1/1: $0\_700[11:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1789$307'.
+     1/1: $0\_696[11:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1775$305'.
+     1/1: $0\_1028[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1757$303'.
+     1/1: $0\_690[2:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1751$302'.
+     1/1: $0\_689[2:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1739$297'.
+     1/1: $0\_684[2:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1731$295'.
+     1/1: $0\_680[2:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1723$293'.
+     1/1: $0\_676[2:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1708$290'.
+     1/1: $0\_1035[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1691$289'.
+     1/1: $0\_1042[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1673$288'.
+     1/1: $0\_1048[3:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1652$285'.
+     1/1: $0\_665[11:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1646$284'.
+     1/1: $0\_664[11:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1630$277'.
+     1/1: $0\_658[11:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1622$275'.
+     1/1: $0\_654[11:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1614$273'.
+     1/1: $0\_650[11:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1594$266'.
+     1/1: $0\_305[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1567$250'.
+     1/1: $0\_355[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1460$195'.
+     1/1: $0\_535[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1397$178'.
+     1/1: $0\_367[1:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1381$172'.
+     1/1: $0\_372[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1250$109'.
+     1/1: $0\_349[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1238$105'.
+     1/1: $0\_343[2:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1227$102'.
+     1/1: $0\_339[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1214$96'.
+     1/1: $0\_325[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1202$90'.
+     1/1: $0\_321[3:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1157$71'.
+     1/1: $0\_257[9:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1151$70'.
+     1/1: $0\_256[9:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1126$58'.
+     1/1: $0\_251[9:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1118$56'.
+     1/1: $0\_247[9:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1110$54'.
+     1/1: $0\_243[9:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1096$48'.
+     1/1: $0\_217[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1077$41'.
+     1/1: $0\_156[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1071$40'.
+     1/1: $0\_146[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1051$28'.
+     1/1: $0\_149[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1043$26'.
+     1/1: $0\_152[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1035$24'.
+     1/1: $0\_155[0:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1020$22'.
+     1/1: $0\_218[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1014$21'.
+     1/1: $0\_188[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:997$17'.
+     1/1: $0\_189[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:991$16'.
+     1/1: $0\_182[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:983$14'.
+     1/1: $0\_176[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:975$12'.
+     1/1: $0\_170[7:0]
+Creating decoders for process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:963$7'.
+     1/1: $0\_165[0:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\deadline_sequencer_v2.\_1125' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2492$525'.
+No latch inferred for signal `\deadline_sequencer_v2.\_1127' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2443$503'.
+No latch inferred for signal `\deadline_sequencer_v2.\_995' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2398$480'.
+No latch inferred for signal `\deadline_sequencer_v2.\_235' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2351$458'.
+No latch inferred for signal `\deadline_sequencer_v2.\_836' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2287$431'.
+No latch inferred for signal `\deadline_sequencer_v2.\_859' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2194$392'.
+No latch inferred for signal `\deadline_sequencer_v2.\_285' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2148$382'.
+No latch inferred for signal `\deadline_sequencer_v2.\_861' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2131$381'.
+No latch inferred for signal `\deadline_sequencer_v2.\_882' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2104$377'.
+No latch inferred for signal `\deadline_sequencer_v2.\_761' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2088$375'.
+No latch inferred for signal `\deadline_sequencer_v2.\_896' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2004$356'.
+No latch inferred for signal `\deadline_sequencer_v2.\_921' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1955$351'.
+No latch inferred for signal `\deadline_sequencer_v2.\_1053' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1858$328'.
+No latch inferred for signal `\deadline_sequencer_v2.\_715' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1835$326'.
+No latch inferred for signal `\deadline_sequencer_v2.\_1028' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1775$305'.
+No latch inferred for signal `\deadline_sequencer_v2.\_690' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1757$303'.
+No latch inferred for signal `\deadline_sequencer_v2.\_1035' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1708$290'.
+No latch inferred for signal `\deadline_sequencer_v2.\_1042' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1691$289'.
+No latch inferred for signal `\deadline_sequencer_v2.\_1048' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1673$288'.
+No latch inferred for signal `\deadline_sequencer_v2.\_665' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1652$285'.
+No latch inferred for signal `\deadline_sequencer_v2.\_305' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1594$266'.
+No latch inferred for signal `\deadline_sequencer_v2.\_257' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1157$71'.
+No latch inferred for signal `\deadline_sequencer_v2.\_156' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1077$41'.
+No latch inferred for signal `\deadline_sequencer_v2.\_218' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1020$22'.
+No latch inferred for signal `\deadline_sequencer_v2.\_189' from process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:997$17'.
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\deadline_sequencer_v2.\_143' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2507$527'.
+  created $dff cell `$procdff$846' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_1115' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2489$524'.
+  created $dff cell `$procdff$847' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_1109' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2480$519'.
+  created $dff cell `$procdff$848' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_1103' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2471$514'.
+  created $dff cell `$procdff$849' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_1097' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2462$509'.
+  created $dff cell `$procdff$850' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_994' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2440$502'.
+  created $dff cell `$procdff$851' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_974' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2395$479'.
+  created $dff cell `$procdff$852' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_964' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2386$474'.
+  created $dff cell `$procdff$853' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_954' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2377$469'.
+  created $dff cell `$procdff$854' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_225' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2345$457'.
+  created $dff cell `$procdff$855' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_732' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2336$454'.
+  created $dff cell `$procdff$856' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_735' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2321$447'.
+  created $dff cell `$procdff$857' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_830' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2275$430'.
+  created $dff cell `$procdff$858' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_823' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2248$413'.
+  created $dff cell `$procdff$859' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_814' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2233$406'.
+  created $dff cell `$procdff$860' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_805' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2218$399'.
+  created $dff cell `$procdff$861' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_797' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2187$391'.
+  created $dff cell `$procdff$862' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_789' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2179$389'.
+  created $dff cell `$procdff$863' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_781' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2171$387'.
+  created $dff cell `$procdff$864' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_773' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2163$385'.
+  created $dff cell `$procdff$865' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_133' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2082$374'.
+  created $dff cell `$procdff$866' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_130' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2067$368'.
+  created $dff cell `$procdff$867' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_127' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2059$366'.
+  created $dff cell `$procdff$868' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_124' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2051$364'.
+  created $dff cell `$procdff$869' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_755' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2041$360'.
+  created $dff cell `$procdff$870' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_228' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1927$348'.
+  created $dff cell `$procdff$871' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_231' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1916$343'.
+  created $dff cell `$procdff$872' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_234' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1905$338'.
+  created $dff cell `$procdff$873' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_714' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1829$325'.
+  created $dff cell `$procdff$874' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_704' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1805$311'.
+  created $dff cell `$procdff$875' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_700' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1797$309'.
+  created $dff cell `$procdff$876' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_696' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1789$307'.
+  created $dff cell `$procdff$877' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_689' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1751$302'.
+  created $dff cell `$procdff$878' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_684' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1739$297'.
+  created $dff cell `$procdff$879' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_680' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1731$295'.
+  created $dff cell `$procdff$880' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_676' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1723$293'.
+  created $dff cell `$procdff$881' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_664' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1646$284'.
+  created $dff cell `$procdff$882' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_658' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1630$277'.
+  created $dff cell `$procdff$883' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_654' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1622$275'.
+  created $dff cell `$procdff$884' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_650' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1614$273'.
+  created $dff cell `$procdff$885' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_355' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1567$250'.
+  created $dff cell `$procdff$886' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_535' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1460$195'.
+  created $dff cell `$procdff$887' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_367' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1397$178'.
+  created $dff cell `$procdff$888' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_372' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1381$172'.
+  created $dff cell `$procdff$889' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_349' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1250$109'.
+  created $dff cell `$procdff$890' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_343' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1238$105'.
+  created $dff cell `$procdff$891' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_339' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1227$102'.
+  created $dff cell `$procdff$892' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_325' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1214$96'.
+  created $dff cell `$procdff$893' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_321' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1202$90'.
+  created $dff cell `$procdff$894' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_256' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1151$70'.
+  created $dff cell `$procdff$895' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_251' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1126$58'.
+  created $dff cell `$procdff$896' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_247' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1118$56'.
+  created $dff cell `$procdff$897' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_243' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1110$54'.
+  created $dff cell `$procdff$898' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_217' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1096$48'.
+  created $dff cell `$procdff$899' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_146' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1071$40'.
+  created $dff cell `$procdff$900' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_149' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1051$28'.
+  created $dff cell `$procdff$901' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_152' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1043$26'.
+  created $dff cell `$procdff$902' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_155' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1035$24'.
+  created $dff cell `$procdff$903' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_188' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1014$21'.
+  created $dff cell `$procdff$904' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_182' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:991$16'.
+  created $dff cell `$procdff$905' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_176' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:983$14'.
+  created $dff cell `$procdff$906' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_170' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:975$12'.
+  created $dff cell `$procdff$907' with positive edge clock.
+Creating register for signal `\deadline_sequencer_v2.\_165' using process `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:963$7'.
+  created $dff cell `$procdff$908' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2507$527'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2507$527'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2492$525'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2492$525'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2489$524'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2480$519'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2471$514'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2462$509'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2443$503'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2443$503'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2440$502'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2398$480'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2398$480'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2395$479'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2386$474'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2377$469'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2351$458'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2351$458'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2345$457'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2345$457'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2336$454'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2336$454'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2321$447'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2321$447'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2287$431'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2287$431'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2275$430'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2275$430'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2248$413'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2248$413'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2233$406'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2233$406'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2218$399'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2218$399'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2194$392'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2194$392'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2187$391'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2187$391'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2179$389'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2179$389'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2171$387'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2171$387'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2163$385'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2163$385'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2148$382'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2148$382'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2131$381'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2131$381'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2104$377'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2104$377'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2088$375'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2088$375'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2082$374'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2082$374'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2067$368'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2067$368'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2059$366'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2059$366'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2051$364'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2051$364'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2041$360'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2041$360'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2004$356'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:2004$356'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1955$351'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1955$351'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1927$348'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1927$348'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1916$343'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1916$343'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1905$338'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1905$338'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1858$328'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1858$328'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1835$326'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1835$326'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1829$325'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1829$325'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1805$311'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1805$311'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1797$309'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1797$309'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1789$307'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1789$307'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1775$305'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1775$305'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1757$303'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1757$303'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1751$302'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1751$302'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1739$297'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1739$297'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1731$295'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1731$295'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1723$293'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1723$293'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1708$290'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1708$290'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1691$289'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1691$289'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1673$288'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1673$288'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1652$285'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1652$285'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1646$284'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1646$284'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1630$277'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1630$277'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1622$275'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1622$275'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1614$273'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1614$273'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1594$266'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1594$266'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1567$250'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1567$250'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1460$195'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1460$195'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1397$178'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1397$178'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1381$172'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1381$172'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1250$109'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1250$109'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1238$105'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1238$105'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1227$102'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1227$102'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1214$96'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1214$96'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1202$90'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1202$90'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1157$71'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1157$71'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1151$70'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1151$70'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1126$58'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1126$58'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1118$56'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1118$56'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1110$54'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1110$54'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1096$48'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1096$48'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1077$41'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1077$41'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1071$40'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1071$40'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1051$28'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1051$28'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1043$26'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1043$26'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1035$24'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1035$24'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1020$22'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1020$22'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1014$21'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:1014$21'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:997$17'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:997$17'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:991$16'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:991$16'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:983$14'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:983$14'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:975$12'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:975$12'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:963$7'.
+Removing empty process `deadline_sequencer_v2.$proc$rtl/deadline_sequencer_v2.v:963$7'.
+Cleaned up 80 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+<suppressed ~47 debug messages>
+
+3.3. Executing FLATTEN pass (flatten design).
+
+3.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+Removed 2 unused cells and 614 unused wires.
+<suppressed ~5 debug messages>
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module deadline_sequencer_v2...
+Found and reported 0 problems.
+
+3.7. Executing OPT pass (performing simple optimizations).
+
+3.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 682 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Computing hashes of 510 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Computing hashes of 509 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+<suppressed ~519 debug messages>
+Removed a total of 173 cells.
+
+3.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_v2..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+      Replacing known input bits on port A of cell $ternary$rtl/deadline_sequencer_v2.v:1057$29: \_156 -> 1'0
+      Replacing known input bits on port A of cell $ternary$rtl/deadline_sequencer_v2.v:1058$30: \_156 -> 1'0
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~813 debug messages>
+
+3.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_v2.
+  Optimizing cells in module \deadline_sequencer_v2.
+Performed a total of 2 changes.
+
+3.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 507 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Computing hashes of 498 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+<suppressed ~27 debug messages>
+Removed a total of 9 cells.
+
+3.7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+Removed 0 unused cells and 79 unused wires.
+<suppressed ~1 debug messages>
+
+3.7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.7.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.7.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_v2..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~810 debug messages>
+
+3.7.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_v2.
+Performed a total of 0 changes.
+
+3.7.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 498 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Removed a total of 0 cells.
+
+3.7.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+
+3.7.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.7.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.8. Executing FSM pass (extract and optimize FSM).
+
+3.8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+
+3.8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.9. Executing OPT pass (performing simple optimizations).
+
+3.9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 498 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Removed a total of 0 cells.
+
+3.9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_v2..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~810 debug messages>
+
+3.9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_v2.
+Performed a total of 0 changes.
+
+3.9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 498 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Removed a total of 0 cells.
+
+3.9.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$908 ($dff) from module deadline_sequencer_v2 (D = \_162, Q = \_165, rval = 1'0).
+Adding SRST signal on $procdff$907 ($dff) from module deadline_sequencer_v2 (D = \_171, Q = \_170, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$912 ($sdff) from module deadline_sequencer_v2 (D = \_7, Q = \_170).
+Adding SRST signal on $procdff$906 ($dff) from module deadline_sequencer_v2 (D = \_177, Q = \_176, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$914 ($sdff) from module deadline_sequencer_v2 (D = \_7, Q = \_176).
+Adding SRST signal on $procdff$905 ($dff) from module deadline_sequencer_v2 (D = \_183, Q = \_182, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$916 ($sdff) from module deadline_sequencer_v2 (D = \_7, Q = \_182).
+Adding SRST signal on $procdff$904 ($dff) from module deadline_sequencer_v2 (D = \_198, Q = \_188, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$918 ($sdff) from module deadline_sequencer_v2 (D = \_7, Q = \_188).
+Adding SRST signal on $procdff$903 ($dff) from module deadline_sequencer_v2 (D = \_199, Q = \_155, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$920 ($sdff) from module deadline_sequencer_v2 (D = \_12, Q = \_155).
+Adding SRST signal on $procdff$902 ($dff) from module deadline_sequencer_v2 (D = \_10, Q = \_152, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$922 ($sdff) from module deadline_sequencer_v2 (D = \_12, Q = \_152).
+Adding SRST signal on $procdff$901 ($dff) from module deadline_sequencer_v2 (D = \_11, Q = \_149, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$924 ($sdff) from module deadline_sequencer_v2 (D = \_12, Q = \_149).
+Adding SRST signal on $procdff$900 ($dff) from module deadline_sequencer_v2 (D = \_13, Q = \_146, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$926 ($sdff) from module deadline_sequencer_v2 (D = \_12, Q = \_146).
+Adding SRST signal on $procdff$899 ($dff) from module deadline_sequencer_v2 (D = \_14, Q = \_217, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$928 ($sdff) from module deadline_sequencer_v2 (D = \_14, Q = \_217).
+Adding SRST signal on $procdff$898 ($dff) from module deadline_sequencer_v2 (D = \_20, Q = \_243, rval = 10'0000000000).
+Adding EN signal on $auto$ff.cc:337:slice$932 ($sdff) from module deadline_sequencer_v2 (D = \_23, Q = \_243).
+Adding SRST signal on $procdff$897 ($dff) from module deadline_sequencer_v2 (D = \_21, Q = \_247, rval = 10'0000000000).
+Adding EN signal on $auto$ff.cc:337:slice$934 ($sdff) from module deadline_sequencer_v2 (D = \_23, Q = \_247).
+Adding SRST signal on $procdff$896 ($dff) from module deadline_sequencer_v2 (D = \_22, Q = \_251, rval = 10'0000000000).
+Adding EN signal on $auto$ff.cc:337:slice$936 ($sdff) from module deadline_sequencer_v2 (D = \_23, Q = \_251).
+Adding SRST signal on $procdff$895 ($dff) from module deadline_sequencer_v2 (D = \_24, Q = \_256, rval = 10'0000000000).
+Adding EN signal on $auto$ff.cc:337:slice$938 ($sdff) from module deadline_sequencer_v2 (D = \_23, Q = \_256).
+Adding SRST signal on $procdff$894 ($dff) from module deadline_sequencer_v2 (D = { \_287 \_289 \_291 \_293 }, Q = \_321, rval = 4'0000).
+Adding SRST signal on $procdff$893 ($dff) from module deadline_sequencer_v2 (D = \_30, Q = \_325, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$949 ($sdff) from module deadline_sequencer_v2 (D = \_235, Q = \_325).
+Adding SRST signal on $procdff$892 ($dff) from module deadline_sequencer_v2 (D = \_336, Q = \_339, rval = 1'0).
+Adding SRST signal on $procdff$891 ($dff) from module deadline_sequencer_v2 (D = \_345, Q = \_343, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$956 ($sdff) from module deadline_sequencer_v2 (D = \imem_data [10:8], Q = \_343).
+Adding SRST signal on $procdff$890 ($dff) from module deadline_sequencer_v2 (D = \_352, Q = \_349, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$958 ($sdff) from module deadline_sequencer_v2 (D = \_351, Q = \_349).
+Adding SRST signal on $procdff$889 ($dff) from module deadline_sequencer_v2 (D = \_355, Q = \_372, rval = 8'00000000).
+Adding SRST signal on $procdff$888 ($dff) from module deadline_sequencer_v2 (D = \_363, Q = \_367, rval = 2'00).
+Adding SRST signal on $procdff$887 ($dff) from module deadline_sequencer_v2 (D = \_44, Q = \_535, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$962 ($sdff) from module deadline_sequencer_v2 (D = \_44, Q = \_535).
+Adding SRST signal on $procdff$886 ($dff) from module deadline_sequencer_v2 (D = \_47, Q = \_355, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$970 ($sdff) from module deadline_sequencer_v2 (D = \_47, Q = \_355).
+Adding SRST signal on $procdff$885 ($dff) from module deadline_sequencer_v2 (D = \_50, Q = \_650, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$974 ($sdff) from module deadline_sequencer_v2 (D = \_53, Q = \_650).
+Adding SRST signal on $procdff$884 ($dff) from module deadline_sequencer_v2 (D = \_51, Q = \_654, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$976 ($sdff) from module deadline_sequencer_v2 (D = \_53, Q = \_654).
+Adding SRST signal on $procdff$883 ($dff) from module deadline_sequencer_v2 (D = \_52, Q = \_658, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$978 ($sdff) from module deadline_sequencer_v2 (D = \_53, Q = \_658).
+Adding SRST signal on $procdff$882 ($dff) from module deadline_sequencer_v2 (D = \_54, Q = \_664, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$980 ($sdff) from module deadline_sequencer_v2 (D = \_53, Q = \_664).
+Adding SRST signal on $procdff$881 ($dff) from module deadline_sequencer_v2 (D = \_57, Q = \_676, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$982 ($sdff) from module deadline_sequencer_v2 (D = \_60, Q = \_676).
+Adding SRST signal on $procdff$880 ($dff) from module deadline_sequencer_v2 (D = \_58, Q = \_680, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$984 ($sdff) from module deadline_sequencer_v2 (D = \_60, Q = \_680).
+Adding SRST signal on $procdff$879 ($dff) from module deadline_sequencer_v2 (D = \_59, Q = \_684, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$986 ($sdff) from module deadline_sequencer_v2 (D = \_60, Q = \_684).
+Adding SRST signal on $procdff$878 ($dff) from module deadline_sequencer_v2 (D = \_61, Q = \_689, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$988 ($sdff) from module deadline_sequencer_v2 (D = \_60, Q = \_689).
+Adding SRST signal on $procdff$877 ($dff) from module deadline_sequencer_v2 (D = \_62, Q = \_696, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$990 ($sdff) from module deadline_sequencer_v2 (D = \_65, Q = \_696).
+Adding SRST signal on $procdff$876 ($dff) from module deadline_sequencer_v2 (D = \_63, Q = \_700, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$992 ($sdff) from module deadline_sequencer_v2 (D = \_65, Q = \_700).
+Adding SRST signal on $procdff$875 ($dff) from module deadline_sequencer_v2 (D = \_64, Q = \_704, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$994 ($sdff) from module deadline_sequencer_v2 (D = \_65, Q = \_704).
+Adding SRST signal on $procdff$874 ($dff) from module deadline_sequencer_v2 (D = \_66, Q = \_714, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$996 ($sdff) from module deadline_sequencer_v2 (D = \_65, Q = \_714).
+Adding SRST signal on $procdff$873 ($dff) from module deadline_sequencer_v2 (D = \_67, Q = \_234, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$998 ($sdff) from module deadline_sequencer_v2 (D = \_67, Q = \_234).
+Adding SRST signal on $procdff$872 ($dff) from module deadline_sequencer_v2 (D = \_68, Q = \_231, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1002 ($sdff) from module deadline_sequencer_v2 (D = \_68, Q = \_231).
+Adding SRST signal on $procdff$871 ($dff) from module deadline_sequencer_v2 (D = \_69, Q = \_228, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1006 ($sdff) from module deadline_sequencer_v2 (D = \_69, Q = \_228).
+Adding SRST signal on $procdff$870 ($dff) from module deadline_sequencer_v2 (D = \_72, Q = \_755, rval = 8'00000000).
+Adding SRST signal on $procdff$869 ($dff) from module deadline_sequencer_v2 (D = \_74, Q = \_124, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1011 ($sdff) from module deadline_sequencer_v2 (D = \_77, Q = \_124).
+Adding SRST signal on $procdff$868 ($dff) from module deadline_sequencer_v2 (D = \_75, Q = \_127, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1013 ($sdff) from module deadline_sequencer_v2 (D = \_77, Q = \_127).
+Adding SRST signal on $procdff$867 ($dff) from module deadline_sequencer_v2 (D = \_759, Q = \_130, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1015 ($sdff) from module deadline_sequencer_v2 (D = \_77, Q = \_130).
+Adding SRST signal on $procdff$866 ($dff) from module deadline_sequencer_v2 (D = \_766, Q = \_133, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1017 ($sdff) from module deadline_sequencer_v2 (D = \_77, Q = \_133).
+Adding SRST signal on $procdff$865 ($dff) from module deadline_sequencer_v2 (D = \_774, Q = \_773, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1019 ($sdff) from module deadline_sequencer_v2 (D = \_235, Q = \_773).
+Adding SRST signal on $procdff$864 ($dff) from module deadline_sequencer_v2 (D = \_782, Q = \_781, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1021 ($sdff) from module deadline_sequencer_v2 (D = \_235, Q = \_781).
+Adding SRST signal on $procdff$863 ($dff) from module deadline_sequencer_v2 (D = \_790, Q = \_789, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1023 ($sdff) from module deadline_sequencer_v2 (D = \_235, Q = \_789).
+Adding SRST signal on $procdff$862 ($dff) from module deadline_sequencer_v2 (D = \_798, Q = \_797, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1025 ($sdff) from module deadline_sequencer_v2 (D = \_235, Q = \_797).
+Adding SRST signal on $procdff$861 ($dff) from module deadline_sequencer_v2 (D = \_806, Q = \_805, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$1027 ($sdff) from module deadline_sequencer_v2 (D = 1'1, Q = \_805).
+Adding SRST signal on $procdff$860 ($dff) from module deadline_sequencer_v2 (D = \_815, Q = \_814, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$1031 ($sdff) from module deadline_sequencer_v2 (D = 1'1, Q = \_814).
+Adding SRST signal on $procdff$859 ($dff) from module deadline_sequencer_v2 (D = \_824, Q = \_823, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$1035 ($sdff) from module deadline_sequencer_v2 (D = 1'1, Q = \_823).
+Adding SRST signal on $procdff$858 ($dff) from module deadline_sequencer_v2 (D = \_850, Q = \_830, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$1039 ($sdff) from module deadline_sequencer_v2 (D = 1'1, Q = \_830).
+Adding SRST signal on $procdff$857 ($dff) from module deadline_sequencer_v2 (D = \_938, Q = \_735, rval = 2'00).
+Adding EN signal on $auto$ff.cc:337:slice$1043 ($sdff) from module deadline_sequencer_v2 (D = \_143, Q = \_735).
+Adding SRST signal on $procdff$856 ($dff) from module deadline_sequencer_v2 (D = \_943, Q = \_732, rval = 1'0).
+Adding SRST signal on $procdff$855 ($dff) from module deadline_sequencer_v2 (D = \_100, Q = \_225, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1046 ($sdff) from module deadline_sequencer_v2 (D = \_100, Q = \_225).
+Adding EN signal on $procdff$854 ($dff) from module deadline_sequencer_v2 (D = \_101, Q = \_954).
+Adding EN signal on $procdff$853 ($dff) from module deadline_sequencer_v2 (D = \_102, Q = \_964).
+Adding EN signal on $procdff$852 ($dff) from module deadline_sequencer_v2 (D = \_105, Q = \_974).
+Adding EN signal on $procdff$851 ($dff) from module deadline_sequencer_v2 (D = \_108, Q = \_994).
+Adding EN signal on $procdff$850 ($dff) from module deadline_sequencer_v2 (D = \_109, Q = \_1097).
+Adding EN signal on $procdff$849 ($dff) from module deadline_sequencer_v2 (D = \_110, Q = \_1103).
+Adding EN signal on $procdff$848 ($dff) from module deadline_sequencer_v2 (D = \_111, Q = \_1109).
+Adding EN signal on $procdff$847 ($dff) from module deadline_sequencer_v2 (D = \_1118, Q = \_1115).
+Adding SRST signal on $procdff$846 ($dff) from module deadline_sequencer_v2 (D = \_1120, Q = \_143, rval = 2'00).
+
+3.9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+Removed 106 unused cells and 147 unused wires.
+<suppressed ~199 debug messages>
+
+3.9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+<suppressed ~16 debug messages>
+
+3.9.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_v2..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~551 debug messages>
+
+3.9.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_v2.
+Performed a total of 0 changes.
+
+3.9.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 419 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Computing hashes of 417 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+<suppressed ~6 debug messages>
+Removed a total of 2 cells.
+
+3.9.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+3.9.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.9.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_v2..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~551 debug messages>
+
+3.9.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_v2.
+Performed a total of 0 changes.
+
+3.9.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 417 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Removed a total of 0 cells.
+
+3.9.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+
+3.9.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.9.23. Finished fast OPT passes. (There is nothing left to do.)
+
+3.10. Executing WREDUCE pass (reducing word size of cells).
+Removed top 2 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1060$31 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1064$35 ($eq).
+Removed top 3 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1066$37 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1102$49 ($eq).
+Removed top 9 bits (of 10) from port B of cell deadline_sequencer_v2.$add$rtl/deadline_sequencer_v2.v:1133$59 ($add).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1139$61 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1144$65 ($eq).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1172$73 ($eq).
+Removed top 1 bits (of 2) from port A of cell deadline_sequencer_v2.$lt$rtl/deadline_sequencer_v2.v:1258$110 ($lt).
+Removed top 1 bits (of 2) from port A of cell deadline_sequencer_v2.$lt$rtl/deadline_sequencer_v2.v:1262$112 ($lt).
+Removed top 2 bits (of 3) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1483$204 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1486$206 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1489$208 ($eq).
+Removed top 2 bits (of 3) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1521$224 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1522$225 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1523$226 ($eq).
+Removed top 2 bits (of 3) from port B of cell deadline_sequencer_v2.$add$rtl/deadline_sequencer_v2.v:1527$230 ($add).
+Removed top 11 bits (of 12) from port B of cell deadline_sequencer_v2.$sub$rtl/deadline_sequencer_v2.v:1637$278 ($sub).
+Removed top 2 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1641$281 ($eq).
+Removed top 11 bits (of 12) from port B of cell deadline_sequencer_v2.$sub$rtl/deadline_sequencer_v2.v:1812$312 ($sub).
+Removed top 2 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1816$314 ($eq).
+Removed top 2 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1824$322 ($eq).
+Removed top 6 bits (of 8) from port B of cell deadline_sequencer_v2.$add$rtl/deadline_sequencer_v2.v:1899$333 ($add).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:1923$345 ($eq).
+Removed top 1 bits (of 8) from mux cell deadline_sequencer_v2.$ternary$rtl/deadline_sequencer_v2.v:1982$354 ($mux).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:2075$369 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:2315$443 ($eq).
+Removed top 3 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:2365$461 ($eq).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:2390$475 ($eq).
+Removed top 7 bits (of 8) from port B of cell deadline_sequencer_v2.$add$rtl/deadline_sequencer_v2.v:2410$481 ($add).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:2429$494 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:2432$496 ($eq).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_v2.$eq$rtl/deadline_sequencer_v2.v:2475$515 ($eq).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_v2.$add$rtl/deadline_sequencer_v2.v:2505$526 ($add).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_v2.$procmux$538_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer_v2.$procmux$651_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer_v2.$procmux$652_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell deadline_sequencer_v2.$procmux$653_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer_v2.$procmux$723_CMP0 ($eq).
+
+3.11. Executing PEEPOPT pass (run peephole optimizers).
+
+3.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+
+3.13. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module deadline_sequencer_v2:
+  creating $macc model for $add$rtl/deadline_sequencer_v2.v:1133$59 ($add).
+  creating $macc model for $add$rtl/deadline_sequencer_v2.v:1527$230 ($add).
+  creating $macc model for $add$rtl/deadline_sequencer_v2.v:1899$333 ($add).
+  creating $macc model for $add$rtl/deadline_sequencer_v2.v:2410$481 ($add).
+  creating $macc model for $add$rtl/deadline_sequencer_v2.v:2505$526 ($add).
+  creating $macc model for $sub$rtl/deadline_sequencer_v2.v:1637$278 ($sub).
+  creating $macc model for $sub$rtl/deadline_sequencer_v2.v:1812$312 ($sub).
+  creating $alu model for $macc $sub$rtl/deadline_sequencer_v2.v:1812$312.
+  creating $alu model for $macc $sub$rtl/deadline_sequencer_v2.v:1637$278.
+  creating $alu model for $macc $add$rtl/deadline_sequencer_v2.v:2505$526.
+  creating $alu model for $macc $add$rtl/deadline_sequencer_v2.v:2410$481.
+  creating $alu model for $macc $add$rtl/deadline_sequencer_v2.v:1899$333.
+  creating $alu model for $macc $add$rtl/deadline_sequencer_v2.v:1527$230.
+  creating $alu model for $macc $add$rtl/deadline_sequencer_v2.v:1133$59.
+  creating $alu model for $lt$rtl/deadline_sequencer_v2.v:1258$110 ($lt): new $alu
+  creating $alu model for $lt$rtl/deadline_sequencer_v2.v:1262$112 ($lt): new $alu
+  creating $alu model for $lt$rtl/deadline_sequencer_v2.v:1266$114 ($lt): new $alu
+  creating $alu model for $lt$rtl/deadline_sequencer_v2.v:1270$116 ($lt): new $alu
+  creating $alu cell for $lt$rtl/deadline_sequencer_v2.v:1270$116: $auto$alumacc.cc:512:replace_alu$1079
+  creating $alu cell for $lt$rtl/deadline_sequencer_v2.v:1266$114: $auto$alumacc.cc:512:replace_alu$1084
+  creating $alu cell for $lt$rtl/deadline_sequencer_v2.v:1262$112: $auto$alumacc.cc:512:replace_alu$1089
+  creating $alu cell for $lt$rtl/deadline_sequencer_v2.v:1258$110: $auto$alumacc.cc:512:replace_alu$1094
+  creating $alu cell for $add$rtl/deadline_sequencer_v2.v:1133$59: $auto$alumacc.cc:512:replace_alu$1099
+  creating $alu cell for $add$rtl/deadline_sequencer_v2.v:1527$230: $auto$alumacc.cc:512:replace_alu$1102
+  creating $alu cell for $add$rtl/deadline_sequencer_v2.v:1899$333: $auto$alumacc.cc:512:replace_alu$1105
+  creating $alu cell for $add$rtl/deadline_sequencer_v2.v:2410$481: $auto$alumacc.cc:512:replace_alu$1108
+  creating $alu cell for $add$rtl/deadline_sequencer_v2.v:2505$526: $auto$alumacc.cc:512:replace_alu$1111
+  creating $alu cell for $sub$rtl/deadline_sequencer_v2.v:1637$278: $auto$alumacc.cc:512:replace_alu$1114
+  creating $alu cell for $sub$rtl/deadline_sequencer_v2.v:1812$312: $auto$alumacc.cc:512:replace_alu$1117
+  created 11 $alu and 0 $macc cells.
+
+3.14. Executing SHARE pass (SAT-based resource sharing).
+
+3.15. Executing OPT pass (performing simple optimizations).
+
+3.15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+<suppressed ~32 debug messages>
+
+3.15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 421 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Removed a total of 0 cells.
+
+3.15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_v2..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~551 debug messages>
+
+3.15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_v2.
+Performed a total of 0 changes.
+
+3.15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 421 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Removed a total of 0 cells.
+
+3.15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+Removed 4 unused cells and 36 unused wires.
+<suppressed ~37 debug messages>
+
+3.15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.15.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.15.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_v2..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~551 debug messages>
+
+3.15.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_v2.
+Performed a total of 0 changes.
+
+3.15.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 417 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Removed a total of 0 cells.
+
+3.15.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+
+3.15.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.15.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.16. Executing MEMORY pass.
+
+3.16.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.16.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.16.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.16.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.16.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+3.16.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+
+3.16.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.16.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.16.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+
+3.16.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+
+3.18. Executing OPT pass (performing simple optimizations).
+
+3.18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+<suppressed ~47 debug messages>
+
+3.18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 387 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Computing hashes of 386 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+3.18.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.18.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+Removed 2 unused cells and 7 unused wires.
+<suppressed ~3 debug messages>
+
+3.18.5. Finished fast OPT passes.
+
+3.19. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.20. Executing OPT pass (performing simple optimizations).
+
+3.20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 384 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Removed a total of 0 cells.
+
+3.20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_v2..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~489 debug messages>
+
+3.20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_v2.
+    Consolidated identical input bits for $mux cell $ternary$rtl/deadline_sequencer_v2.v:1940$349:
+      Old ports: A={ \_235 [6:0] \_922 }, B={ \_235 [5:0] 1'0 \_922 }, Y=\_934
+      New ports: A=\_235 [6:0], B={ \_235 [5:0] 1'0 }, Y=\_934 [7:1]
+      New connections: \_934 [0] = \_922
+  Optimizing cells in module \deadline_sequencer_v2.
+Performed a total of 1 changes.
+
+3.20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 384 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Removed a total of 0 cells.
+
+3.20.6. Executing OPT_SHARE pass.
+
+3.20.7. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $auto$ff.cc:337:slice$929 ($sdffe) from module deadline_sequencer_v2 (D = \_189, Q = \_217).
+
+3.20.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+Removed 1 unused cells and 5 unused wires.
+<suppressed ~6 debug messages>
+
+3.20.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.20.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.20.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer_v2..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~484 debug messages>
+
+3.20.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer_v2.
+Performed a total of 0 changes.
+
+3.20.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 384 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Removed a total of 0 cells.
+
+3.20.14. Executing OPT_SHARE pass.
+
+3.20.15. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+
+3.20.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+
+3.20.18. Finished fast OPT passes. (There is nothing left to do.)
+
+3.21. Executing TECHMAP pass (map to technology primitives).
+
+3.21.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.21.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $sdffe.
+Using template $paramod$c654a831025ee805eb993d5880de10a3d616cd3b\_90_pmux for cells of type $pmux.
+Using template $paramod$6831557730818fb92b11a295f9eb33ff8fa62af1\_90_alu for cells of type $alu.
+Using template $paramod$175e67c02b86e96b1288b9dc100122520d7240d8\_90_alu for cells of type $alu.
+Using template $paramod$645fe0cc96ae5edb83bff90cc2c78f4a20ca3e3c\_90_pmux for cells of type $pmux.
+Using template $paramod$c3cd1564c35d873179656addd6052d7ea8b6d991\_90_alu for cells of type $alu.
+Using template $paramod$103b4016182df467cceab67bcf3e18e6361ec0fd\_90_alu for cells of type $alu.
+Using template $paramod$3ef7d3dd227da7627a99c5e5a6a4deb817573e39\_90_alu for cells of type $alu.
+Using template $paramod$effaf36432c334223db2ff0ecd7fefb10188d957\_90_pmux for cells of type $pmux.
+Using template $paramod$754650b284649a026620fc6856e5b6886cbfe794\_90_alu for cells of type $alu.
+Using template $paramod$adbaf76fa5a3091a329503792521395f8ff4d1a4\_90_alu for cells of type $alu.
+Using template $paramod$7e708ae28ab761f11d0fb59d3ffc72f6a4baf5d9\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $dffe.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $logic_not.
+Using template $paramod$97565c3687be688407d1272a293bd9d0ae6852dc\_90_pmux for cells of type $pmux.
+Using template $paramod$d629d85c8826a74239b9178d1930215a43b0ceb0\_90_pmux for cells of type $pmux.
+Using template $paramod$bf541dd3c0ba8228982b61e7bfbc350a2c253f4c\_90_pmux for cells of type $pmux.
+Using template $paramod$33afdd83bf3811dac2de7a968d39eea5718691bc\_90_pmux for cells of type $pmux.
+Using template $paramod$c2e415ef15bc3ccd2723772353a6b450d3d76206\_90_pmux for cells of type $pmux.
+Using template $paramod$556548cb7038fa09465db9fdc5b10cb4e4ea85e6\_90_pmux for cells of type $pmux.
+Using template $paramod$85df5dc01c7df96a7d8e5f1fdf76ce9ac452af63\_90_pmux for cells of type $pmux.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001100 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001100 for cells of type $lcu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000011 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000111 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000111 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001000 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001000 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000010 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000010 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000001 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000001 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001010 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001010 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~2182 debug messages>
+
+3.22. Executing OPT pass (performing simple optimizations).
+
+3.22.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+<suppressed ~1293 debug messages>
+
+3.22.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 2759 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Computing hashes of 2609 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Computing hashes of 2542 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Computing hashes of 2534 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Computing hashes of 2529 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+<suppressed ~690 debug messages>
+Removed a total of 230 cells.
+
+3.22.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.22.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+Removed 54 unused cells and 1458 unused wires.
+<suppressed ~72 debug messages>
+
+3.22.5. Finished fast OPT passes.
+
+3.23. Executing ABC pass (technology mapping using ABC).
+
+3.23.1. Extracting gate netlist of module `\deadline_sequencer_v2' to `<abc-temp-dir>/input.blif'..
+
+3.23.1.1. Executed ABC.
+Extracted 2079 gates and 2626 wires to a netlist network with 546 inputs and 265 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library /tmp/yosys-abc-uFy6hr/stdcells.genlib 
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+3.23.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:      133
+ABC RESULTS:            ANDNOT cells:      447
+ABC RESULTS:               MUX cells:      824
+ABC RESULTS:              NAND cells:       18
+ABC RESULTS:               NOR cells:       54
+ABC RESULTS:               NOT cells:      106
+ABC RESULTS:                OR cells:      271
+ABC RESULTS:             ORNOT cells:       42
+ABC RESULTS:              XNOR cells:        6
+ABC RESULTS:               XOR cells:       55
+ABC RESULTS:        internal signals:     1815
+ABC RESULTS:           input signals:      546
+ABC RESULTS:          output signals:      265
+Removing temp directory.
+Removing global temp directory.
+
+3.24. Executing OPT pass (performing simple optimizations).
+
+3.24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer_v2.
+<suppressed ~228 debug messages>
+
+3.24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer_v2'.
+Computing hashes of 2352 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+Computing hashes of 2338 cells of `\deadline_sequencer_v2'.
+Finding duplicate cells in `\deadline_sequencer_v2'.
+<suppressed ~42 debug messages>
+Removed a total of 14 cells.
+
+3.24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+Removed 7 unused cells and 1507 unused wires.
+<suppressed ~304 debug messages>
+
+3.24.5. Finished fast OPT passes.
+
+3.25. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `deadline_sequencer_v2'. Setting top module to deadline_sequencer_v2.
+
+3.25.1. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_v2
+
+3.25.2. Analyzing design hierarchy..
+Top module:  \deadline_sequencer_v2
+Removed 0 unused modules.
+
+3.26. Printing statistics.
+
+=== deadline_sequencer_v2 ===
+
+        +----------Local Count, excluding submodules.
+        | 
+     2159 wires
+     3607 wire bits
+      463 public wires
+     1911 public wire bits
+       39 ports
+      332 port bits
+     2331 cells
+      442   $_ANDNOT_
+      131   $_AND_
+       40   $_DFFE_PP_
+      824   $_MUX_
+       17   $_NAND_
+       54   $_NOR_
+       99   $_NOT_
+       38   $_ORNOT_
+      269   $_OR_
+      162   $_SDFFE_PP0N_
+      167   $_SDFFE_PP0P_
+       27   $_SDFF_PP0_
+        6   $_XNOR_
+       55   $_XOR_
+
+3.27. Executing CHECK pass (checking for obvious problems).
+Checking module deadline_sequencer_v2...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\deadline_sequencer_v2':
+  mapped 396 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Extracting gate netlist of module `\deadline_sequencer_v2' to `<abc-temp-dir>/input.blif'..
+
+5.1.1. Executed ABC.
+Extracted 2660 gates and 3235 wires to a netlist network with 573 inputs and 455 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.01 sec
+ABC: Memory =    2.85 MB. Time =     0.01 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+5.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:       47
+ABC RESULTS:    sg13g2_a21oi_1 cells:      501
+ABC RESULTS:   sg13g2_a221oi_1 cells:       49
+ABC RESULTS:    sg13g2_a22oi_1 cells:      279
+ABC RESULTS:     sg13g2_and2_1 cells:       48
+ABC RESULTS:     sg13g2_and3_1 cells:       11
+ABC RESULTS:     sg13g2_and4_1 cells:        4
+ABC RESULTS:      sg13g2_inv_1 cells:      206
+ABC RESULTS:     sg13g2_mux2_1 cells:       70
+ABC RESULTS:     sg13g2_mux4_1 cells:       21
+ABC RESULTS:    sg13g2_nand2_1 cells:      221
+ABC RESULTS:   sg13g2_nand2b_1 cells:       58
+ABC RESULTS:    sg13g2_nand3_1 cells:       46
+ABC RESULTS:   sg13g2_nand3b_1 cells:        1
+ABC RESULTS:    sg13g2_nand4_1 cells:       10
+ABC RESULTS:     sg13g2_nor2_1 cells:      131
+ABC RESULTS:    sg13g2_nor2b_1 cells:       28
+ABC RESULTS:     sg13g2_nor3_1 cells:       18
+ABC RESULTS:     sg13g2_nor4_1 cells:        7
+ABC RESULTS:    sg13g2_o21ai_1 cells:      488
+ABC RESULTS:      sg13g2_or2_1 cells:       11
+ABC RESULTS:      sg13g2_or3_1 cells:        3
+ABC RESULTS:      sg13g2_or4_1 cells:        1
+ABC RESULTS:    sg13g2_xnor2_1 cells:       28
+ABC RESULTS:     sg13g2_xor2_1 cells:       10
+ABC RESULTS:        internal signals:     2207
+ABC RESULTS:           input signals:      573
+ABC RESULTS:          output signals:      455
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer_v2..
+Removed 0 unused cells and 3138 unused wires.
+<suppressed ~86 debug messages>
+
+7. Printing statistics.
+
+=== deadline_sequencer_v2 ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     2616        - wires
+     3754        - wire bits
+      378        - public wires
+     1516        - public wire bits
+       39        - ports
+      332        - port bits
+     2693 4.13E+04 cells
+       47  596.938   sg13g2_a21o_1
+      501 4.55E+03   sg13g2_a21oi_1
+       49  711.245   sg13g2_a221oi_1
+      279 3.03E+03   sg13g2_a22oi_1
+       48  435.456   sg13g2_and2_1
+       11  139.709   sg13g2_and3_1
+        4   58.061   sg13g2_and4_1
+      396 1.94E+04   sg13g2_dfrbpq_1
+      206 1.12E+03   sg13g2_inv_1
+       70  1270.08   sg13g2_mux2_1
+       21   800.15   sg13g2_mux4_1
+      221  1603.93   sg13g2_nand2_1
+       58  526.176   sg13g2_nand2b_1
+       46  417.312   sg13g2_nand3_1
+        1   12.701   sg13g2_nand3b_1
+       10  108.864   sg13g2_nand4_1
+      131  950.746   sg13g2_nor2_1
+       28  254.016   sg13g2_nor2b_1
+       18  163.296   sg13g2_nor3_1
+        7   76.205   sg13g2_nor4_1
+      488 4.43E+03   sg13g2_o21ai_1
+       11   99.792   sg13g2_or2_1
+        3   38.102   sg13g2_or3_1
+        1   14.515   sg13g2_or4_1
+       28  406.426   sg13g2_xnor2_1
+       10  145.152   sg13g2_xor2_1
+
+   Chip area for module '\deadline_sequencer_v2': 41348.701800
+     of which used for sequential elements: 19399.564800 (46.92%)
+
+End of script. Logfile hash: bb5a370cb7, CPU: user 0.39s system 0.05s, MEM: 40.75 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 53% 2x abc (0 sec), 12% 26x opt_clean (0 sec), ...

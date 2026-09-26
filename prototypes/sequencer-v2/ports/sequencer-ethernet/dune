@@ -1,0 +1,9 @@
+; ../../../sequencer-ethernet's 10BASE-T transmitter firmware and checks, unchanged (symlinks), on v2
+(rule
+ (with-stdout-to
+  isa_enc.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
+
+(executable
+ (name main)
+ (libraries hardcaml seqv2))

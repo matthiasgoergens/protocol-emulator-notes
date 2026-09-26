@@ -1,0 +1,15 @@
+(library
+ (name seqv2)
+ (wrapped false)
+ (modules isa2 sequencer2 harness2 compat)
+ (libraries hardcaml))
+
+(executable
+ (name lockstep2)
+ (modules lockstep2)
+ (libraries hardcaml seqv2))
+
+(executable
+ (name emit2)
+ (modules emit2)
+ (libraries hardcaml seqv2))

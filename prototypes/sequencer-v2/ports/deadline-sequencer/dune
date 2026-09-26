@@ -1,0 +1,9 @@
+; ../../../deadline-sequencer's UART, SPI and I2C compiler and demo, unchanged (symlinks), on v2
+(rule
+ (with-stdout-to
+  isa_enc.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
+
+(executable
+ (name demo)
+ (libraries hardcaml seqv2))
