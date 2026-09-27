@@ -25,7 +25,8 @@ in `BRINGUP.md`.
 - **`rtl/emu_core.v`**, the board-independent glue: the UART host link and command engine, the
   memories, the routing, and a trace recorder. The recorder logs every change of what the core
   sees (inputs after the two-flop synchroniser) and does (pins, output enables, host bytes), with
-  its cycle number: 2,048 entries of 80 bits in block RAM. The same module runs on the board and
+  its cycle number: 2,048 entries of 144 bits in block RAM. Each entry also holds `pin_sub` and
+  `pin_in4`, four output levels and four samples per pin. The same module runs on the board and
   in the simulator, so the simulated runs exercise the real host link and command engine.
 - **`rtl/ulx3s_top.v`**, board-specific: the PLL (25 MHz in; 60 MHz and 48 MHz from one
   EHXPLLL), the pads, `USRMCLK`, USB, LEDs, reset on FIRE1. The ESP32 is held in reset
@@ -65,16 +66,17 @@ peripheral registers, runs for an exact number of cycles, then dumps the trace a
 3. **Protocol.** `deadline-sequencer/decoders.ml`, which samples where a receiver would and knows
    nothing of the compiler's arithmetic, must recover the expected bytes from the pins.
 
-The tests (`ocaml/programs.ml`) are the demo's compiled UART, SPI and I2C programmes. Two new
+The tests (`ocaml/programs.ml`) are the demo's compiled UART, SPI and I2C programmes. Two earlier
 programmes, written in the compiler's style, fill its gaps: a UART receiver (WAITP on the start
-edge, then SHI at mid-bit) and an SPI read (SHI while SCLK is high). With them come tests against
-the on-board RTC and flash, the host byte path, the streamer and sampler, trace overflow, and three
-cheap header parts. `fpga_tests.exe list` prints them all.
+edge, then SHI at mid-bit) and an SPI read (SHI while SCLK is high). Two more exercise quarter
+sub-slots and quad SHI. With them come tests against the on-board RTC and flash, the host byte
+path, the streamer and sampler, trace overflow, and three cheap header parts.
+`fpga_tests.exe list` prints them all.
 
 ## Results
 
-**Build** (`./build.sh`; yosys 0.69+77, nextpnr-0.11.1-30, oss-cad-suite; nextpnr seed 1; logs in
-`reports/`):
+**Existing build** (`./build.sh`; yosys 0.69+77, nextpnr-0.11.1-30, oss-cad-suite;
+nextpnr seed 1; logs in `reports/`):
 
 | | |
 | --- | --- |
@@ -90,6 +92,9 @@ cheap header parts. `fpga_tests.exe list` prints them all.
 
 These figures are after merging master (the sub-slot sequencer). Before the merge the same
 design gave 68.27 and 90.02 MHz, 2,958 LUT/carry cells, sha256 c00e0287...
+They predate the quarter-clock replay work, which widens each trace entry from 80 to 144 bits.
+That source has passed RTL simulation but has not yet been resynthesised, so these resource,
+timing and bitstream figures are not measurements of the current source.
 
 The 60 MHz critical path is the instruction fetch: block-RAM clock-to-output (5.83 ns, since the
 DP16KD has no output register, as the chip's one-cycle SRAM read requires) into the sequencer's
@@ -98,13 +103,13 @@ shorter, so the FPGA is the harsher case here. Both PLL outputs come out exactly
 48.00 MHz: nextpnr recomputes them from the hand-edited dividers (VCO 480 MHz), so it confirms
 that arithmetic.
 
-**Simulated end to end** (`uv run host/emu_runner.py --sim --cpb 60 --controls`, with the
-board's real UART divider; evidence in `evidence/2026-09-25-sim-after-master/`, and
-`evidence/2026-09-25-sim/` from before the merge): 16 tests pass, and the 2
-negative controls fail as they must. In every test, the trace is identical to the OCaml
-prediction on every cycle. The same holds with the fast divider (8 clocks per bit). Merging the
-sub-slot sequencer changed no behaviour: all 36 trace and capture files per divider are
-byte-identical to the pre-merge runs. The controls:
+**Historical simulation before quarter-clock replay**
+(`uv run host/emu_runner.py --sim --cpb 60 --controls`, with the board's real UART divider;
+evidence in `evidence/2026-09-25-sim-after-master/`, and `evidence/2026-09-25-sim/` from before
+the merge): 16 tests pass, and the 2 negative controls fail as they must. In every test, the
+trace is identical to the OCaml prediction on every cycle. The same holds with the fast divider
+(8 clocks per bit). Merging the sub-slot sequencer changed no behaviour: all 36 trace and capture
+files per divider are unchanged from the pre-merge runs. The controls:
 
 - one output bit flipped in one recorded entry: the replay and the prediction fail;
 - a programme one bit different from the one the checker replays (a delay one count longer):
@@ -114,6 +119,19 @@ byte-identical to the pre-merge runs. The controls:
 Further runs rehearse board behaviour. A simulated board with an ISSI flash, judged in board mode
 (`--judge board --sim-flash-id 9D6018`), passes; the same run judged strictly fails, as it should.
 An MCP7940N trace judged against the PCF8523 variant of the test fails.
+
+**Quarter-clock replay, 2026-09-26** (exact commands and raw results in
+`evidence/2026-09-26-quarter-replay/README.txt`): the plain and four-phase simulations each
+pass all 18 tests and all 4 negative controls at 60 clocks per UART bit. `subslot_train` records
+165 pin-1 edges, every spacing 17 quarters; `quad_rx` recovers `78 3c 1e 0f` from the four-phase
+stage and `f0 f0 f0 f0` from the plain build. In the four-phase build, 2,784 and 512 loopback
+quarters respectively match the recorded `pin_sub` through the stage. A planted dropped-quad
+fault makes both tests fail as required. The quarter VCDs convert successfully with `vcd2fst`.
+A focused replay then exposed a runner bug: `--only` also filtered the tests eligible to carry
+the generic negative controls, so the imem control could select a quarter test without a suitable
+instruction and abort. Generic controls now come from the unfiltered manifest and require
+`uart_loop`; mutation setup failures are infrastructure errors rather than expected checker
+failures. Fresh focused and full-suite results are in `evidence/2026-09-28-control-fix/`.
 
 ## Protecting the configuration flash
 
@@ -159,8 +177,10 @@ sampler per phase. The ECP5 can prototype this directly:
   ECP5 input gearbox (IDDRX2F, four samples per clock). That gearbox, with ODDRX2F on the output
   side, is also the FPGA-native way to make the same quarter-clock waveform, a second
   implementation to compare the lane-XOR stage against.
-- Replay does not cover the variant's quarter edges yet. The trace records the core's clock-grid
-  pins, not `pin_sub` or `pin_in4`.
+- Replay now covers the variant's quarter edges. The 144-bit trace records `pin_sub` and
+  `pin_in4`; the checker replays `pin_in4` through `Isa.step`, compares all four `pin_sub`
+  quarters, and independently reconstructs the stage's loopback samples. `fpga_tests.exe vcd`
+  renders the result on a 4,167 ps quarter grid for Surfer or GTKWave.
 
 ## Limits of the trace
 
@@ -191,7 +211,7 @@ host sends while a run is in progress are discarded, except `X` (abort): the run
 
 This branch has master merged in (the sub-slot ISA and `prototypes/multiphase`). Every generated
 file was regenerated from master's sources in a scratch copy (each prototype's own tests pass
-there: `evidence/2026-09-25-sim-after-master/regen/`) and is byte-identical to what master
+there: `evidence/2026-09-25-sim-after-master/regen/`) and is the same as what master
 commits, so the `rtl/gen` symlinks need nothing more.
 
 - `emu_core.v` connects the sequencer's new `pin_in4` in both builds. The plain build feeds each
@@ -201,8 +221,8 @@ commits, so the `rtl/gen` symlinks need nothing more.
   the stage and the stage's samples to `pin_in4` for pins 0 and 1.
 - The checker builds unchanged against master's `isa.ml`: master's `compiler.ml` and
   `decoders.ml` are unchanged, and `Isa.step` gained only an optional argument.
-- Not yet covered: programmes that use sub-slots (q > 0) or quad SHI. The trace records the core's
-  clock-grid pins, not `pin_sub`, so replay cannot judge them yet.
+- The trace now carries `pin_sub` and `pin_in4`. `subslot_train` covers q = 0..3 and
+  `quad_rx` covers quad SHI through the four-phase stage and the plain-build calibration case.
 
 ## Files
 
@@ -214,10 +234,12 @@ commits, so the `rtl/gen` symlinks need nothing more.
 | `build.sh`, `build_multiphase.sh`, `reports/` | synthesis, place and route, timing, bitstream |
 | `sim/sim_main.cpp`, `sim/build.sh` | Verilator board model (C++ port of `ocaml/env.ml`) |
 | `ocaml/` | tests, board model, checker (`isa.ml`, `compiler.ml`, `decoders.ml` symlinked) |
-| `host/emu_runner.py`, `host/usb_check.py` | runner for board and simulator; USB enumeration and loopback check |
+| `host/emu_runner.py`, `host/test_emu_runner.py`, `host/usb_check.py` | runner for board and simulator, focused-control regressions, USB enumeration and loopback check |
 | `BRINGUP.md` | the checklist |
 | `evidence/2026-09-25-sim/` | the simulated runs before the merge: 60 and 8 clocks per UART bit, the board-mode rehearsal, the interlock mutation |
 | `evidence/2026-09-25-sim-after-master/` | the same suite after merging master, and the regeneration logs |
+| `evidence/2026-09-26-quarter-replay/` | quarter replay, negative controls, and VCD conversion results |
+| `evidence/2026-09-28-control-fix/` | focused-control regression and fresh plain, four-phase and planted-fault suites |
 
 ## Review
 

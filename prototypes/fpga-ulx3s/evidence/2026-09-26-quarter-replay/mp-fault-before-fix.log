@@ -1,0 +1,19 @@
+== subslot_train (simulation, four-phase build)
+  replay through interpreter   PASS  700 cycles, every output equal, pin_sub on all 2800 quarters
+  prediction (whole trace)     PASS  700 cycles identical to the OCaml board model
+  pin_sub edges pin 1          PASS  165 edges on the quarter grid, spacings all 17 quarters: true
+  quad loopback pin 1          PASS  2784 quarters: stage samples = recorded pin_sub through the stage, 0 differ
+RESULT subslot_train PASS
+  (493 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 2.21 s)
+BAD  subslot_train [control: fault]: CONTROL PASSED: checker is blind
+
+== quad_rx (simulation, four-phase build)
+  replay through interpreter   PASS  132 cycles, every output equal, pin_sub on all 528 quarters
+  prediction (whole trace)     FAIL  cycle 36: captured in=ff out=01 oe=01 fl=00 sub=0000000f in4=fffffff8, predicted in=ff out=01 oe=01 fl=00 sub=0000000f in4=fffffffc
+  host bytes (quad samples)    FAIL  got [78 1e 1e 0f] expected [78 3c 1e 0f] for the four-phase build
+  quad loopback pin 0          FAIL  512 quarters: stage samples = recorded pin_sub through the stage, 2 differ
+RESULT quad_rx FAIL
+  (42 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.20 s)
+OK   quad_rx [control: fault]: control failed as it must
+
+1 of 2 as expected (0 skipped); results in evidence/2026-09-26-quarter-replay/mp-fault-cpb60

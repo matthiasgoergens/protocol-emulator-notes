@@ -35,9 +35,14 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 CHECKER = ROOT / "ocaml" / "_build" / "default" / "fpga_tests.exe"
 CTRL_FLASH, CTRL_USB_ATTACH = 0x01, 0x10
+ENTRY = 18   # trace entry bytes: cycle(4) pin_in pin_out pin_oe flags host_out host_in pin_sub(4) pin_in4(4)
 
 
 class LinkError(RuntimeError):
+    pass
+
+
+class ControlSetupError(RuntimeError):
     pass
 
 
@@ -124,7 +129,7 @@ class Emu:
     def identify(self) -> dict:
         self.link.write(b"I")
         b = self.expect(8, "identify")
-        if b[:4] != b"EMU1" or b[7:8] != b"k":
+        if b[:4] != b"EMU2" or b[7:8] != b"k":
             raise LinkError(f"identify: unexpected reply {b!r}")
         return {"trace_aw": b[4], "ctrl": (b[5] << 8) | b[6]}
 
@@ -167,8 +172,8 @@ class Emu:
         self.link.write(b"T")
         h = self.expect(7, "trace header")
         cnt, ovf, trunc = (h[0] << 8) | h[1], h[2], int.from_bytes(h[3:7], "big")
-        body = self.expect(10 * cnt, "trace body", 30.0)
-        return ovf, trunc, [body[10 * i:10 * i + 10] for i in range(cnt)]
+        body = self.expect(ENTRY * cnt, "trace body", 30.0)
+        return ovf, trunc, [body[ENTRY * i:ENTRY * i + ENTRY] for i in range(cnt)]
 
     def capture(self) -> list[bytes]:
         self.link.write(b"S")
@@ -188,7 +193,8 @@ def write_trace(path: Path, cycles: int, ovf: int, trunc: int, entries: list[byt
         f.write(f"{cycles} {ovf} {trunc}\n")
         for e in entries:
             c = int.from_bytes(e[0:4], "big")
-            f.write(f"{c:x} " + " ".join(f"{x:02x}" for x in e[4:10]) + "\n")
+            sub, in4 = int.from_bytes(e[10:14], "big"), int.from_bytes(e[14:18], "big")
+            f.write(f"{c:x} " + " ".join(f"{x:02x}" for x in e[4:10]) + f" {sub:08x} {in4:08x}\n")
 
 
 def write_capture(path: Path, entries: list[bytes]) -> None:
@@ -226,12 +232,87 @@ def flash_guard(test: dict, ctrl: int) -> None:
         raise LinkError(f"refusing flash-routed test {test['name']}: predicted commands {cmds}, allowed {allowed}")
 
 
-def run_test(emu: Emu, test: dict, outdir: Path, mode: str, mutate: str | None = None) -> tuple[bool, str]:
-    imem = list(test["imem"])
+def swap_quarters(entries: list[bytes]) -> list[bytes]:
+    """Control: in the first recorded pin_sub nibble whose quarters 1 and 2 differ, swap them."""
+    out = list(entries)
+    for k, e in enumerate(out):
+        sub = int.from_bytes(e[10:14], "big")
+        for i in range(8):
+            b1, b2 = (sub >> (4 * i + 1)) & 1, (sub >> (4 * i + 2)) & 1
+            if b1 != b2:
+                sub ^= (1 << (4 * i + 1)) | (1 << (4 * i + 2))
+                out[k] = e[:10] + sub.to_bytes(4, "big") + e[14:]
+                return out
+    raise ControlSetupError("swap control: no pin_sub nibble with quarters 1 and 2 different")
+
+
+def mutate_trace(entries: list[bytes], mutate: str | None) -> list[bytes]:
+    if not mutate:
+        return entries
+    if mutate == "swap":
+        return swap_quarters(entries)
+    if mutate == "trace":
+        if len(entries) <= 4:
+            raise ControlSetupError(f"trace control: only {len(entries)} trace entries")
+        out = list(entries)
+        entry_index = len(out) // 2
+        entry = bytearray(out[entry_index])
+        entry[5] ^= 0x01
+        out[entry_index] = bytes(entry)
+        return out
+    raise ControlSetupError(f"unknown trace mutation {mutate!r}")
+
+
+def mutate_imem(imem: list[int], mutate: str | None) -> None:
+    if not mutate:
+        return
     if mutate == "imem":
-        # control: the board runs a programme one bit different from the one the checker replays
-        i = next(i for i, w in enumerate(imem) if (w >> 12) == 3 and (w & 0xFFF) > 1)   # first LDD n>1
-        imem[i] ^= 0x001
+        wanted = "LDD with n > 1"
+        flip = 0x001
+        index = next(
+            (word_index for word_index, word in enumerate(imem)
+             if (word >> 12) == 3 and (word & 0xFFF) > 1),
+            None,
+        )
+    elif mutate == "q":
+        wanted = "SETP with q = 1"
+        flip = 0x003
+        index = next(
+            (word_index for word_index, word in enumerate(imem)
+             if (word >> 12) == 1 and (word & 3) == 1),
+            None,
+        )
+    else:
+        raise ControlSetupError(f"unknown imem mutation {mutate!r}")
+    if index is None:
+        raise ControlSetupError(f"{mutate} control: no {wanted} instruction")
+    imem[index] ^= flip
+
+
+def negative_controls(all_tests: list[dict], selected_tests: list[dict]) -> list[tuple[dict, str]]:
+    generic = next((candidate for candidate in all_tests if candidate["name"] == "uart_loop"), None)
+    if generic is None:
+        raise ControlSetupError("negative controls require uart_loop in the manifest")
+    mutate_imem(list(generic["imem"]), "imem")
+    plan = [(generic, "trace"), (generic, "imem")]
+    for candidate in selected_tests:
+        if not candidate["subslot"]:
+            continue
+        try:
+            mutate_imem(list(candidate["imem"]), "q")
+        except ControlSetupError:
+            continue
+        return plan + [(candidate, "q"), (candidate, "swap")]
+    return plan
+
+
+def run_test(emu: Emu, test: dict, outdir: Path, mode: str, mutate: str | None = None,
+             build: str = "plain") -> tuple[bool, str]:
+    if mutate is not None and mutate not in {"imem", "q", "trace", "swap"}:
+        raise ControlSetupError(f"unknown mutation {mutate!r}")
+    imem = list(test["imem"])
+    if mutate in {"imem", "q"}:
+        mutate_imem(imem, mutate)
     ctrl = test["ctrl"] | CTRL_USB_ATTACH
     interlock_control = "sim-only" in test["needs"]
     if interlock_control and mode != "sim" and not isinstance(emu.link, SimLink):
@@ -252,16 +333,14 @@ def run_test(emu: Emu, test: dict, outdir: Path, mode: str, mutate: str | None =
     cap = emu.capture()
     st = emu.status()
     elapsed = time.monotonic() - t0
-    if mutate == "trace" and len(entries) > 4:
-        # control: one output bit flipped in one recorded entry
-        e = bytearray(entries[len(entries) // 2])
-        e[5] ^= 0x01
-        entries[len(entries) // 2] = bytes(e)
+    if mutate in {"trace", "swap"}:
+        entries = mutate_trace(entries, mutate)
     stem = test["name"] + (f".control-{mutate}" if mutate else "")
     tr, cp = outdir / f"{stem}.trace", outdir / f"{stem}.capture"
     write_trace(tr, test["cycles"], ovf, trunc, entries)
     write_capture(cp, cap)
-    args = [str(CHECKER), "check", test["name"], "--trace", str(tr), "--capture", str(cp), "--mode", mode]
+    args = [str(CHECKER), "check", test["name"], "--trace", str(tr), "--capture", str(cp), "--mode", mode,
+            "--build", "mp" if build.startswith("mp") else "plain"]
     r = subprocess.run(args, capture_output=True, text=True)
     report = r.stdout + r.stderr + f"  ({len(entries)} trace entries, {len(cap)} capture words, status {st}, {elapsed:.2f} s)\n"
     ok = r.returncode == 0
@@ -292,12 +371,16 @@ def main() -> int:
                     help="checker mode; default sim for --sim, board for --port. '--sim --judge board' rehearses "
                          "a board whose parts differ from the model (e.g. with --sim-flash-id)")
     ap.add_argument("--sim-flash-id", default=None, help="simulation: JEDEC ID of the configuration flash, 6 hex digits")
+    ap.add_argument("--build", choices=["plain", "mp", "mp-fault"], default="plain",
+                    help="which RTL: plain, mp (pins 0 and 1 through the four-phase stage), or, in simulation "
+                         "only, mp-fault (a quad sample dropped on purpose: the quad tests must fail)")
     a = ap.parse_args()
 
     if not CHECKER.exists():
         print(f"missing {CHECKER}; build it: cd {ROOT/'ocaml'} && opam exec --switch=5.3.0 -- dune build", file=sys.stderr)
         return 2
-    tests = json.loads(subprocess.run([str(CHECKER), "manifest"], check=True, capture_output=True, text=True).stdout)
+    all_tests = json.loads(subprocess.run([str(CHECKER), "manifest"], check=True, capture_output=True, text=True).stdout)
+    tests = all_tests
     if a.only:
         want = set(a.only.split(","))
         tests = [t for t in tests if t["name"] in want]
@@ -306,7 +389,11 @@ def main() -> int:
     outdir = Path(a.out) if a.out else ROOT / "results" / f"{stamp}-{mode}"
     outdir.mkdir(parents=True, exist_ok=True)
     have = set(filter(None, a.have.split(",")))
-    sim_bin = ROOT / "sim" / f"obj_dir_cpb{a.cpb}" / "Vemu_sim"
+    tag = {"plain": "", "mp": "mp_", "mp-fault": "mpfault_"}[a.build]
+    sim_bin = ROOT / "sim" / f"obj_dir_{tag}cpb{a.cpb}" / "Vemu_sim"
+    if a.build == "mp-fault" and not a.sim:
+        print("mp-fault exists only in simulation", file=sys.stderr)
+        return 2
     if a.sim and not sim_bin.exists():
         print(f"missing {sim_bin}; build it: sim/build.sh {a.cpb}", file=sys.stderr)
         return 2
@@ -317,10 +404,17 @@ def main() -> int:
         print("identify:", board.identify())
 
     summary = []
-    plan = [(t, None) for t in tests]
+    if a.build == "mp-fault":
+        # every quad test must fail on the RTL with a dropped sample; the rest must still pass
+        plan = [(t, "fault" if t["quad"] else None) for t in tests]
+    else:
+        plan = [(t, None) for t in tests]
     if a.controls:
-        ctl = [t for t in tests if t["name"] == "uart_loop"] or tests[:1]
-        plan += [(ctl[0], "trace"), (ctl[0], "imem")]
+        try:
+            plan += negative_controls(all_tests, tests)
+        except ControlSetupError as e:
+            print(f"ERROR negative controls: {e}", file=sys.stderr)
+            summary.append({"test": "negative controls", "result": "error", "error": str(e)})
     for t, mutate in plan:
         missing = [n for n in t["needs"] if n not in have] if not a.sim else []
         label = t["name"] + (f" [control: {mutate}]" if mutate else "")
@@ -336,7 +430,12 @@ def main() -> int:
                 emu.identify()
             else:
                 emu = board
-            ok, report = run_test(emu, t, outdir, mode, mutate)
+            ok, report = run_test(emu, t, outdir, mode, None if mutate == "fault" else mutate, a.build)
+        except ControlSetupError as e:
+            print(f"control setup error: {e}", file=sys.stderr)
+            print(f"ERR  {label}: infrastructure failure\n")
+            summary.append({"test": label, "result": "error", "error": str(e)})
+            continue
         except LinkError as e:
             ok, report = False, f"link error: {e}\n"
         finally:
@@ -352,8 +451,10 @@ def main() -> int:
         board.link.close()
     (outdir / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")
     bad = [s for s in summary if s["result"] == "bad"]
-    print(f"{len(summary) - len(bad)} of {len(summary)} as expected ({sum(s['result'] == 'skip' for s in summary)} skipped); results in {outdir}")
-    return 1 if bad else 0
+    errors = [s for s in summary if s["result"] == "error"]
+    print(f"{len(summary) - len(bad) - len(errors)} of {len(summary)} as expected "
+          f"({sum(s['result'] == 'skip' for s in summary)} skipped, {len(errors)} errors); results in {outdir}")
+    return 2 if errors else 1 if bad else 0
 
 
 if __name__ == "__main__":

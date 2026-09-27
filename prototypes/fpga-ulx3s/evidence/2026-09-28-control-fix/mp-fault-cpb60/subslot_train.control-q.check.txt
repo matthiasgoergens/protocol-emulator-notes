@@ -1,0 +1,7 @@
+== subslot_train (simulation, four-phase build)
+  replay through interpreter   FAIL  11 mismatching cycles, first at 5: pin_sub pin 1 quarter 1: fpga 1 interp 0
+  prediction (whole trace)     FAIL  cycle 5: captured in=ff out=00 oe=02 fl=00 sub=00000030 in4=ffffffff, predicted in=ff out=00 oe=02 fl=00 sub=00000010 in4=ffffffff
+  pin_sub edges pin 1          FAIL  165 edges on the quarter grid, spacings all 17 quarters: false (first other spacing 18)
+  quad loopback pin 1          FAIL  2784 quarters: stage samples = recorded pin_sub through the stage, 30 differ
+RESULT subslot_train FAIL
+  (493 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 2.19 s)

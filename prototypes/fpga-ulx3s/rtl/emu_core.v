@@ -12,14 +12,14 @@
 // (sim/sim_main.cpp supplies board models), so the host runner is proven before hardware.
 //
 // Host protocol (all multi-byte fields big-endian). Every command gets a reply:
-//   'I'                        -> "EMU1" TRACE_AW CTRL_hi CTRL_lo 'k'        identify
+//   'I'                        -> "EMU2" TRACE_AW CTRL_hi CTRL_lo 'k'        identify
 //   'W' a1 a0 d1 d0            -> 'k'        imem[a] <- d                      (idle only)
 //   'R' a1 a0                  -> d1 d0      read imem[a]                      (idle only)
 //   'K' r  d1 d0               -> 'k'        config register r <- d
 //   'H' b                      -> 'k' | 'f'  push b into the host_in FIFO ('f': full)
 //   'B' a1 a0 c d1 d0          -> 'k'        stream buffer[a] <- {c[3:0], d}
 //   'G' n3 n2 n1 n0            -> 'g'        run n cycles, reply when done ('X' aborts)
-//   'T'                        -> cnt1 cnt0 ovf t3 t2 t1 t0, then cnt entries of 10 bytes
+//   'T'                        -> cnt1 cnt0 ovf t3 t2 t1 t0, then cnt entries of 18 bytes
 //   'S'                        -> cnt1 cnt0, then cnt entries of 3 bytes {count, data1, data0}
 //   'Z'                        -> usb_status smp_overflows trace_ovf 'k'
 //   anything else              -> '?'
@@ -28,10 +28,14 @@
 // clear, imem read address forced to 0, trace reset) and then RUN for n cycles, numbered from 0.
 // Cycle 0 is the first cycle out of clear, exactly as in deadline-sequencer/harness.ml.
 //
-// Trace entry, 80 bits, recorded in cycle c when c = 0 or any field differs from cycle c-1:
-//   [79:48] c   [47:40] pin_in seen by the core in c   [39:32] pin_out   [31:24] pin_oe
-//   [23:16] flags {5'b0, host_in_valid, host_in_ready, host_out_valid}
-//   [15:8] host_out   [7:0] host_in
+// Trace entry, 144 bits, recorded in cycle c when c = 0 or any field differs from cycle c-1:
+//   [143:112] c   [111:104] pin_in seen by the core in c   [103:96] pin_out   [95:88] pin_oe
+//   [87:80] flags {5'b0, host_in_valid, host_in_ready, host_out_valid}
+//   [79:72] host_out   [71:64] host_in
+//   [63:32] pin_sub: bit 4i+p = pin i's level in quarter p, as the core presents it in cycle c
+//           (registered, like pin_out: the result of the instruction of cycle c-1)
+//   [31:0]  pin_in4: bit 4i+p = the quarter-p sample of pin i that the core sees in cycle c
+// A quarter's absolute time is 4c+p; the fields carry the quarters, the entry the cycle.
 // pin_out, pin_oe, host_out and host_out_valid are the core's registered outputs as visible in
 // cycle c, i.e. the state after the instruction of cycle c-1. host_in_ready is combinational in
 // cycle c. If the buffer fills, recording stops; 'T' reports ovf=1 and the first cycle whose
@@ -126,11 +130,9 @@ module emu_core #(
   output wire flash_blocked_o,
   output wire host_activity
 `ifdef EMU_MULTIPHASE
-  // four-phase variant (ulx3s_top.v with EMU_MULTIPHASE): pin_sub to the stage, quad samples
-  // from it
-  , output wire [31:0] seq_pin_sub
-  , input wire [7:0] quad_pins            // which pins take their samples from quad_samples
-  , input wire [31:0] quad_samples        // bit 4i+p: pin i at quarter p, already retimed to clk
+  // four-phase variant: sequencer pins 0 and 1 go through prototypes/multiphase's stage, clocked
+  // on clk (phase 0) and these three phases of the same frequency at 90, 180 and 270 degrees
+  , input wire ph1, input wire ph2, input wire ph3
 `endif
 );
   localparam TRACE_DEPTH = 1 << TRACE_AW;
@@ -194,6 +196,7 @@ module emu_core #(
 
   // ---------------------------------------------------------------- pins and routing
   wire [7:0] core_pin_out, core_pin_oe;
+  wire [31:0] pin_sub_w;   // the sequencer's quarter-clock levels (see the trace entry above)
   // what the pads and the aux buses present, before synchronisation
   wire seq0_level = core_pin_oe[0] ? core_pin_out[0] : seq_pad_in[0];
   reg [7:0] pin_raw;
@@ -210,8 +213,21 @@ module emu_core #(
   always @(posedge clk) begin pin_s1 <= pin_raw; pin_s2 <= pin_s1; end
 
   wire [7:0] routed_away = {1'b0, (r_flash ? 1'b1 : 1'b0), (r_i2c ? 2'b11 : 2'b00), (r_flash ? 3'b111 : 3'b000), 1'b0};
+`ifdef EMU_MULTIPHASE
+  // pins 0 and 1: the stage delays pin and output enable by one clock and places each level
+  // change on its quarter; its samplers read the same pads, four times a clock
+  wire [1:0] mp_pin, mp_oe;
+  wire [7:0] mp_samples;
+  multiphase_stage stage (
+    .ph0(clk), .ph1(ph1), .ph2(ph2), .ph3(ph3), .clear(rst),
+    .sub(pin_sub_w[7:0]), .oe(core_pin_oe[1:0] & ~routed_away[1:0]), .pads(seq_pad_in[1:0]),
+    .pin(mp_pin), .pin_oe(mp_oe), .samples(mp_samples));
+  assign seq_pad_out = {core_pin_out[7:2], mp_pin};
+  assign seq_pad_oe = {core_pin_oe[7:2] & ~routed_away[7:2], mp_oe};
+`else
   assign seq_pad_out = core_pin_out;
   assign seq_pad_oe = core_pin_oe & ~routed_away;
+`endif
   // Flash interlock, in hardware, behind the runner's software allow-list: the first byte after
   // chip select falls must stay a prefix of a read-only command (0x9F RDID, 0x03 READ, 0x0B FAST
   // READ, 0x05 RDSR). Each rising SCLK edge the core is about to make is checked against the bit
@@ -290,18 +306,24 @@ module emu_core #(
   // only matters to the four-phase stage; the plain build leaves it unconnected and drives the
   // pads from pin_out, which equals quarter 3 of pin_sub.
   wire [31:0] pin_in4;
-  wire [31:0] pin_sub_w;
   genvar qi;
   generate for (qi = 0; qi < 8; qi = qi + 1) begin : quad
 `ifdef EMU_MULTIPHASE
-    assign pin_in4[4*qi+3:4*qi] = quad_pins[qi] ? quad_samples[4*qi+3:4*qi] : {4{pin_s2[qi]}};
+    if (qi < 2) begin : staged
+`ifdef EMU_FAULT_DROP_QUAD
+      // planted fault for the negative control: quarter 2 is lost on each staged pin and the
+      // quarter-1 sample stands in for it
+      assign pin_in4[4*qi+3:4*qi] = {mp_samples[4*qi+3], mp_samples[4*qi+1], mp_samples[4*qi+1], mp_samples[4*qi]};
+`else
+      assign pin_in4[4*qi+3:4*qi] = mp_samples[4*qi+3:4*qi];
+`endif
+    end else begin : plain
+      assign pin_in4[4*qi+3:4*qi] = {4{pin_s2[qi]}};
+    end
 `else
     assign pin_in4[4*qi+3:4*qi] = {4{pin_s2[qi]}};
 `endif
   end endgenerate
-`ifdef EMU_MULTIPHASE
-  assign seq_pin_sub = pin_sub_w;
-`endif
   deadline_sequencer seq (
     .pin_in4(pin_in4), .pin_sub(pin_sub_w),
     .clock(clk), .clear(in_clear),
@@ -312,14 +334,14 @@ module emu_core #(
 
   // ---------------------------------------------------------------- trace recorder
   wire [7:0] tr_flags = {5'd0, host_in_valid && running, host_in_ready, host_out_valid};
-  wire [47:0] tr_fields = {pin_s2, core_pin_out, core_pin_oe, tr_flags, host_out, host_in};
-  reg [47:0] tr_prev = 48'd0;
-  reg [79:0] trace [0:TRACE_DEPTH-1];
+  wire [111:0] tr_fields = {pin_s2, core_pin_out, core_pin_oe, tr_flags, host_out, host_in, pin_sub_w, pin_in4};
+  reg [111:0] tr_prev = 112'd0;
+  reg [143:0] trace [0:TRACE_DEPTH-1];
   reg [TRACE_AW:0] tr_cnt = 0;
   reg tr_ovf = 1'b0;
   reg [31:0] tr_trunc = 32'd0;
   reg [TRACE_AW-1:0] tr_ra = 0;
-  reg [79:0] tr_q = 80'd0;
+  reg [143:0] tr_q = 144'd0;
   wire tr_want = running && (cycle == 32'd0 || tr_fields != tr_prev);
   wire tr_full = tr_cnt == TRACE_DEPTH;
   always @(posedge clk) begin
@@ -389,8 +411,8 @@ module emu_core #(
   reg [7:0] op = 8'd0;
   reg [39:0] args = 40'd0;
   reg [2:0] need = 3'd0;
-  reg [79:0] rbuf = 80'd0;     // reply bytes, sent MSB first
-  reg [3:0] rlen = 4'd0;       // bytes left in rbuf
+  reg [143:0] rbuf = 144'd0;   // reply bytes, sent MSB first
+  reg [4:0] rlen = 5'd0;       // bytes left in rbuf
   reg [TRACE_AW:0] didx = 0;   // dump index
   reg [3:0] rnext = 4'd0;      // state after the reply drains (as a C_* code)
 
@@ -416,7 +438,7 @@ module emu_core #(
       default: ;
     endcase
     if (rst) begin
-      cst <= C_OP; rstate <= S_IDLE; rlen <= 4'd0;
+      cst <= C_OP; rstate <= S_IDLE; rlen <= 5'd0;
     end else case (cst)
       C_OP: if (rx_valid) begin
         op <= rx_data; need <= nargs(rx_data); args <= 40'd0;
@@ -430,41 +452,41 @@ module emu_core #(
       C_EXEC: begin
         cst <= C_REPLY; rnext <= C_OP;
         case (op)
-          "I": begin rbuf <= {"EMU1", TAW8, cfg[0], "k", 16'd0}; rlen <= 4'd8; end
+          "I": begin rbuf <= {"EMU2", TAW8, cfg[0], "k", 80'd0}; rlen <= 5'd8; end
           "W": begin
             if (!running) begin imem_we <= 1'b1; imem_wa <= args[23:16]; imem_wd <= args[15:0]; end
-            rbuf <= {"k", 72'd0}; rlen <= 4'd1;
+            rbuf <= {"k", 136'd0}; rlen <= 5'd1;
           end
-          "R": begin host_ra <= args[7:0]; cst <= C_TR_WAIT; rnext <= C_OP; didx <= 0; rlen <= 4'd0; end
-          "K": begin cfg[args[18:16]] <= args[15:0]; rbuf <= {"k", 72'd0}; rlen <= 4'd1; end
+          "R": begin host_ra <= args[7:0]; cst <= C_TR_WAIT; rnext <= C_OP; didx <= 0; rlen <= 5'd0; end
+          "K": begin cfg[args[18:16]] <= args[15:0]; rbuf <= {"k", 136'd0}; rlen <= 5'd1; end
           "H": begin
             hin_push <= !hin_cnt[4]; hin_din <= args[7:0];
-            rbuf <= {(hin_cnt[4] ? "f" : "k"), 72'd0}; rlen <= 4'd1;
+            rbuf <= {(hin_cnt[4] ? "f" : "k"), 136'd0}; rlen <= 5'd1;
           end
-          "B": begin sbuf[args[29:24]] <= args[19:0]; rbuf <= {"k", 72'd0}; rlen <= 4'd1; end
+          "B": begin sbuf[args[29:24]] <= args[19:0]; rbuf <= {"k", 136'd0}; rlen <= 5'd1; end
           "G": begin
             run_len <= args[31:0];
             if (args[31:0] != 32'd0) begin rstate <= S_PRIME; cst <= C_WAITRUN; end
-            else begin rbuf <= {"g", 72'd0}; rlen <= 4'd1; end
+            else begin rbuf <= {"g", 136'd0}; rlen <= 5'd1; end
           end
-          "T": begin rbuf <= {tr_cnt16, 7'd0, tr_ovf, tr_trunc, 24'd0}; rlen <= 4'd7; rnext <= C_TR_RD; didx <= 0; end
-          "S": begin rbuf <= {7'd0, cap_cnt, 64'd0}; rlen <= 4'd2; rnext <= C_CAP_RD; didx <= 0; end
-          "Z": begin rbuf <= {board_status, smp_ovf_hold, 7'd0, tr_ovf, "k", 48'd0}; rlen <= 4'd4; end
-          default: begin rbuf <= {"?", 72'd0}; rlen <= 4'd1; end
+          "T": begin rbuf <= {tr_cnt16, 7'd0, tr_ovf, tr_trunc, 88'd0}; rlen <= 5'd7; rnext <= C_TR_RD; didx <= 0; end
+          "S": begin rbuf <= {7'd0, cap_cnt, 128'd0}; rlen <= 5'd2; rnext <= C_CAP_RD; didx <= 0; end
+          "Z": begin rbuf <= {board_status, smp_ovf_hold, 7'd0, tr_ovf, "k", 112'd0}; rlen <= 5'd4; end
+          default: begin rbuf <= {"?", 136'd0}; rlen <= 5'd1; end
         endcase
       end
-      C_WAITRUN: if (rstate == S_IDLE) begin rbuf <= {"g", 72'd0}; rlen <= 4'd1; cst <= C_REPLY; rnext <= C_OP; end
+      C_WAITRUN: if (rstate == S_IDLE) begin rbuf <= {"g", 136'd0}; rlen <= 5'd1; cst <= C_REPLY; rnext <= C_OP; end
       C_REPLY: begin
-        if (rlen == 4'd0) cst <= rnext;
+        if (rlen == 5'd0) cst <= rnext;
         else if (!txf_full && !txf_push) begin
-          txf_push <= 1'b1; txf_din <= rbuf[79:72]; rbuf <= {rbuf[71:0], 8'd0}; rlen <= rlen - 4'd1;
+          txf_push <= 1'b1; txf_din <= rbuf[143:136]; rbuf <= {rbuf[135:0], 8'd0}; rlen <= rlen - 5'd1;
         end
       end
       // imem readback ('R'): address set, wait one cycle for the synchronous read
       C_TR_WAIT: begin cst <= C_TR_SEND; end
       C_TR_SEND: begin
-        if (op == "R") begin rbuf <= {imem_q, 64'd0}; rlen <= 4'd2; rnext <= C_OP; cst <= C_REPLY; end
-        else begin rbuf <= tr_q; rlen <= 4'd10; rnext <= C_TR_RD; cst <= C_REPLY; didx <= didx + 1'b1; end
+        if (op == "R") begin rbuf <= {imem_q, 128'd0}; rlen <= 5'd2; rnext <= C_OP; cst <= C_REPLY; end
+        else begin rbuf <= tr_q; rlen <= 5'd18; rnext <= C_TR_RD; cst <= C_REPLY; didx <= didx + 1'b1; end
       end
       C_TR_RD: begin
         if (didx == tr_cnt) cst <= C_OP;
@@ -475,7 +497,7 @@ module emu_core #(
         else begin cap_ra <= didx[7:0]; cst <= C_CAP_WAIT; end
       end
       C_CAP_WAIT: cst <= C_CAP_SEND;
-      C_CAP_SEND: begin rbuf <= {4'd0, cap_q, 56'd0}; rlen <= 4'd3; rnext <= C_CAP_RD; cst <= C_REPLY; didx <= didx + 1'b1; end
+      C_CAP_SEND: begin rbuf <= {4'd0, cap_q, 120'd0}; rlen <= 5'd3; rnext <= C_CAP_RD; cst <= C_REPLY; didx <= didx + 1'b1; end
       default: cst <= C_OP;
     endcase
   end

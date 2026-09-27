@@ -108,12 +108,21 @@ let bit v i = (v lsr i) land 1
 
 (* One cycle: from the core's outputs visible in this cycle, the raw pin vector presented to the
    core's synchroniser in this cycle (emu_core.v: pin_raw). *)
-let step e ~pin_out ~pin_oe =
+let routed_mask ctrl =
+  (if ctrl land ctrl_flash <> 0 then 0x4E else 0) lor (if ctrl land ctrl_i2c <> 0 then 0x30 else 0)
+
+(* [mp01 = (oe, level)]: in the four-phase build, pins 0 and 1 are driven by the stage, one clock
+   late: the caller passes the stage's output enables and the pins' levels in quarter 3 of this
+   cycle, which is what the phase-0 synchroniser samples. *)
+let step ?mp01 e ~pin_out ~pin_oe =
   let has b = e.ctrl land b <> 0 in
-  let routed = (if has ctrl_flash then 0x4E else 0) lor (if has ctrl_i2c then 0x30 else 0) in
-  let driven i = bit pin_oe i = 1 && bit routed i = 0 in
+  let routed = routed_mask e.ctrl in
+  let driven i = match mp01 with
+    | Some (oe01, _) when i < 2 -> bit oe01 i = 1
+    | _ -> bit pin_oe i = 1 && bit routed i = 0 in
+  let level i = match mp01 with Some (_, v01) when i < 2 -> bit v01 i | _ -> bit pin_out i in
   (* header pads: pull-ups everywhere, then jumpers and devices *)
-  let pad = Array.init 8 (fun i -> if driven i then bit pin_out i else 1) in
+  let pad = Array.init 8 (fun i -> if driven i then level i else 1) in
   if e.wiring.header_i2c_slave then begin
     let sl = e.header_slave in
     let drv i = driven i in
