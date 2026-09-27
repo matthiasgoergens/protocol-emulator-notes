@@ -9,7 +9,7 @@ D2 edge column, 2 thick banks 128x32: 23 PEs (150863 um2) + storage 45688 um2 = 
 D2s edge column, 2 SRAM 256x16 macros: 21 PEs (137744 um2) + storage 56254 um2 = 193998 um2; 8192 storage bits in 2 blocks; same idea with PDK macros
     2 x SRAM 256x16: 28127 um2 each, 4096 bits, 6.87 um2/bit
 D3 graded: thin 32x16 per 4 PEs + 2 thick 128x32 at the edge: 19 PEs (124626 um2) + storage 68845 um2 = 193471 um2; 10752 storage bits in 7 blocks; dense short-lived storage near producers, long-lived at the edge
-    5 x local thin bank: 4632 um2 each, 512 bits, 9.05 um2/bit
+    5 x local thin bank: 4631 um2 each, 512 bits, 9.05 um2/bit
     2 x thick bank: 22844 um2 each, 4096 bits, 5.58 um2/bit
 D4 array as delay line: 30 PEs (196778 um2) + storage 0 um2 = 196778 um2; 0 storage bits in 0 blocks; any PE can be switched to pass-through: 32 bits of delay per PE
 

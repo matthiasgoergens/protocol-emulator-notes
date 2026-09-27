@@ -49,9 +49,9 @@ area is 2.20–2.89 µm²/bit. The 5–13× figure is a check-column-free payloa
 payload density. With shortened extended-Hamming columns and the
 estimated periphery, code-inclusive thick-bank areas are 18.88585 µm²/payload bit for 8×16,
 9.147625 for 32×16 and 5.1177609375 for 128×32: about 2.41×, 4.98× and 8.91× denser than the
-45.59 µm²/bit latch storage. Using `storage_options.py` and the synthesised periphery in
-`results/gc_periph-code-shapes.txt`, the corresponding figures are 18.333125, 9.9946484375 and
-5.577119140625 µm²/payload bit. Unlike SRAM, gain-cell banks come in any size, with no
+45.59 µm²/bit latch storage. Using `storage_options.py` and the exact synthesis reports, the
+corresponding figures are 18.333025, 9.99458125 and
+5.57711953125 µm²/payload bit. Unlike SRAM, gain-cell banks come in any size, with no
 2 kbit, 17.5k µm² minimum. At 4 kbit and above, a gain-cell bank beats the SRAM macro only by
 1.3–1.9×; `results/candidates.txt` includes the shortened extended-Hamming check columns in
 that comparison.

@@ -32,7 +32,8 @@ GUARD = 0.8
 #             (../pe-synth/results/pnr.txt: 78,814 / 8); standard-cell storage scaled by the
 #             same placed/synthesised ratio as the PE (9,852 / 6,559), which is an assumption:
 #             the periphery and latch file were synthesised but not placed
-SYNTH_PERIPH = {(128, 39): 8417.0, (32, 22): 3082.7, (8, 22): 1838.0}  # gc_periph_<rows>x<cols>
+# Exact cell areas from ../pe-synth/reports/gc_periph_<rows>x<cols>.stat.txt.
+SYNTH_PERIPH = {(128, 39): 8417.0016, (32, 22): 3082.6656, (8, 22): 1837.9872}
 BASES = {
     "estimate": dict(pe=5_000.0, rf=None, periph=None, std=1.0),
     "synth": dict(pe=52_474 / 8, rf=5343.0, periph=SYNTH_PERIPH, std=1.0),
