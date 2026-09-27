@@ -13,7 +13,8 @@
 //             leaves an inferred latch unmapped, with no area)
 //
 // Not included, as in the estimate: read-bit-line precharge, any VLO level for the write
-// drivers (the gain-cell level-shift trick), refresh control, Berger-check logic.
+// drivers (the gain-cell level-shift trick), refresh control, shortened extended-Hamming
+// check logic.
 module gc_periph #(parameter ROWS = 32, parameter COLS = 64, parameter AW = 5) (
   input  wire              clk,
   input  wire [AW-1:0]     addr,

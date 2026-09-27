@@ -14,8 +14,9 @@ t_def,t_last in 50 MHz cycles). The allocator walks the trace in time order and:
 
 The compiler schedules against the *profiled* lifetime times a guard factor; a separate decay
 model applies the *true* lifetime per bit, so a mis-profiled weak row corrupts data. Every word
-carries a Berger check (the count of 0s in the data, stored in the same row), and every read is
-checked, which is how the planted weak row is detected (test_allocator.py).
+carries a shortened extended-Hamming check (minimum distance four), and every read is checked.
+It detects every one-, two- or three-bit transition, in either direction; heavier corruption is
+outside its guarantee.
 
 uv run allocator.py mixes      -> results/mixes.txt       (best thick/thin mix per condition)
 uv run allocator.py summary    -> results/summary.txt     (interval histograms per trace)
@@ -28,7 +29,9 @@ import storage_options as so
 CLK = 50e6
 CONDS = ("tt27", "tt85", "ff85")
 TYPES = {"thick": so.GC_THICK, "thin": so.GC_THIN}
-LIFE = {k: {c: s * CLK for c, s in d.items()} for k, d in so.LIFE.items()}  # cycles
+LIFE_ONE = {k: {c: s * CLK for c, s in d.items()} for k, d in so.LIFE_ONE.items()}
+LIFE_ZERO = {k: {c: s * CLK for c, s in d.items()} for k, d in so.LIFE_ZERO.items()}
+LIFE = {k: {c: min(LIFE_ONE[k][c], LIFE_ZERO[k][c]) for c in CONDS} for k in TYPES}
 
 
 @dataclass
@@ -59,7 +62,8 @@ class Row:
     kind: str
     profiled: float = 1.0   # lifetime factor the compiler believes
     true: float = 1.0       # lifetime factor the silicon has
-    bit_spread: list = field(default_factory=list)  # per-bit multiplier >= 1 on the true lifetime
+    bit_spread: list = field(default_factory=list)  # 1->0 lifetime multiplier
+    rise_spread: list = field(default_factory=list)  # 0->1 lifetime multiplier
 
 
 def make_rows(n_thick, n_thin, width, weak=(), seed=7):
@@ -67,50 +71,110 @@ def make_rows(n_thick, n_thin, width, weak=(), seed=7):
     rng = random.Random(seed)
     rows = [Row(i, "thick" if i < n_thick else "thin") for i in range(n_thick + n_thin)]
     for r in rows:
-        r.bit_spread = [1.0 + 0.5 * rng.random() for _ in range(width + berger_bits(width))]
+        nbits = width + check_bits(width)
+        r.bit_spread = [1.0 + 0.5 * rng.random() for _ in range(nbits)]
+        r.rise_spread = [1.0 + 0.5 * rng.random() for _ in range(nbits)]
     for i, t, p in weak:
         rows[i].true, rows[i].profiled = t, p
     return rows
 
 
-def berger_bits(width):
-    return math.ceil(math.log2(width + 1))
+def hamming_parity_bits(width):
+    """Number of ordinary Hamming parity bits for a shortened systematic codeword."""
+    r = 1
+    while (1 << r) < width + r + 1:
+        r += 1
+    return r
 
 
-def berger(word, width):
-    return width - bin(word).count("1")
+def check_bits(width):
+    """Check bits for shortened extended Hamming: ordinary parity plus overall parity."""
+    return hamming_parity_bits(width) + 1
+
+
+def _data_positions(width):
+    """Virtual Hamming positions for data bits (non-powers of two)."""
+    out, pos = [], 1
+    while len(out) < width:
+        if pos & (pos - 1):
+            out.append(pos)
+        pos += 1
+    return out
+
+
+def encode(data, width):
+    """Pack data and a shortened extended-Hamming codeword."""
+    if not 0 <= data < (1 << width):
+        raise ValueError("data does not fit width")
+    r = hamming_parity_bits(width)
+    positions = _data_positions(width)
+    parity = []
+    for j in range(r):
+        p = 0
+        for b, pos in enumerate(positions):
+            if pos & (1 << j):
+                p ^= (data >> b) & 1
+        parity.append(p)
+    hp = sum(bit << j for j, bit in enumerate(parity))
+    overall = (data.bit_count() + hp.bit_count()) & 1
+    return data | (hp << width) | (overall << (width + r))
+
+
+def code_valid(stored, width):
+    """Return whether a received codeword is in the code."""
+    r = hamming_parity_bits(width)
+    if width < 1 or stored < 0 or stored >= 1 << (width + r + 1):
+        return False
+    mask = (1 << width) - 1
+    data, hp = stored & mask, (stored >> width) & ((1 << r) - 1)
+    positions = _data_positions(width)
+    for j in range(r):
+        p = 0
+        for b, pos in enumerate(positions):
+            if pos & (1 << j):
+                p ^= (data >> b) & 1
+        if ((hp >> j) & 1) != p:
+            return False
+    overall = (stored >> (width + r)) & 1
+    return overall == ((data.bit_count() + hp.bit_count()) & 1)
 
 
 class Decay:
-    """Per-bit decay of stored 1s. A 1 in bit b of row r written at tw reads as 0 after
-    L_true(r) * spread[b]; 0s never change. Checks every read with the Berger code."""
+    """Per-bit decay in both directions. A stored bit crosses its level threshold after its
+    directional lifetime, then reads as the opposite value. Checks every read with the
+    extended-Hamming code. The detection guarantee starts from a valid codeword; hardware must
+    stop or recover on a flag instead of continuing from a damaged check word."""
 
     def __init__(self, cond, width):
-        self.cond, self.width, self.cb = cond, width, berger_bits(width)
-        self.reads = self.corrupt = self.detected = self.silent = self.false_alarm = 0
+        self.cond, self.width, self.cb = cond, width, check_bits(width)
+        self.reads = self.corrupt = self.detected = self.silent = self.check_only = 0
         self.detect_rows = collections.Counter()
 
     def encode(self, data):
-        return data | (berger(data, self.width) << self.width)
+        return encode(data, self.width)
 
     def read(self, row, stored, data, tw, t):
         """stored: the codeword written at tw (a refresh writes back what it read, decayed or
         not); data: the value the program originally wrote. Returns the codeword read."""
-        life = LIFE[row.kind][self.cond] * row.true
+        fall = LIFE_ONE[row.kind][self.cond] * row.true
+        rise = LIFE_ZERO[row.kind][self.cond] * row.true
         age = t - tw
         got = 0
         for b in range(self.width + self.cb):
-            if (stored >> b) & 1 and age <= life * row.bit_spread[b]:
-                got |= 1 << b
+            bit = (stored >> b) & 1
+            deadline = fall * row.bit_spread[b] if bit else rise * row.rise_spread[b]
+            if age <= deadline:
+                got |= bit << b
+            else:
+                got |= (1 - bit) << b
         d = got & ((1 << self.width) - 1)
-        c = got >> self.width
         bad = d != data
-        flag = berger(d, self.width) != c
+        flag = not code_valid(got, self.width)
         self.reads += 1
         self.corrupt += bad
         self.detected += flag
         self.silent += bad and not flag
-        self.false_alarm += flag and not bad
+        self.check_only += flag and not bad
         if flag:
             self.detect_rows[row.idx] += 1
         return got
@@ -189,8 +253,8 @@ def allocate(values, rows, cond, guard=0.8, decay=None, migrate=True, max_ops=No
     return stats
 
 
-def area(n_thick, n_thin, width, with_berger=True):
-    cols = width + (berger_bits(width) if with_berger else 0)
+def area(n_thick, n_thin, width, with_check=True):
+    cols = width + (check_bits(width) if with_check else 0)
     per_row = 2 * so.BUF + so.NAND2 + so.A21OI
     per_col = so.EBUF + so.INV + so.LATCH
     fixed = 8 * so.DFF + 10 * so.NAND2
@@ -255,7 +319,8 @@ def summary():
 def mixes(guard=0.8, cap=0.10):
     print(f"# best thick/thin row mix per trace and condition; guard {guard}, one bank,"
           f" refresh = read+write = 2 port cycles; bandwidth = 2*ops/span")
-    print("# columns: area um2 (Berger columns included), rows thick+thin, refresh+migration ops,"
+    print("# columns: area um2 (extended-Hamming check columns included), rows thick+thin,"
+          " refresh+migration ops,"
           " bandwidth fraction")
     for name, path, only in TRACES:
         vs = load(path, only)

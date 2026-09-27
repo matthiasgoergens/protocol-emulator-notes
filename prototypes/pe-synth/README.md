@@ -19,7 +19,8 @@ to a file here. IHP SG13G2, typical liberty at 1.2 V and 25 °C.
   - `YOSYS_HOST=1` uses Yosys 0.69+77 from the oss-cad-suite in `~/prog/janestreet/fabulous-notes`.
     That is the build that produced the ring's 169,641 µm², and it reproduces the figure
     exactly (`reports/semiring_ring-y069.stat.txt`).
-  - `periph.sh` synthesises the bank periphery for four shapes.
+  - `periph.sh` synthesises the bank periphery for the task's 32×64 shape and the three
+    shortened extended-Hamming shapes used by the current systolic-storage study.
   - Logs are in `logs/`, statistics in `reports/`, and the summary is `results/areas.txt`
     (`python3 summary.py`). Netlists are in `/var/tmp/pe-synth/netlists` (scratch).
 - **Place and route:** `pnr/run_pnr.sh NAME PERIOD UTIL` runs LibreLane 3.0.14 with its own Yosys
@@ -98,20 +99,20 @@ The periphery contains:
 - per column, an `ebufn_2` write driver, an `inv_1` sense inverter and a `dlhq_1` output latch.
 
 It leaves out, as the estimate does: read-bit-line precharge, the VLO level for the level-shift
-trick, refresh control and Berger logic.
+trick, refresh control and shortened extended-Hamming parity-generation and checking logic.
 
-| shape (rows × columns) | synthesised | estimate (`storage_options.gain_array` minus cells) |
+| shape (rows × columns) | synthesised | payload and check columns |
 |---|---|---|
-| 32 × 64 | 5,369 | 4,935 |
-| 128 × 38 (the 128×32 thick bank with Berger) | 8,363 | 6,481 |
-| 32 × 21 (the 32×16 thin bank with Berger) | 3,028 | 2,595 |
-| 8 × 21 (an 8-word per-PE bank) | 1,784 | 1,854 |
-| 8×16 latch register file | 5,343 | 5,835 |
+| 32 × 64 | 5,369 | task shape |
+| 128 × 39 | 8,417 | 128×32 thick bank plus 7 checks |
+| 32 × 22 | 3,083 | 32×16 thin bank plus 6 checks |
+| 8 × 22 | 1,838 | 8×16 per-PE bank plus 6 checks |
+| 8×16 latch register file | 5,343 | no check columns |
 
-The periphery of the three larger banks comes out 9–29 % above the estimate. This is mostly
-because the word-line drivers here are `buf_2` against the estimate's `buf_1`, and the 128-row
-decoder is larger. The 8-row bank is 4 % below. The latch
-file comes out 8 % below: abc builds its read mux from `a22oi`/`nand4` rather than a `mux4` tree.
+The physical check columns are included in the three bank-periphery figures; the generation and
+checking logic is not. `../systolic-storage/results/gc_periph-code-shapes.txt` records the exact
+areas and reproduction boundary. The older 128×38, 32×21 and 8×21 reports used Berger columns
+and are retained only as historical evidence.
 
 ## Open questions
 

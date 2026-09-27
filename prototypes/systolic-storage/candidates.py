@@ -15,6 +15,7 @@ storage_options.py (LEF cells; gain-cell periphery estimated).
 """
 import math
 
+import allocator
 import storage_options as so
 
 BUDGET = 200_000
@@ -25,12 +26,13 @@ GUARD = 0.8
 # bank periphery; not to the drawn gain-cell array or the SRAM macro).
 #   estimate: the original numbers (PE scaled from the ring, storage from LEF cell sums)
 #   synth:    Yosys 0.62 cell area (../pe-synth/results/areas.txt): PE = pe16_row8 / 8
-#             = 52,474 / 8; latch_rf_8x16; gc_periph_128x38 and gc_periph_32x21
+#             = 52,474 / 8; latch_rf_8x16; and the check-inclusive bank shapes measured
+#             in results/gc_periph-code-shapes.txt
 #   placed:   LibreLane core area per PE of pe16_row8 at 72 % target, 90 % final utilisation
 #             (../pe-synth/results/pnr.txt: 78,814 / 8); standard-cell storage scaled by the
 #             same placed/synthesised ratio as the PE (9,852 / 6,559), which is an assumption:
 #             the periphery and latch file were synthesised but not placed
-SYNTH_PERIPH = {(128, 38): 8363.0, (32, 21): 3028.0}   # gc_periph_<rows>x<cols>
+SYNTH_PERIPH = {(128, 39): 8417.0, (32, 22): 3082.7, (8, 22): 1838.0}  # gc_periph_<rows>x<cols>
 BASES = {
     "estimate": dict(pe=5_000.0, rf=None, periph=None, std=1.0),
     "synth": dict(pe=52_474 / 8, rf=5343.0, periph=SYNTH_PERIPH, std=1.0),
@@ -45,12 +47,13 @@ def set_basis(name):
     BASIS, A_PE = name, BASES[name]["pe"]
 
 
-def berger(w):
-    return math.ceil(math.log2(w + 1))
+def check_bits(w):
+    """Shortened extended-Hamming overhead: detects up to three bit transitions."""
+    return allocator.check_bits(w)
 
 
 def gbank(rows, width, kind):
-    cols = width + berger(width)
+    cols = width + check_bits(width)
     cell = so.GC_THICK if kind == "thick" else so.GC_THIN
     b = BASES[BASIS]
     if b["periph"] is None:
