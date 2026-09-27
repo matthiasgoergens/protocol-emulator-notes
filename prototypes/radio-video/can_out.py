@@ -1,3 +1,7 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["numpy"]
+# ///
 """Demo B output: the detector's state as CAN 2.0A frames (what the sequencer sends in firmware,
 with the programmable CRC assist computing CRC-15 and the bit-stuffing assist inserting stuff bits).
 
@@ -10,7 +14,7 @@ checks the CRC and recovers the fields. Planted faults (one flipped bit, a missi
 be caught. Then the detector states saved by advert.py are turned into frames and the bus load and
 the mute latency (detection delay plus one frame) are reported.
 
-Usage: python3 can_out.py   -> results/can_out.txt
+Usage: uv run can_out.py   -> results/can_out.txt
 """
 import pathlib, sys
 import numpy as np

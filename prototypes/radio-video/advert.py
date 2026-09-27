@@ -485,7 +485,7 @@ def main(n_train=3, n_test=3, minutes=40):
                        delay_to_prog_max=[e["delay_to_prog_max"] for e in ev],
                        weights=dict(zip(names + ["bias"], [round(float(x), 3) for x in model[2]])))
             out[f"{rname}/{cs}"] = agg
-            lines.append(f"{rname:13s} {cs:6s} acc {agg['acc']:.3f}  boundaries {agg['boundaries']:3d} missed {agg['missed']:2d}  "
+            lines.append(f"{rname:17s} {cs:6s} acc {agg['acc']:.3f}  boundaries {agg['boundaries']:3d} missed {agg['missed']:2d}  "
                          f"false {agg['false_switches']:2d} ({agg['false_per_hour']:.2f}/h)  "
                          f"to advert {agg['delay_to_ad_median']} max {agg['delay_to_ad_max']}  "
                          f"to programme {agg['delay_to_prog_median']} max {agg['delay_to_prog_max']}")
@@ -499,7 +499,7 @@ def main(n_train=3, n_test=3, minutes=40):
             x = np.concatenate([features(sims[(black, s)], aregime, [k])[:, 0] for s in range(n_train, n_train + n_test)])
             y = np.concatenate([sims[(black, s)]["label"] for s in range(n_train, n_train + n_test)])
             row.append(f"{k} {auc(x, y):.2f}")
-        lines.append(f"  {rname:13s} " + "  ".join(row))
+        lines.append(f"  {rname:17s} " + "  ".join(row))
     out["seconds"] = round(time.time() - t0)
     (RES / "advert.json").write_text(json.dumps(out, indent=1))
     (RES / "advert.txt").write_text("\n".join(lines) + "\n")

@@ -1,0 +1,18 @@
+CAN output for Demo B (can_out.py). ID 0x2A0, DLC 3: state, confidence, sequence.
+round trip: 2000 / 2000 frames decoded exactly. One random flipped bit per frame: 1998 rejected (stuff or CRC error), 2 harmless (flip after the CRC, in the delimiter, ACK or EOF, which this decoder does not check), 0 wrong frames accepted
+example frame (advert, confidence 200, seq 7), 73 bits on the wire: 0010101000001000001110000010011100100000100011100101101111101101111111111
+legacy_audio             0 state changes in 725 s -> 725 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+legacy_both              3 state changes in 725 s -> 728 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+legacy_video             1 state changes in 725 s -> 726 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_audio               0 state changes in 725 s -> 725 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_both               10 state changes in 725 s -> 735 frames, 77 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_mild_audio          0 state changes in 725 s -> 725 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_mild_both           2 state changes in 725 s -> 727 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_mild_noblack_audio   0 state changes in 724 s -> 724 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_mild_noblack_both  20 state changes in 724 s -> 744 frames, 78 bit/s (0.062% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_mild_noblack_video   1 state changes in 724 s -> 725 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_mild_video          1 state changes in 725 s -> 726 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_noblack_audio       0 state changes in 724 s -> 724 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_noblack_both       48 state changes in 724 s -> 772 frames, 81 bit/s (0.065% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_noblack_video       1 state changes in 724 s -> 725 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s
+r128_video               1 state changes in 725 s -> 726 frames, 76 bit/s (0.061% of 125 kbit/s); frame time 0.61 ms at 125 kbit/s, 0.15 ms at 500 kbit/s

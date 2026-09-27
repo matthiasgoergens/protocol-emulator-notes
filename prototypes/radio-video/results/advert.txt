@@ -1,0 +1,26 @@
+Demo B advert detection (advert.py). Synthetic timelines, 1 train and 1 test seeds of 8 min.
+Delays in seconds from the true boundary to the detector's switch (median / max);
+false = detector switches not matched to a true boundary.
+
+legacy            audio  acc 0.208  boundaries   1 missed  1  false  0 (0.00/h)  to advert [None] max [None]  to programme [None] max [None]
+legacy            video  acc 0.996  boundaries   1 missed  0  false  0 (0.00/h)  to advert [3.0] max [3]  to programme [None] max [None]
+legacy            both   acc 0.961  boundaries   1 missed  0  false  2 (10.00/h)  to advert [2.0] max [2]  to programme [None] max [None]
+r128              audio  acc 0.208  boundaries   1 missed  1  false  0 (0.00/h)  to advert [None] max [None]  to programme [None] max [None]
+r128              video  acc 0.996  boundaries   1 missed  0  false  0 (0.00/h)  to advert [3.0] max [3]  to programme [None] max [None]
+r128              both   acc 0.921  boundaries   1 missed  0  false  9 (45.00/h)  to advert [2.0] max [2]  to programme [None] max [None]
+r128_noblack      audio  acc 0.207  boundaries   1 missed  1  false  0 (0.00/h)  to advert [None] max [None]  to programme [None] max [None]
+r128_noblack      video  acc 0.996  boundaries   1 missed  0  false  0 (0.00/h)  to advert [3.0] max [3]  to programme [None] max [None]
+r128_noblack      both   acc 0.646  boundaries   1 missed  0  false 47 (235.00/h)  to advert [-10.0] max [-10]  to programme [None] max [None]
+r128_mild         audio  acc 0.208  boundaries   1 missed  1  false  0 (0.00/h)  to advert [None] max [None]  to programme [None] max [None]
+r128_mild         video  acc 0.996  boundaries   1 missed  0  false  0 (0.00/h)  to advert [3.0] max [3]  to programme [None] max [None]
+r128_mild         both   acc 0.950  boundaries   1 missed  0  false  1 (5.00/h)  to advert [3.0] max [3]  to programme [None] max [None]
+r128_mild_noblack audio  acc 0.207  boundaries   1 missed  1  false  0 (0.00/h)  to advert [None] max [None]  to programme [None] max [None]
+r128_mild_noblack video  acc 0.996  boundaries   1 missed  0  false  0 (0.00/h)  to advert [3.0] max [3]  to programme [None] max [None]
+r128_mild_noblack both   acc 0.889  boundaries   1 missed  0  false 19 (95.00/h)  to advert [2.0] max [2]  to programme [None] max [None]
+
+Per-second separability of each cue on test seeds (AUC; 0.5 = none, 1 or 0 = perfect):
+  legacy            crest 0.86  lra 0.96  jump 0.98  level 1.00  logo3 0.04  black3 0.42  cuts5 0.95  spread 0.96  luma 0.84
+  r128              crest 0.86  lra 0.96  jump 0.47  level 0.44  logo3 0.04  black3 0.42  cuts5 0.95  spread 0.96  luma 0.84
+  r128_noblack      crest 0.89  lra 0.94  jump 0.45  level 0.45  logo3 0.04  black3 1.00  cuts5 0.96  spread 0.97  luma 0.87
+  r128_mild         crest 0.99  lra 0.99  jump 0.49  level 0.47  logo3 0.04  black3 0.42  cuts5 0.95  spread 0.96  luma 0.84
+  r128_mild_noblack crest 0.99  lra 0.99  jump 0.43  level 0.39  logo3 0.04  black3 1.00  cuts5 0.96  spread 0.97  luma 0.87
