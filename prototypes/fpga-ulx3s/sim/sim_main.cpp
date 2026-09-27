@@ -23,6 +23,55 @@
 
 static inline int bit(unsigned v, int i) { return (v >> i) & 1; }
 
+// Time runs in quarter clocks. Each cycle has four edges: phase 0 (clk) rises at quarter 0 and
+// falls at quarter 2; in the four-phase build (EMU_MULTIPHASE) phases 1, 2 and 3 rise at quarters
+// 1, 2 and 3 and fall half a period later. After every edge the stage's pads (pins 0 and 1) are
+// refreshed from its outputs, so a sampler on phase p sees the level of the quarter before p, as
+// it would with any real clock-to-output delay. The board model and the host link run once a
+// cycle, after quarter 3, as before the four-phase build existed.
+static Vemu_core* g_top;
+static VerilatedVcdC* g_tfp;
+static long long g_qtime = 0;
+static void settle_pads01() {
+#ifdef EMU_MULTIPHASE
+  unsigned out = g_top->seq_pad_out, oe = g_top->seq_pad_oe, pads = g_top->seq_pad_in;
+  for (int i = 0; i < 2; i++) {
+    int v = bit(oe, i) ? bit(out, i) : 1;   // released: the pad's pull-up
+    pads = (pads & ~(1u << i)) | ((unsigned)v << i);
+  }
+  g_top->seq_pad_in = pads;
+  g_top->eval();
+#endif
+}
+static void quarter(int q) {
+  switch (q) {
+    case 0: g_top->clk = 1;
+#ifdef EMU_MULTIPHASE
+      g_top->ph2 = 0;
+#endif
+      break;
+    case 1:
+#ifdef EMU_MULTIPHASE
+      g_top->ph1 = 1; g_top->ph3 = 0;
+#endif
+      break;
+    case 2: g_top->clk = 0;
+#ifdef EMU_MULTIPHASE
+      g_top->ph2 = 1;
+#endif
+      break;
+    case 3:
+#ifdef EMU_MULTIPHASE
+      g_top->ph3 = 1; g_top->ph1 = 0;
+#endif
+      break;
+  }
+  g_top->eval();
+  settle_pads01();
+  if (g_tfp) g_tfp->dump((uint64_t)g_qtime);
+  g_qtime++;
+}
+
 // ---------------------------------------------------------------- env.ml: i2c_slave
 struct Slave {
   int addr;  // -1: acknowledge everything
@@ -99,6 +148,7 @@ int main(int argc, char** argv) {
   Vemu_core* top = new Vemu_core;
   VerilatedVcdC* tfp = nullptr;
   if (vcd) { Verilated::traceEverOn(true); tfp = new VerilatedVcdC; top->trace(tfp, 99); tfp->open(vcd); }
+  g_top = top; g_tfp = tfp;
 
   Slave hdr(hslave_addr), rtc(rtc_addr);
   Flash hflash; hflash.id = {0xEF, 0x40, 0x17};
@@ -113,12 +163,10 @@ int main(int argc, char** argv) {
   top->clk = 0; top->rst = 1; top->uart_rx = 1;
   top->seq_pad_in = 0xFF; top->aux_spi_miso = 1; top->aux_sda_in = 1; top->aux_scl_in = 1;
   top->smp_pad_in = 0xF; top->board_status = 0;
-  for (int i = 0; i < 8; i++) { top->clk = 0; top->eval(); top->clk = 1; top->eval(); }
+  for (int i = 0; i < 8; i++) for (int q = 0; q < 4; q++) quarter(q);
   top->rst = 0;
 
   for (long long cyc = 0; cyc < max_cycles; cyc++) {
-    top->clk = 0; top->eval();
-    if (tfp) tfp->dump((uint64_t)(2 * cyc));
     // ---------------- board model: env.ml's step, from the outputs visible in this cycle
     unsigned ctrl = top->ctrl;
     unsigned out = top->seq_pad_out, oe = top->seq_pad_oe;   // oe already masks routed pins
@@ -172,8 +220,8 @@ int main(int argc, char** argv) {
       if (--tx_cnt == 0) { tx_cnt = cpb; if (++tx_bit == 10) tx_bit = -1; }
     } else top->uart_rx = 1;
 
-    top->clk = 1; top->eval();
-    if (tfp) tfp->dump((uint64_t)(2 * cyc + 1));
+    top->eval();
+    quarter(0);
 
     // ---------------- host link: uart_tx -> stdout
     int line = top->uart_tx;
@@ -191,6 +239,7 @@ int main(int argc, char** argv) {
       }
       rx_bit++;
     }
+    quarter(1); quarter(2); quarter(3);
   }
   if (!flash.commands.empty()) {
     fprintf(stderr, "sim: flash commands:");

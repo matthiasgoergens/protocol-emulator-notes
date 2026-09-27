@@ -15,6 +15,12 @@ type expect =
   | I2c_bytes of { sda : int; scl : int; bytes : int list; acks : bool list option }
   | Capture_uart of int list             (* sampler capture, timed mode, 10-bit frames *)
   | Trace_overflows                      (* the run must overflow the trace buffer *)
+  | Host_bytes_by_build of { plain : int list; mp : int list }
+                                         (* host bytes that depend on the build: quad samples *)
+  | Quarter_spacing of { pin : int; spacing : int; min_edges : int }
+                                         (* edges of the recorded pin_sub, on the quarter grid *)
+  | Quad_loopback of { pins : int list } (* four-phase build: stage samples = pads the recorded
+                                            pin_sub and pin_oe imply, quarter by quarter *)
 
 type test = {
   name : string;
@@ -271,6 +277,48 @@ let flash_interlock () =
     stream = []; wiring = Env.no_wiring; needs = [ "sim-only" ]; board_only_lenient = false;
     expects = []; forbid_flash_cmds_except = None }
 
+(* Sub-slot edge train, the multiphase prototype's (multiphase/main.ml, fine_edge_train): pin 1
+   toggles every 17 quarters (4.25 clocks), a period the clock grid cannot make. Edge n lands at
+   quarter 17n, which is clock 4n + n div 4 and sub-slot n mod 4, and that clock belongs to thread
+   (n div 4) mod 4, so each thread writes four edges on four consecutive slots with q = 0, 1, 2, 3
+   and idles 13 slots. *)
+let subslot_train () =
+  let program u =
+    let body = [ Isa.setpq ~q:0 ~mask:2 ~value:1 ~oe:1; Isa.setpq ~q:1 ~mask:2 ~value:0 ~oe:1;
+                 Isa.setpq ~q:2 ~mask:2 ~value:1 ~oe:1; Isa.setpq ~q:3 ~mask:2 ~value:0 ~oe:1 ]
+               @ List.init 12 (fun _ -> Isa.nop) @ [ Isa.jmp (4 * u) ] in
+    let code = Array.of_list (List.init (4 * u) (fun _ -> Isa.nop) @ body) in
+    Array.init Isa.prog_len (fun i -> if i < Array.length code then code.(i) else Isa.halt) in
+  { name = "subslot_train"; doc = "pin 1 toggles every 17 quarters: SETP with q = 0..3 rotating over all four threads";
+    mem = Array.init Isa.n_threads program; cycles = 700; ctrl = 0; cfg = []; host_in = []; stream = [];
+    wiring = Env.no_wiring; needs = []; board_only_lenient = false;
+    expects = [ Quarter_spacing { pin = 1; spacing = 17; min_edges = 150 }; Quad_loopback { pins = [ 1 ] } ];
+    forbid_flash_cmds_except = None }
+
+(* Quad SHI against the stage's own samplers: thread 0 drives pin 0 and, one slot (four cycles)
+   later, takes pin 0's four quarter samples back with quad SHI. For a write at cycle c with
+   sub-slot q, those are the samples of clock c+2 (the core sees clock k's samples in cycle k+2),
+   and the samplers see: quarter 0 the level of quarter 3 of clock c+1, the old level; quarter
+   p >= 1 the level of quarter p-1 of clock c+2, where the stage shows the nibble the write
+   produced. So a rising edge reads s0..s3 = 0,1,1,1 for q = 0, 0,0,1,1 for q = 1, 0,0,0,1 for
+   q = 2 and 0,0,0,0 for q = 3 (the edge falls after the window), and a falling edge the
+   complement. MSB-first quad SHI puts s0 at the top of each nibble, so the byte for sub-slot q is
+   (rise nibble, fall nibble): 78 3C 1E 0F. In the plain build the pads change on the clock grid
+   and pin_in4 repeats the one synchronised sample, which is already the new level: F0 four times.
+   Derived by hand from the stage's documented timing, not from the model. *)
+let quad_rx () =
+  let setq q v = Isa.setpq ~q ~mask:1 ~value:v ~oe:1 in
+  let body = List.concat_map (fun q -> [ setq q 1; Isa.shi_quad ~pin:0 ~msb:1; setq q 0; Isa.shi_quad ~pin:0 ~msb:1; Isa.out ])
+      [ 0; 1; 2; 3 ] in
+  let code = Array.of_list ([ setq 0 0; Isa.nop; Isa.nop ] @ body @ [ Isa.halt ]) in
+  let p = Array.init Isa.prog_len (fun i -> if i < Array.length code then code.(i) else Isa.halt) in
+  { name = "quad_rx"; doc = "pin 0 edges at q = 0..3 read back by quad SHI through the stage's own samplers";
+    mem = image [ (0, p) ]; cycles = 4 * (3 + 20) + 40; ctrl = 0; cfg = []; host_in = []; stream = [];
+    wiring = Env.no_wiring; needs = []; board_only_lenient = false;
+    expects = [ Host_bytes_by_build { plain = [ 0xF0; 0xF0; 0xF0; 0xF0 ]; mp = [ 0x78; 0x3C; 0x1E; 0x0F ] };
+                Quad_loopback { pins = [ 0 ] } ];
+    forbid_flash_cmds_except = None }
+
 let all () = [
   uart_pair ~ctrl:Env.ctrl_uloop ~wiring:Env.no_wiring ~name:"uart_loop" ~needs:[] ~lenient:false
     ~doc:"UART transmitter (thread 0, pin 0) into UART receiver (thread 1, pin 7) through the internal loop";
@@ -290,4 +338,6 @@ let all () = [
   header_flash ();
   uart_adapter ();
   flash_interlock ();
+  subslot_train ();
+  quad_rx ();
 ]

@@ -1,0 +1,7 @@
+== quad_rx (simulation, four-phase build)
+  replay through interpreter   PASS  132 cycles, every output equal, pin_sub on all 528 quarters
+  prediction (whole trace)     FAIL  cycle 36: captured in=ff out=01 oe=01 fl=00 sub=0000000f in4=fffffff8, predicted in=ff out=01 oe=01 fl=00 sub=0000000f in4=fffffffc
+  host bytes (quad samples)    FAIL  got [78 1e 1e 0f] expected [78 3c 1e 0f] for the four-phase build
+  quad loopback pin 0          FAIL  512 quarters: stage samples = recorded pin_sub through the stage, 2 differ
+RESULT quad_rx FAIL
+  (42 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.19 s)

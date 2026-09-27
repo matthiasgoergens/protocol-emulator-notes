@@ -1,0 +1,7 @@
+== quad_rx (simulation, four-phase build)
+  replay through interpreter   PASS  132 cycles, every output equal, pin_sub on all 528 quarters
+  prediction (whole trace)     PASS  132 cycles identical to the OCaml board model
+  host bytes (quad samples)    PASS  got [78 3c 1e 0f] expected [78 3c 1e 0f] for the four-phase build
+  quad loopback pin 0          PASS  512 quarters: stage samples = recorded pin_sub through the stage, 0 differ
+RESULT quad_rx PASS
+  (42 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.19 s)

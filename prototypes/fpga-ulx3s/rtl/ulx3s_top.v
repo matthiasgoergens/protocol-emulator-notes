@@ -74,10 +74,6 @@ module ulx3s_top (
   wire running, trace_ovf, activity, flash_blocked;
   reg  [7:0] usb_status_s1 = 8'd0, usb_status_s2 = 8'd0;
   wire [7:0] usb_status;
-`ifdef EMU_MULTIPHASE
-  wire [31:0] pin_sub;
-  wire [7:0] quad;
-`endif
 
   emu_core #(.CLKS_PER_BIT(60), .TRACE_AW(11)) core (
     .clk(clk60), .rst(rst60),
@@ -89,27 +85,14 @@ module ulx3s_top (
     .board_status(usb_status_s2), .ctrl(ctrl),
     .running_o(running), .trace_ovf_o(trace_ovf), .flash_blocked_o(flash_blocked), .host_activity(activity)
 `ifdef EMU_MULTIPHASE
-    , .seq_pin_sub(pin_sub), .quad_pins(8'b0000_0011), .quad_samples({24'd0, quad})
+    , .ph1(ph1), .ph2(ph2), .ph3(ph3)
 `endif
     );
 
   genvar i;
-`ifdef EMU_MULTIPHASE
-  // pins 0 and 1 through the four-phase stage; the stage delays the pin by one clock and carries
-  // the output enable along with it
-  wire [1:0] mp_pin, mp_oe;
-  multiphase_stage stage (
-    .ph0(clk60), .ph1(ph1), .ph2(ph2), .ph3(ph3), .clear(rst60),
-    .sub(pin_sub[7:0]), .oe(seq_oe[1:0]), .pads(gp[1:0]),
-    .pin(mp_pin), .pin_oe(mp_oe), .samples(quad));
-  assign gp[0] = mp_oe[0] ? mp_pin[0] : 1'bz;
-  assign gp[1] = mp_oe[1] ? mp_pin[1] : 1'bz;
-  localparam FIRST_PLAIN = 2;
-`else
-  localparam FIRST_PLAIN = 0;
-`endif
   generate
-    for (i = FIRST_PLAIN; i < 8; i = i + 1) begin : seq_pads
+    // with EMU_MULTIPHASE, seq_out/seq_oe for pins 0 and 1 already come from the stage in emu_core
+    for (i = 0; i < 8; i = i + 1) begin : seq_pads
       assign gp[i] = seq_oe[i] ? seq_out[i] : 1'bz;
     end
     for (i = 0; i < 4; i = i + 1) begin : str_pads

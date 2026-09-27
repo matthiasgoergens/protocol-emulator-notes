@@ -1,0 +1,112 @@
+[
+ {
+  "test": "uart_loop",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "uart_jumper",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "demo3_noslave",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "demo3",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "rtc_ack",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "rtc_ack_pcf8523",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "rtc_nack",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "flash_id",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "stream_loop",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "stream_jumper",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "trace_overflow",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "host_echo",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "eeprom_ack",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "spi_flash_header",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "uart_adapter",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "flash_interlock",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "subslot_train",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "quad_rx",
+  "result": "ok",
+  "checker_pass": true
+ },
+ {
+  "test": "uart_loop [control: trace]",
+  "result": "ok",
+  "checker_pass": false
+ },
+ {
+  "test": "uart_loop [control: imem]",
+  "result": "ok",
+  "checker_pass": false
+ },
+ {
+  "test": "subslot_train [control: q]",
+  "result": "ok",
+  "checker_pass": false
+ },
+ {
+  "test": "subslot_train [control: swap]",
+  "result": "ok",
+  "checker_pass": false
+ }
+]

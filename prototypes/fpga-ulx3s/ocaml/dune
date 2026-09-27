@@ -2,4 +2,4 @@
 ; checks use the same interpreter, compiler and decoders as the simulation work.
 (executable
  (name fpga_tests)
- (modules isa compiler decoders env programs fpga_tests))
+ (modules isa compiler decoders env programs vcd fpga_tests))
