@@ -1,0 +1,8 @@
+pe16x lockstep: 0 mismatches / 20000 cycles (got 20001 outputs)
+pe16x lockstep (FAULT=1): 8006 mismatches / 20000 cycles (got 20001 outputs)
+full      Chip area for module '\pe16x': 17294.860800  of which used for sequential elements: 5584.723200 (32.29%) 
+nolut     Chip area for module '\pe16x': 15493.161600  of which used for sequential elements: 5486.745600 (35.41%) 
+noema     Chip area for module '\pe16x': 14798.322000  of which used for sequential elements: 5584.723200 (37.74%) 
+noshift   Chip area for module '\pe16x': 16231.698000  of which used for sequential elements: 5584.723200 (34.41%) 
+base      Chip area for module '\pe16x': 11483.488800  of which used for sequential elements: 5486.745600 (47.78%) 
+ring_cell16 (pe-synth, same Yosys)  Chip area for module '\ring_cell16': 6072.229800  of which used for sequential elements: 1959.552000 (32.27%) 

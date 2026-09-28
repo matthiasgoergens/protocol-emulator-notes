@@ -1,0 +1,44 @@
+
+7. Printing statistics.
+
+=== pe16x ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1026        - wires
+     1281        - wire bits
+       38        - public wires
+      293        - public wire bits
+       12        - ports
+      103        - port bits
+     1100 1.55E+04 cells
+       18  228.614   sg13g2_a21o_1
+      132  1.2E+03   sg13g2_a21oi_1
+       26  377.395   sg13g2_a221oi_1
+       96 1.04E+03   sg13g2_a22oi_1
+       29  263.088   sg13g2_and2_1
+       15  190.512   sg13g2_and3_1
+        2    29.03   sg13g2_and4_1
+      112 5.49E+03   sg13g2_dfrbpq_1
+       49  266.717   sg13g2_inv_1
+       81 1.47E+03   sg13g2_mux2_1
+        4   152.41   sg13g2_mux4_1
+      110  798.336   sg13g2_nand2_1
+       20   181.44   sg13g2_nand2b_1
+       39  353.808   sg13g2_nand3_1
+        6   76.205   sg13g2_nand3b_1
+        8   87.091   sg13g2_nand4_1
+       86  624.154   sg13g2_nor2_1
+       12  108.864   sg13g2_nor2b_1
+       25    226.8   sg13g2_nor3_1
+        1   10.886   sg13g2_nor4_1
+      161 1.46E+03   sg13g2_o21ai_1
+       22  199.584   sg13g2_or2_1
+        3   38.102   sg13g2_or3_1
+       35  508.032   sg13g2_xnor2_1
+        8  116.122   sg13g2_xor2_1
+
+   Chip area for module '\pe16x': 15493.161600
+     of which used for sequential elements: 5486.745600 (35.41%)
+

@@ -1,0 +1,423 @@
+{
+ "legacy/audio": {
+  "acc": 0.2083,
+  "boundaries": 1,
+  "missed": 1,
+  "false_switches": 0,
+  "false_per_hour": 0.0,
+  "delay_to_ad_median": [
+   null
+  ],
+  "delay_to_ad_max": [
+   null
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "crest": -7.655,
+   "lra": 1.27,
+   "jump": -5.315,
+   "level": 9.97,
+   "bias": -4.47
+  }
+ },
+ "legacy/video": {
+  "acc": 0.9959,
+  "boundaries": 1,
+  "missed": 0,
+  "false_switches": 0,
+  "false_per_hour": 0.0,
+  "delay_to_ad_median": [
+   3.0
+  ],
+  "delay_to_ad_max": [
+   3
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "logo3": -6.795,
+   "black3": 2.407,
+   "cuts5": 3.757,
+   "spread": 3.74,
+   "luma": 2.647,
+   "bias": -7.89
+  }
+ },
+ "legacy/both": {
+  "acc": 0.9614,
+  "boundaries": 1,
+  "missed": 0,
+  "false_switches": 2,
+  "false_per_hour": 10.0,
+  "delay_to_ad_median": [
+   2.0
+  ],
+  "delay_to_ad_max": [
+   2
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "crest": -2.245,
+   "lra": -0.257,
+   "jump": -1.441,
+   "level": 3.462,
+   "logo3": -3.495,
+   "black3": 1.991,
+   "cuts5": 1.841,
+   "spread": 1.18,
+   "luma": 1.651,
+   "bias": -5.73
+  }
+ },
+ "r128/audio": {
+  "acc": 0.2083,
+  "boundaries": 1,
+  "missed": 1,
+  "false_switches": 0,
+  "false_per_hour": 0.0,
+  "delay_to_ad_median": [
+   null
+  ],
+  "delay_to_ad_max": [
+   null
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "crest": -7.9,
+   "lra": -0.41,
+   "jump": -17.664,
+   "level": 17.112,
+   "bias": -5.483
+  }
+ },
+ "r128/video": {
+  "acc": 0.9959,
+  "boundaries": 1,
+  "missed": 0,
+  "false_switches": 0,
+  "false_per_hour": 0.0,
+  "delay_to_ad_median": [
+   3.0
+  ],
+  "delay_to_ad_max": [
+   3
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "logo3": -6.795,
+   "black3": 2.407,
+   "cuts5": 3.757,
+   "spread": 3.74,
+   "luma": 2.647,
+   "bias": -7.89
+  }
+ },
+ "r128/both": {
+  "acc": 0.9214,
+  "boundaries": 1,
+  "missed": 0,
+  "false_switches": 9,
+  "false_per_hour": 45.0,
+  "delay_to_ad_median": [
+   2.0
+  ],
+  "delay_to_ad_max": [
+   2
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "crest": -3.374,
+   "lra": -0.399,
+   "jump": -0.783,
+   "level": 0.679,
+   "logo3": -4.705,
+   "black3": 2.169,
+   "cuts5": 2.472,
+   "spread": 1.806,
+   "luma": 2.228,
+   "bias": -6.498
+  }
+ },
+ "r128_noblack/audio": {
+  "acc": 0.2072,
+  "boundaries": 1,
+  "missed": 1,
+  "false_switches": 0,
+  "false_per_hour": 0.0,
+  "delay_to_ad_median": [
+   null
+  ],
+  "delay_to_ad_max": [
+   null
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "crest": -7.811,
+   "lra": -0.548,
+   "jump": -16.939,
+   "level": 16.342,
+   "bias": -5.397
+  }
+ },
+ "r128_noblack/video": {
+  "acc": 0.9959,
+  "boundaries": 1,
+  "missed": 0,
+  "false_switches": 0,
+  "false_per_hour": 0.0,
+  "delay_to_ad_median": [
+   3.0
+  ],
+  "delay_to_ad_max": [
+   3
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "logo3": -7.691,
+   "black3": 0.0,
+   "cuts5": 4.583,
+   "spread": 2.936,
+   "luma": 7.213,
+   "bias": -7.543
+  }
+ },
+ "r128_noblack/both": {
+  "acc": 0.6464,
+  "boundaries": 1,
+  "missed": 0,
+  "false_switches": 47,
+  "false_per_hour": 235.0,
+  "delay_to_ad_median": [
+   -10.0
+  ],
+  "delay_to_ad_max": [
+   -10
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "crest": -4.852,
+   "lra": -1.739,
+   "jump": -2.853,
+   "level": 2.306,
+   "logo3": -7.187,
+   "black3": 0.0,
+   "cuts5": 2.426,
+   "spread": 1.991,
+   "luma": 6.774,
+   "bias": -7.017
+  }
+ },
+ "r128_mild/audio": {
+  "acc": 0.2083,
+  "boundaries": 1,
+  "missed": 1,
+  "false_switches": 0,
+  "false_per_hour": 0.0,
+  "delay_to_ad_median": [
+   null
+  ],
+  "delay_to_ad_max": [
+   null
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "crest": -3.519,
+   "lra": 0.697,
+   "jump": -10.945,
+   "level": 10.072,
+   "bias": -2.592
+  }
+ },
+ "r128_mild/video": {
+  "acc": 0.9959,
+  "boundaries": 1,
+  "missed": 0,
+  "false_switches": 0,
+  "false_per_hour": 0.0,
+  "delay_to_ad_median": [
+   3.0
+  ],
+  "delay_to_ad_max": [
+   3
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "logo3": -6.795,
+   "black3": 2.407,
+   "cuts5": 3.757,
+   "spread": 3.74,
+   "luma": 2.647,
+   "bias": -7.89
+  }
+ },
+ "r128_mild/both": {
+  "acc": 0.9503,
+  "boundaries": 1,
+  "missed": 0,
+  "false_switches": 1,
+  "false_per_hour": 5.0,
+  "delay_to_ad_median": [
+   3.0
+  ],
+  "delay_to_ad_max": [
+   3
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "crest": -1.399,
+   "lra": 0.04,
+   "jump": -0.444,
+   "level": 0.931,
+   "logo3": -6.505,
+   "black3": 2.153,
+   "cuts5": 3.229,
+   "spread": 2.72,
+   "luma": 2.597,
+   "bias": -7.351
+  }
+ },
+ "r128_mild_noblack/audio": {
+  "acc": 0.2072,
+  "boundaries": 1,
+  "missed": 1,
+  "false_switches": 0,
+  "false_per_hour": 0.0,
+  "delay_to_ad_median": [
+   null
+  ],
+  "delay_to_ad_max": [
+   null
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "crest": -3.454,
+   "lra": 0.538,
+   "jump": -8.043,
+   "level": 7.273,
+   "bias": -2.503
+  }
+ },
+ "r128_mild_noblack/video": {
+  "acc": 0.9959,
+  "boundaries": 1,
+  "missed": 0,
+  "false_switches": 0,
+  "false_per_hour": 0.0,
+  "delay_to_ad_median": [
+   3.0
+  ],
+  "delay_to_ad_max": [
+   3
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "logo3": -7.691,
+   "black3": 0.0,
+   "cuts5": 4.583,
+   "spread": 2.936,
+   "luma": 7.213,
+   "bias": -7.543
+  }
+ },
+ "r128_mild_noblack/both": {
+  "acc": 0.8895,
+  "boundaries": 1,
+  "missed": 0,
+  "false_switches": 19,
+  "false_per_hour": 95.0,
+  "delay_to_ad_median": [
+   2.0
+  ],
+  "delay_to_ad_max": [
+   2
+  ],
+  "delay_to_prog_median": [
+   null
+  ],
+  "delay_to_prog_max": [
+   null
+  ],
+  "weights": {
+   "crest": -2.676,
+   "lra": -0.813,
+   "jump": -2.831,
+   "level": 3.511,
+   "logo3": -8.717,
+   "black3": 0.0,
+   "cuts5": 4.891,
+   "spread": 3.19,
+   "luma": 6.565,
+   "bias": -7.306
+  }
+ },
+ "seconds": 37
+}
