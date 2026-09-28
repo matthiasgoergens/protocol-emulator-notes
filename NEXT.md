@@ -1,100 +1,82 @@
-# NEXT: where things stand (handoff 2026-09-25 19:30 +08)
+# NEXT: verified state and next actions
 
-**Goal.** An entry to Jane Street's protocol-emulator ASIC competition: IHP 130 nm, 6×4 Tiny
-Tapeout tiles, deadline 2027-01-18. Direction (`PLAN.md`, "Direction"): ONE programmable chip.
-Every protocol and demo is a programme or configuration of a few generic blocks. Framing: "software-defined
-hardware" (Groq's term), led by determinism and compilers (`notes/backlog.md`). Repo:
-github.com/matthiasgoergens/protocol-emulator-notes (public, Apache-2.0 since d3de5ae; standing
-permission to push master fast-forward).
+## Goal
 
-## Read first
-- `notes/architecture-v0.md`: the unified chip, ISA v2 encoding table, area budget, the gaps
-  G1–G15 and decisions D1–D15 (merged f89ee80).
-- `notes/backlog.md`: everything agreed, including framing, policies and tools to port.
-- `notes/jane-street-alignment.md`: their asks, quoted.
+Entry to Jane Street's protocol-emulator ASIC competition: IHP 130 nm, 6×4
+Tiny Tapeout tiles, deadline 2027-01-18. Direction remains one programmable
+chip whose protocols and demos are configurations of generic blocks.
 
-## Done (on master, pushed unless noted; latest c3c1602)
-- **Protocols in simulation:** UART, SPI, I2C; JTAG and SWD (`prototypes/proto-jtag-swd`);
-  PS/2 and CAN (`prototypes/sequencer-ps2-can`); low-speed USB as firmware and as a block
-  (`prototypes/usb-ls`); 10BASE-T node with ARP and ping (`prototypes/eth10-node`); bridges and
-  Ethernet- or CAN-to-TV (`prototypes/multi-proto`).
-- **Blocks:** four-phase pin stage (`prototypes/multiphase`); the unified PE, with an OCaml model,
-  Hardcaml RTL and lockstep, 41/41 planted bugs caught, 17/17 cells, 14,359 µm²
-  (`prototypes/unified-pe/verify`, e2f7073, G1 closed).
-- **Studies:** GPS (`prototypes/gps-hotcold`); FPGA ULX3S bring-up, 18/18 in simulation
-  (`prototypes/fpga-ulx3s`); gain cells and tricks (`prototypes/gain-cell`); SRAM corner-cutting;
-  rule breaks (`prototypes/rule-breaks`: TT's precheck runs only IHP's main DRC table, so run the
-  maximal deck ourselves).
-- **Notes:** Jane Street taste; hard-to-program history; systolic prior art (Groq, TPU, Eyeriss).
-- **Fix:** 10BASE-T receiver shift-register clear (74562bf); its regenerated Verilog is bad8787.
+## Current state
 
-## In flight: agent worktrees (no agents are running now; each worktree is on its own branch)
-All agents were killed by the restart at about 15:05, or later by the usage limit. Status per
-worktree (commits ahead of master / uncommitted files):
-- `emulator-wt-isa-v2` (9/0): **G2**, ISA v2 interpreter, RTL and firmware ports. It was
-  resumed at 19:17, then stopped by Matthias at about 19:30 while committing and merging master.
-  Check `git status` and finish.
-- `emulator-wt-scope` (12/0): beyond-Nyquist scope, compressive inference, K-hypothesis tests.
-  Resumed at 19:17, then stopped by Matthias at about 19:30 while revising its README after
-  review. It has uncommitted edits, so check `git status` there.
-- `emulator-wt-array-uses` (9/0): problems for the systolic array (Viterbi, Reed–Solomon,
-  raycaster, …). Stopped by Matthias at about 19:30.
-- **Killed, not resumed:**
-  - `emulator-wt-mc-thick` (22/0): Monte Carlo of the thick cells;
-  - `emulator-wt-periphery` (4/0): gain-cell periphery and pump safety;
-  - `emulator-wt-fast-eth` (4/3): IHP pad speed, 100BASE-FX and 100BASE-TX;
-  - `emulator-wt-radio-video` (6/1): FM receive to TV, advert detection;
-  - `emulator-wt-platformer` (6/0): tile platformer on generic blocks;
-  - `emulator-wt-fpga-subslot` (0/9): quarter-clock replay tooling.
+- Local `master` contains the `platformer` and `radio-video` merges; commits
+  are not pushed.
+- `platformer` is merged at `554203d`; `radio-video` is merged at `c1e08db`.
+- The platformer branch added the generic-block game study, area comparison,
+  RTL/model checks, and local-only still/GIF workflow. Its 285-field game run
+  is still executing and no result is claimed yet.
+- The radio-video branch adds FM/RDS, advert detection and CAN models. The
+  evidence claims were tightened after an independent audit.
 
-  For each: read its README and results, finish or merge.
-- `emulator-snap-brainstorm2`: a finished codex brainstorm snapshot; remove it.
-- Untracked leftovers of merged worktrees are archived in `/var/tmp/worktree-leftovers/`.
+## Verified evidence
 
-## Open items (evidence in brackets)
-1. **Berger code is unsound as specified.** It assumes only 1→0 decay, but stored 0s rise in
-   the thin level-shifted cell (the 0 fails first in some Monte Carlo samples:
-   `prototypes/gain-cell/tricks-thin/results/mc-*`) and in the all-thick cell (0.5–0.9 V
-   within 1 s: `prototypes/gain-cell/tricks-thick/README.md`). A mixed-direction control
-   already escapes it (`prototypes/systolic-storage/README.md`). Fix the design, for example
-   with a two-sided check or refresh bounds, before presenting it.
-2. **Untriaged:** the codex brainstorm's answer, `notes/codex-brainstorm-2026-09-25.md`
-   (committed with this handoff, but not yet triaged). Headline: "silicon laboratory" (learn an unknown peripheral, perturb it,
-   emulate it). It recommends an SRAM programme store and an agents-programming-the-chip
-   experiment with eight unseen tasks.
-3. **Gaps from architecture-v0 still open:**
-   - G4, NCO colour at 60 MHz through the software TV;
-   - G13, whole-chip place and route (heavy; run only when the host is idle);
-   - G14, tile reload;
-   - G6, G7, G15.
-4. **PE definition changes from G1** to fold into architecture-v0: a "follow" bit and
-   broadcast chaining (`prototypes/unified-pe/verify/README.md`).
-5. **Unanswered questions:** whether to add Ed Kmett (a private contact, Groq) to the private
-   outreach notes. Parts ordering: `~/prog/janestreet/fpga-notes/shopping-list.md` (items marked
-   "verify" are from memory).
+- Gain-cell storage: `15 passed`; weak row `55/6000` corrupt and flagged;
+  promotion performs `248` operations with zero corruption.
+- Exact synthesis areas are `1837.987200`, `3082.665600` and `8417.001600
+  um^2`; code-inclusive densities are `18.333025`, `9.99458125` and
+  `5.57711953125 um^2/payload bit`.
+- FPGA focused-control tests pass `5/5` under pytest and unittest. The plain,
+  four-phase and planted-fault runs are `22/22 as expected`, with no skips or
+  infrastructure errors; quarter VCD timestamps are `11,667,600 ps` and
+  `2,200,176 ps`.
+- Platformer model/RTL evidence: `0` differing pixels in 20,000 random model
+  lines and 240 directed edge lines; RTL checks report zero differences for
+  random and directed cases, while three planted faults are caught.
+- Platformer timing and palette checks are recorded in `results/timing.txt`
+  and `results/palette-compare.txt`; the 143 palette colours differ by at
+  most `0.007` full scale.
+- Radio advert smoke data is one training and one test seed with an
+  eight-minute target; retained timelines are `724-725 s` because the
+  generator completes the final programme segment. Video-only accuracy is
+  `0.996`; combined `r128_mild` is `0.950`; audio-only is `0.208`.
+- Radio CAN replay is `2000/2000` clean frames, `1998` rejected sampled bit
+  faults, two harmless delimiter flips and zero wrong accepted frames. The
+  sweep excludes the final ten wire bits and does not exercise ACK, EOF or
+  missing-stuff-bit faults.
+- Radio PE lockstep is `0/20000` normally and `8006/20000` with the planted
+  EMA fault, now checking complete transcript lengths.
 
-## Rules learnt this session (also in memory or CLAUDE.md)
-- **Load:** keep the total load below 32 and aim under 20. At most 3–4 compute agents, each
-  with 1–3 jobs; check `uptime` before every launch. 15 parallel agents forced a restart
-  (memory `limit-host-load.md`). Much of the current load (~40) is Matthias's other work.
-- **Tools and style:**
-  - codex via `codex-luna` only (cheap model);
-  - DeepSeek off-peak (`deepseek-peak-guard`), with MiMo Flash as a stand-in;
-  - prefer OCaml;
-  - verify every agent's numbers against its files before relaying them.
-- Private material (the people to contact, outreach) lives in
-  `~/prog/janestreet/competitor-notes/`, never in the public repo.
+## Skeptic findings
 
-## Next actions, in priority order
-1. **Finish and merge the three stopped agents** (all stopped by Matthias at about 19:30):
-   isa-v2, scope, array-uses. Check their numbers at
-   source first.
-2. **Triage the codex brainstorm** with a cheap reader, commit it, and fix the Berger-code
-   design (open item 1).
-3. **Resume the killed studies one at a time** when the load is below 20: first
-   fpga-subslot and platformer (light), then radio-video, then the SPICE ones (mc-thick,
-   periphery, fast-eth).
+| Claim | Outcome | Evidence |
+| --- | --- | --- |
+| Original code-inclusive density figures | Refuted | Rounded synthesis areas were used; `73944f2` replaces them with exact Yosys areas. |
+| Weak-bit `0.25` factor | Confirmed | It is physical once; the second profile factor only changes scheduling. |
+| Thin tt/85 stored-zero deadline | Confirmed | `106.9 us` versus an `8 us` aggregate deadline. |
+| Quarter-control swap behaviour | Qualified | Controls select `SETP q=1` eligibility first; swap feasibility is later, and an unswappable first candidate is an infrastructure error. |
+| Radio advert and lockstep wording | Corrected | Eight-minute target, audio-cue, CAN-scope and transcript-length caveats are now explicit. |
 
-## Unverified beliefs
-- That the fast-eth and radio-video uncommitted files are useful work in progress, not
-  scratch.
+## Open items
+
+- Finish or explicitly abandon the 285-field platformer game run; until then
+  keep its result unclaimed.
+- FPGA quarter replay still has the swap limitation above.
+- FM rows retain settings but not code hashes, dependency versions or raw
+  samples; the expensive full sweep was not rerun.
+- Architecture gaps remain G4, G6, G7, G13, G14 and G15. G13 is whole-chip
+  place and route and should run only when the host is idle.
+- `.codex/config.toml` has unrelated uncommitted home-configuration changes.
+  The requested emulator worktree write profile is already committed in
+  `~/git-tracked` as `83e47ad`; do not stage the unrelated remainder.
+
+## Next actions
+
+1. Resolve the platformer 285-field run and record either its checked result
+   or a reproducible failure boundary.
+2. Re-run the focused FPGA checks after any quarter-control changes, keeping
+   the swap limitation visible.
+3. Tackle one architecture gap at a time, starting with G4 or G14, and keep
+   total host load below 20. That number is a conservative concurrency policy
+   from prior restart instability, not a hardware limit.
+
+Local commits are safe; do not push without an immediate explicit
+confirmation.
