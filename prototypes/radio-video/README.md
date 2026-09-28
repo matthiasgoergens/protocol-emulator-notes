@@ -31,7 +31,9 @@ and 0.000 for the floating-point reference on the same one-bit samples and
 PE result is 60.2 dB and BLER 0.022. The multi-station row at 30 dB CNR and
 0 dB relative level gets 53.4 dB and BLER 0.224; the target is deliberately
 close to an equal neighbour 400 kHz away. These are three-second, one-seed
-models, not a receiver sensitivity claim.
+models, not a receiver sensitivity claim. The retained rows record the
+simulation settings but not a code hash, dependency versions or raw samples;
+the full three-second sweep was not rerun for this evidence commit.
 
 `pe-ext/check.py` was rerun for 20,000 cycles: 0 mismatches with the normal
 model and 8,006 mismatches with `FAULT=1`, which plants an EMA shift error.
@@ -42,29 +44,36 @@ Yosys flow.
 ### Demo B: advert detection
 
 `results/advert.txt` and `results/advert.json` come from a fresh smoke run,
-`uv run advert.py 1 1 8`: one training seed and one test seed of eight
-minutes. The run has only one true advert boundary per test timeline, so its
+`uv run advert.py 1 1 8`: one training seed and one test seed with an
+eight-minute target. The generator completes the final programme segment, so
+the retained timelines run for 724-725 seconds rather than exactly 480. The
+run has only one true advert boundary per test timeline, so its
 boundary and delay counts are a smoke test, not an estimate of field
 performance. Video-only accuracy is 0.996 in each of the five regimes. The
 combined result is 0.950 for `r128_mild` and 0.889 for
 `r128_mild_noblack`; the audio-only result is 0.208 and misses the boundary.
-The cue AUC rows in `results/advert.txt` show why: cut, spread and luma are
-strong on this generator, while audio cues are not reliable at this sample
-size. `results/real_audio.txt` is the separate real-recording check used to
-set the mild-compression regime.
+The cue AUC rows in `results/advert.txt` show strong cut, spread and luma
+cues. Crest and loudness-range AUCs are also high, but the audio-only
+classifier still misses the boundary; marginal cue separability is not a
+reliable detector here. `results/real_audio.txt` is the separate
+real-recording check used to set the mild-compression regime.
 
 The PNGs in `out/advert_frame_*.png` and `out/advert_timeline_*.png` show the
 generated frames and detector timelines. The generated `.npz` state and seed
-dumps are intermediate reproducibility scratch, not evidence used by these
-claims.
+dumps are intermediate reproducibility scratch. They are not retained as
+evidence, but `can_out.py` uses the state dumps to regenerate the
+state-change and bus-load rows, so those rows require rerunning `advert.py`
+first.
 
 ### Demo B: CAN output
 
 `results/can_out.txt` was regenerated from the fresh advert states with
 `uv run can_out.py`. The independent decoder accepts
-2,000/2,000 clean frames. Of 2,000 single-bit faults, 1,998 are rejected,
-two are harmless faults after the CRC in fields this decoder does not check,
-and zero wrong frames are accepted. The state streams use about 76–81 bit/s
+2,000/2,000 clean frames. The random fault sweep samples one bit before the
+final ten wire bits: 1,998 are rejected, two harmless delimiter flips are
+outside the checked fields, and zero wrong frames are accepted. ACK, EOF and
+missing-stuff-bit faults are not exercised by this sweep. The state streams
+use about 76–81 bit/s
 at the tested rates, or 0.061–0.065 % of a 125 kbit/s CAN bus.
 
 ## Reproduction

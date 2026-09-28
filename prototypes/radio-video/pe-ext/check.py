@@ -96,6 +96,7 @@ module tb;
     #1 clk = 1; #1 clk = 0; rst = 0;
     while (!$feof(f)) begin
       r = $fscanf(f, "%d %h %d %h %h %h %h %d %d\n", a, b, c, e, g, h, i, j, q);
+      if (r != 9) break;
       if (r == 9) begin
         cs = a; ci = b; en = c; n1 = e; n2 = g; n3 = h; n4 = i; ext = j;
         #1 clk = 1; #1 clk = 0;
@@ -108,9 +109,9 @@ endmodule
 '''.replace("STIM", str(tmp / "stim.txt"))
     (tmp / "tb.v").write_text(tb)
     subprocess.run(["iverilog", "-g2012", "-o", str(tmp / "sim"), str(tmp / "tb.v"), str(HERE / "pe16x.v")], check=True)
-    out = subprocess.run(["vvp", "-n", str(tmp / "sim")], capture_output=True, text=True, check=True).stdout.split()
+    out = subprocess.run(["vvp", "-n", str(tmp / "sim")], capture_output=True, text=True, check=True).stdout.splitlines()
     got = [int(v) for v in out if v.lstrip("-").isdigit()]
-    bad = sum(1 for g, e in zip(got, exp) if g != e)
+    bad = sum(1 for g, e in zip(got, exp) if g != e) + abs(len(got) - len(exp))
     print(f"pe16x lockstep{' (FAULT=1)' if FAULT else ''}: {bad} mismatches / {len(exp)} cycles (got {len(got)} outputs)")
 
 

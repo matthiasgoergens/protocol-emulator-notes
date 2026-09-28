@@ -732,9 +732,10 @@ def sweep(seconds=3.0):
     if path.exists():
         for line in path.read_text().splitlines():
             o = json.loads(line)
-            done.add((o["scenario"], o["cnr_db"], o["rel_db"]))
+            done.add((o["scenario"], o["cnr_db"], o["rel_db"], o["seconds"], o["seed"],
+                      o["n_chan"], o["lo_offset_hz"], o["lo"]))
     for sc, c, r in SWEEP:
-        if (sc, float(c), float(r)) in done:
+        if (sc, float(c), float(r), seconds, 1, 4, 31.25e3, "tri3") in done:
             continue
         o = run(float(c), sc, float(r), seconds)
         print(fmt(o), flush=True)

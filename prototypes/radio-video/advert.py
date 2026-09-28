@@ -459,7 +459,7 @@ def main(n_train=3, n_test=3, minutes=40):
                ("r128_mild", True, "r128_mild"), ("r128_mild_noblack", False, "r128_mild")]
     out = {}
     states = {}
-    lines = ["Demo B advert detection (advert.py). Synthetic timelines, %d train and %d test seeds of %d min."
+    lines = ["Demo B advert detection (advert.py). Synthetic timelines, %d train and %d test seeds of %d min target."
              % (n_train, n_test, minutes),
              "Delays in seconds from the true boundary to the detector's switch (median / max);",
              "false = detector switches not matched to a true boundary.", ""]

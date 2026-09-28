@@ -10,8 +10,9 @@ sequence number]. Sent on every state change and once a second as a heartbeat.
 
 The encoder builds the bit stream (SOF .. EOF) with CRC-15 (polynomial 0x4599) and stuffing.
 An independent decoder (written from the frame format, not sharing the encoder's code) destuffs,
-checks the CRC and recovers the fields. Planted faults (one flipped bit, a missing stuff bit) must
-be caught. Then the detector states saved by advert.py are turned into frames and the bus load and
+checks the CRC and recovers the fields. The current planted-fault sweep flips one bit sampled
+before the final ten wire bits; missing stuff bits are not exercised. Then the detector states
+saved by advert.py are turned into frames and the bus load and
 the mute latency (detection delay plus one frame) are reported.
 
 Usage: uv run can_out.py   -> results/can_out.txt
@@ -112,9 +113,11 @@ def main():
         f2[k] ^= 1
         d2, _ = decode(f2)
         flips["detected" if d2 is None else "harmless" if d2 == (CAN_ID, data) else "undetected"] += 1
-    lines.append(f"round trip: {ok} / 2000 frames decoded exactly. One random flipped bit per frame: "
+    lines.append(f"round trip: {ok} / 2000 frames decoded exactly. One random flipped bit per frame, "
+                 f"sampled before the final ten wire bits: "
                  f"{flips['detected']} rejected (stuff or CRC error), {flips['harmless']} harmless (flip after the "
-                 f"CRC, in the delimiter, ACK or EOF, which this decoder does not check), "
+                 f"CRC in the delimiter, outside the fields this decoder checks; ACK, EOF and missing-stuff-bit "
+                 f"faults were not exercised), "
                  f"{flips['undetected']} wrong frames accepted")
     ex = encode(CAN_ID, [1, 200, 7])
     lines.append(f"example frame (advert, confidence 200, seq 7), {len(ex)} bits on the wire: " + "".join(map(str, ex)))
