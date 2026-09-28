@@ -1,0 +1,931 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Running command `read_verilog -sv rtl/feeder.v; hierarchy -check -top feeder; synth -top feeder -flatten ; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/feeder.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; write_verilog -noattr /var/tmp/platformer/netlists/feeder.v' --
+
+1. Executing Verilog-2005 frontend: rtl/feeder.v
+Parsing SystemVerilog input from `rtl/feeder.v' to AST representation.
+Generating RTLIL representation for module `\feeder'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \feeder
+
+2.2. Analyzing design hierarchy..
+Top module:  \feeder
+Removed 0 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \feeder
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \feeder
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:292$72 in module feeder.
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:283$69 in module feeder.
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:274$66 in module feeder.
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:262$60 in module feeder.
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:245$53 in module feeder.
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:235$49 in module feeder.
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:213$38 in module feeder.
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:181$22 in module feeder.
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:169$18 in module feeder.
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:156$13 in module feeder.
+Marked 1 switch rules as full_case in process $proc$rtl/feeder.v:144$7 in module feeder.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 11 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~11 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:292$72'.
+     1/1: $0\_88[0:0]
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:283$69'.
+     1/1: $0\_23[0:0]
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:274$66'.
+     1/1: $0\_123[7:0]
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:262$60'.
+     1/1: $0\_28[11:0]
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:245$53'.
+     1/1: $0\_33[0:0]
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:235$49'.
+     1/1: $0\_43[0:0]
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:213$38'.
+     1/1: $0\_37[8:0]
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:181$22'.
+     1/1: $0\_80[7:0]
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:169$18'.
+     1/1: $0\_77[2:0]
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:156$13'.
+     1/1: $0\_68[15:0]
+Creating decoders for process `\feeder.$proc$rtl/feeder.v:144$7'.
+     1/1: $0\_46[15:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\feeder.\_88' using process `\feeder.$proc$rtl/feeder.v:292$72'.
+  created $dff cell `$procdff$106' with positive edge clock.
+Creating register for signal `\feeder.\_23' using process `\feeder.$proc$rtl/feeder.v:283$69'.
+  created $dff cell `$procdff$107' with positive edge clock.
+Creating register for signal `\feeder.\_123' using process `\feeder.$proc$rtl/feeder.v:274$66'.
+  created $dff cell `$procdff$108' with positive edge clock.
+Creating register for signal `\feeder.\_28' using process `\feeder.$proc$rtl/feeder.v:262$60'.
+  created $dff cell `$procdff$109' with positive edge clock.
+Creating register for signal `\feeder.\_33' using process `\feeder.$proc$rtl/feeder.v:245$53'.
+  created $dff cell `$procdff$110' with positive edge clock.
+Creating register for signal `\feeder.\_43' using process `\feeder.$proc$rtl/feeder.v:235$49'.
+  created $dff cell `$procdff$111' with positive edge clock.
+Creating register for signal `\feeder.\_37' using process `\feeder.$proc$rtl/feeder.v:213$38'.
+  created $dff cell `$procdff$112' with positive edge clock.
+Creating register for signal `\feeder.\_80' using process `\feeder.$proc$rtl/feeder.v:181$22'.
+  created $dff cell `$procdff$113' with positive edge clock.
+Creating register for signal `\feeder.\_77' using process `\feeder.$proc$rtl/feeder.v:169$18'.
+  created $dff cell `$procdff$114' with positive edge clock.
+Creating register for signal `\feeder.\_68' using process `\feeder.$proc$rtl/feeder.v:156$13'.
+  created $dff cell `$procdff$115' with positive edge clock.
+Creating register for signal `\feeder.\_46' using process `\feeder.$proc$rtl/feeder.v:144$7'.
+  created $dff cell `$procdff$116' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:292$72'.
+Removing empty process `feeder.$proc$rtl/feeder.v:292$72'.
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:283$69'.
+Removing empty process `feeder.$proc$rtl/feeder.v:283$69'.
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:274$66'.
+Removing empty process `feeder.$proc$rtl/feeder.v:274$66'.
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:262$60'.
+Removing empty process `feeder.$proc$rtl/feeder.v:262$60'.
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:245$53'.
+Removing empty process `feeder.$proc$rtl/feeder.v:245$53'.
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:235$49'.
+Removing empty process `feeder.$proc$rtl/feeder.v:235$49'.
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:213$38'.
+Removing empty process `feeder.$proc$rtl/feeder.v:213$38'.
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:181$22'.
+Removing empty process `feeder.$proc$rtl/feeder.v:181$22'.
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:169$18'.
+Removing empty process `feeder.$proc$rtl/feeder.v:169$18'.
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:156$13'.
+Removing empty process `feeder.$proc$rtl/feeder.v:156$13'.
+Found and cleaned up 1 empty switch in `\feeder.$proc$rtl/feeder.v:144$7'.
+Removing empty process `feeder.$proc$rtl/feeder.v:144$7'.
+Cleaned up 11 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+<suppressed ~4 debug messages>
+
+3.3. Executing FLATTEN pass (flatten design).
+
+3.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+Removed 1 unused cells and 84 unused wires.
+<suppressed ~3 debug messages>
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module feeder...
+Found and reported 0 problems.
+
+3.7. Executing OPT pass (performing simple optimizations).
+
+3.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 82 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Computing hashes of 76 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+<suppressed ~18 debug messages>
+Removed a total of 6 cells.
+
+3.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \feeder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+      Replacing known input bits on port A of cell $ternary$rtl/feeder.v:231$46: \_43 -> 1'0
+      Replacing known input bits on port A of cell $ternary$rtl/feeder.v:226$43: \_43 -> 1'1
+      Replacing known input bits on port B of cell $ternary$rtl/feeder.v:164$14: \rdata [18:16] -> { \rdata [18] 1'1 \rdata [16] }
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~58 debug messages>
+
+3.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \feeder.
+Performed a total of 0 changes.
+
+3.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 76 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Removed a total of 0 cells.
+
+3.7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+
+3.7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.7.9. Finished fast OPT passes. (There is nothing left to do.)
+
+3.8. Executing FSM pass (extract and optimize FSM).
+
+3.8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+
+3.8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.9. Executing OPT pass (performing simple optimizations).
+
+3.9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 76 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Removed a total of 0 cells.
+
+3.9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \feeder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~58 debug messages>
+
+3.9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \feeder.
+Performed a total of 0 changes.
+
+3.9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 76 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Removed a total of 0 cells.
+
+3.9.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$116 ($dff) from module feeder (D = \_1, Q = \_46, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$117 ($sdff) from module feeder (D = \rdata [15:0], Q = \_46).
+Adding SRST signal on $procdff$115 ($dff) from module feeder (D = \_64, Q = \_68, rval = 16'0000000000000000).
+Adding SRST signal on $procdff$114 ($dff) from module feeder (D = \rdata [18], Q = \_77 [2], rval = 1'0).
+Adding SRST signal on $procdff$114 ($dff) from module feeder (D = \_70 [1], Q = \_77 [1], rval = 1'0).
+Adding SRST signal on $procdff$114 ($dff) from module feeder (D = \_73 [0], Q = \_77 [0], rval = 1'0).
+Adding SRST signal on $procdff$113 ($dff) from module feeder (D = \_83, Q = \_80, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$143 ($sdff) from module feeder (D = \_82, Q = \_80).
+Adding SRST signal on $procdff$112 ($dff) from module feeder (D = \_93, Q = \_37, rval = 9'000000000).
+Adding EN signal on $auto$ff.cc:337:slice$147 ($sdff) from module feeder (D = \_92, Q = \_37).
+Adding SRST signal on $procdff$111 ($dff) from module feeder (D = \_105, Q = \_43, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$151 ($sdff) from module feeder (D = \_105, Q = \_43).
+Adding SRST signal on $procdff$110 ($dff) from module feeder (D = \_109, Q = \_33, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$155 ($sdff) from module feeder (D = 1'1, Q = \_33).
+Adding SRST signal on $procdff$109 ($dff) from module feeder (D = { \_120 [9] \_120 [7] \_120 [0] }, Q = { \_28 [9] \_28 [7] \_28 [0] }, rval = 3'000).
+Adding SRST signal on $procdff$109 ($dff) from module feeder (D = { \_116 [11:10] \_116 [8] \_116 [6:4] \_116 [2:1] }, Q = { \_28 [11:10] \_28 [8] \_28 [6:4] \_28 [2:1] }, rval = 8'00000000).
+Adding SRST signal on $procdff$109 ($dff) from module feeder (D = \_118 [3], Q = \_28 [3], rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$167 ($sdff) from module feeder (D = \_118 [3], Q = \_28 [3]).
+Adding EN signal on $auto$ff.cc:337:slice$164 ($sdff) from module feeder (D = { \_115 [11:10] \_115 [8] \_115 [6:4] \_115 [2:1] }, Q = { \_28 [11:10] \_28 [8] \_28 [6:4] \_28 [2:1] }).
+Adding EN signal on $auto$ff.cc:337:slice$163 ($sdff) from module feeder (D = { \_120 [9] \_120 [7] \_120 [0] }, Q = { \_28 [9] \_28 [7] \_28 [0] }).
+Adding SRST signal on $procdff$108 ($dff) from module feeder (D = \_141, Q = \_123, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$177 ($sdff) from module feeder (D = \_139, Q = \_123).
+Adding SRST signal on $procdff$107 ($dff) from module feeder (D = \line_go_n, Q = \_23, rval = 1'0).
+Adding SRST signal on $procdff$106 ($dff) from module feeder (D = \_145, Q = \_88, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$190 ($sdff) from module feeder (D = \_144, Q = \_88).
+
+3.9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+Removed 29 unused cells and 37 unused wires.
+<suppressed ~56 debug messages>
+
+3.9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+<suppressed ~1 debug messages>
+
+3.9.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \feeder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~25 debug messages>
+
+3.9.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \feeder.
+Performed a total of 0 changes.
+
+3.9.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 76 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Computing hashes of 67 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+<suppressed ~27 debug messages>
+Removed a total of 9 cells.
+
+3.9.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+Removed 0 unused cells and 9 unused wires.
+<suppressed ~1 debug messages>
+
+3.9.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.9.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \feeder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~25 debug messages>
+
+3.9.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \feeder.
+Performed a total of 0 changes.
+
+3.9.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 67 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Removed a total of 0 cells.
+
+3.9.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+
+3.9.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.9.23. Finished fast OPT passes. (There is nothing left to do.)
+
+3.10. Executing WREDUCE pass (reducing word size of cells).
+Removed top 2 bits (of 3) from port B of cell feeder.$auto$opt_dff.cc:235:make_patterns_logic$176 ($ne).
+Removed top 1 bits (of 2) from port B of cell feeder.$auto$opt_dff.cc:235:make_patterns_logic$172 ($ne).
+Removed top 1 bits (of 2) from port B of cell feeder.$auto$opt_dff.cc:235:make_patterns_logic$154 ($ne).
+Removed top 1 bits (of 9) from port B of cell feeder.$eq$rtl/feeder.v:135$1 ($eq).
+Removed top 2 bits (of 3) from port B of cell feeder.$eq$rtl/feeder.v:138$2 ($eq).
+Removed top 2 bits (of 3) from mux cell feeder.$ternary$rtl/feeder.v:166$16 ($mux).
+Removed top 7 bits (of 8) from port B of cell feeder.$add$rtl/feeder.v:177$19 ($add).
+Removed top 7 bits (of 8) from port B of cell feeder.$add$rtl/feeder.v:190$24 ($add).
+Removed top 7 bits (of 16) from port B of cell feeder.$lt$rtl/feeder.v:196$26 ($lt).
+Removed top 8 bits (of 9) from port B of cell feeder.$add$rtl/feeder.v:209$35 ($add).
+Removed top 11 bits (of 12) from port B of cell feeder.$sub$rtl/feeder.v:255$54 ($sub).
+Removed top 2 bits (of 12) from mux cell feeder.$ternary$rtl/feeder.v:260$59 ($mux).
+Removed top 2 bits (of 3) from mux cell feeder.$ternary$rtl/feeder.v:165$15 ($mux).
+Removed top 2 bits (of 12) from mux cell feeder.$ternary$rtl/feeder.v:259$58 ($mux).
+Removed top 1 bits (of 3) from mux cell feeder.$ternary$rtl/feeder.v:164$14 ($mux).
+Removed top 2 bits (of 12) from mux cell feeder.$ternary$rtl/feeder.v:258$57 ($mux).
+Removed top 2 bits (of 12) from wire feeder._116.
+Removed top 2 bits (of 12) from wire feeder._118.
+Removed top 2 bits (of 12) from wire feeder._120.
+Removed top 1 bits (of 3) from wire feeder._70.
+Removed top 2 bits (of 3) from wire feeder._71.
+Removed top 2 bits (of 3) from wire feeder._73.
+
+3.11. Executing PEEPOPT pass (run peephole optimizers).
+
+3.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+Removed 0 unused cells and 6 unused wires.
+<suppressed ~1 debug messages>
+
+3.13. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module feeder:
+  creating $macc model for $add$rtl/feeder.v:177$19 ($add).
+  creating $macc model for $add$rtl/feeder.v:190$24 ($add).
+  creating $macc model for $add$rtl/feeder.v:209$35 ($add).
+  creating $macc model for $sub$rtl/feeder.v:255$54 ($sub).
+  creating $alu model for $macc $sub$rtl/feeder.v:255$54.
+  creating $alu model for $macc $add$rtl/feeder.v:209$35.
+  creating $alu model for $macc $add$rtl/feeder.v:190$24.
+  creating $alu model for $macc $add$rtl/feeder.v:177$19.
+  creating $alu model for $lt$rtl/feeder.v:196$26 ($lt): new $alu
+  creating $alu model for $lt$rtl/feeder.v:219$39 ($lt): new $alu
+  creating $alu cell for $lt$rtl/feeder.v:219$39: $auto$alumacc.cc:512:replace_alu$200
+  creating $alu cell for $lt$rtl/feeder.v:196$26: $auto$alumacc.cc:512:replace_alu$205
+  creating $alu cell for $add$rtl/feeder.v:177$19: $auto$alumacc.cc:512:replace_alu$210
+  creating $alu cell for $add$rtl/feeder.v:190$24: $auto$alumacc.cc:512:replace_alu$213
+  creating $alu cell for $add$rtl/feeder.v:209$35: $auto$alumacc.cc:512:replace_alu$216
+  creating $alu cell for $sub$rtl/feeder.v:255$54: $auto$alumacc.cc:512:replace_alu$219
+  created 6 $alu and 0 $macc cells.
+
+3.14. Executing SHARE pass (SAT-based resource sharing).
+
+3.15. Executing OPT pass (performing simple optimizations).
+
+3.15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+<suppressed ~1 debug messages>
+
+3.15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 69 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Removed a total of 0 cells.
+
+3.15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \feeder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~25 debug messages>
+
+3.15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \feeder.
+Performed a total of 0 changes.
+
+3.15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 69 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Removed a total of 0 cells.
+
+3.15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+3.15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.15.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.15.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \feeder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~25 debug messages>
+
+3.15.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \feeder.
+Performed a total of 0 changes.
+
+3.15.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 69 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Removed a total of 0 cells.
+
+3.15.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+
+3.15.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.15.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.16. Executing MEMORY pass.
+
+3.16.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.16.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.16.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.16.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.16.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+3.16.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+
+3.16.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.16.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.16.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+
+3.16.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+
+3.18. Executing OPT pass (performing simple optimizations).
+
+3.18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+<suppressed ~16 debug messages>
+
+3.18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 72 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Removed a total of 0 cells.
+
+3.18.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.18.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+Removed 8 unused cells and 10 unused wires.
+<suppressed ~9 debug messages>
+
+3.18.5. Finished fast OPT passes.
+
+3.19. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.20. Executing OPT pass (performing simple optimizations).
+
+3.20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 64 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Removed a total of 0 cells.
+
+3.20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \feeder..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~13 debug messages>
+
+3.20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \feeder.
+Performed a total of 0 changes.
+
+3.20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 64 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Removed a total of 0 cells.
+
+3.20.6. Executing OPT_SHARE pass.
+
+3.20.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+
+3.20.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.20.10. Finished fast OPT passes. (There is nothing left to do.)
+
+3.21. Executing TECHMAP pass (map to technology primitives).
+
+3.21.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.21.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $or.
+Using template $paramod$6831557730818fb92b11a295f9eb33ff8fa62af1\_90_alu for cells of type $alu.
+Using template $paramod$53700bbee849b2010ad0b60a61ccd204a10e24ca\_90_alu for cells of type $alu.
+Using template $paramod$c3cd1564c35d873179656addd6052d7ea8b6d991\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $not.
+Using template $paramod$d3871fccd7727ad2eede7aae9f2bfe3ef8275711\_90_alu for cells of type $alu.
+Using template $paramod$fc972a7a46956c1788f3cb5257b53c8f1df2d0cc\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $ne.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001100 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001100 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001001 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001001 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001000 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001000 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010000 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010000 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000001 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000001 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~1142 debug messages>
+
+3.22. Executing OPT pass (performing simple optimizations).
+
+3.22.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+<suppressed ~447 debug messages>
+
+3.22.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 509 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Computing hashes of 481 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Computing hashes of 480 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+<suppressed ~87 debug messages>
+Removed a total of 29 cells.
+
+3.22.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.22.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+Removed 88 unused cells and 380 unused wires.
+<suppressed ~91 debug messages>
+
+3.22.5. Finished fast OPT passes.
+
+3.23. Executing ABC pass (technology mapping using ABC).
+
+3.23.1. Extracting gate netlist of module `\feeder' to `<abc-temp-dir>/input.blif'..
+Replacing 4 occurrences of constant undef bits with constant zero bits
+
+3.23.1.1. Executed ABC.
+Extracted 316 gates and 397 wires to a netlist network with 78 inputs and 69 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library /tmp/yosys-abc-K7wqHr/stdcells.genlib 
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+3.23.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       12
+ABC RESULTS:            ANDNOT cells:       79
+ABC RESULTS:               MUX cells:       16
+ABC RESULTS:              NAND cells:       29
+ABC RESULTS:               NOR cells:       19
+ABC RESULTS:               NOT cells:        7
+ABC RESULTS:                OR cells:       35
+ABC RESULTS:             ORNOT cells:       13
+ABC RESULTS:              XNOR cells:        7
+ABC RESULTS:               XOR cells:       34
+ABC RESULTS:        internal signals:      250
+ABC RESULTS:           input signals:       78
+ABC RESULTS:          output signals:       69
+Removing temp directory.
+Removing global temp directory.
+
+3.24. Executing OPT pass (performing simple optimizations).
+
+3.24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module feeder.
+
+3.24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\feeder'.
+Computing hashes of 327 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+Computing hashes of 323 cells of `\feeder'.
+Finding duplicate cells in `\feeder'.
+<suppressed ~12 debug messages>
+Removed a total of 4 cells.
+
+3.24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+Removed 0 unused cells and 278 unused wires.
+<suppressed ~20 debug messages>
+
+3.24.5. Finished fast OPT passes.
+
+3.25. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `feeder'. Setting top module to feeder.
+
+3.25.1. Analyzing design hierarchy..
+Top module:  \feeder
+
+3.25.2. Analyzing design hierarchy..
+Top module:  \feeder
+Removed 0 unused modules.
+
+3.26. Printing statistics.
+
+=== feeder ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      259 wires
+      706 wire bits
+       70 public wires
+      517 public wire bits
+        9 ports
+       60 port bits
+      323 cells
+       79   $_ANDNOT_
+       12   $_AND_
+       16   $_MUX_
+       29   $_NAND_
+       15   $_NOR_
+        7   $_NOT_
+       13   $_ORNOT_
+       35   $_OR_
+       56   $_SDFFE_PP0P_
+       20   $_SDFF_PP0_
+        7   $_XNOR_
+       34   $_XOR_
+
+3.27. Executing CHECK pass (checking for obvious problems).
+Checking module feeder...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\feeder':
+  mapped 76 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Extracting gate netlist of module `\feeder' to `<abc-temp-dir>/input.blif'..
+
+5.1.1. Executed ABC.
+Extracted 379 gates and 460 wires to a netlist network with 79 inputs and 77 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.01 sec
+ABC: Memory =    2.85 MB. Time =     0.01 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+5.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:        4
+ABC RESULTS:    sg13g2_a21oi_1 cells:       38
+ABC RESULTS:   sg13g2_a221oi_1 cells:        3
+ABC RESULTS:    sg13g2_a22oi_1 cells:       18
+ABC RESULTS:     sg13g2_and2_1 cells:       11
+ABC RESULTS:     sg13g2_and3_1 cells:        8
+ABC RESULTS:      sg13g2_inv_1 cells:       35
+ABC RESULTS:    sg13g2_nand2_1 cells:       23
+ABC RESULTS:   sg13g2_nand2b_1 cells:        9
+ABC RESULTS:    sg13g2_nand3_1 cells:        8
+ABC RESULTS:   sg13g2_nand3b_1 cells:        1
+ABC RESULTS:    sg13g2_nand4_1 cells:        4
+ABC RESULTS:     sg13g2_nor2_1 cells:       21
+ABC RESULTS:    sg13g2_nor2b_1 cells:       10
+ABC RESULTS:     sg13g2_nor3_1 cells:       12
+ABC RESULTS:     sg13g2_nor4_1 cells:        3
+ABC RESULTS:    sg13g2_o21ai_1 cells:       37
+ABC RESULTS:      sg13g2_or2_1 cells:        2
+ABC RESULTS:      sg13g2_or3_1 cells:        1
+ABC RESULTS:      sg13g2_or4_1 cells:        1
+ABC RESULTS:    sg13g2_xnor2_1 cells:        4
+ABC RESULTS:     sg13g2_xor2_1 cells:        3
+ABC RESULTS:        internal signals:      304
+ABC RESULTS:           input signals:       79
+ABC RESULTS:          output signals:       77
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \feeder..
+Removed 0 unused cells and 419 unused wires.
+<suppressed ~19 debug messages>
+
+7. Printing statistics.
+
+=== feeder ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      307        - wires
+      646        - wire bits
+       52        - public wires
+      391        - public wire bits
+        9        - ports
+       60        - port bits
+      332 5.99E+03 cells
+        4   50.803   sg13g2_a21o_1
+       38  344.736   sg13g2_a21oi_1
+        3   43.546   sg13g2_a221oi_1
+       18  195.275   sg13g2_a22oi_1
+       11   99.792   sg13g2_and2_1
+        8  101.606   sg13g2_and3_1
+       76 3.72E+03   sg13g2_dfrbpq_1
+       35  190.512   sg13g2_inv_1
+       23  166.925   sg13g2_nand2_1
+        9   81.648   sg13g2_nand2b_1
+        8   72.576   sg13g2_nand3_1
+        1   12.701   sg13g2_nand3b_1
+        4   43.546   sg13g2_nand4_1
+       21   152.41   sg13g2_nor2_1
+       10    90.72   sg13g2_nor2b_1
+       12  108.864   sg13g2_nor3_1
+        3   32.659   sg13g2_nor4_1
+       37  335.664   sg13g2_o21ai_1
+        2   18.144   sg13g2_or2_1
+        1   12.701   sg13g2_or3_1
+        1   14.515   sg13g2_or4_1
+        4   58.061   sg13g2_xnor2_1
+        3   43.546   sg13g2_xor2_1
+
+   Chip area for module '\feeder': 5994.097200
+     of which used for sequential elements: 3723.148800 (62.11%)
+
+8. Executing Verilog backend.
+
+8.1. Executing BMUXMAP pass.
+
+8.2. Executing DEMUXMAP pass.
+Dumping module `\feeder'.
+
+End of script. Logfile hash: 093a287044, CPU: user 0.21s system 0.05s, MEM: 29.82 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 50% 2x abc (0 sec), 8% 22x opt_clean (0 sec), ...

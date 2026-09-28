@@ -1,0 +1,4 @@
+PE-X lockstep: 300 rows of 4 PEs x 2000 cycles, random configurations and streams: 0 mismatching cycles
+  planted fault 1 (no horizontal flip): 2850 mismatching cycles in 211 of 300 runs
+  planted fault 2 (flag block ignored): 39508 mismatching cycles in 241 of 300 runs
+  planted fault 3 (release at window start): 353663 mismatching cycles in 249 of 300 runs

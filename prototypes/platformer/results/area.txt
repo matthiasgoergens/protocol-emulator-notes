@@ -1,0 +1,30 @@
+block                                                             um2
+
+-- with pex (18,110 um2 each; pe16 is 6,586: 2.75x)
+18 x pex                                                     325,983
+feeder                                                          5,994
+output port                                                     5,305
+deadline sequencer                                             18,995
+line buffer, 2 x 256 x 19 (video.ml) (9728 bits)               40,110
+colour table, 64 x 14 (video.ml) (896 bits)                     5,384
+sequencer programme, 4 x 64 x 16 (resident; 0.1-0.4 % refresh) (4096 bits)     17,992
+total                                                         419,763
+  of which the 18 PEs                                         325,983 (78 %)
+
+-- with pex_lean (14,363 um2 each; pe16 is 6,586: 2.18x)
+18 x pex_lean                                                258,534
+feeder                                                          5,994
+output port                                                     5,305
+deadline sequencer                                             18,995
+line buffer, 2 x 256 x 19 (video.ml) (9728 bits)               40,110
+colour table, 64 x 14 (video.ml) (896 bits)                     5,384
+sequencer programme, 4 x 64 x 16 (resident; 0.1-0.4 % refresh) (4096 bits)     17,992
+total                                                         352,315
+  of which the 18 PEs                                         258,534 (73 %)
+
+retro console (special purpose, PAL build, same flow): 100,433 um2, no memories
+  generic chip with pex / console: 4.2x
+  generic chip with pex_lean / console: 3.5x
+  per display cell: console 6,277 um2 per sprite cell including its share of timing, colour and the double-buffered packet; PE-X 18,110 / 14,363 um2
+  incremental with pex: PE extensions 207,435 + feeder and output port 11,299 + line buffer and colour table 45,494 = 264,228 um2 = 2.63x the console
+  incremental with pex_lean: PE extensions 139,986 + feeder and output port 11,299 + line buffer and colour table 45,494 = 196,780 um2 = 1.96x the console

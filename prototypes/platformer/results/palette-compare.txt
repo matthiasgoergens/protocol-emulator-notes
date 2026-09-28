@@ -1,0 +1,15 @@
+# main.exe palette; uv run ../retro-console/console_tv.py palette (software TV, PAL)
+0 #4c4c4c #999999 #e5e5e5
+1 #6b15ff #b762ff #ffaeff
+2 #9f05df #ec52ff #ff9eff
+3 #be0882 #ff54ce #ffa1ff
+4 #bd1d15 #ff6a62 #ffb6af
+5 #9f3f00 #ec8b05 #ffd851
+6 #6a6400 #b7b000 #fffd1b
+7 #2e8300 #7acf00 #c7ff1b
+8 #009300 #45e005 #92ff52
+9 #009017 #27dd63 #74ffaf
+10 #007b83 #27c8cf #74ffff
+11 #005ae0 #46a6ff #92f3ff
+12 #2e34ff #7a81ff #c7cdff
+143 colours; largest RGB component difference against ../retro-console/out/palette.json (the special-purpose chip): 0.007 (full scale 1)

@@ -1,0 +1,30 @@
+line 3404 clocks = 63.98 us; field 312 lines = 19.96 ms
+
+== Line packet per visible line (scene.ml encode; counts in entries of 19 bits)
+   0 sprite cells:  77 entries =  182.9 bytes; host link busy 770 of 3404 clocks (23 %)
+   4 sprite cells:  97 entries =  230.4 bytes; host link busy 970 of 3404 clocks (28 %)
+   8 sprite cells: 117 entries =  277.9 bytes; host link busy 1170 of 3404 clocks (34 %)
+  16 sprite cells: 157 entries =  372.9 bytes; host link busy 1570 of 3404 clocks (46 %)
+  link capacity at one nibble per 2 clocks: 340 entries per line (13.3 MB/s of payload bits)
+  the special-purpose console: 54 bytes per line (../retro-console/console.ml)
+  peak (16 sprites on every visible line): 5.83 MB/s
+
+== Where tile patterns live
+  (a) streamed per line into a ping-pong line buffer (chosen): 9728 bits (2 banks x 256 x 19); a value lives at most 2 lines = 128 us
+      thick gain cells at 4.12 um2/bit (256x32 bank): 40,110 um2; lifetime 3100 us worst >> 128 us: no refresh ever
+      thin cells: 118.8 us at tt/27 C < 128 us: too short even at room temperature
+      flops instead: 476,575 um2
+  (b) on-chip cache of 64 tiles (16x16, 2 bpp): 32768 bits = 135,108 um2 in thick gain cells (+ tile map or per-line indices)
+      each tile row is read once per frame (20.0 ms) but lives >= 3.1 ms: reads cannot keep it alive; refresh 0.41 M words/s = 0.78 % of a 32-bit port
+      with the pumped all-thick cell (368 ms worst, not drawn, needs a 2.2 V word-line pump and a sense amplifier): a rewrite-on-read keeps on-screen tiles alive, off-screen ones expire after 18 fields; or the host re-sends the whole set every 15 fields = 0.9 bytes per line
+  (c) the same 64 tiles in flops: 1,605,304 um2
+  (b) on-chip cache of 128 tiles (16x16, 2 bpp): 65536 bits = 270,216 um2 in thick gain cells (+ tile map or per-line indices)
+      each tile row is read once per frame (20.0 ms) but lives >= 3.1 ms: reads cannot keep it alive; refresh 0.83 M words/s = 1.55 % of a 32-bit port
+      with the pumped all-thick cell (368 ms worst, not drawn, needs a 2.2 V word-line pump and a sense amplifier): a rewrite-on-read keeps on-screen tiles alive, off-screen ones expire after 18 fields; or the host re-sends the whole set every 15 fields = 1.8 bytes per line
+  (c) the same 128 tiles in flops: 3,210,609 um2
+  (d) a 16-tile flop cache: 401,326 um2
+  RP2350 SRAM: 520 KB; 128 tiles are 8192 bytes of it
+
+== Colour lookup table (64 x 14 bits)
+  896 bits: flops 43,895 um2; latches 41,485 um2; thick gain cells 5,384 um2 (32x32 bank estimate)
+  read every pixel, but the 3T read does not restore: the host rewrites 4 entries per line, all 64 every 16 lines = 1.02 ms < 3.1 ms (sim.ml measures the oldest entry read)
