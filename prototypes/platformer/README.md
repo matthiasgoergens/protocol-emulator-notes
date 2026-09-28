@@ -192,7 +192,7 @@ console.
 | the whole chip against the reference renderer, 240 random lines (random tiles, fine scroll, priority, 0-21 sprites with flip and clipping) and 240 directed edge cases (`results/check.txt`) | 0 of 61,440 pixels differ in each set, and 0 with the lean PE; the three planted faults change 7,788, 2,999 and 27,423 pixels |
 | sequencer timing, interpreter and RTL pins (`results/timing.txt`) | every line 3404 clocks, broad pulses 1700/1704, first pixel at clock 662 as in the console, 2560 pixel clocks per line |
 | palette through the software TV (`results/palette-compare.txt`) | 143 colours within 0.007 of the console's |
-| the demo, every visible line of every field against the reference renderer | the 285-field run is still executing; no result is claimed in this commit |
+| the demo, every visible line of every field against the reference renderer (`results/game.txt`) | 285 fields and 68,400 visible lines differ in 0 pixels; the run takes 2,452 s and the oldest table entry read is 1.020 ms |
 | colour-table age (every read, `results/check.txt`) | oldest entry read 1.02 ms after it was written, under the thick cell's 3.1 ms |
 
 ## Not done
