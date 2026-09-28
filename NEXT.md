@@ -13,7 +13,7 @@ chip whose protocols and demos are configurations of generic blocks.
 - `platformer` is merged at `554203d`; `radio-video` is merged at `c1e08db`.
 - The platformer branch added the generic-block game study, area comparison,
   RTL/model checks, and local-only still/GIF workflow. Its 285-field game run
-  is still executing and no result is claimed yet.
+  completed after the initial merge and is now recorded separately.
 - The radio-video branch adds FM/RDS, advert detection and CAN models. The
   evidence claims were tightened after an independent audit.
 
@@ -31,6 +31,8 @@ chip whose protocols and demos are configurations of generic blocks.
 - Platformer model/RTL evidence: `0` differing pixels in 20,000 random model
   lines and 240 directed edge lines; RTL checks report zero differences for
   random and directed cases, while three planted faults are caught.
+- The full platformer run compares `68,400` visible lines from 285 fields
+  with the reference renderer and finds `0` differing pixels in `2,452 s`.
 - Platformer timing and palette checks are recorded in `results/timing.txt`
   and `results/palette-compare.txt`; the 143 palette colours differ by at
   most `0.007` full scale.
@@ -57,8 +59,6 @@ chip whose protocols and demos are configurations of generic blocks.
 
 ## Open items
 
-- Finish or explicitly abandon the 285-field platformer game run; until then
-  keep its result unclaimed.
 - FPGA quarter replay still has the swap limitation above.
 - FM rows retain settings but not code hashes, dependency versions or raw
   samples; the expensive full sweep was not rerun.
@@ -70,11 +70,9 @@ chip whose protocols and demos are configurations of generic blocks.
 
 ## Next actions
 
-1. Resolve the platformer 285-field run and record either its checked result
-   or a reproducible failure boundary.
-2. Re-run the focused FPGA checks after any quarter-control changes, keeping
+1. Re-run the focused FPGA checks after any quarter-control changes, keeping
    the swap limitation visible.
-3. Tackle one architecture gap at a time, starting with G4 or G14, and keep
+2. Tackle one architecture gap at a time, starting with G4 or G14, and keep
    total host load below 20. That number is a conservative concurrency policy
    from prior restart instability, not a hardware limit.
 
