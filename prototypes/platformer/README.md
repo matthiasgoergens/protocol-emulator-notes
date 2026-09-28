@@ -7,7 +7,9 @@ processing element, gain-cell memory, and an NCO for colour. The special-purpose
 `../retro-console` is the comparison: which of its parts map directly onto generic blocks, which
 needed extensions to the PE, and what the generality costs.
 
-![game](out/game.gif)
+The game GIF is generated locally as `out/game.gif`; the selected stills and
+their strip are generated as `out/still_*.png` and `out/stills.png`. These are
+build outputs and are not committed here.
 
 The clip is the chip's pin output, simulated cycle by cycle in Hardcaml (sequencer, line buffer,
 feeder, PE row, output port), turned into composite video by the resistor-DAC model and decoded by
@@ -18,7 +20,7 @@ snapweed rising behind it, stomps a burrbug, clears a pit onto a ledge and lands
 lanternsnail. The score bar at the top does not scroll. Input is a scripted SNES pad
 (`game.ml`).
 
-GAMEPLACEHOLDER
+The stills strip is produced with `uv run stills.py 36 82 150 205 276`.
 
 ## The chip, from generic blocks (`video.ml`)
 
@@ -187,10 +189,10 @@ console.
 | check | result |
 | --- | --- |
 | PE-X RTL against its model, rows of 4, 300 random configurations x 2,000 cycles (`results/pecheck.txt`) | 0 mismatching cycles; planted faults (no flip, block ignored, early release) caught in 211, 241, 249 of 300 runs |
-| the whole chip against the reference renderer, 240 random lines (random tiles, fine scroll, priority, 0-21 sprites with flip and clipping) (`results/check.txt`) | 0 of 61,440 pixels differ, and 0 with the lean PE; the three planted faults change 7,788, 2,999 and 27,423 pixels |
+| the whole chip against the reference renderer, 240 random lines (random tiles, fine scroll, priority, 0-21 sprites with flip and clipping) and 240 directed edge cases (`results/check.txt`) | 0 of 61,440 pixels differ in each set, and 0 with the lean PE; the three planted faults change 7,788, 2,999 and 27,423 pixels |
 | sequencer timing, interpreter and RTL pins (`results/timing.txt`) | every line 3404 clocks, broad pulses 1700/1704, first pixel at clock 662 as in the console, 2560 pixel clocks per line |
 | palette through the software TV (`results/palette-compare.txt`) | 143 colours within 0.007 of the console's |
-| the demo, every visible line of every field against the reference renderer (`results/game.txt`) | GAMECHECK |
+| the demo, every visible line of every field against the reference renderer | the 285-field run is still executing; no result is claimed in this commit |
 | colour-table age (every read, `results/check.txt`) | oldest entry read 1.02 ms after it was written, under the thick cell's 3.1 ms |
 
 ## Not done
@@ -201,13 +203,14 @@ DMA streaming 19-bit entries); a real TV.
 
 ## Files and how to run
 
-    opam exec --switch=5.3.0 -- dune build
-    ./_build/default/main.exe pecheck           # PE-X lockstep          -> results/pecheck.txt
-    ./_build/default/main.exe check             # chip against reference -> results/check.txt
+    opam --switch=5.3.0 exec dune build
+    ./_build/default/main.exe pecheck           # PE-X lockstep; see results/pecheck.txt
+    ./_build/default/main.exe check             # chip against reference; see results/check.txt
     ./_build/default/main.exe timing            # firmware on the interpreter
     ./_build/default/main.exe rtltiming         # the same on the RTL's pins
     ./_build/default/main.exe palette && uv run ../retro-console/console_tv.py palette
     ./_build/default/main.exe game 285 && uv run ../retro-console/console_tv.py frames game
+    uv run stills.py 36 82 150 205 276          # generate the local GIF and selected stills
     ./_build/default/main.exe preview 300 6 && uv run preview.py   # host-only preview, reference renderer
     ./_build/default/main.exe verilog pex && ./synth.sh pex        # likewise pex_lean, feeder, outport, deadline_sequencer, retro_console
     uv run budget.py > results/budget.txt; uv run area.py > results/area.txt
