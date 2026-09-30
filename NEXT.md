@@ -1,4 +1,4 @@
-# NEXT: quarter-grid video measurements and remaining integration
+# NEXT: browser video exports and quarter-grid evidence
 
 ## Goal
 
@@ -9,10 +9,21 @@ decisions remain in `notes/architecture-v0.md` and
 
 ## Current state, 2026-09-30
 
-- Work is on local branch `g4-video-judgement`, based on `cf0f3f1`.
+- Current branch is `tv-demo-videos`, based on `fd16953`. Its new work is
+  `demos/tv/export.py`, the gallery template and README. Five checked MP4s
+  and a 17.37 MB portable gallery ZIP are local in `demos/tv/out/`, ignored
+  by Git. The manifest records 120/540/540/48/300 fields and all hashes.
+  Existing-output refusal was tested (exit 2); full exports and ZIP checks
+  passed (exit 0). No browser was connected for playback UI testing.
+- The platformer's rendered fields are absent; its retained result remains
+  below. Do not present a host preview as a new RTL capture.
+- `g4-video-judgement` was pushed to origin at `fd16953`, verified by
+  `git rev-parse origin/g4-video-judgement`. The user explicitly authorised
+  commits and pushes this session. No video-host upload or deployment occurred.
+- G4 work was on `g4-video-judgement`, based on `cf0f3f1`.
   `34a39ef` preserves the exploratory run; `e6b7316` records the corrected
   experiment, observations, decoder option and architecture updates.
-  `master` remains at `cf0f3f1` (`git rev-parse master`). No push was run.
+  `master` remains at `cf0f3f1` (`git rev-parse master`).
 - Both full corrected experiments finished. `analyse.py` exits 0 and
   verifies every individual observation and carrier RTL sample against a
   fresh-process confirmation. See `prototypes/video-nco/results/summary.md`.
