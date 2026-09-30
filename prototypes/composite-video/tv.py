@@ -112,8 +112,23 @@ def sigma_delta(x, levels):
     return out
 
 
-def decode(r, s, w_out=768):
-    """Software TV. r: composite estimate (0 = sync tip)."""
+def pal_switch(burst, neighbour):
+    """Identify the +/-45 degree swing about a neighbouring burst pair's centre.
+
+    Unlike the sign of the absolute real component, this survives an arbitrary
+    common carrier phase. Requires consecutive PAL lines and comparable bursts.
+    """
+    centre = burst + neighbour
+    return 1.0 if np.imag(burst * np.conj(centre)) < 0 else -1.0
+
+
+def decode(r, s, w_out=768, *, pal_burst_pairs=False):
+    """Software TV. r: composite estimate (0 = sync tip).
+
+    pal_burst_pairs tracks PAL's line alternation relative to neighbouring
+    bursts. The original absolute-phase rule remains the default for existing
+    prototype evidence; the video-nco experiment opts into pair tracking.
+    """
     r = np.concatenate([r, np.full(8000, s["blank"])])   # the last active line reads past the field end
     thr = s["blank"] / 2
     # a TV's sync separator slices a heavily low-passed copy, so noise cannot fake a sync edge
@@ -143,14 +158,24 @@ def decode(r, s, w_out=768):
     chroma_lp = sg.firwin(127, 1.3e6, fs=FS)
     out = np.zeros((len(lines), w_out, 3))
     prev_uv = None
-    for k_line, st in enumerate(lines):
+    bursts = []
+    for st in lines:
         i0 = int(st + s["burst_start"] * FS)
         nb = int(s["burst_cycles"] / s["fsc"] * FS)
         idx = np.arange(i0, i0 + nb)
         zb = 2 * np.mean((r[idx] - s["blank"]) * np.exp(-1j * wfs * idx))
+        bursts.append(zb)
+    if s["pal"] and pal_burst_pairs and len(bursts) < 2:
+        raise ValueError("PAL burst-pair tracking requires two active lines")
+    for k_line, st in enumerate(lines):
+        zb = bursts[k_line]
         th = np.angle(zb)
         if s["pal"]:
-            sw = 1.0 if np.real(zb) > 0 else -1.0
+            if pal_burst_pairs:
+                neighbour = bursts[k_line + 1 if k_line + 1 < len(bursts) else k_line - 1]
+                sw = pal_switch(zb, neighbour)
+            else:
+                sw = 1.0 if np.real(zb) > 0 else -1.0
             th0 = th + sw * np.pi / 4
         else:
             sw, th0 = 1.0, th

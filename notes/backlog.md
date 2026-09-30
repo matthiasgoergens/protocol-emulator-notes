@@ -1,5 +1,9 @@
 # Backlog: everything we said we want to do (as of 2026-09-25)
 
+Historical snapshot: every **running** tag below describes work in progress on
+2026-09-25; it is not a current status report. `NEXT.md` is the current source
+of truth for verified state and next actions.
+
 Collected from the conversation of 23–25 September, so that nothing agreed is lost. Items marked
 **running** had an agent working on them when this was written; their results land on branches
 and are merged into master. The direction behind all of it is in `PLAN.md` ("Direction"): one
@@ -91,6 +95,10 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   - rule breaks under the SRAM marker, which the Tiny Tapeout precheck accepts: what they buy for
     our own cells.
 - To do:
+  - reconcile `notes/gain-cell-compiler.md` with the mixed-direction failure
+    model and shortened extended-Hamming checks now demonstrated in
+    `prototypes/systolic-storage/`; quantify residual undetected errors
+    (`notes/codex-brainstorm-triage.md`, §4);
   - draw the metal finger capacitor (with WBL moved to Metal3), the row driver and the pump;
   - full LVS against a schematic, because the precheck has no LVS;
   - on-chip self-test: retention profiling per row, Berger checks, canary rows used as the
@@ -245,7 +253,8 @@ The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candida
 
 - Jane Street's hardware taste; tools to port (**running**).
 - Public competitors and the winners of Jane Street's recent challenges (**running**).
-- The codex brainstorm on everything since 23 September (**running**; triage it when it lands).
+- The codex brainstorm on everything since 23 September (**triaged**; see
+  `notes/codex-brainstorm-triage.md`).
 - Ideas from the Forth chips: slot-packed instructions, loops inside one word, blocking
   neighbour ports, executing code straight from a port.
 

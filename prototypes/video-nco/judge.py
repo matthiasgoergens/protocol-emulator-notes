@@ -135,7 +135,8 @@ def prepare(s):
     return base, amplitude, offset, np.diff(starts).tolist()
 
 
-def waveform(data, s, start, grid=None, frequency_scale=1.0, chroma=True):
+def waveform(data, s, start, grid=None, frequency_scale=1.0, chroma=True,
+             pal_burst_pairs=True):
     base, amplitude, offset, _ = data
     n = len(base) * 4
     off = np.repeat(offset, 4) * (MOD // 256)
@@ -164,12 +165,12 @@ def waveform(data, s, start, grid=None, frequency_scale=1.0, chroma=True):
         ri = np.searchsorted(rises, e, side="right")
         if ri < len(rises) and 3e-6 < (rises[ri] - e) / FCLK < 6.5e-6:
             syncs.append(e - 1 + (rs[e-1] - threshold) / (rs[e-1] - rs[e]))
-    return tv.decode(comp, s), np.diff(syncs)
+    return tv.decode(comp, s, pal_burst_pairs=pal_burst_pairs), np.diff(syncs)
 
 
 def measure(image, reference, s):
     image, periods = image
-    reference, _ = reference
+    reference, reference_periods = reference
     if image.shape != reference.shape or len(image) != s["n_active"]:
         raise AssertionError((image.shape, reference.shape, s["n_active"]))
     # The six chromatic bars occupy the first third; omit edges and grey bars.
@@ -182,13 +183,18 @@ def measure(image, reference, s):
     hue = np.angle((ua + 1j * va) * (ub - 1j * vb)) * 180 / np.pi
     errors = np.abs(hue)
     period_values, counts = np.unique(np.rint(periods).astype(int), return_counts=True)
-    expected_periods = {int(np.floor(s["line"] * FCLK)), int(np.ceil(s["line"] * FCLK))}
-    sync_ok = bool(set(period_values).issubset(expected_periods)
+    # The first run's exact-integer threshold confused FIR crossing-time shifts
+    # with scheduled line periods. Pair against the same ideal-carrier field.
+    if periods.shape != reference_periods.shape:
+        raise AssertionError((periods.shape, reference_periods.shape))
+    max_sync_error = float(np.max(np.abs(periods - reference_periods)))
+    sync_ok = bool(max_sync_error <= 1
                    and len(periods) == s["lines"] - s["vsync_lines"] - 1)
     return dict(active_lines=len(image), psnr_dB=float(tv.psnr(image, reference)),
                 max_hue_error_deg=float(errors.max()), mean_hue_error_deg=float(errors.mean()),
                 hue_error_deg_by_line_and_bar=hue.tolist(),
                 sync_period_clocks=periods.tolist(), sync_ok=sync_ok,
+                max_sync_error_clocks=max_sync_error,
                 sync_period_histogram={str(v): int(c) for v, c in zip(period_values, counts)},
                 passed=bool(tv.psnr(image, reference) >= 35 and errors.max() <= 2 and sync_ok))
 
@@ -203,11 +209,33 @@ def main():
     print("RTL", rtl, flush=True)
     if args.rtl_only:
         return
+    switch_checks = 0
+    legacy_wrong = 0
+    for phase in np.arange(256) / 256:
+        for sw in (-1, 1):
+            burst = (sw + 1j) * np.exp(2j * np.pi * phase)
+            neighbour = (-sw + 1j) * np.exp(2j * np.pi * phase)
+            assert tv.pal_switch(burst, neighbour) == sw
+            legacy_wrong += (1 if burst.real > 0 else -1) != sw
+            switch_checks += 1
+    assert legacy_wrong > 0
+    print("PAL switch calibration", switch_checks, "correct; legacy wrong", legacy_wrong, flush=True)
     observations = []
+    calibrations = []
     for name, s in tv.STD.items():
         data = prepare(s)
+        canonical = waveform(data, s, 0)
+        if s["pal"]:
+            legacy = waveform(data, s, 0, pal_burst_pairs=False)
+            assert np.array_equal(legacy[0], canonical[0]), "nominal legacy decode changed"
         for start in PHASES:
             reference = waveform(data, s, start)
+            if start != 0:
+                cal = measure(reference, canonical, s)
+                calibrations.append(dict(standard=name, start_cycles=start, **cal))
+                print(name, "ideal-phase-calibration", start,
+                      {k: v for k, v in cal.items()
+                       if k not in ("hue_error_deg_by_line_and_bar", "sync_period_clocks")}, flush=True)
             for grid in (1, 2, 4):
                 image = waveform(data, s, start, grid=grid)
                 metrics = measure(image, reference, s)
@@ -229,7 +257,9 @@ def main():
                     observations.append(dict(standard=name, control=control, **metrics))
                     print(name, control, {k: v for k, v in metrics.items()
                                           if k not in ("hue_error_deg_by_line_and_bar", "sync_period_clocks")}, flush=True)
-                    assert not metrics["passed"], (name, control)
+                    # Controls must strongly change colour even if a nominal case
+                    # misses the predeclared practical threshold by a small amount.
+                    assert metrics["psnr_dB"] < 25 and metrics["max_hue_error_deg"] > 20, (name, control)
     paths = [pathlib.Path(__file__), HERE.parent / "composite-video/tv.py",
              HERE.parent / "unified-pe/rtl/assists.v"]
     metadata = dict(clock_Hz=FCLK, accumulator_bits=WIDTH, starting_phases_cycles=PHASES,
@@ -239,6 +269,9 @@ def main():
                     source_sha256={str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                                    for p in paths},
                     thresholds=dict(psnr_dB=35, max_hue_error_deg=2),
+                    revised_sync_margin_clocks=1,
+                    pal_switch_calibration=dict(cases=switch_checks, legacy_wrong=int(legacy_wrong)),
+                    ideal_phase_calibrations=calibrations,
                     observations=observations)
     (args.out / "observations.json").write_text(json.dumps(metadata, indent=2) + "\n")
 
