@@ -25,3 +25,8 @@ Remaining concerns preserved from the incremental review:
 This was a delegated same-family review, not a cross-model headless review.
 The quantitative results were checked locally through analyse.py, including
 fresh-process agreement and nominal phase-zero image parity.
+
+A second cheap subagent checked the final README and architecture claims
+against every observation group. It confirmed the ranges, pass counts and
+paired sync maxima, and checked all three recorded source hashes against
+the current files. It reported no additional overclaim in the final text.

@@ -18,7 +18,7 @@ def main():
             filename = f"{standard}-{arm}.png"
             assert (HERE / "results-initial" / filename).read_bytes() == (HERE / "results" / filename).read_bytes(), filename
     tool = subprocess.run(["iverilog", "-V"], capture_output=True, text=True, check=True)
-    (HERE / "results/iverilog-version.txt").write_text(tool.stdout + tool.stderr)
+    (HERE / "results/iverilog-version.txt").write_text((tool.stdout + tool.stderr).rstrip() + "\n")
     lines = ["Fresh-process confirmation: all individual observations and RTL samples match.",
              "", "| Standard | Samples/clock | Fields | PSNR range (dB) | Max hue error range (degrees) | Passing fields |",
              "| --- | --- | --- | --- | --- | --- |"]
