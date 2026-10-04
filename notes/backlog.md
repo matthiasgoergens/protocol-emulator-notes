@@ -149,6 +149,10 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   written in another language (Clash/Haskell, Verilog, Python) and gets rewritten in
   OCaml/Hardcaml anyway. So unlicensed sources are fine as ideas. Credit the source of every
   idea we adopt; licences matter only for the rare verbatim copy.
+  Code with vague or missing licences may still be run locally, for example as a test oracle
+  or a reference to compare against (clash-chip8 as a reference emulator, fpga4fun's HDMI
+  Verilog on the FPGA). It must not be committed to the public repository; keep it outside the
+  repository, or gitignored.
 - **Copying from other entries: the policy.** Ideas may be copied from anyone, with attribution.
   Code only under a compatible open-source licence, with attribution. Of the repositories studied
   on 2026-09-25, 11 are Apache-2.0 and 2 are MIT; 3 have no licence (fjpolo/ProtocolEmulatorr,
