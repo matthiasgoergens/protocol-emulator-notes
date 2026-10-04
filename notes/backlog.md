@@ -189,6 +189,12 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   exists (gergoerdi/clash-flappysquare, branch `ulx3s-hdmi`, `target/ulx3s`). Port its TMDS
   encoder and serialiser to Hardcaml, or bridge it, so FPGA bring-up can show the video demos on
   a monitor. On the chip itself, TMDS at 640×480 needs 250 Mbit/s per lane, beyond our pads.
+  Read on 2026-10-04 (MIT licence, so code may be ported with attribution):
+  - `TMDS.hs` is a 66-line DVI 8b/10b encoder: popcount, an XOR/XNOR chain and a 4-bit running
+    disparity, as a Mealy machine.
+  - On the ECP5, one PLL makes 25 MHz pixel and 250 MHz bit clocks (`src-hdl/clock.v`).
+    `ClockToBit.hs` routes a clock onto a data pin.
+  - A straight Hardcaml port is about a day's work.
 - **Timed model checking of sequencer programmes.** Model each thread as a timed automaton and
   check deadlines with an established tool (UPPAAL, or nuXmv/Kind 2 on a discrete-time
   encoding). This would be an independent check of the programme verifier.
