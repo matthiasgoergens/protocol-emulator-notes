@@ -1,0 +1,12 @@
+# ./_build/default/crc/crc_oracle.exe pe 50; commit 7a98eef + uncommitted verif-oracles
+  CRC-16/XMODEM    1 PE                 50 splits: identity fails 0, whole vs direct CRC fails 0, lockstep mismatches 0
+  CRC-16/IBM-3740  1 PE                 50 splits: identity fails 0, whole vs direct CRC fails 0, lockstep mismatches 0
+  CRC-16/KERMIT    1 PE                 50 splits: identity fails 0, whole vs direct CRC fails 0, lockstep mismatches 0
+  CRC-16/USB       1 PE                 50 splits: identity fails 0, whole vs direct CRC fails 0, lockstep mismatches 0
+  CRC-32/ISO-HDLC  pair, every clock    50 splits: identity fails 0, whole vs direct CRC fails 0, lockstep mismatches 0
+  CRC-32/ISO-HDLC  pair, gaps, follow   50 splits: identity fails 0, whole vs direct CRC fails 0, lockstep mismatches 0
+  CRC-32/BZIP2     pair, every clock    50 splits: identity fails 0, whole vs direct CRC fails 0, lockstep mismatches 0
+  CRC-32/BZIP2     pair, gaps, follow   50 splits: identity fails 0, whole vs direct CRC fails 0, lockstep mismatches 0
+  CRC-32/MPEG-2    pair, every clock    50 splits: identity fails 0, whole vs direct CRC fails 0, lockstep mismatches 0
+  CRC-32/MPEG-2    pair, gaps, follow   50 splits: identity fails 0, whole vs direct CRC fails 0, lockstep mismatches 0
+pe: PASS

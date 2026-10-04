@@ -1,0 +1,4 @@
+# crc_oracle.exe blind 20
+  control bits of each byte fed in the wrong order, CRC-16/KERMIT    1 PE                identity fails 0 of 20 (blind), direct CRC fails 20 of 20, lockstep 0
+  control bits of each byte fed in the wrong order, CRC-32/ISO-HDLC  pair, every clock   identity fails 0 of 20 (blind), direct CRC fails 20 of 20, lockstep 0
+  control bits of each byte fed in the wrong order, CRC-32/ISO-HDLC  pair, gaps, follow  identity fails 0 of 20 (blind), direct CRC fails 20 of 20, lockstep 0

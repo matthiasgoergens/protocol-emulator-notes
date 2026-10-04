@@ -1,0 +1,23 @@
+  Refs.crc reproduces every catalogue check value                    ok
+  xpow = xpow_slow for n = 0..3000, every catalogue polynomial       ok
+  xpow_slow agrees with the incremental loop at n = 1234             ok
+  x^(a+b) = x^a * x^b for 1000 random a, b < 2^40                    ok
+  CRC-16/XMODEM    combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+  CRC-16/IBM-3740  combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+  CRC-16/KERMIT    combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+  CRC-16/USB       combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+  CRC-32/ISO-HDLC  combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+  CRC-32/BZIP2     combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+  CRC-32/MPEG-2    combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+  CRC-16/XMODEM    monoid: identity (crc "", 0), associativity, 500 random triples ok
+  CRC-16/IBM-3740  monoid: identity (crc "", 0), associativity, 500 random triples ok
+  CRC-16/KERMIT    monoid: identity (crc "", 0), associativity, 500 random triples ok
+  CRC-16/USB       monoid: identity (crc "", 0), associativity, 500 random triples ok
+  CRC-32/ISO-HDLC  monoid: identity (crc "", 0), associativity, 500 random triples ok
+  CRC-32/BZIP2     monoid: identity (crc "", 0), associativity, 500 random triples ok
+  CRC-32/MPEG-2    monoid: identity (crc "", 0), associativity, 500 random triples ok
+  control shift by x^|b| (bits counted as bytes)         caught on 7 of 7 CRCs: CRC-16/XMODEM 200/200, CRC-16/IBM-3740 200/200, CRC-16/KERMIT 200/200, CRC-16/USB 200/200, CRC-32/ISO-HDLC 200/200, CRC-32/BZIP2 200/200, CRC-32/MPEG-2 200/200
+  control init term dropped                              caught on 5 of 7 CRCs: CRC-16/IBM-3740 200/200, CRC-16/USB 200/200, CRC-32/ISO-HDLC 200/200, CRC-32/BZIP2 200/200, CRC-32/MPEG-2 200/200
+  control reflection ignored                             caught on 3 of 7 CRCs: CRC-16/KERMIT 200/200, CRC-16/USB 200/200, CRC-32/ISO-HDLC 200/200
+  control zlib's formula on every CRC                    caught on 2 of 7 CRCs: CRC-16/IBM-3740 200/200, CRC-32/MPEG-2 200/200
+maths: PASS

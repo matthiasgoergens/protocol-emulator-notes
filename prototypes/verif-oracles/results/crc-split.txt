@@ -1,0 +1,9 @@
+# ./_build/default/crc/crc_oracle.exe split
+  CRC-16/XMODEM    segments 0 and 1, one PE each, feed registers: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-16/IBM-3740  segments 0 and 1, one PE each, feed registers: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-16/KERMIT    segments 0 and 1, one PE each, feed registers: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-16/USB       segments 0 and 1, one PE each, feed registers: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-32/ISO-HDLC  segments 1 and 2, a pair each, fixed ports, gaps: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-32/BZIP2     segments 1 and 2, a pair each, fixed ports, gaps: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-32/MPEG-2    segments 1 and 2, a pair each, fixed ports, gaps: 15 splits, 0 wrong, 0 lockstep mismatches
+split: PASS

@@ -1,0 +1,13 @@
+# ./_build/default/crc/crc_oracle.exe shared-faults 20
+  fault window_bit_order   configurations where the identity fails: 0 of 10; where the direct CRC fails: 0 of 10; lockstep mismatches 0
+  fault carry_bit15        configurations where the identity fails: 0 of 10; where the direct CRC fails: 0 of 10; lockstep mismatches 0
+  fault neg_no_plus1       configurations where the identity fails: 0 of 10; where the direct CRC fails: 0 of 10; lockstep mismatches 0
+  fault sin_s15_uses_own   configurations where the identity fails: 6 of 10; where the direct CRC fails: 6 of 10; lockstep mismatches 0
+      CRC-32/ISO-HDLC  pair, every clock   identity 20/20, direct 20/20
+      CRC-32/ISO-HDLC  pair, gaps, follow  identity 20/20, direct 20/20
+      CRC-32/BZIP2     pair, every clock   identity 20/20, direct 20/20
+      CRC-32/BZIP2     pair, gaps, follow  identity 20/20, direct 20/20
+      CRC-32/MPEG-2    pair, every clock   identity 20/20, direct 20/20
+      CRC-32/MPEG-2    pair, gaps, follow  identity 20/20, direct 20/20
+  fault merge_colour_hi    configurations where the identity fails: 0 of 10; where the direct CRC fails: 0 of 10; lockstep mismatches 0
+  fault max_unsigned       configurations where the identity fails: 0 of 10; where the direct CRC fails: 0 of 10; lockstep mismatches 0
