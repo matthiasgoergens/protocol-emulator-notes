@@ -201,6 +201,13 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
 ## Tools worth porting or bridging to Hardcaml
 
+- **`hardcaml-latency`: decided 2026-10-05.** It stays its own repository
+  (`~/prog/janestreet/hardcaml-latency`, local only for now), because a standalone library is the
+  likeliest upstream route and keeps it reusable outside this entry. The emulator uses it as a
+  vendored or path dependency when the video pipelines adopt the wrapper. Publishing it is a
+  later step, with any issue text to Jane Street reviewed by Matthias first. The decision is
+  cheap to revisit.
+
 - **Our own reverse-engineering tooling from the August puzzle**
   (`~/prog/janestreet/hardware-2026-08/`, `WRITEUP.md`). Reuse it on our own layout:
   - a GDS-to-netlist extractor (`work/extract.py`), with an OCaml port at
