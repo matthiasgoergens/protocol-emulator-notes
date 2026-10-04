@@ -185,6 +185,16 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
 ## Tools worth porting or bridging to Hardcaml
 
+- **HDMI/DVI output on the ULX3S for the demos.** A Clash HDMI encoder for exactly this board
+  exists (gergoerdi/clash-flappysquare, branch `ulx3s-hdmi`, `target/ulx3s`). Port its TMDS
+  encoder and serialiser to Hardcaml, or bridge it, so FPGA bring-up can show the video demos on
+  a monitor. On the chip itself, TMDS at 640×480 needs 250 Mbit/s per lane, beyond our pads.
+- **Timed model checking of sequencer programmes.** Model each thread as a timed automaton and
+  check deadlines with an established tool (UPPAAL, or nuXmv/Kind 2 on a discrete-time
+  encoding). This would be an independent check of the programme verifier.
+- **Refinement types for hardware:** Liquid Clash, LiquidHaskell applied to Clash, as prior art
+  for static checking of widths, ranges and deadlines. Look for an OCaml/Hardcaml analogue.
+
 The ranking is **running** in `notes/jane-street-hardware-taste.md`. The candidates:
 - **sigrok's protocol decoders** (over 100), as independent oracles for every protocol we
   implement: a bridge from Hardcaml simulation, or ports of the key ones. First pick.
