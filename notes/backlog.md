@@ -185,6 +185,26 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
 ## Tools worth porting or bridging to Hardcaml
 
+- **Our own reverse-engineering tooling from the August puzzle**
+  (`~/prog/janestreet/hardware-2026-08/`, `WRITEUP.md`). Reuse it on our own layout:
+  - a GDS-to-netlist extractor (`work/extract.py`), with an OCaml port at
+    `hardcaml_firing_squad/extract.ml` and `cells.ml`;
+  - a gate-level simulator (`work/sim.py`, `sim.ml`);
+  - a netlist checker (`netlist_check.ml`).
+
+  Port them to IHP sg13g2 cells and use them for the post-layout round trip: extract our GDS,
+  then run lockstep and fuzzing on the extracted netlist against the RTL. This is the
+  independent check that Tiny Tapeout's precheck, with no LVS, does not give.
+- **Lesson from that puzzle: check for undriven nets explicitly.** Jane Street's chip shipped
+  with a floating input net that corrupts one message. A SAT solver treats an undriven wire as
+  a free variable and picks a value that hides the bug, and our simulator read it as 0. So the
+  round trip must report every net without exactly one driver, before any simulation or formal
+  check. A cheap check, worth a line in the write-up.
+- **A firing-squad puzzle chip already written in Hardcaml**
+  (`hardware-2026-08/hardcaml_firing_squad/`): Hardcaml v0.17, Hegel property tests, a LibreLane
+  SKY130 flow, DEF-to-GDS. It is a template for our own Hardcaml-to-GDS flow and property
+  tests.
+
 - **HDMI/DVI output on the ULX3S for the demos.** A Clash HDMI encoder for exactly this board
   exists (gergoerdi/clash-flappysquare, branch `ulx3s-hdmi`, `target/ulx3s`). Port its TMDS
   encoder and serialiser to Hardcaml, or bridge it, so FPGA bring-up can show the video demos on
