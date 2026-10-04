@@ -29,11 +29,11 @@ let reference ~width ~height x y =
     let v = if (x + y) land 1 = 0 then 255 else 0 in
     v, v, v
   else
-    let g = (x - width / 2) * 256 / (width / 2) in
+    let g = ((x - width / 2) * 205 / 256) land 255 in
     g, g, g
 
-(* Hardware version.  The bar index x * 8 / width and the ramp need constants only: both are
-   compared against precomputed thresholds rather than divided. *)
+(* Hardware version.  The bar index x * 8 / width is a count of precomputed thresholds, so no
+   divider is needed. *)
 let create ~width ~height ~x ~y =
   let band1 = height / 3 and band2 = 2 * height / 3 in
   let w = width (* for readability below *) in
@@ -53,22 +53,10 @@ let create ~width ~height ~x ~y =
   let gradient = lo8 x, lo8 y, lo8 (x ^: uresize y (Signal.width x)) in
   let half = w / 2 in
   let check = sel (~:(lsb x ^: lsb y)) in
-  (* ramp g = (x - half) * 256 / half; for width 640 that is (x - 320) * 4 / 5, done as a lookup of
-     thresholds would be large, so we compute (x - half) * 256 with a constant multiplier and
-     compare: g is the number of k in 1..255 with (x - half) * 256 >= k * half. *)
-  let xr = x -:. half in
-  let ramp =
-    let prod = uresize xr (Signal.width x + 9) *: of_int ~width:9 256 |> fun p -> uresize p (Signal.width x + 9) in
-    (* g = floor(prod / half): binary long division by a constant, unrolled over 8 result bits *)
-    let rec divide bitpos rem acc =
-      if bitpos < 0 then acc
-      else
-        let d = of_int ~width:(Signal.width rem) (half lsl bitpos) in
-        let ge = rem >=: d in
-        divide (bitpos - 1) (mux2 ge (rem -: d) rem) (acc |: sll (uresize ge 8) bitpos)
-    in
-    divide 7 prod (zero 8)
-  in
+  (* ramp: g = (x - half) * 205 / 256, about (x - half) * 0.8, so 0 .. 255 over the 320 pixels
+     of the right half at width 640; a constant multiply is a few adders *)
+  let xr = uresize (x -:. half) 16 in
+  let ramp = select (uresize (xr *: of_int ~width:8 205) 24) 15 8 in
   let r, g, b =
     let pick a b c d =
       mux2 border ff (mux2 (y <:. band1) a (mux2 (y <:. band2) b (mux2 (x <:. half) c d)))

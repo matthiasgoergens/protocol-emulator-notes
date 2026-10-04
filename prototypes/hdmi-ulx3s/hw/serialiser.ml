@@ -12,13 +12,15 @@
    them, so the transfer is made safe by construction instead of by timing analysis.  The pixel
    domain flips [toggle] on every pixel clock, on the same edge that updates the three words.  Here
    [toggle] passes two flip-flops; the first fast cycle in which the synchronised value has changed
-   arms the loader: the words are captured at that edge and then every [n] cycles after it, by a
-   free-running counter.  The capture therefore happens 2 to 3 fast cycles after the words changed,
-   and at least n - 3 cycles before they change again: at 250 MHz that is 8 ns of settling and
-   28 ns of hold margin; at 125 MHz 16 ns and 16 ns.  The first flip-flop may go metastable when a
+   arms the loader: the words are captured one cycle later and then every [n] cycles after that,
+   by a free-running counter.  The capture therefore happens 3 to 4 fast cycles after the words
+   changed, and at least n - 4 cycles before they change again: at 250 MHz that is 12 ns of
+   settling and 24 ns of margin; at 125 MHz 24 ns and 8 ns.  The first flip-flop may go metastable when a
    toggle edge lands on a fast edge; that can only move the arming by one cycle, which the window
-   above absorbs.  After arming, every further toggle change is compared with the counter, and a
-   mismatch sets the sticky [slip] flag (an LED on the board). *)
+   above absorbs.  After arming, every further toggle change is compared with the counter, and one
+   more than a cycle away from the expected place sets the sticky [slip] flag (an LED on the
+   board).  The PLL also offsets the pixel clock by half a bit-clock period (ecppll's --phase1), so
+   the race should not arise at all; the design does not depend on that. *)
 open! Base
 open Hardcaml
 open Signal
@@ -38,16 +40,23 @@ let create ~spec ~bits_per_cycle ~toggle ~words =
   let edge = s2 ^: s3 in
   let cw = num_bits_to_represent (n - 1) in
   let count = wire cw and armed = wire 1 in
-  let at_load = count ==:. 0 in
-  let load = mux2 armed at_load edge in
   armed <== reg spec (armed |: edge);
-  count <== reg spec (mux2 load (of_int ~width:cw (1 % n)) (mux2 (count ==:. n - 1) (zero cw) (count +:. 1)));
-  (* After arming, toggle edges arrive exactly every n cycles, on the cycle the counter is 0. *)
+  (* The first edge restarts the count at 0 on the next cycle; from then on [load] is high on the
+     cycle after each count of n - 1, i.e. every n cycles.  [load] is a register, so the select of
+     the forty shift-register multiplexers comes straight from a flip-flop. *)
+  let last = count ==:. n - 1 in
+  count <== reg spec (mux2 (~:armed &: edge) (zero cw) (mux2 last (zero cw) (count +:. 1)));
+  let load = reg spec (mux2 armed last edge) in
+  (* After arming, toggle edges arrive every n cycles, when the count is n - 1, or one cycle
+     either side of it if the first synchroniser stage resolved differently this time. *)
   let slip = wire 1 in
-  slip <== reg spec (slip |: (armed &: edge &: ~:at_load));
+  let expected = last |: (count ==:. n - 2) |: (count ==:. 0) in
+  slip <== reg spec (slip |: (armed &: edge &: ~:expected));
+  (* The shift registers need no clear: they are loaded before their output means anything. *)
+  let spec_noclear = Reg_spec.override spec ~clear:gnd in
   let lane word =
     let sr = wire 10 in
-    sr <== reg spec (mux2 load word (srl sr k));
+    sr <== reg spec_noclear (mux2 load word (srl sr k));
     select sr (k - 1) 0
   in
   let words = words @ [ of_int ~width:10 clock_word ] in

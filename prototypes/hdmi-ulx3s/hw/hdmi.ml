@@ -28,8 +28,12 @@ let blink ~spec ~half_period =
    the same latency in the type; here it is a number checked by the end-to-end simulation. *)
 type source = spec:Reg_spec.t -> x:Signal.t -> y:Signal.t -> (Signal.t * Signal.t * Signal.t) * int
 
-let test_pattern ~width ~height : source =
- fun ~spec:_ ~x ~y -> Test_pattern.create ~width ~height ~x ~y, 0
+(* The pattern is registered once, so its latency is 1.  [declared_latency] exists only to plant
+   a sync/pixel misalignment in a negative control. *)
+let test_pattern ?(declared_latency = 1) ~width ~height () : source =
+ fun ~spec ~x ~y ->
+  let r, g, b = Test_pattern.create ~width ~height ~x ~y in
+  (reg spec r, reg spec g, reg spec b), declared_latency
 
 let pixel_circuit ?(name = "hdmi_pixel") ?mutant ?(timing = Video_timing.vga_640x480_60) ~blink_half_period
     ~(source : source) () =
