@@ -1,0 +1,21 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/stall/i2c_stretch.exe
+# commit: 1b0fdb87d3b6693110537793b9b4d0e06913d01b (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T07:55:14+08:00
+golden (no stretching): uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=true host-acks [00 00]; RTL vs interpreter: 0 clocks differ
+golden matches the demo's own expected bytes: true
+
+stretch p = 0.10 per SCL release, 1..  4 clocks: 30 runs, 204 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 0; RTL vs interpreter 0 clocks differ
+stretch p = 0.30 per SCL release, 1.. 16 clocks: 30 runs, 1536 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 1; RTL vs interpreter 0 clocks differ
+    first differing i2c transcript: seed 9: uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=false host-acks [00 00]
+stretch p = 0.50 per SCL release, 1.. 64 clocks: 30 runs, 9210 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 30; RTL vs interpreter 0 clocks differ
+    first differing i2c transcript: seed 1: uart [4f 4b 21] spi [a5 3c] i2c [07+] stop=true host-acks [01 01]
+stretch p = 1.00 per SCL release, 1..200 clocks: 30 runs, 32886 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 30; RTL vs interpreter 0 clocks differ
+    first differing i2c transcript: seed 1: uart [4f 4b 21] spi [a5 3c] i2c [] stop=false host-acks [01 01]
+
+finding: UART and SPI transcripts are identical under every stretch pattern (they read no pins);
+the compiled I2C master's transcript BREAKS under stretching: it never samples SCL, so it does not honour clock stretching.
+control: UART data bit 5 stretched by 9 slots (the demo's own fault), no I2C stretching: comparison flags it
+
+I2C STRETCH PASS (PASS = UART/SPI insensitive, RTL agrees, control flagged; the I2C result is a finding, reported above)
+exit 0

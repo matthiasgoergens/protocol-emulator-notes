@@ -1,0 +1,63 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/stall/eth_stall.exe
+# commit: 1b0fdb87d3b6693110537793b9b4d0e06913d01b (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T07:55:11+08:00
+10BASE-T TX firmware under host stalls: 73 bytes on the wire, 1168 half-bits, frame window 3504 clocks
+fixed firmware sizes (words per thread): 34,36,35,34; original: 28,30,29,28
+
+== golden: no stalls
+  original  none (golden)                                  1 runs: exact   1, cut and reported   0, VIOLATIONS   0
+  fixed     none (golden)                                  1 runs: exact   1, cut and reported   0, VIOLATIONS   0, RTL vs interpreter 0 clocks differ
+
+== latency sweep: every byte after the first d clocks late (the slack of the 24-slot loop)
+  original  d =   0: exact
+  original  d =  40: exact
+  original  d =  80: exact
+  original  d =  82: exact
+  original  d =  83: exact
+  original  d =  84: exact
+  original  d =  85: exact
+  original  d =  87: exact
+  original  d =  88: exact
+  original  d =  92: exact
+  original  d =  94: exact
+  original  d =  95: exact
+  original  d =  96: VIOLATION: wrong level on the line at half-bit 65 (clock 211)
+  original  d = 120: VIOLATION: wrong level on the line at half-bit 33 (clock 115)
+  fixed     d =   0: exact
+  fixed     d =  40: exact
+  fixed     d =  80: exact
+  fixed     d =  82: exact
+  fixed     d =  83: exact
+  fixed     d =  84: cut at half-bit 30, reported
+  fixed     d =  85: cut at half-bit 30, reported
+  fixed     d =  87: cut at half-bit 30, reported
+  fixed     d =  88: cut at half-bit 30, reported
+  fixed     d =  92: cut at half-bit 30, reported
+  fixed     d =  94: cut at half-bit 30, reported
+  fixed     d =  95: cut at half-bit 30, reported
+  fixed     d =  96: cut at half-bit 30, reported
+  fixed     d = 120: cut at half-bit 30, reported
+  largest exact delay: original 95 clocks, fixed 83 clocks
+
+== random stall patterns (seeds 1..N)
+  original  random: p = 0.010 per byte, 1..40 clocks      50 runs: exact  48, cut and reported   0, VIOLATIONS   2 (seed 14: wrong level on the line at half-bit 7 (clock 38))
+  fixed     random: p = 0.010 per byte, 1..40 clocks      50 runs: exact  48, cut and reported   2, VIOLATIONS   0, RTL vs interpreter 0 clocks differ
+  original  random: p = 0.050 per byte, 1..120 clocks     50 runs: exact   7, cut and reported   0, VIOLATIONS  43 (seed 1: wrong level on the line at half-bit 736 (clock 2224))
+  fixed     random: p = 0.050 per byte, 1..120 clocks     50 runs: exact   5, cut and reported  45, VIOLATIONS   0, RTL vs interpreter 0 clocks differ
+  original  random: p = 0.300 per byte, 1..200 clocks     50 runs: exact   0, cut and reported   0, VIOLATIONS  50 (seed 1: wrong level on the line at half-bit 1 (clock 19))
+  fixed     random: p = 0.300 per byte, 1..200 clocks     50 runs: exact   0, cut and reported  50, VIOLATIONS   0, RTL vs interpreter 0 clocks differ
+  original  one random byte 97..200 clocks late           50 runs: exact   1, cut and reported   0, VIOLATIONS  49 (seed 1: wrong level on the line at half-bit 162 (clock 502))
+  fixed     one random byte 97..200 clocks late           50 runs: exact   0, cut and reported  50, VIOLATIONS   0, RTL vs interpreter 0 clocks differ
+
+== controls (each must be flagged)
+  original  random: p = 0.050 per byte, 1..120 clocks     50 runs: exact   7, cut and reported   0, VIOLATIONS  43 (seed 1: wrong level on the line at half-bit 736 (clock 2224))
+  control original firmware (no underrun path): flagged
+  no-rel    random: p = 0.050 per byte, 1..120 clocks     50 runs: exact   5, cut and reported   0, VIOLATIONS  45 (seed 1: wrong level on the line at half-bit 736 (clock 2224))
+  control fixed firmware without the line release: flagged
+  no-rep    random: p = 0.050 per byte, 1..120 clocks     50 runs: exact   5, cut and reported   0, VIOLATIONS  45 (seed 1: line released at half-bit 734 without an underrun report)
+  control fixed firmware without the underrun report: flagged
+  control golden transcript with half-bit 500 flipped, no stalls: flagged
+
+ETH STALL PASS
+exit 0

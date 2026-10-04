@@ -1,0 +1,5 @@
+; ISA v2 interpreter and RTL, symlinks to ../../sequencer-v2 (unchanged)
+(library
+ (name seqv2)
+ (wrapped false)
+ (libraries hardcaml))

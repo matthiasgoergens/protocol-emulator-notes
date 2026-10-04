@@ -1,0 +1,21 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/stall-wide/jtag_swd_stall.exe
+# commit: 1b0fdb87d3b6693110537793b9b4d0e06913d01b (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T07:55:19+08:00
+JTAG host firmware (random chains of 1-4 TAPs, sessions of reset, IDCODE, BYPASS, SAMPLE, EXTEST):
+  JTAG stall p = 0.02: 20 sessions, 40643 stalled clocks; timed out with a correct prefix 0; oracle failures 0, TDO transcript differs from golden 0, interpreter vs RTL clocks differing 0
+  JTAG stall p = 0.20: 20 sessions, 140122 stalled clocks; timed out with a correct prefix 0; oracle failures 0, TDO transcript differs from golden 0, interpreter vs RTL clocks differing 0
+  JTAG stall p = 0.60: 20 sessions, 299427 stalled clocks; timed out with a correct prefix 0; oracle failures 0, TDO transcript differs from golden 0, interpreter vs RTL clocks differing 0
+  JTAG stall p = 0.95: 20 sessions, 1435740 stalled clocks; timed out with a correct prefix 19; oracle failures 0, TDO transcript differs from golden 0, interpreter vs RTL clocks differing 0
+SWD host firmware (random reads and writes through the MEM-AP):
+  SWD stall p = 0.02, target WAIT p = 0.00: 15 sessions, 162179 stalled clocks, 0 WAITs retried; timed out with a correct prefix 0; oracle failures 0, transcript differs 0, interpreter vs RTL clocks differing 0
+  SWD stall p = 0.20, target WAIT p = 0.20: 15 sessions, 570896 stalled clocks, 118 WAITs retried; timed out with a correct prefix 0; oracle failures 0, transcript differs 0, interpreter vs RTL clocks differing 0
+  SWD stall p = 0.60, target WAIT p = 0.50: 15 sessions, 1493741 stalled clocks, 566 WAITs retried; timed out with a correct prefix 0; oracle failures 0, transcript differs 0, interpreter vs RTL clocks differing 0
+  SWD stall p = 0.95, target WAIT p = 0.50: 15 sessions, 9012050 stalled clocks, 388 WAITs retried; timed out with a correct prefix 13; oracle failures 0, transcript differs 0, interpreter vs RTL clocks differing 0
+controls (must be flagged under heavy stalls):
+  JTAG stall p = 0.60 (planted bug: early exit): 10 sessions, 144598 stalled clocks; timed out with a correct prefix 0; oracle failures 10, TDO transcript differs from golden 10, interpreter vs RTL clocks differing 0
+    first failure: bsr(dev 0, 108 bits): boundary capture: got 111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111 want 011111001010101100011100110010001000011111111110111001010011111111010111111101001000100110000100000001111100 | bsr(dev 0, 108 bits): boundary capture: got 111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111 want 011111001010101100011100110010001000011111111110111001010011111111010111111101001000100110000100000001111100
+  control JTAG planted early-exit bug under stalls: flagged
+
+JTAG/SWD STALL PASS
+exit 0

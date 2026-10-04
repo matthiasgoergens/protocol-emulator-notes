@@ -1,0 +1,23 @@
+; Stall injection on base-ISA firmware run on ISA v2. isa.ml and harness.ml are the v2 shim of
+; ../../sequencer-v2/ports/shim; compiler, decoders, eth_model and orig/ are symlinks to the
+; prototypes' own files (unchanged).
+(rule
+ (with-stdout-to
+  isa_enc.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
+
+; the 10BASE-T firmware generator: sequencer-ethernet/main.ml up to its first test
+(rule
+ (with-stdout-to
+  eth_fw.ml
+  (run sed "/^let () =/,$d" %{dep:orig/eth_main.ml})))
+
+; the deadline-sequencer demo's bus model and programmes, up to its first top-level run
+(rule
+ (with-stdout-to
+  demo_lib.ml
+  (run sed "/^let () =/,$d" %{dep:orig/demo.ml})))
+
+(executables
+ (names eth_stall i2c_stretch)
+ (libraries hardcaml seqv2))
