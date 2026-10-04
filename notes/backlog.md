@@ -145,6 +145,10 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
   Each needs its fence written down: which interfaces re-synchronise, what the verifier may
   assume, and how a run is still replayed.
+- **In practice we reimplement, not copy** (Matthias, 2026-10-04): almost everything we borrow is
+  written in another language (Clash/Haskell, Verilog, Python) and gets rewritten in
+  OCaml/Hardcaml anyway. So unlicensed sources are fine as ideas. Credit the source of every
+  idea we adopt; licences matter only for the rare verbatim copy.
 - **Copying from other entries: the policy.** Ideas may be copied from anyone, with attribution.
   Code only under a compatible open-source licence, with attribution. Of the repositories studied
   on 2026-09-25, 11 are Apache-2.0 and 2 are MIT; 3 have no licence (fjpolo/ProtocolEmulatorr,
