@@ -1,5 +1,13 @@
 # Architecture v0: one programmable chip (note, 2026-09-25)
 
+Status, 2026-09-30: this design note retains historical assumptions and gap
+labels; `NEXT.md` records the current verified state. In particular, the
+Berger checks below are superseded by the mixed-direction failure model and
+shortened extended-Hamming checks in `prototypes/systolic-storage/README.md`.
+The old one-way-error safety claims are not current guarantees. G4 now has
+a waveform measurement with remaining limits, and G14 is narrowed below to
+reflect the demonstrated bitmap reload.
+
 The prototypes so far are mostly special-purpose hardware: a sprite pipeline, a USB engine, an
 Ethernet receiver, a semiring ring, a wave engine. This note converges them into **one chip made of
 a few generic programmable blocks**, on which every protocol and every demo is a programme or a
@@ -277,7 +285,7 @@ One step (every clock, or only when A is valid in stream mode):
 | cell the demos need | configuration | status |
 |---|---|---|
 | sprite (con) | K = {x, colour}; S = the 16-pixel bitmap, per line through the init chain; A = {pixel x, colour}; g = window (A.hi − x < 16 and S[15 − (A.hi − x)]); P ← merge; stream stepping per pixel. Later PEs win. | configuration designed; the console's lockstep reference is the oracle |
-| tile (platformer) | the sprite configuration, with S and K reloaded every 16 pixels | **not expressible in the probe**: the only mid-line write of S is the step's writeback, which the window mode already uses; needs a reload path (gap G14), or a tile layer made of sprite PEs reloaded per line |
+| tile (platformer) | the sprite configuration, with S and K reloaded every 16 pixels | **bitmap reload demonstrated; per-tile colour remains open (G14)**. The verification suite renders 256/256 pixels using mid-line S init-chain writes with gaps between pixels and segment-mates that do not use S. Reloading K through the configuration chain would temporarily garble the op and was not attempted (`prototypes/unified-pe/verify/README.md`). |
 | background, rotozoomer (con) | 4 PEs: pixel counter (S ← S + 0x0100 on {x, colour A}, P ← result); u accumulator (S ← S + ustep, lane out = S[15]); v accumulator (S ← S + vstep, g = S[15] XOR lane, lane out = g); merge (K = {0, colour B}, g = lane, P ← merge). The host offsets u₀ and v₀ by the one-step skew | designed |
 | FIR tap on 1-bit samples, PDM decimation | transposed form: P ← A + (g ? −K : K), g = the broadcast sample bit | designed |
 | CIC integrator / comb | integrator S ← S + A; comb P ← A − S, S ← A | designed |
@@ -414,10 +422,16 @@ grid.** Not 17 × fsc (60.85 MHz) and not 12 × fsc PAL (53.20 MHz).
   grid (4.17 ns). At PAL's 4.43 MHz that is 6.6° of subcarrier phase per quarter, so ±3.3° of hue
   error (est, arithmetic); the console's hues are 30° apart (`retro-console/README.md`). FM on the
   third harmonic through the same stage decodes at "essentially ideal" quality
-  (`multiphase/README.md`: SINAD* 31.5 dB, tone rms 53.2 kHz of 53 ideal). **Not yet measured for
-  video** (gap G4): a subcarrier made this way has a phase-quantisation pattern, and the software
-  TV must judge it. PAL lines are exactly 3,840 clocks at 60 MHz; NTSC lines alternate 3,813 and
-  3,814 (est, arithmetic).
+  (`multiphase/README.md`: SINAD* 31.5 dB, tone rms 53.2 kHz of 53 ideal).
+  **Waveform model measured, G4 remains open:** `prototypes/video-nco/README.md`
+  records four starting phases through the software TV at 60 MHz. Quarter-grid
+  NTSC reaches 46.64–47.02 dB picture PSNR and 1.339–1.492° maximum bar-centre
+  hue error versus the same-phase ideal carrier. PAL reaches 45.65–45.71 dB
+  but misses the declared 2° hue target at 2.137–2.223°. The carrier recurrence
+  matches the 24-bit NCO RTL; hue/amplitude control and the DAC/filter are
+  behavioural. The existing NCO lacks the planned hue-offset input, and pad
+  distortion and phase-clock skew remain unmeasured. PAL lines are 3,840 clocks
+  at 60 MHz; NTSC uses 3,813/3,814 in this model.
 - **The RP2040 makes 60 MHz exactly** (VCO 1,440 MHz / 6 / 4, `eth10-node/README.md`;
   `pal-ethernet/README.md`); the sequencer closes 66 MHz and the PE row 114 MHz at the slow
   corner (`pe-synth/README.md`).
@@ -427,7 +441,8 @@ grid.** Not 17 × fsc (60.85 MHz) and not 12 × fsc PAL (53.20 MHz).
   the sampler's clocked mode on the front end's own clock at 60 MHz.
 - **The demonstrated Ethernet-to-TV ran at 60.852 MHz** (17 × fsc NTSC), because its chroma pins
   put the subcarrier on 17 phases (`multi-proto/README.md`). It only receives, so it may keep that
-  clock as a board setting; running it at 60 MHz is exactly gap G4.
+  clock as a board setting. The new G4 waveform model does not port this
+  integrated Ethernet-to-TV demonstration to 60 MHz.
 - **Four phases on chip.** Both clock edges first (free), then the calibrated delay line
   (`multiphase/README.md`, "Phase sources: verdicts"). A quadrature clock from the RP2350's PIO
   would cap the chip at 37.5 MHz.
@@ -619,8 +634,12 @@ Further gaps: **G11** time-sharing PEs (contexts); **G12** the full-speed pad qu
 figure is sky130's 33 MHz output; `notes/tiny-tapeout-ihp-rules.md` §4) gates 100BASE-FX, runts,
 and composite at 66 Msps; **G13** a whole-chip place and route (sequencer, four PEs, the
 interconnect, one macro) to replace the assumed placement factor of section 6, which decides
-between 16 and 12 PEs; **G15** GPS capture at 60 MHz through the sampler's clocked mode, not yet modelled; **G14** a mid-line reload path for a PE's state (tile layers), for example
-a conditional S ← A on a second condition bit.
+between 16 and 12 PEs; **G15** GPS capture at 60 MHz through the sampler's clocked mode, not yet modelled;
+**G14** a safe mid-line reload of both bitmap state S and colour/configuration
+K for per-tile colour. Bitmap-only S reload is demonstrated through the init
+chain, but needs pixel gaps and segment-mates that do not use S. A conditional
+S ← A on a second condition bit is one possible state path; it would not alone
+solve colour reload.
 
 ## 6. Area budget against 6 × 4 tiles
 

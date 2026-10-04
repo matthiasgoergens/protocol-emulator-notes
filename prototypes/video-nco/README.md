@@ -1,0 +1,109 @@
+# Quarter-clock pin NCO through the software TV, 2026-09-30
+
+At 60 MHz, the quarter-grid carrier gives 46.64–47.02 dB picture PSNR for
+NTSC and 45.65–45.71 dB for PAL against an ideal sinusoidal carrier decoded
+at the same starting phase. NTSC meets the declared 35 dB picture and 2°
+maximum hue-error targets at all four phases. PAL misses the hue target:
+2.137–2.223°, despite the high picture PSNR. G4 remains open for the PAL
+target and hardware integration.
+
+## Experiment
+
+Run from the repository root:
+
+```sh
+nice ionice uv run prototypes/video-nco/judge.py
+nice ionice uv run prototypes/video-nco/judge.py --out prototypes/video-nco/results-confirmation
+nice ionice uv run --no-cache --offline prototypes/video-nco/analyse.py
+```
+
+`judge.py` pins NumPy, SciPy and Pillow and records their versions, Python,
+platform, base commit and SHA-256 hashes of the generator, TV and NCO RTL.
+The Icarus version is in `results/iverilog-version.txt`. The question is
+whether the proposed 60 MHz carrier produces acceptable colour through the
+software TV. Each experimental unit is one deterministic test-card field,
+paired with the same timing, envelope, hue controls and starting phase in
+the ideal-carrier arm. There are four specified starting phases (0, 1/8,
+1/4 and 3/8 cycle), two standards and three grids: clock, half-clock and
+quarter-clock. Lines and colour blocks within a field are measurements,
+not independent replications or evidence for a population of TVs.
+
+The predeclared practical targets are at least 35 dB full-picture PSNR and
+at most 2° hue error at the centres of six chromatic bars, excluding four
+lines at either end of their region. No observations are excluded. The
+1-clock paired sync margin was added after the first exploratory run;
+that change and the original observations are retained below. No timing
+benchmark or statistical equivalence claim is made.
+
+## What is implemented and what is modelled
+
+The carrier check loads the unchanged 24-bit `pin_nco` from
+`../unified-pe/rtl/assists.v` in Icarus. All 10,000 nibbles and phase bytes
+per standard match the separate integer recurrence. Swapping quarters 1
+and 2 differs in 370 PAL and 285 NTSC clocks. `results/*-rtl.txt` retains
+every sample; `results/rtl.json` records the counts.
+
+The composite experiment uses that recurrence, including truncated
+quarter increments, for a square-wave carrier. Eight-bit hue offsets and
+amplitude envelopes are behavioural inputs held for a main clock. The
+existing NCO has no hue-offset input; this is a proposed use, not an RTL
+demonstration of the entire colour path. The square wave is scaled by π/4
+to match the sinusoid's fundamental. This comparison includes waveform
+harmonics, gating and frequency rounding as well as grid quantisation.
+
+Quarter samples pass through an ideal 1601-tap reconstruction FIR before
+decimation to 60 Msps. The existing software TV finds sync and burst,
+demodulates chroma and applies its PAL delay line. The DAC, arbitrary
+amplitude control, phase clocks, output-stage connection, pads and analogue
+filter are not implemented or measured here. Main-clock line scheduling
+uses 3,840 clocks for PAL and 3,813/3,814 for NTSC; detected sync crossings
+can shift after filtering, so the revised judge measures their difference
+from the paired ideal waveform rather than requiring integer crossings.
+
+## Decoder corrections and calibration
+
+The first run, committed at `34a39ef`, is in `results-initial/`. PAL at
+3/8-cycle starting phase collapsed to 19.6 dB. The TV's original PAL rule
+uses the absolute real part of the burst phasor to choose the line's V
+sign. A common carrier rotation can therefore be mistaken for PAL's
+alternating burst phase.
+
+The new optional `pal_burst_pairs=True` decoder mode finds the sign
+relative to the centre of adjacent bursts. Existing callers retain the
+original default. All 512 synthetic rotation/sign cases recover the
+correct sign; the old rule gets 256 wrong. The nominal phase-zero ideal
+decode is exactly equal under both modes, and all four nominal phase-zero
+PNGs match the first run. This clean calibration assumes consecutive PAL
+lines with comparable bursts; it does not establish noisy-burst recovery.
+
+An ideal-carrier sweep against its phase-zero decode still shows picture
+dependence on starting phase: PAL reaches 32.96 dB and NTSC 30.49 dB at
+3/8 cycle, with maximum bar-centre hue errors below 0.09° and 1.17°
+respectively. This limits generalisation about the decoder. Each NCO arm
+is compared with its ideal carrier at the same phase.
+
+Chroma-off and carrier-frequency +1% controls produce 10.97–13.07 dB
+picture PSNR and maximum hue errors above 136°. Their checks require PSNR
+below 25 dB and maximum hue error above 20°. The ideal-calibration
+observations and controls are retained
+alongside every main observation, including per-line/bar hue errors and
+all detected sync intervals.
+
+## Results and remaining work
+
+`results/summary.md` is generated by `analyse.py`; both corrected runs
+agree on every individual observation and RTL sample in fresh processes.
+Quarter-grid PAL's maximum paired sync discrepancy is 0.0064 clocks;
+NTSC's is 0.237 clocks. Both meet the revised relative-sync target.
+Decoded fields contain 288 PAL or 240 NTSC active lines.
+
+The clock grid misses the hue target for both standards. Half-clock PAL
+also misses it; half-clock NTSC passes at three of four starting phases.
+The quarter grid improves picture PSNR by roughly 10 dB over the clock
+grid, within this model and test card.
+
+Next: separate PAL's remaining square-wave/gating and burst-estimation
+errors from temporal quantisation using a finer-grid square reference;
+then implement and check the hue-offset/amplitude path through the actual
+pin stage. Keep pad distortion, phase skew, field/interlace timing and a
+real TV as separate hardware questions.
