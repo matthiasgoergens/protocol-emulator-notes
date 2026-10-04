@@ -1,0 +1,68 @@
+Independent TMDS reference model (tmds_indep) -- notes
+=======================================================
+
+SPEC SOURCE
+  Digital Visual Interface DVI Revision 1.0 (2 April 1999), downloaded from
+  https://glenwing.github.io/docs/DVI-1.0.pdf  (cs.unc.edu copy returned HTML)
+  saved as spec/dvi.pdf, text in spec/dvi.txt (pdftotext -layout).
+  sha256 4a4575086567487c9942fc50cb1f2f1a0b74ec92662e40810f7875ee7eb6a07d
+  Used: 3.1.3-3.1.4, 3.2.2 (Table 3-1, Figure 3-5), 3.2.3, 3.3.3 (Figure 3-6).
+  No other TMDS source code was read.  Nothing under janestreet/ or
+  /var/tmp/clash-hdmi was read.
+
+AMBIGUITIES / RESOLUTIONS
+  1. pdftotext flattens the Figure 3-5 flowchart, so TRUE/FALSE branch labels
+     had to be inferred from the text layout.  Resolved by internal consistency:
+     with the branches as implemented, cnt equals the true ones-minus-zeros of
+     the emitted words in every case (tested), and the data-word count is
+     exactly 460, as section 3.2.2 states.
+  2. Control codes are written "q_out[0:9] = 0010101011": the leftmost
+     character is q_out[0], the first bit on the wire (3.2.3).  So bit i of
+     the int = character i of the string.  Reading the string as an MSB-first
+     binary literal would give the bit-reversed word.
+  3. Typos in the figure: unbalanced parenthesis in
+     "q_out[0:7] = (q_m[8]) ? q_m[0:7]:~q_m[0:7]);" -- read as q_m[8] ? q_m : ~q_m.
+     "~q_m[8]" in the cnt update is one-bit negation.
+  4. Initial cnt is not stated; taken as 0 (the value set on every control
+     period).  The spec says nothing about the decoder's reaction to words
+     outside the 464; Figure 3-6 decodes every non-control word as data, so
+     [decode] never returns Invalid ([decode_strict] does).
+  5. The decoder figure has an "Active Data?" test that a real decoder cannot
+     evaluate; it is implemented as "is the word one of the four control codes".
+  6. Control codes (C1,C0)=10 and 11 have disparity -2 and +2 (the other two
+     are 0).  cnt is reset to 0 regardless, so cnt = sum of disparities holds
+     only "since the last control period", as the task said.
+  7. DVI has no HSYNC/VSYNC definition beyond "C0/C1 of the blue channel"
+     (channel map, 3.2.1); active polarity is not fixed, hence the minority rule.
+     The sync waveform is held through data cycles (data cycles carry no sync);
+     VSYNC is sampled at the first cycle of the horizontal front porch when
+     counting lines, so a VSYNC transition mid-active-area would shift by a line.
+  8. Spec does not give a numeric bound on cnt.  By closure from cnt = 0 the
+     reachable cnt values are exactly -8,-6,...,+8 (always even), and the
+     measured running disparity over 10^6 random bytes is -8..+8.  The
+     largest |disparity| of a single data word is 10 (measured), so single words are far from balanced; only the running total is bounded.
+
+TEST RESULTS (dune test, ~4 s): all checks passed.
+  - decode(encode x) = x: all 256 x, every start cnt in -20..20 (incl. odd).
+  - 460 distinct data words, from reachable cnt and also from cnt -40..40
+    (unreachable starting values add no new words); none is a control word.
+  - 10^6 random bytes: running disparity in [-8, +8].
+  - find_alignment: all 10 offsets, all three lanes, plus data-only => None.
+  - 640x480@60 synthetic stream: 3 frames -> 2 complete frames recovered
+    bit-exact, timing measured H 640/16/96/48, V 480/10/2/33, for polarities
+    (low,low), (high,high), (low,high); loud failure on lane DE mismatch and
+    on Invalid symbols.
+  - Planted bugs (matrix is printed by the test):
+      mutant                          roundtrip validword control cnt=sum disp-bound
+      xnor tie clause dropped         pass      CAUGHT    pass    pass    pass
+      xnor tie uses D[0]==1           pass      CAUGHT    pass    pass    pass
+      cnt 2*q_m[8] swapped            pass      pass      pass    CAUGHT  CAUGHT
+      control 10/11 swapped           pass      pass      CAUGHT  pass    pass
+      inversion test cnt>=0           pass      pass      pass    pass    CAUGHT
+      cnt not reset on control        pass      pass      pass    CAUGHT  pass
+      balanced cnt sign flipped       pass      pass      pass    CAUGHT  CAUGHT
+      balanced q_out[9] wrong         CAUGHT    CAUGHT    pass    CAUGHT  CAUGHT
+    Only the last is caught by roundtrip; the other seven need the
+    valid-word set (XOR/XNOR choice bugs), the control table, the cnt tracking
+    or the disparity bound.  The inversion-cnt>=0 mutant is caught ONLY by the
+    disparity bound (its words are all legal and cnt is self-consistent).
