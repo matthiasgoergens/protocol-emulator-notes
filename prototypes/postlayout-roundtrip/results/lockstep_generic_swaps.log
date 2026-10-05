@@ -1,0 +1,12 @@
+deadline_sequencer.gds: extracted in 0.42 s
+deadline_sequencer.gds: structural check: 0 errors
+deadline_sequencer.gds: 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.5 s)
+deadline_sequencer.gds: generic random-input lockstep: 20 runs x 2000 cycles, 0 mismatching cycles (3.2 s)
+swap u1653@75.84,45.36.A2 (n1850) with u1577@83.52,52.92.A2 (n1720): generic random-input lockstep: 20 runs x 2000 cycles, 0 mismatching cycles (3.2 s)
+swap u1844@28.32,30.24.A1 (n1957) with u608@17.76,136.08.A1 (n755): generic random-input lockstep: 20 runs x 2000 cycles, 0 mismatching cycles (3.2 s)
+  seed 1: first mismatch at cycle 963: host_out rtl=a gate=1a
+swap u344@40.32,158.76.B1 (n258) with u1228@134.88,83.16.A (n75): generic random-input lockstep: 20 runs x 2000 cycles, 563 mismatching cycles (3.2 s)
+swap u1051@37.44,98.28.CLK (n1164) with u512@49.92,143.64.CLK (n740): generic random-input lockstep: 20 runs x 2000 cycles, 0 mismatching cycles (3.2 s)
+  seed 1: first mismatch at cycle 290: pcs rtl=1 gate=5
+swap u1480@88.32,60.48.RESET_B (n1629) with u835@67.20,120.96.B1 (n706): generic random-input lockstep: 20 runs x 2000 cycles, 1692 mismatching cycles (3.2 s)
+generic lockstep caught 2 of the selected swaps

@@ -1,0 +1,46 @@
+models: 84 cells read in 0.00 s; RTL ports: 157 bits
+  60230 conductor shapes, 2017 cell instances
+  6495 connected components
+extract: 0.45 s (60230 shapes, 6495 components, 2017 instances, 2086 nets)
+check: 0.002 s
+  instances                    2017
+  nets                         2086
+  flip-flops                   189
+  undriven nets                0
+  pins on undriven nets        0
+  multiply driven nets         0
+  driven nets nobody reads     3
+  unresolved labels            0
+  cell sg13g2_a21o_1           9
+  cell sg13g2_a21oi_1          207
+  cell sg13g2_a221oi_1         11
+  cell sg13g2_a22oi_1          96
+  cell sg13g2_and2_1           19
+  cell sg13g2_and3_1           7
+  cell sg13g2_and4_1           1
+  cell sg13g2_buf_1            353
+  cell sg13g2_buf_16           33
+  cell sg13g2_buf_8            16
+  cell sg13g2_dfrbpq_1         189
+  cell sg13g2_dlygate4sd3_1    177
+  cell sg13g2_inv_1            138
+  cell sg13g2_mux2_1           31
+  cell sg13g2_mux4_1           8
+  cell sg13g2_nand2_1          51
+  cell sg13g2_nand2b_1         15
+  cell sg13g2_nand3_1          19
+  cell sg13g2_nand3b_1         2
+  cell sg13g2_nand4_1          9
+  cell sg13g2_nor2_1           97
+  cell sg13g2_nor2b_1          18
+  cell sg13g2_nor3_1           12
+  cell sg13g2_nor4_1           8
+  cell sg13g2_o21ai_1          264
+  cell sg13g2_or2_1            16
+  cell sg13g2_or4_1            1
+  cell sg13g2_tiehi            189
+  cell sg13g2_xnor2_1          12
+  cell sg13g2_xor2_1           9
+  errors: 0, warnings: 0
+simulator: 3756 primitive gates, 189 flip-flops, built in 0.00 s
+STRUCTURE CLEAN

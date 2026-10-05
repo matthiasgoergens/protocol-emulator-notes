@@ -1,0 +1,6 @@
+FAIL sg13g2_a21oi_1.Y = !((A1*A2)+B1) for A1=1,A2=1,B1=0 IQ=0: model gives 1
+FAIL sg13g2_a21oi_1.Y = !((A1*A2)+B1) for A1=0,A2=0,B1=1 IQ=0: model gives 1
+FAIL sg13g2_a21oi_1.Y = !((A1*A2)+B1) for A1=1,A2=0,B1=1 IQ=0: model gives 1
+FAIL sg13g2_a21oi_1.Y = !((A1*A2)+B1) for A1=0,A2=1,B1=1 IQ=0: model gives 1
+FAIL sg13g2_tiehi.L_HI = 1 for  IQ=0: model gives 0
+cells: 2636 comparisons, 5 disagreements

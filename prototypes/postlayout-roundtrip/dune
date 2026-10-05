@@ -1,0 +1,20 @@
+(library
+ (name roundtrip)
+ (wrapped false)
+ (modules gds extract cells sim check mutate)
+ (flags (:standard -w -69)))
+
+(executable
+ (name roundtrip_check)
+ (modules roundtrip_check)
+ (libraries roundtrip unix))
+
+(executable
+ (name seq_lockstep)
+ (modules isa sequencer harness generic_lockstep seq_lockstep)
+ (libraries hardcaml roundtrip unix))
+
+(executable
+ (name test_cells)
+ (modules test_cells)
+ (libraries roundtrip))
