@@ -310,6 +310,19 @@ let () =
     Printf.printf "  T1 reported %d lost answers of %d (inbox 2 keeps %d); I2C bus and register file as the reference: %b -> %s\n%!"
       lost (List.length st.expected) base.depth (st.bus_ok && st.regs_ok) (if ok_st then "as expected" else "UNEXPECTED");
     if not ok_st then all_ok := false;
+    (* the same for bridge B's SPI master: each answer that finds inbox 2 full is dropped at its
+       deadline and reported as 0xFB, and the master takes the next byte code. B has no RTS, so
+       the receiver overflows (T0 reports) while the master waits out a deadline, and the device
+       is not compared: what is checked is that T1 keeps going, with every one of its reports a
+       lost answer. Before the deadline existed T1 waited at the first full inbox for ever. *)
+    let stb = run { base with which = B; rtl = false; drain = false } in
+    describe "answer deadline B: UART transmitter stopped (interp)" stb;
+    let t1b = List.filter (fun (th, _) -> th = 1) stb.reports in
+    let lostb = List.length (List.filter (fun (_, v) -> v = 0xFB) t1b) in
+    let ok_stb = stb.answers = [] && lostb = List.length t1b && lostb >= 3 in
+    Printf.printf "  T1 reported %d lost answers, and nothing else (of %d answers; inbox 2 keeps %d) -> %s\n%!"
+      lostb (List.length stb.expected) base.depth (if ok_stb then "as expected" else "UNEXPECTED");
+    if not ok_stb then all_ok := false;
     print_endline (if !all_ok then "BRIDGES PASS" else "BRIDGES FAIL")
   end;
   Printf.printf "elapsed %.0f s\n" (Unix.gettimeofday () -. t0)

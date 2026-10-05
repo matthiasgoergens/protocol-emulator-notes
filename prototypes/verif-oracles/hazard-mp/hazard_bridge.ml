@@ -36,6 +36,38 @@ let () =
   Printf.printf "HAZARD BRIDGE %s (bridge A accepted without a waiver: %d rejections; control: %d of %d sends rejected)\n"
     (if f = [] && n_send2 > 0 && List.length f_old = n_send2 then "PASS" else "FAIL") (List.length f) (List.length f_old) n_send2
 
+(* Bridge B (UART <-> SPI master, an I2C master loop as the unrelated neighbour). The v2 port
+   (../../sequencer-v2/ports/multi-proto) covers bridge A only, and v2's SHX takes its capture pin
+   as the pin below the output pin, so bridges.ml's layout (MOSI 3, MISO 4) does not assemble.
+   The SPI master is therefore placed on SCLK 4, MOSI 3, MISO 2, CS 5; the code is otherwise the
+   one bridges.ml runs. Declarations: T0 UART RX (pin 0, no RTS) -> inbox 1; T1 SPI master
+   <- inbox 1, -> inbox 2; T2 UART TX (pin 1) <- inbox 2; T3 I2C master write loop on pins 6, 7. *)
+let () =
+  let (t0, _, _), (t1, _, _), (t2, _, _) =
+    uart_rx ~rx:0 ~rts:None ~dst:1 (), spi_master ~sclk:4 ~mosi:3 ~miso:2 ~cs:5 ~own:1 ~reply:2 (), uart_tx ~tx:1 ~own:2 () in
+  let t3 = Asm.of_base ~loop:true (Compiler.i2c_write { sda = 6; scl = 7; q = 4; ibytes = [ 0xA0; 0x3C ] }) ~plen:128 in
+  let d = { no_decl with grants =
+                           [ g (Pin 0) 0 [ Pin_sample ]; g (Inbox 1) 0 [ Send_k; Space_wait ];
+                             g (Pin 2) 1 [ Pin_sample ]; g (Pin 3) 1 [ Pin_drive ]; g (Pin 4) 1 [ Pin_drive ]; g (Pin 5) 1 [ Pin_drive ];
+                             g (Inbox 1) 1 [ Recv_k; Poll ]; g (Inbox 2) 1 [ Send_k; Space_wait ];
+                             g (Pin 1) 2 [ Pin_drive ]; g (Inbox 2) 2 [ Recv_k; Poll ];
+                             g (Pin 6) 3 [ Pin_drive; Pin_sample ]; g (Pin 7) 3 [ Pin_drive; Pin_sample ] ] } in
+  let check name t1 =
+    let mem = [| t0; t1; t2; t3 |] in
+    let fetch a = let t = a lsr 8 and pc = a land 0xFF in if pc < Array.length mem.(t) then mem.(t).(pc) else Isa2.nop in
+    report ~name ~fetch d in
+  let f = check "bridge B on v2: T0 UART RX -> inbox 1 -> T1 SPI master -> inbox 2 -> T2 UART TX; T3 I2C neighbour" t1 in
+  Printf.printf "bridge B: %d rejected combination(s), no waiver (bridge_lib's spi_master answers into inbox 2 with \
+                 LDD 4095; SEND ch2 -> replylost)\n\n" (List.length f);
+  (* control: T1 as it was before the fix, by pointing every SEND to inbox 2 back at itself *)
+  let is_send2 w = (w lsr 12) land 15 = 13 && (w lsr 11) land 1 = 0 && (w lsr 8) land 7 = 2 in
+  let t1_old = Array.mapi (fun pc w -> if is_send2 w then Isa2.send ~ch:2 ~fail:pc else w) t1 in
+  let n_send2 = Array.fold_left (fun n w -> if is_send2 w then n + 1 else n) 0 t1 in
+  let f_old = check "control: the same with T1's SENDs to inbox 2 made fail = own address (the code before the fix)" t1_old in
+  Printf.printf "control: %d SEND(s) to inbox 2 in T1; with fail = own address the checker rejects %d\n\n" n_send2 (List.length f_old);
+  Printf.printf "HAZARD BRIDGE B %s (bridge B accepted without a waiver: %d rejections; control: %d of %d sends rejected)\n"
+    (if f = [] && n_send2 > 0 && List.length f_old = n_send2 then "PASS" else "FAIL") (List.length f) (List.length f_old) n_send2
+
 let () =
   let (_, _, _), (t1, _, _), (_, _, _) =
     uart_rx ~rx:0 ~rts:(Some 2) ~dst:1 (), i2c_master ~sda:3 ~scl:4 ~own:1 ~reply:2 (), uart_tx ~tx:1 ~own:2 () in

@@ -134,10 +134,15 @@ let i2c_master ?(reply_deadline = 4095) ~sda ~scl ~own ~reply () =
   emit b (W (Isa.lda 0xFB)); emit b (W Isa.out); emit b (jmp "top");
   assemble b
 
-(* SPI master, mode 0, msb first, with the capture option for full duplex. *)
-let spi_master ~sclk ~mosi ~miso ~cs ~own ~reply () =
+(* SPI master, mode 0, msb first, with the capture option for full duplex. Every answer to
+   [reply] is a SEND with a deadline of [reply_deadline] slots, as in [i2c_master]: if the
+   consumer has stopped, the answer is dropped, 0xFB goes to the host instead (OUT) and the master
+   takes the next byte code. Without the deadline it waited for ever with its answer unsent. *)
+let spi_master ?(reply_deadline = 4095) ~sclk ~mosi ~miso ~cs ~own ~reply () =
   let b = create () in
   let m p = 1 lsl p in
+  (* the LDD 0 after the SEND clears what is left of the deadline, as in [i2c_master] *)
+  let answer () = emit b (W (Isa.ldd reply_deadline)); emit b (send reply "replylost"); emit b (W (Isa.ldd 0)) in
   emit b (W (Isa.setp ~mask:(m cs) ~value:1 ~oe:1));
   emit b (W (Isa.setp ~mask:(m sclk lor m mosi) ~value:0 ~oe:1));
   label b "top";
@@ -159,8 +164,9 @@ let spi_master ~sclk ~mosi ~miso ~cs ~own ~reply () =
   emit b (W (Isa.setp ~mask:(m sclk) ~value:1 ~oe:1)); wait b (h - 1);
   emit b (W (Isa.shi ~pin:miso ~msb:1));
   emit b (W (Isa.setp ~mask:(m sclk) ~value:0 ~oe:1));
-  block_send b reply; emit b (jmp "top");
-  label b "protoerr"; emit b (W (Isa.lda 0xFC)); block_send b reply; emit b (jmp "top");
+  answer (); emit b (jmp "top");
+  label b "protoerr"; emit b (W (Isa.lda 0xFC)); answer (); emit b (jmp "top");
+  label b "replylost"; emit b (W (Isa.lda 0xFB)); emit b (W Isa.out); emit b (jmp "top");
   assemble b
 
 (* ---------------- device models (bit level) ---------------- *)
