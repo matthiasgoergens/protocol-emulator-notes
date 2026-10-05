@@ -61,6 +61,24 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
 ## Pins and timing
 
+- **HDMI/DVI from the chip itself (2026-10-05).** The minimal dedicated hardware is a 10-to-4
+  gearbox per lane, or none if a generic wide-streamer mode is built. Everything else is
+  generic: timing, a balanced-palette lookup (52 of 256 byte values encode to DC-balanced
+  words, so no encoder), the pin oscillator for the clock lane, and the four-phase stage.
+  Gating unknowns:
+  - IHP pad speed (resumed in `fast-eth`);
+  - the bit rate: 240 Mbit/s at 60 MHz, so a 24 MHz pixel clock against the standard
+    25.175 MHz.
+
+  To do:
+  - test monitor tolerance of a 24 MHz pixel clock on real hardware, with the ULX3S HDMI build
+    retimed to 24 MHz, across several monitors and a cheap HDMI capture dongle;
+  - ask Jane Street whether a slight overclock (62.5 MHz) is acceptable (Matthias to ask;
+    Claude drafts on request);
+  - brainstorm tricks (running: draft in `emulator-notes-drafts/hdmi-bitrate-tricks.md`);
+  - build the wide-streamer mode, which also serves fast Ethernet (Matthias: "might be
+    worth it").
+
 - **Receiving beyond Nyquist** (the user's insight: real protocols suit compressed-sensing ideas).
   The framework is sampling at the finite rate of innovation (Vetterli, Marziliano, Blu 2002).
   The floor is the entropy rate of the unknown content, not twice a bandwidth. Uses:
