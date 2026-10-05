@@ -124,6 +124,13 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
 ## Verification (Jane Street's emphasis)
 
+- **Latency checking adopted (`latency-adopt`, merged 2026-10-05):** the HDMI pixel path is rewritten
+  with `Delayed` and `align`, and is cycle-identical to the original; five prototypes fail
+  `dune test` on a latency regression. Gap: in the small 5-frame Cyclesim test, the planted
+  end-to-end latency mutant gives 0 of 1,375 cycles different, so that test cannot detect it;
+  only the full-resolution iverilog comparison does (359,985 cycles differ). Make the small
+  mode detect it too. Fourteen improvement proposals for hardcaml-latency are in
+  `notes/latency-adoption.md`.
 - **Open after the 2026-10-05 fixes (`fix-findings`, merged):**
   - bridge B's SPI master still has a mailbox send with no timeout;
   - `prototypes/systolic-storage/seqtrace/check.sh` fails because its copy of `isa.ml` is stale;
