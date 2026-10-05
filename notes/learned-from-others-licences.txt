@@ -1,0 +1,52 @@
+# Licence check, 2026-10-05 (SGT). Command, per repository:
+#   gh api repos/<owner>/<repo> --jq '.license.spdx_id // "none"'
+# 'none' = GitHub found no licence file: ideas only; code may be run locally, never committed.
+
+TeslaCoilerOW/ttihp-protocol-emulator                   Apache-2.0
+kaikino/core-asic                                       Apache-2.0
+kdp1965/ihp-um-janestreet-prism                         Apache-2.0
+smprather/janestreet-blog-serial-protocol-emulator      MIT
+thomasgilbert481/tt_um_loom                             Apache-2.0
+mohammedbala/chipwheel                                  Apache-2.0
+gigamonster256/protean                                  Apache-2.0
+elementalcollision/retrace                              Apache-2.0
+Kanishk234/protocol-emulator-asic                       Apache-2.0
+joshvern/pinscript-cmos5l-feasibility                   Apache-2.0
+WilliamZhang20/protocol-emulator-compiler               none
+WilliamZhang20/protocol-emulator                        Apache-2.0
+MarcosAsh/protocol-emulator                             Apache-2.0
+2AMLogic/sg13cmos5l-protocol-emulator                   Apache-2.0
+Lincreased/tt-protoseq                                  Apache-2.0
+umerimran-10xe/protocol-emulator-asic                   Apache-2.0
+dishishshawn/protocol-emulator-asic                     Apache-2.0
+TejasDasa/protocol-emulator-asic                        MIT
+fjpolo/ProtocolEmulatorr                                none
+wsb1994/Gremlin-Board                                   Apache-2.0
+LeEmperor/hardcaml_protemu                              none
+Kleven2k/silverfox-tt                                   Apache-2.0
+sjrai007/gp_pae                                         Apache-2.0
+TalentA99/pemu-asic                                     MIT
+OliverKlug/sophos-protocol-emulator                     Apache-2.0
+mcranny/protocol-emulator-asic                          Apache-2.0
+DanielMBouyou/protocol-emulator-asic                    none
+gergoerdi/clash-flappysquare                            MIT
+gergoerdi/scottcheck                                    MIT
+gergoerdi/clash-intel8080                               MIT
+TinyTapeout/ttihp-verilog-template                      Apache-2.0
+antojoseph/protocol-emulator-verifier                   Apache-2.0
+PankajNair/protocol-emulator-tt                         Apache-2.0
+janestreet/hardcaml_hobby_boards         MIT
+sigrokproject/libsigrokdecode            GPL-3.0
+alexforencich/verilog-uart               MIT
+alexforencich/cocotbext-uart             MIT
+alexforencich/verilog-i2c                MIT
+Wren6991/Hazard3                         Apache-2.0
+YosysHQ/picorv32                         ISC
+MichaelBell/tinyQV                       Apache-2.0
+AUCOHL/DFFRAM                            Apache-2.0
+lawrie/fpga_pio                          BSD-2-Clause
+tweag/opam-nix                           MIT
+urish/ttihp-sram-test                    Apache-2.0
+kdp1965/tt-support-tools                 Apache-2.0
+olofk/serv                     ISC
+BrunoLevy/learn-fpga           BSD-3-Clause
