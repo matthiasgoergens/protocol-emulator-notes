@@ -1,0 +1,30 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/sequencer-v2/_build/default/ports/can/can_stall.exe
+# commit: 85a197d7cd80ac1228eea24be8fbaaf34b78f968
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T08:48:49+08:00
+CAN TX stall injection, 500 kbit/s (N = 30 slots per bit, SP = 23): TX thread 60 words before the fix, 64 after
+frame 123[8] 00 ff 55 0f f0 81 7e c3, 15 stream bytes (byte 0 the bit count, then the stuffed frame)
+
+before, no stall: reference got 1 good frame(s), 0 error(s); A reported [1]; lockstep mismatches 0 -> golden
+after , no stall: reference got 1 good frame(s), 0 error(s); A reported [1]; lockstep mismatches 0 -> golden
+unstalled txd transcripts before and after the fix identical: true
+
+slack (byte 5 late by d clocks; first d that is not exact): before 960 clocks, after 956 clocks (cost 4)
+
+one byte (5) late by slack+1..slack+200            before: 20 runs: exact  0, clean abort  0, VIOLATION 20; lockstep mismatches 0
+      first violation: seed 1: wrong level from clock 5793
+one byte (5) late by slack+1..slack+200            after : 20 runs: exact  0, clean abort 20, VIOLATION  0; lockstep mismatches 0
+one random byte late by 0..2000                    before: 20 runs: exact 10, clean abort  0, VIOLATION 10; lockstep mismatches 0
+      first violation: seed 1: released at clock 14673 without the underrun report (reports [3])
+one random byte late by 0..2000                    after : 20 runs: exact 10, clean abort 10, VIOLATION  0; lockstep mismatches 0
+random bursts: p = 0.3 per byte, 1..1500 clocks    before: 20 runs: exact  3, clean abort  0, VIOLATION 17; lockstep mismatches 0
+      first violation: seed 1: wrong level from clock 7593
+random bursts: p = 0.3 per byte, 1..1500 clocks    after : 20 runs: exact  3, clean abort 17, VIOLATION  0; lockstep mismatches 0
+a byte that never comes (byte 6)                   before: 20 runs: exact  0, clean abort  0, VIOLATION 20; lockstep mismatches 0
+      first violation: seed 1: released at clock 6633 without the underrun report (reports [])
+a byte that never comes (byte 6)                   after : 20 runs: exact  0, clean abort 20, VIOLATION  0; lockstep mismatches 0
+
+control: golden with one clock's level flipped: judged a violation
+
+CAN STALL PASS
+exit 0
