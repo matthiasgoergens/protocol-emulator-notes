@@ -1,0 +1,6 @@
+; RTL against specification (README.md, task 4). isa2.ml and sequencer2.ml are links to
+; ../../sequencer-v2, not copies.
+(executable
+ (name miter)
+ (modules isa2 sequencer2 hw_value spec_core miter)
+ (libraries hardcaml))

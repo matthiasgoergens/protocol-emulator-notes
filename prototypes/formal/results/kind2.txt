@@ -1,0 +1,25 @@
+# command: kind2 on kind2/*.lus
+# commit: 7f4fda88ac5ea84e095db9052dd9bf80e280985d
+# Z3 version 5.1.0 - 64 bit
+# date: 2026-10-05T08:46:21+08:00
+# kind2 v3.0.0
+== kind2/deadline-ldd20.lus
+<Success> Property InvProp[L154C3] is valid by inductive step after 0.222s.
+InvProp[L154C3]: valid (k=24)
+wall 0.5 s
+== kind2/deadline-ldd21.lus
+<Failure> Property InvProp[L154C3] is invalid by bounded model checking for k=22 after 0.162s.
+InvProp[L154C3]: invalid after 22 steps
+wall 0.5 s
+== kind2/uart-every-byte-any-arrival.lus
+<Note> Incomplete analysis result: Not all properties could be proven invariant
+<Timeout> Wallclock timeout.
+wall 900.2 s
+== kind2/uart-every-byte.lus
+<Note> Incomplete analysis result: Not all properties could be proven invariant
+<Timeout> Wallclock timeout.
+wall 900.6 s
+== kind2/uart-planted-stretch.lus
+<Failure> Property InvProp[L1164C3] is invalid by bounded model checking for k=24 after 0.585s.
+InvProp[L1164C3]: invalid after 24 steps
+wall 2.2 s

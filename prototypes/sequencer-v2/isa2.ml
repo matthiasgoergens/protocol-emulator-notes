@@ -124,31 +124,325 @@ let cfg v = ext x_cfg v
 let cfg_round_latch = 0x80
 
 (* ---- interpreter ---- *)
-type state = {
+
+(* The interpreter is written once, over an abstract domain of values [VALUE], and instantiated
+   with OCaml integers ([Int_value] below), which is the executable specification every test uses.
+   ../formal instantiates the same code with SMT-LIB terms for bounded model checking, so there is
+   one semantics, not two.
+
+   A value is a bit-vector of a fixed width; truth values are a separate type [b]. The integer
+   instance does not record widths, so every operation that could leave its width ([add], [sub],
+   [lognot], [shl]) is told the width ([~w]) and wraps there. [shl] and [lshr] shift by a value of
+   the same width as the shifted one, giving 0 when the shift is at least the width. *)
+module type VALUE = sig
+  type t
+  type b
+  type mem                                    (* the data bank: 2^10 bytes *)
+  val const : w:int -> int -> t
+  val add : w:int -> t -> t -> t
+  val sub : w:int -> t -> t -> t
+  val logand : t -> t -> t
+  val logor : t -> t -> t
+  val logxor : t -> t -> t
+  val lognot : w:int -> t -> t
+  val shl : w:int -> t -> t -> t
+  val lshr : t -> t -> t
+  val extract : t -> hi:int -> lo:int -> t
+  val zext : w:int -> t -> t                  (* zero-extend to w bits *)
+  val eq : t -> t -> b
+  val ult : t -> t -> b
+  val ite : b -> t -> t -> t
+  val tt : b
+  val ff : b
+  val not_ : b -> b
+  val and_ : b -> b -> b
+  val or_ : b -> b -> b
+  val mem_read : mem -> t -> t
+  val mem_write : mem -> b -> t -> t -> mem   (* store the byte at the address if [b] holds *)
+  val mem_ite : b -> mem -> mem -> mem
+  val mem_copy : mem -> mem
+end
+
+module Make (V : VALUE) = struct
+  open V
+
+  type state = {
+    pcs : t array; pages : t array; accs : t array; cnts : t array; dls : t array;
+    bps : t array; fines : t array; armed : t array; cfgs : t array; lsend : t array;
+    inbox : t array; full : t array;
+    mutable pin_out : t; mutable pin_oe : t; mutable thread : int;
+    mutable pin_sub : t; mutable latch : t;
+    mutable bankmem : mem;
+  }
+
+  type io = {
+    pin_in : t;
+    pin_in4 : t;                   (* bit 4i+p: pin i in quarter p of the last clock *)
+    host_in : t; host_in_valid : b;
+    port_in : t array; port_in_valid : b array; port_out_ready : b array;
+    flags : t;                     (* 16 bits: thread t's flag inputs are bits 4t..4t+3 *)
+    host_ctl : (int * t * t) option;   (* (thread, page, pc) *)
+  }
+
+  (* What one clock does besides changing the state; each effect happens when its [b] holds. *)
+  type effects = {
+    host_out : b * t * t;          (* tag, byte *)
+    host_in_ready : b;
+    port_pop : b * t;              (* in-port *)
+    port_push : b * t * t;         (* out-port, byte *)
+    bank_write : b * t * t;        (* address, byte *)
+    bank_read : b * t;             (* address *)
+    fine_out : b * t;
+    pins_written : t;              (* the pins this clock's SETP or SHO writes, for checks *)
+  }
+
+  let c w n = const ~w n
+  let bit x i = eq (extract x ~hi:i ~lo:i) (c 1 1)
+  let of_b x = ite x (c 1 1) (c 1 0)
+  let ite_b s x y = or_ (and_ s x) (and_ (not_ s) y)
+
+  (* bit [i] of [v], for a value [i]; [w] is the width of [v] *)
+  let bit_at ~w v i = bit (lshr v (zext ~w i)) 0
+
+  (* one-bit values, most significant first, as one value *)
+  let of_bits bits =
+    let w = List.length bits in
+    List.fold_left (fun r x -> logor (shl ~w r (c w 1)) (zext ~w x)) (c w 0) bits
+
+  (* [arr.(i)] for a value [i] of [w] bits *)
+  let select ~w arr i =
+    let n = Array.length arr in
+    let r = ref arr.(n - 1) in
+    for k = n - 2 downto 0 do r := ite (eq i (c w k)) arr.(k) !r done; !r
+
+  let select_b ~w arr i =
+    let n = Array.length arr in
+    let r = ref arr.(n - 1) in
+    for k = n - 2 downto 0 do r := ite_b (eq i (c w k)) arr.(k) !r done; !r
+
+  let reset ~boot ~bank =
+    let z w = Array.make n_threads (c w 0) in
+    { pcs = Array.map snd boot; pages = Array.map fst boot; accs = z 8; cnts = z 12; dls = z 12;
+      bps = z 10; fines = z 8; armed = z 1; cfgs = z 8; lsend = z 3; inbox = z 8; full = z 1;
+      pin_out = c 8 0; pin_oe = c 8 0; thread = 0; pin_sub = c 32 0; latch = c 8 0; bankmem = bank }
+
+  let copy st =
+    let a = Array.copy in
+    { pcs = a st.pcs; pages = a st.pages; accs = a st.accs; cnts = a st.cnts; dls = a st.dls;
+      bps = a st.bps; fines = a st.fines; armed = a st.armed; cfgs = a st.cfgs; lsend = a st.lsend;
+      inbox = a st.inbox; full = a st.full; pin_out = st.pin_out; pin_oe = st.pin_oe;
+      thread = st.thread; pin_sub = st.pin_sub; latch = st.latch; bankmem = mem_copy st.bankmem }
+
+  (* [merge s x y]: the state that is [x] where [s] holds and [y] elsewhere (same thread) *)
+  let merge s x y =
+    assert (x.thread = y.thread);
+    let m = Array.map2 (ite s) in
+    { pcs = m x.pcs y.pcs; pages = m x.pages y.pages; accs = m x.accs y.accs; cnts = m x.cnts y.cnts;
+      dls = m x.dls y.dls; bps = m x.bps y.bps; fines = m x.fines y.fines; armed = m x.armed y.armed;
+      cfgs = m x.cfgs y.cfgs; lsend = m x.lsend y.lsend; inbox = m x.inbox y.inbox;
+      full = m x.full y.full; pin_out = ite s x.pin_out y.pin_out; pin_oe = ite s x.pin_oe y.pin_oe;
+      thread = x.thread; pin_sub = ite s x.pin_sub y.pin_sub; latch = ite s x.latch y.latch;
+      bankmem = mem_ite s x.bankmem y.bankmem }
+
+  (* the quarter-clock view of a clock whose instruction moved the pins from [old_] to [new_] at
+     sub-slot [q]: bit 4i+p is old_ bit i for p < q, new_ bit i otherwise *)
+  let sub_of ~old_ ~new_ ~q =
+    (* bit i of an 8-bit value to bit 4i of a 32-bit one, by the usual shift-and-mask steps *)
+    let spread x =
+      let step y s m = logand (logor y (shl ~w:32 y (c 32 s))) (c 32 m) in
+      step (step (step (zext ~w:32 x) 12 0x000F000F) 6 0x03030303) 3 0x11111111 in
+    let quarter p = shl ~w:32 (spread (ite (ult (c 2 p) q) old_ new_)) (c 32 p) in
+    logor (logor (quarter 0) (quarter 1)) (logor (quarter 2) (quarter 3))
+
+  let fetch_addr st t = logor (shl ~w:10 (zext ~w:10 st.pages.(t)) (c 10 pc_bits)) (zext ~w:10 st.pcs.(t))
+
+  (* One clock: the current thread executes [instr], the word at [fetch_addr st st.thread]. Every
+     next-state value is computed from the state as it was at the start of the clock; the state
+     is updated at the end. *)
+  let exec st ~instr (io : io) =
+    let t = st.thread in
+    let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
+    let field hi lo = extract instr ~hi ~lo and flag i = bit instr i in
+    let opc = field 15 12 in
+    let is op = eq opc (c 4 op) in
+    let imm12 = field 11 0 and imm8 = field 7 0 in
+    let pin = field 11 9 and msb = flag 8 and od = flag 7 in
+    let addr = imm8 in
+    let mask8 = field 11 4 and setv = flag 3 and seto = flag 2 and q = field 1 0 in
+    (* round latch: all four threads of a round see pin_in of thread 0's clock (D6) *)
+    let latch = if t = 0 then io.pin_in else st.latch in
+    let pins = ite (bit st.cfgs.(t) 7) latch io.pin_in in
+    let pin_at p = bit_at ~w:8 pins p in
+    let dl_zero = eq dl (c 12 0) in
+    let pc1 = add ~w:8 pc (c 8 1) in
+    let fail_or_stay = ite dl_zero addr pc in
+    let cases default l = List.fold_right (fun (s, v) r -> ite s v r) l default in
+    (* SETP *)
+    let set_masked x v = logor (logand x (lognot ~w:8 mask8)) (ite v mask8 (c 8 0)) in
+    (* SHO: drive [p] with the one-bit [v]; open drain (od) drives 0 for a 0, releases for a 1 *)
+    let pair = flag 6 and psel = flag 5 and cap = flag 4 in
+    let acc_bit i = extract acc ~hi:i ~lo:i in
+    let onehot p = shl ~w:8 (c 8 1) (zext ~w:8 p) in
+    let drive (po, oe) p v =
+      let m = onehot p and one = eq v (c 1 1) in
+      let keep x = logand x (lognot ~w:8 m) in
+      ite od (keep po) (logor (keep po) (ite one m (c 8 0))),
+      ite od (logor (keep oe) (ite one (c 8 0) m)) oe in
+    let b0 = ite msb (acc_bit 7) (acc_bit 0) in
+    let b1 = ite psel (ite msb (acc_bit 6) (acc_bit 1)) (lognot ~w:1 b0) in
+    let one_pin = drive (st.pin_out, st.pin_oe) pin b0 in
+    let two_pins = drive one_pin (add ~w:3 pin (c 3 1)) b1 in
+    let sho_pins = (ite pair (fst two_pins) (fst one_pin), ite pair (snd two_pins) (snd one_pin)) in
+    let sh = ite (and_ pair psel) (c 8 2) (c 8 1) in
+    let cbit = zext ~w:8 (of_b (and_ cap (pin_at (logxor pin (c 3 1))))) in
+    let sho_acc = ite msb (logor (shl ~w:8 acc sh) cbit) (logor (lshr acc sh) (shl ~w:8 cbit (c 8 7))) in
+    (* SHI *)
+    let quad = flag 7 in
+    let pin_bit = zext ~w:8 (of_b (pin_at pin)) in
+    let nib = extract (lshr io.pin_in4 (shl ~w:32 (zext ~w:32 pin) (c 32 2))) ~hi:3 ~lo:0 in
+    let rev4 = of_bits (List.map (fun i -> extract nib ~hi:i ~lo:i) [ 0; 1; 2; 3 ]) in
+    let shi_acc =
+      ite quad
+        (ite msb (logor (shl ~w:8 acc (c 8 4)) (zext ~w:8 rev4))
+           (logor (lshr acc (c 8 4)) (shl ~w:8 (zext ~w:8 nib) (c 8 4))))
+        (ite msb (logor (shl ~w:8 acc (c 8 1)) pin_bit)
+           (logor (lshr acc (c 8 1)) (shl ~w:8 pin_bit (c 8 7)))) in
+    (* MBX: channel 0..3 is an inbox, 4..7 a port *)
+    let recv = flag 11 and ch = field 10 8 in
+    let to_port = bit ch 2 and slot = extract ch ~hi:1 ~lo:0 in
+    let is_send = and_ (is op_mbx) (not_ recv) and is_recv = and_ (is op_mbx) recv in
+    let full_at i = eq (select ~w:2 st.full i) (c 1 1) in
+    let send_ok = ite_b to_port (select_b ~w:2 io.port_out_ready slot) (not_ (full_at slot)) in
+    let recv_ok = ite_b to_port (select_b ~w:2 io.port_in_valid slot) (full_at slot) in
+    let recv_byte = ite to_port (select ~w:2 io.port_in slot) (select ~w:2 st.inbox slot) in
+    (* WAITC *)
+    let cond = field 11 8 in
+    let ls = st.lsend.(t) in
+    let ls_slot = extract ls ~hi:1 ~lo:0 in
+    let space = ite_b (bit ls 2) (select_b ~w:2 io.port_out_ready ls_slot) (not_ (full_at ls_slot)) in
+    let is_cond k = eq cond (c 4 k) in
+    let holds =
+      ite_b (ult cond (c 4 8)) (bit_at ~w:8 acc (extract cond ~hi:2 ~lo:0))
+        (ite_b (is_cond c_byte) (eq (extract cnt ~hi:2 ~lo:0) (c 3 0))
+           (ite_b (is_cond c_host) io.host_in_valid
+              (ite_b (is_cond c_inbox) (eq st.full.(t) (c 1 1))
+                 (ite_b (is_cond c_space) space
+                    (bit (lshr io.flags (zext ~w:16 (extract cond ~hi:1 ~lo:0))) (4 * t)))))) in
+    (* EXT *)
+    let x k = and_ (is op_ext) (eq (field 11 8) (c 4 k)) in
+    let skip = or_ (and_ (x x_skne) (not_ (eq acc imm8))) (and_ (x x_skeq) (eq acc imm8)) in
+    let bp = st.bps.(t) in
+    let pin_write = or_ (is op_setp) (is op_sho) in
+    (* next state *)
+    let pc_next =
+      cases pc1
+        [ is op_waitp, ite (eq (of_b (pin_at pin)) (field 8 8)) pc1 fail_or_stay;
+          is op_waitd, ite dl_zero pc1 pc;
+          is op_jmp, addr;
+          is op_jnz, ite (eq cnt (c 12 0)) pc1 addr;
+          is op_in, ite io.host_in_valid pc1 pc;
+          is op_mbx, ite (ite_b recv recv_ok send_ok) pc1 fail_or_stay;
+          is op_waitc, ite holds pc1 fail_or_stay;
+          skip, add ~w:8 pc (c 8 2) ] in
+    let acc_next =
+      cases acc
+        [ is op_lda, imm8; is op_sho, sho_acc; is op_shi, shi_acc;
+          is op_in, ite io.host_in_valid io.host_in acc;
+          is_recv, ite recv_ok recv_byte acc;
+          x x_ldb, mem_read st.bankmem bp ] in
+    let cnt_dec = sub ~w:12 cnt (c 12 1) in
+    let cnt_next = cases cnt [ is op_ldc, imm12; is op_sho, cnt_dec; is op_shi, cnt_dec; x x_cnta, zext ~w:12 acc ] in
+    let dl_next = ite (is op_ldd) imm12 (ite dl_zero (c 12 0) (sub ~w:12 dl (c 12 1))) in
+    let pin_out_next = cases st.pin_out [ is op_setp, set_masked st.pin_out setv; is op_sho, fst sho_pins ] in
+    let pin_oe_next = cases st.pin_oe [ is op_setp, set_masked st.pin_oe seto; is op_sho, snd sho_pins ] in
+    let sub_q = cases (c 2 0) [ is op_setp, q; is op_sho, ite od (c 2 0) q ] in
+    let inbox_next = Array.mapi (fun k v ->
+        ite (and_ (and_ is_send (not_ to_port)) (and_ (eq slot (c 2 k)) (not_ (full_at slot)))) acc v) st.inbox in
+    let full_next = Array.mapi (fun k v ->
+        let here = and_ (not_ to_port) (eq slot (c 2 k)) in
+        ite (and_ is_send here) (c 1 1) (ite (and_ is_recv here) (c 1 0) v)) st.full in
+    let bp_next =
+      cases bp
+        [ or_ (x x_ldb) (x x_stb), add ~w:10 bp (c 10 1);
+          x x_bank, logor (shl ~w:10 (zext ~w:10 (extract imm8 ~hi:1 ~lo:0)) (c 10 8)) (zext ~w:10 acc) ] in
+    let armed = eq st.armed.(t) (c 1 1) in
+    let effects =
+      { host_out = (is op_out, field 10 8, ite (flag 11) imm8 acc);
+        host_in_ready = and_ (is op_in) io.host_in_valid;
+        port_pop = (and_ (and_ is_recv to_port) (select_b ~w:2 io.port_in_valid slot), slot);
+        port_push = (and_ (and_ is_send to_port) (select_b ~w:2 io.port_out_ready slot), slot, acc);
+        bank_write = (x x_stb, bp, acc);
+        bank_read = (x x_ldb, bp);
+        fine_out = (and_ pin_write armed, st.fines.(t));
+        pins_written =
+          cases (c 8 0) [ is op_setp, mask8; is op_sho, logor (onehot pin) (ite pair (onehot (add ~w:3 pin (c 3 1))) (c 8 0)) ] } in
+    (* commit *)
+    st.bankmem <- mem_write st.bankmem (x x_stb) bp acc;
+    st.pin_sub <- sub_of ~old_:st.pin_out ~new_:pin_out_next ~q:sub_q;
+    st.pin_out <- pin_out_next; st.pin_oe <- pin_oe_next; st.latch <- latch;
+    Array.blit inbox_next 0 st.inbox 0 n_threads; Array.blit full_next 0 st.full 0 n_threads;
+    st.lsend.(t) <- ite is_send ch ls;
+    st.fines.(t) <- ite (x x_fine) imm8 st.fines.(t);
+    st.armed.(t) <- ite (x x_fine) (c 1 1) (ite pin_write (c 1 0) st.armed.(t));
+    st.cfgs.(t) <- ite (x x_cfg) imm8 st.cfgs.(t);
+    st.bps.(t) <- bp_next;
+    st.pcs.(t) <- pc_next; st.accs.(t) <- acc_next; st.cnts.(t) <- cnt_next; st.dls.(t) <- dl_next;
+    (match io.host_ctl with
+     | Some (ht, pg, hpc) -> st.pages.(ht) <- extract pg ~hi:1 ~lo:0; st.pcs.(ht) <- extract hpc ~hi:7 ~lo:0
+     | None -> ());
+    st.thread <- (t + 1) mod n_threads;
+    effects
+end
+
+(* The executable specification: [Make] over OCaml integers. *)
+module Int_value = struct
+  type t = int
+  type b = bool
+  type mem = int array
+  let mask w = (1 lsl w) - 1
+  let const ~w n = n land mask w
+  let add ~w x y = (x + y) land mask w
+  let sub ~w x y = (x - y) land mask w
+  let logand = ( land )
+  let logor = ( lor )
+  let logxor = ( lxor )
+  let lognot ~w x = lnot x land mask w
+  let shl ~w x s = if s >= w then 0 else (x lsl s) land mask w
+  let lshr x s = if s >= Sys.int_size then 0 else x lsr s
+  let extract x ~hi ~lo = (x lsr lo) land mask (hi - lo + 1)
+  let zext ~w:_ x = x
+  let eq = Int.equal
+  let ult x y = x < y
+  let ite s x y = if s then x else y
+  let tt = true
+  let ff = false
+  let not_ = not
+  let and_ = ( && )
+  let or_ = ( || )
+  let mem_read m a = m.(a)
+  let mem_write m s a v = if s then m.(a) <- v; m
+  let mem_ite s x y = if s then x else y
+  let mem_copy = Array.copy
+end
+
+module Spec = Make (Int_value)
+
+type state = Spec.state = {
   pcs : int array; pages : int array; accs : int array; cnts : int array; dls : int array;
   bps : int array; fines : int array; armed : int array; cfgs : int array; lsend : int array;
   inbox : int array; full : int array;
   mutable pin_out : int; mutable pin_oe : int; mutable thread : int;
   mutable pin_sub : int; mutable latch : int;
-  bankmem : int array;
+  mutable bankmem : int array;
 }
 
 (* [boot]: each thread's (page, pc) after reset, set by the host *)
 let init ?(boot = Array.make n_threads (0, 0)) ?bank () =
-  let z () = Array.make n_threads 0 in
-  { pcs = Array.map snd boot; pages = Array.map fst boot; accs = z (); cnts = z (); dls = z (); bps = z (); fines = z ();
-    armed = z (); cfgs = z (); lsend = z (); inbox = z (); full = z ();
-    pin_out = 0; pin_oe = 0; thread = 0; pin_sub = 0; latch = 0;
-    bankmem = (match bank with Some b -> Array.copy b | None -> Array.make bank_len 0) }
+  Spec.reset ~boot ~bank:(match bank with Some b -> Array.copy b | None -> Array.make bank_len 0)
 
-let copy st =
-  let c = Array.copy in
-  { pcs = c st.pcs; pages = c st.pages; accs = c st.accs; cnts = c st.cnts; dls = c st.dls;
-    bps = c st.bps; fines = c st.fines; armed = c st.armed; cfgs = c st.cfgs; lsend = c st.lsend;
-    inbox = c st.inbox; full = c st.full; pin_out = st.pin_out; pin_oe = st.pin_oe;
-    thread = st.thread; pin_sub = st.pin_sub; latch = st.latch; bankmem = c st.bankmem }
+let copy = Spec.copy
 
-type io = {
+type io = Spec.io = {
   pin_in : int;
   pin_in4 : int;                 (* bit 4i+p: pin i in quarter p of the last clock *)
   host_in : int; host_in_valid : bool;
@@ -157,14 +451,7 @@ type io = {
   host_ctl : (int * int * int) option;   (* (thread, page, pc) *)
 }
 
-let sub_of ~old_ ~new_ ~q =
-  let r = ref 0 in
-  for i = 0 to 7 do
-    for p = 0 to 3 do
-      let v = if p < q then (old_ lsr i) land 1 else (new_ lsr i) land 1 in
-      r := !r lor (v lsl (4 * i + p))
-    done
-  done; !r
+let sub_of = Spec.sub_of
 
 let replicate4 pin_in = sub_of ~old_:pin_in ~new_:pin_in ~q:0
 
@@ -184,7 +471,7 @@ type effects = {
   fine_out : int option;
 }
 
-let fetch_addr st t = (st.pages.(t) lsl pc_bits) lor st.pcs.(t)
+let fetch_addr = Spec.fetch_addr
 let fetch st ~(mem : int array) t = mem.(fetch_addr st t)
 
 (* [step_f] reads the store through [fetch] (a function of the 10-bit address), so a programme
@@ -192,127 +479,12 @@ let fetch st ~(mem : int array) t = mem.(fetch_addr st t)
 let rec step st ~(mem : int array) (io : io) = step_f st ~fetch:(Array.get mem) io
 
 and step_f st ~(fetch : int -> int) (io : io) =
-  let t = st.thread in
-  let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
-  let instr = fetch (fetch_addr st t) in
-  let opc = (instr lsr 12) land 0xF in
-  let imm12 = instr land 0xFFF and imm8 = instr land 0xFF in
-  let pin = (instr lsr 9) land 7 and pin_val = (instr lsr 8) land 1 in
-  let addr = instr land 0xFF in
-  let od = (instr lsr 7) land 1 in
-  let mask8 = (instr lsr 4) land 0xFF and setv = (instr lsr 3) land 1 and seto = (instr lsr 2) land 1 in
-  let q = instr land 3 in
-  (* round latch: all four threads of a round see pin_in of thread 0's clock *)
-  if t = 0 then st.latch <- io.pin_in;
-  let pins = if st.cfgs.(t) land 0x80 <> 0 then st.latch else io.pin_in in
-  let old_pins = st.pin_out in
-  let sub_q = ref 0 in
-  let pc_next = ref ((pc + 1) land 0xFF) in
-  let acc_next = ref acc and cnt_next = ref cnt in
-  let dl_next = ref (if dl = 0 then 0 else dl - 1) in
-  let host_out = ref None and host_in_ready = ref false and port_pop = ref None
-  and port_push = ref None and bank_write = ref None and bank_read = ref None and fine_out = ref None in
-  let stay () = pc_next := pc in
-  let fail_or_stay () = if dl = 0 then pc_next := addr else stay () in
-  let pin_write () =
-    if st.armed.(t) = 1 then (fine_out := Some st.fines.(t); st.armed.(t) <- 0) in
-  let drive p b =
-    if od = 1 then begin
-      st.pin_out <- st.pin_out land lnot (1 lsl p);
-      st.pin_oe <- (st.pin_oe land lnot (1 lsl p)) lor ((1 - b) lsl p)
-    end else st.pin_out <- (st.pin_out land lnot (1 lsl p)) lor (b lsl p) in
-  let bp = st.bps.(t) in
-  (match opc with
-   | 1 ->
-     sub_q := q; pin_write ();
-     st.pin_out <- (st.pin_out land lnot mask8) lor (if setv = 1 then mask8 else 0);
-     st.pin_oe <- (st.pin_oe land lnot mask8) lor (if seto = 1 then mask8 else 0)
-   | 2 -> cnt_next := imm12
-   | 3 -> dl_next := imm12
-   | 4 -> acc_next := imm8
-   | 5 -> if (pins lsr pin) land 1 <> pin_val then fail_or_stay ()
-   | 6 -> if dl <> 0 then stay ()
-   | 7 ->
-     let pair = (instr lsr 6) land 1 and psel = (instr lsr 5) land 1 and cap = (instr lsr 4) land 1 in
-     let msb = pin_val = 1 in
-     let b0 = if msb then (acc lsr 7) land 1 else acc land 1 in
-     pin_write ();
-     drive pin b0;
-     if pair = 1 then begin
-       let b1 = if psel = 1 then (if msb then (acc lsr 6) land 1 else (acc lsr 1) land 1) else 1 - b0 in
-       drive ((pin + 1) land 7) b1
-     end;
-     if od = 0 then sub_q := q;
-     let sh = if pair = 1 && psel = 1 then 2 else 1 in
-     let cbit = cap land ((pins lsr (pin lxor 1)) land 1) in
-     acc_next := (if msb then ((acc lsl sh) land 0xFF) lor cbit
-                  else (acc lsr sh) lor (cbit lsl 7));
-     cnt_next := (cnt - 1) land 0xFFF
-   | 8 ->
-     let quad = (instr lsr 7) land 1 in
-     let pin_bit = (pins lsr pin) land 1 in
-     let nib = (io.pin_in4 lsr (4 * pin)) land 0xF in
-     let rev4 n = ((n land 1) lsl 3) lor ((n land 2) lsl 1) lor ((n land 4) lsr 1) lor ((n land 8) lsr 3) in
-     acc_next :=
-       (if quad = 1 then
-          (if pin_val = 1 then ((acc lsl 4) land 0xFF) lor rev4 nib else (acc lsr 4) lor (nib lsl 4))
-        else if pin_val = 1 then ((acc lsl 1) land 0xFF) lor pin_bit else (acc lsr 1) lor (pin_bit lsl 7));
-     cnt_next := (cnt - 1) land 0xFFF
-   | 9 -> pc_next := addr
-   | 10 -> if cnt <> 0 then pc_next := addr
-   | 11 ->
-     let src = (instr lsr 11) land 1 and tag = (instr lsr 8) land 7 in
-     host_out := Some (tag, if src = 1 then imm8 else acc)
-   | 12 -> if io.host_in_valid then (acc_next := io.host_in; host_in_ready := true) else stay ()
-   | 13 ->
-     let recv = (instr lsr 11) land 1 = 1 and ch = (instr lsr 8) land 7 in
-     if not recv then begin
-       st.lsend.(t) <- ch;
-       if ch >= 4 then (if io.port_out_ready.(ch - 4) then port_push := Some (ch - 4, acc) else fail_or_stay ())
-       else if st.full.(ch) = 0 then (st.inbox.(ch) <- acc; st.full.(ch) <- 1)
-       else fail_or_stay ()
-     end else begin
-       if ch >= 4 then
-         (if io.port_in_valid.(ch - 4) then (acc_next := io.port_in.(ch - 4); port_pop := Some (ch - 4))
-          else fail_or_stay ())
-       else if st.full.(ch) = 1 then (acc_next := st.inbox.(ch); st.full.(ch) <- 0)
-       else fail_or_stay ()
-     end
-   | 14 ->
-     let c = (instr lsr 8) land 0xF in
-     let ls = st.lsend.(t) in
-     let holds =
-       if c < 8 then (acc lsr c) land 1 = 1
-       else if c = 8 then cnt land 7 = 0
-       else if c = 9 then io.host_in_valid
-       else if c = 10 then st.full.(t) = 1
-       else if c = 11 then (if ls >= 4 then io.port_out_ready.(ls - 4) else st.full.(ls) = 0)
-       else (io.flags lsr (4 * t + c - 12)) land 1 = 1 in
-     if not holds then fail_or_stay ()
-   | 15 ->
-     let sub = (instr lsr 8) land 0xF in
-     if sub = x_skne then (if acc <> imm8 then pc_next := (pc + 2) land 0xFF)
-     else if sub = x_skeq then (if acc = imm8 then pc_next := (pc + 2) land 0xFF)
-     else if sub = x_fine then (st.fines.(t) <- imm8; st.armed.(t) <- 1)
-     else if sub = x_cnta then cnt_next := acc
-     else if sub = x_ldb then begin
-       acc_next := st.bankmem.(bp); bank_read := Some bp; st.bps.(t) <- (bp + 1) land (bank_len - 1)
-     end
-     else if sub = x_stb then begin
-       st.bankmem.(bp) <- acc; bank_write := Some (bp, acc);
-       st.bps.(t) <- (bp + 1) land (bank_len - 1)
-     end
-     else if sub = x_bank then st.bps.(t) <- ((imm8 land 3) lsl 8) lor acc
-     else if sub = x_cfg then st.cfgs.(t) <- imm8
-   | _ -> ());
-  st.pin_sub <- sub_of ~old_:old_pins ~new_:st.pin_out ~q:!sub_q;
-  st.pcs.(t) <- !pc_next; st.accs.(t) <- !acc_next; st.cnts.(t) <- !cnt_next; st.dls.(t) <- !dl_next;
-  (match io.host_ctl with
-   | Some (ht, pg, hpc) -> st.pages.(ht) <- pg land 3; st.pcs.(ht) <- hpc land 0xFF
-   | None -> ());
-  st.thread <- (t + 1) mod n_threads;
-  { host_out = !host_out; host_in_ready = !host_in_ready; port_pop = !port_pop;
-    port_push = !port_push; bank_write = !bank_write; bank_read = !bank_read; fine_out = !fine_out }
+  let e = Spec.exec st ~instr:(fetch (fetch_addr st st.thread)) io in
+  let opt (v, x) = if v then Some x else None in
+  let opt2 (v, x, y) = if v then Some (x, y) else None in
+  { host_out = opt2 e.Spec.host_out; host_in_ready = e.Spec.host_in_ready; port_pop = opt e.Spec.port_pop;
+    port_push = opt2 e.Spec.port_push; bank_write = opt2 e.Spec.bank_write;
+    bank_read = opt e.Spec.bank_read; fine_out = opt e.Spec.fine_out }
 
 (* ---- disassembler (for traces and the README) ---- *)
 let disasm w =
