@@ -28,3 +28,13 @@
  (name ps2_stall)
  (modules ps2_stall)
  (libraries hardcaml ps2can))
+
+(executable
+ (name ps2_dump)
+ (modules ps2_dump)
+ (libraries hardcaml ps2can))
+
+(executable
+ (name can_dump)
+ (modules can_dump)
+ (libraries hardcaml ps2can))

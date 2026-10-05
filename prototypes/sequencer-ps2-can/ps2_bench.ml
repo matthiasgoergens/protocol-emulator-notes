@@ -92,7 +92,7 @@ let lagged ~lag ~early ~now ~queue ~due =
     q <> [] && now () >= max !since (due q) + lag in
   (fun req -> if early then req else req && valid ()), valid
 
-let device_vs_model_host ?(faults = Ps2_fw.no_faults) ?(timing = timing) ?(rtl = true) ?(lag = 0) ?(early = false)
+let device_vs_model_host ?(faults = Ps2_fw.no_faults) ?(timing = timing) ?(rtl = true) ?(lag = 0) ?(early = false) ?tap
     ~name ~seed ~codes ~cmds ~inhibits ~rise () =
   ignore seed;
   let clk = Sim.Oc.create ~rise and data = Sim.Oc.create ~rise in
@@ -116,7 +116,10 @@ let device_vs_model_host ?(faults = Ps2_fw.no_faults) ?(timing = timing) ?(rtl =
                 && host.inhibit_until = 0 in
   (* a late byte (stall injection) lengthens the run by up to [lag] per byte *)
   ignore (Sim.run ~stop ~until:(last_cmd + Sim.us (3000. +. float (List.length codes + 10) *. 1500.)
-                                + lag * (List.length codes + (3 * List.length cmds) + 10)) [ seq; model ]);
+                                + lag * (List.length codes + (3 * List.length cmds) + 10)) ([ seq; model ]
+                                @ (match tap with   (* a read-only sampler of the two lines, for tools/sigrok-judge *)
+                                   | Some (hz, f) -> [ Sim.agent ~name:"tap" ~hz (fun now -> f ~clk:(Sim.Oc.level clk ~now) ~data:(Sim.Oc.level data ~now)) ]
+                                   | None -> [])));
   (* checks *)
   let got = List.rev_map (fun (_, b, p) -> b, p) host.received in
   let bad_parity = List.filter (fun (_, p) -> not p) got in

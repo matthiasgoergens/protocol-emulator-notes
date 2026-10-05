@@ -34,3 +34,8 @@
  (name stall_fw)
  (modules stall_fw)
  (libraries hardcaml usbls))
+
+(executable
+ (name usb_dump)
+ (modules usb_dump)
+ (libraries hardcaml usbls))
