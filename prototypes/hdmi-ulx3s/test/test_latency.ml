@@ -65,7 +65,7 @@ let () =
 (* 2. cycle identity with the frozen original *)
 let outputs = [ "word_b"; "word_g"; "word_r"; "toggle"; "led_1hz" ]
 
-let lockstep ~title ~cycles a b =
+let compare_lockstep ~title ~cycles a b =
   let sa = Cyclesim.create a and sb = Cyclesim.create b in
   let reset sim =
     Cyclesim.in_port sim "clear" := Bits.vdd;
@@ -89,10 +89,24 @@ let lockstep ~title ~cycles a b =
   done;
   Stdio.printf "%s: %d of %d cycles differ (all of %s)\n" title !differ cycles
     (String.concat ~sep:", " outputs);
-  if !differ > 0
-  then
-    fail "%s: rewrite differs from the original, first at cycle %d" title
-      (Option.value_exn !first)
+  !differ, !first
+;;
+
+(* the rewrite must be identical to the original *)
+let lockstep ~title ~cycles a b =
+  match compare_lockstep ~title ~cycles a b with
+  | 0, _ -> ()
+  | _, first ->
+    fail "%s: rewrite differs from the original, first at cycle %s" title
+      (Option.value_map first ~default:"?" ~f:Int.to_string)
+;;
+
+(* a control for [lockstep]: the pair is known to differ, so a comparison that reports no
+   difference here is blind, and the check fails *)
+let lockstep_must_differ ~title ~cycles a b =
+  match compare_lockstep ~title ~cycles a b with
+  | 0, _ -> fail "%s: no cycle differs, so the lockstep comparison cannot see this fault" title
+  | _ -> ()
 ;;
 
 let frame (m : Video_timing.t) = Video_timing.total m.h * Video_timing.total m.v
@@ -125,17 +139,17 @@ let () =
   (* the end-to-end negative control must still be misaligned, and in the same way *)
   lockstep ~title:"e2e mutant 'latency', small mode, 5 frames" ~cycles:(5 * frame tiny)
     (orig ~declared_latency:0 tiny) (ours ~misdeclare:true tiny);
-  (* ... and it must differ from the good design, or the comparison above shows nothing *)
-  let sa = Cyclesim.create (ours tiny) and sb = Cyclesim.create (ours ~misdeclare:true tiny) in
-  let differ = ref 0 in
-  for _ = 1 to 5 * frame tiny do
-    Cyclesim.cycle sa;
-    Cyclesim.cycle sb;
-    if not (Bits.equal !(Cyclesim.out_port sa "word_b") !(Cyclesim.out_port sb "word_b"))
-    then Int.incr differ
-  done;
-  Stdio.printf "e2e mutant 'latency' against the good design: word_b differs on %d cycles\n" !differ;
-  if !differ = 0 then fail "the misdeclared pattern is indistinguishable from the good one"
+  (* ... and the comparison itself must be able to see it: the rewritten mutant against the
+     ORIGINAL GOOD design (what would be compared if the rewrite had introduced the fault), over
+     the same small mode and the same outputs.  This is the detection control of the small mode;
+     before 2026-10-05 only word_b of the mutant against the rewrite was counted, and the
+     lockstep comparison itself was never shown to fail on this fault. *)
+  lockstep_must_differ ~title:"e2e mutant 'latency' (rewrite) against the ORIGINAL good design, small mode, 5 frames"
+    ~cycles:(5 * frame tiny) (orig tiny) (ours ~misdeclare:true tiny);
+  (* the same with the roles swapped: a rewrite that was correct against an original that had
+     the fault would be as wrong *)
+  lockstep_must_differ ~title:"e2e mutant 'latency' (original) against the REWRITTEN good design, small mode, 5 frames"
+    ~cycles:(5 * frame tiny) (orig ~declared_latency:0 tiny) (ours tiny)
 ;;
 
 (* 3. the lint *)
