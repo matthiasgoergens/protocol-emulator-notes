@@ -22,11 +22,40 @@ has no licence and was not used.
 | Encoder planted bugs (4) | each caught; see below |
 | End to end, 250 MHz single-edge and 125 MHz DDR, pixel clock in phase and offset | first complete frame identical to the pattern on every pixel; timing H 640/16/96/48, V 480/10/2/33, both syncs negative |
 | End to end planted bugs (5) | each caught |
-| End to end, retro console game through the frame buffer | RESULTS_DEMO |
-| Synthesis and timing | RESULTS_TIMING |
+| End to end, retro console game (field 30) through the frame buffer, both serialisers | last complete frame identical to `demo/expected.ml` on every pixel |
+| Place and route, 125 MHz DDR (chosen) | bit clock 195 MHz, pixel clock 80 MHz: passes; demo 183 / 45 MHz |
+| Place and route, 250 MHz single-edge | bit clock 225 MHz at seed 1, 195 to 202 MHz at seeds 2 to 5: fails |
 
 Evidence: `test/test_tmds.exe` output in `results/test_tmds.txt`, the end-to-end summaries and
-decoder logs in `results/e2e/` (with `decoded.png` and `expected.png` for each passing run).
+decoder logs in `results/e2e/` (with `decoded.png` and `expected.png` for four of the passing
+runs; each run's `commit.txt` names the commit it was measured on, ce7b884), build reports in
+`reports/`.
+
+## Build results
+
+yosys 0.69+77 and nextpnr-0.11.1-30 (oss-cad-suite), LFE5U-85F CABGA381 speed 6, seed 1; reports
+in `reports/<variant>/`, bitstreams in `/var/tmp/hdmi-ulx3s/build/`.
+
+| Variant | FFs | LUT4/carry | DP16KD | bit clock fmax | pixel clock fmax |
+| --- | --- | --- | --- | --- | --- |
+| `./build.sh ddr` (test pattern) | 203 | 971 | 0 | 195.1 MHz, needs 125 | 80.0 MHz, needs 25 |
+| `./build.sh ddr demo` | 1,549 | 2,501 | 81 | 182.7 MHz | 44.7 MHz |
+| `./build.sh sdr` | 211 | 935 | 0 | **224.6 MHz, needs 250: fails** | 82.3 MHz |
+| `../fpga-ulx3s/build_hdmi.sh` (emulator + HDMI) | 2,001 | 3,917 | 18 | 277.3 MHz | 84.8 MHz; 60 MHz core 67.0, USB 85.6 |
+| `../fpga-ulx3s/build_hdmi.sh demo` | 3,347 | 5,435 | 99 | 264.8 MHz | 48.3 MHz; core 61.5, USB 85.6 |
+
+Each uses one EHXPLLL (two with the emulator), 4 ODDRX1F in the DDR builds, and 14 I/O
+(51 with the emulator). The worst pixel-to-bit-clock path nextpnr reports (unconstrained, as it does
+not relate the two PLL outputs) is 1.8 to 2.0 ns, against the 24 ns (DDR) the synchroniser leaves.
+In the emulator-with-demo build the 60 MHz core passes with only 0.4 ns of slack (61.5 MHz).
+
+**Why DDR.** The 250 MHz single-edge serialiser fails timing at every seed tried (seed 1 after
+taking the blinker's 27-bit comparison off the critical path, which had held it at 172 MHz).
+Worse, its last flip-flop is placed in the fabric, not in the I/O cell, so each lane reaches its pad
+over a different, untimed route (up to 3.0 ns in the seed-1 build), which is most of a 4 ns bit. The
+DDR variant's ODDRX1F sits in the I/O cell of each pad, so the four lanes leave with matched
+timing, and the fabric runs at half the rate with 70 MHz to spare. The single-edge variant is
+kept, simulated, as the comparison.
 
 ## The TMDS encoder (`hw/tmds.ml`)
 
@@ -94,7 +123,7 @@ the evidence.
   the pin through a black box). Two variants, both simulated end to end:
   - 10:1 at 250 MHz, one bit per clock, plain output flip-flops (Gergo's choice);
   - 5:1 at 125 MHz, two bits per clock into ECP5 `ODDRX1F` (D0 first: Amaranth's ECP5 DDR buffer
-    maps its rising-edge bit to D0). RESULTS_CHOICE
+    maps its rising-edge bit to D0). This is the one we use; see "Why DDR" above.
 - **Clock crossing.** nextpnr does not relate two PLL outputs, so the transfer of the words from
   the pixel to the bit domain is safe by construction: the pixel domain flips a toggle with every
   word, the bit domain synchronises it through two flip-flops, arms on its first change and loads
@@ -151,9 +180,14 @@ testbench feeds it. Each console pixel is sampled at the middle of its 10 clocks
 frame buffer, which the 640x480 raster reads at 2 x 2, centred (512 x 480, black side borders).
 Colours come from an approximate palette (luma to Y, hue to a fixed-saturation angle, BT.601),
 not from the composite path. `e2e/run_demo.sh` simulates one static field (game field 30) for
-67 ms and compares the last complete frame with `demo/expected.ml`: the console's reference line
+68 ms and compares the last complete frame with `demo/expected.ml`: the console's reference line
 model (from `../retro-console/main.ml`, where it is checked against the RTL), the palette and the
 scaling.
+
+A second-family review (codex, gpt-6-luna) of the clock crossing, ODDRX1F use, PLLs, resets, TMDS
+details and the demo addressing, asked for what would fail on the board, found no defect; it named
+as unproven what only the board can show: lock, the real PLL phase, the pseudo-differential pads,
+and whether a given monitor accepts 25.000 MHz.
 
 ## Files
 
