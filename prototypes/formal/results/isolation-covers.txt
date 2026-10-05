@@ -1,0 +1,20 @@
+# command: main.exe c (the 36-clock isolation miter; covers decided by concrete witnesses)
+# commit: built from the tree between 77647a0 and ba6c90a; the changes in between (Boolean cuts, the ownership witness horizon) do not touch scenario c
+# Z3 version 5.1.0 - 64 bit
+# date: 2026-10-05T17:59+08:00 (start), wall 1020 s
+  witnesses replayed on Isa2.Spec: 'the other threads make the copies' other pins differ' holds from clock 1; 'the transmitter drives its pin low' from clock 8
+  c-isolation-uart depth    4:     524 definitions,    3 goals checked, solver    0.01 s, total    0.01 s
+  c-isolation-uart depth    8:    1809 definitions,    7 goals checked, solver    0.06 s, total    0.06 s
+  c-isolation-uart depth   12:    3453 definitions,   11 goals checked, solver    0.10 s, total    0.11 s
+  c-isolation-uart depth   16:    5115 definitions,   15 goals checked, solver    0.30 s, total    0.31 s
+  c-isolation-uart depth   20:    6777 definitions,   19 goals checked, solver    1.19 s, total    1.20 s
+  c-isolation-uart depth   24:    8439 definitions,   23 goals checked, solver    4.89 s, total    4.90 s
+  c-isolation-uart depth   28:   10101 definitions,   27 goals checked, solver   18.23 s, total   18.24 s
+  c-isolation-uart depth   32:   11791 definitions,   31 goals checked, solver   59.69 s, total   59.71 s
+  c-isolation-uart depth   36:   13453 definitions,   35 goals checked, solver 1019.22 s, total 1019.24 s
+c-isolation-uart: no violation; 36 clocks unrolled, 35 goals sent to the solver, 1 folded to false, 14390 definitions; solver 1020.17 s, total 1020.38 s
+  cover the other threads make the copies' other pins differ reachable (concrete witness, checked by the solver in 0.92 s)
+  cover the transmitter drives its pin low                 reachable (concrete witness, checked by the solver in 0.03 s)
+
+wall 1020.40 s
+c exit 0

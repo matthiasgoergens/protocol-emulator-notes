@@ -17,7 +17,8 @@ Everything was run on 2026-10-05.
 | 2a | deadline waits | `main.ml`'s deadline programme: no violation to 160 clocks, with the other three threads unconstrained; planted bug found at clock 89 |
 | 2a | every WAITD of UART + SPI + I2C | 15 contracts, 720 clocks; **found a latent SPI compiler bug** (Findings) |
 | 2b | pin ownership | four programmes, 720 clocks; planted bug found at clock 95 |
-| 2c | isolation (2-copy miter) | BMC: planted bug found at clock 28; induction: holds at **every depth** for the UART |
+| 2c | isolation (2-copy miter) | BMC: planted bug found at clock 28; induction: holds at **every depth** for the UART; both covers now reachable by concrete witness (0.9 s, was unanswered after 22 min) |
+| 2e | ownership of bank, inboxes, ports | bridge A: no violation to 300 clocks; planted violations found; with bank ownership the bank-reading UART is isolated at **every depth** |
 | 2d | UART frame, every byte | 2 frames (440 clocks); planted bug found at clock 98 (byte 0x04) |
 | 3 | Kind 2 (k-induction, IC3) | deadline property **proved for all depths** in 0.2 s; UART times out at 15 min |
 | 4 | RTL against specification (Yosys) | equal for 23 clocks after reset, for every instruction stream and input; **28 of 28** planted RTL bugs found |
@@ -194,6 +195,47 @@ The planted bug is the compiler's own fault injector (data bit 3 of the first by
 slots). The solver picks byte 0x04, whose bit 2 is 1 and bit 3 is 0, so the stretched bit is
 sampled where bit 3 should be.
 
+**(e) Ownership of the bank, the inboxes and the ports** (2026-10-05, `results/ownership.txt`).
+The declaration is `../sequencer-v2/ownership.ml`: per thread, the bank address ranges it may
+read and write, the inboxes it may send to and receive from, the ports it may use. The same
+declaration is checked statically by the hazard checker (`../verif-oracles`, with bank addresses
+from a data-flow analysis of the bank pointer) and here as a property. The interpreter reports
+what each clock touches: `bank_read`, `bank_write`, and four new 4-bit effects naming the inboxes
+and ports an instruction uses, whether or not it succeeds. `Props.disobeys` is bad when a touch
+is outside the executing thread's declaration; `Props.obeys` is the same as an assumption.
+
+| scenario | what | result |
+|---|---|---|
+| e | bridge A (T0 UART RX → inbox 1 → T1 I2C master → inbox 2 → T2 UART TX, T3 SPI), every input free | no violation to 300 clocks (175 goals, solver 267 s) |
+| e-planted-steal | T3's first word becomes RECV inbox 2 | violated at clock 3, confirmed on `Isa2.Spec` |
+| e-bank | the UART reading its two bytes from bank 0 and 1 (LDB), declared to read 0..1 | no violation to 440 clocks (2 frames), both addresses read |
+| e-bank-planted | the same, declared to read 0 only | violated at clock 204 (the second LDB, address 0.13), confirmed |
+| c-induction-ldb-owned | isolation of that UART, every thread assumed to keep to its declaration (the others may write 2..1023), R also equates bank 0..1 | **inductive**: pin 0 cannot depend on the other threads, at any depth |
+| c-induction-ldb-owned-overlap | the same, with the others allowed to write address 1 | not inductive (counterexample with thread 0 at pc 14) |
+
+The last two answer finding 2: with the bank under ownership, the UART that reads the bank is
+isolated without a bound, as the immediate-only UART was. Each assumption is a property
+checked on its own: the UART's own reads by e-bank and by the hazard checker (which accepts 0..1
+and rejects 0 only, at the same LDB); the other threads' by checking their programmes when
+there are any.
+
+Covers for e use one concrete witness: the host sends 0x10 (ACK) on the UART line from clock 8.
+Replayed on `Isa2.Spec`, T1 and T2 start receiving at clocks 5 and 6, T0 passes the byte to
+inbox 1 at clock 620 and T1 answers into inbox 2 at 785. The two later ones lie beyond the
+300-clock bound and are reported as such.
+
+**Cost, and the cut.** Bridge A's UART receiver follows its input, so without help the unrolled
+terms nest: the term graph more than doubled every 20 clocks (31,000 definitions at 120). After
+each clock `Machine.cut` replaces every non-constant register by a fresh variable with its
+defining equation, and keeps a thread's pc split over the addresses it can be at. The graph then
+grows linearly (about 525 definitions a clock), but the solver's time does not: the goals at the
+UART's WAITC 11 (whose target comes from `lsend`) need z3 to reason back through the unrolling,
+267 s in all at 300 clocks, and an earlier run had not reached 400 clocks 10 minutes later. 1,000
+clocks, which would include a whole frame, was out of reach. The static check covers every
+reachable instruction without a bound; the BMC's value here is the semantic cross-check and the
+counterexamples. The cut is not used for the isolation miter, where it undoes the sharing
+between the two copies (16 clocks: 5.9 s with it, 0.3 s without).
+
 ### Limits of the checks
 - Bounded, except where stated: the isolation induction step, and Kind 2's proof of (a).
 - Inputs are free and independent on every clock. In particular, the four quarter-clock samples
@@ -204,12 +246,26 @@ sampled where bit 3 should be.
 - (d) covers 2 frames with the host always ready, and 1 frame with arbitrary arrival times.
   With free arrival the solver's time per clock grows quickly (over 200 s per clock at 224 in an
   earlier run), so 208 clocks, just enough for one frame, is the depth used.
-- The clean isolation miter ran to 36 clocks only (cumulative solver time 22 s at 24 clocks,
-  329 s at 32, 919 s at 36); its two cover queries were stopped unanswered after 22 minutes.
-  The non-vacuity of the unconstrained threads is shown instead by the planted run, where one
-  of them does reach pin 0 through the bank. The induction step is the real result.
-- The isolation result is for one protocol (the UART). Any protocol that reads the inbox, the
-  bank or a port is not isolated by construction, and the induction step says so.
+- The clean isolation miter ran to 36 clocks (cumulative solver time 4.9 s at 24 clocks, 60 s
+  at 32, 1019 s at 36, `results/isolation-covers.txt`). Its two cover queries had run 22
+  minutes unanswered as plain satisfiability questions. They are now decided by concrete
+  witnesses (below), in 0.92 s and 0.03 s. The induction step remains the real result.
+- The isolation result is for one protocol (the UART). A protocol that reads the inbox, the
+  bank or a port is isolated only under the ownership assumption of (e), as the induction with
+  bank ownership shows for the bank.
+
+**Covers by concrete witness** (`bmc.ml`, `witnesses`). A cover asks whether an outcome is
+reachable, and a satisfying assignment is all that needs. A witness gives a value to every
+input and unconstrained instruction word. It is first replayed on `Isa2.Spec` through the same
+condition (in OCaml), then asserted in the solver with the cover, inside the push, so that z3
+only evaluates. Unsatisfiable means the witness is wrong and is reported as "WITNESS FAILED",
+never as unreachable. For the isolation miter: every input 0 and every unconstrained word a
+NOP, except copy a's thread 1 setting pin 1 at clock 1 ("the copies' other pins differ", from
+clock 1), and the same with no exception ("the transmitter drives pin 0 low", from clock 8, its
+start bit). A first version emitted the witness's equations inside the push, so the first
+cover's pop deleted definitions the second cover then used; z3 answered with an error, which was
+read as unsatisfiable. Definitions are now written before the push, and a solver error fails
+loudly.
 
 ## 3. Timed model checking for comparison: Kind 2
 
@@ -303,11 +359,19 @@ the previous pins) would probably need strengthening invariants first.
    SPI thread never finish within 720 clocks), not by a property violation.
 2. The isolation counterexample is a design point, not just a test. Pins have an ownership
    discipline; the data bank, the inboxes and the ports have none. A protocol thread that reads
-   any of them can be disturbed by another thread. Bank and inbox ownership need the same
-   treatment as pins; `props.ml`'s ownership monitor could be extended to them the same way.
+   any of them can be disturbed by another thread. **Addressed** by (e): an ownership
+   declaration for the bank, inboxes and ports, checked statically and by BMC, under which the
+   bank-reading UART is isolated at every depth.
 3. The bounded equivalence finds all 28 planted RTL bugs at 15 clocks. That includes three that
    uniform random simulation of the same miter misses in 20,000 clocks; the lockstep needed a
    biased generator for those.
+4. **(a) on the three protocols no longer finishes** (2026-10-05, `results/a-protocols-after-i2c-fix.txt`).
+   `results/bmc.txt` was recorded before the merge with the I2C clock-stretching fix
+   (5be80cf). The I2C master now waits on SCL, so its timing follows an input, the goals no
+   longer fold to constants (0 goals before), and the run did not finish in 30 minutes (69 goals
+   sent), nor in 15 minutes with the state cut. The UART and SPI contracts are unaffected in
+   principle; splitting the I2C thread out, or giving it a stretching bound, is the obvious next
+   step. Not done here.
 
 ## Credits and prior art
 
@@ -334,6 +398,8 @@ opam exec --switch=5.3.0 -- dune build          # main.exe and equiv/miter.exe
 uv venv /var/tmp/symbolic-bmc/z3env && uv pip install --python /var/tmp/symbolic-bmc/z3env/bin/python z3-solver
 export PATH=/var/tmp/symbolic-bmc/z3env/bin:$PATH
 ./_build/default/main.exe a a-planted      # one or more scenarios; no argument: all
+./_build/default/main.exe e e-bank e-bank-planted e-planted-steal c-induction-ldb-owned
+                                           # ownership (results/ownership.txt)
 ./run_all.sh bmc | kind2                   # regenerates results/bmc.txt, results/kind2.txt
 equiv/run_equiv.sh clean 8 16 24           # Yosys, in the LibreLane container
 equiv/run_equiv.sh bugs 16

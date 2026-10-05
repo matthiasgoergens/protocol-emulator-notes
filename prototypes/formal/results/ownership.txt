@@ -1,0 +1,48 @@
+# command: main.exe e e-bank e-bank-planted e-planted-steal c-induction c-induction-planted c-induction-ldb-owned c-induction-ldb-owned-overlap c-induction-no-ownership
+# commit: ba6c90a5657a2c0b4c0fc748afec74a95a6f2332
+# Z3 version 5.1.0 - 64 bit
+# date: 2026-10-05T18:18:01+08:00
+  witness (the host sends 0x10 from clock 8), replayed on Isa2.Spec: T0 sends to inbox 1 at clock 620; T1 receives from inbox 1 at clock 5; T1 sends to inbox 2 at clock 785; T2 receives from inbox 2 at clock 6
+  (cover 'T1 sends to inbox 2' is reached at clock 785, beyond the bound of 300)
+  (cover 'T0 sends to inbox 1' is reached at clock 620, beyond the bound of 300)
+  e-ownership-bridge-a depth   50:     456 definitions,    0 goals checked, solver    0.00 s, total    0.00 s
+  e-ownership-bridge-a depth  100:    8366 definitions,   25 goals checked, solver    0.40 s, total    0.41 s
+  e-ownership-bridge-a depth  150:   31577 definitions,   63 goals checked, solver    3.83 s, total    3.90 s
+  e-ownership-bridge-a depth  200:   56923 definitions,  100 goals checked, solver   17.93 s, total   18.07 s
+  e-ownership-bridge-a depth  250:   84014 definitions,  138 goals checked, solver   55.77 s, total   55.98 s
+  e-ownership-bridge-a depth  300:  109396 definitions,  175 goals checked, solver  128.78 s, total  129.08 s
+e-ownership-bridge-a: no violation; 300 clocks unrolled, 175 goals sent to the solver, 125 folded to false, 110226 definitions; solver 267.40 s, total 267.84 s
+  cover T0 sends to inbox 1                                NOT REACHABLE (vacuous?)
+  cover T1 receives from inbox 1                           reachable (concrete witness, checked by the solver in 0.82 s)
+  cover T1 sends to inbox 2                                NOT REACHABLE (vacuous?)
+  cover T2 receives from inbox 2                           reachable (concrete witness, checked by the solver in 1.71 s)
+
+e-bank-uart-reads-0..1: no violation; 440 clocks unrolled, 0 goals sent to the solver, 440 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  cover thread 0 reads bank address 0                      reachable
+  cover thread 0 reads bank address 1                      reachable
+
+e-bank-uart-declared-0-only: VIOLATED at clock 204; 205 clocks unrolled, 1 goals sent to the solver, 204 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+       4: t0 0.1   ldb                          reads bank address 0
+     204: t0 0.13  ldb                          reads bank address 1
+  replay on Isa2.Spec: the monitor fires first at clock 204 (solver: clock 204) -> counterexample CONFIRMED
+
+  witness (the host sends 0x10 from clock 8), replayed on Isa2.Spec: T0 sends to inbox 1 at clock 620; T1 receives from inbox 1 at clock 5; T1 sends to inbox 2 at clock 785; T2 receives from inbox 2 at clock 6; T3 receives from inbox 2 at clock 3
+  (cover 'T1 sends to inbox 2' is reached at clock 785, beyond the bound of 40)
+  (cover 'T0 sends to inbox 1' is reached at clock 620, beyond the bound of 40)
+e-ownership-planted-t3-receives-inbox-2: VIOLATED at clock 3; 4 clocks unrolled, 1 goals sent to the solver, 3 folded to false, 0 definitions; solver 0.00 s, total 0.00 s
+  counterexample: the offending clock and the UART line before it
+       3: t3 3.0   recv ch2 fail=0              inbox send 0 recv 4, port out 0 in 0, bank read - write -
+    the UART line (pin 0) is low at clocks 1,2,3 ...
+  replay on Isa2.Spec: the monitor fires first at clock 3 (solver: clock 3) -> counterexample CONFIRMED
+
+c-isolation-uart-induction: the relation is inductive: pin 0 cannot depend on the other threads, at any depth; assumptions satisfiable; thread 0 can be at 26 addresses; 1001 definitions, 0.03 s
+
+c-isolation-planted-ldb-induction: NOT inductive (a counterexample to induction with thread 0 at pc 1); assumptions satisfiable; thread 0 can be at 26 addresses; 1040 definitions, 0.02 s
+
+c-isolation-ldb-with-bank-ownership-induction: the relation is inductive: pin 0 cannot depend on the other threads, at any depth; assumptions satisfiable; thread 0 can be at 26 addresses; 1191 definitions, 0.04 s
+
+c-isolation-ldb-others-may-write-address-1-induction: NOT inductive (a counterexample to induction with thread 0 at pc 14); assumptions satisfiable; thread 0 can be at 26 addresses; 1191 definitions, 0.02 s
+
+c-isolation-uart-induction-without-ownership-assumption: NOT inductive (a counterexample to induction with thread 0 at pc 6); assumptions satisfiable; thread 0 can be at 26 addresses; 965 definitions, 0.01 s
+
+wall 268.01 s

@@ -30,7 +30,8 @@ what=${1:-all}
 if [ "$what" = all ] || [ "$what" = bmc ]; then
   { header "main.exe (every scenario)"
     for s in a a-planted a-protocols a-spi8 b b-planted c-planted c-induction c-induction-planted \
-             c-induction-no-ownership d d-planted d-anytime c; do
+             c-induction-no-ownership c-induction-ldb-owned c-induction-ldb-owned-overlap \
+             e e-bank e-bank-planted e-planted-steal d d-planted d-anytime c; do
       wait_load
       SMT_SOLVER=$Z3 nice ionice ./_build/default/main.exe "$s"
     done; } 2>&1 | tee results/bmc.txt
