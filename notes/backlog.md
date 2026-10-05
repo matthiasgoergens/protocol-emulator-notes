@@ -124,6 +124,14 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
 ## Verification (Jane Street's emphasis)
 
+- **Open after the 2026-10-05 fixes (`fix-findings`, merged):**
+  - bridge B's SPI master still has a mailbox send with no timeout;
+  - `prototypes/systolic-storage/seqtrace/check.sh` fails because its copy of `isa.ml` is stale;
+  - the I2C fix changed the timing within one SCL low phase (SDA now moves 2 slots after SCL
+    falls; low phases 28→36 and 44→40 clocks). It was accepted by the coordinator as within I2C's
+    own timing rules, but rerun the FPGA I2C tests on the board;
+  - the base-ISA 10BASE-T firmware cannot detect host underrun; only the v2 port has the fix.
+
 - **Sign-off DRC must run IHP's maximal deck ourselves.** Tiny Tapeout's precheck runs only the
   deck's main table, which does not check the thick-oxide keep-outs (TGO.a–e), the poly end cap
   (Gat.c), n-well enclosures, pSD rules or contact-to-gate spacing (verified in the deck
