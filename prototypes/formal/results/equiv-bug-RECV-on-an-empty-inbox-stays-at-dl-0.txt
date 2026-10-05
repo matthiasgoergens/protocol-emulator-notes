@@ -1,0 +1,22 @@
+# command: run_equiv.sh bug 16 RECV on an empty inbox stays at dl = 0
+# commit: 75d32c3d4e2c3beae2ee4fc1ba39ee083d46bac8
+# yosys: Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+# date: 2026-10-05T12:39:32+08:00
+bug-RECV-on-an-empty-inbox-stays-at-dl-0-16 depth 16 (15 clocks after the clear): COUNTEREXAMPLE, 91 s (931009 variables and 2482910 clauses)
+counterexample (step 1 clears; then one thread per step):
+  step  1  clear
+  step  2  thread 0  7b53  sho pin5 msb pair cap q=3     
+  step  3  thread 1  f400  ldb                           
+  step  4  thread 2  1a7e  setp mask=a7 val=1 oe=1 q=2   
+  step  5  thread 3  e0b5  waitc cond=0 fail=181         
+  step  6  thread 0  7a31  sho pin5 lsb psel cap q=1     
+  step  7  thread 1  7151  sho pin0 msb pair cap q=1     
+  step  8  thread 2  1bfb  setp mask=bf val=1 oe=0 q=3   
+  step  9  thread 3  70e2  sho pin0 lsb od pair psel q=2 
+  step 10  thread 0  143f  setp mask=43 val=1 oe=1 q=3   
+  step 11  thread 1  d103  send ch1 fail=3               
+  step 12  thread 2  d8ed  recv ch0 fail=237             
+  step 13  thread 3  dcc1  recv ch4 fail=193               <- differs: dbg_pc2
+  step 14  thread 0  cce0  in                              <- differs: dbg_pc2
+  step 15  thread 1  8840  shi pin4 lsb                    <- differs: dbg_pc2, imem_addr
+  step 16  thread 2  7c80  sho pin6 lsb od q=0             <- differs: dbg_pc2

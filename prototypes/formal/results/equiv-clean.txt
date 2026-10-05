@@ -1,0 +1,7 @@
+# command: run_equiv.sh clean 8 16 24
+# commit: 75d32c3d4e2c3beae2ee4fc1ba39ee083d46bac8
+# yosys: Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+# date: 2026-10-05T12:30:30+08:00
+clean-8 depth 8 (7 clocks after the clear): PROVED, 55 s (465049 variables and 1240086 clauses)
+clean-16 depth 16 (15 clocks after the clear): PROVED, 96 s (931009 variables and 2482910 clauses)
+clean-24 depth 24 (23 clocks after the clear): PROVED, 264 s (1396969 variables and 3725734 clauses)
