@@ -118,6 +118,8 @@ let run_netlist ~lib ~runs ~cycles ~label (nl : Extract.netlist) =
     let t2 = Unix.gettimeofday () in
     Printf.printf "%s: %d programmes x %d cycles, %d mismatching cycles in %d programmes, %d output-bit toggles (lockstep %.1f s)\n%!"
       label runs cycles !total !failing !toggles (t2 -. t1);
+    (* a comparison of outputs that never change would prove nothing *)
+    if !toggles = 0 then failwith "no output bit ever changed: the comparison is vacuous";
     if !total = 0 then (if structural.errors = [] then `Agrees else `Structural) else `Differs
 
 let extract gds =

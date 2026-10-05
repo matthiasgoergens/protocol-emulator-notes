@@ -187,6 +187,10 @@ type netlist = {
   unresolved : string list;  (* pins and ports whose label has no conductor under it *)
   nshapes : int;
   ncomponents : int;
+  foreign_layers : (int * int * int) list;
+  (* layer, datatype, count of shapes drawn in the top cell itself (the
+     routing) on layers the extractor does not follow: a route on such a
+     layer would silently split a net, so the check reports them *)
 }
 
 (* Shapes and their net, kept for choosing planted faults. *)
@@ -244,6 +248,20 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
     (Hashtbl.find flat top_name);
   let shapes = Array.of_list (List.rev !shapes) in
   let nshapes = Array.length shapes in
+  let foreign = Hashtbl.create 8 in
+  let known lay dt =
+    (metal_index lay <> None && (List.mem dt metal_datatypes || dt = text_datatype))
+    || (via_metals lay <> None && dt = via_datatype)
+    || (lay = 189 && dt = 4) (* prBoundary, the die outline *) in
+  List.iter (fun (p : Gds.poly) ->
+    if not (known p.player p.pdt) then
+      Hashtbl.replace foreign (p.player, p.pdt)
+        (1 + Option.value ~default:0 (Hashtbl.find_opt foreign (p.player, p.pdt)))) top.polys;
+  List.iter (fun (p : Gds.path) ->
+    if not (known p.hlayer p.hdt) then
+      Hashtbl.replace foreign (p.hlayer, p.hdt)
+        (1 + Option.value ~default:0 (Hashtbl.find_opt foreign (p.hlayer, p.hdt)))) top.paths;
+  let foreign_layers = Hashtbl.fold (fun (l, d) c acc -> (l, d, c) :: acc) foreign [] |> List.sort compare in
   log (Printf.sprintf "%d conductor shapes, %d cell instances" nshapes (Array.length instances));
   (* spatial hash *)
   let grid : (int64 * int64, int list) Hashtbl.t = Hashtbl.create 65536 in
@@ -339,7 +357,7 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
       { inst with nets = List.map (fun (p, n) -> (p, Option.map canon n)) inst.nets }) inst_arr in
   let shape_net = Array.init nshapes (fun i -> Hashtbl.find_opt remap (uf_find uf i)) in
   ({ instances = inst_arr; ports; nnets = Hashtbl.length remap;
-     unresolved = List.rev !unresolved; nshapes; ncomponents = uf.count },
+     unresolved = List.rev !unresolved; nshapes; ncomponents = uf.count; foreign_layers },
    { shapes; shape_net; dbu_um = dbu })
 
 (* Plain-text netlist, one instance per line, for diffing between runs. *)

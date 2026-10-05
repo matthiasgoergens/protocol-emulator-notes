@@ -122,6 +122,8 @@ let parse path : lib =
   let off = ref 0 in
   while !off + 4 <= n do
     let len = get_u16 d !off in
+    if len < 4 || !off + len > n then
+      failwith (Printf.sprintf "%s: bad GDS record length %d at byte %d" path len !off);
     let rt = get_u16 d (!off + 2) in
     let tag = rt lsr 8 in
     let p = !off + 4 in

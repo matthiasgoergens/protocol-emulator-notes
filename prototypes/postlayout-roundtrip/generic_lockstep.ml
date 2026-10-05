@@ -22,6 +22,7 @@ let run ?(hold_low = [ "clear"; "reset"; "rst" ]) ?(clock = "clock") ~(circuit :
   List.iter (fun (n, b) -> if Bits.width !b > 62 then failwith (n ^ ": ports wider than 62 bits not supported"))
     (inputs @ Cyclesim.outputs rtl);
   let outputs = Cyclesim.outputs rtl in
+  if outputs = [] then failwith "the circuit has no outputs: a lockstep would compare nothing";
   let set name (b : Bits.t ref) v =
     let w = Bits.width !b in
     b := Bits.of_int ~width:w v;

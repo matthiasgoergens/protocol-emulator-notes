@@ -50,6 +50,8 @@ let run ~(lib : (string, Cells.cell) Hashtbl.t) ~(ports : (string * dir) list)
   let drivers = Array.make n [] and sinks = Array.make n [] in
   let power_net = Array.make n None in
   List.iter (fun u -> err "unresolved label: %s" u) nl.unresolved;
+  List.iter (fun (l, d, c) -> err "%d shapes in the top cell on layer %d/%d, which the extractor does not follow" c l d)
+    nl.foreign_layers;
   (* ports: every RTL port bit must be a label in the layout, and back *)
   let layout_ports = Hashtbl.create 64 in
   List.iter (fun (p, net) -> Hashtbl.replace layout_ports p net) nl.ports;
@@ -142,6 +144,12 @@ let run ~(lib : (string, Cells.cell) Hashtbl.t) ~(ports : (string * dir) list)
     | Some cell when cell.ffs <> [] ->
       List.iter (fun (f : Cells.ff) ->
         incr nff;
+        (* the simulator clocks every flip-flop on the rising edge of the
+           clock port: that needs the model's flip-flop clock to be the
+           cell's clock input itself (rising edge, ihp_dff_* table), and
+           the path from the port to have no net inversion (below) *)
+        if not (List.mem f.clk cell.inputs) then
+          err "%s: %s clocks its flip-flop from an internal wire %s" inst.iname inst.icell f.clk;
         match List.assoc_opt f.clk inst.nets with
         | Some (Some net) ->
           Hashtbl.replace clock_buffers net ();
