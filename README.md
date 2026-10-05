@@ -1,78 +1,154 @@
-# Protocol-emulator ASIC: design notes and measurements
+# One programmable chip for protocols: a protocol-emulator ASIC
 
-Working notes for an entry to Jane Street's protocol-emulator ASIC
-competition (<https://blog.janestreet.com/protocol-emulator-asic-competition/>):
-a small reprogrammable chip for bit-banging protocols such as UART, SPI and
-I2C, to be fabricated on IHP's 130 nm process through a Tiny Tapeout shuttle.
+This is the working repository for an entry to Jane Street's
+[protocol-emulator ASIC competition](https://blog.janestreet.com/protocol-emulator-asic-competition/):
+a small chip, fabricated on IHP's 130 nm process through a Tiny Tapeout shuttle, that speaks
+protocols such as UART, SPI and I2C on behalf of a host. Entries are due on 18 January 2027, for
+the March 2027 shuttle, in at most 6x4 tiles.
 
-Nothing here is a finished design. It is the record of the brainstorming and
-of the measurements that followed, kept so that every number in the notes
-can be traced to the run that produced it.
-`PLAN.md` says where the measurements point and what comes next;
-`techniques.md` lists the ways a big host can do the work a tiny chip cannot.
-`demos/` holds demonstration plans.
+The design takes the competition's hint literally: "The goal isn't to put a UART block, an SPI
+block, and an I2C block on one die and call it done." There are no protocol blocks. The chip is a handful of generic
+programmable blocks, and every protocol and every demo is a programme or a configuration of them.
+Timing is exact by construction, so a compiler can check before anything runs that a programme
+meets its deadlines.
 
-## Contents
+Everything here is design, simulation and measurement. Nothing has been fabricated, and the FPGA
+bring-up is prepared but not yet run on a board.
 
-- `brainstorm-*.md`: three independent idea lists written by three
-  different AI systems from the same prompt, followed by a `synthesis.md`
-  that compares them and a `brainstorm-wild.md` that deliberately ignores
-  where they agree. `second-layer/` pushes further into unusual execution
-  models. Not every idea in them is original to this repository; some arrived
-  from outside and are recorded without attribution. They also refer to an
-  earlier, separate body of work on a chip reverse-engineering puzzle (paths
-  under `hardware-2026-08/`), which is not included here.
-- `datapoints.md`: the running list of measured facts, each with a pointer
-  to its raw run.
-- `prototypes/deadline-sequencer/`: a four-thread deterministic sequencer
-  in Hardcaml with an OCaml interpreter as its specification, a lockstep
-  test, a protocol compiler for UART, SPI and I2C, independent decoders,
-  fault injection and a baud sweep, plus area and place-and-route results.
-- `prototypes/systolic-matcher/`: a sixteen-cell systolic pattern
-  correlator in Hardcaml with a closed-form specification, lockstep and
-  directed tests, area and place-and-route results.
-- `measurements/pio-area/`: standard-cell area of an open-source RP2040
-  PIO clone on IHP sg13g2, synthesised with Yosys, including two variants
-  of its shift register with fixed shift widths.
-- `measurements/fabulous/`: area of a FABulous embedded-FPGA tile and of a
-  small 4x4 fabric on the same process, a sparse-routing variant, two tiles
-  containing hardened blocks, place-and-route results for the stock tile
-  with LibreLane and OpenROAD, and a routability benchmark of four small
-  protocol designs (one written in Hardcaml) on stock and sparse fabrics.
+## The intended chip
 
-## Headline numbers
+This is the target design; the blocks exist as separate prototypes and are not yet integrated
+into one top level.
 
-All from Yosys area-oriented synthesis against the sg13g2 typical liberty
-file unless stated; details, caveats and logs sit next to each number.
+```
+            host (the RP2040/RP2350 on Tiny Tapeout's demo board)
+                                 | programme and configuration loading, data streams
+   +-----------------------------+------------------------------------------------+
+   | sequencer: 4 hardware threads, deadline waits ------------ programme memory    |
+   |    | push/pull bus                  | pin writes and reads           | mailbox |
+   |    v                                v                                          |
+   | PE array: 16 processing elements, pin stage: four-phase output and input,      |
+   | split into segments, with         open drain, complementary pairs, streamer,  |
+   | loop-backs and feeds   <------->  sampler, phase accumulator (pin NCO)        |
+   |    ^                               ^  bit-path assists: edge-tracking sampler, |
+   |    |                               |  bit-stuff tracker, line coder, CRC,      |
+   | gain-cell memory banks             |  sync-word matcher                        |
+   +--------------------------------------------------------------------------------+
+          one 60 MHz clock, four phases derived on chip
+```
 
-| Thing | Result |
+- **Deadline sequencer.** Four hardware threads issue round-robin, one instruction per clock in
+  total, so every instruction takes exactly one slot. Its central instruction is "wait for this
+  pin level, but no longer than this deadline". Threads pass data through small mailboxes. The executable specification is an OCaml
+  interpreter (`prototypes/sequencer-v2/isa2.ml`); the hardware is written in
+  [Hardcaml](https://github.com/janestreet/hardcaml).
+- **Four-phase pin stage.** Four clock phases let a pin change, or be sampled, on a quarter-clock
+  grid: four edges per clock out, 4x oversampling in (`prototypes/multiphase`).
+- **Pin stage helpers.** A streamer and a sampler move words between the host and the pins at a
+  fixed rate without the sequencer; a phase accumulator (NCO) makes carriers and PWM; small assists
+  handle bit recovery, bit stuffing, line coding, CRCs and sync-word matching.
+- **Processing-element array.** Sixteen identical elements in a line (a systolic array), which can
+  be split into independent segments, for the work a sequencer is too slow for: CRCs, correlation,
+  phase accumulators, pixel generation, audio noise shaping (`prototypes/unified-pe`). Its RTL is
+  checked in lockstep against a model (`prototypes/unified-pe/verify`).
+- **Gain-cell memory.** Dynamic memory cells denser than the process's SRAM, which forget within
+  microseconds to milliseconds; the compiler schedules every read before its value expires
+  (`prototypes/gain-cell`, `notes/gain-cell-compiler.md`). So far these are SPICE simulations on
+  the process models and drawn layouts with DRC and LVS runs, not part of any hardened design.
+
+The design rationale, including how the blocks were chosen by counting the primitives the earlier
+special-purpose prototypes needed, is in `notes/architecture-v0.md`. Some earlier prototypes ran
+at other clock rates (53.2 MHz for PAL video, for instance); the note explains the choice of
+60 MHz. The running list of open
+work is `notes/backlog.md`.
+
+## What runs on it (in simulation)
+
+| Area | Protocols and demos | Where |
+| --- | --- | --- |
+| Competition list | UART, SPI, I2C | `prototypes/deadline-sequencer`, `prototypes/sequencer-v2` |
+| Further protocols | JTAG, SWD, PS/2, CAN, S/PDIF | `prototypes/proto-jtag-swd`, `prototypes/sequencer-ps2-can`, `prototypes/spdif` |
+| Stretch goals | low-speed USB as firmware; 10BASE-T Ethernet answering ARP and ping | `prototypes/usb-ls`, `prototypes/eth10-node` |
+| Several at once | several protocols on one sequencer, with bridges between them (Ethernet to TV, a CAN bus analyser) | `prototypes/multi-proto` |
+| Video | PAL and NTSC composite colour, a retro console, a platformer game, a wave-interference game | `prototypes/retro-console`, `prototypes/platformer`, `prototypes/wave-engine`, `prototypes/video-nco` |
+| Audio and radio | one-bit audio output with noise shaping, IMA ADPCM and SBC decoding, FM transmit | `prototypes/onebit-dac`, `prototypes/multiphase` |
+| Gadgets | a GPS finder that tells you by sound whether you are getting closer, the chip as a logic analyser and oscilloscope | `prototypes/gps-hotcold`, `prototypes/scope` |
+| FPGA test bench | ULX3S top level, host runner and checker; DVI output to a monitor | `prototypes/fpga-ulx3s`, `prototypes/hdmi-ulx3s` |
+
+Each directory's README states what was checked, how, and what was not.
+
+## How it is checked
+
+The aim is that no claim rests on one implementation agreeing with itself, and that every check is
+shown to be able to fail.
+
+- **Lockstep.** The RTL runs clock by clock against the OCaml specification and every output is
+  compared. Each test suite comes with deliberately planted bugs that it must catch.
+- **Independent oracles.** Protocol traffic is judged by code written separately from the design:
+  host models, [sigrok](https://sigrok.org/)'s protocol decoders run as an external program
+  (`tools/sigrok-judge`), and unmodified third-party HDL such as alexforencich's `verilog-uart`
+  (`tools/peers`). Every judge also gets a deliberately faulty trace, to show it can fail.
+- **A static programme verifier.** Abstract interpretation proves that a programme makes its pin
+  events within the declared timing windows for every input, or rejects it with the path to the
+  violation (`prototypes/verifier`). It proves all 530 programmes the compiler emits across the
+  swept parameter ranges, and its trusted kernel is tested with planted kernel bugs.
+- **Formal proofs.** Bounded model checking of the specification with z3; SymbiYosys and Yosys
+  proofs on the RTL, including that the chip behaves identically after reset whatever its
+  registers held at power-up; an equivalence check of our UART against the transmitter in Jane
+  Street's [`hardcaml_hobby_boards`](https://github.com/janestreet/hardcaml_hobby_boards). Every property is reported as proved, reachable or vacuous
+  (`prototypes/formal`).
+- **Layout back to behaviour.** A netlist extracted from the final GDS alone, independently of the
+  place-and-route tools, is compared with the place-and-route record per cell and per net, and run
+  cycle by cycle against the RTL (`prototypes/postlayout-roundtrip`).
+- **Coverage-guided fuzzing** of Hardcaml designs (`prototypes/hwfuzz`), stall injection, and
+  checks that every pin and memory bank has one declared owner (`prototypes/verif-oracles`).
+
+## Tiny Tapeout
+
+`tt/` is the submission harness, laid out as in Tiny Tapeout's IHP template. Its Verilog is
+generated from Hardcaml at build time and never committed. `tt/scripts/harden.sh` runs Tiny
+Tapeout's own hardening steps in a pinned copy of their LibreLane environment
+(`tools/librelane-tt`). The first run, on a 6x4-tile placeholder top level around the sequencer,
+finished with no DRC, LVS or antenna errors, setup slack +10.39 ns and hold slack +0.12 ns at a
+20 ns clock (`tools/librelane-tt/results/tt-harden/`). It has not been through Tiny Tapeout's
+precheck yet, and the real top level, with all the blocks above, is not integrated yet.
+
+## Repository map
+
+| Path | Contents |
 | --- | --- |
-| One PIO state machine (fpga_pio, all submodules) | 4,713 cells, 61.6K um2, about two Tiny Tapeout tiles at full utilisation |
-| Its two shift registers | 53 % of that area; fixing the shift width to one bit shrinks the input shifter 4.6x |
-| One FABulous LUT4AB tile (8 x LUT4) | 36.3K um2 flattened; configuration latches 52 %, switch matrix 37 %, logic about 10 % |
-| Routing share of the tile once its own config bits are counted | 77 to 78 % |
-| Sparse variant without length-4 and length-6 wires | 19 % smaller; routes the same four protocol designs as the stock fabric at up to 83 % utilisation |
-| Hardened blocks as tiles | about 20K um2 of through-routing per tile regardless of content; about 160 um2 per extra block port |
-| Stock tile through place and route | routes with zero DRC violations at 77 % utilisation; die 72K to 84K um2; worst path about 32 ns at the typical corner before timing optimisation |
-| Deadline sequencer, four threads | 1,052 cells, 17.3K um2; closes 66 MHz at every corner with 7 ns slack on a 36.7K um2 die |
-| Systolic correlator, sixteen cells | 458 cells, 10.0K um2; closes 200 MHz at the slow corner on a 31.5K um2 die |
+| `prototypes/` | one directory per block, protocol, demo or study, each with a README and a `results/` directory |
+| `tools/` | the sigrok judge, third-party peers, the pinned LibreLane environment, latency checks |
+| `tt/` | the Tiny Tapeout harness |
+| `notes/` | architecture, backlog, prior-art surveys, and what we learnt from other entrants and from the solvers of Jane Street's earlier [ASIC puzzle](https://blog.janestreet.com/asic-puzzle-results/) |
+| `measurements/` | early area studies: an RP2040 PIO clone and a FABulous embedded-FPGA tile on the same process |
+| `brainstorm-*.md`, `synthesis.md`, `second-layer/` | the opening brainstorm (see "How this was made") |
+| `datapoints.md`, `PLAN.md`, `techniques.md` | early measured facts, the first plan, and ways a large host can do the work a tiny chip cannot |
 
 ## Reproducing
 
-Each measurement directory has a `NOTES.md` with the exact tool versions,
-commits, commands and the reading of the results. The scripts expect
-`yosys` on the path and the IHP sg13g2 liberty file from IHP-Open-PDK; the
-FABulous scripts additionally expect a project-local install of the
-`fabulous-fpga` package and, for place and route, the LibreLane container.
-The fpga_pio sources and the PDK are not vendored; the notes name the
+Most prototypes are OCaml: install Hardcaml v0.17 in an opam switch with OCaml 5.3, then
+`dune build` in the prototype's directory; its README lists the commands, and each `results/`
+file names the command and commit that produced it. Synthesis and place and route use Yosys and
+LibreLane in containers; the Python tools run through [uv](https://docs.astral.sh/uv/). The IHP
+process design kit and third-party sources are not vendored unless stated; the notes name the
 commits used.
+
+## How this was made
+
+The work was done with AI assistants, which wrote much of the code and the first drafts of the
+notes: mainly Claude, with Codex, Kimi and DeepSeek for brainstorming and adversarial reviews. The brainstorm files at the top level are three
+independent idea lists written by Claude, Codex and Kimi from the same prompt, compared in
+`synthesis.md`, plus `brainstorm-wild.md`, which deliberately ignores where they agree. The
+verification above is set up so that no result depends on trusting any one model's output.
+
+## Credits
+
+Ideas and code from other people's public work are credited where they are used, by repository,
+and listed with their licences in `notes/learned-from-others.md`,
+`notes/learned-from-puzzle-solvers.md` and `NOTICE`. Prior-art surveys are in `notes/prior-art-*.md`.
 
 ## Licence
 
-Notes and scripts: Apache-2.0 since 2026-09-25 (MIT before; see `NOTICE`). The two shift-register variants under
-`measurements/pio-area/variants/` are derived from fpga_pio and keep its
-BSD-2-Clause header. `measurements/fabulous/synth/models_pack_onelatch.v` is
-derived from FABulous's Apache-2.0 `models_pack.v` with one module replaced.
-`measurements/fabulous/yosys-fabulous-0.60/` holds the FABulous technology
-files from the Yosys repository at tag v0.60, ISC licence, vendored because
-later Yosys releases no longer ship them.
+Apache-2.0 (see `LICENSE`); the repository was relicensed from MIT on 2026-09-25. Third-party files keep their
+own licences, listed in `NOTICE`.
