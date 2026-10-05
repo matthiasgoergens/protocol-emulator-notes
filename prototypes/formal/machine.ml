@@ -44,12 +44,17 @@ let instr_name m ~thread ~k = Printf.sprintf "%sinstr%d@%d" m.prefix thread k
 
 (* the constant leaves of an ite tree, or None if the term is not one *)
 let leaves t =
-  let rec go (t : Smt.term) acc =
-    match t.node with
-    | K n -> Some (n :: acc)
-    | App ("ite", _, [ _; x; y ]) -> (match go x acc with Some acc -> go y acc | None -> None)
-    | _ -> None in
-  Option.map (List.sort_uniq compare) (go t [])
+  let seen = Hashtbl.create 64 and out = ref [] and ok = ref true in
+  let rec go (t : Smt.term) =
+    if !ok && not (Hashtbl.mem seen t.id) then begin
+      Hashtbl.replace seen t.id ();
+      match t.node with
+      | K n -> out := n :: !out
+      | App ("ite", _, [ _; x; y ]) -> go x; go y
+      | _ -> ok := false
+    end in
+  go t;
+  if !ok then Some (List.sort_uniq compare !out) else None
 
 let merge_effects g (x : Sym.effects) (y : Sym.effects) : Sym.effects =
   let i = Smt.ite g in

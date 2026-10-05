@@ -54,7 +54,8 @@ let run ?(progress = 0) ~name ~depth ~(step : int -> Smt.term * Smt.term list) ~
     incr k;
     if progress > 0 && !k mod progress = 0 then
       Printf.printf "  %s depth %4d: %7d definitions, %4d goals checked, solver %7.2f s, total %7.2f s\n%!"
-        name !k s.Smt.Solver.defs !checks !solver_s (now () -. t0)
+        name !k s.Smt.Solver.defs !checks !solver_s (now () -. t0);
+    if Sys.getenv_opt "BMC_DEBUG" <> None then Printf.eprintf "  [%d term nodes built]\n%!" (Smt.nodes_built ())
   done;
   let covers =
     if !violation <> None then []

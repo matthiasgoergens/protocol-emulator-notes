@@ -250,7 +250,7 @@ let uart_functional ~name ?stretch ?(anytime = false) ~bytes ~depth () =
     let t, _, e = Machine.clock m ~k io in
     P.uart_rx_step rx ~thread:t ~io ~e ~st:m.st, [] in
   let covers () = [ Printf.sprintf "%d frames received" bytes, Smt.eq rx.frames (Smt.k ~w:8 bytes) ] in
-  let r = Bmc.run ~progress:100 ~name ~depth ~step ~covers () in
+  let r = Bmc.run ~progress:(if anytime then 4 else 100) ~name ~depth ~step ~covers () in
   Bmc.report r;
   (match r.violation with
    | None -> ()

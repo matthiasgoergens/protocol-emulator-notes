@@ -96,10 +96,19 @@ let ite s x y =
       | _ -> (match s.node with App ("not", _, [ s' ]) -> app "ite" [] [ s'; y; x ] x.sort | _ -> app "ite" [] [ s; x; y ] x.sort)
     end
 
+(* eq pushes into ite trees of constants; memoised, because those trees share subterms *)
+let eq_memo : (int * int, term) Hashtbl.t = Hashtbl.create 100_000
+
 let rec eq x y =
   same_width x y;
   if x == y then tt
-  else match x.node, y.node with
+  else
+    let key = (x.id, y.id) in
+    match Hashtbl.find_opt eq_memo key with
+    | Some r -> r
+    | None -> let r = eq_uncached x y in Hashtbl.add eq_memo key r; r
+and eq_uncached x y =
+  match x.node, y.node with
     | K a, K c -> b (a = c)
     (* a comparison of a tree of constants with a constant folds to a condition on the tree *)
     | App ("ite", _, [ s; p; q ]), K _ when (is_k p || is_ite p) && (is_k q || is_ite q) -> ite_bool s (eq p y) (eq q y)
