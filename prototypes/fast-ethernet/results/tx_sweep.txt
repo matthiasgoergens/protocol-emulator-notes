@@ -1,0 +1,314 @@
+# PARTIAL: interrupted by a host restart after 127 of 144 cells (2026-09-25); cells missing are listed by comparing with tx_sweep.sh
+# 100BASE-TX receive sweep (tx_sweep.sh at worktree dac659c + uncommitted); stream: main.exe txgen 200 (200 frames 64/128/512/1518 B after 10 000 idle clocks); ppm +200, sampling jitter 0.2 ns rms, amp 0.97 V, tr 2.9 ns (spice eye_tx tt 27 C); thresholds +-0.5 V (x g)
+len 1 eq none g 1 corner tt osr 2 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 98 loss 51.0% false_acc 0 | bit_err 12 / 66272 BER 1.8e-04 | 64B:20% 128B:18% 512B:70% 1518B:96% | locked 1 overflow 1
+len 1 eq none g 1 corner tt osr 4 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 1 eq none g 1 corner ss osr 2 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 1 overflow 1
+len 1 eq none g 1 corner ff osr 2 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 86 loss 57.0% false_acc 0 | bit_err 4 / 26624 BER 1.5e-04 | 64B:10% 128B:36% 512B:82% 1518B:100% | locked 1 overflow 1
+len 1 eq none g 1 corner ss osr 4 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 1 overflow 0
+len 1 eq none g 1 corner ff osr 4 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 1 eq none g 2 corner tt osr 4 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 1 eq none g 2 corner ss osr 2 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 97 loss 51.5% false_acc 0 | bit_err 41 / 180816 BER 2.3e-04 | 64B:18% 128B:16% 512B:74% 1518B:98% | locked 1 overflow 1
+len 1 eq none g 2 corner tt osr 2 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 82 loss 59.0% false_acc 0 | bit_err 40 / 92528 BER 4.3e-04 | 64B:18% 128B:34% 512B:84% 1518B:100% | locked 1 overflow 1
+len 1 eq none g 2 corner ff osr 2 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 89 loss 55.5% false_acc 0 | bit_err 10 / 40304 BER 2.5e-04 | 64B:8% 128B:34% 512B:82% 1518B:98% | locked 1 overflow 1
+len 1 eq none g 2 corner ff osr 4 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 1 eq none g 2 corner ss osr 4 | len 1.0 m eq none amp 0.97 tr 2.9 | best phase 4.75 ns: eye upper 726 mV lower 725 mV, worst margin to +-0.5 V thresholds 346 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 2 eq none g 1 corner tt osr 2 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 96 loss 52.0% false_acc 0 | bit_err 14 / 57712 BER 2.4e-04 | 64B:20% 128B:16% 512B:72% 1518B:100% | locked 1 overflow 1
+len 2 eq none g 1 corner tt osr 4 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 2 eq none g 1 corner ss osr 2 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 1 overflow 1
+len 2 eq none g 1 corner ss osr 4 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 1 overflow 0
+len 2 eq none g 1 corner ff osr 4 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 2 eq none g 1 corner ff osr 2 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 91 loss 54.5% false_acc 0 | bit_err 4 / 31232 BER 1.3e-04 | 64B:8% 128B:32% 512B:78% 1518B:100% | locked 1 overflow 1
+len 2 eq none g 2 corner tt osr 2 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 90 loss 55.0% false_acc 0 | bit_err 61 / 192448 BER 3.2e-04 | 64B:18% 128B:26% 512B:76% 1518B:100% | locked 1 overflow 1
+len 2 eq none g 2 corner tt osr 4 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 2 eq none g 2 corner ss osr 2 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 90 loss 55.0% false_acc 0 | bit_err 21 / 109424 BER 1.9e-04 | 64B:20% 128B:28% 512B:72% 1518B:100% | locked 1 overflow 1
+len 2 eq none g 2 corner ss osr 4 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 2 eq none g 2 corner ff osr 4 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 2 eq none g 2 corner ff osr 2 | len 2.0 m eq none amp 0.97 tr 2.9 | best phase 4.25 ns: eye upper 722 mV lower 714 mV, worst margin to +-0.5 V thresholds 337 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 86 loss 57.0% false_acc 0 | bit_err 6 / 39280 BER 1.5e-04 | 64B:8% 128B:36% 512B:86% 1518B:98% | locked 1 overflow 1
+len 5 eq none g 1 corner tt osr 2 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 97 loss 51.5% false_acc 0 | bit_err 48 / 220464 BER 2.2e-04 | 64B:10% 128B:28% 512B:68% 1518B:100% | locked 1 overflow 1
+len 5 eq none g 1 corner tt osr 4 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 5 eq none g 1 corner ss osr 2 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 1 overflow 1
+len 5 eq none g 1 corner ss osr 4 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 1 overflow 0
+len 5 eq none g 1 corner ff osr 2 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 100 loss 50.0% false_acc 0 | bit_err 50 / 239120 BER 2.1e-04 | 64B:12% 128B:24% 512B:70% 1518B:94% | locked 1 overflow 1
+len 5 eq none g 2 corner tt osr 2 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 98 loss 51.0% false_acc 0 | bit_err 53 / 234656 BER 2.3e-04 | 64B:10% 128B:20% 512B:74% 1518B:100% | locked 1 overflow 1
+len 5 eq none g 1 corner ff osr 4 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 5 eq none g 2 corner tt osr 4 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 5 eq none g 2 corner ss osr 4 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 5 eq none g 2 corner ss osr 2 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 80 loss 60.0% false_acc 0 | bit_err 0 / 4096 BER 0.0e+00 | 64B:16% 128B:34% 512B:90% 1518B:100% | locked 1 overflow 1
+len 5 eq none g 2 corner ff osr 2 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 106 loss 47.0% false_acc 0 | bit_err 16 / 100656 BER 1.6e-04 | 64B:8% 128B:24% 512B:62% 1518B:94% | locked 1 overflow 1
+len 5 eq none g 2 corner ff osr 4 | len 5.0 m eq none amp 0.97 tr 2.9 | best phase 5.00 ns: eye upper 671 mV lower 666 mV, worst margin to +-0.5 V thresholds 300 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 10 eq none g 1 corner tt osr 4 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 10 eq none g 1 corner tt osr 2 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 109 loss 45.5% false_acc 0 | bit_err 20 / 269040 BER 7.4e-05 | 64B:12% 128B:20% 512B:62% 1518B:88% | locked 1 overflow 1
+len 10 eq none g 1 corner ss osr 2 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 10 eq none g 1 corner ss osr 4 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 10 eq none g 1 corner ff osr 2 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 117 loss 41.5% false_acc 0 | bit_err 50 / 358576 BER 1.4e-04 | 64B:16% 128B:14% 512B:50% 1518B:86% | locked 1 overflow 1
+len 10 eq none g 1 corner ff osr 4 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 10 eq none g 2 corner tt osr 2 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 115 loss 42.5% false_acc 0 | bit_err 27 / 221136 BER 1.2e-04 | 64B:16% 128B:20% 512B:64% 1518B:70% | locked 1 overflow 1
+len 10 eq none g 2 corner tt osr 4 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 10 eq none g 2 corner ss osr 2 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 103 loss 48.5% false_acc 0 | bit_err 8 / 76880 BER 1.0e-04 | 64B:18% 128B:24% 512B:62% 1518B:90% | locked 1 overflow 1
+len 10 eq none g 2 corner ff osr 2 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 113 loss 43.5% false_acc 0 | bit_err 61 / 331728 BER 1.8e-04 | 64B:12% 128B:16% 512B:54% 1518B:92% | locked 1 overflow 1
+len 10 eq none g 2 corner ss osr 4 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 10 eq none g 2 corner ff osr 4 | len 10.0 m eq none amp 0.97 tr 2.9 | best phase 5.25 ns: eye upper 584 mV lower 584 mV, worst margin to +-0.5 V thresholds 241 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 20 eq none g 1 corner tt osr 2 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 1 overflow 1
+len 20 eq none g 1 corner tt osr 4 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 12 loss 94.0% false_acc 0 | bit_err 10 / 1536 BER 6.5e-03 | 64B:82% 128B:94% 512B:100% 1518B:100% | locked 1 overflow 0
+len 20 eq none g 1 corner ss osr 2 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 20 eq none g 1 corner ss osr 4 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 20 eq none g 1 corner ff osr 2 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 14 loss 93.0% false_acc 0 | bit_err 0 / 1536 BER 0.0e+00 | 64B:84% 128B:88% 512B:100% 1518B:100% | locked 1 overflow 1
+len 20 eq none g 1 corner ff osr 4 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 94 loss 53.0% false_acc 0 | bit_err 40 / 109936 BER 3.6e-04 | 64B:14% 128B:20% 512B:78% 1518B:100% | locked 1 overflow 0
+len 20 eq none g 2 corner tt osr 2 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 170 loss 15.0% false_acc 0 | bit_err 13 / 692160 BER 1.9e-05 | 64B:0% 128B:6% 512B:16% 1518B:38% | locked 1 overflow 1
+len 20 eq none g 2 corner tt osr 4 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 20 eq none g 2 corner ss osr 2 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 112 loss 44.0% false_acc 0 | bit_err 11 / 148352 BER 7.4e-05 | 64B:26% 128B:30% 512B:40% 1518B:80% | locked 1 overflow 1
+len 20 eq none g 2 corner ss osr 4 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 162 loss 19.0% false_acc 0 | bit_err 33 / 672848 BER 4.9e-05 | 64B:0% 128B:4% 512B:20% 1518B:52% | locked 1 overflow 0
+len 20 eq none g 2 corner ff osr 2 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 180 loss 10.0% false_acc 0 | bit_err 15 / 778848 BER 1.9e-05 | 64B:4% 128B:0% 512B:14% 1518B:22% | locked 1 overflow 1
+len 20 eq none g 2 corner ff osr 4 | len 20.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 427 mV lower 409 mV, worst margin to +-0.5 V thresholds 121 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 200 loss 0.0% false_acc 0 | bit_err 0 / 888800 BER 0.0e+00 | 64B:0% 128B:0% 512B:0% 1518B:0% | locked 1 overflow 0
+len 20 eq shelf g 1 corner tt osr 2 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 20 eq shelf g 1 corner tt osr 4 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 20 eq shelf g 1 corner ss osr 2 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 20 eq shelf g 1 corner ss osr 4 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 20 eq shelf g 1 corner ff osr 2 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 20 eq shelf g 1 corner ff osr 4 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 20 eq shelf g 2 corner tt osr 2 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 20 eq shelf g 2 corner tt osr 4 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 20 eq shelf g 2 corner ss osr 2 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 20 eq shelf g 2 corner ss osr 4 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 20 eq shelf g 2 corner ff osr 2 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 30 eq none g 1 corner tt osr 2 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 20 eq shelf g 2 corner ff osr 4 | len 20.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.00 ns: eye upper -268 mV lower -267 mV, worst margin to +-0.5 V thresholds -416 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq none g 1 corner ss osr 2 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 30 eq none g 1 corner tt osr 4 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq none g 1 corner ss osr 4 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq none g 1 corner ff osr 2 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 30 eq none g 1 corner ff osr 4 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq none g 2 corner tt osr 2 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 1 loss 99.5% false_acc 0 | bit_err 0 / 0 BER nan | 64B:98% 128B:100% 512B:100% 1518B:100% | locked 1 overflow 1
+len 30 eq none g 2 corner tt osr 4 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 2 loss 99.0% false_acc 0 | bit_err 3 / 512 BER 5.9e-03 | 64B:96% 128B:100% 512B:100% 1518B:100% | locked 1 overflow 0
+len 30 eq none g 2 corner ss osr 2 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 30 eq none g 2 corner ss osr 4 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 1 overflow 0
+len 30 eq none g 2 corner ff osr 2 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 4 loss 98.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:96% 128B:96% 512B:100% 1518B:100% | locked 1 overflow 1
+len 30 eq none g 2 corner ff osr 4 | len 30.0 m eq none amp 0.97 tr 2.9 | best phase 6.00 ns: eye upper 266 mV lower 248 mV, worst margin to +-0.5 V thresholds 13 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 15 loss 92.5% false_acc 0 | bit_err 2 / 512 BER 3.9e-03 | 64B:78% 128B:92% 512B:100% 1518B:100% | locked 1 overflow 0
+len 30 eq shelf g 1 corner tt osr 2 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 30 eq shelf g 1 corner ss osr 2 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq shelf g 1 corner tt osr 4 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq shelf g 1 corner ss osr 4 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq shelf g 1 corner ff osr 2 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 30 eq shelf g 1 corner ff osr 4 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq shelf g 2 corner tt osr 2 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 30 eq shelf g 2 corner ss osr 2 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 30 eq shelf g 2 corner tt osr 4 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq shelf g 2 corner ss osr 4 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq shelf g 2 corner ff osr 4 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 30 eq shelf g 2 corner ff osr 2 | len 30.0 m eq shelf amp 0.97 tr 2.9 | best phase 0.75 ns: eye upper -315 mV lower -315 mV, worst margin to +-0.5 V thresholds -417 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 50 eq none g 1 corner tt osr 2 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 50 eq none g 1 corner tt osr 4 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq none g 1 corner ss osr 2 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 50 eq none g 1 corner ss osr 4 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq none g 1 corner ff osr 2 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 50 eq none g 1 corner ff osr 4 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq none g 2 corner tt osr 2 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 50 eq none g 2 corner ss osr 2 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 50 eq none g 2 corner tt osr 4 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq none g 2 corner ss osr 4 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq none g 2 corner ff osr 2 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 50 eq none g 2 corner ff osr 4 | len 50.0 m eq none amp 0.97 tr 2.9 | best phase 7.00 ns: eye upper -3 mV lower -31 mV, worst margin to +-0.5 V thresholds -184 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq shelf g 1 corner tt osr 2 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq shelf g 1 corner tt osr 4 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq shelf g 1 corner ss osr 2 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq shelf g 1 corner ss osr 4 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq shelf g 1 corner ff osr 4 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq shelf g 1 corner ff osr 2 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq shelf g 2 corner tt osr 2 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 50 eq shelf g 2 corner ss osr 2 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq shelf g 2 corner tt osr 4 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq shelf g 2 corner ss osr 4 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 50 eq shelf g 2 corner ff osr 2 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 50 eq shelf g 2 corner ff osr 4 | len 50.0 m eq shelf amp 0.97 tr 2.9 | best phase 1.75 ns: eye upper -233 mV lower -229 mV, worst margin to +-0.5 V thresholds -418 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 100 eq none g 1 corner tt osr 2 | len 100.0 m eq none amp 0.97 tr 2.9 | best phase 7.75 ns: eye upper -544 mV lower -577 mV, worst margin to +-0.5 V thresholds -571 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 100 eq none g 1 corner ss osr 2 | len 100.0 m eq none amp 0.97 tr 2.9 | best phase 7.75 ns: eye upper -544 mV lower -577 mV, worst margin to +-0.5 V thresholds -571 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 100 eq none g 1 corner tt osr 4 | len 100.0 m eq none amp 0.97 tr 2.9 | best phase 7.75 ns: eye upper -544 mV lower -577 mV, worst margin to +-0.5 V thresholds -571 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 100 eq none g 1 corner ss osr 4 | len 100.0 m eq none amp 0.97 tr 2.9 | best phase 7.75 ns: eye upper -544 mV lower -577 mV, worst margin to +-0.5 V thresholds -571 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 100 eq none g 1 corner ff osr 4 | len 100.0 m eq none amp 0.97 tr 2.9 | best phase 7.75 ns: eye upper -544 mV lower -577 mV, worst margin to +-0.5 V thresholds -571 mV samples 4691975, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 0
+len 100 eq none g 1 corner ff osr 2 | len 100.0 m eq none amp 0.97 tr 2.9 | best phase 7.75 ns: eye upper -544 mV lower -577 mV, worst margin to +-0.5 V thresholds -571 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+len 100 eq none g 2 corner tt osr 2 | len 100.0 m eq none amp 0.97 tr 2.9 | best phase 7.75 ns: eye upper -544 mV lower -577 mV, worst margin to +-0.5 V thresholds -571 mV samples 2345986, both-slicer conflicts 0 | sent 200 intact 0 loss 100.0% false_acc 0 | bit_err 0 / 0 BER nan | 64B:100% 128B:100% 512B:100% 1518B:100% | locked 0 overflow 1
+error: Request failed after 3 retries in 47.4s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: operation timed out
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-none-2-tt-4.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq none g 2 corner tt osr 4 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 48.9s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: operation timed out
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-none-2-ss-2.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq none g 2 corner ss osr 2 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 48.1s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-none-2-ss-4.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq none g 2 corner ss osr 4 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 6.4s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-none-2-ff-4.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq none g 2 corner ff osr 4 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 10.8s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-none-2-ff-2.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq none g 2 corner ff osr 2 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 7.3s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-1-tt-2.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 1 corner tt osr 2 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 5.4s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-1-tt-4.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 1 corner tt osr 4 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 5.1s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-1-ss-2.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 1 corner ss osr 2 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 7.4s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-1-ss-4.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 1 corner ss osr 4 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 9.1s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-1-ff-2.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 1 corner ff osr 2 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 9.2s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-1-ff-4.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 1 corner ff osr 4 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 5.1s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-2-tt-4.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 2 corner tt osr 4 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 11.8s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-2-tt-2.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 2 corner tt osr 2 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 5.7s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-2-ss-2.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 2 corner ss osr 2 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 6.2s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-2-ss-4.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 2 corner ss osr 4 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 11.1s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-2-ff-2.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 2 corner ff osr 2 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI
+error: Request failed after 3 retries in 12.7s
+  cause: Failed to fetch: `https://pypi.org/simple/numpy/`
+  cause: error sending request for url (https://pypi.org/simple/numpy/)
+  cause: client error (Connect)
+  cause: dns error
+  cause: failed to lookup address information: Temporary failure in name resolution
+Fatal error: exception Sys_error("/var/tmp/fast-eth/tx/s-100-shelf-2-ff-4.txt: No such file or directory")
+Raised by primitive operation at Stdlib.open_in_gen in file "stdlib.ml", line 405, characters 28-54
+Called from Stdlib.open_in in file "stdlib.ml" (inlined), line 410, characters 2-45
+Called from Dune__exe__Main in file "main.ml", line 215, characters 13-28
+len 100 eq shelf g 2 corner ff osr 4 | |   TX pins: minimum spacing between edges on one pin: A 2 UI, B 2 UI

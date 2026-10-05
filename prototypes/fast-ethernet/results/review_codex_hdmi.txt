@@ -1,0 +1,674 @@
+Reading additional input from stdin...
+OpenAI Codex v0.160.0
+--------
+workdir: /home/matthias/prog/janestreet/emulator-wt-fast-eth/prototypes/fast-ethernet
+model: gpt-6-luna
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a10b4d-87d8-7cc0-b189-deb23f940b4f
+--------
+user
+You are reviewing a simulation study in this directory (read-only). Read README.md (sections 'Step 1: the IHP I/O pads' and 'Pad speed for HDMI / DVI and faster links'), spice/padsim.py (cases hdmi, hdmi4, rcap, inf_, inac_) and results/pads_hdmi.txt. Try to BREAK the conclusion that HDMI/DVI at 240-250 Mbit/s per lane is electrically plausible from IHP sg13g2 30 mA pads driving each TMDS pair pseudo-differentially through 270 ohm series resistors into a sink with 50 ohm to 3.3 V. Look for: modelling errors in the netlists (load, termination, cable, supply, the way the eye is measured in spice/analyse.py eye_ui/hdmi), wrong or misremembered TMDS electrical requirements (swing, common mode, rise time, intra-pair skew, eye mask), effects left out that would change the verdict, and numbers in the README that the results file does not support. Answer as a numbered list of concrete findings, each with the file/line or number it concerns and how severe it is (changes the verdict / changes a number / cosmetic). Say plainly if you find nothing that changes the verdict.
+2026-10-05T09:03:13.708985Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/\"" })
+2026-10-05T09:03:13.981088Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when UnexpectedServerResponse("HTTP 401: {\"errors\":[\"Unauthorized\"]}")
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+I’ll read the specified sections and netlists, then check the TMDS requirements against authoritative sources and inspect the eye-analysis code so the review tests the conclusion at its weakest points.
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,240p' README.md" in /home/matthias/prog/janestreet/emulator-wt-fast-eth/prototypes/fast-ethernet
+ succeeded in 0ms:
+# 100 Mbit/s Ethernet without a PHY chip, on the IHP Tiny Tapeout chip
+
+Two routes to 100 Mbit/s Ethernet straight from the chip's pins, IHP SG13G2 (1.2 V core, sg13g2_io
+pads at 3.3 V), with a core clock of 62.5 MHz:
+
+1. **100BASE-FX through an SFP fibre module**: 125 Mbaud NRZI with 4B5B coding.
+2. **100BASE-TX straight onto copper**: 125 Mbaud MLT-3 after 4B5B and a scrambler.
+
+**Verdict in one paragraph.**
+- **The pads are not the limit.** The 30 mA output pads that Tiny Tapeout wires to `uo_out` and `uio` switch cleanly to 250 Mtoggles/s into 10 pF in every corner.
+- **100BASE-FX is feasible.** Transmit needs both clock edges. Receive needs a front end that samples at least 3 times per UI to be robust. At 2 samples per UI, which the four-phase stage gives at 62.5 MHz, it works without frequency offset or without jitter, but frames are lost when both are present.
+- **The receive input needs gain.** The CMOS input pad cannot slice an SFP's LVPECL output directly in slow silicon, because it needs ±300 mV of overdrive at 62.5 MHz. One small part fixes that: a 1:2 transformer or a differential receiver.
+- **100BASE-TX transmit works from two pins and three resistors.** The simulated waveform is close to the TP-PMD template. The rise time is slightly too fast and is fixed with a capacitor.
+- **100BASE-TX receive works over a few metres of cable at 3–4 samples per UI**, with two CMOS input pads as slicers biased from the transformer centre tap. It fails on long cables, where the lack of adaptive equalisation shows, and in slow silicon unless the pads get more signal.
+
+The pieces are reusable: a line-code unit, an LFSR scrambler, a 4B5B block code, a delimiter
+aligner, and an oversampling CDR (see "Reusable units").
+
+Everything below points to a file. Raw simulation data is in `/var/tmp/fast-eth/` (scratch, not
+committed); the summaries are in `results/`.
+
+## Step 1: the IHP I/O pads
+
+**Which pads.** From Tiny Tapeout's own TTIHP 26a chip netlist, `release/v.1.0.0/netlist/tt_ihp_wrapper.v` in `tinytapeout-ihp-26a-foundry-submission` (fetched 2026-09-25, copy in `/var/tmp/fast-eth/tt_ihp_wrapper_26a.v`):
+- `uo_out` uses `sg13g2_IOPadOut30mA`;
+- `uio` uses `sg13g2_IOPadInOut30mA`;
+- `ui_in` and the other digital inputs use `sg13g2_IOPadIn`;
+- IOVDD is 3.3 V and the core 1.2 V (its `doc/Datasheet.md`).
+
+The early ttihp 0p1 chip used the 4 mA pads instead.
+
+**How.** The runs are `spice/padsim.py` and `spice/run_all.sh`, analysed by `spice/analyse.py`, with all numbers in `results/pads.txt`.
+- **Tools:** ngspice 44.2 with PSP103 and R3_CMC (compiled with openvaf-r in the container), using the PDK's own `sg13g2_io.spi`.
+- **Corners:** tt (1.2 V / 3.3 V), ss (1.08 V / 3.0 V) and ff (1.32 V / 3.6 V), each at 27 °C and 85 °C.
+- **Package and board:** a 2 nH bond wire plus a lumped capacitance.
+- **Not modelled:** supply inductance, so ground bounce from simultaneous switching is not in these numbers.
+
+Two changes to the PDK netlist were needed to simulate at all. Both are reproduced in isolation (`/var/tmp/fast-eth/pads/dbg-*`) and documented in `padsim.py`:
+- **The clamp-gate antenna diodes are removed.** These are 0.3 µm² `dantenna` junctions. With them, every transient that switches the driver stops with "timestep too small": level shifter plus clamps fails, the same circuit without them runs.
+- **The pad ESD diodes use simplified model cards.** The same `dantenna` / `dpantenna` models fail when the pad passes through 0 V, so I kept saturation current, series resistance and capacitance, and dropped the breakdown, recombination and high-injection terms, which only act far outside 0 to IOVDD.
+
+**Output pads, toggle test into 10 pF.** The table gives swing as a percentage of IOVDD (`results/pads.txt`):
+
+| pad | 125 Mt/s | 250 Mt/s | 333 Mt/s |
+|---|---|---|---|
+| 30 mA (TT's uo_out, uio) | 100 % every corner | 98-100 % | 89-100 % |
+| 16 mA | 100 % | 84-99 % | 67-94 % |
+| 4 mA (ttihp 0p1) | 56-84 % | 30-48 % | 24-36 % |
+
+**30 mA pad, PRBS7 NRZI at 125 Mbaud.**
+- **10-90 % edges:** 0.8-1.6 ns into 5 pF and 1.3-2.2 ns into 10 pF.
+- **Delay from the core to the pin:** 1.7-3.5 ns.
+- **Data-dependent jitter:** at most 0.44 ns peak to peak.
+- **Eye:** fully open in every corner, both temperatures.
+
+The maximum clean toggle rate is above 250 Mt/s for the 30 mA pad, and about 100 Mt/s for the 4 mA pad in slow corners.
+
+**Input pad `sg13g2_IOPadIn`.**
+- **Switching point: 0.55-0.63 V.** From `in_dc` over the corners. It is not mid-rail: the input stage is a thick-oxide inverter supplied from the 1.2 V core. It has no hysteresis. That is below LVTTL's V_IL of 0.8 V, so a 0.7 V "low" from a 3.3 V part reads as a 1.
+- **Small signals at 62.5 MHz**, a sine centred on its own threshold through 50 Ω, 3 pF and 2 nH:
+  - ±300 mV toggles in every corner, with the output duty cycle at 53-60 % and a delay of 1.2-3.7 ns;
+  - ±150 mV fails at ss (no output swing);
+  - ±75 mV fails at ss and at tt 27 °C.
+
+  **So a slicer built from this pad needs about ±0.3 V of overdrive to cover slow silicon**, and about ±0.1 V at typical.
+- **A full-swing 0-3.3 V clock at 62.5 MHz comes out at 56-58 % duty cycle**, because the threshold is low. Every digital input on TTIHP 26a is this pad (I did not trace which gpio carries `clk`), so the core clock probably arrives with a 7 % duty-cycle error, about 1.1 ns at 62.5 MHz. That matters for any both-edges output: see the transmit notes below.
+
+### Pad speed for HDMI / DVI and faster links (2026-10-05)
+
+These runs are in `results/pads_hdmi.txt` (`spice/run_hdmi.sh`). The core-side drive is an ideal PRBS7 into the pad's `c2p` at the bit rate, so they say what the pads can do, not how the core makes 250 Mbit/s. That needs the four-phase stage, or a 10-to-4 gearbox at 60-62.5 MHz.
+
+**Drive-strength options in sg13g2_io:** `IOPadOut` / `TriOut` / `InOut` at 4, 16 and 30 mA, plus `IOPadAnalog`. On TTIHP 26a the choice is already made: the 30 mA cells. The 4 mA cell would not do these rates (toggle table above).
+
+**Into 2 nH plus 10 pF** (30 mA pad, PRBS7 NRZ):
+
+| rate | eye opening above 50 % of IOVDD, worst (ss 85 °C) to best (ff 27 °C) |
+|---|---|
+| 120 Mbit/s | 0.86-0.91 UI |
+| 240 Mbit/s | 0.67-0.81 UI |
+| 250 Mbit/s | 0.68-0.81 UI (5 pF: 0.76-0.88 UI) |
+
+The full swing is reached in every case (97-100 %), with 10-90 % edges of 1.3-2.2 ns.
+
+**HDMI / DVI pair, driven pseudo-differentially.** The arrangement:
+- two 30 mA pads in antiphase per pair, each through a series resistor Rs at the chip;
+- 10 cm of board plus 1 m of cable, modelled as 50 Ω per conductor, lossless;
+- the sink's 50 Ω to AVcc = 3.3 V on each conductor, plus 1.5 pF.
+
+With a pin low, the line sits at 3.3 V × (Rs + Ron) / (Rs + Ron + 50), so the pad acts as the current switch a real TMDS source has.
+
+| Rs | rate | diff swing p-p | eye height | eye open ≥ 150 mV | common mode |
+|---|---|---|---|---|---|
+| 270 Ω | 120 Mbit/s | 0.87-1.13 V | 0.82-1.03 V | 0.96-0.97 UI | 3.06-3.09 V |
+| 270 Ω | 240 Mbit/s | 0.87-1.14 V | 0.80-1.03 V | 0.88-0.94 UI | 3.07-3.08 V |
+| 270 Ω | 250 Mbit/s | 0.87-1.14 V | 0.81-1.03 V | 0.86-0.93 UI | 3.07-3.08 V |
+| 120 Ω | 250 Mbit/s | 1.37-1.93 V | 1.26-1.80 V | 0.91-0.95 UI | 2.91-2.95 V |
+
+**Verdict: HDMI / DVI at 240-250 Mbit/s per lane is electrically plausible from these pads**, with 8 resistors and an HDMI connector: four pairs (three data and the clock) use all 8 `uo_out` pins.
+- **Use about 270 Ω.** It gives TMDS-like levels: the line low at 2.8 V (about 10 mA per pin), about 1 V p-p differential, and a common mode of 3.07 V.
+- **Avoid 120 Ω.** It gives a bigger swing, but 1.4-1.9 V p-p exceeds the 1.2 V maximum I remember, and its 2.9 V common mode is below the window.
+- **The TMDS limits used here are from memory and NOT checked against the DVI or HDMI text:** a receiver needs at least 150 mV differential; the common mode must lie between AVcc − 300 mV and AVcc − 37.5 mV; the swing must stay under 1.2 V p-p.
+
+**Ground bounce, simulated** (`results/pads_hdmi.txt`; one corner, tt 27 °C). All 8 pads switch together, with IOVDD and IOVSS each through 1 nH and an assumed 100 pF of on-die IO decoupling:
+- **the IO rails bounce by 0.37-0.41 V p-p;**
+- **the pair's differential eye barely changes:** open over 0.86-0.90 UI against 0.93 without bounce, with the same swing and height. A pseudo-differential pair rejects bounce common to both pins.
+- **The real casualty would be single-ended inputs on the same ring:** 0.4 V of IOVSS bounce against a 0.59 V input threshold. Keep fast inputs (Ethernet receive) away from the HDMI pins, or do not run both at once.
+
+**Not modelled:**
+- cable loss: 1 m at 125 MHz is small, but longer cables matter;
+- skew between the pads of a pair, which shows up as common-mode noise;
+- whether a given monitor accepts a 24 MHz pixel clock.
+
+The edges (0.8-1.3 ns, 20-80 %) are fast for the rate, so ringing at the connector is the board's job.
+
+**Input pad at 125 MHz:**
+- **A full-swing square** comes through in every corner, at 58-63 % duty cycle with 0.35-0.85 ns delay.
+- **±600 mV** comes through in every corner (51-54 % duty).
+- **±300 mV** fails at ss 27 °C (works at 62.5 MHz).
+
+So the pads can also *receive* 250 Mbit/s if the signal is large.
+
+## Step 2: 100BASE-FX via an SFP module
+
+### Design
+
+Transmit (`pcs.ml`, `tx ~media:Fx`), at 2 code bits per clock:
+- a byte interface, one byte per 5 clocks;
+- /J/K/ replaces the first preamble octet, then 6 × 0x55, the SFD, data, a CRC-32 FCS computed on the fly, /T/R/, and 12 octets of /I/ before the next frame;
+- 4B5B, then a 10-bit gearbox that shifts out 2 bits per clock;
+- NRZI, 2 levels per clock.
+
+The two levels go out on one clock's rising and falling edges. **Assumption:** a both-edges output stage. That is the four-phase stage with 2 of its 4 lanes, or the classic XOR of a rising-edge and a falling-edge flop. The line has 8 ns resolution, so a finer stage is not needed.
+
+**SFP transmit interface.** Two 30 mA pads in antiphase, each through 150 Ω, into the SFP's internally AC-coupled 100 Ω differential input (the SFP MSA puts the coupling capacitors and termination inside the module):
+- simulated 1.18-1.58 V peak-to-peak differential, with 1.1-1.5 V of eye in every corner (`results/pads.txt`, "SFP transmit input");
+- that is inside the usual 0.5-2.4 V SFP input range (from memory of SFP datasheets, not checked against the MSA text);
+- the crossing spread of 0.75 ns includes the coupling capacitors still settling in a 1 µs run, so it is an upper bound.
+
+Receive (`pcs.ml`, `rx ~media:Fx`, plus `cdr.ml`):
+- the sampler delivers n samples per clock;
+- the CDR turns them into 0-3 UIs per clock;
+- NRZI decode;
+- the delimiter aligner finds /J/K/ at any bit position and emits 5-bit groups;
+- 4B5B decode;
+- the frame state machine strips the preamble at the SFD, checks the CRC-32 residual (0xDEBB20E3), and requires /T/R/ at an even nibble.
+
+Any other symbol ends the frame as bad. Bad frames are signalled, never passed as good.
+
+The CDR (`cdr.ml`) is a precise fixed-point model written the way the hardware would be: integer arithmetic, bounded work per clock, and one clock of look-ahead. It has two parts.
+- **At 3 or more samples per UI:** a second-order digital PLL on edge positions, with 16 fractional bits (so the frequency integrator resolves about 8 ppm; with 8 bits it pinned at ±2000 ppm, found by trace). It decides each UI from edges, not by picking samples: each edge is assigned to its nearest UI boundary.
+- **At exactly 2 samples per UI:** a separate slot tracker. There, the PLL has a false lock. I showed at source, and measured, that when edges straddle a sample, the edge positions alone cannot tell which of the two samples is the eye centre. The tracker follows the jitter cluster between two sample slots, and learns the direction of the frequency offset in idle, where every run is one UI, so that the sum of (run − 2) is exactly the drift in samples.
+
+**This CDR is not yet in Hardcaml.** The rest of the receive path is.
+
+**Front-end assumptions (someone else's block, modelled behaviourally in `line.ml`):**
+- n = 2 samples per clock is both edges of the 62.5 MHz clock (1 sample per UI);
+- n = 4 is the four-phase stage (2 per UI);
+- n = 6 or 8 would need 6 or 8 phases, or a delay-line / TDC sampler (3 or 4 per UI).
+
+A per-tap phase error models multi-phase mismatch.
+
+**SFP receive interface.** The SFP's receive output is LVPECL/CML, typically 0.6-1.2 V peak to peak differential (again from memory of datasheets), so about ±150-300 mV per leg. The input pad needs ±300 mV at ss, so **a single leg into a biased pad works at tt and ff and fails in slow silicon.** Options, in order of robustness:
+1. **A small differential receiver** (an LVPECL/LVDS-to-LVCMOS translator). One part, and it always works. It is the fallback, not the fun answer.
+2. **A 1:2 RF transformer (balun), e.g. Mini-Circuits ADT4-1WT (1:4 impedance, 2-775 MHz).** It turns the differential signal into a single-ended one of twice the voltage, centred by a divider on the pad threshold. Its 2 MHz low corner is acceptable for FX, whose NRZI runs are at most 4 UI, but not for scrambled 100BASE-TX.
+3. **Resistors only**: AC-couple one leg, and bias it at the pad threshold with a divider, or better with a threshold servo. In a servo, the chip drives a PWM pin into an RC and adjusts the duty until the sliced idle pattern (/I/ is a 62.5 MHz square wave) is 50/50, which cancels the 0.55-0.63 V spread of the threshold. **Margin in slow silicon is too small.**
+
+### Verification
+
+**Checks** (`opam exec --switch=5.3.0 -- dune build`, then `./_build/default/main.exe`; each prints its pass lines):
+- **Reference model** `ref_model.ml`, written independently from the code tables as list-level OCaml: bit-serial CRC-32 (checked on "123456789" = 0xCBF43926), 4B5B, NRZI, MLT-3, the x^11+x^9+1 keystream (checked to be maximal length, 2047), and a stream decoder. The 4B5B table was checked against Wikipedia's on 2026-09-25.
+- **The RTL transmitter's code stream decodes to the same frames** as the reference.
+- **Every frame is delimited and its FCS is correct.**
+- **The NRZI line decodes back to the code stream.**
+- **At most 3 zeros in a row** anywhere in the coded stream.
+- **The RTL receiver recovers every frame** from the reference line, on an ideal input.
+
+**Loss sweep.** Frame loss rate against oversampling, random jitter and frequency offset:
+- **Setup:** `results/fx_sweep.txt`, summarised in `results/fx_summary.txt`; 400 frames per cell, rotating 64 / 128 / 512 / 1518 bytes, after 20 000 UI of link-up idle; one command per cell, `main.exe fxcell OSR PPM RJ DCD DDR TAP NF`. Loss means frames not received intact. **The CRC let no bad frame through: 0 false accepts in 120 cells × 400 frames.**
+- **The table:** all sizes, with 64 B / 1518 B in brackets. Columns are the random jitter on every edge, in ns RMS.
+
+| samples per UI | offset | 0 | 0.25 | 0.5 | 0.75 | 1.0 |
+|---|---|---|---|---|---|---|
+| 1 (both edges) | 0 | 0 % | 100 % | 100 % | 100 % | 100 % |
+| 1 | ±200 ppm | 60 % (12 / 100) | 67 % | 75 % | 84 % | 94 % |
+| 2 (four-phase) | 0 | 0 % | 6 % | 0 % | 0 % | 34 % |
+| 2 | +100 ppm | 0 % | 45 % (10 / 89) | 55 % | 60 % | 81 % |
+| 2 | ±200 ppm | 0 % | 16-32 % (3-6 / 43-75) | 42-60 % | 59-68 % | 84-86 % |
+| 3 | ±200 ppm | 0 % | 0 % | 0 % | 16-20 % (3 / 37-48) | 78-80 % |
+| 4 | ±200 ppm | 0 % | 0 % | 0 % | 4-6 % (0-2 / 13-17) | 64-68 % |
+
+Budget cells at +200 ppm and 0.3 ns RMS:
+- **Other error sources:** plus 0.5-2 ns of duty-cycle distortion at the receiver, 0.5-1 ns of both-edges skew from the transmitter, and ±0.3-0.6 ns of tap mismatch.
+- **3 or 4 samples per UI: 0 % loss**, except the harshest cell (1.5 ns DCD, 1 ns skew and ±0.5 ns mismatch): 40 % at 3 samples, 2 % at 4.
+- **2 samples per UI: 54-70 % loss**, 12-35 % for 64-byte frames.
+
+**Reading.**
+- **Both clock edges alone (1 sample per UI) cannot receive.** It works only at exactly 0 ppm with no jitter. With an offset, the sampling point sweeps through the edges, and a 1518-byte frame always contains a slip.
+- **With 3-4 samples per UI there is a wide margin.** The knee is at 0.75 ns RMS random jitter, against a 100BASE-FX receive budget whose random part is, from memory of the FDDI PMD numbers, about 2.3 ns p-p (about 0.16 ns RMS).
+- **The four-phase stage's 2 samples per UI is the borderline case.** It is error-free without frequency offset, or without jitter, but with both it loses about a third of the frames at 0.25 ns RMS. That is usable for a ping demo with 64-byte frames (3-16 % loss). The remaining loss is my tracker, which falls behind when jitter and drift coincide, not a demonstrated limit: the edges carry the information. A better 2× tracker, or a third sampling phase from a delay-line tap, is the next step.
+
+**Frequency offset.** 100BASE-FX allows ±100 ppm at each end, ±200 ppm together (802.3 clause 24). Our transmit clock must be 62.5 MHz within 100 ppm:
+- the RP2040/RP2350 makes exactly 62.5 MHz from 125 MHz, and 12 MHz crystals are typically ±30 ppm;
+- the 56-58 % duty cycle through the clock pad means about 1.1 ns of both-edges skew at our transmitter, the `ddr` column above;
+- it is within what our own receiver tolerates, but the media converter's receiver tolerance is not known.
+
+Three ways to remove the skew:
+- feed 125 MHz and divide by two on chip;
+- bias the clock input at the pad threshold;
+- let the four-phase stage's calibrated fine delay trim the falling-edge lane.
+
+### Module choice and demo path
+
+- **Module:** a 100BASE-FX SFP, 1310 nm multimode, LC, 2 km class, e.g. an "SFP-FE-FX"-type part from FS.com, or Cisco GLC-FE-100FX-compatible modules.
+- **Why not 1000BASE-X SFPs:**
+  - 1000BASE-SX is 850 nm, which a 1310 nm 100BASE-FX partner cannot receive;
+  - some 1G modules have a clock-and-data recovery unit, or receive filtering, specified only near 1.25 Gb/s;
+  - copper 1000BASE-T SFPs contain a PHY speaking SGMII / 1000BASE-X and will not pass 125 Mbaud NRZI at all.
+
+  Multi-rate modules specified from 125 Mb/s to 1.25 Gb/s exist, but "works at 125 Mbaud" has to be read from the datasheet, not assumed. None of this is from a datasheet I checked today: treat it as the question to ask the vendor.
+- **Demo path:** chip → SFP → multimode duplex patch cord (LC to SC) → TP-Link MC100CM media converter → RJ45 → any PC or switch. The MC100CM is 802.3u 100BASE-FX, 1310 nm, multimode, SC, 2 km, with a 10/100 RJ45 port (TP-Link product page, fetched 2026-09-25).
+
+## Step 3: 100BASE-TX straight onto copper
+
+### Transmit
+
+MLT-3 on a pin pair (`units.ml`, `Line_code.mlt3_pins`):
+- **The line level is A − B.** A 1 toggles A when the line is at ±1, and B when it is at 0.
+- **So exactly one pin moves per step**, and each pin moves at most every second UI.
+- **The zero level alternates** between (0,0) after +1 and (1,1) after −1.
+- **Each pin is a 62.5 Mt/s signal with 8 ns edge resolution**, the same both-edges output as FX.
+
+The pins drive the MagJack primary. The first values (82 Ω, 250 Ω) assumed ideal 3.3 V pins and gave only 0.77 V: the pads measure about 36 Ω output resistance under this load.
+- **Series resistor per pin:** 47 Ω.
+- **Across the primary:** 249 Ω.
+- **Result:** a 100 Ω differential source and about 1 V into 100 Ω.
+
+The scrambler is the generic additive LFSR (x^11 + x^9 + 1). Checked against the reference: the RTL scrambler output equals reference keystream XOR code, and A − B equals the reference MLT-3 of the scrambled stream.
+
+Simulated with the pads, 1:1 magnetics (350 µH, 0.3 µH leakage) and 1 m of line into 100 Ω (`results/pads.txt`, "100BASE-TX"). The TP-PMD template numbers are from memory and NOT checked against the standard's text.
+
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c 3 rg -n "hdmi|hdmi4|rcap|inf_|inac_|eye_ui|eye" spice/padsim.py spice/analyse.py' in /home/matthias/prog/janestreet/emulator-wt-fast-eth/prototypes/fast-ethernet
+ succeeded in 0ms:
+spice/analyse.py:53:def eye(t, v, ref_t, ref_bits, delay, t0=100e-9):
+spice/analyse.py:54:    """Eye of a 2-level signal: for each sampling phase within the UI, eye height = min over 1-bits
+spice/analyse.py:56:    signal is delayed by `delay`. Returns (best height, best phase, eye width where height > 0)."""
+spice/analyse.py:109:def eyes_cap():
+spice/analyse.py:111:    print("| load | corner | rise 10-90 (ns) | fall 10-90 (ns) | delay c2p->pin 50% (ns) | DDJ p-p at IOVDD/2 (ns) | eye height (% IOVDD) | eye width (ns) |")
+spice/analyse.py:113:    for case in ("eye_cap5", "eye_cap10"):
+spice/analyse.py:126:            h, ph, w = eye(t, v, 2e-9, bits, dl)
+spice/analyse.py:141:def eye_generic(t, v, levels, delay, t0=2e-9, tmin=150e-9):
+spice/analyse.py:142:    """per sampling phase: for each level value, min and max of v; returns best phase and eyes
+spice/analyse.py:150:        eyes = [x[lv == hi].min() - x[lv == lo].max() for lo, hi in zip(vals[:-1], vals[1:])]
+spice/analyse.py:151:        if best is None or min(eyes) > min(best[1]):
+spice/analyse.py:152:            best = (ph, eyes)
+spice/analyse.py:171:def eye_sfp():
+spice/analyse.py:176:    print("| corner | diff swing p-p (mV) | rise 20-80 (ns) | fall 20-80 (ns) | crossing jitter p-p at 0 V (ns) | eye height (mV) | eye width at 0 V (ns) |")
+spice/analyse.py:179:        d = load("eye_sfp", c, tmp)
+spice/analyse.py:188:        ph, eyes = eye_generic(t, v, lv, dl)
+spice/analyse.py:194:        # eye width at 0 V: UI minus crossing spread
+spice/analyse.py:195:        print(f"| {c} {tmp}C | {1000 * (hi - lo):.0f} | {ns(np.mean(r))} | {ns(np.mean(f))} | {ns(jit)} | {1000 * eyes[0]:.0f} | {ns(UI - jit)} |")
+spice/analyse.py:198:def eye_txcp():
+spice/analyse.py:200:    eye_tx(case="eye_txcp", note="with 33 pF across the primary")
+spice/analyse.py:202:def eye_txcp15():
+spice/analyse.py:204:    eye_tx(case="eye_txcp15", note="with 15 pF across the primary")
+spice/analyse.py:206:def eye_tx(case="eye_tx", note=""):
+spice/analyse.py:213:    print("| corner | simulated to (us) | +peak (mV) | -peak (mV) | symmetry (%) | overshoot (%) | rise 10-90 (ns) | fall 10-90 (ns) | jitter p-p at +-50 % (ns) | eye upper / lower (mV) |")
+spice/analyse.py:218:            if case == "eye_tx": print(f"| {c} {tmp}C | missing |")
+spice/analyse.py:243:        ph, eyes = eye_generic(t, v, L, dl)
+spice/analyse.py:244:        print(f"| {c} {tmp}C | {t[-1] * 1e6:.2f} | {1000 * vp:.0f} | {1000 * vn:.0f} | {100 * vp / -vn:.1f} | {ov:.1f} | {ns(np.mean(r))} | {ns(np.mean(f))} | {ns(max(jp, jn))} | {1000 * eyes[1]:.0f} / {1000 * eyes[0]:.0f} |")
+spice/analyse.py:281:# ---------------------------------------------------------------- 2026-10-05: bit-rate eyes, HDMI
+spice/analyse.py:282:def eye_ui(t, v, bits, ui, t0=2e-9, tmin=None, lo_level=None, hi_level=None, open_at=0.0):
+spice/analyse.py:283:    """2-level eye at bit period ui. Finds the delay by correlation, then for 80 phases the eye
+spice/analyse.py:311:    print("eye height as % of IOVDD at the best phase; eye width = phases where the eye is open by more than 50 % of IOVDD\n")
+spice/analyse.py:312:    print("| load, rate | corner | rise 10-90 (ns) | fall 10-90 (ns) | eye height (% IOVDD) | eye width at 50 % (ns / UI) |")
+spice/analyse.py:314:    for case in ("rcap10_r120", "rcap10_r240", "rcap10_r250", "rcap5_r250"):
+spice/analyse.py:322:            h, w, _ = eye_ui(t, v, bits, ui, open_at=0.5 * io)
+spice/analyse.py:326:def hdmi():
+spice/analyse.py:333:    print("| Rs, rate | corner | diff swing p-p (mV) | eye height (mV) | eye width >= 150 mV (ns / UI) | rise 20-80 (ns) | line low / common mode (V) |")
+spice/analyse.py:335:    for case in ("hdmi_270_r120", "hdmi_270_r240", "hdmi_270_r250", "hdmi_120_r120", "hdmi_120_r250"):
+spice/analyse.py:348:            h, w, _ = eye_ui(t, v, bits, ui, open_at=0.150)
+spice/analyse.py:360:    cases = ["inf_125", "inac_600_125", "inac_300_125", "inac_300_62.5"]
+spice/analyse.py:381:    what = sys.argv[1:] or ["toggle", "eyes_cap", "eye_sfp", "eye_tx", "inputs"]
+spice/padsim.py:16:#     eye_cap5  / eye_cap10   PRBS7 at 125 Mbaud into 5 / 10 pF (30 mA pad)
+spice/padsim.py:17:#     eye_sfp   two 30 mA pads in antiphase -> 150 ohm series each -> 50 ohm lines -> SFP input
+spice/padsim.py:19:#     eye_tx    two 30 mA pads, MLT-3 by pin pair -> 82 ohm series each, 250 ohm across the
+spice/padsim.py:148:    elif case in ("eye_cap5", "eye_cap10"):
+spice/padsim.py:149:        c = "5p" if case == "eye_cap5" else "10p"
+spice/padsim.py:155:    elif case == "eye_sfp":
+spice/padsim.py:171:    elif case == "eye_tx":
+spice/padsim.py:187:    elif case.startswith("rcap"):
+spice/padsim.py:188:        # rcap<C>_r<Mbit/s>: PRBS7 NRZ at the given bit rate, 30 mA pad into 2 nH + C pF
+spice/padsim.py:197:    elif case.startswith("hdmi4"):
+spice/padsim.py:198:        # hdmi4_<Rs>_r<Mbit/s>: all four TMDS pairs (8 x 30 mA pads, independent PRBS7 phases)
+spice/padsim.py:202:        # 3.3 V - v(iovdd); the eye is measured on pair 0.
+spice/padsim.py:223:    elif case.startswith("hdmi"):
+spice/padsim.py:224:        # hdmi_<Rs>_r<Mbit/s>: one TMDS pair driven pseudo-differentially by two 30 mA pads in
+spice/padsim.py:245:    elif case.startswith("inf_"):
+spice/padsim.py:246:        # inf_<MHz>: full-swing 0..IOVDD square at the given frequency (edges 10 % of the period,
+spice/padsim.py:256:    elif case.startswith("inac_"):
+spice/padsim.py:257:        # inac_<amp mV>_<MHz>: sine of that peak amplitude centred on this corner's threshold
+spice/padsim.py:290:    # eye_tx needs a 20 ps maximum step: with the default the run stops ("timestep too small")
+spice/padsim.py:293:    maxstep = " 0 20p" if case in ("eye_tx", "eye_sfp") or case.startswith("hdmi") else ""  # eye_sfp stopped the same way
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '180,275p' spice/padsim.py
+nice ionice -c 3 sed -n '280,375p' spice/analyse.py
+nice ionice -c 3 cat results/pads_hdmi.txt" in /home/matthias/prog/janestreet/emulator-wt-fast-eth/prototypes/fast-ethernet
+ succeeded in 0ms:
+                 # 1:1 magnetics: 350 uH OCL, ~0.3 uH leakage, 0.5 ohm winding resistance, 5 pF
+                 # winding capacitance each side
+                 "l1 pria w1 350u\nrw1 w1 prib 0.5\nl2 seca w2 350u\nrw2 w2 secb 0.5\nk1 l1 l2 0.99957\n"
+                 "cw1 pria prib 5p\ncw2 seca secb 5p\nrref secb 0 1meg\n"
+                 # 1 m of 100 ohm twisted pair (lossless here; loss is in the channel model), 100 ohm
+                 "tl seca secb la lb z0=100 td=5n\nrl la lb 100\nrlr lb 0 1meg\n")
+        save += ["oa", "ob", "pria", "prib", "seca", "secb", "la", "lb"]
+    elif case.startswith("rcap"):
+        # rcap<C>_r<Mbit/s>: PRBS7 NRZ at the given bit rate, 30 mA pad into 2 nH + C pF
+        cpart, rpart = case[4:].split("_r")
+        ui = 1e-6 / float(rpart)
+        bits = prbs7(250)
+        tstop = 2e-9 + 250 * ui
+        body += (f"vc c 0 pwl({pwl_bits(bits, vdd, ui=ui)})\n"
+                 f"xp vss vdd iovss iovdd c p sg13g2_IOPadOut30mA\n" + pkg("o", "p", "o", cpart + "p"))
+        save += ["c", "p", "o"]
+        tstep = "5p"
+    elif case.startswith("hdmi4"):
+        # hdmi4_<Rs>_r<Mbit/s>: all four TMDS pairs (8 x 30 mA pads, independent PRBS7 phases)
+        # switching together, with IOVDD and IOVSS each reaching the pads through 1 nH + 0.1 ohm
+        # (about two bond wires in parallel) and 100 pF of on-die IO decoupling (an assumption:
+        # the ring's real decoupling is not in the netlist). Ground bounce is v(iovss) and
+        # 3.3 V - v(iovdd); the eye is measured on pair 0.
+        _, rs, rpart = case.split("_")
+        ui = 1e-6 / float(rpart[1:])
+        tstop = 2e-9 + 250 * ui
+        h = h.replace("viovdd iovdd 0", "viovdd iovdd_x 0").replace("viovss iovss 0 0", "viovss iovss_x 0 0")
+        body += ("liovdd iovdd_x iovdd_l 1n\nriovdd iovdd_l iovdd 0.1\nliovss iovss_x iovss_l 1n\nriovss iovss_l iovss 0.1\n"
+                 "cdecap iovdd iovss 100p\n")
+        for q in range(4):
+            bits = prbs7(250, seed=(0x7F >> q) | 0x40 if q else 0x7F)
+            nb = [1 - b for b in bits]
+            body += (f"vcp{q} cp{q} 0 pwl({pwl_bits(bits, vdd, ui=ui)})\nvcn{q} cn{q} 0 pwl({pwl_bits(nb, vdd, ui=ui)})\n"
+                     f"xpp{q} vss vdd iovss iovdd cp{q} pp{q} sg13g2_IOPadOut30mA\n"
+                     f"xpn{q} vss vdd iovss iovdd cn{q} pn{q} sg13g2_IOPadOut30mA\n"
+                     + pkg(f"p{q}", f"pp{q}", f"op{q}", "5p") + pkg(f"n{q}", f"pn{q}", f"on{q}", "5p") +
+                     f"rsp{q} op{q} hp{q} {rs}\nrsn{q} on{q} hn{q} {rs}\n"
+                     + ladder(f"p{q}", f"hp{q}", f"sp{q}", sections=30, l="10n", c="4p")
+                     + ladder(f"n{q}", f"hn{q}", f"sn{q}", sections=30, l="10n", c="4p") +
+                     f"rtp{q} sp{q} avcc 50\nrtn{q} sn{q} avcc 50\ncsp{q} sp{q} 0 1.5p\ncsn{q} sn{q} 0 1.5p\n")
+        body += "vavcc avcc 0 3.3\n"
+        save += ["sp0", "sn0", "iovss", "iovdd", "op0"]
+        tstep = "5p"
+    elif case.startswith("hdmi"):
+        # hdmi_<Rs>_r<Mbit/s>: one TMDS pair driven pseudo-differentially by two 30 mA pads in
+        # antiphase, PRBS7 NRZ. Each pin: 2 nH + 5 pF (package + pin + trace), series Rs at the
+        # chip, then 10 cm of board and 1 m of cable as one 50 ohm line per conductor (30-section
+        # LC ladder, 0.2 ns per section, 6 ns, lossless), then the sink: 50 ohm to AVcc = 3.3 V
+        # per conductor and 1.5 pF input capacitance. A real TMDS source is a 10 mA current
+        # switch; with Rs the low level is 3.3 V x (Rs + Ron) / (Rs + Ron + 50).
+        _, rs, rpart = case.split("_")
+        ui = 1e-6 / float(rpart[1:])
+        bits = prbs7(250)
+        nbits = [1 - b for b in bits]
+        tstop = 2e-9 + 250 * ui
+        body += (f"vcp cp 0 pwl({pwl_bits(bits, vdd, ui=ui)})\nvcn cn 0 pwl({pwl_bits(nbits, vdd, ui=ui)})\n"
+                 f"xpp vss vdd iovss iovdd cp pp sg13g2_IOPadOut30mA\n"
+                 f"xpn vss vdd iovss iovdd cn pn sg13g2_IOPadOut30mA\n"
+                 + pkg("p", "pp", "op", "5p") + pkg("n", "pn", "on", "5p") +
+                 f"rsp op hp {rs}\nrsn on hn {rs}\n"
+                 + ladder("p", "hp", "sp", sections=30, l="10n", c="4p")
+                 + ladder("n", "hn", "sn", sections=30, l="10n", c="4p") +
+                 "vavcc avcc 0 3.3\nrtp sp avcc 50\nrtn sn avcc 50\ncsp sp 0 1.5p\ncsn sn 0 1.5p\n")
+        save += ["op", "on", "sp", "sn"]
+        tstep = "5p"
+    elif case.startswith("inf_"):
+        # inf_<MHz>: full-swing 0..IOVDD square at the given frequency (edges 10 % of the period,
+        # at most 1 ns) into IOPadIn via 50 ohm, 3 pF, 2 nH
+        f = float(case.split("_")[1]) * 1e6
+        per = 1 / f; e = min(1e-9, 0.1 * per)
+        body += (f"vs s 0 pulse(0 {iovdd} 2n {e:.3e} {e:.3e} {per/2 - e:.4e} {per:.4e})\nrs s pb 50\n"
+                 "cpb pb 0 3p\nlb pb pad 2n\n"
+                 f"xi vss vdd iovss iovdd p2c pad sg13g2_IOPadIn\ncl p2c 0 10f\n")
+        save += ["s", "pad", "p2c"]
+        tstop = 2e-9 + 20 * per
+        tstep = "5p"
+    elif case.startswith("inac_"):
+        # inac_<amp mV>_<MHz>: sine of that peak amplitude centred on this corner's threshold
+        _, amp, mhz = case.split("_")
+        thr = threshold(corner, temp)
+        f = float(mhz) * 1e6
+        body += (f"vs s 0 sin({thr:.4f} {float(amp)/1000} {f:.4e})\nrs s pb 50\n"
+                 "cpb pb 0 3p\nlb pb pad 2n\n"
+                 f"xi vss vdd iovss iovdd p2c pad sg13g2_IOPadIn\ncl p2c 0 10f\n")
+        save += ["s", "pad", "p2c"]
+        tstop = 2e-9 + 20 / f
+        tstep = "5p"
+    elif case == "in_dc":
+        body += (f"vpad pad 0 0\nxi vss vdd iovss iovdd p2c pad sg13g2_IOPadIn\ncl p2c 0 5f\n")
+        ctl = f"dc vpad 0 {iovdd} 0.002\nwrdata /work/out.dat v(pad) v(p2c)\n"
+        return h + body + control(ctl)
+    elif case.startswith("in_ac") or case == "in_full":
+        # in_ac_<amp_mV>_<offset_mV>: a sine of the given peak amplitude at 62.5 MHz (the
+        # fundamental of 125 Mbaud 1010) centred <offset> above this corner's DC threshold (read
+        # from the in_dc run), through 50 ohm, 3 pF board + package and the 2 nH bond wire.
+        # in_full: a full-swing 0..IOVDD 62.5 MHz square wave (1 ns edges) the same way.
+
+# ---------------------------------------------------------------- 2026-10-05: bit-rate eyes, HDMI
+def eye_ui(t, v, bits, ui, t0=2e-9, tmin=None, lo_level=None, hi_level=None, open_at=0.0):
+    """2-level eye at bit period ui. Finds the delay by correlation, then for 80 phases the eye
+    height (min of 1-bits minus max of 0-bits). Returns (best height, width in seconds of the
+    phases where the height exceeds open_at, delay)."""
+    tmin = tmin if tmin is not None else 40 * ui
+    lv = np.array([2 * b - 1 for b in bits], dtype=float)
+    m = t > tmin
+    best_d, best_c = 0.0, -1e99
+    for d in np.arange(0, 12e-9, 0.05e-9):
+        k = np.clip(((t[m] - t0 - d) // ui).astype(int), 0, len(bits) - 1)
+        cc = np.dot(v[m] - v[m].mean(), lv[k])
+        if cc > best_c: best_c, best_d = cc, d
+    hs = []
+    phases = np.linspace(0, ui, 81)[:-1]
+    for ph in phases:
+        ts = t0 + np.arange(len(bits)) * ui + best_d + ph
+        ok = (ts > tmin) & (ts < t[-1])
+        x = np.interp(ts[ok], t, v); b = np.array(bits)[ok]
+        hs.append(x[b == 1].min() - x[b == 0].max())
+    hs = np.array(hs)
+    return hs.max(), (hs > open_at).sum() * (phases[1] - phases[0]), best_d
+
+def rate_of(case): return float(case.split("_r")[1])
+
+def rates():
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import padsim
+    bits = padsim.prbs7(250)
+    print("## 30 mA pad, PRBS7 NRZ at 120 / 240 / 250 Mbit/s into 2 nH + C, at the pin")
+    print("eye height as % of IOVDD at the best phase; eye width = phases where the eye is open by more than 50 % of IOVDD\n")
+    print("| load, rate | corner | rise 10-90 (ns) | fall 10-90 (ns) | eye height (% IOVDD) | eye width at 50 % (ns / UI) |")
+    print("|---|---|---|---|---|---|")
+    for case in ("rcap10_r120", "rcap10_r240", "rcap10_r250", "rcap5_r250"):
+        ui = 1e-6 / rate_of(case)
+        for c, tmp in ORDER:
+            d = load(case, c, tmp)
+            if d is None: print(f"| {case} | {c} {tmp}C | missing |"); continue
+            io = CORN[c][1]
+            t, v = uniform(d["time"], d["v(o)"])
+            r, f = edge_times(t, v, 0, io)
+            h, w, _ = eye_ui(t, v, bits, ui, open_at=0.5 * io)
+            print(f"| {case[1:].replace('_r', ' pF, ')} Mb/s | {c} {tmp}C | {ns(np.mean(r))} | {ns(np.mean(f))} | {100 * h / io:.0f} | {ns(w)} / {w / ui:.2f} |")
+    print()
+
+def hdmi():
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import padsim
+    bits = padsim.prbs7(250)
+    print("## HDMI / DVI pair from two 30 mA pads in antiphase, series Rs at the chip, 1.1 m of 50 ohm per conductor, sink 50 ohm to 3.3 V")
+    print("differential at the sink (v(sp) - v(sn)). Eye width = phases with an opening of at least 150 mV, the minimum TMDS")
+    print("receiver input as I remember it (NOT checked against the DVI 1.0 / HDMI text). Common mode = mean of the two lines.\n")
+    print("| Rs, rate | corner | diff swing p-p (mV) | eye height (mV) | eye width >= 150 mV (ns / UI) | rise 20-80 (ns) | line low / common mode (V) |")
+    print("|---|---|---|---|---|---|---|")
+    for case in ("hdmi_270_r120", "hdmi_270_r240", "hdmi_270_r250", "hdmi_120_r120", "hdmi_120_r250"):
+        ui = 1e-6 / rate_of(case)
+        for c, tmp in ORDER:
+            d = load(case, c, tmp)
+            if d is None: print(f"| {case} | {c} {tmp}C | missing |"); continue
+            t, vp = uniform(d["time"], d["v(sp)"]); _, vn = uniform(d["time"], d["v(sn)"])
+            v = vp - vn
+            m = t > 40 * ui
+            hi, lo = np.percentile(v[m], 99), np.percentile(v[m], 1)
+            r, _ = edge_times(t, v, lo + 0.25 * (hi - lo) - 0.125 * (hi - lo) / 0.75 * 0, hi)  # 10-90 of the swing
+            a, b = lo + 0.2 * (hi - lo), lo + 0.8 * (hi - lo)
+            ca, cb = crossings(t[m], v[m], a), crossings(t[m], v[m], b)
+            r2080 = [y - x for x, u in ca if u for y in [min((z for z, uu in cb if uu and z > x), default=np.nan)] if y - x < ui]
+            h, w, _ = eye_ui(t, v, bits, ui, open_at=0.150)
+            low = min(np.percentile(vp[m], 1), np.percentile(vn[m], 1))
+            cm = ((vp + vn) / 2)[m].mean()
+            rs, rate = case.split("_")[1], rate_of(case)
+            print(f"| {rs} ohm, {rate:.0f} Mb/s | {c} {tmp}C | {1000 * (hi - lo):.0f} | {1000 * h:.0f} | {ns(w)} / {w / ui:.2f} | {ns(np.nanmean(r2080))} | {low:.2f} / {cm:.2f} |")
+    print()
+
+def inputs125():
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import padsim
+    print("## sg13g2_IOPadIn at 125 MHz (250 Mbit/s toggling) and 62.5 MHz, through 50 ohm + 3 pF + 2 nH")
+    print("p2c duty cycle (ideal 50 %) / delay from the pad crossing its own threshold to p2c at VDD/2; 'no toggle' if p2c swings < 90 % of VDD\n")
+    cases = ["inf_125", "inac_600_125", "inac_300_125", "inac_300_62.5"]
+    print("| corner | " + " | ".join(cases) + " |"); print("|---" * (len(cases) + 1) + "|")
+    for c, tmp in ORDER:
+        vdd = CORN[c][0]; row = []
+        for case in cases:
+            d = load(case, c, tmp)
+            if d is None: row.append("missing"); continue
+            t, p = uniform(d["time"], d["v(p2c)"]); _, pad = uniform(d["time"], d["v(pad)"])
+            m = t > t[-1] / 3
+            sw = p[m].max() - p[m].min()
+            if sw < 0.9 * vdd: row.append(f"no toggle ({sw:.2f} V)"); continue
+            duty = (p[m] > vdd / 2).mean() * 100
+            thr = padsim.threshold(c, tmp)
+            cin = [x for x, u in crossings(t[m], pad[m], thr)]
+            cout = [x for x, u in crossings(t[m], p[m], vdd / 2)]
+            dl = np.nanmedian([min((y - x for y in cout if y > x), default=np.nan) for x in cin])
+# Pad speed for HDMI and faster links (2026-10-05): spice/run_hdmi.sh (2 runs at a time, load-gated), analysed by spice/analyse.py rates hdmi inputs125
+# raw runs: /var/tmp/fast-eth/pads/{rcap*,hdmi_*,inf_125,inac_*}-<corner>-<temp>/ ; same PDK netlist changes as results/pads.txt
+# core-side drive is an ideal 80 ps PWL into c2p at the bit rate: these runs say what the PADS can do, not how the core produces 250 Mbit/s
+
+## 30 mA pad, PRBS7 NRZ at 120 / 240 / 250 Mbit/s into 2 nH + C, at the pin
+eye height as % of IOVDD at the best phase; eye width = phases where the eye is open by more than 50 % of IOVDD
+
+| load, rate | corner | rise 10-90 (ns) | fall 10-90 (ns) | eye height (% IOVDD) | eye width at 50 % (ns / UI) |
+|---|---|---|---|---|---|
+| cap10 pF, 120 Mb/s | tt 27C | 1.53 | 1.57 | 100 | 7.40 / 0.89 |
+| cap10 pF, 120 Mb/s | tt 85C | 1.74 | 1.84 | 100 | 7.29 / 0.88 |
+| cap10 pF, 120 Mb/s | ss 27C | 1.89 | 1.86 | 100 | 7.29 / 0.88 |
+| cap10 pF, 120 Mb/s | ss 85C | 2.14 | 2.18 | 100 | 7.19 / 0.86 |
+| cap10 pF, 120 Mb/s | ff 27C | 1.27 | 1.34 | 100 | 7.60 / 0.91 |
+| cap10 pF, 120 Mb/s | ff 85C | 1.45 | 1.58 | 100 | 7.40 / 0.89 |
+| cap10 pF, 240 Mb/s | tt 27C | 1.53 | 1.56 | 100 | 3.28 / 0.79 |
+| cap10 pF, 240 Mb/s | tt 85C | 1.74 | 1.82 | 100 | 3.12 / 0.75 |
+| cap10 pF, 240 Mb/s | ss 27C | 1.89 | 1.83 | 100 | 3.02 / 0.72 |
+| cap10 pF, 240 Mb/s | ss 85C | 2.14 | 2.13 | 98 | 2.81 / 0.67 |
+| cap10 pF, 240 Mb/s | ff 27C | 1.27 | 1.34 | 100 | 3.39 / 0.81 |
+| cap10 pF, 240 Mb/s | ff 85C | 1.45 | 1.57 | 100 | 3.28 / 0.79 |
+| cap10 pF, 250 Mb/s | tt 27C | 1.53 | 1.56 | 100 | 3.10 / 0.78 |
+| cap10 pF, 250 Mb/s | tt 85C | 1.74 | 1.82 | 99 | 3.00 / 0.75 |
+| cap10 pF, 250 Mb/s | ss 27C | 1.89 | 1.83 | 99 | 2.90 / 0.73 |
+| cap10 pF, 250 Mb/s | ss 85C | 2.15 | 2.13 | 97 | 2.70 / 0.68 |
+| cap10 pF, 250 Mb/s | ff 27C | 1.27 | 1.34 | 100 | 3.25 / 0.81 |
+| cap10 pF, 250 Mb/s | ff 85C | 1.45 | 1.57 | 100 | 3.15 / 0.79 |
+| cap5 pF, 250 Mb/s | tt 27C | 0.97 | 1.15 | 100 | 3.40 / 0.85 |
+| cap5 pF, 250 Mb/s | tt 85C | 1.11 | 1.34 | 100 | 3.30 / 0.83 |
+| cap5 pF, 250 Mb/s | ss 27C | 1.17 | 1.34 | 100 | 3.25 / 0.81 |
+| cap5 pF, 250 Mb/s | ss 85C | 1.34 | 1.55 | 100 | 3.05 / 0.76 |
+| cap5 pF, 250 Mb/s | ff 27C | 0.81 | 0.99 | 100 | 3.50 / 0.88 |
+| cap5 pF, 250 Mb/s | ff 85C | 0.93 | 1.16 | 100 | 3.40 / 0.85 |
+
+## HDMI / DVI pair from two 30 mA pads in antiphase, series Rs at the chip, 1.1 m of 50 ohm per conductor, sink 50 ohm to 3.3 V
+differential at the sink (v(sp) - v(sn)). Eye width = phases with an opening of at least 150 mV, the minimum TMDS
+receiver input as I remember it (NOT checked against the DVI 1.0 / HDMI text). Common mode = mean of the two lines.
+
+| Rs, rate | corner | diff swing p-p (mV) | eye height (mV) | eye width >= 150 mV (ns / UI) | rise 20-80 (ns) | line low / common mode (V) |
+|---|---|---|---|---|---|---|
+| 270 ohm, 120 Mb/s | tt 27C | 1017 | 936 | 8.12 / 0.97 | 0.87 | 2.81 / 3.07 |
+| 270 ohm, 120 Mb/s | tt 85C | 990 | 916 | 8.02 / 0.96 | 0.98 | 2.82 / 3.07 |
+| 270 ohm, 120 Mb/s | ss 27C | 902 | 840 | 8.02 / 0.96 | 1.14 | 2.82 / 3.06 |
+| 270 ohm, 120 Mb/s | ss 85C | 872 | 816 | 8.02 / 0.96 | 1.31 | 2.83 / 3.06 |
+| 270 ohm, 120 Mb/s | ff 27C | 1130 | 1030 | 8.12 / 0.97 | 0.79 | 2.80 / 3.08 |
+| 270 ohm, 120 Mb/s | ff 85C | 1103 | 1013 | 8.12 / 0.97 | 0.87 | 2.81 / 3.09 |
+| 270 ohm, 240 Mb/s | tt 27C | 1015 | 935 | 3.85 / 0.92 | 0.87 | 2.81 / 3.07 |
+| 270 ohm, 240 Mb/s | tt 85C | 989 | 911 | 3.80 / 0.91 | 0.97 | 2.82 / 3.07 |
+| 270 ohm, 240 Mb/s | ss 27C | 902 | 833 | 3.75 / 0.90 | 1.14 | 2.82 / 3.07 |
+| 270 ohm, 240 Mb/s | ss 85C | 872 | 803 | 3.65 / 0.88 | 1.31 | 2.83 / 3.07 |
+| 270 ohm, 240 Mb/s | ff 27C | 1140 | 1025 | 3.91 / 0.94 | 0.80 | 2.80 / 3.08 |
+| 270 ohm, 240 Mb/s | ff 85C | 1101 | 1009 | 3.85 / 0.92 | 0.86 | 2.81 / 3.08 |
+| 270 ohm, 250 Mb/s | tt 27C | 1018 | 931 | 3.70 / 0.93 | 0.87 | 2.81 / 3.07 |
+| 270 ohm, 250 Mb/s | tt 85C | 991 | 914 | 3.60 / 0.90 | 0.97 | 2.82 / 3.07 |
+| 270 ohm, 250 Mb/s | ss 27C | 904 | 838 | 3.55 / 0.89 | 1.15 | 2.82 / 3.07 |
+| 270 ohm, 250 Mb/s | ss 85C | 873 | 809 | 3.45 / 0.86 | 1.31 | 2.83 / 3.08 |
+| 270 ohm, 250 Mb/s | ff 27C | 1139 | 1027 | 3.70 / 0.93 | 0.80 | 2.80 / 3.08 |
+| 270 ohm, 250 Mb/s | ff 85C | 1104 | 1012 | 3.70 / 0.93 | 0.86 | 2.81 / 3.08 |
+| 120 ohm, 120 Mb/s | tt 27C | 1704 | 1605 | 8.23 / 0.99 | 0.85 | 2.47 / 2.91 |
+| 120 ohm, 120 Mb/s | tt 85C | 1623 | 1531 | 8.23 / 0.99 | 0.96 | 2.51 / 2.93 |
+| 120 ohm, 120 Mb/s | ss 27C | 1470 | 1393 | 8.12 / 0.97 | 1.36 | 2.51 / 2.90 |
+| 120 ohm, 120 Mb/s | ss 85C | 1367 | 1300 | 8.02 / 0.96 | 1.55 | 2.56 / 2.93 |
+| 120 ohm, 120 Mb/s | ff 27C | 1919 | 1799 | 8.23 / 0.99 | 0.75 | 2.44 / 2.92 |
+| 120 ohm, 120 Mb/s | ff 85C | 1850 | 1739 | 8.23 / 0.99 | 0.82 | 2.47 / 2.94 |
+| 120 ohm, 250 Mb/s | tt 27C | 1706 | 1603 | 3.80 / 0.95 | 0.85 | 2.47 / 2.91 |
+| 120 ohm, 250 Mb/s | tt 85C | 1625 | 1527 | 3.75 / 0.94 | 0.96 | 2.51 / 2.94 |
+| 120 ohm, 250 Mb/s | ss 27C | 1470 | 1372 | 3.70 / 0.93 | 1.38 | 2.51 / 2.93 |
+| 120 ohm, 250 Mb/s | ss 85C | 1370 | 1256 | 3.65 / 0.91 | 1.57 | 2.56 / 2.95 |
+| 120 ohm, 250 Mb/s | ff 27C | 1933 | 1795 | 3.80 / 0.95 | 0.75 | 2.44 / 2.92 |
+| 120 ohm, 250 Mb/s | ff 85C | 1852 | 1735 | 3.80 / 0.95 | 0.82 | 2.47 / 2.94 |
+
+## sg13g2_IOPadIn at 125 MHz (250 Mbit/s toggling) and 62.5 MHz, through 50 ohm + 3 pF + 2 nH
+p2c duty cycle (ideal 50 %) / delay from the pad crossing its own threshold to p2c at VDD/2; 'no toggle' if p2c swings < 90 % of VDD
+
+| corner | inf_125 | inac_600_125 | inac_300_125 | inac_300_62.5 |
+|---|---|---|---|---|
+| tt 27C | 59 % / 0.52 ns | 53 % / 0.81 ns | 55 % / 1.26 ns | 53 % / 2.19 ns |
+| tt 85C | 59 % / 0.49 ns | 52 % / 0.79 ns | 53 % / 1.18 ns | 51 % / 1.67 ns |
+| ss 27C | 63 % / 0.85 ns | 54 % / 1.12 ns | no toggle (0.32 V) | 58 % / 3.70 ns |
+| ss 85C | 61 % / 0.76 ns | 53 % / 1.07 ns | 64 % / 1.40 ns | 54 % / 3.14 ns |
+| ff 27C | 58 % / 0.36 ns | 51 % / 0.58 ns | 52 % / 0.83 ns | 51 % / 1.13 ns |
+| ff 85C | 58 % / 0.35 ns | 51 % / 0.59 ns | 51 % / 0.81 ns | 50 % / 1.10 ns |
+
+
+# raw: /var/tmp/fast-eth/pads/gb-{a,b}/ (hdmi4_270_r250 tt 27 netlist from padsim.py with the grounding change shown; the unmodified hdmi4 netlist stops at t = 0 because core VSS (ideal) and the inductive IOVSS meet inside the level shifters)
+## Simultaneous switching: 8 x 30 mA pads (4 TMDS pairs, Rs 270 ohm, 250 Mbit/s, pairs 0 and 1 carry identical data), tt 27 C
+IOVDD and IOVSS each through 1 nH + 0.1 ohm, 100 pF between the IO rails (assumed on-die decoupling)
+| variant | IOVSS bounce p-p (mV) | IOVDD droop p-p (mV) | pair-0 diff swing p-p (mV) | eye height (mV) | eye open >= 150 mV (UI) | without bounce (same pair, single-pair run) |
+|---|---|---|---|---|---|---|
+| a: core VSS tied to IOVSS | 385 | 368 | 1039 | 930 | 0.86 | 1018 mV p-p, 931 mV, 0.93 UI |
+| b: plus 50 pF from each IO rail to board ground | 403 | 410 | 1039 | 924 | 0.90 | 1018 mV p-p, 931 mV, 0.93 UI |
+
+hook: PreToolUse
+hook: PreToolUse Completed
+web search: 
+web search: DVI 1.0 specification TMDS data eye mask 400 mV 600 mV common mode 3.3 V pdf ...
+hook: PreToolUse
+hook: PreToolUse Completed
+web search: 
+web search: 
+codex
+1. **The 270 Ω result supports electrical plausibility at the sink, but not transmitter compliance.** The simulated 0.87–1.14 V differential swing corresponds to roughly 0.44–0.57 V per leg, within DVI 1.0’s 0.40–0.60 V single-ended swing range. The reported common mode and ≥150 mV eye also meet the remembered receiver limits. But DVI specifies transmitter levels, rise/fall time, intra-pair skew and an eye mask at **TP2**, the transmitter connector. The simulation reports sink levels and eye width, and does not check all those TP2 requirements. **Severity: changes the strength of the verdict**, not an indication that the 270 Ω case fails. [README.md, “HDMI / DVI pair”; DVI 1.0 §§4.3–4.4](https://ez.analog.com/cfs-file/__key/communityserver-discussions-components-files/331/DVI_2D00_1.0_5F00_specs.pdf)
+
+2. **The eye-width comparison is useful but is not a standards eye-mask test.** `eye_ui()` in `spice/analyse.py` samples 80 phases and reports the best vertical opening and the width above a chosen threshold; `hdmi()` sets that threshold to 150 mV. DVI’s transmitter and receiver eye masks impose amplitude limits across defined time regions, and the receiver requirement includes a pixel-error-rate test. Passing the scalar 150 mV threshold therefore does not establish mask compliance or receiver interoperability. **Severity: changes the strength of the verdict.** [spice/analyse.py, `eye_ui()` and `hdmi()`; DVI 1.0 §§4.3–4.4](https://ez.analog.com/cfs-file/__key/communityserver-discussions-components-files/331/DVI_2D00_1.0_5F00_specs.pdf)
+
+3. **The 240 Mbit/s row is below DVI’s minimum clock rate.** DVI 1.0 sets its minimum required pixel format at a 25.175 MHz TMDS clock, and specifies single-link operation from 25 MHz. At 10 serial bits per pixel clock, 240 Mbit/s corresponds to 24 MHz; 250 Mbit/s corresponds to 25 MHz. So the 240 Mbit/s electrical simulation does not by itself support a compliant DVI video mode, while 250 Mbit/s is at the stated minimum boundary. The README’s note that a monitor may reject a 24 MHz clock is apt. **Severity: changes the DVI-use claim, not the electrical result.** [README.md, “Pad speed for HDMI / DVI”; DVI 1.0 §§2.2.2 and 2.3.1](https://ez.analog.com/cfs-file/__key/communityserver-discussions-components-files/331/DVI_2D00_1.0_5F00_specs.pdf)
+
+4. **The per-conductor cable model omits loss and real interconnect variation.** `padsim.py` models 10 cm of board plus 1 m of cable as identical, lossless 50 Ω ladders, then measures at the sink. That is a clean nominal transmission-line load, but does not cover cable attenuation, connector/board discontinuities, impedance tolerance, or pair skew. Loss is acknowledged in the README; the reported sink eye and swing should be read as ideal-channel results, not as assured values for a real HDMI cable. **Severity: changes the scope of the verdict.** [spice/padsim.py, `hdmi`/`hdmi4` cases; README.md, “Not modelled”]
+
+5. **The claimed four-pair pin allocation omits the rest of the HDMI/DVI interface.** The `hdmi4` case models eight signal pads and their common supply bounce. The README says four pairs use all eight `uo_out` pins, then summarises the setup as using an HDMI connector. That accounts for TMDS clock and data only; it does not establish the required auxiliary power, hot-plug or DDC connections, nor their implementation. **Severity: changes the completeness of the connector/demo claim; no change to the measured pair.** [README.md, “Verdict: HDMI / DVI”; spice/padsim.py, `hdmi4`]
+
+6. **The results file supports the table values, with a measurement-definition caveat.** The 240 and 250 Mbit/s 270 Ω rows span 872–1140 mV differential swing, 803–1027 mV best-phase eye height, 0.86–0.94 UI above 150 mV, and 3.06–3.08 V reported common mode. These support the README’s rounded ranges. The table’s “line low / common mode” column reports a percentile-based low and mean common mode over the sampled interval, rather than an explicit worst-case common-mode bound. **Severity: changes what the reported common-mode number proves.** [results/pads_hdmi.txt, HDMI/DVI table; spice/analyse.py, `hdmi()`]
+
+7. **The 270 Ω load and remembered TMDS limits are broadly consistent with DVI 1.0.** The simulated 50 Ω pull-ups to 3.3 V match the DVI termination arrangement; DVI specifies AVcc at 3.3 V ±5%, 50 Ω ±10%, a receiver differential input range of 150–1200 mV, and a common-mode range of AVcc−300 to AVcc−37 mV. Its transmitter swing is 400–600 mV single-ended, or 800–1200 mV differential peak-to-peak. Thus “1.2 V maximum” is correct when referring to differential peak-to-peak swing, and 270 Ω stays within it in the reported corners. **Severity: no adverse finding; this checks the remembered limits for DVI 1.0.** [DVI 1.0 §§4.2–4.4](https://ez.analog.com/cfs-file/__key/communityserver-discussions-components-files/331/DVI_2D00_1.0_5F00_specs.pdf)
+
+**I found no result that reverses the narrow conclusion:** the simulated IHP 30 mA pads with about 270 Ω series resistors can produce a plausible TMDS-like electrical signal at 240–250 Mbit/s per lane under the modelled load. The results do not establish standards compliance or real-cable operation, and 240 Mbit/s does not correspond to the stated DVI minimum video clock.
+tokens used
+48,464
+1. **The 270 Ω result supports electrical plausibility at the sink, but not transmitter compliance.** The simulated 0.87–1.14 V differential swing corresponds to roughly 0.44–0.57 V per leg, within DVI 1.0’s 0.40–0.60 V single-ended swing range. The reported common mode and ≥150 mV eye also meet the remembered receiver limits. But DVI specifies transmitter levels, rise/fall time, intra-pair skew and an eye mask at **TP2**, the transmitter connector. The simulation reports sink levels and eye width, and does not check all those TP2 requirements. **Severity: changes the strength of the verdict**, not an indication that the 270 Ω case fails. [README.md, “HDMI / DVI pair”; DVI 1.0 §§4.3–4.4](https://ez.analog.com/cfs-file/__key/communityserver-discussions-components-files/331/DVI_2D00_1.0_5F00_specs.pdf)
+
+2. **The eye-width comparison is useful but is not a standards eye-mask test.** `eye_ui()` in `spice/analyse.py` samples 80 phases and reports the best vertical opening and the width above a chosen threshold; `hdmi()` sets that threshold to 150 mV. DVI’s transmitter and receiver eye masks impose amplitude limits across defined time regions, and the receiver requirement includes a pixel-error-rate test. Passing the scalar 150 mV threshold therefore does not establish mask compliance or receiver interoperability. **Severity: changes the strength of the verdict.** [spice/analyse.py, `eye_ui()` and `hdmi()`; DVI 1.0 §§4.3–4.4](https://ez.analog.com/cfs-file/__key/communityserver-discussions-components-files/331/DVI_2D00_1.0_5F00_specs.pdf)
+
+3. **The 240 Mbit/s row is below DVI’s minimum clock rate.** DVI 1.0 sets its minimum required pixel format at a 25.175 MHz TMDS clock, and specifies single-link operation from 25 MHz. At 10 serial bits per pixel clock, 240 Mbit/s corresponds to 24 MHz; 250 Mbit/s corresponds to 25 MHz. So the 240 Mbit/s electrical simulation does not by itself support a compliant DVI video mode, while 250 Mbit/s is at the stated minimum boundary. The README’s note that a monitor may reject a 24 MHz clock is apt. **Severity: changes the DVI-use claim, not the electrical result.** [README.md, “Pad speed for HDMI / DVI”; DVI 1.0 §§2.2.2 and 2.3.1](https://ez.analog.com/cfs-file/__key/communityserver-discussions-components-files/331/DVI_2D00_1.0_5F00_specs.pdf)
+
+4. **The per-conductor cable model omits loss and real interconnect variation.** `padsim.py` models 10 cm of board plus 1 m of cable as identical, lossless 50 Ω ladders, then measures at the sink. That is a clean nominal transmission-line load, but does not cover cable attenuation, connector/board discontinuities, impedance tolerance, or pair skew. Loss is acknowledged in the README; the reported sink eye and swing should be read as ideal-channel results, not as assured values for a real HDMI cable. **Severity: changes the scope of the verdict.** [spice/padsim.py, `hdmi`/`hdmi4` cases; README.md, “Not modelled”]
+
+5. **The claimed four-pair pin allocation omits the rest of the HDMI/DVI interface.** The `hdmi4` case models eight signal pads and their common supply bounce. The README says four pairs use all eight `uo_out` pins, then summarises the setup as using an HDMI connector. That accounts for TMDS clock and data only; it does not establish the required auxiliary power, hot-plug or DDC connections, nor their implementation. **Severity: changes the completeness of the connector/demo claim; no change to the measured pair.** [README.md, “Verdict: HDMI / DVI”; spice/padsim.py, `hdmi4`]
+
+6. **The results file supports the table values, with a measurement-definition caveat.** The 240 and 250 Mbit/s 270 Ω rows span 872–1140 mV differential swing, 803–1027 mV best-phase eye height, 0.86–0.94 UI above 150 mV, and 3.06–3.08 V reported common mode. These support the README’s rounded ranges. The table’s “line low / common mode” column reports a percentile-based low and mean common mode over the sampled interval, rather than an explicit worst-case common-mode bound. **Severity: changes what the reported common-mode number proves.** [results/pads_hdmi.txt, HDMI/DVI table; spice/analyse.py, `hdmi()`]
+
+7. **The 270 Ω load and remembered TMDS limits are broadly consistent with DVI 1.0.** The simulated 50 Ω pull-ups to 3.3 V match the DVI termination arrangement; DVI specifies AVcc at 3.3 V ±5%, 50 Ω ±10%, a receiver differential input range of 150–1200 mV, and a common-mode range of AVcc−300 to AVcc−37 mV. Its transmitter swing is 400–600 mV single-ended, or 800–1200 mV differential peak-to-peak. Thus “1.2 V maximum” is correct when referring to differential peak-to-peak swing, and 270 Ω stays within it in the reported corners. **Severity: no adverse finding; this checks the remembered limits for DVI 1.0.** [DVI 1.0 §§4.2–4.4](https://ez.analog.com/cfs-file/__key/communityserver-discussions-components-files/331/DVI_2D00_1.0_5F00_specs.pdf)
+
+**I found no result that reverses the narrow conclusion:** the simulated IHP 30 mA pads with about 270 Ω series resistors can produce a plausible TMDS-like electrical signal at 240–250 Mbit/s per lane under the modelled load. The results do not establish standards compliance or real-cable operation, and 240 Mbit/s does not correspond to the stated DVI minimum video clock.
