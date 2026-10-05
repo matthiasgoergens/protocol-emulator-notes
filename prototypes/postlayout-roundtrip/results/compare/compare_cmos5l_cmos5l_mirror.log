@@ -1,0 +1,32 @@
+abutment boxes: 33 cells' prBoundary equals the LEF ORIGIN/SIZE box, 0 differ
+placements: GDS 2983 standard-cell references (orientations N 1067 S 486 FN 531 FS 899), DEF 2983 components of the library
+placements: 2982 of 2983 match a DEF component by (master, x, y, orientation); with the GDS origin taken as the DEF position, 1100 would
+    DEF component not placed once in the GDS: _1639_ sg13cmos5l_inv_1 (167040 189000) N
+names: 2015 of 2016 extracted instances named from the DEF (1 not)
+supplies: 2 extracted supply nets (by top-level label VPWR/VGND) left out
+nets vs DEF: pins on no wire, set aside: 4 in the extraction (clkload0/Y clkload1/Y u1861@167.04,192.95/A clkload2/Y), 0 in the record
+nets vs DEF: extraction 2079 nets (0 single-endpoint) over 6140 endpoints; record 2080 nets (0 single-endpoint) over 6143 endpoints
+nets vs DEF: 2078 nets identical as endpoint sets; 1 only in the extraction, 2 only in the record; 0 record nets split, 0 extracted nets merge record nets
+nets vs DEF: 4 endpoints only in the record, 1 only in the extraction
+    only in the extraction: _2528_/A1 u1861@167.04,192.95/Y
+    only in the record: _1639_/Y _2528_/A1
+    only in the record: _1639_/A _2501_/B2 hold557/X
+    endpoint missing from the extraction: _1639_/A
+    endpoint missing from the extraction: _1639_/Y
+    endpoint missing from the extraction: _2501_/B2
+    endpoint missing from the extraction: hold557/X
+    endpoint missing from the record: u1861@167.04,192.95/Y
+nl.v: 2983 instances, 0 assign statements, 0 constant connections
+nets vs nl.v: pins on no wire, set aside: 4 in the extraction (clkload0/Y clkload1/Y u1861@167.04,192.95/A clkload2/Y), 0 in the record
+nets vs nl.v: extraction 2079 nets (0 single-endpoint) over 6140 endpoints; record 2080 nets (0 single-endpoint) over 6143 endpoints
+nets vs nl.v: 2078 nets identical as endpoint sets; 1 only in the extraction, 2 only in the record; 0 record nets split, 0 extracted nets merge record nets
+nets vs nl.v: 4 endpoints only in the record, 1 only in the extraction
+    only in the extraction: _2528_/A1 u1861@167.04,192.95/Y
+    only in the record: _1639_/Y _2528_/A1
+    only in the record: _1639_/A _2501_/B2 hold557/X
+    endpoint missing from the extraction: _1639_/A
+    endpoint missing from the extraction: _1639_/Y
+    endpoint missing from the extraction: _2501_/B2
+    endpoint missing from the extraction: hold557/X
+    endpoint missing from the record: u1861@167.04,192.95/Y
+COMPARISON DIFFERS

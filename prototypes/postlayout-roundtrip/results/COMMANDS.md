@@ -28,3 +28,7 @@ M = the PDK's sg13g2_stdcell.v, L = sg13g2_stdcell_typ_1p20V_25C.lib.
   lockstep_swaps.log (20 2000 --swaps 50 1), test_cells.log and test_cells_planted.log (same plants as above),
   sta_summary.rpt (step 55). ../controls.log was regenerated for sg13g2 after the cut planting learnt paths
   and via references (same ten cuts and ten shorts as before).
+- compare/compare_sg13g2.log: compare_def.exe $G deadline_sequencer RUN/final/def/deadline_sequencer.def
+  RUN/final/nl/deadline_sequencer.nl.v sg13g2_stdcell.lef; compare_cmos5l.log: the same on G5 with the DEF of step 53,
+  nl.v of step 52 and sg13cmos5l_stdcell.lef; the *_cutNN/_shortNN logs on the controls' GDS copies, *_mirror and
+  *_swap on GDS written by plant_placement.py (gdstk).

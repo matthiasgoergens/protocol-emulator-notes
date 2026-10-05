@@ -48,6 +48,7 @@ reads as 0, so both kinds of tool agree with the broken chip unless the structur
 | `test_via_overlap.ml` | synthetic GDS cases for the join rule (vias must overlap, same-layer metal may abut) |
 | `generic_lockstep.ml` | block-independent lockstep: random values on every input, every output compared |
 | `seq_lockstep.ml` | the deadline sequencer's lockstep with its real harness, plus planted crossed wires |
+| `compare_def.ml` | the extraction against the run's DEF and `nl.v`, per placement and per net, as partitions |
 | `run_pnr.sh` | LibreLane 3.0.14 in its container, in a scratch directory, keeping the GDS (`sg13g2` or `sg13cmos5l`) |
 | `roundtrip.sh` | the whole round trip for one block |
 | `results/` | the logs behind every number below |
@@ -207,6 +208,47 @@ cuts had no effect. The cut planting now also removes paths and via references (
 as before. Two via-metal pairs in this GDS touch without overlapping (a Via1 and a Via2 abutting the
 ends of short Metal2 pieces at one stack); both pairs lie in one component anyway, so the
 touch-versus-overlap rule changes nothing here either, and the extractor now names such pairs.
+
+## Per placement and per net against the P&R run's own record
+
+Equal per-cell-type counts would pass a layout with two nets swapped or merged elsewhere.
+`compare_def.exe GDS TOP DEF NL.V CELL.LEF` compares the extraction with LibreLane's DEF and final
+netlist element by element, following the ladder in Shapovalov's paper
+([FigureZig/asicrev](https://github.com/FigureZig/asicrev), Table I) and retrace's checks (a)-(c)
+(`docs/TEMPO_LVS.md` section 1.5):
+
+- **Placements.** Each standard-cell reference in the GDS becomes the DEF's
+  `(master, x, y, orientation)`: the orientation from the reference's transform (all eight), the
+  position as the lower-left of the transformed LEF abutment box, which for a flipped or rotated
+  cell is not the GDS origin. The LEF box is checked against each cell's own prBoundary (189/4)
+  first. Every extracted instance takes its DEF name from that key.
+- **Nets**, against DEF `NETS` and separately against `nl.v`: each net is the set of its endpoints,
+  `(instance, pin)` or `(PIN, port)`, and the two sides are compared as partitions, never by net
+  name; a differing net is reported as split or merged. Supply nets are in neither record's signal
+  nets and are left out, counted; a pin on no wire (a clock-tree dummy load's output) is a
+  one-endpoint net in the extraction and absent from the record, which is the same partition, so
+  those are set aside and listed.
+
+| | sg13g2 | sg13cmos5l |
+| --- | --- | --- |
+| abutment box equals prBoundary | 34 of 34 cell types | 33 of 33 |
+| placements matched | 2,867 of 2,867 (N 993, S 488, FN 533, FS 853) | 2,983 of 2,983 (N 1,068, S 486, FN 531, FS 898) |
+| matched if the GDS origin were taken as the DEF position | 1,033 | 1,101 |
+| extracted instances named from the DEF | 2,017 of 2,017 | 2,016 of 2,016 |
+| nets identical as endpoint sets, vs DEF and vs `nl.v` | 2,081 of 2,081 (6,145 endpoints) | 2,080 of 2,080 (6,143 endpoints) |
+| pins on no wire set aside | 3 (`clkload0-2/Y`) | 3 (`clkload0-2/Y`) |
+
+The origin-as-position row is the trap Shapovalov describes (his check scored 96 of 230 before he
+compared transformed boxes): about two thirds of the placements here are in flipped or rotated rows.
+
+Controls, each of which must make the comparison fail and point at its own fault
+(`results/compare/`): a planted cut splits exactly one record net (sg13g2 `cut01`, `cut02`;
+sg13cmos5l `cut01`, and `cut10`, which the lockstep missed); a planted short merges exactly two
+(sg13g2 `short01`, `short02`; sg13cmos5l `short03`, also missed by the lockstep); one inverter
+mirrored in place and one `nand2_1` replaced by the `nor2_1` of the same footprint
+(`plant_placement.py`, written with gdstk) each leave exactly one DEF component unmatched, named,
+and one instance unnamed. The master swap is the case retrace reports surviving every
+extraction-level check of its own; here the placement key includes the master, so it is caught.
 
 ## What it does not check
 

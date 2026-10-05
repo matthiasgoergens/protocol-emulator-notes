@@ -1,0 +1,21 @@
+abutment boxes: 34 cells' prBoundary equals the LEF ORIGIN/SIZE box, 0 differ
+placements: GDS 2867 standard-cell references (orientations N 993 S 488 FN 533 FS 853), DEF 2867 components of the library
+placements: 2867 of 2867 match a DEF component by (master, x, y, orientation); with the GDS origin taken as the DEF position, 1033 would
+names: 2017 of 2017 extracted instances named from the DEF (0 not)
+supplies: 2 extracted supply nets (by top-level label VPWR/VGND) left out
+nets vs DEF: pins on no wire, set aside: 3 in the extraction (clkload1/Y clkload2/Y clkload0/Y), 0 in the record
+nets vs DEF: extraction 2080 nets (0 single-endpoint) over 6145 endpoints; record 2081 nets (0 single-endpoint) over 6145 endpoints
+nets vs DEF: 2079 nets identical as endpoint sets; 1 only in the extraction, 2 only in the record; 0 record nets split, 1 extracted nets merge record nets
+nets vs DEF: 0 endpoints only in the record, 0 only in the extraction
+    only in the extraction: _1889_/X _1897_/A _1904_/A _2325_/A _2325_/Y _2331_/B
+    only in the record: _2325_/Y _2331_/B
+    only in the record: _1889_/X _1897_/A _1904_/A _2325_/A
+nl.v: 2867 instances, 0 assign statements, 0 constant connections
+nets vs nl.v: pins on no wire, set aside: 3 in the extraction (clkload1/Y clkload2/Y clkload0/Y), 0 in the record
+nets vs nl.v: extraction 2080 nets (0 single-endpoint) over 6145 endpoints; record 2081 nets (0 single-endpoint) over 6145 endpoints
+nets vs nl.v: 2079 nets identical as endpoint sets; 1 only in the extraction, 2 only in the record; 0 record nets split, 1 extracted nets merge record nets
+nets vs nl.v: 0 endpoints only in the record, 0 only in the extraction
+    only in the extraction: _1889_/X _1897_/A _1904_/A _2325_/A _2325_/Y _2331_/B
+    only in the record: _2325_/Y _2331_/B
+    only in the record: _1889_/X _1897_/A _1904_/A _2325_/A
+COMPARISON DIFFERS
