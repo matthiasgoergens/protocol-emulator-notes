@@ -14,11 +14,14 @@ open! Base
 open Hardcaml
 open Signal
 
-(* LED toggling every [half_period] cycles: 1 Hz when half_period = f / 2. *)
+(* LED toggling every [half_period] cycles: 1 Hz when half_period = f / 2.  The terminal count is
+   compared one cycle early and registered, so at 250 MHz the 27-bit comparison is not in series
+   with the counter's reset (it was the critical path, 172 MHz, before). *)
 let blink ~spec ~half_period =
+  assert (half_period >= 2);
   let w = num_bits_to_represent (half_period - 1) in
   let c = wire w and led = wire 1 in
-  let wrap = c ==:. half_period - 1 in
+  let wrap = reg spec (c ==:. half_period - 2) (* high while c = half_period - 1 *) in
   c <== reg spec (mux2 wrap (zero w) (c +:. 1));
   led <== reg spec (led ^: wrap);
   led
