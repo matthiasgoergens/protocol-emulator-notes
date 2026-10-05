@@ -34,6 +34,13 @@ file in `results/`.
 
   So the hardware notes recommend re-clocking the outputs in an external flip-flop on a quiet
   supply.
+- **Compressed audio** (section 8):
+  - our IMA ADPCM and SBC decoders are bit-exact with ffmpeg and BlueZ's sbcdec on five streams
+    (A2DP 44.1 and 48 kHz joint stereo, bitpool 53/51, SNR allocation, 4 subbands, dual channel);
+  - the SBC CRC-8 runs on the PE array model and the RTL;
+  - but the SBC filterbank (2.29 M MAC/s for stereo) does not fit the multiplier-less PEs or the
+    1 KB of banks;
+  - aptX was not attempted.
 - **Underruns hold the last frame.** At the edges of a gap that adds nothing measurable (median
   +0.2 dB against the gapless output). Substituting zeros instead gives +19 dB median and +34 dB
   worst (`results/music.txt`).
@@ -412,12 +419,148 @@ DAC fits beside order-3 modulators** with threads 1-3 free for the receiver.
     ratios in `results/design.txt` (5.7×, 8×, 14×), not from the level sweep. That is where the
     README takes it from.
 
+## 8. Compressed audio in front of the DAC: IMA ADPCM and SBC (A2DP)
+
+The scope extension asked for on-chip decoding on generic blocks. **What is built and checked:**
+- **Bit-exact decoder models** (`sim/codec.ml`) for IMA ADPCM (WAV blocks) and for SBC: 8 and 4
+  subbands; 4-16 blocks; mono, dual, stereo and joint stereo; loudness and SNR allocation;
+  44.1 and 48 kHz. Their arithmetic is the arithmetic of the chosen blocks.
+- **The SBC frame CRC-8 runs on the PE array model itself**, also in lockstep with the Hardcaml
+  RTL.
+
+**What is not:** the SBC synthesis filterbank does not run on the PEs, and the finding below
+says why. aptX was not attempted. It is proprietary, its patent and licence status is
+unverified here, and nothing in this directory implements it.
+
+**Oracles** (`codec/run_codec.sh`, `results/codec/references.txt`):
+- the streams are made from the synthetic clip with ffmpeg (adpcm_ima_wav) and BlueZ's sbcenc;
+- the references are ffmpeg's decoders and BlueZ's sbcdec;
+- sbcdec and ffmpeg agree with each other bit for bit on all four SBC streams. They are separate
+  programs from one lineage, the BlueZ code, so this is one reference decoded twice, not two
+  independent ones.
+
+| stream | our decoder |
+|---|---|
+| IMA ADPCM, stereo, 1,024-byte blocks | **bit-exact** with ffmpeg (1,061,748 bytes) |
+| SBC 44.1 kHz, 8 subbands, 16 blocks, joint stereo, loudness, bitpool 53 (the common A2DP high quality) | **bit-exact** with sbcdec and ffmpeg |
+| SBC 48 kHz, 8 / 16, joint, bitpool 51 | **bit-exact** |
+| SBC 44.1 kHz, 8 / 16, stereo, SNR allocation, bitpool 35 | **bit-exact** |
+| SBC 44.1 kHz, 4 subbands, 8 blocks, dual channel, bitpool 20 | **bit-exact**, also with the CRC on the Hardcaml RTL in lockstep with the model (818,937 clocks, 0 mismatches) |
+
+**Planted controls,** each caught (`references.txt`):
+- the CRC byte of one frame flipped: that frame alone is rejected by the PE CRC;
+- one scale-factor bit flipped: rejected, since the CRC covers the scale factors;
+- a wrong bit allocation (the loudness offset of subband 0 off by one): 397,017 of 529,408
+  samples differ, so the reference comparison fails;
+- a fault in the PE CRC's result: every frame is rejected.
+
+A rejected frame is skipped whole, using the length from its header, and the stream stays in
+sync.
+
+**End to end:**
+- `wav/decoded_adpcm_o2_modeA.wav` and `wav/decoded_sbc_a2dp_j53_o2_modeA.wav` are our decoded
+  PCM through the order-2 one-bit chain (ideal pins; the constant gain into the modulator folds
+  into the decoder's last shift);
+- the codecs' own loss against the source clip (`results/codec/chain.txt`) is a waveform SNR of
+  32.9 dB for ADPCM and 31.7 dB for SBC at bitpool 53. That is a property of the codecs, not of
+  the DAC.
+
+### 8.1 IMA ADPCM on the sequencer and one PE
+
+| part | block | cost |
+|---|---|---|
+| read the code bytes | thread, IN | ½ slot per sample |
+| select the step terms | the thread branches on the nibble's bits (WAITC acc bit k at dl = 0, one slot each) and sends only the terms the nibble selects, from tables of step, step>>1, step>>2 and step>>3 in the data bank | 712 bytes of bank (4 × 89 × 2) |
+| predictor | **one PE**: S ← sat(S + (g ? -A : A)), with g the sign bit through the segment's broadcast | 2.18 PE steps per sample, measured over the clip |
+| step index | a second PE adds the index increment that the thread sends, with saturation clamping at 88 (the index kept at an offset of 32,679, so that 88 is 32,767); the thread clamps at 0 with one SKEQ. The tap's low byte, 0xA7 + index, is the bank address of the tables | 1 PE step per sample |
+
+**The saturation argument.** The terms of one sample all have one sign, so the partial sums are
+monotone. Saturating each add therefore equals the reference's single clip of the total. The
+bit-exact match is the check; the model computes it this way.
+
+**Thread cost:** about 27 slots per sample (est, not run: four branches, about seven slots per
+selected term, the sign write and the index exchange). For stereo at 44.1 kHz that is about
+2.4 M of a thread's 15 M slots/s, with 2 PEs per channel.
+
+**What was not run** is the thread code itself and the bank layout. Eight byte tables addressed
+by {page, 0xA7 + index} need eight pages, and the bank has four. A second index offset (another
+PE and tap), or deriving step>>2 and step>>3 by X1 shifts in their own PEs, closes this. Neither
+was built.
+
+**Why the thread selects.** A PE has one condition g. The nibble's four bits cannot ride in the
+token beside a 15-bit step, and the per-segment broadcast bits are written by the thread anyway.
+
+### 8.2 SBC: what maps, and the finding that the filterbank does not
+
+Measured per frame for the A2DP stream (44.1 kHz, 8/16, joint, bitpool 53: 119 bytes, 344.5
+frames/s, 41 kB/s on the host link):
+- 88 CRC bits;
+- 246 elementary bit-allocation operations (compare, add, branch);
+- 174 dequantisations, each a division by 2^b - 1;
+- **6,656 multiply-accumulates**: 26 per output sample, of a 32-bit V by a 17-bit coefficient,
+  wrapping at 32 bits.
+
+| stage | block | rate at 44.1 kHz stereo | status |
+|---|---|---|---|
+| parse the header, joint bits, 4-bit scale factors and the fixed-width samples | a thread with the bit path (packer) or a deserialiser PE | about 1,000 fields per frame | modelled, not on the blocks |
+| CRC-8 (x⁸+x⁴+x³+x²+1, init 0x0F) | **one PE in GF(2) mode**: S ← ((S << 1) \| 0) XOR (g ? 0x1D00 : 0), g = S[15] ^ data bit, the CRC in the high byte | 88 bits per frame. 179 array clocks per frame here, at two feed writes per bit; the bit-path CRC unit would take 88 | **run on the PE model and on the RTL**, bit-exact |
+| bit allocation | a thread sequencing, with one PE as its adder and comparator through a feed and a tap | 85k operations/s; about 0.4 M slots/s at about 5 slots per round trip (est) | modelled |
+| dequantisation | ((2a+1) << s) / (2^b - 1): a short series of shifted adds (x/(2^b-1) = Σ x >> kb, plus a correction), on 32-bit PE pairs | 60k/s, about 10 PE-pair steps each (est) | modelled |
+| synthesis: 16×8 matrixing and an 80-tap window per block | **no PE configuration** | 2.29 M MAC/s | **not feasible on the array as specified** |
+
+**Why the synthesis does not map.** The PE has no multiply. A constant multiply by shift-and-add
+needs the coefficient in a static configuration (one PE per coefficient digit, and SBC has 208
+coefficients). Bit-serial multiplication needs the operand that changes on every step either in
+K, which cannot change while running, or as a bit stream on the lane, which only a thread writes,
+one bit per mailbox write. At 26 MACs × 17 bits × 88.2k samples/s that is about 39 M bit-steps/s,
+more than the mailbox and the threads together can deliver. The operands also have to stream
+from memory at about 14 MB/s with a ring-buffer address pattern, which needs the bank-port
+streaming features of gap G8 (not built).
+
+**Memory per channel:**
+- V: 160 words of 32 bits, 640 bytes as a ring, or 680 with the reference's 9-word copy;
+- a 119-byte frame buffer;
+- one block of dequantised samples, 32 bytes;
+- coefficient tables, about 400 bytes, shared.
+
+That is **about 1.9 KB for stereo, against the chip's 1 KB of gain-cell data bank**.
+
+**What would make it fit:**
+- **a multiplier.** One shared 16×16 MAC unit (mac16 with Booth, **17,004 µm²** synthesised,
+  `../pe-synth/README.md`) fed by two bank streams does the bit-exact 32×17 product as two MACs:
+  4.6 M of its 60 M MAC/s for SBC stereo;
+- G8's bank streaming;
+- 2 KB more data memory: two more 4-kbit banks or two 1 KB SRAM macros.
+
+Without them, the realistic split decodes SBC on the host and streams PCM (sections 1-3).
+
+### 8.3 The Bluetooth side (not built)
+
+**Forwarding.** A Pico 2 W (RP2350 with a CYW43439) running an A2DP sink (for example
+BTstack):
+- receives AVDTP media packets: an RTP header, a 1-byte SBC media header with the frame count,
+  then whole SBC frames;
+- forwards the raw frames over the host link: about 41 kB/s at bitpool 53, 0.5 % of the
+  link's estimated rate.
+
+The chip's decoder finds the 0x9C sync word and uses the header for the length, as `codec.ml`
+does.
+
+**The clock.** As with S/PDIF (section 6), the phone's sample clock is asynchronous to the chip:
+- with on-chip decoding the host never sees PCM, so it cannot resample;
+- the options are the host dropping or repeating a whole SBC frame (2.9 ms, audible) when its
+  buffer drifts, or a fractional trim of the pump's sample period, whose one-step timing error
+  section 6 shows to be costly;
+- with host-side decoding (the realistic split above), the host resamples into mode B.
+
 ## Files
 
 | path | what |
 |---|---|
 | `sim/spec.ml`, `model.ml`, `upe_rtl.ml`, `rtlsim.ml`, `lockstep.ml` | the PE array, copied from `../unified-pe/verify` and extended (X1, E1, E2) |
 | `sim/dac.ml` | the configurations, the fast model, the pump programme, the host FIFO, the system glue |
+| `sim/codec.ml` | the IMA ADPCM and SBC decoders and the CRC-8 PE configuration (section 8) |
+| `codec/run_codec.sh` | makes the test streams, runs the reference decoders and ours, the controls |
 | `sim/main.ml` | `lockstep`, `controls`, `controls-new`, `check-fast`, `rtl-lockstep`, `pump-check`, `render`, `verilog-pe` |
 | `sim/isa2.ml` | a symlink to `../../sequencer-v2/isa2.ml` |
 | `run_rtl_lockstep.sh` | the DAC lockstep runs, niced, waiting while the load is above 20 |
