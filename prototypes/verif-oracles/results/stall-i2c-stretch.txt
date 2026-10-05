@@ -1,7 +1,7 @@
 # command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/verif-oracles/_build/default/stall/i2c_stretch.exe
-# commit: 5be80cf854522d8fe3907369d329079ba4a49aeb (with uncommitted changes)
+# commit: 61e8b0434af942db81aa64a2d74766d20d505576 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T08:29:55+08:00
+# date: 2026-10-05T08:58:42+08:00
 I2C programme before the fix: 63 words; after: 64 words (of 64)
 before, no stretching: uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=true host-acks [00 00]; RTL vs interpreter: 0 clocks differ; matches the demo's expected bytes: true
 after , no stretching: uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=true host-acks [00 00]; RTL vs interpreter: 0 clocks differ; matches the demo's expected bytes: true

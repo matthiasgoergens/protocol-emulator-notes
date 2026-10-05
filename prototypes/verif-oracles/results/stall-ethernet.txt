@@ -1,7 +1,7 @@
-# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/stall/eth_stall.exe
-# commit: 02381a72826a9cea01ae57c25ae22e05286ab226 (with uncommitted changes)
+# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/verif-oracles/_build/default/stall/eth_stall.exe
+# commit: 61e8b0434af942db81aa64a2d74766d20d505576 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T08:12:24+08:00
+# date: 2026-10-05T08:58:38+08:00
 10BASE-T TX firmware under host stalls: 73 bytes on the wire, 1168 half-bits, frame window 3504 clocks
 fixed firmware sizes (words per thread): 34,36,35,34; original: 28,30,29,28
 
