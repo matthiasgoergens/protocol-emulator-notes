@@ -1,0 +1,24 @@
+# ./_build/default/stall_fw.exe at 50fd5bf plus the uncommitted controller change it tests, 2026-10-05T08:52:59+08:00
+longest reply (8 bytes of 0xFF, most stuffing): 29 FIFO bytes with the terminator; the FIFO takes one byte per 160 clocks
+
+== before: RDY = FIFO not empty, depth 4 (the earlier defaults)
+  refill 40 (the default)                3 sessions: 0 with errors (0 errors), 366 replies, 0 NAKs while preparing, FIFO peak 4, lockstep mismatches 0
+  refill 160 (the stated bound)          3 sessions: 0 with errors (0 errors), 366 replies, 0 NAKs while preparing, FIFO peak 4, lockstep mismatches 0
+  refill 200                             3 sessions: 3 with errors (51 errors), 1396 replies, 1211 NAKs while preparing, FIFO peak 4, lockstep mismatches 0
+      first error: [refill 200 clk 11915] IN ep0: got undecodable: 91 bits is not whole bytes, expected data 4b [12 01 10 01 00 00 00 08]
+  refill 400                             3 sessions: 3 with errors (63 errors), 34 replies, 0 NAKs while preparing, FIFO peak 4, lockstep mismatches 0
+      first error: [refill 400 clk 16103] IN ep0: got undecodable: run of 64 clocks is not a whole number of bits, expected data 4b [12 01 10 01 00 00 00 08]
+  refill 40, bursts p 0.2 x 1..800       3 sessions: 3 with errors (42 errors), 1448 replies, 1213 NAKs while preparing, FIFO peak 4, lockstep mismatches 0
+      first error: [refill 40, bursts p 0.2 x 1..800 clk 18607] IN ep0: got undecodable: run of 252 clocks is not a whole number of bits, expected data c3 [09 12 01 00 00 01 00 00]
+  refill 40, bursts p 0.05 x 1..3000     3 sessions: 3 with errors (62 errors), 987 replies, 404 NAKs while preparing, FIFO peak 4, lockstep mismatches 0
+      first error: [refill 40, bursts p 0.05 x 1..3000 clk 20347] IN ep0: got undecodable: run of 1492 clocks is not a whole number of bits, expected data c3 [09 12 01 00 00 01 00 00]
+== after: RDY = whole reply in the FIFO, depth 32
+  refill 40 (the default)                3 sessions: 0 with errors (0 errors), 361 replies, 4 NAKs while preparing, FIFO peak 27, lockstep mismatches 0
+  refill 160 (the stated bound)          3 sessions: 0 with errors (0 errors), 552 replies, 207 NAKs while preparing, FIFO peak 27, lockstep mismatches 0
+  refill 200                             3 sessions: 0 with errors (0 errors), 684 replies, 313 NAKs while preparing, FIFO peak 27, lockstep mismatches 0
+  refill 400                             3 sessions: 0 with errors (0 errors), 878 replies, 538 NAKs while preparing, FIFO peak 27, lockstep mismatches 0
+  refill 40, bursts p 0.2 x 1..800       3 sessions: 0 with errors (0 errors), 510 replies, 157 NAKs while preparing, FIFO peak 27, lockstep mismatches 0
+  refill 40, bursts p 0.05 x 1..3000     3 sessions: 0 with errors (0 errors), 470 replies, 129 NAKs while preparing, FIFO peak 27, lockstep mismatches 0
+
+USB STALL PASS (PASS = after: no errors under any pattern; before: no errors at or under the 160-clock bound; lockstep agrees)
+exit 0
