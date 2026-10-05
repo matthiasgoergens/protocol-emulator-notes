@@ -26,7 +26,9 @@ let check_replay ~expected ~fired =
 
 (* ---- (a) deadline waits ---- *)
 
-let deadline ~name ~store ~code ~(contracts : Props.contract list) ~depth =
+(* [cut]: Machine.cut after every clock, and the monitors' counters with it (for programmes whose
+   control flow follows their inputs, such as the I2C master since it honours clock stretching) *)
+let deadline ?(cut = false) ~name ~store ~code ~(contracts : Props.contract list) ~depth () =
   let m = Machine.create ~store ~code () in
   let mons = List.map P.deadline contracts in
   let by_event = Array.make (List.length contracts) Smt.ff and by_deadline = Array.make (List.length contracts) Smt.ff in
@@ -41,7 +43,16 @@ let deadline ~name ~store ~code ~(contracts : Props.contract list) ~depth =
           bad := Smt.or_ !bad b;
           by_event.(i) <- Smt.or_ by_event.(i) ev; by_deadline.(i) <- Smt.or_ by_deadline.(i) dd
         end) mons;
-    !bad, [] in
+    let cuts =
+      if not cut then []
+      else begin
+        let eqs = ref (Machine.cut m ~k) in
+        List.iteri (fun i (mon : P.deadline) -> mon.since <- Machine.cut_value ~prefix:"" ~k (Printf.sprintf "since%d" i) mon.since eqs) mons;
+        Array.iteri (fun i x -> by_event.(i) <- Machine.cut_value ~prefix:"" ~k (Printf.sprintf "ev%d" i) x eqs) by_event;
+        Array.iteri (fun i x -> by_deadline.(i) <- Machine.cut_value ~prefix:"" ~k (Printf.sprintf "dd%d" i) x eqs) by_deadline;
+        !eqs
+      end in
+    !bad, cuts in
   let covers () =
     List.concat (List.mapi (fun i (c : Props.contract) ->
         let w = Printf.sprintf "wait at %d.%d" (c.wait lsr 8) (c.wait land 0xFF) in
@@ -77,15 +88,15 @@ let a_main ~ldd ~name =
   (* the contract: a window of 21 slots (84 clocks) from the LDD, as main.ml's test exercises *)
   let contract = { Props.thread = 1; anchor = addr ~thread:1 1; wait = addr ~thread:1 2; fail = addr ~thread:1 5;
                    slots = 21; kind = Waitp (1, 1) } in
-  deadline ~name ~store ~code:[| Havoc; Fixed; Havoc; Havoc |] ~contracts:[ contract ] ~depth:160
+  deadline ~name ~store ~code:[| Havoc; Fixed; Havoc; Havoc |] ~contracts:[ contract ] ~depth:160 ()
 
-let a_protocols ~spi_period ~name =
+let a_protocols ?(cut = false) ~spi_period ~name () =
   let u = Programmes.uart ~bit_slots:5 [ 0x4F ] and spi = Programmes.spi_with ~period:spi_period in
   let store = Programmes.store_of [| u; spi; Programmes.i2c; Programmes.idle |] in
   let contracts = Programmes.waitd_contracts ~thread:0 u @ Programmes.waitd_contracts ~thread:1 spi
                   @ Programmes.waitd_contracts ~thread:2 Programmes.i2c in
   pr "(a) %d WAITD contracts across the three programmes (SPI period %d slots)\n" (List.length contracts) spi_period;
-  deadline ~name ~store ~code:[| Fixed; Fixed; Fixed; Fixed |] ~contracts ~depth:720
+  deadline ~cut ~name ~store ~code:[| Fixed; Fixed; Fixed; Fixed |] ~contracts ~depth:720 ()
 
 (* ---- (b) pin ownership ---- *)
 
@@ -121,7 +132,7 @@ let ownership ~name ~timeout_mask ~depth =
 
 (* ---- (c) isolation: a two-copy miter ---- *)
 
-let isolation ~name ~ldb ~depth =
+let isolation ~name ~ldb ~depth () =
   let u = Programmes.uart ~bit_slots:5 [ 0x4F; 0x4B ] in
   let store = Programmes.store_of [| u; Programmes.idle; Programmes.idle; Programmes.idle |] in
   (* planted: the transmitter takes its bytes from the shared data bank (LDB, from bp = 0 after
@@ -138,10 +149,37 @@ let isolation ~name ~ldb ~depth =
     let assumptions = if code.(t) = Havoc then [ P.keeps_off ~pins:0x01 ea; P.keeps_off ~pins:0x01 eb ] else [] in
     flag_or others_differ (P.pins_differ ~pins:0xFE a.st b.st);
     flag_or uart_low (Smt.not_ (Smt.eq (Smt.extract a.st.pin_out ~hi:0 ~lo:0) (Smt.k ~w:1 1)));
+    (* no Machine.cut here: the copies' identical terms are shared, which the cut would undo (at
+       16 clocks the solver took 5.9 s with it and 0.3 s without) *)
     P.pins_differ ~pins:0x01 a.st b.st, assumptions in
-  let covers () = [ "the other threads make the copies' other pins differ", !others_differ;
-                    "the transmitter drives its pin low", !uart_low ] in
-  let r = Bmc.run ~progress:4 ~name ~depth ~step ~covers () in
+  let c_differ = "the other threads make the copies' other pins differ" and c_low = "the transmitter drives its pin low" in
+  let covers () = [ c_differ, !others_differ; c_low, !uart_low ] in
+  (* Concrete witnesses for the two covers, which the solver could not answer in 22 minutes on
+     its own: every input 0 and every unconstrained word a NOP, except, for the first, copy a's
+     thread 1 setting pin 1 at its first slot (clock 1). Each witness is first replayed on
+     Isa2.Spec through the same conditions; the solver then checks it as a satisfying assignment
+     of the unrolled miter, assumptions included. *)
+  let setp_pin1 = Isa2.setp ~mask:0x02 ~value:1 ~oe:1 () in
+  let w_differ n = Some (if n = "a.instr1@1" then setp_pin1 else 0) and w_low _ = Some 0 in
+  let replay_cover w =
+    let m = Hashtbl.create 16 in
+    List.iter (fun k -> let n = Printf.sprintf "a.instr1@%d" k in Hashtbl.replace m n (Option.get (w n))) (List.init depth Fun.id);
+    let ca = Machine.concrete ~prefix:"a." ~bank ~store ~code () and cb = Machine.concrete ~prefix:"b." ~bank ~store ~code () in
+    let first_differ = ref None and first_low = ref None in
+    for k = 0 to depth - 1 do
+      let io = Machine.concrete_io m ~k in
+      let t, _, _, ea = Machine.concrete_clock ca m ~k io in
+      let _, _, _, eb = Machine.concrete_clock cb m ~k io in
+      if code.(t) = Havoc && not (PC.keeps_off ~pins:0x01 ea && PC.keeps_off ~pins:0x01 eb) then failwith "witness breaks the assumption";
+      if !first_differ = None && PC.pins_differ ~pins:0xFE ca.cst cb.cst then first_differ := Some k;
+      if !first_low = None && ca.cst.pin_out land 1 = 0 then first_low := Some k
+    done;
+    (!first_differ, !first_low) in
+  let show = function Some k -> Printf.sprintf "clock %d" k | None -> "never" in
+  let d1, _ = replay_cover w_differ and _, l2 = replay_cover w_low in
+  pr "  witnesses replayed on Isa2.Spec: '%s' holds from %s; '%s' from %s\n" c_differ (show d1) c_low (show l2);
+  let witnesses = (if d1 <> None then [ c_differ, w_differ ] else []) @ (if l2 <> None then [ c_low, w_low ] else []) in
+  let r = Bmc.run ~progress:4 ~witnesses ~name ~depth ~step ~covers () in
   Bmc.report r;
   (match r.violation with
    | None -> ()
@@ -174,7 +212,12 @@ let isolation ~name ~ldb ~depth =
    arbitrary instructions that keep off pin 0) implies pin 0 equal after every clock and R after
    the round, then, since both copies start from the same reset state, pin 0 agrees at every
    clock of every run: isolation without a bound. *)
-let isolation_induction ?(assume = true) ~name ~ldb () =
+(* [owned]: the bank ownership of ownership.ml as well (README, "isolation with the bank"):
+   thread 0 may read bank addresses 0 and 1 (its two bytes, with ~ldb), the other threads may
+   write anything but those ([others_write], 2..1023); every thread is assumed to keep to its declaration (each such
+   assumption is a property checked on its own, statically and by scenario e-bank), and R also
+   says the copies agree on bank addresses 0 and 1. *)
+let isolation_induction ?(assume = true) ?(owned = false) ?(others_write = (2, 1023)) ~name ~ldb () =
   let u = Programmes.uart ~bit_slots:5 [ 0x4F; 0x4B ] in
   let store = Programmes.store_of [| u; Programmes.idle; Programmes.idle; Programmes.idle |] in
   if ldb then for pc = 0 to Isa2.page_len - 1 do if Programmes.opcode store.(pc) = Isa2.op_lda then store.(pc) <- Isa2.ldb done;
@@ -196,19 +239,27 @@ let isolation_induction ?(assume = true) ~name ~ldb () =
   let a = mk "a." and b = mk "b." in
   let s0 = a.st in
   let in_reach = List.fold_left (fun acc x -> Smt.or_ acc (Smt.eq s0.pcs.(0) (Smt.k ~w:8 (x land 0xFF)))) Smt.ff reach in
-  let assumptions = ref [ in_reach ] and differ = ref Smt.ff in
+  let own : Ownership.t =
+    let n = Ownership.nothing and all = [ 0; 1; 2; 3 ] in
+    let other = { Ownership.bank_read = [ (0, 1023) ]; bank_write = [ others_write ]; inbox_send = all; inbox_recv = all; port_out = all; port_in = all } in
+    [| { n with bank_read = [ (0, 1) ] }; other; other; other |] in
+  let cells_equal () =
+    List.fold_left Smt.and_ Smt.tt
+      (List.map (fun i -> Smt.eq (Smt.select a.st.bankmem (Smt.k ~w:10 i)) (Smt.select b.st.bankmem (Smt.k ~w:10 i))) [ 0; 1 ]) in
+  let assumptions = ref ([ in_reach ] @ if owned then [ cells_equal () ] else []) and differ = ref Smt.ff in
   for k = 0 to 3 do
     let io = Machine.io ~k in
     let t, _, ea = Machine.clock a ~k io in
     let _, _, eb = Machine.clock b ~k io in
     if assume && code.(t) = Havoc then assumptions := P.keeps_off ~pins:0x01 ea :: P.keeps_off ~pins:0x01 eb :: !assumptions;
+    if owned then assumptions := P.obeys own.(t) ea :: P.obeys own.(t) eb :: !assumptions;
     differ := Smt.or_ !differ (P.pins_differ ~pins:0x01 a.st b.st)
   done;
   let eq0 f = Smt.eq (f a.st).(0) (f b.st).(0) in
-  let r_after = List.fold_left Smt.and_ (Smt.eq a.st.latch b.st.latch)
-      [ eq0 (fun s -> s.Sym.pcs); eq0 (fun s -> s.Sym.accs); eq0 (fun s -> s.Sym.cnts); eq0 (fun s -> s.Sym.dls);
-        eq0 (fun s -> s.Sym.bps); eq0 (fun s -> s.Sym.fines); eq0 (fun s -> s.Sym.armed); eq0 (fun s -> s.Sym.cfgs);
-        eq0 (fun s -> s.Sym.lsend) ] in
+  let r_after = List.fold_left Smt.and_ (if owned then Smt.and_ (cells_equal ()) (Smt.eq a.st.latch b.st.latch) else Smt.eq a.st.latch b.st.latch)
+      [ eq0 (fun s -> s.Isa2.pcs); eq0 (fun s -> s.Isa2.accs); eq0 (fun s -> s.Isa2.cnts); eq0 (fun s -> s.Isa2.dls);
+        eq0 (fun s -> s.Isa2.bps); eq0 (fun s -> s.Isa2.fines); eq0 (fun s -> s.Isa2.armed); eq0 (fun s -> s.Isa2.cfgs);
+        eq0 (fun s -> s.Isa2.lsend) ] in
   let goal = Smt.or_ !differ (Smt.not_ r_after) in
   let t0 = Unix.gettimeofday () in
   let sv = Smt.Solver.start ?log:(Option.map (fun d -> Filename.concat d (name ^ ".smt2")) (Bmc.log_dir ())) () in
@@ -341,19 +392,160 @@ let export_kind2_uart ?stretch ~anytime ~bytes ~file () =
   close_out oc;
   pr "%s: %d state variables, %d inputs, %d equations in the cone of the property\n" file ns ni ne
 
+(* ---- (e) ownership of the bank, the inboxes and the ports (ownership.ml) ---- *)
+
+(* v2 words, thread t's at page t *)
+let store_v2 (progs : int array array) =
+  let s = Array.make Isa2.store_len 0 in
+  Array.iteri (fun t p -> Array.iteri (fun pc w -> s.(Programmes.addr ~thread:t pc) <- w) p) progs;
+  s
+
+(* Bridge A's declaration, as in ../verif-oracles/hazard-mp/hazard_bridge.ml *)
+let bridge_owns () : Ownership.t =
+  let n = Ownership.nothing in
+  [| { n with inbox_send = [ 1 ] }; { n with inbox_recv = [ 1 ]; inbox_send = [ 2 ] }; { n with inbox_recv = [ 2 ] }; n |]
+
+(* A concrete input sequence for bridge A: the host sends [byte] on the UART line (pin 0) from
+   clock [start], 8N1 at the bridge's bit period; every other pin input reads 1 (the I2C lines
+   released and never stretched); no host or port traffic. As a function from variable name to
+   value, for Machine's models and Bmc's witnesses. *)
+let uart_stimulus ~start ~byte =
+  let bit_clocks = Bridge_fw.Bridge_a_words.uart_bit_clocks in
+  let line k =
+    if k < start then 1
+    else let i = (k - start) / bit_clocks in
+      if i = 0 then 0 else if i <= 8 then (byte lsr (i - 1)) land 1 else 1 in
+  fun name ->
+    match String.index_opt name '@' with
+    | None -> None
+    | Some j ->
+      let k = int_of_string (String.sub name (j + 1) (String.length name - j - 1)) and base = String.sub name 0 j in
+      let pins = 0xFE lor line k in
+      if base = "pin_in" then Some pins else if base = "pin_in4" then Some (Isa2.replicate4 pins)
+      else if String.length base >= 4 && String.sub base 0 4 = "cut." then None else Some 0
+
+let resources ~name ?(plant = fun (_ : int array array) -> ()) ~owns ~depth () =
+  let progs = Bridge_fw.Bridge_a_words.threads () in
+  plant progs;
+  let store = store_v2 progs in
+  let code = [| Fixed; Fixed; Fixed; Fixed |] in
+  let m = Machine.create ~store ~code () in
+  (* non-vacuity: every inbox a thread is declared to use is touched by it *)
+  let touched = Hashtbl.create 8 in
+  let touch key x = Hashtbl.replace touched key (Smt.or_ (Option.value (Hashtbl.find_opt touched key) ~default:Smt.ff) x) in
+  let step k =
+    let io = Machine.io ~k in
+    let t, _, e = Machine.clock m ~k io in
+    List.iter (fun i -> touch (Printf.sprintf "T%d sends to inbox %d" t i) (Smt.not_ (Smt.eq (Smt.extract e.inbox_send ~hi:i ~lo:i) (Smt.k ~w:1 0))))
+      owns.(t).Ownership.inbox_send;
+    List.iter (fun i -> touch (Printf.sprintf "T%d receives from inbox %d" t i) (Smt.not_ (Smt.eq (Smt.extract e.inbox_recv ~hi:i ~lo:i) (Smt.k ~w:1 0))))
+      owns.(t).Ownership.inbox_recv;
+    let bad = P.resources_step owns ~thread:t ~e in
+    bad, Machine.cut m ~k in
+  let covers () = List.sort compare (Hashtbl.fold (fun k v acc -> (k, v) :: acc) touched []) in
+  (* one witness for every cover: the host sends ACK (0x10), which T0 receives and passes to T1,
+     whose I2C master acknowledges and answers into inbox 2; replayed on Isa2.Spec first *)
+  let w = uart_stimulus ~start:8 ~byte:Bridge_fw.Bridge_a_words.op_ack in
+  (* the replay runs past the bound, to show where the covers the bound cannot reach are reached *)
+  let horizon = max depth 1200 in
+  let model = Hashtbl.create 4096 in
+  List.iter (fun k -> List.iter (fun b -> let n = Printf.sprintf "%s@%d" b k in Hashtbl.replace model n (Option.get (w n))) [ "pin_in"; "pin_in4" ])
+    (List.init horizon Fun.id);
+  let seen = Hashtbl.create 8 in
+  replay ~store ~code model ~upto:(horizon - 1) (fun k _ t _ _ e _ ->
+      List.iter (fun i -> if (e.inbox_send lsr i) land 1 = 1 && not (Hashtbl.mem seen (Printf.sprintf "T%d sends to inbox %d" t i)) then
+                    Hashtbl.replace seen (Printf.sprintf "T%d sends to inbox %d" t i) k) [ 0; 1; 2; 3 ];
+      List.iter (fun i -> if (e.inbox_recv lsr i) land 1 = 1 && not (Hashtbl.mem seen (Printf.sprintf "T%d receives from inbox %d" t i)) then
+                    Hashtbl.replace seen (Printf.sprintf "T%d receives from inbox %d" t i) k) [ 0; 1; 2; 3 ]);
+  pr "  witness (the host sends 0x%02x from clock 8), replayed on Isa2.Spec: %s\n" Bridge_fw.Bridge_a_words.op_ack
+    (String.concat "; " (List.sort compare (Hashtbl.fold (fun n k acc -> Printf.sprintf "%s at clock %d" n k :: acc) seen [])));
+  let witnesses = Hashtbl.fold (fun n k acc -> if k < depth then (n, w) :: acc else acc) seen [] in
+  Hashtbl.iter (fun n k -> if k >= depth then pr "  (cover '%s' is reached at clock %d, beyond the bound of %d)\n" n k depth) seen;
+  let r = Bmc.run ~progress:50 ~witnesses ~name ~depth ~step ~covers () in
+  Bmc.report r;
+  (match r.violation with
+   | None -> ()
+   | Some (kbad, model) ->
+     let fired = ref None in
+     pr "  counterexample: the offending clock and the UART line before it\n";
+     replay ~store ~code model ~upto:kbad (fun k io t a instr e _ ->
+         if PC.resources_step owns ~thread:t ~e && !fired = None then begin
+           fired := Some k;
+           pr "    %4d: t%d %d.%-3d %-28s inbox send %x recv %x, port out %x in %x, bank read %s write %s\n" k t (a lsr 8) (a land 0xFF)
+             (Isa2.disasm instr) e.inbox_send e.inbox_recv e.port_out e.port_in
+             (let v, x = e.bank_read in if v then string_of_int x else "-") (let v, x, _ = e.bank_write in if v then string_of_int x else "-")
+         end;
+         ignore io);
+     let falls = ref [] in
+     replay ~store ~code model ~upto:kbad (fun k io _ _ _ _ _ ->
+         if k > 0 && io.pin_in land 1 = 0 && List.length !falls < 12 then falls := k :: !falls);
+     pr "    the UART line (pin 0) is low at clocks %s ...\n" (String.concat "," (List.rev_map string_of_int !falls));
+     check_replay ~expected:kbad ~fired:!fired);
+  r
+
+(* The bank under ownership: the UART of (c) taking its two bytes from bank addresses 0 and 1
+   (LDB, the planted variant of the isolation check), thread 0 declared to read addresses
+   [reads]; the other threads idle and own nothing. Every LDB's address is in the range at every
+   clock, or the counterexample shows the first that is not. *)
+let bank_ownership ~name ~reads ~depth =
+  let u = Programmes.uart ~bit_slots:5 [ 0x4F; 0x4B ] in
+  let store = Programmes.store_of [| u; Programmes.idle; Programmes.idle; Programmes.idle |] in
+  for pc = 0 to Isa2.page_len - 1 do if Programmes.opcode store.(pc) = Isa2.op_lda then store.(pc) <- Isa2.ldb done;
+  let bank = [ (0, 0x4F); (1, 0x4B) ] in
+  let owns = Ownership.none () in
+  owns.(0) <- { Ownership.nothing with bank_read = reads };
+  let code = [| Fixed; Fixed; Fixed; Fixed |] in
+  let m = Machine.create ~bank ~store ~code () in
+  let read = Array.make 2 Smt.ff in
+  let step k =
+    let io = Machine.io ~k in
+    let t, _, e = Machine.clock m ~k io in
+    let rd, ra = e.bank_read in
+    Array.iteri (fun i r -> read.(i) <- Smt.or_ r (Smt.and_ rd (Smt.eq ra (Smt.k ~w:10 i)))) read;
+    P.resources_step owns ~thread:t ~e, [] in
+  let covers () = List.init 2 (fun i -> Printf.sprintf "thread 0 reads bank address %d" i, read.(i)) in
+  let r = Bmc.run ~name ~depth ~step ~covers () in
+  Bmc.report r;
+  (match r.violation with
+   | None -> ()
+   | Some (kbad, model) ->
+     let fired = ref None in
+     replay ~bank ~store ~code model ~upto:kbad (fun k _ t a instr e _ ->
+         let rd, ra = e.bank_read in
+         if rd then pr "    %4d: t%d %d.%-3d %-28s reads bank address %d\n" k t (a lsr 8) (a land 0xFF) (Isa2.disasm instr) ra;
+         if PC.resources_step owns ~thread:t ~e && !fired = None then fired := Some k);
+     check_replay ~expected:kbad ~fired:!fired);
+  r
+
 let scenarios = [
   "a", (fun () -> ignore (a_main ~ldd:20 ~name:"a-deadline-main.ml-programme"));
   "a-planted", (fun () -> ignore (a_main ~ldd:21 ~name:"a-deadline-planted-ldd21"));
-  "a-protocols", (fun () -> ignore (a_protocols ~spi_period:10 ~name:"a-waitd-uart-spi-i2c"));
-  "a-spi8", (fun () -> ignore (a_protocols ~spi_period:8 ~name:"a-waitd-uart-spi8-i2c"));
+  "a-protocols", (fun () -> ignore (a_protocols ~spi_period:10 ~name:"a-waitd-uart-spi-i2c" ()));
+  "a-protocols-cut", (fun () -> ignore (a_protocols ~cut:true ~spi_period:10 ~name:"a-waitd-uart-spi-i2c-cut" ()));
+  "a-spi8", (fun () -> ignore (a_protocols ~spi_period:8 ~name:"a-waitd-uart-spi8-i2c" ()));
   "b", (fun () -> ignore (ownership ~name:"b-ownership" ~timeout_mask:0x80 ~depth:720));
   "b-planted", (fun () -> ignore (ownership ~name:"b-ownership-planted-mask01" ~timeout_mask:0x01 ~depth:720));
-  "c", (fun () -> ignore (isolation ~name:"c-isolation-uart" ~ldb:false ~depth:36));
+  "c", (fun () -> ignore (isolation ~name:"c-isolation-uart" ~ldb:false ~depth:36 ()));
+  (* 300 clocks: with the cut the unrolling grows linearly (about 525 definitions a clock), but
+     the solver's time per goal does not: 126 s in all at 300 clocks, and it had not reached 400
+     after a further 10 minutes *)
+  "e", (fun () -> ignore (resources ~name:"e-ownership-bridge-a" ~owns:(bridge_owns ()) ~depth:300 ()));
+  "e-bank", (fun () -> ignore (bank_ownership ~name:"e-bank-uart-reads-0..1" ~reads:[ (0, 1) ] ~depth:440));
+  "e-bank-planted", (fun () -> ignore (bank_ownership ~name:"e-bank-uart-declared-0-only" ~reads:[ (0, 0) ] ~depth:440));
+  "e-planted-steal", (fun () ->
+      ignore (resources ~name:"e-ownership-planted-t3-receives-inbox-2" ~owns:(bridge_owns ())
+                ~plant:(fun p -> p.(3).(0) <- Isa2.recv ~ch:2 ~fail:0) ~depth:40 ()));
+  "c-short", (fun () -> ignore (isolation ~name:"c-isolation-uart-16" ~ldb:false ~depth:16 ()));
   "c-induction", (fun () -> isolation_induction ~name:"c-isolation-uart-induction" ~ldb:false ());
   "c-induction-planted", (fun () -> isolation_induction ~name:"c-isolation-planted-ldb-induction" ~ldb:true ());
+  "c-induction-ldb-owned", (fun () ->
+      isolation_induction ~owned:true ~name:"c-isolation-ldb-with-bank-ownership-induction" ~ldb:true ());
+  "c-induction-ldb-owned-overlap", (fun () ->
+      isolation_induction ~owned:true ~others_write:(1, 1023)
+        ~name:"c-isolation-ldb-others-may-write-address-1-induction" ~ldb:true ());
   "c-induction-no-ownership", (fun () ->
       isolation_induction ~assume:false ~name:"c-isolation-uart-induction-without-ownership-assumption" ~ldb:false ());
-  "c-planted", (fun () -> ignore (isolation ~name:"c-isolation-planted-ldb" ~ldb:true ~depth:440));
+  "c-planted", (fun () -> ignore (isolation ~name:"c-isolation-planted-ldb" ~ldb:true ~depth:440 ()));
   "kind2-export", (fun () ->
       export_kind2 ~ldd:20 ~file:"kind2/deadline-ldd20.lus"; export_kind2 ~ldd:21 ~file:"kind2/deadline-ldd21.lus";
       export_kind2_uart ~anytime:false ~bytes:1 ~file:"kind2/uart-every-byte.lus" ();

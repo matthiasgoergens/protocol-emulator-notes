@@ -2,5 +2,5 @@
 ; compiler.ml are links to the prototypes' own files, not copies.
 (executable
  (name main)
- (modules isa2 compat isa compiler smt props machine bmc programmes lustre main)
- (libraries unix))
+ (modules isa2 compat isa compiler ownership smt props machine bmc programmes lustre main)
+ (libraries unix bridge_fw))

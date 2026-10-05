@@ -36,3 +36,5 @@ let mem_read m _ = m.rd
 let mem_write m c a v = { m with we = c; waddr = a; wdata = v }
 let mem_ite c x y = { rd = x.rd; we = mux2 c x.we y.we; waddr = mux2 c x.waddr y.waddr; wdata = mux2 c x.wdata y.wdata }
 let mem_copy m = m
+(* never: every opcode's logic is built, so the circuit is the whole instruction set *)
+let known_false _ = false

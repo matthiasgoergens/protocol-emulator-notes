@@ -1,7 +1,7 @@
-# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/sequencer-v2/_build/default/ports/deadline-sequencer/demo.exe
-# commit: b58ef4e4eebc095e715bfe81aa54f8e86229c517 (with uncommitted changes)
+# command: /home/matthias/prog/janestreet/emulator-wt-formal-followups/prototypes/sequencer-v2/_build/default/ports/deadline-sequencer/demo.exe
+# commit: ab9e69f97fdd4e66e3f2bb6f46b9d74d1e227e20 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T09:00:42+08:00
+# date: 2026-10-05T18:40:04+08:00
 == uart_tx (38 words)
    0: setp mask=01 val=1 oe=1
    1: lda 0x4f

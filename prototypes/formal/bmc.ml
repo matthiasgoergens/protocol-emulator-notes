@@ -19,8 +19,14 @@ type result = {
   solver_s : float;                  (* time inside check-sat *)
   total_s : float;
   defs : int;                        (* define-funs sent *)
-  covers : (string * bool) list;     (* non-vacuity: each must be reachable *)
+  covers : (string * cover) list;    (* non-vacuity: each must be reachable *)
 }
+
+(* How a cover was decided. [Witnessed]: satisfiable with every variable fixed to a concrete
+   witness (an input sequence found by running Isa2.Spec), so the solver only evaluates; a
+   satisfying assignment is all that reachability needs. [Witness_failed]: the witness does not
+   satisfy the cover (it says nothing about reachability; nothing else is tried). *)
+and cover = Reachable | Unreachable | Witnessed of float | Witness_failed
 
 let now () = Unix.gettimeofday ()
 
@@ -29,7 +35,10 @@ let log_dir () = match Sys.getenv_opt "BMC_SMT_LOG" with Some d -> Some d | None
 (* [step k] performs clock k and returns the clock's violation term and new assumptions;
    [covers ()], called after the last clock, returns named terms that must each be satisfiable
    (they are ghost flags meaning "this outcome has happened by now"). *)
-let run ?(progress = 0) ~name ~depth ~(step : int -> Smt.term * Smt.term list) ~(covers : unit -> (string * Smt.term) list) () =
+(* [witnesses]: for some covers, by name, values for variables by their names: the inputs and the
+   unconstrained instruction words. A variable the witness gives no value (None) is left free, as
+   are bank (array) variables; the cut variables (Machine.cut) are fixed by their equations. *)
+let run ?(progress = 0) ?(witnesses = []) ~name ~depth ~(step : int -> Smt.term * Smt.term list) ~(covers : unit -> (string * Smt.term) list) () =
   let log = Option.map (fun d -> Filename.concat d (name ^ ".smt2")) (log_dir ()) in
   let s = Smt.Solver.start ?log () in
   let t0 = now () in
@@ -61,10 +70,29 @@ let run ?(progress = 0) ~name ~depth ~(step : int -> Smt.term * Smt.term list) ~
     if !violation <> None then []
     else List.map (fun (cname, term) ->
         Smt.Solver.ensure s term;
+        let witness = List.assoc_opt cname witnesses in
+        let fixed = match witness with
+          | None -> []
+          | Some (w : string -> int option) ->
+            List.filter_map (fun (v : Smt.term) ->
+                match v.node, v.sort with
+                | Var n, Smt.Bool -> Option.map (fun x -> if x = 1 then v else Smt.not_ v) (w n)
+                | Var n, Smt.Bv width -> Option.map (fun x -> Smt.eq v (Smt.k ~w:width x)) (w n)
+                | _ -> None) s.Smt.Solver.vars in
+        (* definitions outside the push, which would otherwise discard them *)
+        List.iter (Smt.Solver.ensure s) fixed;
         Smt.Solver.push s; Smt.Solver.assert_ s term;
+        List.iter (Smt.Solver.assert_ s) fixed;
+        let t = now () in
         let r = check () in
         Smt.Solver.pop s;
-        (cname, r = `Sat)) (covers ()) in
+        (cname, match witness, r with
+         | Some _, `Sat -> Witnessed (now () -. t)
+         | Some _, `Unsat -> Witness_failed
+         | Some _, `Unknown e -> failwith ("solver: " ^ e)
+         | None, `Sat -> Reachable
+         | None, `Unsat -> Unreachable
+         | None, `Unknown e -> failwith ("solver: " ^ e))) (covers ()) in
   let defs = s.Smt.Solver.defs in
   Smt.Solver.close s;
   { name; depth = !k; violation = !violation; checks = !checks; folded = !folded; solver_s = !solver_s;
@@ -77,4 +105,8 @@ let report r =
      | Some (k, _) -> Printf.sprintf "VIOLATED at clock %d" k
      | None -> "no violation")
     r.depth r.checks r.folded r.defs r.solver_s r.total_s;
-  List.iter (fun (n, ok) -> Printf.printf "  cover %-50s %s\n" n (if ok then "reachable" else "NOT REACHABLE (vacuous?)")) r.covers
+  List.iter (fun (n, c) -> Printf.printf "  cover %-50s %s\n" n (match c with
+      | Reachable -> "reachable"
+      | Witnessed t -> Printf.sprintf "reachable (concrete witness, checked by the solver in %.2f s)" t
+      | Witness_failed -> "WITNESS FAILED (reachability not decided)"
+      | Unreachable -> "NOT REACHABLE (vacuous?)")) r.covers

@@ -62,7 +62,9 @@ let merge_effects g (x : Sym.effects) (y : Sym.effects) : Sym.effects =
   { host_out = three x.host_out y.host_out; host_in_ready = i x.host_in_ready y.host_in_ready;
     port_pop = two x.port_pop y.port_pop; port_push = three x.port_push y.port_push;
     bank_write = three x.bank_write y.bank_write; bank_read = two x.bank_read y.bank_read;
-    fine_out = two x.fine_out y.fine_out; pins_written = i x.pins_written y.pins_written }
+    fine_out = two x.fine_out y.fine_out; pins_written = i x.pins_written y.pins_written;
+    inbox_send = i x.inbox_send y.inbox_send; inbox_recv = i x.inbox_recv y.inbox_recv;
+    port_out = i x.port_out y.port_out; port_in = i x.port_in y.port_in }
 
 (* One clock. Returns the thread that executed, its fetch address before the clock, and the
    clock's effects; [m.st] becomes the state after the clock. *)
@@ -98,6 +100,42 @@ let clock m ~k (io : Sym.io) =
                (Smt.eq before.pages.(t) (Smt.k ~w:2 (a lsr Isa2.pc_bits))) in
            (Sym.merge g st_a st, merge_effects g e_a e)) (st_d, e_d) rest in
        m.st <- st; (t, addr, e))
+
+(* Cut the state after clock [k]: every register that is not a constant becomes a fresh variable,
+   and the equation "variable = its expression" is returned, to be asserted as an assumption.
+   The unrolling then grows linearly with the depth, instead of each clock's terms nesting the
+   previous clock's: without the cut, programmes whose control flow follows their inputs (bridge
+   A's UART receiver) double their term graph every few dozen clocks. A Fixed thread's pc keeps
+   its split: the addresses it can be at (the leaves of its expression) become [reach]. The bank
+   is left as it is. *)
+(* [cut_value ~prefix ~k name x eqs]: [x] itself if it is a constant or a variable, else a fresh
+   variable, with "variable = x" added to [eqs]; for ghost state that should be cut too *)
+let cut_value ~prefix ~k name (x : Smt.term) eqs =
+  match x.node with
+  | Smt.K _ | Smt.B _ | Smt.Var _ -> x
+  | Smt.App _ ->
+    let v = Smt.var (Printf.sprintf "%scut.%s@%d" prefix name k) x.sort in
+    let same = match x.sort with
+      | Smt.Bool -> Smt.or_ (Smt.and_ v x) (Smt.and_ (Smt.not_ v) (Smt.not_ x))
+      | Smt.Bv _ | Smt.Mem -> Smt.eq v x in
+    eqs := same :: !eqs; v
+
+let cut m ~k =
+  let eqs = ref [] in
+  let fresh name x = cut_value ~prefix:m.prefix ~k name x eqs in
+  let st = m.st in
+  let arr name a = Array.iteri (fun i x -> a.(i) <- fresh (Printf.sprintf "%s%d" name i) x) a in
+  Array.iteri (fun t x ->
+      match x.Smt.node, st.pages.(t).Smt.node, leaves x with
+      | Smt.App _, Smt.K page, Some l ->
+        m.reach.(t) <- Some (List.map (fun pc -> (page lsl Isa2.pc_bits) lor pc) l);
+        st.pcs.(t) <- fresh (Printf.sprintf "pc%d" t) x
+      | _ -> ()) st.pcs;
+  arr "acc" st.accs; arr "cnt" st.cnts; arr "dl" st.dls; arr "bp" st.bps; arr "fine" st.fines;
+  arr "armed" st.armed; arr "cfg" st.cfgs; arr "lsend" st.lsend; arr "inbox" st.inbox; arr "full" st.full;
+  st.pin_out <- fresh "pin_out" st.pin_out; st.pin_oe <- fresh "pin_oe" st.pin_oe;
+  st.pin_sub <- fresh "pin_sub" st.pin_sub; st.latch <- fresh "latch" st.latch;
+  !eqs
 
 (* ---- concrete replay ---- *)
 

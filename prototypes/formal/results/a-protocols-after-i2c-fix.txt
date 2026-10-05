@@ -1,0 +1,12 @@
+# a-protocols (every WAITD of UART + SPI + I2C, 720 clocks) on the merged tree, after the I2C
+# clock-stretching fix (5be80cf) made the I2C master wait on SCL: 13 contracts (was 15).
+# 1. unmodified HEAD 447595d, main.exe a-protocols, stopped by timeout 1800 at 30 min: 69 goals sent
+#    to z3 (SMT log /var/tmp/formal-followups/smtlog-ap), no verdict printed (output is printed at the end).
+# 2. with Machine.cut (scenario a-protocols-cut), stopped by timeout 900:
+# command: main.exe a-protocols-cut (stopped after 15 min if unfinished)
+# commit: ba6c90a5657a2c0b4c0fc748afec74a95a6f2332 (with uncommitted changes)
+# Z3 version 5.1.0 - 64 bit
+# date: 2026-10-05T18:22:29+08:00
+Command exited with non-zero status 124
+wall 900.00 s
+exit 124

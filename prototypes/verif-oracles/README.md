@@ -201,8 +201,11 @@ static checker over v2 words.
 **What is enumerated.**
 
 - Each thread's reachable code, from its boot address, following every branch both ways.
-- The bank of each LDB/STB and the target of WAITC 11, from a data-flow fixpoint: BANK's imm[1]
-  sets the bank and SEND sets `lsend`, starting from the reset values.
+- The bank addresses of each LDB/STB and the target of WAITC 11, from a data-flow fixpoint
+  starting from the reset values: BANK sets the pointer from its immediate and the accumulator
+  (tracked as far as LDA's immediate; otherwise all 256 low bytes), LDB and STB step it (with the
+  carry into bank 1), and SEND sets `lsend`. A pointer stepped in a loop grows to every address
+  the loop could reach, since the loop count is not tracked.
 - Clock coincidence: thread t's clocks are t mod 4. Refresh `(bank, period, offset)` and array
   streams (every clock) are declared, and coincidence is decided by gcd.
 - Wait classes: a SEND, RECV or WAITC is unbounded when its failure target returns to itself
@@ -219,9 +222,31 @@ The hazards and how each is caught:
 | refresh versus access | PAIR (access, refresh, same clock) missing | yes at offset 5 and with period 6 on T2; accepted at offset 2 and with period 6 on T1 (odd clocks never coincide) |
 | mailbox SEND to a full inbox with no deadline | SOLO (send or space-wait, unbounded) missing | yes ×3: fail = self, a jump straight back, WAITC 11 spinning; a SEND with a give-up path is accepted |
 | two consumers, undeclared producers, a send nobody receives | PAIR and COUNTERPART | yes ×4 |
+| bank address, inbox or port outside the thread's ownership declaration (below) | SOLO (kind, undeclared) missing | yes ×7, plus 4 planted in bridge A and 1 in the bank-reading UART |
+| two threads declared to write one bank address, or to use one port in the same direction | OWNERSHIP | yes ×2 |
 
-27 controls, 27 as expected (`results/hazard-controls.txt`). The controls include accepted
+42 controls, 42 as expected (`results/hazard-controls.txt`). The controls include accepted
 twins, so a checker that rejects everything fails too.
+
+**Ownership of the bank, the inboxes and the ports** (added 2026-10-05, after the isolation
+finding of `../formal`). Pins had an ownership discipline; nothing protected the rest. The
+declaration, `../sequencer-v2/ownership.ml`, says per thread:
+- which bank addresses it may read (LDB) and write (STB), as ranges;
+- which inboxes it may send to (SEND, WAITC 11) and receive from (RECV, WAITC 10);
+- which ports it may send to and receive from (MBX channels 4 to 7).
+
+Anything not declared is forbidden, and "use" means naming the resource, whether or not the
+instruction succeeds. Pins stay in `grants`; a grant of anything else is refused at start-up.
+A use outside the declaration is undeclared, which the SOLO table has no entry for, so it is
+REJECTED, with the offending addresses named. Two threads declared to write one address, or on
+one port in one direction, are rejected before any code is read. A bank address written by one
+thread and read by another is listed as a channel, not rejected. The same declaration is
+checked by bounded model checking in `../formal` (scenarios e, e-bank) and is the assumption that
+makes the UART isolated even when it reads the bank (`../formal/README.md`).
+
+The 15 new controls: LDB inside and outside a declared range, an endless LDB loop, BANK from an
+unknown byte, the carry from 511 to 512, overlapping and disjoint write ranges, ports used with
+and without a declaration, a port declared to two threads, and WAITC 10 on an inbox not owned.
 
 **Applied to the existing programmes.** Declarations are written from each prototype's own pin
 assignments, not from what the checker infers.
@@ -235,6 +260,14 @@ assignments, not from what the checker infers.
 
   `results/hazard-base.txt`.
 - **JTAG and SWD hosts:** accepted (`results/hazard-wide.txt`).
+- **Ownership of the bank, inboxes and ports**, declared from each prototype's own description:
+  the demo, 10BASE-T, JTAG and SWD own none of them and use none (accepted); bridge A's inboxes
+  are T0 → inbox 1 → T1 → inbox 2 → T2, which the code keeps to (accepted). Four violations
+  planted in bridge A's real firmware are all rejected: T3 receiving from inbox 2, T3 sending into
+  inbox 1, T3 reading the bank, T2 sending to a port. The UART that reads its two bytes from the
+  bank is accepted when declared to read 0..1 and rejected at 0 only. Bridge B could not be
+  checked: its SPI master's capture (SHX) uses pins 3 and 4, and v2's capture pin for pin 3 is 2,
+  which is why only bridge A was ported to v2. **No finding** in the existing programmes.
 - **Bridge A on v2:** found 4 rejections, **fixed 2026-10-05** (`results/hazard-bridge.txt`).
   - The I2C master (T1) answered into inbox 2 with `SEND ch2 fail=self` at four places. These
     waits never timed out, and at one of them SCL was held low while it waited. It was safe
@@ -259,10 +292,9 @@ assignments, not from what the checker infers.
 **Not checked:**
 
 - the host rewriting a thread's pc at run time (D1);
-- the bank pointer carrying from bank 0 into bank 1 by post-increment;
 - self-patching code (usb-ls);
 - deadlines met;
-- address disjointness between bank users.
+- loop counts in the bank pointer analysis (a pointer stepped in a loop covers every address).
 
 ## Review
 

@@ -161,48 +161,76 @@ module type VALUE = sig
   val mem_write : mem -> b -> t -> t -> mem   (* store the byte at the address if [b] holds *)
   val mem_ite : b -> mem -> mem -> mem
   val mem_copy : mem -> mem
+  val known_false : b -> bool                 (* [b] is false whatever the inputs; may answer
+                                                 [false] when unsure (see [unless_false]) *)
 end
+
+(* The interpreter's state, inputs and effects, for values ['t], truth values ['b] and a data bank
+   ['mem]. They are defined outside [Make] so that every instance over the same types shares them:
+   [Spec.state] below is the same type as [Make (Int_value).state]. *)
+type ('t, 'mem) state_of = {
+  pcs : 't array; pages : 't array; accs : 't array; cnts : 't array; dls : 't array;
+  bps : 't array; fines : 't array; armed : 't array; cfgs : 't array; lsend : 't array;
+  inbox : 't array; full : 't array;
+  mutable pin_out : 't; mutable pin_oe : 't; mutable thread : int;
+  mutable pin_sub : 't; mutable latch : 't;
+  mutable bankmem : 'mem;
+}
+
+type ('t, 'b) io_of = {
+  pin_in : 't;
+  pin_in4 : 't;                  (* bit 4i+p: pin i in quarter p of the last clock *)
+  host_in : 't; host_in_valid : 'b;
+  port_in : 't array; port_in_valid : 'b array; port_out_ready : 'b array;
+  flags : 't;                    (* 16 bits: thread t's flag inputs are bits 4t..4t+3 *)
+  host_ctl : (int * 't * 't) option;   (* (thread, page, pc) *)
+}
+
+(* What one clock does besides changing the state; each effect happens when its ['b] holds. *)
+type ('t, 'b) effects_of = {
+  host_out : 'b * 't * 't;        (* tag, byte *)
+  host_in_ready : 'b;
+  port_pop : 'b * 't;             (* in-port *)
+  port_push : 'b * 't * 't;       (* out-port, byte *)
+  bank_write : 'b * 't * 't;      (* address, byte *)
+  bank_read : 'b * 't;            (* address *)
+  fine_out : 'b * 't;
+  pins_written : 't;              (* the pins this clock's SETP or SHO writes, for checks *)
+  (* The inboxes and ports this clock's instruction names, as 4-bit masks (bit i: inbox i, or
+     port i, which is MBX channel 4 + i), whether or not it succeeds; for ownership checks. *)
+  inbox_send : 't;                (* SEND to an inbox, or WAITC 11 waiting for space in it *)
+  inbox_recv : 't;                (* RECV from an inbox, or WAITC 10 polling the thread's own *)
+  port_out : 't;                  (* SEND to an out-port, or WAITC 11 waiting until it is ready *)
+  port_in : 't;                   (* RECV from an in-port *)
+}
 
 module Make (V : VALUE) = struct
   open V
+  (* BEGIN body of Make *)
 
-  type state = {
-    pcs : t array; pages : t array; accs : t array; cnts : t array; dls : t array;
-    bps : t array; fines : t array; armed : t array; cfgs : t array; lsend : t array;
-    inbox : t array; full : t array;
-    mutable pin_out : t; mutable pin_oe : t; mutable thread : int;
-    mutable pin_sub : t; mutable latch : t;
-    mutable bankmem : mem;
-  }
+  type state = (t, mem) state_of
+  type io = (t, b) io_of
+  type effects = (t, b) effects_of
 
-  type io = {
-    pin_in : t;
-    pin_in4 : t;                   (* bit 4i+p: pin i in quarter p of the last clock *)
-    host_in : t; host_in_valid : b;
-    port_in : t array; port_in_valid : b array; port_out_ready : b array;
-    flags : t;                     (* 16 bits: thread t's flag inputs are bits 4t..4t+3 *)
-    host_ctl : (int * t * t) option;   (* (thread, page, pc) *)
-  }
+  let[@inline] c w n = const ~w n
+  let[@inline] bit x i = eq (extract x ~hi:i ~lo:i) (c 1 1)
+  let[@inline] of_b x = ite x (c 1 1) (c 1 0)
+  let[@inline] ite_b s x y = or_ (and_ s x) (and_ (not_ s) y)
 
-  (* What one clock does besides changing the state; each effect happens when its [b] holds. *)
-  type effects = {
-    host_out : b * t * t;          (* tag, byte *)
-    host_in_ready : b;
-    port_pop : b * t;              (* in-port *)
-    port_push : b * t * t;         (* out-port, byte *)
-    bank_write : b * t * t;        (* address, byte *)
-    bank_read : b * t;             (* address *)
-    fine_out : b * t;
-    pins_written : t;              (* the pins this clock's SETP or SHO writes, for checks *)
-  }
-
-  let c w n = const ~w n
-  let bit x i = eq (extract x ~hi:i ~lo:i) (c 1 1)
-  let of_b x = ite x (c 1 1) (c 1 0)
-  let ite_b s x y = or_ (and_ s x) (and_ (not_ s) y)
+  (* [unless_false s d f] is [f ()], or [d] when [s] is known to be false. It guards a value that
+     is only ever used where [s] holds, such as the result of one opcode, so the choice between
+     [d] and [f ()] cannot change the outcome; it only saves computing it. On integers [s] is
+     always known, so a clock computes only its own opcode's results; on SMT terms it skips
+     building terms that would fold away; on signals it is never taken. *)
+  let unless_false s d f = if known_false s then d else f ()
 
   (* bit [i] of [v], for a value [i]; [w] is the width of [v] *)
-  let bit_at ~w v i = bit (lshr v (zext ~w i)) 0
+  (* instruction fields, and the opcode test *)
+  let[@inline] field instr hi lo = extract instr ~hi ~lo
+  let[@inline] flag instr i = bit instr i
+  let[@inline] is opc op = eq opc (c 4 op)
+
+  let[@inline] bit_at ~w v i = bit (lshr v (zext ~w i)) 0
 
   (* one-bit values, most significant first, as one value *)
   let of_bits bits =
@@ -251,7 +279,8 @@ module Make (V : VALUE) = struct
     let spread x =
       let step y s m = logand (logor y (shl ~w:32 y (c 32 s))) (c 32 m) in
       step (step (step (zext ~w:32 x) 12 0x000F000F) 6 0x03030303) 3 0x11111111 in
-    let quarter p = shl ~w:32 (spread (ite (ult (c 2 p) q) old_ new_)) (c 32 p) in
+    let old4 = spread old_ and new4 = spread new_ in
+    let quarter p = shl ~w:32 (ite (ult (c 2 p) q) old4 new4) (c 32 p) in
     logor (logor (quarter 0) (quarter 1)) (logor (quarter 2) (quarter 3))
 
   let fetch_addr st t = logor (shl ~w:10 (zext ~w:10 st.pages.(t)) (c 10 pc_bits)) (zext ~w:10 st.pcs.(t))
@@ -262,13 +291,11 @@ module Make (V : VALUE) = struct
   let exec st ~instr (io : io) =
     let t = st.thread in
     let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
-    let field hi lo = extract instr ~hi ~lo and flag i = bit instr i in
-    let opc = field 15 12 in
-    let is op = eq opc (c 4 op) in
-    let imm12 = field 11 0 and imm8 = field 7 0 in
-    let pin = field 11 9 and msb = flag 8 and od = flag 7 in
+    let opc = field instr 15 12 in
+    let imm12 = field instr 11 0 and imm8 = field instr 7 0 in
+    let pin = field instr 11 9 and msb = flag instr 8 and od = flag instr 7 in
     let addr = imm8 in
-    let mask8 = field 11 4 and setv = flag 3 and seto = flag 2 and q = field 1 0 in
+    let mask8 = field instr 11 4 and setv = flag instr 3 and seto = flag instr 2 and q = field instr 1 0 in
     (* round latch: all four threads of a round see pin_in of thread 0's clock (D6) *)
     let latch = if t = 0 then io.pin_in else st.latch in
     let pins = ite (bit st.cfgs.(t) 7) latch io.pin_in in
@@ -276,111 +303,151 @@ module Make (V : VALUE) = struct
     let dl_zero = eq dl (c 12 0) in
     let pc1 = add ~w:8 pc (c 8 1) in
     let fail_or_stay = ite dl_zero addr pc in
-    let cases default l = List.fold_right (fun (s, v) r -> ite s v r) l default in
     (* SETP *)
     let set_masked x v = logor (logand x (lognot ~w:8 mask8)) (ite v mask8 (c 8 0)) in
     (* SHO: drive [p] with the one-bit [v]; open drain (od) drives 0 for a 0, releases for a 1 *)
-    let pair = flag 6 and psel = flag 5 and cap = flag 4 in
-    let acc_bit i = extract acc ~hi:i ~lo:i in
+    let pair = flag instr 6 and psel = flag instr 5 and cap = flag instr 4 in
     let onehot p = shl ~w:8 (c 8 1) (zext ~w:8 p) in
-    let drive (po, oe) p v =
-      let m = onehot p and one = eq v (c 1 1) in
-      let keep x = logand x (lognot ~w:8 m) in
-      ite od (keep po) (logor (keep po) (ite one m (c 8 0))),
-      ite od (logor (keep oe) (ite one (c 8 0) m)) oe in
-    let b0 = ite msb (acc_bit 7) (acc_bit 0) in
-    let b1 = ite psel (ite msb (acc_bit 6) (acc_bit 1)) (lognot ~w:1 b0) in
-    let one_pin = drive (st.pin_out, st.pin_oe) pin b0 in
-    let two_pins = drive one_pin (add ~w:3 pin (c 3 1)) b1 in
-    let sho_pins = (ite pair (fst two_pins) (fst one_pin), ite pair (snd two_pins) (snd one_pin)) in
-    let sh = ite (and_ pair psel) (c 8 2) (c 8 1) in
-    let cbit = zext ~w:8 (of_b (and_ cap (pin_at (logxor pin (c 3 1))))) in
-    let sho_acc = ite msb (logor (shl ~w:8 acc sh) cbit) (logor (lshr acc sh) (shl ~w:8 cbit (c 8 7))) in
+    let is_sho = is opc op_sho in
+    let sho_pins, sho_acc = unless_false is_sho ((st.pin_out, st.pin_oe), acc) (fun () ->
+        let acc_bit i = extract acc ~hi:i ~lo:i in
+        let drive (po, oe) p v =
+          let m = onehot p and one = eq v (c 1 1) in
+          let keep x = logand x (lognot ~w:8 m) in
+          ite od (keep po) (logor (keep po) (ite one m (c 8 0))),
+          ite od (logor (keep oe) (ite one (c 8 0) m)) oe in
+        let b0 = ite msb (acc_bit 7) (acc_bit 0) in
+        let b1 = ite psel (ite msb (acc_bit 6) (acc_bit 1)) (lognot ~w:1 b0) in
+        let one_pin = drive (st.pin_out, st.pin_oe) pin b0 in
+        let two_pins = drive one_pin (add ~w:3 pin (c 3 1)) b1 in
+        let sho_pins = (ite pair (fst two_pins) (fst one_pin), ite pair (snd two_pins) (snd one_pin)) in
+        let sh = ite (and_ pair psel) (c 8 2) (c 8 1) in
+        let cbit = zext ~w:8 (of_b (and_ cap (pin_at (logxor pin (c 3 1))))) in
+        sho_pins, ite msb (logor (shl ~w:8 acc sh) cbit) (logor (lshr acc sh) (shl ~w:8 cbit (c 8 7)))) in
     (* SHI *)
-    let quad = flag 7 in
-    let pin_bit = zext ~w:8 (of_b (pin_at pin)) in
-    let nib = extract (lshr io.pin_in4 (shl ~w:32 (zext ~w:32 pin) (c 32 2))) ~hi:3 ~lo:0 in
-    let rev4 = of_bits (List.map (fun i -> extract nib ~hi:i ~lo:i) [ 0; 1; 2; 3 ]) in
-    let shi_acc =
-      ite quad
-        (ite msb (logor (shl ~w:8 acc (c 8 4)) (zext ~w:8 rev4))
-           (logor (lshr acc (c 8 4)) (shl ~w:8 (zext ~w:8 nib) (c 8 4))))
-        (ite msb (logor (shl ~w:8 acc (c 8 1)) pin_bit)
-           (logor (lshr acc (c 8 1)) (shl ~w:8 pin_bit (c 8 7)))) in
+    let shi_acc = unless_false (is opc op_shi) acc (fun () ->
+        let quad = flag instr 7 in
+        let pin_bit = zext ~w:8 (of_b (pin_at pin)) in
+        let nib = extract (lshr io.pin_in4 (shl ~w:32 (zext ~w:32 pin) (c 32 2))) ~hi:3 ~lo:0 in
+        let rev4 = of_bits (List.map (fun i -> extract nib ~hi:i ~lo:i) [ 0; 1; 2; 3 ]) in
+        ite quad
+          (ite msb (logor (shl ~w:8 acc (c 8 4)) (zext ~w:8 rev4))
+             (logor (lshr acc (c 8 4)) (shl ~w:8 (zext ~w:8 nib) (c 8 4))))
+          (ite msb (logor (shl ~w:8 acc (c 8 1)) pin_bit)
+             (logor (lshr acc (c 8 1)) (shl ~w:8 pin_bit (c 8 7))))) in
     (* MBX: channel 0..3 is an inbox, 4..7 a port *)
-    let recv = flag 11 and ch = field 10 8 in
+    let recv = flag instr 11 and ch = field instr 10 8 in
     let to_port = bit ch 2 and slot = extract ch ~hi:1 ~lo:0 in
-    let is_send = and_ (is op_mbx) (not_ recv) and is_recv = and_ (is op_mbx) recv in
+    let is_mbx = is opc op_mbx in
+    let is_send = and_ is_mbx (not_ recv) and is_recv = and_ is_mbx recv in
     let full_at i = eq (select ~w:2 st.full i) (c 1 1) in
-    let send_ok = ite_b to_port (select_b ~w:2 io.port_out_ready slot) (not_ (full_at slot)) in
-    let recv_ok = ite_b to_port (select_b ~w:2 io.port_in_valid slot) (full_at slot) in
-    let recv_byte = ite to_port (select ~w:2 io.port_in slot) (select ~w:2 st.inbox slot) in
+    let send_ok, recv_ok, recv_byte = unless_false is_mbx (ff, ff, acc) (fun () ->
+        ite_b to_port (select_b ~w:2 io.port_out_ready slot) (not_ (full_at slot)),
+        ite_b to_port (select_b ~w:2 io.port_in_valid slot) (full_at slot),
+        ite to_port (select ~w:2 io.port_in slot) (select ~w:2 st.inbox slot)) in
     (* WAITC *)
-    let cond = field 11 8 in
     let ls = st.lsend.(t) in
-    let ls_slot = extract ls ~hi:1 ~lo:0 in
-    let space = ite_b (bit ls 2) (select_b ~w:2 io.port_out_ready ls_slot) (not_ (full_at ls_slot)) in
-    let is_cond k = eq cond (c 4 k) in
-    let holds =
-      ite_b (ult cond (c 4 8)) (bit_at ~w:8 acc (extract cond ~hi:2 ~lo:0))
-        (ite_b (is_cond c_byte) (eq (extract cnt ~hi:2 ~lo:0) (c 3 0))
-           (ite_b (is_cond c_host) io.host_in_valid
-              (ite_b (is_cond c_inbox) (eq st.full.(t) (c 1 1))
-                 (ite_b (is_cond c_space) space
-                    (bit (lshr io.flags (zext ~w:16 (extract cond ~hi:1 ~lo:0))) (4 * t)))))) in
+    let is_waitc = is opc op_waitc in
+    let holds = unless_false is_waitc ff (fun () ->
+        let cond = field instr 11 8 in
+        let ls_slot = extract ls ~hi:1 ~lo:0 in
+        let space = ite_b (bit ls 2) (select_b ~w:2 io.port_out_ready ls_slot) (not_ (full_at ls_slot)) in
+        let is_cond k = eq cond (c 4 k) in
+        ite_b (ult cond (c 4 8)) (bit_at ~w:8 acc (extract cond ~hi:2 ~lo:0))
+          (ite_b (is_cond c_byte) (eq (extract cnt ~hi:2 ~lo:0) (c 3 0))
+             (ite_b (is_cond c_host) io.host_in_valid
+                (ite_b (is_cond c_inbox) (eq st.full.(t) (c 1 1))
+                   (ite_b (is_cond c_space) space
+                      (bit (lshr io.flags (zext ~w:16 (extract cond ~hi:1 ~lo:0))) (4 * t))))))) in
+    let inbox_send, inbox_recv, port_out, port_in =
+      let none4 = c 4 0 in
+      unless_false (or_ is_mbx is_waitc) (none4, none4, none4, none4) (fun () ->
+          let names s i = ite s (shl ~w:4 (c 4 1) (zext ~w:4 i)) none4 in
+          let space_wait = and_ is_waitc (eq (field instr 11 8) (c 4 c_space))
+          and poll = and_ is_waitc (eq (field instr 11 8) (c 4 c_inbox)) in
+          let ls_port = bit ls 2 and ls_slot = extract ls ~hi:1 ~lo:0 in
+          logor (names (and_ is_send (not_ to_port)) slot) (names (and_ space_wait (not_ ls_port)) ls_slot),
+          logor (names (and_ is_recv (not_ to_port)) slot) (names poll (c 2 t)),
+          logor (names (and_ is_send to_port) slot) (names (and_ space_wait ls_port) ls_slot),
+          names (and_ is_recv to_port) slot) in
     (* EXT *)
-    let x k = and_ (is op_ext) (eq (field 11 8) (c 4 k)) in
-    let skip = or_ (and_ (x x_skne) (not_ (eq acc imm8))) (and_ (x x_skeq) (eq acc imm8)) in
+    let is_ext = is opc op_ext in
+    let ext_sub = field instr 11 8 in
+    let x k = and_ is_ext (eq ext_sub (c 4 k)) in
+    let skip = unless_false is_ext ff (fun () ->
+        or_ (and_ (x x_skne) (not_ (eq acc imm8))) (and_ (x x_skeq) (eq acc imm8))) in
     let bp = st.bps.(t) in
-    let pin_write = or_ (is op_setp) (is op_sho) in
+    let pin_write = or_ (is opc op_setp) is_sho in
     (* next state *)
+    (* Each next value is a chain [ite s1 v1 @@ ite s2 v2 @@ ... @@ default]: v1 where s1 holds,
+       else v2 where s2 holds, ..., else the default. *)
+    let is_waitp = is opc op_waitp in
     let pc_next =
-      cases pc1
-        [ is op_waitp, ite (eq (of_b (pin_at pin)) (field 8 8)) pc1 fail_or_stay;
-          is op_waitd, ite dl_zero pc1 pc;
-          is op_jmp, addr;
-          is op_jnz, ite (eq cnt (c 12 0)) pc1 addr;
-          is op_in, ite io.host_in_valid pc1 pc;
-          is op_mbx, ite (ite_b recv recv_ok send_ok) pc1 fail_or_stay;
-          is op_waitc, ite holds pc1 fail_or_stay;
-          skip, add ~w:8 pc (c 8 2) ] in
+      ite is_waitp (unless_false is_waitp pc (fun () ->
+          ite (eq (of_b (pin_at pin)) (field instr 8 8)) pc1 fail_or_stay)) @@
+      ite (is opc op_waitd) (ite dl_zero pc1 pc) @@
+      ite (is opc op_jmp) addr @@
+      ite (is opc op_jnz) (ite (eq cnt (c 12 0)) pc1 addr) @@
+      ite (is opc op_in) (ite io.host_in_valid pc1 pc) @@
+      ite is_mbx (ite (ite_b recv recv_ok send_ok) pc1 fail_or_stay) @@
+      ite is_waitc (ite holds pc1 fail_or_stay) @@
+      ite skip (add ~w:8 pc (c 8 2)) @@
+      pc1 in
+    let is_ldb = x x_ldb in
     let acc_next =
-      cases acc
-        [ is op_lda, imm8; is op_sho, sho_acc; is op_shi, shi_acc;
-          is op_in, ite io.host_in_valid io.host_in acc;
-          is_recv, ite recv_ok recv_byte acc;
-          x x_ldb, mem_read st.bankmem bp ] in
+      ite (is opc op_lda) imm8 @@
+      ite is_sho sho_acc @@
+      ite (is opc op_shi) shi_acc @@
+      ite (is opc op_in) (ite io.host_in_valid io.host_in acc) @@
+      ite is_recv (ite recv_ok recv_byte acc) @@
+      ite is_ldb (unless_false is_ldb acc (fun () -> mem_read st.bankmem bp)) @@
+      acc in
     let cnt_dec = sub ~w:12 cnt (c 12 1) in
-    let cnt_next = cases cnt [ is op_ldc, imm12; is op_sho, cnt_dec; is op_shi, cnt_dec; x x_cnta, zext ~w:12 acc ] in
-    let dl_next = ite (is op_ldd) imm12 (ite dl_zero (c 12 0) (sub ~w:12 dl (c 12 1))) in
-    let pin_out_next = cases st.pin_out [ is op_setp, set_masked st.pin_out setv; is op_sho, fst sho_pins ] in
-    let pin_oe_next = cases st.pin_oe [ is op_setp, set_masked st.pin_oe seto; is op_sho, snd sho_pins ] in
-    let sub_q = cases (c 2 0) [ is op_setp, q; is op_sho, ite od (c 2 0) q ] in
-    let inbox_next = Array.mapi (fun k v ->
-        ite (and_ (and_ is_send (not_ to_port)) (and_ (eq slot (c 2 k)) (not_ (full_at slot)))) acc v) st.inbox in
-    let full_next = Array.mapi (fun k v ->
+    let cnt_next =
+      ite (is opc op_ldc) imm12 @@
+      ite is_sho cnt_dec @@
+      ite (is opc op_shi) cnt_dec @@
+      ite (x x_cnta) (zext ~w:12 acc) @@
+      cnt in
+    let dl_next = ite (is opc op_ldd) imm12 (ite dl_zero (c 12 0) (sub ~w:12 dl (c 12 1))) in
+    let is_setp = is opc op_setp in
+    let setp_out, setp_oe = unless_false is_setp (st.pin_out, st.pin_oe) (fun () ->
+        set_masked st.pin_out setv, set_masked st.pin_oe seto) in
+    let pin_out_next = ite is_setp setp_out @@ ite is_sho (fst sho_pins) @@ st.pin_out in
+    let pin_oe_next = ite is_setp setp_oe @@ ite is_sho (snd sho_pins) @@ st.pin_oe in
+    let sub_q = ite is_setp q @@ ite is_sho (ite od (c 2 0) q) @@ c 2 0 in
+    let inbox_next = unless_false is_mbx st.inbox (fun () -> Array.mapi (fun k v ->
+        ite (and_ (and_ is_send (not_ to_port)) (and_ (eq slot (c 2 k)) (not_ (full_at slot)))) acc v) st.inbox) in
+    let full_next = unless_false is_mbx st.full (fun () -> Array.mapi (fun k v ->
         let here = and_ (not_ to_port) (eq slot (c 2 k)) in
-        ite (and_ is_send here) (c 1 1) (ite (and_ is_recv here) (c 1 0) v)) st.full in
-    let bp_next =
-      cases bp
-        [ or_ (x x_ldb) (x x_stb), add ~w:10 bp (c 10 1);
-          x x_bank, logor (shl ~w:10 (zext ~w:10 (extract imm8 ~hi:1 ~lo:0)) (c 10 8)) (zext ~w:10 acc) ] in
+        ite (and_ is_send here) (c 1 1) (ite (and_ is_recv here) (c 1 0) v)) st.full) in
+    let bp_next = unless_false is_ext bp (fun () ->
+        ite (or_ is_ldb (x x_stb)) (add ~w:10 bp (c 10 1)) @@
+        ite (x x_bank) (logor (shl ~w:10 (zext ~w:10 (extract imm8 ~hi:1 ~lo:0)) (c 10 8)) (zext ~w:10 acc)) @@
+        bp) in
     let armed = eq st.armed.(t) (c 1 1) in
     let effects =
-      { host_out = (is op_out, field 10 8, ite (flag 11) imm8 acc);
-        host_in_ready = and_ (is op_in) io.host_in_valid;
-        port_pop = (and_ (and_ is_recv to_port) (select_b ~w:2 io.port_in_valid slot), slot);
-        port_push = (and_ (and_ is_send to_port) (select_b ~w:2 io.port_out_ready slot), slot, acc);
+      { host_out = (is opc op_out, field instr 10 8, ite (flag instr 11) imm8 acc);
+        host_in_ready = and_ (is opc op_in) io.host_in_valid;
+        port_pop = (unless_false is_mbx ff (fun () ->
+            and_ (and_ is_recv to_port) (select_b ~w:2 io.port_in_valid slot)), slot);
+        port_push = (unless_false is_mbx ff (fun () ->
+            and_ (and_ is_send to_port) (select_b ~w:2 io.port_out_ready slot)), slot, acc);
         bank_write = (x x_stb, bp, acc);
-        bank_read = (x x_ldb, bp);
+        bank_read = (is_ldb, bp);
         fine_out = (and_ pin_write armed, st.fines.(t));
         pins_written =
-          cases (c 8 0) [ is op_setp, mask8; is op_sho, logor (onehot pin) (ite pair (onehot (add ~w:3 pin (c 3 1))) (c 8 0)) ] } in
+          ite is_setp mask8 @@
+          ite is_sho (unless_false is_sho (c 8 0) (fun () ->
+              logor (onehot pin) (ite pair (onehot (add ~w:3 pin (c 3 1))) (c 8 0)))) @@
+          c 8 0;
+        inbox_send; inbox_recv; port_out; port_in } in
     (* commit *)
-    st.bankmem <- mem_write st.bankmem (x x_stb) bp acc;
+    st.bankmem <- unless_false (x x_stb) st.bankmem (fun () -> mem_write st.bankmem (x x_stb) bp acc);
     st.pin_sub <- sub_of ~old_:st.pin_out ~new_:pin_out_next ~q:sub_q;
     st.pin_out <- pin_out_next; st.pin_oe <- pin_oe_next; st.latch <- latch;
-    Array.blit inbox_next 0 st.inbox 0 n_threads; Array.blit full_next 0 st.full 0 n_threads;
+    if inbox_next != st.inbox then Array.blit inbox_next 0 st.inbox 0 n_threads;
+    if full_next != st.full then Array.blit full_next 0 st.full 0 n_threads;
     st.lsend.(t) <- ite is_send ch ls;
     st.fines.(t) <- ite (x x_fine) imm8 st.fines.(t);
     st.armed.(t) <- ite (x x_fine) (c 1 1) (ite pin_write (c 1 0) st.armed.(t));
@@ -392,49 +459,308 @@ module Make (V : VALUE) = struct
      | None -> ());
     st.thread <- (t + 1) mod n_threads;
     effects
+  (* END body of Make *)
 end
 
 (* The executable specification: [Make] over OCaml integers. *)
+(* The integer instance. [@inline] makes ocamlopt (without flambda) inline each operation into
+   [Spec] below, where they are known functions; the annotations keep comparisons on [int]. *)
 module Int_value = struct
   type t = int
   type b = bool
   type mem = int array
-  let mask w = (1 lsl w) - 1
-  let const ~w n = n land mask w
-  let add ~w x y = (x + y) land mask w
-  let sub ~w x y = (x - y) land mask w
-  let logand = ( land )
-  let logor = ( lor )
-  let logxor = ( lxor )
-  let lognot ~w x = lnot x land mask w
-  let shl ~w x s = if s >= w then 0 else (x lsl s) land mask w
-  let lshr x s = if s >= Sys.int_size then 0 else x lsr s
-  let extract x ~hi ~lo = (x lsr lo) land mask (hi - lo + 1)
-  let zext ~w:_ x = x
-  let eq = Int.equal
-  let ult x y = x < y
-  let ite s x y = if s then x else y
+  let[@inline] mask w = (1 lsl w) - 1
+  let[@inline] const ~w n = n land mask w
+  let[@inline] add ~w (x : int) y = (x + y) land mask w
+  let[@inline] sub ~w (x : int) y = (x - y) land mask w
+  let[@inline] logand (x : int) y = x land y
+  let[@inline] logor (x : int) y = x lor y
+  let[@inline] logxor (x : int) y = x lxor y
+  let[@inline] lognot ~w x = lnot x land mask w
+  let[@inline] shl ~w x s = if s >= w then 0 else (x lsl s) land mask w
+  let[@inline] lshr x s = if s >= Sys.int_size then 0 else x lsr s
+  let[@inline] extract x ~hi ~lo = (x lsr lo) land mask (hi - lo + 1)
+  let[@inline] zext ~w:_ (x : int) = x
+  let[@inline] eq (x : int) y = x = y
+  let[@inline] ult (x : int) y = x < y
+  let[@inline] ite s (x : int) y = if s then x else y
   let tt = true
   let ff = false
-  let not_ = not
-  let and_ = ( && )
-  let or_ = ( || )
-  let mem_read m a = m.(a)
-  let mem_write m s a v = if s then m.(a) <- v; m
-  let mem_ite s x y = if s then x else y
-  let mem_copy = Array.copy
+  let[@inline] not_ x = not x
+  let[@inline] and_ x y = x && y
+  let[@inline] or_ x y = x || y
+  let[@inline] mem_read (m : int array) a = m.(a)
+  let[@inline] mem_write (m : int array) s a v = if s then m.(a) <- v; m
+  let[@inline] mem_ite s (x : int array) y = if s then x else y
+  let mem_copy (m : int array) = Array.copy m
+  let[@inline] known_false b = not b
 end
 
-module Spec = Make (Int_value)
+(* The executable specification. It is [Make (Int_value)], written out: the lines between the
+   BEGIN and END markers below are a verbatim copy of [Make]'s body, so that the compiler sees
+   [Int_value]'s operations as known functions and inlines them. Through the functor, without
+   flambda, every operation is an indirect call; bridge A of the multi-proto port took three times
+   as long. The build checks that the copy is verbatim (specialise.awk, run from ./dune), and
+   [./specialise.sh] rewrites it after an edit of [Make]. *)
+module Spec = struct
+  open (Int_value : VALUE with type t = int and type b = bool and type mem = int array)
+  (* BEGIN copy of Make's body *)
 
-type state = Spec.state = {
-  pcs : int array; pages : int array; accs : int array; cnts : int array; dls : int array;
-  bps : int array; fines : int array; armed : int array; cfgs : int array; lsend : int array;
-  inbox : int array; full : int array;
-  mutable pin_out : int; mutable pin_oe : int; mutable thread : int;
-  mutable pin_sub : int; mutable latch : int;
-  mutable bankmem : int array;
-}
+  type state = (t, mem) state_of
+  type io = (t, b) io_of
+  type effects = (t, b) effects_of
+
+  let[@inline] c w n = const ~w n
+  let[@inline] bit x i = eq (extract x ~hi:i ~lo:i) (c 1 1)
+  let[@inline] of_b x = ite x (c 1 1) (c 1 0)
+  let[@inline] ite_b s x y = or_ (and_ s x) (and_ (not_ s) y)
+
+  (* [unless_false s d f] is [f ()], or [d] when [s] is known to be false. It guards a value that
+     is only ever used where [s] holds, such as the result of one opcode, so the choice between
+     [d] and [f ()] cannot change the outcome; it only saves computing it. On integers [s] is
+     always known, so a clock computes only its own opcode's results; on SMT terms it skips
+     building terms that would fold away; on signals it is never taken. *)
+  let unless_false s d f = if known_false s then d else f ()
+
+  (* bit [i] of [v], for a value [i]; [w] is the width of [v] *)
+  (* instruction fields, and the opcode test *)
+  let[@inline] field instr hi lo = extract instr ~hi ~lo
+  let[@inline] flag instr i = bit instr i
+  let[@inline] is opc op = eq opc (c 4 op)
+
+  let[@inline] bit_at ~w v i = bit (lshr v (zext ~w i)) 0
+
+  (* one-bit values, most significant first, as one value *)
+  let of_bits bits =
+    let w = List.length bits in
+    List.fold_left (fun r x -> logor (shl ~w r (c w 1)) (zext ~w x)) (c w 0) bits
+
+  (* [arr.(i)] for a value [i] of [w] bits *)
+  let select ~w arr i =
+    let n = Array.length arr in
+    let r = ref arr.(n - 1) in
+    for k = n - 2 downto 0 do r := ite (eq i (c w k)) arr.(k) !r done; !r
+
+  let select_b ~w arr i =
+    let n = Array.length arr in
+    let r = ref arr.(n - 1) in
+    for k = n - 2 downto 0 do r := ite_b (eq i (c w k)) arr.(k) !r done; !r
+
+  let reset ~boot ~bank =
+    let z w = Array.make n_threads (c w 0) in
+    { pcs = Array.map snd boot; pages = Array.map fst boot; accs = z 8; cnts = z 12; dls = z 12;
+      bps = z 10; fines = z 8; armed = z 1; cfgs = z 8; lsend = z 3; inbox = z 8; full = z 1;
+      pin_out = c 8 0; pin_oe = c 8 0; thread = 0; pin_sub = c 32 0; latch = c 8 0; bankmem = bank }
+
+  let copy st =
+    let a = Array.copy in
+    { pcs = a st.pcs; pages = a st.pages; accs = a st.accs; cnts = a st.cnts; dls = a st.dls;
+      bps = a st.bps; fines = a st.fines; armed = a st.armed; cfgs = a st.cfgs; lsend = a st.lsend;
+      inbox = a st.inbox; full = a st.full; pin_out = st.pin_out; pin_oe = st.pin_oe;
+      thread = st.thread; pin_sub = st.pin_sub; latch = st.latch; bankmem = mem_copy st.bankmem }
+
+  (* [merge s x y]: the state that is [x] where [s] holds and [y] elsewhere (same thread) *)
+  let merge s x y =
+    assert (x.thread = y.thread);
+    let m = Array.map2 (ite s) in
+    { pcs = m x.pcs y.pcs; pages = m x.pages y.pages; accs = m x.accs y.accs; cnts = m x.cnts y.cnts;
+      dls = m x.dls y.dls; bps = m x.bps y.bps; fines = m x.fines y.fines; armed = m x.armed y.armed;
+      cfgs = m x.cfgs y.cfgs; lsend = m x.lsend y.lsend; inbox = m x.inbox y.inbox;
+      full = m x.full y.full; pin_out = ite s x.pin_out y.pin_out; pin_oe = ite s x.pin_oe y.pin_oe;
+      thread = x.thread; pin_sub = ite s x.pin_sub y.pin_sub; latch = ite s x.latch y.latch;
+      bankmem = mem_ite s x.bankmem y.bankmem }
+
+  (* the quarter-clock view of a clock whose instruction moved the pins from [old_] to [new_] at
+     sub-slot [q]: bit 4i+p is old_ bit i for p < q, new_ bit i otherwise *)
+  let sub_of ~old_ ~new_ ~q =
+    (* bit i of an 8-bit value to bit 4i of a 32-bit one, by the usual shift-and-mask steps *)
+    let spread x =
+      let step y s m = logand (logor y (shl ~w:32 y (c 32 s))) (c 32 m) in
+      step (step (step (zext ~w:32 x) 12 0x000F000F) 6 0x03030303) 3 0x11111111 in
+    let old4 = spread old_ and new4 = spread new_ in
+    let quarter p = shl ~w:32 (ite (ult (c 2 p) q) old4 new4) (c 32 p) in
+    logor (logor (quarter 0) (quarter 1)) (logor (quarter 2) (quarter 3))
+
+  let fetch_addr st t = logor (shl ~w:10 (zext ~w:10 st.pages.(t)) (c 10 pc_bits)) (zext ~w:10 st.pcs.(t))
+
+  (* One clock: the current thread executes [instr], the word at [fetch_addr st st.thread]. Every
+     next-state value is computed from the state as it was at the start of the clock; the state
+     is updated at the end. *)
+  let exec st ~instr (io : io) =
+    let t = st.thread in
+    let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
+    let opc = field instr 15 12 in
+    let imm12 = field instr 11 0 and imm8 = field instr 7 0 in
+    let pin = field instr 11 9 and msb = flag instr 8 and od = flag instr 7 in
+    let addr = imm8 in
+    let mask8 = field instr 11 4 and setv = flag instr 3 and seto = flag instr 2 and q = field instr 1 0 in
+    (* round latch: all four threads of a round see pin_in of thread 0's clock (D6) *)
+    let latch = if t = 0 then io.pin_in else st.latch in
+    let pins = ite (bit st.cfgs.(t) 7) latch io.pin_in in
+    let pin_at p = bit_at ~w:8 pins p in
+    let dl_zero = eq dl (c 12 0) in
+    let pc1 = add ~w:8 pc (c 8 1) in
+    let fail_or_stay = ite dl_zero addr pc in
+    (* SETP *)
+    let set_masked x v = logor (logand x (lognot ~w:8 mask8)) (ite v mask8 (c 8 0)) in
+    (* SHO: drive [p] with the one-bit [v]; open drain (od) drives 0 for a 0, releases for a 1 *)
+    let pair = flag instr 6 and psel = flag instr 5 and cap = flag instr 4 in
+    let onehot p = shl ~w:8 (c 8 1) (zext ~w:8 p) in
+    let is_sho = is opc op_sho in
+    let sho_pins, sho_acc = unless_false is_sho ((st.pin_out, st.pin_oe), acc) (fun () ->
+        let acc_bit i = extract acc ~hi:i ~lo:i in
+        let drive (po, oe) p v =
+          let m = onehot p and one = eq v (c 1 1) in
+          let keep x = logand x (lognot ~w:8 m) in
+          ite od (keep po) (logor (keep po) (ite one m (c 8 0))),
+          ite od (logor (keep oe) (ite one (c 8 0) m)) oe in
+        let b0 = ite msb (acc_bit 7) (acc_bit 0) in
+        let b1 = ite psel (ite msb (acc_bit 6) (acc_bit 1)) (lognot ~w:1 b0) in
+        let one_pin = drive (st.pin_out, st.pin_oe) pin b0 in
+        let two_pins = drive one_pin (add ~w:3 pin (c 3 1)) b1 in
+        let sho_pins = (ite pair (fst two_pins) (fst one_pin), ite pair (snd two_pins) (snd one_pin)) in
+        let sh = ite (and_ pair psel) (c 8 2) (c 8 1) in
+        let cbit = zext ~w:8 (of_b (and_ cap (pin_at (logxor pin (c 3 1))))) in
+        sho_pins, ite msb (logor (shl ~w:8 acc sh) cbit) (logor (lshr acc sh) (shl ~w:8 cbit (c 8 7)))) in
+    (* SHI *)
+    let shi_acc = unless_false (is opc op_shi) acc (fun () ->
+        let quad = flag instr 7 in
+        let pin_bit = zext ~w:8 (of_b (pin_at pin)) in
+        let nib = extract (lshr io.pin_in4 (shl ~w:32 (zext ~w:32 pin) (c 32 2))) ~hi:3 ~lo:0 in
+        let rev4 = of_bits (List.map (fun i -> extract nib ~hi:i ~lo:i) [ 0; 1; 2; 3 ]) in
+        ite quad
+          (ite msb (logor (shl ~w:8 acc (c 8 4)) (zext ~w:8 rev4))
+             (logor (lshr acc (c 8 4)) (shl ~w:8 (zext ~w:8 nib) (c 8 4))))
+          (ite msb (logor (shl ~w:8 acc (c 8 1)) pin_bit)
+             (logor (lshr acc (c 8 1)) (shl ~w:8 pin_bit (c 8 7))))) in
+    (* MBX: channel 0..3 is an inbox, 4..7 a port *)
+    let recv = flag instr 11 and ch = field instr 10 8 in
+    let to_port = bit ch 2 and slot = extract ch ~hi:1 ~lo:0 in
+    let is_mbx = is opc op_mbx in
+    let is_send = and_ is_mbx (not_ recv) and is_recv = and_ is_mbx recv in
+    let full_at i = eq (select ~w:2 st.full i) (c 1 1) in
+    let send_ok, recv_ok, recv_byte = unless_false is_mbx (ff, ff, acc) (fun () ->
+        ite_b to_port (select_b ~w:2 io.port_out_ready slot) (not_ (full_at slot)),
+        ite_b to_port (select_b ~w:2 io.port_in_valid slot) (full_at slot),
+        ite to_port (select ~w:2 io.port_in slot) (select ~w:2 st.inbox slot)) in
+    (* WAITC *)
+    let ls = st.lsend.(t) in
+    let is_waitc = is opc op_waitc in
+    let holds = unless_false is_waitc ff (fun () ->
+        let cond = field instr 11 8 in
+        let ls_slot = extract ls ~hi:1 ~lo:0 in
+        let space = ite_b (bit ls 2) (select_b ~w:2 io.port_out_ready ls_slot) (not_ (full_at ls_slot)) in
+        let is_cond k = eq cond (c 4 k) in
+        ite_b (ult cond (c 4 8)) (bit_at ~w:8 acc (extract cond ~hi:2 ~lo:0))
+          (ite_b (is_cond c_byte) (eq (extract cnt ~hi:2 ~lo:0) (c 3 0))
+             (ite_b (is_cond c_host) io.host_in_valid
+                (ite_b (is_cond c_inbox) (eq st.full.(t) (c 1 1))
+                   (ite_b (is_cond c_space) space
+                      (bit (lshr io.flags (zext ~w:16 (extract cond ~hi:1 ~lo:0))) (4 * t))))))) in
+    let inbox_send, inbox_recv, port_out, port_in =
+      let none4 = c 4 0 in
+      unless_false (or_ is_mbx is_waitc) (none4, none4, none4, none4) (fun () ->
+          let names s i = ite s (shl ~w:4 (c 4 1) (zext ~w:4 i)) none4 in
+          let space_wait = and_ is_waitc (eq (field instr 11 8) (c 4 c_space))
+          and poll = and_ is_waitc (eq (field instr 11 8) (c 4 c_inbox)) in
+          let ls_port = bit ls 2 and ls_slot = extract ls ~hi:1 ~lo:0 in
+          logor (names (and_ is_send (not_ to_port)) slot) (names (and_ space_wait (not_ ls_port)) ls_slot),
+          logor (names (and_ is_recv (not_ to_port)) slot) (names poll (c 2 t)),
+          logor (names (and_ is_send to_port) slot) (names (and_ space_wait ls_port) ls_slot),
+          names (and_ is_recv to_port) slot) in
+    (* EXT *)
+    let is_ext = is opc op_ext in
+    let ext_sub = field instr 11 8 in
+    let x k = and_ is_ext (eq ext_sub (c 4 k)) in
+    let skip = unless_false is_ext ff (fun () ->
+        or_ (and_ (x x_skne) (not_ (eq acc imm8))) (and_ (x x_skeq) (eq acc imm8))) in
+    let bp = st.bps.(t) in
+    let pin_write = or_ (is opc op_setp) is_sho in
+    (* next state *)
+    (* Each next value is a chain [ite s1 v1 @@ ite s2 v2 @@ ... @@ default]: v1 where s1 holds,
+       else v2 where s2 holds, ..., else the default. *)
+    let is_waitp = is opc op_waitp in
+    let pc_next =
+      ite is_waitp (unless_false is_waitp pc (fun () ->
+          ite (eq (of_b (pin_at pin)) (field instr 8 8)) pc1 fail_or_stay)) @@
+      ite (is opc op_waitd) (ite dl_zero pc1 pc) @@
+      ite (is opc op_jmp) addr @@
+      ite (is opc op_jnz) (ite (eq cnt (c 12 0)) pc1 addr) @@
+      ite (is opc op_in) (ite io.host_in_valid pc1 pc) @@
+      ite is_mbx (ite (ite_b recv recv_ok send_ok) pc1 fail_or_stay) @@
+      ite is_waitc (ite holds pc1 fail_or_stay) @@
+      ite skip (add ~w:8 pc (c 8 2)) @@
+      pc1 in
+    let is_ldb = x x_ldb in
+    let acc_next =
+      ite (is opc op_lda) imm8 @@
+      ite is_sho sho_acc @@
+      ite (is opc op_shi) shi_acc @@
+      ite (is opc op_in) (ite io.host_in_valid io.host_in acc) @@
+      ite is_recv (ite recv_ok recv_byte acc) @@
+      ite is_ldb (unless_false is_ldb acc (fun () -> mem_read st.bankmem bp)) @@
+      acc in
+    let cnt_dec = sub ~w:12 cnt (c 12 1) in
+    let cnt_next =
+      ite (is opc op_ldc) imm12 @@
+      ite is_sho cnt_dec @@
+      ite (is opc op_shi) cnt_dec @@
+      ite (x x_cnta) (zext ~w:12 acc) @@
+      cnt in
+    let dl_next = ite (is opc op_ldd) imm12 (ite dl_zero (c 12 0) (sub ~w:12 dl (c 12 1))) in
+    let is_setp = is opc op_setp in
+    let setp_out, setp_oe = unless_false is_setp (st.pin_out, st.pin_oe) (fun () ->
+        set_masked st.pin_out setv, set_masked st.pin_oe seto) in
+    let pin_out_next = ite is_setp setp_out @@ ite is_sho (fst sho_pins) @@ st.pin_out in
+    let pin_oe_next = ite is_setp setp_oe @@ ite is_sho (snd sho_pins) @@ st.pin_oe in
+    let sub_q = ite is_setp q @@ ite is_sho (ite od (c 2 0) q) @@ c 2 0 in
+    let inbox_next = unless_false is_mbx st.inbox (fun () -> Array.mapi (fun k v ->
+        ite (and_ (and_ is_send (not_ to_port)) (and_ (eq slot (c 2 k)) (not_ (full_at slot)))) acc v) st.inbox) in
+    let full_next = unless_false is_mbx st.full (fun () -> Array.mapi (fun k v ->
+        let here = and_ (not_ to_port) (eq slot (c 2 k)) in
+        ite (and_ is_send here) (c 1 1) (ite (and_ is_recv here) (c 1 0) v)) st.full) in
+    let bp_next = unless_false is_ext bp (fun () ->
+        ite (or_ is_ldb (x x_stb)) (add ~w:10 bp (c 10 1)) @@
+        ite (x x_bank) (logor (shl ~w:10 (zext ~w:10 (extract imm8 ~hi:1 ~lo:0)) (c 10 8)) (zext ~w:10 acc)) @@
+        bp) in
+    let armed = eq st.armed.(t) (c 1 1) in
+    let effects =
+      { host_out = (is opc op_out, field instr 10 8, ite (flag instr 11) imm8 acc);
+        host_in_ready = and_ (is opc op_in) io.host_in_valid;
+        port_pop = (unless_false is_mbx ff (fun () ->
+            and_ (and_ is_recv to_port) (select_b ~w:2 io.port_in_valid slot)), slot);
+        port_push = (unless_false is_mbx ff (fun () ->
+            and_ (and_ is_send to_port) (select_b ~w:2 io.port_out_ready slot)), slot, acc);
+        bank_write = (x x_stb, bp, acc);
+        bank_read = (is_ldb, bp);
+        fine_out = (and_ pin_write armed, st.fines.(t));
+        pins_written =
+          ite is_setp mask8 @@
+          ite is_sho (unless_false is_sho (c 8 0) (fun () ->
+              logor (onehot pin) (ite pair (onehot (add ~w:3 pin (c 3 1))) (c 8 0)))) @@
+          c 8 0;
+        inbox_send; inbox_recv; port_out; port_in } in
+    (* commit *)
+    st.bankmem <- unless_false (x x_stb) st.bankmem (fun () -> mem_write st.bankmem (x x_stb) bp acc);
+    st.pin_sub <- sub_of ~old_:st.pin_out ~new_:pin_out_next ~q:sub_q;
+    st.pin_out <- pin_out_next; st.pin_oe <- pin_oe_next; st.latch <- latch;
+    if inbox_next != st.inbox then Array.blit inbox_next 0 st.inbox 0 n_threads;
+    if full_next != st.full then Array.blit full_next 0 st.full 0 n_threads;
+    st.lsend.(t) <- ite is_send ch ls;
+    st.fines.(t) <- ite (x x_fine) imm8 st.fines.(t);
+    st.armed.(t) <- ite (x x_fine) (c 1 1) (ite pin_write (c 1 0) st.armed.(t));
+    st.cfgs.(t) <- ite (x x_cfg) imm8 st.cfgs.(t);
+    st.bps.(t) <- bp_next;
+    st.pcs.(t) <- pc_next; st.accs.(t) <- acc_next; st.cnts.(t) <- cnt_next; st.dls.(t) <- dl_next;
+    (match io.host_ctl with
+     | Some (ht, pg, hpc) -> st.pages.(ht) <- extract pg ~hi:1 ~lo:0; st.pcs.(ht) <- extract hpc ~hi:7 ~lo:0
+     | None -> ());
+    st.thread <- (t + 1) mod n_threads;
+    effects
+  (* END copy of Make's body *)
+end
+
+type state = Spec.state   (* (int, int array) state_of *)
 
 (* [boot]: each thread's (page, pc) after reset, set by the host *)
 let init ?(boot = Array.make n_threads (0, 0)) ?bank () =
@@ -442,14 +768,7 @@ let init ?(boot = Array.make n_threads (0, 0)) ?bank () =
 
 let copy = Spec.copy
 
-type io = Spec.io = {
-  pin_in : int;
-  pin_in4 : int;                 (* bit 4i+p: pin i in quarter p of the last clock *)
-  host_in : int; host_in_valid : bool;
-  port_in : int array; port_in_valid : bool array; port_out_ready : bool array;
-  flags : int;                   (* 16 bits: thread t's flag inputs are bits 4t..4t+3 *)
-  host_ctl : (int * int * int) option;   (* (thread, page, pc) *)
-}
+type io = Spec.io         (* (int, bool) io_of *)
 
 let sub_of = Spec.sub_of
 
@@ -479,12 +798,12 @@ let fetch st ~(mem : int array) t = mem.(fetch_addr st t)
 let rec step st ~(mem : int array) (io : io) = step_f st ~fetch:(Array.get mem) io
 
 and step_f st ~(fetch : int -> int) (io : io) =
-  let e = Spec.exec st ~instr:(fetch (fetch_addr st st.thread)) io in
+  let (e : Spec.effects) = Spec.exec st ~instr:(fetch (fetch_addr st st.thread)) io in
   let opt (v, x) = if v then Some x else None in
   let opt2 (v, x, y) = if v then Some (x, y) else None in
-  { host_out = opt2 e.Spec.host_out; host_in_ready = e.Spec.host_in_ready; port_pop = opt e.Spec.port_pop;
-    port_push = opt2 e.Spec.port_push; bank_write = opt2 e.Spec.bank_write;
-    bank_read = opt e.Spec.bank_read; fine_out = opt e.Spec.fine_out }
+  { host_out = opt2 e.host_out; host_in_ready = e.host_in_ready; port_pop = opt e.port_pop;
+    port_push = opt2 e.port_push; bank_write = opt2 e.bank_write;
+    bank_read = opt e.bank_read; fine_out = opt e.fine_out }
 
 (* ---- disassembler (for traces and the README) ---- *)
 let disasm w =

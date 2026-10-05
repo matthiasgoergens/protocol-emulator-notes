@@ -45,16 +45,16 @@ let state_slots () =
   let add name w init next = let var = Smt.var name (Smt.Bv w) in slots := { sname = name; var; init; next } :: !slots; var in
   let per name w get init = Array.init Isa2.n_threads (fun t -> add (Printf.sprintf "%s%d" name t) w (init t) (fun st -> (get st).(t))) in
   let boot = Compat.boot_by_thread in
-  let pcs = per "pc" 8 (fun st -> st.Sym.pcs) (fun t -> snd boot.(t)) in
-  let pages = per "page" 2 (fun st -> st.Sym.pages) (fun t -> fst boot.(t)) in
+  let pcs = per "pc" 8 (fun st -> st.Isa2.pcs) (fun t -> snd boot.(t)) in
+  let pages = per "page" 2 (fun st -> st.Isa2.pages) (fun t -> fst boot.(t)) in
   let z name w get = per name w get (fun _ -> 0) in
-  let accs = z "acc" 8 (fun st -> st.Sym.accs) and cnts = z "cnt" 12 (fun st -> st.Sym.cnts) in
-  let dls = z "dl" 12 (fun st -> st.Sym.dls) and bps = z "bp" 10 (fun st -> st.Sym.bps) in
-  let fines = z "fine" 8 (fun st -> st.Sym.fines) and armed = z "armed" 1 (fun st -> st.Sym.armed) in
-  let cfgs = z "cfg" 8 (fun st -> st.Sym.cfgs) and lsend = z "lsend" 3 (fun st -> st.Sym.lsend) in
-  let inbox = z "inbox" 8 (fun st -> st.Sym.inbox) and full = z "full" 1 (fun st -> st.Sym.full) in
-  let pin_out = add "pin_out" 8 0 (fun st -> st.Sym.pin_out) and pin_oe = add "pin_oe" 8 0 (fun st -> st.Sym.pin_oe) in
-  let pin_sub = add "pin_sub" 32 0 (fun st -> st.Sym.pin_sub) and latch = add "latch" 8 0 (fun st -> st.Sym.latch) in
+  let accs = z "acc" 8 (fun st -> st.Isa2.accs) and cnts = z "cnt" 12 (fun st -> st.Isa2.cnts) in
+  let dls = z "dl" 12 (fun st -> st.Isa2.dls) and bps = z "bp" 10 (fun st -> st.Isa2.bps) in
+  let fines = z "fine" 8 (fun st -> st.Isa2.fines) and armed = z "armed" 1 (fun st -> st.Isa2.armed) in
+  let cfgs = z "cfg" 8 (fun st -> st.Isa2.cfgs) and lsend = z "lsend" 3 (fun st -> st.Isa2.lsend) in
+  let inbox = z "inbox" 8 (fun st -> st.Isa2.inbox) and full = z "full" 1 (fun st -> st.Isa2.full) in
+  let pin_out = add "pin_out" 8 0 (fun st -> st.Isa2.pin_out) and pin_oe = add "pin_oe" 8 0 (fun st -> st.Isa2.pin_oe) in
+  let pin_sub = add "pin_sub" 32 0 (fun st -> st.Isa2.pin_sub) and latch = add "latch" 8 0 (fun st -> st.Isa2.latch) in
   let st : Sym.state = { pcs; pages; accs; cnts; dls; bps; fines; armed; cfgs; lsend; inbox; full; pin_out; pin_oe;
                          thread = 0; pin_sub; latch; bankmem = Smt.mem_var "bank" } in
   st, !slots
