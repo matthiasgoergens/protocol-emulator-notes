@@ -1,0 +1,30 @@
+# Licence check, 2026-10-05 (SGT), for notes/learned-from-puzzle-solvers.md. Command, per repository:
+#   gh api repos/<owner>/<repo> --jq '.license.spdx_id // "none"'
+# 'none' = GitHub found no licence file: ideas only; code may be run locally, never committed.
+# Second column: the commit read (shallow clone in /var/tmp/learn-from-puzzle/repos/, 7 characters).
+# umutdinceryananer: GitHub says NOASSERTION, but the LICENSE file is the MIT text with "Copyright (c) 2026 Umut Dincer Yananer".
+# janestreet/asic-puzzle-2026 (the puzzle files themselves) has no licence: do not redistribute them.
+# IHP-GmbH/IHP-Open-PDK: Apache-2.0 (spdx id from the API; files read on the dev branch).
+
+4wirtc/Janestreetproblem_PuzzleSolution2026_Christian_Philipp          6419fd5  none
+ArkAung/silicon-atlas                                                  09164b7  none
+davidg351/Jane-Street-Puzzle-August-2026                               a296fa3  none
+elementalcollision/retrace                                             baa863b  Apache-2.0
+FigureZig/asicrev                                                      a5de3b0  MIT
+flash1729/jane-street-asic-puzzle                                      22ebe63  none
+GabbyTab/asic-puzzle-2026                                              c993f1b  none
+janestreet/asic-puzzle-2026                                            ffd53e0  none
+JGalil/gds2netlist-asic-puzzle                                         4adc9ed  MIT
+mwernest/Jane-Street-asic-puzzle-2026                                  182cb1e  none
+NeoTorino/asic-puzzle-2026                                             70b5d2c  none
+NithinKenMaran/asic-reverse-engineering                                cf44cb0  none
+NotCleo/GDS-to-RTL                                                     3882b3e  none
+sanrav2016/asic-puzzle-2026                                            4003636  none
+semtexzv/asic-puzzle-2026                                              035775f  none
+shaikhmubin02/asic-puzzle-2026-solution                                1dc0423  MIT
+stephenebert/asic-puzzle-solver                                        e6ba734  none
+toshipiazza/js-asic-puzzle-2026-writeup                                47b2618  none
+umutdinceryananer/asic-reverse-engineering                             4d4f9eb  NOASSERTION
+wjrforcyber/js-asic-puzzle-2026                                        5d005b5  none
+zaidharis7/asic-reverse-eng                                            90cdd9f  none
+IHP-GmbH/IHP-Open-PDK                                                  (dev)  Apache-2.0
