@@ -1,0 +1,13 @@
+# LibreLane 3.1.0.dev3, the version TinyTapeout/tt-gds-action (branch ihp-cmos5l, commit 3412659)
+# installs for the sg13cmos5l shuttle.  That action runs `pip install librelane==3.1.0.dev3` and then
+# `python -m librelane --dockerized`, which runs every tool inside ghcr.io/librelane/librelane:3.1.0.dev3;
+# this is the same image, pinned by the digest of its x86_64 manifest (recorded 2026-10-05) so that a
+# re-pushed tag cannot change it.  Tools inside (README.md has the full list): Magic 8.3.674,
+# KLayout 0.30.9, Yosys 0.66, OpenROAD 2026-02-17, Netgen 1.5.320, Python 3.13.13.
+FROM ghcr.io/librelane/librelane@sha256:f454022a9bd73f8b2f2208d3cc4a262ad7e95674780b85fa830c8bbc5b8dd542
+LABEL org.opencontainers.image.title="librelane-tt" \
+      org.opencontainers.image.version="3.1.0.dev3" \
+      org.opencontainers.image.description="LibreLane as Tiny Tapeout's ihp-cmos5l GDS action runs it"
+# Fail the build if the base image is not the one described above.
+RUN librelane --version | grep --quiet 'v3.1.0.dev3' \
+ && magic --version | grep --quiet '^8\.3\.674$'
