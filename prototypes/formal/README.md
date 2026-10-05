@@ -13,7 +13,7 @@ Everything was run on 2026-10-05.
 
 | task | what | result |
 |---|---|---|
-| 1 | interpreter generic over values | lockstep and all ported suites unchanged; integer speed restored (bridge A 31.7 s → 11.3 s, 10.1 s before the functor) |
+| 1 | interpreter generic over values | lockstep and all ported suites unchanged; integer speed restored (bridge A 31.7 s → 10.2 s, 9.4 s before the functor) |
 | 2a | deadline waits | `main.ml`'s deadline programme: no violation to 160 clocks, with the other three threads unconstrained; planted bug found at clock 89 |
 | 2a | every WAITD of UART + SPI + I2C | 15 contracts, 720 clocks; **found a latent SPI compiler bug** (Findings) |
 | 2b | pin ownership | four programmes, 720 clocks; planted bug found at clock 95 |
@@ -72,7 +72,8 @@ Measured on this machine, each run back to back (`/var/tmp/formal-followups/runs
 
 | run | before the functor | functor | now |
 |---|---|---|---|
-| bridge A, `bridge_a.exe all` (3 runs each) | 10.1 s | 31.7 s | 11.3 s |
+| bridge A, `bridge_a.exe all`, 3 runs each, alternating | 10.1 s | 31.7 s | 11.3 s |
+| the same at the end of the work (with the ownership effects) | 9.4 s | | 10.2 s |
 | interpreter alone, 20 M random clocks | 1.0 s | 8.9 s (generic instance) | 1.6 s |
 | lockstep 1000 × 5000 (RTL simulation dominates) | 133 s | 152 s | 143 s |
 
@@ -369,7 +370,9 @@ the previous pins) would probably need strengthening invariants first.
    `results/bmc.txt` was recorded before the merge with the I2C clock-stretching fix
    (5be80cf). The I2C master now waits on SCL, so its timing follows an input, the goals no
    longer fold to constants (0 goals before), and the run did not finish in 30 minutes (69 goals
-   sent), nor in 15 minutes with the state cut. The UART and SPI contracts are unaffected in
+   sent), nor in 15 minutes with the state cut. Scenario b (pin ownership, the same I2C
+   programme) still passes, but sends 646 goals instead of 625 and takes 55 s instead of 0.12 s;
+   unmodified HEAD gives the same numbers, so this comes from the merge, not from the follow-ups. The UART and SPI contracts are unaffected in
    principle; splitting the I2C thread out, or giving it a stretching bound, is the obvious next
    step. Not done here.
 
