@@ -1,7 +1,7 @@
 # command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/crc/crc_oracle.exe maths
-# commit: 46d053daa4693ec4ce76a6f444021d641c3a6a63 (with uncommitted changes)
+# commit: 02381a72826a9cea01ae57c25ae22e05286ab226 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T08:09:03+08:00
+# date: 2026-10-05T08:11:32+08:00
   Refs.crc reproduces every catalogue check value                    ok
   xpow = xpow_slow for n = 0..3000, every catalogue polynomial       ok
   xpow_slow agrees with the incremental loop at n = 1234             ok

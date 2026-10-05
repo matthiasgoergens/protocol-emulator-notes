@@ -1,7 +1,7 @@
 # command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/stall-wide/jtag_swd_stall.exe
-# commit: 46d053daa4693ec4ce76a6f444021d641c3a6a63 (with uncommitted changes)
+# commit: 02381a72826a9cea01ae57c25ae22e05286ab226 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T08:10:02+08:00
+# date: 2026-10-05T08:12:32+08:00
 JTAG host firmware (random chains of 1-4 TAPs, sessions of reset, IDCODE, BYPASS, SAMPLE, EXTEST):
   JTAG stall p = 0.02: 20 sessions, 40643 stalled clocks; timed out with a correct prefix 0; oracle failures 0, TDO transcript differs from golden 0, interpreter vs RTL clocks differing 0
   JTAG stall p = 0.20: 20 sessions, 140122 stalled clocks; timed out with a correct prefix 0; oracle failures 0, TDO transcript differs from golden 0, interpreter vs RTL clocks differing 0
