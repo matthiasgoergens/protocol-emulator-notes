@@ -7,7 +7,10 @@
    own harness (the sequencer's lockstep feeds it a coherent instruction
    memory, which reaches deeper states), and a reset or clear input driven
    at random spends half the time in reset, so [hold_low] names inputs that
-   are pulsed high once at the start and then held low. *)
+   are high on the first cycle and then high on one cycle in 64 at random.
+   Pulsing them mid-run matters: a block harness that clears only at the
+   start cannot see a wire carrying "not clear" crossed with a tie-high,
+   which is exactly the crossed-wire fault this was added for. *)
 
 open Hardcaml
 
@@ -39,7 +42,7 @@ let run ?(hold_low = [ "clear"; "reset"; "rst" ]) ?(clock = "clock") ~(circuit :
     List.iter (fun (name, b) ->
       let w = Bits.width !b in
       let v =
-        if List.mem name hold_low then (if c = 0 then 1 else 0)
+        if List.mem name hold_low then (if c = 0 || Random.int 64 = 0 then 1 else 0)
         else if w <= 30 then Random.bits () land ((1 lsl w) - 1)
         else (Random.bits () lor (Random.bits () lsl 30)) land ((1 lsl w) - 1) in
       set name b v) inputs;

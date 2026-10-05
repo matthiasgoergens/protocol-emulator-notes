@@ -161,28 +161,50 @@ let () =
     let runs = int_of_string runs and cycles = int_of_string cycles in
     let nl = extract gds in
     let base = run_netlist ~lib ~runs ~cycles ~label:(Filename.basename gds) nl in
-    if more = [ "--generic" ] then begin
+    let generic ~label nl =
       (* the block-independent check: random values on every input port *)
-      let sim = Sim.create lib nl in
-      let t0 = Unix.gettimeofday () in
-      let total = ref 0 in
-      for seed = 1 to runs do
-        let m, first = Generic_lockstep.run ~circuit:Harness.circuit ~sim ~seed ~cycles () in
-        total := !total + m;
-        Option.iter (fun (c, what) ->
-          Printf.printf "  seed %d: first mismatch at cycle %d: %s\n" seed c (String.concat "; " what)) first
-      done;
-      Printf.printf "generic random-input lockstep: %d runs x %d cycles, %d mismatching cycles (%.1f s)\n"
-        runs cycles !total (Unix.gettimeofday () -. t0);
-      exit (if !total = 0 && base = `Agrees then 0 else 1)
-    end;
+      match Sim.create lib nl with
+      | exception Failure e -> Printf.printf "%s: generic: cannot simulate: %s\n%!" label e; 1
+      | sim ->
+        let t0 = Unix.gettimeofday () in
+        let total = ref 0 and shown = ref false in
+        for seed = 1 to runs do
+          let m, first = Generic_lockstep.run ~circuit:Harness.circuit ~sim ~seed ~cycles () in
+          total := !total + m;
+          match first with
+          | Some (c, what) when not !shown ->
+            shown := true;
+            Printf.printf "  seed %d: first mismatch at cycle %d: %s\n" seed c
+              (String.concat "; " (List.filteri (fun i _ -> i < 3) what))
+          | _ -> ()
+        done;
+        Printf.printf "%s: generic random-input lockstep: %d runs x %d cycles, %d mismatching cycles (%.1f s)\n%!"
+          label runs cycles !total (Unix.gettimeofday () -. t0);
+        !total
+    in
+    (match more with
+     | "--generic" :: rest ->
+       let m = generic ~label:(Filename.basename gds) nl in
+       (match rest with
+        | "--swaps" :: n :: seed :: only ->
+          Random.init (int_of_string seed);
+          let all = List.init (int_of_string n) (fun _ -> swap_inputs lib nl) in
+          let keep = List.map int_of_string only in
+          let caught = List.filteri (fun i _ -> keep = [] || List.mem (i + 1) keep) all
+                       |> List.filter (fun (label, nl') -> generic ~label nl' > 0) in
+          Printf.printf "generic lockstep caught %d of the selected swaps\n" (List.length caught)
+        | _ -> ());
+       exit (if m = 0 && base = `Agrees then 0 else 1)
+     | _ -> ());
     let controls =
       match more with
-      | [ "--swaps"; n; seed ] ->
+      | "--swaps" :: n :: seed :: only ->
+        (* "--swaps N SEED [I J ...]": plant N swaps, keep only the I-th, J-th
+           (from 1), to re-run the ones a short run missed with more stimulus *)
         Random.init (int_of_string seed);
-        List.init (int_of_string n) (fun _ ->
-          let label, nl' = swap_inputs lib nl in
-          (label, nl'))
+        let all = List.init (int_of_string n) (fun _ -> swap_inputs lib nl) in
+        let keep = List.map int_of_string only in
+        List.filteri (fun i _ -> keep = [] || List.mem (i + 1) keep) all
       | gdss -> List.map (fun g -> (Filename.basename g, extract g)) gdss
     in
     let results = List.map (fun (label, nl') -> run_netlist ~lib ~runs ~cycles ~label nl') controls in

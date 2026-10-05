@@ -1,0 +1,16 @@
+deadline_sequencer.gds: extracted in 0.41 s
+deadline_sequencer.gds: structural check: 0 errors
+deadline_sequencer.gds: 300 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 2887468 output-bit toggles (lockstep 51.8 s)
+swap u1653@75.84,45.36.A2 (n1850) with u1577@83.52,52.92.A2 (n1720): structural check: 0 errors
+swap u1653@75.84,45.36.A2 (n1850) with u1577@83.52,52.92.A2 (n1720): 300 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 2887468 output-bit toggles (lockstep 51.9 s)
+swap u1844@28.32,30.24.A1 (n1957) with u608@17.76,136.08.A1 (n755): structural check: 0 errors
+  seed 47: first mismatch at cycle 311: pcs rtl=9394a1 gate=9794a1
+swap u1844@28.32,30.24.A1 (n1957) with u608@17.76,136.08.A1 (n755): 300 programmes x 2000 cycles, 7542 mismatching cycles in 13 programmes, 2889313 output-bit toggles (lockstep 51.8 s)
+swap u344@40.32,158.76.B1 (n258) with u1228@134.88,83.16.A (n75): structural check: 0 errors
+  seed 82: first mismatch at cycle 63: host_out rtl=8 gate=18
+swap u344@40.32,158.76.B1 (n258) with u1228@134.88,83.16.A (n75): 300 programmes x 2000 cycles, 5448 mismatching cycles in 4 programmes, 2887434 output-bit toggles (lockstep 52.0 s)
+swap u1051@37.44,98.28.CLK (n1164) with u512@49.92,143.64.CLK (n740): structural check: 0 errors
+swap u1051@37.44,98.28.CLK (n1164) with u512@49.92,143.64.CLK (n740): 300 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 2887468 output-bit toggles (lockstep 51.7 s)
+swap u1480@88.32,60.48.RESET_B (n1629) with u835@67.20,120.96.B1 (n706): structural check: 0 errors
+swap u1480@88.32,60.48.RESET_B (n1629) with u835@67.20,120.96.B1 (n706): 300 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 2887468 output-bit toggles (lockstep 51.8 s)
+planted faults: 5; behaviour differs or cannot be simulated: 2; caught only by the structural check: 0; caught by neither: 3
