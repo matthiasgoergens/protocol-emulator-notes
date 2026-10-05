@@ -12,5 +12,8 @@ Third-party material, under its own licence:
   Apache-2.0, with one module replaced.
 - measurements/fabulous/yosys-fabulous-0.60/: FABulous technology files from the Yosys
   repository at tag v0.60, ISC licence, vendored because later Yosys releases no longer ship them.
+- prototypes/verifier/interval.ml: derived from src/interval.ml of MarcosAsh/protocol-emulator,
+  https://github.com/MarcosAsh/protocol-emulator (commit 3333f0c), by Marcos Ashton Iglesias,
+  Apache-2.0; the changes are listed in the file's header.
 
 Ideas taken from other public work are credited where they are used (see notes/backlog.md).

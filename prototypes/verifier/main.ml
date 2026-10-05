@@ -6,6 +6,7 @@
      main.exe sweep             every image of the compiler sweep: verdict and interpreter
                                 cross-check
      main.exe planted           the planted bugs: each must be rejected, with its path
+     main.exe precision         correct hand-written programmes that are hard for the analysis
      main.exe compose           ownership across threads for the demo composition
      main.exe mutants           single-word mutants: verdict against the interpreter
      main.exe random N          random programmes: certificate against the interpreter
@@ -328,7 +329,8 @@ let cmd_controls () =
           try_ (Printf.sprintf "entry %d since +1" i) (with_ { x with since = sh x.since 1 });
           if x.since.lo > 0 && x.since.hi <> None then try_ (Printf.sprintf "entry %d since -1" i) (with_ { x with since = sh x.since (-1) });
           try_ (Printf.sprintf "entry %d time +1" i) (with_ { x with time = sh x.time 1 });
-          if x.dl.hi <> Some 4095 then try_ (Printf.sprintf "entry %d dl +1" i) (with_ { x with dl = sh x.dl 1 })) cert;
+          if x.dl.hi <> Some 4095 then try_ (Printf.sprintf "entry %d dl +1" i) (with_ { x with dl = sh x.dl 1 });
+          if x.due.hi <> None then try_ (Printf.sprintf "entry %d due +1" i) (with_ { x with due = sh x.due 1 })) cert;
       (* the declared gaps, perturbed: the kernel checks the certificate against a specification
          whose every declared gap is moved by one slot in turn *)
       List.iteri (fun ti (tr : Spec.transition) ->
@@ -437,6 +439,16 @@ let () =
   | [ "compose" ] -> cmd_compose ()
   | [ "mutants" ] -> cmd_mutants ()
   | [ "random"; n ] -> cmd_random (int_of_string n)
+  | [ "random-show"; n ] ->
+    (* the n-th random programme of [cmd_random], its listing and its table *)
+    let rng = Random.State.make [| 2026 |] in
+    let words = ref [||] in
+    for _ = 1 to int_of_string n do words := random_words rng done;
+    let spec = Spec.unconstrained "random" in
+    let img = { name = "random" ^ n; words = !words; spec; thread = int_of_string n mod 4; env = Random_inputs } in
+    Array.iteri (fun pc w -> if w <> 0 then Printf.printf "%3d %04x %s\n" pc w (disasm w)) !words;
+    let v = verify img in
+    List.iter (fun ((k : Kernel.key), x) -> Printf.printf "%s %s\n" (Kernel.key_to_string k) (Kernel.value_to_string x)) v.res.cert
   | [ "controls" ] -> cmd_controls ()
   | [ "certs"; dir ] -> cmd_certs dir
   | [ "ledger-check"; file ] -> cmd_ledger_check file

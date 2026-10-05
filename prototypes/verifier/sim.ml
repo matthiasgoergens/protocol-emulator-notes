@@ -124,7 +124,8 @@ let run ?(slots = 60_000) ?(stretch_max = 20_000) ~seed (cert : Kernel.certifica
         incr n_entries;
         (* A5's view: the thread's enables are the chip's, other threads being halted *)
         let k = { Kernel.pc; astate = !astate; cnt = Known cnt; acc = Known acc; oe_known = 0xFF; oe = st.pin_oe } in
-        let v = { Kernel.dl = Interval.exactly dl; since = Interval.exactly since; time = Interval.exactly s } in
+        let v = { Kernel.dl = Interval.exactly dl; since = Interval.exactly since; time = Interval.exactly s;
+                  due = Interval.exactly (since + dl) } in
         let found = List.find_opt (fun (tk, tv) -> Kernel.key_covers ~table:tk k && Kernel.value_leq v tv)
             (try Hashtbl.find h (pc, !astate) with Not_found -> []) in
         (match found with

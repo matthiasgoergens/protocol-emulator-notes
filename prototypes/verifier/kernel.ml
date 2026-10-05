@@ -10,9 +10,15 @@
 
    The abstract state at the first issue of an instruction is a *key*, kept exactly, and a
    *value*, kept as intervals:
-     key   pc; the state of the specification automaton; cnt and acc, each a known value or Any
+     key   pc; the state of the specification automaton; cnt and acc, each a known value or Any;
+           the output enables (A5)
      value dl (the deadline register); since (slots since the last channel event, or since the
-           thread's first slot); time (slots since the thread's first slot)
+           thread's first slot); time (slots since the thread's first slot); due (since + dl:
+           the slot, on the same scale as since, on which dl reaches 0, or now if it has)
+   [due] is MarcosAsh's representation of the deadline as a point in time (their phase, now - t)
+   kept beside the count-down register: two paths that load different counts at different times
+   for one deadline join to one exact [due], where (since, dl) would join to two intervals whose
+   correlation is lost. A WAITD then ends on slot due + 1 exactly.
    A *certificate* is a table of (key, value) entries. [check] accepts it when
    - the start state (pc 0, cnt = acc = dl = 0, time 0) lies in some entry;
    - every successor of every entry, by [transfer], lies in some entry (the table is closed);
@@ -43,7 +49,7 @@
 type known = Known of int | Any
 type key = { pc : int; astate : int; cnt : known; acc : known;
              oe_known : int; oe : int }   (* A5: the enables known, as a mask, and their values *)
-type value = { dl : Interval.t; since : Interval.t; time : Interval.t }
+type value = { dl : Interval.t; since : Interval.t; time : Interval.t; due : Interval.t }
 
 let known_to_string = function Known n -> string_of_int n | Any -> "?"
 
@@ -52,13 +58,15 @@ let key_to_string k =
     (known_to_string k.acc) k.oe k.oe_known
 
 let value_to_string v =
-  Printf.sprintf "dl=%s since=%s time=%s" (Interval.to_string v.dl) (Interval.to_string v.since)
-    (Interval.to_string v.time)
+  Printf.sprintf "dl=%s since=%s due=%s time=%s" (Interval.to_string v.dl) (Interval.to_string v.since)
+    (Interval.to_string v.due) (Interval.to_string v.time)
 
 let value_leq a b = Interval.leq a.dl b.dl && Interval.leq a.since b.since && Interval.leq a.time b.time
+                    && Interval.leq a.due b.due
 let value_join a b = { dl = Interval.join a.dl b.dl; since = Interval.join a.since b.since;
-                       time = Interval.join a.time b.time }
+                       time = Interval.join a.time b.time; due = Interval.join a.due b.due }
 let value_equal a b = Interval.equal a.dl b.dl && Interval.equal a.since b.since && Interval.equal a.time b.time
+                      && Interval.equal a.due b.due
 
 (* a key in the table covers a key reached when they agree on pc and state and the table's cnt
    and acc are Any or equal *)
@@ -70,8 +78,17 @@ let key_covers ~table k =
 
 (* ---- the abstract step ---- *)
 
+(* How an outcome's duration relates to the deadline register, for [due]:
+   Plain       one slot, dl counts down (or is unchanged at 0)
+   Load n      one slot, dl <- n (LDD)
+   Until_due   ends on the slot after dl reaches 0 (WAITD; a wait that times out)
+   By_due      ends no later than that (a wait that proceeds)
+   Unbounded   any time (IN) *)
+type timing = Plain | Load of int | Until_due | By_due | Unbounded
+
 (* What one instruction does from its first issue to the first issue of the next instruction. *)
 type raw = {
+  timing : timing;
   next_pc : int; cnt' : known; acc' : known; dl' : Interval.t; oe_known' : int; oe' : int;
   elapsed : Interval.t;            (* slots until the next instruction first issues *)
   at : Interval.t;                 (* the slot of the event, counted from the first issue *)
@@ -82,9 +99,8 @@ type raw = {
 let dl_max = 4095
 
 (* Planted kernel bugs, for [Main]'s kernel-bugs command only: each must make some check of the
-   verifier fail (the interpreter cross-check, a planted programme accepted, ...). 0, the value
-   every other command runs with, is the kernel as specified; [Main] refuses to run any other
-   command with a planted bug set. *)
+   verifier fail (the interpreter cross-check, a planted programme accepted, ...). 0 is the
+   kernel as specified; only [Main]'s --bug option sets another value. *)
 let planted_bug = ref 0
 let bug n = !planted_bug = n
 
@@ -101,18 +117,18 @@ let transfer w (k : key) (dl : Interval.t) : raw list =
   let pc1 = (k.pc + 1) land 0xFF in
   let dec = Interval.sub_sat dl 1 in
   let dec_cnt = match k.cnt with Known c -> Known ((c - 1) land 0xFFF) | Any -> Any in
-  let one ?(ev = []) ?(q = 0) ?(cnt = k.cnt) ?(acc = k.acc) ?(dl' = dec) ?(oe = (k.oe_known, k.oe)) next_pc =
-    { next_pc; cnt' = cnt; acc' = acc; dl'; elapsed = Interval.exactly 1; at = Interval.exactly 0; ev; q;
+  let one ?(ev = []) ?(q = 0) ?(cnt = k.cnt) ?(acc = k.acc) ?(dl' = dec) ?(oe = (k.oe_known, k.oe)) ?(timing = Plain) next_pc =
+    { timing; next_pc; cnt' = cnt; acc' = acc; dl'; elapsed = Interval.exactly 1; at = Interval.exactly 0; ev; q;
       oe_known' = fst oe; oe' = snd oe } in
   let same_oe = (k.oe_known, k.oe) in
   let oe_known' = k.oe_known and oe' = k.oe in
   let dlo = dl.Interval.lo and dhi = match dl.hi with Some h -> h | None -> dl_max in
   (* A1: a wait that may proceed on any slot 0..d, or fail after slot d *)
   let proceed ?(ev = []) ?(acc = k.acc) () =
-    { next_pc = pc1; cnt' = k.cnt; acc' = acc; dl' = Interval.range 0 (max (dhi - 1) 0);
+    { timing = By_due; next_pc = pc1; cnt' = k.cnt; acc' = acc; dl' = Interval.range 0 (max (dhi - 1) 0);
       elapsed = Interval.range 1 (if bug 1 then dhi else dhi + 1); at = Interval.range 0 dhi; ev; q = 0; oe_known'; oe' } in
   let fail ?(ev = []) () =
-    { next_pc = imm8; cnt' = k.cnt; acc' = k.acc; dl' = Interval.exactly 0;
+    { timing = Until_due; next_pc = imm8; cnt' = k.cnt; acc' = k.acc; dl' = Interval.exactly 0;
       elapsed = (if bug 2 then Interval.range dlo dhi else Interval.range (dlo + 1) (dhi + 1)); at = Interval.range dlo dhi; ev; q = 0; oe_known'; oe' } in
   (* a wait whose condition is known: it holds on its first slot or never (nothing it reads
      changes while it waits) *)
@@ -126,12 +142,12 @@ let transfer w (k : key) (dl : Interval.t) : raw list =
         [ 0; 1; 2; 3; 4; 5; 6; 7 ] in
     [ one ~ev ~q:(w land 3) ~oe:(k.oe_known lor mask, (k.oe land lnot mask) lor (if bit 2 then mask else 0)) pc1 ]
   | 2 -> [ one ~cnt:(Known imm12) pc1 ]                         (* LDC *)
-  | 3 -> [ one ~dl':(Interval.exactly (if bug 3 then max 0 (imm12 - 1) else imm12)) pc1 ]              (* LDD: no decrement this slot *)
+  | 3 -> let n = if bug 3 then max 0 (imm12 - 1) else imm12 in [ one ~dl':(Interval.exactly n) ~timing:(Load n) pc1 ]              (* LDD: no decrement this slot *)
   | 4 -> [ one ~acc:(Known imm8) pc1 ]                          (* LDA *)
   | 5 ->                                                       (* WAITP *)
     [ proceed ~ev:[ (pin, Spec.Observe b8) ] (); fail ~ev:[ (pin, Spec.Expire b8) ] () ]
   | 6 ->                                                       (* WAITD: stays until dl = 0 *)
-    [ { next_pc = pc1; cnt' = k.cnt; acc' = k.acc; dl' = Interval.exactly 0;
+    [ { timing = Until_due; next_pc = pc1; cnt' = k.cnt; acc' = k.acc; dl' = Interval.exactly 0;
         elapsed = (if bug 7 then Interval.range dlo dhi else Interval.range (dlo + 1) (dhi + 1)); at = Interval.exactly 0;
         ev = []; q = 0; oe_known'; oe' } ]
   | 7 ->                                                       (* SHO *)
@@ -170,7 +186,7 @@ let transfer w (k : key) (dl : Interval.t) : raw list =
      | Any -> [ one imm8; one ~cnt:(Known 0) pc1 ])
   | 11 -> [ one pc1 ]                                           (* OUT *)
   | 12 ->                                                      (* IN: A1, no bound *)
-    [ { next_pc = pc1; cnt' = k.cnt; acc' = Any; dl' = Interval.range 0 (max (dhi - 1) 0);
+    [ { timing = Unbounded; next_pc = pc1; cnt' = k.cnt; acc' = Any; dl' = Interval.range 0 (max (dhi - 1) 0);
         elapsed = Interval.at_least 1; at = Interval.exactly 0; ev = []; q = 0; oe_known'; oe' } ]
   | 13 ->                                                      (* MBX: A1 *)
     let recv = bit 11 in
@@ -218,15 +234,35 @@ let step spec (words : int array) (k, v) =
   let raws = transfer words.(k.pc) k v.dl in
   List.fold_left (fun (succs, viols, preds) r ->
       let time_ev = Interval.plus v.time r.at in
-      let after = { dl = r.dl'; since = Interval.plus v.since r.elapsed; time = Interval.plus v.time r.elapsed } in
+      (* since and due at the next instruction, with no event: both bounds on since are sound, so
+         their meet is; an empty meet is a combination no execution reaches *)
+      let since_plain = Interval.plus v.since r.elapsed in
+      let since' = match r.timing with
+        | Until_due -> Interval.meet since_plain (Interval.shift v.due 1)
+        | By_due -> (match v.due.hi with
+            | Some h -> Interval.meet since_plain (Interval.at_most (h + 1))
+            | None -> Some since_plain)
+        | Plain | Load _ | Unbounded -> Some since_plain in
+      let after = Option.map (fun since ->
+          let due_plain = Interval.plus since r.dl' in
+          let due = match r.timing with
+            | Load n -> Some (Interval.shift since n)
+            | Until_due -> Some since
+            | Plain | By_due | Unbounded -> Interval.meet due_plain (Interval.max_ v.due since) in
+          Option.map (fun due -> { dl = r.dl'; since; time = Interval.plus v.time r.elapsed; due }) due) since'
+                  |> Option.join in
       let key' astate = { pc = r.next_pc; astate; cnt = r.cnt'; acc = r.acc'; oe_known = r.oe_known'; oe = r.oe' } in
       let pred ?to_ ?gap ?allowed () =
         if r.ev = [] then [] else
           [ { p_pc = k.pc; p_word = words.(k.pc); p_from = k.astate; p_to = to_; p_ev = r.ev; p_time = time_ev;
               p_gap = gap; p_q = r.q; p_allowed = allowed } ] in
-      match channel_event spec r.ev with
-      | [] -> ({ s_key = key' k.astate; s_value = after; s_event = false } :: succs, viols, pred () @ preds)
-      | ev ->
+      match channel_event spec r.ev, after with
+      | [], None -> (succs, viols, pred () @ preds)
+      | [], Some after -> ({ s_key = key' k.astate; s_value = after; s_event = false } :: succs, viols, pred () @ preds)
+      | ev, _ ->
+        (* after an event, since restarts at 1 and due is 1 + dl *)
+        let after = { dl = r.dl'; since = Interval.exactly 1; time = Interval.plus v.time r.elapsed;
+                      due = Interval.shift r.dl' 1 } in
         let gap = Interval.plus v.since r.at in
         (match Spec.next spec k.astate ev with
          | None ->
@@ -234,7 +270,7 @@ let step spec (words : int array) (k, v) =
          | Some tr ->
            let viols = if bug 10 || Interval.leq gap tr.gap then viols
              else Bad_gap { from = k; value = v; event = ev; gap; tr } :: viols in
-           ({ s_key = key' tr.dst; s_value = { after with since = Interval.exactly 1 }; s_event = true } :: succs,
+           ({ s_key = key' tr.dst; s_value = after; s_event = true } :: succs,
             viols, pred ~to_:tr.dst ~gap ~allowed:tr.gap () @ preds)))
     ([], [], []) raws
 
@@ -244,7 +280,7 @@ let deadline_violation spec (k, v) =
   | _ -> None
 
 let start_key spec = { pc = 0; astate = spec.Spec.start; cnt = Known 0; acc = Known 0; oe_known = 0xFF; oe = 0 }
-let start_value = { dl = Interval.exactly 0; since = Interval.exactly 0; time = Interval.exactly 0 }
+let start_value = { dl = Interval.exactly 0; since = Interval.exactly 0; time = Interval.exactly 0; due = Interval.exactly 0 }
 
 (* ---- the certificate check ---- *)
 

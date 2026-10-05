@@ -22,7 +22,8 @@ let key_limit = 512
 let widen ~old v =
   { dl = Interval.widen_to ~ceil:dl_max ~floor:0 ~old:old.dl v.dl;
     since = Interval.widen_to ~floor:0 ~old:old.since v.since;
-    time = Interval.widen_to ~floor:0 ~old:old.time v.time }
+    time = Interval.widen_to ~floor:0 ~old:old.time v.time;
+    due = Interval.widen_to ~floor:0 ~old:old.due v.due }
 
 type result = {
   cert : certificate;

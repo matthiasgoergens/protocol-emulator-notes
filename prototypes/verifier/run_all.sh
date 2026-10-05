@@ -2,7 +2,8 @@
 # Regenerates every file in results/ (README.md cites them), one job at a time, niced, waiting
 # while the 1-minute load is above 20. Each file starts with its command, commit and date.
 #   ./run_all.sh            all of them
-#   ./run_all.sh NAME       one of: selftest planted sweep compose mutants random controls certs
+#   ./run_all.sh NAME       one of: selftest planted precision sweep compose mutants random controls
+#                           kernel-bugs certs
 set -o errexit -o nounset -o pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 cd "$HERE"
@@ -32,7 +33,7 @@ run() {
 }
 what=${1:-all}
 status=0
-for job in selftest planted sweep compose mutants random controls certs; do
+for job in selftest planted precision sweep compose mutants random controls kernel-bugs certs; do
   if [ "$what" != all ] && [ "$what" != "$job" ]; then continue; fi
   case $job in
     random) run random random 3000 || status=1 ;;

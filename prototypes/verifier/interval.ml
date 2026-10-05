@@ -6,8 +6,9 @@
    2026-10-04; author Marcos Ashton Iglesias), Apache-2.0. Changes made here: ported from Core to
    the OCaml standard library; the lower end is always finite (every quantity this verifier
    bounds, a count of slots or a register value, is at least zero), so [lo] is an [int]; [leq]
-   (containment) and [widen_to] (widening to a known range instead of to no bound) added;
-   [clamp_low], [disjoint] and [meet] dropped, [minus] replaced by [sub_sat]. *)
+   (containment), [max_] and [widen_to] (widening to a known range instead of to no bound)
+   added; [meet] returns [None] when empty; [clamp_low] and [disjoint] dropped, [minus] replaced
+   by [sub_sat]. *)
 
 type t = { lo : int; hi : int option }   (* [hi = None]: no upper bound *)
 
@@ -22,6 +23,18 @@ let join a b =
 
 let plus a b =
   { lo = a.lo + b.lo; hi = (match a.hi, b.hi with Some x, Some y -> Some (x + y) | _ -> None) }
+
+(* the integers in both, if any *)
+let meet a b =
+  let lo = max a.lo b.lo in
+  let hi = match a.hi, b.hi with Some x, Some y -> Some (min x y) | (Some _ as h), None | None, h -> h in
+  match hi with Some h when h < lo -> None | _ -> Some { lo; hi }
+
+(* [max x y] for x in [a] and y in [b] *)
+let max_ a b =
+  { lo = max a.lo b.lo; hi = (match a.hi, b.hi with Some x, Some y -> Some (max x y) | _ -> None) }
+
+let at_most h = { lo = 0; hi = Some h }
 
 (* [max (x - n) 0] for every x in [t]: a down-counter that stops at zero, after [n] steps *)
 let sub_sat t n =
