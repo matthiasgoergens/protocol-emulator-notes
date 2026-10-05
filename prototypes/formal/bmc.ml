@@ -20,6 +20,7 @@ type result = {
   total_s : float;
   defs : int;                        (* define-funs sent *)
   covers : (string * cover) list;    (* non-vacuity: each must be reachable *)
+  antecedent : string;               (* the cover that says the property's antecedent happens *)
 }
 
 (* How a cover was decided. [Witnessed]: satisfiable with every variable fixed to a concrete
@@ -38,7 +39,11 @@ let log_dir () = match Sys.getenv_opt "BMC_SMT_LOG" with Some d -> Some d | None
 (* [witnesses]: for some covers, by name, values for variables by their names: the inputs and the
    unconstrained instruction words. A variable the witness gives no value (None) is left free, as
    are bank (array) variables; the cut variables (Machine.cut) are fixed by their equations. *)
-let run ?(progress = 0) ?(witnesses = []) ~name ~depth ~(step : int -> Smt.term * Smt.term list) ~(covers : unit -> (string * Smt.term) list) () =
+(* [antecedent] names one of the covers: the condition under which the property can fail at all
+   (the wait executes, a second thread writes pins, a frame is sampled, ...). The verdict is
+   PROVED only if it is reachable within the bound, VACUOUS if it is not; after smprather's
+   per-property PROVED / REACHABLE / VACUOUS report (credits in README.md). *)
+let run ?(progress = 0) ?(witnesses = []) ~antecedent ~name ~depth ~(step : int -> Smt.term * Smt.term list) ~(covers : unit -> (string * Smt.term) list) () =
   let log = Option.map (fun d -> Filename.concat d (name ^ ".smt2")) (log_dir ()) in
   let s = Smt.Solver.start ?log () in
   let t0 = now () in
@@ -95,8 +100,31 @@ let run ?(progress = 0) ?(witnesses = []) ~name ~depth ~(step : int -> Smt.term 
          | None, `Unknown e -> failwith ("solver: " ^ e))) (covers ()) in
   let defs = s.Smt.Solver.defs in
   Smt.Solver.close s;
+  if !violation = None && not (List.mem_assoc antecedent covers) then
+    failwith (Printf.sprintf "%s: the antecedent '%s' is not among the covers" name antecedent);
   { name; depth = !k; violation = !violation; checks = !checks; folded = !folded; solver_s = !solver_s;
-    total_s = now () -. t0; defs; covers }
+    total_s = now () -. t0; defs; covers; antecedent }
+
+type verdict = Failed of int | Proved | Vacuous | Undecided
+
+let verdict r =
+  match r.violation with
+  | Some (k, _) -> Failed k
+  | None ->
+    (match List.assoc r.antecedent r.covers with
+     | Reachable | Witnessed _ -> Proved
+     | Unreachable -> Vacuous
+     | Witness_failed -> Undecided)
+
+(* One line per property, the same shape for every engine (README.md, "Per-property report"):
+   PROPERTY <name>: PROVED | VACUOUS | FAILED | UNDECIDED, <scope>; and one line per cover:
+   COVER <name>: REACHABLE | UNREACHABLE | UNDECIDED. *)
+let verdict_line r =
+  match verdict r with
+  | Failed k -> Printf.sprintf "PROPERTY %s: FAILED at clock %d" r.name k
+  | Proved -> Printf.sprintf "PROPERTY %s: PROVED to %d clocks (bounded); antecedent '%s' reachable" r.name r.depth r.antecedent
+  | Vacuous -> Printf.sprintf "PROPERTY %s: VACUOUS to %d clocks; antecedent '%s' unreachable" r.name r.depth r.antecedent
+  | Undecided -> Printf.sprintf "PROPERTY %s: UNDECIDED to %d clocks; no violation, but the antecedent's witness failed" r.name r.depth
 
 let report r =
   Printf.printf "%s: %s; %d clocks unrolled, %d goals sent to the solver, %d folded to false, %d definitions; solver %.2f s, total %.2f s\n%!"
@@ -105,8 +133,9 @@ let report r =
      | Some (k, _) -> Printf.sprintf "VIOLATED at clock %d" k
      | None -> "no violation")
     r.depth r.checks r.folded r.defs r.solver_s r.total_s;
-  List.iter (fun (n, c) -> Printf.printf "  cover %-50s %s\n" n (match c with
-      | Reachable -> "reachable"
-      | Witnessed t -> Printf.sprintf "reachable (concrete witness, checked by the solver in %.2f s)" t
-      | Witness_failed -> "WITNESS FAILED (reachability not decided)"
-      | Unreachable -> "NOT REACHABLE (vacuous?)")) r.covers
+  List.iter (fun (n, c) -> Printf.printf "  COVER %s%s: %s\n" n (if n = r.antecedent then " (antecedent)" else "") (match c with
+      | Reachable -> "REACHABLE"
+      | Witnessed t -> Printf.sprintf "REACHABLE (concrete witness, checked by the solver in %.2f s)" t
+      | Witness_failed -> "UNDECIDED (the witness failed; reachability not decided)"
+      | Unreachable -> Printf.sprintf "UNREACHABLE within %d clocks" r.depth)) r.covers;
+  print_endline (verdict_line r)

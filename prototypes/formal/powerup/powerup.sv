@@ -101,14 +101,27 @@ module powerup #(parameter RESET_CLOCKS = 1) (
                        && (!bank_we_a || bank_wdata_a == bank_wdata_b));
     fine:      assert (fine_valid_a == fine_valid_b && (!fine_valid_a || fine_out_a == fine_out_b));
     cfg:       assert (cfg_out_a == cfg_out_b);
+    // a control for the per-property report: an implication whose antecedent (the output
+    // enables differ) the other assertions rule out, so it holds vacuously and must be
+    // reported VACUOUS, never PROVED
+    vacuity_control: assert (pin_oe_a == pin_oe_b || pin_out_a == pin_out_b);
   end
 
-  // non-vacuity: after the reset the copies do things, without another clear
+  // Antecedent covers, one per assertion (<name>_ante), for the per-property report
+  // (../sby_report.py): after the reset and without another clear, the outputs the assertion
+  // compares actually do something. An assertion whose antecedent is unreachable is VACUOUS.
   reg quiet = 1'b1;   // no clear since the forced reset
   always @(posedge clock) if (started && clear_in) quiet <= 1'b0;
+  reg [9:0] fetch_before;
+  always @(posedge clock) fetch_before <= imem_addr_a;
   always @(*) if (started && quiet && !clear_in) begin
-    drives_pin:  cover (pin_oe_a != 8'd0);
-    sends_host:  cover (host_out_valid_a);
-    writes_bank: cover (bank_we_a);
+    pins_ante:  cover (pin_oe_a != 8'd0);
+    fetch_ante: cover (n == 2'd3 && imem_addr_a != fetch_before);
+    host_ante:  cover (host_out_valid_a);
+    ports_ante: cover (port_out_valid_a != 4'd0);
+    bank_ante:  cover (bank_we_a);
+    fine_ante:  cover (fine_valid_a);
+    cfg_ante:   cover (cfg_out_a != 32'd0);
+    vacuity_control_ante: cover (pin_oe_a != pin_oe_b);
   end
 endmodule

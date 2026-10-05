@@ -63,7 +63,8 @@ wait
   echo "# yosys: $(timeout 300 docker run --rm "$IMAGE" yosys -V 2>/dev/null)"
   echo "# z3: $("$Z3ENV/bin/z3" --version)"
   echo "# date: $(date --iso-8601=seconds)"
-  for t in $tasks; do
+  for t in $all_tasks; do
+    [ -f "$WORK/$t.out" ] || continue
     echo "== $t"
     grep --extended-regexp 'summary: engine|failed assertion|reached cover|unreached cover|DONE|Property proved|Time =' "$WORK/$t.out" \
       | sed 's/^SBY [0-9:]* \[[^]]*\] //' || echo "no result (see $WORK/$t.out)"
@@ -73,4 +74,21 @@ wait
       "$HERE/vcd_table.py" "$trace" clear imem_addr_a imem_addr_b imem_a imem_b pin_out_a pin_out_b cfg_out_a cfg_out_b
     fi
   done
+  echo "== per-task verdicts (every assertion of powerup.sv at once; the antecedent covers are those of r1 below, on the same miter)"
+  for t in $all_tasks; do
+    case $t in cover|r1) continue ;; esac
+    f=$WORK/$t.out
+    [ -f "$f" ] || continue
+    if grep --quiet 'DONE (PASS' "$f"; then
+      echo "PROPERTY powerup-$t: PROVED $(grep --quiet 'mode bmc' "$WORK/powerup_$t/config.sby" 2>/dev/null && echo 'to 12 clocks (smtbmc)' || echo 'unbounded (abc pdr)')"
+    elif grep --quiet 'DONE (FAIL' "$f"; then
+      echo "PROPERTY powerup-$t: FAILED at step $(grep --only-matching --max-count=1 'failed assertion .* step [0-9]*' "$f" | sed 's/.* step //') ($(grep --only-matching 'failed assertion [^ ]*' "$f" | sed 's/failed assertion //' | sort --unique | tr '\n' ' '))"
+    else
+      echo "PROPERTY powerup-$t: UNDECIDED (see $f)"
+    fi
+  done
+  if [ -f "$WORK/r1.out" ] && [ -f "$WORK/cover.out" ]; then
+    echo "== per-property report: r1 (proof) with cover (antecedents)"
+    "$FORMAL/sby_report.py" "$HERE/powerup.sv" "$WORK/r1.out" "$WORK/cover.out" "unbounded (abc pdr), one-clock reset" || true
+  fi
 } | tee "$FORMAL/results/powerup.txt"

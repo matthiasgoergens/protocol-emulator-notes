@@ -23,6 +23,7 @@ Everything was run on 2026-10-05.
 | 3 | Kind 2 (k-induction, IC3) | deadline property **proved for all depths** in 0.2 s; UART times out at 15 min |
 | 4 | RTL against specification (Yosys) | equal for 23 clocks after reset, for every instruction stream and input; **28 of 28** planted RTL bugs found |
 | 5 | power-up determinism (SymbiYosys) | two copies from arbitrary register contents agree on every output after a one-clock reset, **unbounded** (abc pdr); **found a fetch bug in the RTL** (Findings 5), now fixed; 2 of 2 planted un-reset registers that reach an output are caught, 3 that cannot are correctly passed |
+| 6 | per-property report | every property PROVED, VACUOUS, FAILED or UNDECIDED, every cover REACHABLE or UNREACHABLE, across all engines (`results/summary.txt`); a planted vacuous property is reported VACUOUS |
 
 ## 1. One interpreter, several value domains
 
@@ -375,8 +376,8 @@ LibreLane container; abc pdr for the proofs, smtbmc with z3 for the bounded run 
 
 | task | what | result |
 |---|---|---|
-| r1 | real core, one-clock reset | **PASS, unbounded** (abc pdr, 45 s) |
-| r2 | real core, two-clock reset | PASS, unbounded (abc pdr, 171 s) |
+| r1 | real core, one-clock reset | **PASS, unbounded** (abc pdr; 45 s, 333 s with the vacuity control added) |
+| r2 | real core, two-clock reset | PASS, unbounded (abc pdr, 27 to 171 s across runs) |
 | r1_bmc | as r1, bounded, 12 clocks | PASS |
 | u_cfg | `cfg` registers without the clear | **FAIL** at step 1 (`cfg_out` differs) |
 | u_dl | `dl` registers without the clear | **FAIL** at step 4: a wait in thread 0 ends at a different clock, so the fetch addresses part |
@@ -407,6 +408,44 @@ Limits: the inputs `boot_pc` and `boot_page` are free on every clock (on the chi
 configuration register); the stores are modelled per address, not as a whole memory, which only
 adds behaviours. The proof is of the core alone; the TT wrapper's own registers (its loader) are
 outside it.
+
+## 6. Per-property report
+
+After smprather's per-property PROVED / REACHABLE / VACUOUS summary (credits). Every assertion
+names a cover for its **antecedent**: the condition under which it can fail at all. A property is
+PROVED only when the engine finds no violation **and** its antecedent is reachable within the
+same bound; if the antecedent is unreachable the verdict is VACUOUS, never a pass. The format is
+the same for every engine:
+
+    PROPERTY <name>: PROVED <scope>; antecedent <cover> reachable
+    PROPERTY <name>: VACUOUS <scope>; antecedent <cover> unreachable
+    PROPERTY <name>: FAILED at clock <k>
+    PROPERTY <name>: UNDECIDED (...)
+    COVER <name>: REACHABLE | UNREACHABLE within <n> clocks | UNDECIDED
+
+- **Our BMC** (`bmc.ml`): `Bmc.run` takes a mandatory `~antecedent`, the name of one of its
+  covers, and fails if the cover is missing. The antecedents: (a) every contract's wait executes;
+  (b) two threads write pins; (c) the other threads make the copies' other pins differ; (d) a
+  frame is sampled; (e) some thread touches an inbox; e-bank: thread 0 reads the bank. For an
+  induction step the antecedent is its hypotheses: unsatisfiable hypotheses make it VACUOUS.
+- **SymbiYosys** (`sby_report.py`): each `label: assert` needs a `label_ante: cover`; the script
+  combines the proof's log with the cover task's log. Where smtbmc's covers are too slow, the
+  antecedent can be asserted negated as `label_ante_reach` and checked by a bit-level BMC: a
+  failure at step n means reachable at step n.
+- `report.sh` collects every PROPERTY and COVER line into `results/summary.txt` and marks the
+  planted faults and controls, where FAILED or VACUOUS is the expected answer.
+
+Controls for the report itself: `a-vacuous-planted` places a deadline contract on an address the
+programme never reaches; it has no violation, and is reported **VACUOUS**, not PROVED. In
+`powerup.sv`, `vacuity_control` asserts an implication whose antecedent (the output enables
+differ) the other assertions rule out; it must be reported VACUOUS too.
+
+One thing this caught while it was being built: sby's summary listed only 5 of the 7 reached
+covers in one run, so a report read from the summary called two reachable antecedents undecided;
+`sby_report.py` reads the engine's own "Reached cover statement" lines.
+
+Not in the report: Kind 2 (section 3) and the RTL-against-specification runs (section 4), whose
+non-vacuity evidence is the 28 of 28 planted bugs; and a-protocols (Findings 4).
 
 ## Findings
 
@@ -454,6 +493,9 @@ outside it.
 - **MarcosAsh**, github.com/MarcosAsh/protocol-emulator (Apache-2.0): power-up determinism as
   a two-copy proof from arbitrary flop contents (`formal/powerup.sby`). Idea only; section 5 is
   our own.
+- **smprather**, github.com/smprather/janestreet-blog-serial-protocol-emulator (MIT): every
+  property reported as PROVED, REACHABLE or VACUOUS, vacuous never counting as a pass
+  (`formal/run_formal.sh`). Idea only; section 6 is our own.
 - Tools: z3 (MIT, from the `z3-solver` wheel), Kind 2 (Apache-2.0), Yosys (ISC, in the
   LibreLane image), Hardcaml.
 
@@ -473,6 +515,8 @@ equiv/run_equiv.sh bugs 16
 equiv/run_equiv.sh bug 12 "SKEQ skip lands on pc+1"
 ./_build/default/equiv/miter.exe --sim 20000 ["BUG"]   # the miter in Cyclesim, a smoke test
 ```
+
+Per-property report (section 6): `./report.sh` (reads the result files, runs nothing).
 
 Power-up determinism (section 5): `powerup/run_powerup.sh [TASK...]`. It needs the LibreLane
 image and the z3 venv above (`Z3ENV`); the container has no `/lib64`, so the script runs the
