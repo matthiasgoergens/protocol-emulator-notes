@@ -1,0 +1,20 @@
+half_period 5: toggle gaps 5 5 5 5 5 5 5 5 5 -> ok
+half_period 2: toggle gaps 2 2 2 2 2 2 2 2 2 -> ok
+File "test/dune", lines 21-24, characters 0-70:
+21 | (rule
+22 |  (with-stdout-to
+23 |   latency.out
+24 |   (run %{exe:test_latency.exe})))
+FAIL: pattern, 640x480 did not build
+FAIL: demo, 640x480 did not build
+Fatal error: exception Latency mismatch in [tmds] at hw/hdmi.ml:80:
+    arg 0    latency 1       (hw/video_timing.ml:67)
+    arg 1    latency 2       (hw/hdmi.ml:49)
+    arg 2    latency 1       (hw/video_timing.ml:64)
+    arg 3    latency 1       (hw/video_timing.ml:64)
+  To line them up: arg 0 needs 1 more register stage(s); arg 2 needs 1 more register stage(s); arg 3 needs 1 more register stage(s) (Delayed.pipeline / Delayed.align).
+Raised at Hardcaml_latency__Delayed.Primitives.check in file "src/delayed.ml", lines 104-113, characters 6-21
+Called from Hardcaml_latency__Delayed.lift in file "src/delayed.ml", line 230, characters 4-80
+Called from Hdmi_hw__Hdmi.pixel_circuit.enc in file "hw/hdmi.ml", lines 80-84, characters 4-23
+Called from Hdmi_hw__Hdmi.pixel_circuit in file "hw/hdmi.ml", line 87, characters 11-22
+Called from Dune__exe__Test_latency in file "test/test_latency.ml", line 122, characters 87-98

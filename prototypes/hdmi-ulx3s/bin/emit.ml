@@ -1,7 +1,8 @@
 (* Writes the generated Verilog: emit.exe <outdir> [mutant]
-   mutant (negative controls for the end-to-end simulation only): latency (the pattern's latency
-   declared as 0, so syncs and pixels are misaligned by one), xnor (Gergo's XOR/XNOR rule),
-   qm8 (Gergo's 2 * q_m[8] correction), control (a wrong control code)
+   mutant (negative controls for the end-to-end simulation only): latency (the pattern's registered
+   colour declared to be at the raster's latency, so syncs and pixels are misaligned by one),
+   xnor (Gergo's XOR/XNOR rule), qm8 (Gergo's 2 * q_m[8] correction), control (a wrong control
+   code)
      hdmi_pixel.v       640x480@60 test pattern, three TMDS encoders, 1 Hz LED at 25 MHz
      hdmi_serial_sdr.v  serialiser, one bit per 250 MHz cycle, 1 Hz LED at 250 MHz
      hdmi_serial_ddr.v  serialiser, two bits per 125 MHz cycle (to ODDRX1F), 1 Hz LED at 125 MHz
@@ -20,7 +21,7 @@ let () =
   let argv = Sys.get_argv () in
   let dir = argv.(1) in
   let mutant_name = if Array.length argv > 2 then argv.(2) else "none" in
-  let declared_latency = if String.equal mutant_name "latency" then 0 else 1 in
+  let misdeclare = String.equal mutant_name "latency" in
   let mutant =
     match mutant_name with
     | "none" | "latency" -> Tmds.Faithful
@@ -32,7 +33,7 @@ let () =
   let m = Video_timing.vga_640x480_60 in
   write dir
     (Hdmi.pixel_circuit ~mutant ~blink_half_period:12_500_000
-       ~source:(Hdmi.test_pattern ~declared_latency ~width:m.h.active ~height:m.v.active ()) ());
+       ~source:(Hdmi.test_pattern ~misdeclare ~width:m.h.active ~height:m.v.active ()) ());
   let env name default = Option.value (Sys.getenv name) ~default in
   let fields = Int.of_string (env "DEMO_FIELDS" "8") and packet_file = env "DEMO_PACKETS" "packets.hex" in
   write dir

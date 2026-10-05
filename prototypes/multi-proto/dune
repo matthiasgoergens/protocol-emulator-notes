@@ -33,3 +33,20 @@
  (name loopback)
  (modules loopback)
  (libraries hardcaml unix mpcore))
+
+; The latency lint (latency_lint.ml): stdout must match latency.expected; accept a reviewed
+; change with [dune promote].
+(executable
+ (name latency_lint)
+ (modules latency_lint)
+ (libraries hardcaml mpcore hardcaml_latency latency_ci))
+
+(rule
+ (with-stdout-to
+  latency.out
+  (run %{exe:latency_lint.exe})))
+
+(rule
+ (alias runtest)
+ (action
+  (diff latency.expected latency.out)))

@@ -1,0 +1,442 @@
+== hdmi pattern: 0 finding(s)
+   528 of 719 nodes checked (the rest static); 9 loop registers; 0 memories/instances cut
+== hdmi pattern, declared 0: 6 finding(s)
+   525 of 710 nodes checked (the rest static); 9 loop registers; 0 memories/instances cut
+reconvergence at mux (uid 281) @ hw/tmds.ml:91:4
+  measured from reg (uid 669) @ hw/video_timing.ml:49:8:
+      0 cycles: & (uid 41) @ hw/video_timing.ml:54:9
+      1 cycles: mux (uid 280) @ hw/tmds.ml:80:17
+reconvergence at mux (uid 295) @ hw/tmds.ml:90:4
+  measured from reg (uid 669) @ hw/video_timing.ml:49:8:
+      0 cycles: & (uid 41) @ hw/video_timing.ml:54:9
+      1 cycles: mux (uid 294) @ hw/tmds.ml:79:18
+reconvergence at mux (uid 462) @ hw/tmds.ml:91:4
+  measured from reg (uid 669) @ hw/video_timing.ml:49:8:
+      0 cycles: & (uid 41) @ hw/video_timing.ml:54:9
+      1 cycles: mux (uid 461) @ hw/tmds.ml:80:17
+reconvergence at mux (uid 476) @ hw/tmds.ml:90:4
+  measured from reg (uid 669) @ hw/video_timing.ml:49:8:
+      0 cycles: & (uid 41) @ hw/video_timing.ml:54:9
+      1 cycles: mux (uid 475) @ hw/tmds.ml:79:18
+reconvergence at mux (uid 654) @ hw/tmds.ml:91:4
+  measured from reg (uid 669) @ hw/video_timing.ml:49:8:
+      0 cycles: & (uid 41) @ hw/video_timing.ml:54:9
+      1 cycles: mux (uid 653) @ hw/tmds.ml:80:17
+reconvergence at mux (uid 706) @ hw/tmds.ml:90:4
+  measured from reg (uid 669) @ hw/video_timing.ml:49:8:
+      0 cycles: & (uid 41) @ hw/video_timing.ml:54:9
+      1 cycles: mux (uid 705) @ hw/tmds.ml:79:18
+== hdmi pattern, declared 2: 6 finding(s)
+   531 of 728 nodes checked (the rest static); 9 loop registers; 0 memories/instances cut
+reconvergence at mux (uid 287) @ hw/tmds.ml:91:4
+  measured from reg (uid 675) @ hw/video_timing.ml:49:8:
+      2 cycles: reg (uid 47) @ hw/hdmi.ml:47:16
+      1 cycles: mux (uid 286) @ hw/tmds.ml:80:17
+reconvergence at mux (uid 301) @ hw/tmds.ml:90:4
+  measured from reg (uid 675) @ hw/video_timing.ml:49:8:
+      2 cycles: reg (uid 47) @ hw/hdmi.ml:47:16
+      1 cycles: mux (uid 300) @ hw/tmds.ml:79:18
+reconvergence at mux (uid 468) @ hw/tmds.ml:91:4
+  measured from reg (uid 675) @ hw/video_timing.ml:49:8:
+      2 cycles: reg (uid 47) @ hw/hdmi.ml:47:16
+      1 cycles: mux (uid 467) @ hw/tmds.ml:80:17
+reconvergence at mux (uid 482) @ hw/tmds.ml:90:4
+  measured from reg (uid 675) @ hw/video_timing.ml:49:8:
+      2 cycles: reg (uid 47) @ hw/hdmi.ml:47:16
+      1 cycles: mux (uid 481) @ hw/tmds.ml:79:18
+reconvergence at mux (uid 660) @ hw/tmds.ml:91:4
+  measured from reg (uid 675) @ hw/video_timing.ml:49:8:
+      2 cycles: reg (uid 47) @ hw/hdmi.ml:47:16
+      1 cycles: mux (uid 659) @ hw/tmds.ml:80:17
+reconvergence at mux (uid 724) @ hw/tmds.ml:90:4
+  measured from reg (uid 675) @ hw/video_timing.ml:49:8:
+      2 cycles: reg (uid 47) @ hw/hdmi.ml:47:16
+      1 cycles: mux (uid 723) @ hw/tmds.ml:79:18
+== hdmi demo: 95 finding(s)
+   1021 of 2377 nodes checked (the rest static); 19 loop registers; 2 memories/instances cut
+reconvergence at concat (uid 1133) @ demo/console.ml:62:11
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     52 cycles: reg (uid 1126) @ demo/console.ml:54:12
+     53 cycles: reg (uid 1132) @ demo/console.ml:54:12
+reconvergence at concat (uid 1117) @ demo/console.ml:62:51
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     50 cycles: reg (uid 1110) @ demo/console.ml:54:12
+     51 cycles: reg (uid 1116) @ demo/console.ml:54:12
+reconvergence at mux (uid 1134) @ demo/console.ml:63:2
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     50 cycles: & (uid 947) @ demo/console.ml:57:15
+     52 cycles: concat (uid 1133) @ demo/console.ml:62:11
+reconvergence at concat (uid 1166) @ demo/console.ml:61:11
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     56 cycles: reg (uid 1159) @ demo/console.ml:54:12
+     57 cycles: reg (uid 1165) @ demo/console.ml:54:12
+reconvergence at concat (uid 1150) @ demo/console.ml:61:50
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     54 cycles: reg (uid 1143) @ demo/console.ml:54:12
+     55 cycles: reg (uid 1149) @ demo/console.ml:54:12
+reconvergence at mux (uid 1152) @ demo/console.ml:63:2
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     50 cycles: == (uid 958) @ demo/console_hdmi.ml:47:52
+     54 cycles: reg (uid 1137) @ demo/console.ml:59:10
+reconvergence at mux (uid 1153) @ demo/console.ml:63:2
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     50 cycles: reg (uid 950) @ demo/console.ml:60:48
+     54 cycles: reg (uid 1137) @ demo/console.ml:59:10
+reconvergence at mux (uid 1167) @ demo/console.ml:63:2
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     50 cycles: & (uid 947) @ demo/console.ml:57:15
+     56 cycles: concat (uid 1166) @ demo/console.ml:61:11
+reconvergence at ^ (uid 1759) @ demo/console.ml:70:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     54 cycles: select[12:12] (uid 1757) @ demo/console_hdmi.ml:47:52
+     50 cycles: select[12:12] (uid 1758) @ demo/console_hdmi.ml:47:52
+reconvergence at mux (uid 1772) @ demo/console.ml:70:11
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     54 cycles: ^ (uid 1759) @ demo/console.ml:70:16
+     59 cycles: reg (uid 1768) @ demo/console.ml:54:12
+reconvergence at mux (uid 1755) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     49 cycles: select[3:1] (uid 1743) @ demo/console.ml:77:16
+     48 cycles: select[7:7] (uid 1747) @ demo/console.ml:77:31
+reconvergence at & (uid 1742) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     51 cycles: reg (uid 1226) @ demo/console.ml:71:64
+     49 cycles: < (uid 1741) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1756) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     51 cycles: & (uid 1742) @ demo/console.ml:76:16
+     49 cycles: mux (uid 1755) @ demo/console.ml:77:12
+reconvergence at mux (uid 1779) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     51 cycles: & (uid 1756) @ demo/console.ml:78:41
+     55 cycles: reg (uid 1775) @ demo/console.ml:71:51
+reconvergence at - (uid 1716) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     50 cycles: concat (uid 1711) @ demo/console.ml:75:12
+     46 cycles: concat (uid 1715) @ demo/console.ml:75:27
+reconvergence at mux (uid 1732) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     50 cycles: select[3:1] (uid 1720) @ demo/console.ml:77:16
+     45 cycles: select[7:7] (uid 1724) @ demo/console.ml:77:31
+reconvergence at & (uid 1719) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     52 cycles: reg (uid 1229) @ demo/console.ml:78:65
+     50 cycles: < (uid 1718) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1733) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     52 cycles: & (uid 1719) @ demo/console.ml:76:16
+     50 cycles: mux (uid 1732) @ demo/console.ml:77:12
+reconvergence at mux (uid 1786) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     52 cycles: & (uid 1733) @ demo/console.ml:78:41
+     44 cycles: reg (uid 1785) @ demo/console.ml:54:12
+reconvergence at - (uid 1693) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     51 cycles: concat (uid 1688) @ demo/console.ml:75:12
+     43 cycles: concat (uid 1692) @ demo/console.ml:75:27
+reconvergence at mux (uid 1709) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     51 cycles: select[3:1] (uid 1697) @ demo/console.ml:77:16
+     42 cycles: select[7:7] (uid 1701) @ demo/console.ml:77:31
+reconvergence at & (uid 1696) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     53 cycles: reg (uid 1232) @ demo/console.ml:78:65
+     51 cycles: < (uid 1695) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1710) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     53 cycles: & (uid 1696) @ demo/console.ml:76:16
+     51 cycles: mux (uid 1709) @ demo/console.ml:77:12
+reconvergence at mux (uid 1793) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     53 cycles: & (uid 1710) @ demo/console.ml:78:41
+     41 cycles: reg (uid 1792) @ demo/console.ml:54:12
+reconvergence at - (uid 1670) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     52 cycles: concat (uid 1665) @ demo/console.ml:75:12
+     40 cycles: concat (uid 1669) @ demo/console.ml:75:27
+reconvergence at mux (uid 1686) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     52 cycles: select[3:1] (uid 1674) @ demo/console.ml:77:16
+     39 cycles: select[7:7] (uid 1678) @ demo/console.ml:77:31
+reconvergence at & (uid 1673) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     54 cycles: reg (uid 1235) @ demo/console.ml:78:65
+     52 cycles: < (uid 1672) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1687) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     54 cycles: & (uid 1673) @ demo/console.ml:76:16
+     52 cycles: mux (uid 1686) @ demo/console.ml:77:12
+reconvergence at mux (uid 1800) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     54 cycles: & (uid 1687) @ demo/console.ml:78:41
+     38 cycles: reg (uid 1799) @ demo/console.ml:54:12
+reconvergence at - (uid 1647) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     53 cycles: concat (uid 1642) @ demo/console.ml:75:12
+     37 cycles: concat (uid 1646) @ demo/console.ml:75:27
+reconvergence at mux (uid 1663) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     53 cycles: select[3:1] (uid 1651) @ demo/console.ml:77:16
+     36 cycles: select[7:7] (uid 1655) @ demo/console.ml:77:31
+reconvergence at & (uid 1650) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     55 cycles: reg (uid 1238) @ demo/console.ml:78:65
+     53 cycles: < (uid 1649) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1664) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     55 cycles: & (uid 1650) @ demo/console.ml:76:16
+     53 cycles: mux (uid 1663) @ demo/console.ml:77:12
+reconvergence at mux (uid 1807) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     55 cycles: & (uid 1664) @ demo/console.ml:78:41
+     35 cycles: reg (uid 1806) @ demo/console.ml:54:12
+reconvergence at - (uid 1624) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     54 cycles: concat (uid 1619) @ demo/console.ml:75:12
+     34 cycles: concat (uid 1623) @ demo/console.ml:75:27
+reconvergence at mux (uid 1640) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     54 cycles: select[3:1] (uid 1628) @ demo/console.ml:77:16
+     33 cycles: select[7:7] (uid 1632) @ demo/console.ml:77:31
+reconvergence at & (uid 1627) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     56 cycles: reg (uid 1241) @ demo/console.ml:78:65
+     54 cycles: < (uid 1626) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1641) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     56 cycles: & (uid 1627) @ demo/console.ml:76:16
+     54 cycles: mux (uid 1640) @ demo/console.ml:77:12
+reconvergence at mux (uid 1814) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     56 cycles: & (uid 1641) @ demo/console.ml:78:41
+     32 cycles: reg (uid 1813) @ demo/console.ml:54:12
+reconvergence at - (uid 1601) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     55 cycles: concat (uid 1596) @ demo/console.ml:75:12
+     31 cycles: concat (uid 1600) @ demo/console.ml:75:27
+reconvergence at mux (uid 1617) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     55 cycles: select[3:1] (uid 1605) @ demo/console.ml:77:16
+     30 cycles: select[7:7] (uid 1609) @ demo/console.ml:77:31
+reconvergence at & (uid 1604) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     57 cycles: reg (uid 1244) @ demo/console.ml:78:65
+     55 cycles: < (uid 1603) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1618) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     57 cycles: & (uid 1604) @ demo/console.ml:76:16
+     55 cycles: mux (uid 1617) @ demo/console.ml:77:12
+reconvergence at mux (uid 1821) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     57 cycles: & (uid 1618) @ demo/console.ml:78:41
+     29 cycles: reg (uid 1820) @ demo/console.ml:54:12
+reconvergence at - (uid 1578) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     56 cycles: concat (uid 1573) @ demo/console.ml:75:12
+     28 cycles: concat (uid 1577) @ demo/console.ml:75:27
+reconvergence at mux (uid 1594) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     56 cycles: select[3:1] (uid 1582) @ demo/console.ml:77:16
+     27 cycles: select[7:7] (uid 1586) @ demo/console.ml:77:31
+reconvergence at & (uid 1581) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     58 cycles: reg (uid 1247) @ demo/console.ml:78:65
+     56 cycles: < (uid 1580) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1595) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     58 cycles: & (uid 1581) @ demo/console.ml:76:16
+     56 cycles: mux (uid 1594) @ demo/console.ml:77:12
+reconvergence at mux (uid 1828) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     58 cycles: & (uid 1595) @ demo/console.ml:78:41
+     26 cycles: reg (uid 1827) @ demo/console.ml:54:12
+reconvergence at - (uid 1555) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     57 cycles: concat (uid 1550) @ demo/console.ml:75:12
+     25 cycles: concat (uid 1554) @ demo/console.ml:75:27
+reconvergence at mux (uid 1571) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     57 cycles: select[3:1] (uid 1559) @ demo/console.ml:77:16
+     24 cycles: select[7:7] (uid 1563) @ demo/console.ml:77:31
+reconvergence at & (uid 1558) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     59 cycles: reg (uid 1250) @ demo/console.ml:78:65
+     57 cycles: < (uid 1557) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1572) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     59 cycles: & (uid 1558) @ demo/console.ml:76:16
+     57 cycles: mux (uid 1571) @ demo/console.ml:77:12
+reconvergence at mux (uid 1835) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     59 cycles: & (uid 1572) @ demo/console.ml:78:41
+     23 cycles: reg (uid 1834) @ demo/console.ml:54:12
+reconvergence at - (uid 1532) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     58 cycles: concat (uid 1527) @ demo/console.ml:75:12
+     22 cycles: concat (uid 1531) @ demo/console.ml:75:27
+reconvergence at mux (uid 1548) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     58 cycles: select[3:1] (uid 1536) @ demo/console.ml:77:16
+     21 cycles: select[7:7] (uid 1540) @ demo/console.ml:77:31
+reconvergence at & (uid 1535) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     60 cycles: reg (uid 1253) @ demo/console.ml:78:65
+     58 cycles: < (uid 1534) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1549) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     60 cycles: & (uid 1535) @ demo/console.ml:76:16
+     58 cycles: mux (uid 1548) @ demo/console.ml:77:12
+reconvergence at mux (uid 1842) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     60 cycles: & (uid 1549) @ demo/console.ml:78:41
+     20 cycles: reg (uid 1841) @ demo/console.ml:54:12
+reconvergence at - (uid 1509) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     59 cycles: concat (uid 1504) @ demo/console.ml:75:12
+     19 cycles: concat (uid 1508) @ demo/console.ml:75:27
+reconvergence at mux (uid 1525) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     59 cycles: select[3:1] (uid 1513) @ demo/console.ml:77:16
+     18 cycles: select[7:7] (uid 1517) @ demo/console.ml:77:31
+reconvergence at & (uid 1512) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     61 cycles: reg (uid 1256) @ demo/console.ml:78:65
+     59 cycles: < (uid 1511) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1526) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     61 cycles: & (uid 1512) @ demo/console.ml:76:16
+     59 cycles: mux (uid 1525) @ demo/console.ml:77:12
+reconvergence at mux (uid 1849) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     61 cycles: & (uid 1526) @ demo/console.ml:78:41
+     17 cycles: reg (uid 1848) @ demo/console.ml:54:12
+reconvergence at - (uid 1486) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     60 cycles: concat (uid 1481) @ demo/console.ml:75:12
+     16 cycles: concat (uid 1485) @ demo/console.ml:75:27
+reconvergence at mux (uid 1502) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     60 cycles: select[3:1] (uid 1490) @ demo/console.ml:77:16
+     15 cycles: select[7:7] (uid 1494) @ demo/console.ml:77:31
+reconvergence at & (uid 1489) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     62 cycles: reg (uid 1259) @ demo/console.ml:78:65
+     60 cycles: < (uid 1488) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1503) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     62 cycles: & (uid 1489) @ demo/console.ml:76:16
+     60 cycles: mux (uid 1502) @ demo/console.ml:77:12
+reconvergence at mux (uid 1856) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     62 cycles: & (uid 1503) @ demo/console.ml:78:41
+     14 cycles: reg (uid 1855) @ demo/console.ml:54:12
+reconvergence at - (uid 1463) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     61 cycles: concat (uid 1458) @ demo/console.ml:75:12
+     13 cycles: concat (uid 1462) @ demo/console.ml:75:27
+reconvergence at mux (uid 1479) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     61 cycles: select[3:1] (uid 1467) @ demo/console.ml:77:16
+     12 cycles: select[7:7] (uid 1471) @ demo/console.ml:77:31
+reconvergence at & (uid 1466) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     63 cycles: reg (uid 1262) @ demo/console.ml:78:65
+     61 cycles: < (uid 1465) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1480) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     63 cycles: & (uid 1466) @ demo/console.ml:76:16
+     61 cycles: mux (uid 1479) @ demo/console.ml:77:12
+reconvergence at mux (uid 1863) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     63 cycles: & (uid 1480) @ demo/console.ml:78:41
+     11 cycles: reg (uid 1862) @ demo/console.ml:54:12
+reconvergence at - (uid 1440) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     62 cycles: concat (uid 1435) @ demo/console.ml:75:12
+     10 cycles: concat (uid 1439) @ demo/console.ml:75:27
+reconvergence at mux (uid 1456) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     62 cycles: select[3:1] (uid 1444) @ demo/console.ml:77:16
+      9 cycles: select[7:7] (uid 1448) @ demo/console.ml:77:31
+reconvergence at & (uid 1443) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     64 cycles: reg (uid 1265) @ demo/console.ml:78:65
+     62 cycles: < (uid 1442) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1457) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     64 cycles: & (uid 1443) @ demo/console.ml:76:16
+     62 cycles: mux (uid 1456) @ demo/console.ml:77:12
+reconvergence at mux (uid 1870) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     64 cycles: & (uid 1457) @ demo/console.ml:78:41
+      8 cycles: reg (uid 1869) @ demo/console.ml:54:12
+reconvergence at - (uid 1417) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     63 cycles: concat (uid 1412) @ demo/console.ml:75:12
+      7 cycles: concat (uid 1416) @ demo/console.ml:75:27
+reconvergence at mux (uid 1433) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     63 cycles: select[3:1] (uid 1421) @ demo/console.ml:77:16
+      6 cycles: select[7:7] (uid 1425) @ demo/console.ml:77:31
+reconvergence at & (uid 1420) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     65 cycles: reg (uid 1268) @ demo/console.ml:78:65
+     63 cycles: < (uid 1419) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1434) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     65 cycles: & (uid 1420) @ demo/console.ml:76:16
+     63 cycles: mux (uid 1433) @ demo/console.ml:77:12
+reconvergence at mux (uid 1877) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     65 cycles: & (uid 1434) @ demo/console.ml:78:41
+      5 cycles: reg (uid 1876) @ demo/console.ml:54:12
+reconvergence at - (uid 1394) @ demo/console.ml:75:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     64 cycles: concat (uid 1389) @ demo/console.ml:75:12
+      4 cycles: concat (uid 1393) @ demo/console.ml:75:27
+reconvergence at mux (uid 1410) @ demo/console.ml:77:12
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     64 cycles: select[3:1] (uid 1398) @ demo/console.ml:77:16
+      3 cycles: select[7:7] (uid 1402) @ demo/console.ml:77:31
+reconvergence at & (uid 1397) @ demo/console.ml:76:16
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     66 cycles: reg (uid 1271) @ demo/console.ml:78:65
+     64 cycles: < (uid 1396) @ demo/console_hdmi.ml:47:52
+reconvergence at & (uid 1411) @ demo/console.ml:78:41
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     66 cycles: & (uid 1397) @ demo/console.ml:76:16
+     64 cycles: mux (uid 1410) @ demo/console.ml:77:12
+reconvergence at mux (uid 1884) @ demo/console.ml:78:35
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     66 cycles: & (uid 1411) @ demo/console.ml:78:41
+      2 cycles: reg (uid 1883) @ demo/console.ml:54:12
+reconvergence at & (uid 1279) @ demo/console_hdmi.ml:74:14
+  measured from instance (uid 1223) @ demo/console_hdmi.ml:65:4:
+     67 cycles: reg (uid 1274) @ demo/console.ml:78:65
+     68 cycles: not (uid 1278) @ demo/console_hdmi.ml:74:24
+reconvergence at concat (uid 1339) @ demo/console_hdmi.ml:82:14
+  measured from reg (uid 1298) @ demo/console_hdmi.ml:78:10:
+    -17 cycles: select[7:0] (uid 1338) @ demo/console_hdmi.ml:81:14
+      0 cycles: mux (uid 1285) @ demo/console_hdmi.ml:76:54
+reconvergence at mux (uid 1304) @ demo/console.ml:63:2
+  measured from reg (uid 1298) @ demo/console_hdmi.ml:78:10:
+    -17 cycles: == (uid 958) @ demo/console_hdmi.ml:47:52
+    -19 cycles: reg (uid 1301) @ demo/console.ml:59:83
+reconvergence at mux (uid 1305) @ demo/console.ml:63:2
+  measured from reg (uid 1298) @ demo/console_hdmi.ml:78:10:
+    -17 cycles: reg (uid 950) @ demo/console.ml:60:48
+    -19 cycles: reg (uid 1301) @ demo/console.ml:59:83
+reconvergence at mux (uid 1329) @ demo/console.ml:63:2
+  measured from reg (uid 1298) @ demo/console_hdmi.ml:78:10:
+    -19 cycles: == (uid 1328) @ demo/console_hdmi.ml:47:52
+    -17 cycles: reg (uid 950) @ demo/console.ml:60:48
+reconvergence at mux (uid 1330) @ demo/console.ml:63:2
+  measured from reg (uid 1298) @ demo/console_hdmi.ml:78:10:
+    -17 cycles: == (uid 958) @ demo/console_hdmi.ml:47:52
+    -19 cycles: mux (uid 1329) @ demo/console.ml:63:2
+== hdmi demo hold: 1 finding(s)
+   725 of 2377 nodes checked (the rest static); 17 loop registers; 2 memories/instances cut
+reconvergence at & (uid 1279) @ demo/console_hdmi.ml:74:14
+  measured from reg (uid 1301) @ demo/console.ml:59:83:
+     17 cycles: reg (uid 1274) @ demo/console.ml:78:65
+     18 cycles: not (uid 1278) @ demo/console_hdmi.ml:74:24

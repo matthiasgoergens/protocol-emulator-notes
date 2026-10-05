@@ -3,7 +3,7 @@
 (library
  (name hdmi_demo)
  (modules console game console_hdmi expected)
- (libraries base hardcaml hdmi_hw))
+ (libraries base hardcaml hardcaml_latency hdmi_hw))
 
 (executable
  (name gen_packets)

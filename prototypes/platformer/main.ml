@@ -3,6 +3,7 @@ let () =
   match Array.to_list Sys.argv with
   | [ _; "pecheck" ] -> exit (if Pecheck.main () then 0 else 1)
   | [ _; "check" ] -> exit (if Check.main () then 0 else 1)
+  | [ _; "latency" ] -> Latency_check.main ()
   | [ _; "rtltiming" ] -> print_string (Pins.timing ())
   | [ _; "palette" ] -> print_string (Sim.print_stats (Pins.palette ()))
   | [ _; "preview"; n; e ] -> Preview.run ~fields:(int_of_string n) ~every:(int_of_string e)

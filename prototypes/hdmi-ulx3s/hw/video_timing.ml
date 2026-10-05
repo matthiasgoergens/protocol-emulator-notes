@@ -14,7 +14,6 @@
    frame is 524 lines, one short of the standard.  We use the DMT values. *)
 open! Base
 open Hardcaml
-open Signal
 
 type axis = { active : int; front : int; sync : int; back : int }
 
@@ -37,16 +36,30 @@ let tiny =
   ; vsync_active_high = false
   }
 
-type signals = { x : Signal.t; y : Signal.t; de : Signal.t; hsync : Signal.t; vsync : Signal.t }
+(* All outputs carry their latency (Hardcaml_latency.Delayed).  The two counters are one
+   register, so that they are at the same latency: in the plain design they were two registers
+   updated on the same edge, but [Delayed.reg_fb] gives each feedback register the latency of
+   what it reads plus one, and v reads h's wrap, so two separate [reg_fb]s would put v one stage
+   after h and the [de] below would not build.  One concatenated register has the same flip-flops
+   and the same behaviour.  The counters are the time origin: everything here is at latency 1
+   (reg_fb's output), and every pixel source and delayed sync is measured from them. *)
+module D = Hardcaml_latency.Delayed
 
-(* All outputs are functions of the registered counters, so they are valid together in the same
-   cycle; a pixel generator that is combinational in (x, y) stays aligned with the syncs. *)
+type signals = { x : D.t; y : D.t; de : D.t; hsync : D.t; vsync : D.t }
+
 let create ~spec t =
-  let hw = num_bits_to_represent (total t.h - 1) and vw = num_bits_to_represent (total t.v - 1) in
-  let h = wire hw and v = wire vw in
-  let h_last = h ==:. total t.h - 1 and v_last = v ==:. total t.v - 1 in
-  h <== reg spec (mux2 h_last (zero hw) (h +:. 1));
-  v <== reg spec (mux2 h_last (mux2 v_last (zero vw) (v +:. 1)) v);
+  let hw = Signal.num_bits_to_represent (total t.h - 1)
+  and vw = Signal.num_bits_to_represent (total t.v - 1) in
+  let open D in
+  let split s = select s (hw - 1) 0, select s (hw + vw - 1) hw in
+  let state =
+    reg_fb spec ~latency:0 ~width:(hw + vw) ~f:(fun s ->
+        let h, v = split s in
+        let h_last = h ==:. total t.h - 1 and v_last = v ==:. total t.v - 1 in
+        concat_msb
+          [ mux2 h_last (mux2 v_last (zero vw) (v +:. 1)) v; mux2 h_last (zero hw) (h +:. 1) ])
+  in
+  let h, v = split state in
   let in_sync c a = c >=:. a.active + a.front &: (c <:. a.active + a.front + a.sync) in
   let level active_high s = if active_high then s else ~:s in
   { x = h

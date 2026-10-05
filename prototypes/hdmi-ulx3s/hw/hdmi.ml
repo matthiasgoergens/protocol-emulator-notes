@@ -26,34 +26,72 @@ let blink ~spec ~half_period =
   led <== reg spec (led ^: wrap);
   led
 
-(* A pixel source maps the raster position to a colour, with a fixed latency in pixel clocks
-   (registers inside it); the syncs are delayed to match.  Gergo's RetroClash Delayed.hs carries
-   the same latency in the type; here it is a number checked by the end-to-end simulation. *)
-type source = spec:Reg_spec.t -> x:Signal.t -> y:Signal.t -> (Signal.t * Signal.t * Signal.t) * int
+(* A pixel source maps the raster position to a colour, with registers inside it.  Its latency is
+   carried by the signals (Hardcaml_latency.Delayed, the counterpart of Gergo's RetroClash
+   Delayed.hs): x and y arrive at the raster counters' latency, the colour leaves at whatever the
+   source's registers make it, and [pixel_circuit] delays the syncs to match with [align].  A
+   source that registers its colour one time fewer or more than it says needs no change here;
+   one that combines signals of different latencies does not build. *)
+module D = Hardcaml_latency.Delayed
 
-(* The pattern is registered once, so its latency is 1.  [declared_latency] exists only to plant
-   a sync/pixel misalignment in a negative control. *)
-let test_pattern ?(declared_latency = 1) ~width ~height () : source =
+type source = spec:Reg_spec.t -> x:D.t -> y:D.t -> D.t * D.t * D.t
+
+module Pattern = Test_pattern.Make (D)
+
+(* The pattern is registered once.  [misdeclare] exists only for a negative control of the
+   end-to-end simulation: the registered colour is declared to be at the raster's latency, as if
+   it were combinational, so [align] leaves the syncs one pixel early.  It is the one way to
+   misalign this design, and it needs [D.of_signal], the escape hatch that asserts a latency
+   without checking it. *)
+let test_pattern ?(misdeclare = false) ~width ~height () : source =
  fun ~spec ~x ~y ->
-  let r, g, b = Test_pattern.create ~width ~height ~x ~y in
-  (reg spec r, reg spec g, reg spec b), declared_latency
+  let r, g, b = Pattern.create ~width ~height ~x ~y in
+  let r, g, b = D.reg spec r, D.reg spec g, D.reg spec b in
+  if misdeclare
+  then
+    let lie c = D.of_signal ~latency:(D.latency_exn x) (D.to_signal c) in
+    lie r, lie g, lie b
+  else r, g, b
 
-let pixel_circuit ?(name = "hdmi_pixel") ?mutant ?(timing = Video_timing.vga_640x480_60) ~blink_half_period
-    ~(source : source) () =
-  let clock = input "clock" 1 and clear = input "clear" 1 in
+(* [plant_sync_short] removes one register from the delayed syncs and blank, for the negative
+   control of the latency check (test/test_latency.ml): building the circuit must fail. *)
+let pixel_circuit ?(name = "hdmi_pixel") ?mutant ?(timing = Video_timing.vga_640x480_60)
+    ?(plant_sync_short = false) ~blink_half_period ~(source : source) () =
+  let clock = Signal.input "clock" 1 and clear = Signal.input "clear" 1 in
   let spec = Reg_spec.create ~clock ~clear () in
   let t = Video_timing.create ~spec timing in
-  let (r, g, b), latency = source ~spec ~x:t.x ~y:t.y in
-  let delay s = pipeline spec ~n:latency s in
-  let de = delay t.de and hs = delay t.hsync and vs = delay t.vsync in
-  let enc d c0 c1 = fst (Tmds.create ?mutant ~spec ~de ~d ~c0 ~c1 ()) in
-  let wb = enc b hs vs and wg = enc g gnd gnd and wr = enc r gnd gnd in
+  let r, g, b = source ~spec ~x:t.x ~y:t.y in
+  let de, hs, vs, r, g, b =
+    match D.align spec [ t.de; t.hsync; t.vsync; r; g; b ] with
+    | [ de; hs; vs; r; g; b ] -> de, hs, vs, r, g, b
+    | _ -> assert false
+  in
+  let de, hs, vs =
+    if plant_sync_short
+    then (
+      (* the planted bug: the syncs and blank delayed by hand, one register short *)
+      let n = D.latency_exn r - D.latency_exn t.de - 1 in
+      D.pipeline spec ~n t.de, D.pipeline spec ~n t.hsync, D.pipeline spec ~n t.vsync)
+    else de, hs, vs
+  in
+  (* The TMDS encoder is an existing, unchecked circuit with one register; [D.lift] checks that
+     de, the pixel and the control bits agree on latency before it. *)
+  let enc d c0 c1 =
+    D.lift ~name:"tmds" ~latency:1
+      (function
+        | [ de; d; c0; c1 ] -> fst (Tmds.create ?mutant ~spec ~de ~d ~c0 ~c1 ())
+        | _ -> assert false)
+      [ de; d; c0; c1 ]
+    |> D.to_signal
+  in
+  let wb = enc b hs vs and wg = enc g D.gnd D.gnd and wr = enc r D.gnd D.gnd in
   (* toggle changes on the same edge as the encoders' output registers *)
-  let toggle = wire 1 in
-  toggle <== reg spec ~:toggle;
+  let toggle = Signal.wire 1 in
+  Signal.(toggle <== reg spec ~:toggle);
   Circuit.create_exn ~name
-    [ output "word_b" wb; output "word_g" wg; output "word_r" wr; output "toggle" toggle
-    ; output "led_1hz" (blink ~spec ~half_period:blink_half_period) ]
+    Signal.
+      [ output "word_b" wb; output "word_g" wg; output "word_r" wr; output "toggle" toggle
+      ; output "led_1hz" (blink ~spec ~half_period:blink_half_period) ]
 
 let serial_circuit ?(name = "hdmi_serial") ~bits_per_cycle ~blink_half_period () =
   let clock = input "clock" 1 and clear = input "clear" 1 in

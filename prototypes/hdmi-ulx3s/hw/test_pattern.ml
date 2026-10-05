@@ -14,7 +14,6 @@
    [mode] picks the visible width and height. *)
 open! Base
 open Hardcaml
-open Signal
 
 let reference ~width ~height x y =
   let band1 = height / 3 and band2 = 2 * height / 3 in
@@ -33,35 +32,43 @@ let reference ~width ~height x y =
     g, g, g
 
 (* Hardware version.  The bar index x * 8 / width is a count of precomputed thresholds, so no
-   divider is needed. *)
-let create ~width ~height ~x ~y =
-  let band1 = height / 3 and band2 = 2 * height / 3 in
-  let w = width (* for readability below *) in
-  let border = x ==:. 0 |: (y ==:. 0) |: (x ==:. w - 1) |: (y ==:. height - 1) in
-  let ff = ones 8 and z = zero 8 in
-  let sel b = mux2 b ff z in
-  let bar_index =
-    (* number of bar boundaries at or left of x: i = x * 8 / width *)
-    List.init 7 ~f:(fun k ->
-        let threshold = ((k + 1) * w + 7) / 8 (* smallest x with x * 8 / w >= k + 1 *) in
-        uresize (x >=:. threshold) 3)
-    |> List.reduce_exn ~f:( +: )
-  in
-  let i_is l = List.map l ~f:(fun k -> bar_index ==:. k) |> List.reduce_exn ~f:( |: ) in
-  let bars = sel (i_is [ 0; 1; 4; 5 ]), sel (bar_index <:. 4), sel (i_is [ 0; 2; 4; 6 ]) in
-  let lo8 s = uresize s 8 in
-  let gradient = lo8 x, lo8 y, lo8 (x ^: uresize y (Signal.width x)) in
-  let half = w / 2 in
-  let check = sel (~:(lsb x ^: lsb y)) in
-  (* ramp: g = (x - half) * 205 / 256, about (x - half) * 0.8, so 0 .. 255 over the 320 pixels
-     of the right half at width 640; a constant multiply is a few adders *)
-  let xr = uresize (x -:. half) 16 in
-  let ramp = select (uresize (xr *: of_int ~width:8 205) 24) 15 8 in
-  let r, g, b =
-    let pick a b c d =
-      mux2 border ff (mux2 (y <:. band1) a (mux2 (y <:. band2) b (mux2 (x <:. half) c d)))
+   divider is needed.  Written over any [Comb.S], so that the same logic builds plain signals
+   ([create]) or latency-checked ones ([Make (Hardcaml_latency.Delayed)], used by hdmi.ml): x and
+   y must then be at the same latency, or building the circuit fails. *)
+module Make (S : Comb.S) = struct
+  open S
+
+  let create ~width ~height ~x ~y =
+    let band1 = height / 3 and band2 = 2 * height / 3 in
+    let w = width (* for readability below *) in
+    let border = x ==:. 0 |: (y ==:. 0) |: (x ==:. w - 1) |: (y ==:. height - 1) in
+    let ff = ones 8 and z = zero 8 in
+    let sel b = mux2 b ff z in
+    let bar_index =
+      (* number of bar boundaries at or left of x: i = x * 8 / width *)
+      List.init 7 ~f:(fun k ->
+          let threshold = ((k + 1) * w + 7) / 8 (* smallest x with x * 8 / w >= k + 1 *) in
+          uresize (x >=:. threshold) 3)
+      |> List.reduce_exn ~f:( +: )
     in
-    let (br, bg, bb), (gr, gg, gb) = bars, gradient in
-    pick br gr check ramp, pick bg gg check ramp, pick bb gb check ramp
-  in
-  r, g, b
+    let i_is l = List.map l ~f:(fun k -> bar_index ==:. k) |> List.reduce_exn ~f:( |: ) in
+    let bars = sel (i_is [ 0; 1; 4; 5 ]), sel (bar_index <:. 4), sel (i_is [ 0; 2; 4; 6 ]) in
+    let lo8 s = uresize s 8 in
+    let gradient = lo8 x, lo8 y, lo8 (x ^: uresize y (S.width x)) in
+    let half = w / 2 in
+    let check = sel (~:(lsb x ^: lsb y)) in
+    (* ramp: g = (x - half) * 205 / 256, about (x - half) * 0.8, so 0 .. 255 over the 320 pixels
+       of the right half at width 640; a constant multiply is a few adders *)
+    let xr = uresize (x -:. half) 16 in
+    let ramp = select (uresize (xr *: of_int ~width:8 205) 24) 15 8 in
+    let r, g, b =
+      let pick a b c d =
+        mux2 border ff (mux2 (y <:. band1) a (mux2 (y <:. band2) b (mux2 (x <:. half) c d)))
+      in
+      let (br, bg, bb), (gr, gg, gb) = bars, gradient in
+      pick br gr check ramp, pick bg gg check ramp, pick bb gb check ramp
+    in
+    r, g, b
+end
+
+include Make (Signal)

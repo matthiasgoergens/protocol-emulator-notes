@@ -1,0 +1,12 @@
+== sequencer_mb p7 d2 (as ethtv and cantv) (defaults): 0 finding(s)
+== eth_rx h3 (defaults): 1 finding(s)
+reconvergence at == @ eth_rx.ml:18:19
+  measured from input rx @ eth_rx.ml:46:67:
+      2 cycles: reg @ eth_rx.ml:12:13
+      3 cycles: reg @ eth_rx.ml:13:16
+== eth_rx_fixed h3 (defaults): 1 finding(s)
+reconvergence at == @ eth_rx_fixed.ml:24:19
+  measured from input rx @ eth_rx_fixed.ml:52:67:
+      2 cycles: reg @ eth_rx_fixed.ml:18:13
+      3 cycles: reg @ eth_rx_fixed.ml:19:16
+== BLIND SPOT, not caught: two inputs synchronised by 2 and 1 registers (defaults): 0 finding(s)

@@ -1,0 +1,288 @@
+retro_console: 570 of 991 nodes checked; 8 loop registers; 0 memories/instances cut
+== retro_console (defaults): 66 finding(s)
+reconvergence at +
+  measured from input din:
+     59 cycles: reg
+     50 cycles: concat
+reconvergence at +
+  measured from input din:
+     59 cycles: reg
+     54 cycles: concat
+reconvergence at -
+  measured from input din:
+      0 cycles: concat
+     16 cycles: concat
+reconvergence at -
+  measured from input din:
+      1 cycles: concat
+     13 cycles: concat
+reconvergence at -
+  measured from input din:
+      2 cycles: concat
+     10 cycles: concat
+reconvergence at -
+  measured from input din:
+      3 cycles: concat
+      7 cycles: concat
+reconvergence at -
+  measured from input din:
+     -1 cycles: concat
+     19 cycles: concat
+reconvergence at -
+  measured from input din:
+     -2 cycles: concat
+     22 cycles: concat
+reconvergence at -
+  measured from input din:
+     -3 cycles: concat
+     25 cycles: concat
+reconvergence at -
+  measured from input din:
+     -4 cycles: concat
+     28 cycles: concat
+reconvergence at -
+  measured from input din:
+     -5 cycles: concat
+     31 cycles: concat
+reconvergence at -
+  measured from input din:
+     -6 cycles: concat
+     34 cycles: concat
+reconvergence at -
+  measured from input din:
+     -7 cycles: concat
+     37 cycles: concat
+reconvergence at -
+  measured from input din:
+     -8 cycles: concat
+     40 cycles: concat
+reconvergence at -
+  measured from input din:
+     -9 cycles: concat
+     43 cycles: concat
+reconvergence at -
+  measured from input din:
+    -10 cycles: concat
+     46 cycles: concat
+reconvergence at -
+  measured from input din:
+    -11 cycles: concat
+     49 cycles: concat
+reconvergence at concat
+  measured from input din:
+     50 cycles: reg
+     51 cycles: reg
+reconvergence at concat
+  measured from input din:
+     52 cycles: reg
+     53 cycles: reg
+reconvergence at concat
+  measured from input din:
+     54 cycles: reg
+     55 cycles: reg
+reconvergence at concat
+  measured from input din:
+     56 cycles: reg
+     57 cycles: reg
+reconvergence at mux
+  measured from input din:
+      0 cycles: &
+     14 cycles: reg
+reconvergence at mux
+  measured from input din:
+      0 cycles: select[3:1]
+     15 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+      1 cycles: &
+     11 cycles: reg
+reconvergence at mux
+  measured from input din:
+      1 cycles: select[3:1]
+     12 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+      2 cycles: &
+      8 cycles: reg
+reconvergence at mux
+  measured from input din:
+      2 cycles: select[3:1]
+      9 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+      3 cycles: &
+      5 cycles: reg
+reconvergence at mux
+  measured from input din:
+      3 cycles: select[3:1]
+      6 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+      4 cycles: &
+      2 cycles: reg
+reconvergence at mux
+  measured from input din:
+      4 cycles: select[3:1]
+      3 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+      5 cycles: &
+    -12 cycles: mux
+reconvergence at mux
+  measured from input din:
+      5 cycles: &
+    -12 cycles: mux
+reconvergence at mux
+  measured from input din:
+      5 cycles: &
+    -12 cycles: mux
+reconvergence at mux
+  measured from input din:
+      5 cycles: &
+    -12 cycles: mux
+reconvergence at mux
+  measured from input din:
+      5 cycles: &
+    -12 cycles: mux
+reconvergence at mux
+  measured from input din:
+     -1 cycles: &
+     17 cycles: reg
+reconvergence at mux
+  measured from input din:
+     -1 cycles: select[3:1]
+     18 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+     -2 cycles: &
+     20 cycles: reg
+reconvergence at mux
+  measured from input din:
+     -2 cycles: select[3:1]
+     21 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+     -3 cycles: &
+     23 cycles: reg
+reconvergence at mux
+  measured from input din:
+     -3 cycles: select[3:1]
+     24 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+     -4 cycles: &
+     26 cycles: reg
+reconvergence at mux
+  measured from input din:
+     -4 cycles: select[3:1]
+     27 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+     -5 cycles: &
+     29 cycles: reg
+reconvergence at mux
+  measured from input din:
+     -5 cycles: select[3:1]
+     30 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+     -6 cycles: &
+     32 cycles: reg
+reconvergence at mux
+  measured from input din:
+     -6 cycles: select[3:1]
+     33 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+     -7 cycles: &
+     35 cycles: reg
+reconvergence at mux
+  measured from input din:
+     -7 cycles: select[3:1]
+     36 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+     -8 cycles: &
+     38 cycles: reg
+reconvergence at mux
+  measured from input din:
+     -8 cycles: select[3:1]
+     39 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+     -9 cycles: &
+     41 cycles: reg
+reconvergence at mux
+  measured from input din:
+     -9 cycles: select[3:1]
+     42 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+     59 cycles: ==
+    -12 cycles: reg
+reconvergence at mux
+  measured from input din:
+     59 cycles: ==
+    -12 cycles: reg
+reconvergence at mux
+  measured from input din:
+     59 cycles: ^
+     58 cycles: reg
+reconvergence at mux
+  measured from input din:
+    -10 cycles: &
+     44 cycles: reg
+reconvergence at mux
+  measured from input din:
+    -10 cycles: select[3:1]
+     45 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+    -11 cycles: &
+     60 cycles: reg
+reconvergence at mux
+  measured from input din:
+    -11 cycles: select[3:1]
+     48 cycles: select[7:7]
+reconvergence at mux
+  measured from input din:
+    -12 cycles: reg
+     59 cycles: mux
+reconvergence at mux
+  measured from input din:
+    -12 cycles: reg
+     59 cycles: mux
+reconvergence at mux
+  measured from input din:
+    -12 cycles: reg
+     59 cycles: reg
+reconvergence at mux
+  measured from input din:
+    -12 cycles: reg
+     59 cycles: reg
+reconvergence at mux
+  measured from input din:
+    -12 cycles: reg
+     59 cycles: reg
+retro_console: 291 of 991 nodes checked; 7 loop registers; 0 memories/instances cut
+== retro_console (hold_registers): 5 finding(s)
+reconvergence at mux
+  measured from reg:
+     17 cycles: &
+      0 cycles: mux
+reconvergence at mux
+  measured from reg:
+     17 cycles: &
+      0 cycles: mux
+reconvergence at mux
+  measured from reg:
+     17 cycles: &
+      0 cycles: mux
+reconvergence at mux
+  measured from reg:
+     17 cycles: &
+      0 cycles: mux
+reconvergence at mux
+  measured from reg:
+     17 cycles: &
+      0 cycles: mux
