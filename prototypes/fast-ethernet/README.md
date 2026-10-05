@@ -65,6 +65,56 @@ The maximum clean toggle rate is above 250 Mt/s for the 30 mA pad, and about 100
   **So a slicer built from this pad needs about ±0.3 V of overdrive to cover slow silicon**, and about ±0.1 V at typical.
 - **A full-swing 0-3.3 V clock at 62.5 MHz comes out at 56-58 % duty cycle**, because the threshold is low. Every digital input on TTIHP 26a is this pad (I did not trace which gpio carries `clk`), so the core clock probably arrives with a 7 % duty-cycle error, about 1.1 ns at 62.5 MHz. That matters for any both-edges output: see the transmit notes below.
 
+### Pad speed for HDMI / DVI and faster links (2026-10-05)
+
+These runs are in `results/pads_hdmi.txt` (`spice/run_hdmi.sh`). The core-side drive is an ideal PRBS7 into the pad's `c2p` at the bit rate, so they say what the pads can do, not how the core makes 250 Mbit/s. That needs the four-phase stage, or a 10-to-4 gearbox at 60-62.5 MHz.
+
+**Drive-strength options in sg13g2_io:** `IOPadOut` / `TriOut` / `InOut` at 4, 16 and 30 mA, plus `IOPadAnalog`. On TTIHP 26a the choice is already made: the 30 mA cells. The 4 mA cell would not do these rates (toggle table above).
+
+**Into 2 nH plus 10 pF** (30 mA pad, PRBS7 NRZ):
+
+| rate | eye opening above 50 % of IOVDD, worst (ss 85 °C) to best (ff 27 °C) |
+|---|---|
+| 120 Mbit/s | 0.86-0.91 UI |
+| 240 Mbit/s | 0.67-0.81 UI |
+| 250 Mbit/s | 0.68-0.81 UI (5 pF: 0.76-0.88 UI) |
+
+The full swing is reached in every case (97-100 %), with 10-90 % edges of 1.3-2.2 ns.
+
+**HDMI / DVI pair, driven pseudo-differentially.** The arrangement:
+- two 30 mA pads in antiphase per pair, each through a series resistor Rs at the chip;
+- 10 cm of board plus 1 m of cable, modelled as 50 Ω per conductor, lossless;
+- the sink's 50 Ω to AVcc = 3.3 V on each conductor, plus 1.5 pF.
+
+With a pin low, the line sits at 3.3 V × (Rs + Ron) / (Rs + Ron + 50), so the pad acts as the current switch a real TMDS source has.
+
+| Rs | rate | diff swing p-p | eye height | eye open ≥ 150 mV | common mode |
+|---|---|---|---|---|---|
+| 270 Ω | 120 Mbit/s | 0.87-1.13 V | 0.82-1.03 V | 0.96-0.97 UI | 3.06-3.09 V |
+| 270 Ω | 240 Mbit/s | 0.87-1.14 V | 0.80-1.03 V | 0.88-0.94 UI | 3.07-3.08 V |
+| 270 Ω | 250 Mbit/s | 0.87-1.14 V | 0.81-1.03 V | 0.86-0.93 UI | 3.07-3.08 V |
+| 120 Ω | 250 Mbit/s | 1.37-1.93 V | 1.26-1.80 V | 0.91-0.95 UI | 2.91-2.95 V |
+
+**Verdict: HDMI / DVI at 240-250 Mbit/s per lane is electrically plausible from these pads**, with 8 resistors and an HDMI connector: four pairs (three data and the clock) use all 8 `uo_out` pins.
+- **Use about 270 Ω.** It gives TMDS-like levels: the line low at 2.8 V (about 10 mA per pin), about 1 V p-p differential, and a common mode of 3.07 V.
+- **Avoid 120 Ω.** It gives a bigger swing, but 1.4-1.9 V p-p exceeds the 1.2 V maximum I remember, and its 2.9 V common mode is below the window.
+- **The TMDS limits used here are from memory and NOT checked against the DVI or HDMI text:** a receiver needs at least 150 mV differential; the common mode must lie between AVcc − 300 mV and AVcc − 37.5 mV; the swing must stay under 1.2 V p-p.
+
+**Not modelled:**
+- ground bounce from 8 pads switching together;
+- cable loss: 1 m at 125 MHz is small, but longer cables matter;
+- skew between the pads of a pair, which shows up as common-mode noise;
+- whether a given monitor accepts a 24 MHz pixel clock.
+
+The edges (0.8-1.3 ns, 20-80 %) are fast for the rate, so ringing at the connector is the board's job.
+
+**Input pad at 125 MHz:**
+- **A full-swing square** comes through in every corner, at 58-63 % duty cycle with 0.35-0.85 ns delay.
+- **±600 mV** comes through in every corner (51-54 % duty).
+- **±300 mV** fails at ss 27 °C (works at 62.5 MHz).
+
+So the pads can also *receive* 250 Mbit/s if the signal is large.
+
 ## Step 2: 100BASE-FX via an SFP module
 
 ### Design
