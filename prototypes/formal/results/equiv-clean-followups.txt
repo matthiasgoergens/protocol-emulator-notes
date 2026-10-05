@@ -1,0 +1,7 @@
+# command: run_equiv.sh clean 8 16
+# rerun after the follow-ups (specialised Spec, guards, sub_of spreading once, new effects): RTL still equals the specification; planted "SKEQ skip lands on pc+1" still found at depth 12 (47 s)
+# commit: 1626025c61d2f95345cc5f4705eb0e61fd541f7d (with uncommitted changes)
+# yosys: Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+# date: 2026-10-05T18:45:30+08:00
+clean-8 depth 8 (7 clocks after the clear): PROVED, 92 s (454561 variables and 1216446 clauses)
+clean-16 depth 16 (15 clocks after the clear): PROVED, 90 s (910033 variables and 2435630 clauses)
