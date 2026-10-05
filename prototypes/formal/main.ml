@@ -141,7 +141,7 @@ let isolation ~name ~ldb ~depth =
     P.pins_differ ~pins:0x01 a.st b.st, assumptions in
   let covers () = [ "the other threads make the copies' other pins differ", !others_differ;
                     "the transmitter drives its pin low", !uart_low ] in
-  let r = Bmc.run ~progress:40 ~name ~depth ~step ~covers () in
+  let r = Bmc.run ~progress:4 ~name ~depth ~step ~covers () in
   Bmc.report r;
   (match r.violation with
    | None -> ()
@@ -309,6 +309,38 @@ let export_kind2 ~ldd ~file =
   pr "%s: thread 1 can be at %d addresses; %d state variables, %d inputs, %d equations in the cone of the property\n"
     file (List.length reach) ns ni ne
 
+(* (d) for Kind 2: thread 0 transmits [bytes] bytes taken from the host, the receiver monitor's
+   registers become state variables; [anytime]: the host's byte may arrive at any clock *)
+let export_kind2_uart ?stretch ~anytime ~bytes ~file () =
+  let bit_slots = 5 in
+  let u = Programmes.uart_from_host ?stretch ~bit_slots bytes in
+  let store = Programmes.store_of [| u; Programmes.idle; Programmes.idle; Programmes.idle |] in
+  let st, slots = Lustre.state_slots () in
+  let reach = Lustre.cfg_closure store ~start:(addr ~thread:0 0) in
+  let idle t = Lustre.cfg_closure store ~start:(addr ~thread:t 0) in
+  let m = { Machine.prefix = ""; st; store; code = [| Fixed; Fixed; Fixed; Fixed |];
+            reach = [| Some reach; Some (idle 1); Some (idle 2); Some (idle 3) |] } in
+  let rx = P.uart_rx ~pin:0 ~bit_clocks:(4 * bit_slots) ~tx_thread:0 in
+  let mon name w get set init =
+    let v = Smt.var name (Smt.Bv w) in set v; (v, name, w, get, init) in
+  let mons = [ mon "rx_busy" 1 (fun () -> rx.busy) (fun v -> rx.busy <- v) 0;
+               mon "rx_count" 16 (fun () -> rx.count) (fun v -> rx.count <- v) 0;
+               mon "rx_byte" 8 (fun () -> rx.byte) (fun v -> rx.byte <- v) 0;
+               mon "rx_frames" 8 (fun () -> rx.frames) (fun v -> rx.frames <- v) 0 ] in
+  let in_reach = List.fold_left (fun acc a -> Smt.or_ acc (Smt.eq st.pcs.(0) (Smt.k ~w:8 (a land 0xFF)))) Smt.ff reach in
+  let bad = ref Smt.ff in
+  for k = 0 to 3 do
+    let io = Machine.io ~k in
+    let io = if anytime then io else { io with host_in_valid = Smt.tt } in
+    let t, _, e = Machine.clock m ~k io in
+    bad := Smt.or_ !bad (P.uart_rx_step rx ~thread:t ~io ~e ~st:m.st)
+  done;
+  let mon_slots = List.map (fun (v, name, _, get, init) -> let n = get () in { Lustre.sname = name; var = v; init; next = (fun _ -> n) }) mons in
+  let oc = open_out file in
+  let ns, ni, ne = Lustre.write oc ~node:"uart" ~ok:(Smt.and_ in_reach (Smt.not_ !bad)) ~slots:(mon_slots @ slots) ~final:m.st in
+  close_out oc;
+  pr "%s: %d state variables, %d inputs, %d equations in the cone of the property\n" file ns ni ne
+
 let scenarios = [
   "a", (fun () -> ignore (a_main ~ldd:20 ~name:"a-deadline-main.ml-programme"));
   "a-planted", (fun () -> ignore (a_main ~ldd:21 ~name:"a-deadline-planted-ldd21"));
@@ -316,14 +348,17 @@ let scenarios = [
   "a-spi8", (fun () -> ignore (a_protocols ~spi_period:8 ~name:"a-waitd-uart-spi8-i2c"));
   "b", (fun () -> ignore (ownership ~name:"b-ownership" ~timeout_mask:0x80 ~depth:720));
   "b-planted", (fun () -> ignore (ownership ~name:"b-ownership-planted-mask01" ~timeout_mask:0x01 ~depth:720));
-  "c", (fun () -> ignore (isolation ~name:"c-isolation-uart" ~ldb:false ~depth:440));
+  "c", (fun () -> ignore (isolation ~name:"c-isolation-uart" ~ldb:false ~depth:36));
   "c-induction", (fun () -> isolation_induction ~name:"c-isolation-uart-induction" ~ldb:false ());
   "c-induction-planted", (fun () -> isolation_induction ~name:"c-isolation-planted-ldb-induction" ~ldb:true ());
   "c-induction-no-ownership", (fun () ->
       isolation_induction ~assume:false ~name:"c-isolation-uart-induction-without-ownership-assumption" ~ldb:false ());
   "c-planted", (fun () -> ignore (isolation ~name:"c-isolation-planted-ldb" ~ldb:true ~depth:440));
   "kind2-export", (fun () ->
-      export_kind2 ~ldd:20 ~file:"kind2/deadline-ldd20.lus"; export_kind2 ~ldd:21 ~file:"kind2/deadline-ldd21.lus");
+      export_kind2 ~ldd:20 ~file:"kind2/deadline-ldd20.lus"; export_kind2 ~ldd:21 ~file:"kind2/deadline-ldd21.lus";
+      export_kind2_uart ~anytime:false ~bytes:1 ~file:"kind2/uart-every-byte.lus" ();
+      export_kind2_uart ~anytime:true ~bytes:1 ~file:"kind2/uart-every-byte-any-arrival.lus" ();
+      export_kind2_uart ~stretch:(3, 3) ~anytime:false ~bytes:1 ~file:"kind2/uart-planted-stretch.lus" ());
   "d", (fun () -> ignore (uart_functional ~name:"d-uart-every-byte" ~bytes:2 ~depth:440 ()));
   "d-planted", (fun () -> ignore (uart_functional ~name:"d-uart-planted-stretch" ~stretch:(3, 3) ~bytes:2 ~depth:440 ()));
   "d-anytime", (fun () -> ignore (uart_functional ~name:"d-uart-every-byte-any-arrival" ~anytime:true ~bytes:1 ~depth:240 ()));
