@@ -58,13 +58,15 @@ let uart_tx u =
   emit (W Isa.halt);
   assemble (List.rev !items)
 
-(* SPI master, mode 0, msb first, cs active low, period P slots (even, >= 8).
+(* SPI master, mode 0, msb first, cs active low, period P slots (even, >= 10).
    Bit: SHO(0) LDD a(1) WAITD(2..2+a) SETP sclk=1 (3+a) LDD b WAITD SETP sclk=0 (6+a+b) JNZ, next SHO at 8+a+b.
-   High width 3+b = P/2, so b = P/2-3 and a = P-8-b. *)
+   High width 3+b = P/2, so b = P/2-3 and a = P-8-b; a >= 0 needs P >= 10 (at P = 8, a = -1
+   and LDD wraps to 4095, so SCLK edges come 16,416 clocks apart: found by the bounded model
+   checker's reachability check, prototypes/formal). *)
 type spi = { sclk : int; mosi : int; cs : int; period : int; sbytes : int list }
 
 let spi_master s =
-  assert (s.period >= 8 && s.period mod 2 = 0);
+  assert (s.period >= 10 && s.period mod 2 = 0);
   let b = s.period / 2 - 3 in
   let a = s.period - 8 - b in
   let mk p = 1 lsl p in
