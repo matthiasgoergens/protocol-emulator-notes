@@ -147,6 +147,22 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   `dune test` on a latency regression. The small 5-frame Cyclesim test
   now detects the end-to-end latency mutant too (555 of 1,375 cycles differ against the good design; `small-fixes`, 2026-10-05). Fourteen improvement proposals for hardcaml-latency are in
   `notes/latency-adoption.md`.
+- **sigrok judge landed (`tools/sigrok-judge`, `tools/peers`, merged 2026-10-05):** sigrok-cli
+  0.7.2, pinned in a container and run only as an external program, decodes UART, SPI, I2C,
+  PS/2, CAN, USB-LS and S/PDIF traces. Every clean trace passes and each protocol has two planted
+  faults, all caught. alexforencich/verilog-uart, unmodified, receives our UART. Open:
+  - **CAN start-up glitch:** the model drives the bus low for 200 ns at time 0, which the
+    decoder reads as a start of frame; the judge skips it. On a real bus that could be a stray
+    dominant pulse. Find out whether it is the TXD/TXE reset value, and fix it in the design
+    rather than in the judge.
+  - **PS/2 shim:** the PS/2 pass needs a shim that adds one clock pulse per frame, because
+    libsigrokdecode 0.5.3's ps2 decoder misframes back-to-back frames even on an ideal trace
+    (`results/ps2-decoder-quirk.txt`). Check whether it is a decoder bug or a missing inter-frame
+    idle in the ideal trace before reporting it upstream; the shim weakens the oracle meanwhile.
+  - **Phase steps unseen:** sigrok's S/PDIF decoder re-locks on every edge, so it cannot see
+    phase steps or jitter; the jitter measurement in `prototypes/spdif` remains the check for that.
+  - **Not judged:** 10BASE-T (sigrok has no decoder), gate-level traces, receive and slave roles,
+    and JTAG/SWD.
 - **Formal checking landed (`symbolic-bmc`, merged 2026-10-05; `prototypes/formal/README.md`):**
   - **The interpreter:** ISA v2's interpreter is a functor over integers, SMT terms and Hardcaml
     signals.
