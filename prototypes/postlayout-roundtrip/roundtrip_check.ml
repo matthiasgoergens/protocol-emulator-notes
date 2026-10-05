@@ -89,11 +89,16 @@ let controls gds top rtl models outdir n seed =
   let run_one label path =
     let nl', _, r, t, _ = extract_and_check ~quiet:true ~gds:path ~top ~lib ~ports () in
     let caught = r.errors <> [] in
-    Printf.printf "  %-6s %s: %d errors (%.2f s)%s\n%!" label (Filename.basename path)
-      (List.length r.errors) t (if caught then "" else "  NOT CAUGHT");
+    (* a planted fault that leaves the connectivity as it was is no fault:
+       say so, rather than count it either way *)
+    (* nets are the components that reach a pin or a port; a rectangle that
+       touches nothing adds a component but no net *)
+    let effective = nl'.nnets <> nl.nnets in
+    Printf.printf "  %-6s %s: nets %+d, %d errors (%.2f s)%s\n%!" label (Filename.basename path)
+      (nl'.nnets - nl.nnets) (List.length r.errors) t
+      (if not effective then "  NO EFFECT ON CONNECTIVITY" else if caught then "" else "  NOT CAUGHT");
     List.iteri (fun i e -> if i < 3 then Printf.printf "           %s\n" e) r.errors;
-    ignore nl';
-    results := (label, caught) :: !results
+    if effective then results := (label, caught) :: !results
   in
   for i = 1 to n do
     let e = cut_candidates.(Random.int (Array.length cut_candidates)) in
@@ -109,9 +114,10 @@ let controls gds top rtl models outdir n seed =
       match geo.shapes.(i).kind, geo.shape_net.(i) with
       | Extract.Metal 1, Some x when signal x -> Some i
       | _ -> None) (List.init (Array.length geo.shapes) Fun.id) |> Array.of_list in
-  let centre (s : Extract.shape) =
-    let x0, y0, x1, y1 = s.bbox in
-    (Int64.div (Int64.add x0 x1) 2L, Int64.div (Int64.add y0 y1) 2L) in
+  (* a vertex, not the bbox centre: the centre of an L-shaped wire can lie
+     outside it, and then the planted rectangle touches nothing (this
+     happened in the first run, and those "shorts" were no faults at all) *)
+  let centre (s : Extract.shape) = s.pts.(0) in
   for i = 1 to n do
     let a = m2.(Random.int (Array.length m2)) in
     let na = Option.get geo.shape_net.(a) in
@@ -135,7 +141,8 @@ let controls gds top rtl models outdir n seed =
     run_one "short" path
   done;
   let caught = List.length (List.filter snd !results) in
-  Printf.printf "controls: %d of %d planted faults caught structurally\n" caught (List.length !results)
+  Printf.printf "controls: %d of %d effective planted faults caught structurally (%d had no effect)\n"
+    caught (List.length !results) (2 * n - List.length !results)
 
 let () =
   match Array.to_list Sys.argv |> List.tl with

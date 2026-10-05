@@ -24,6 +24,7 @@ type t = {
   ffs : ff array;
   v : int array;
   port : (string, int) Hashtbl.t;  (* port name -> signal *)
+  const1 : int;                    (* the signal for 1'b1 *)
 }
 
 let create (lib : (string, Cells.cell) Hashtbl.t) (nl : Extract.netlist) : t =
@@ -83,16 +84,36 @@ let create (lib : (string, Cells.cell) Hashtbl.t) (nl : Extract.netlist) : t =
   List.iter (fun (p, n) -> Option.iter (fun n -> Hashtbl.replace port p n) n) nl.ports;
   { gates = Array.of_list (List.rev_map (fun i -> gates.(i)) !order);
     ffs = Array.of_list (List.rev !ffs);
-    v = Array.init nsig (fun i -> if i = const1 then 1 else 0); port }
+    v = Array.init nsig (fun i -> if i = const1 then 1 else 0); port; const1 }
 
+(* every signal to 0 (flip-flops included), except the constant 1 *)
+let reset t =
+  Array.fill t.v 0 (Array.length t.v) 0;
+  t.v.(t.const1) <- 1
+
+(* Evaluate every gate once, in order.  Written out per primitive, without
+   allocating, because this loop is the whole cost of the lockstep run;
+   Cells.eval_prim is the reference it must agree with (test_cells.ml). *)
 let settle t =
   let v = t.v in
-  let buf = Array.make 6 0 in
   Array.iter (fun g ->
-    let n = Array.length g.ins in
-    let xs = if n <= 6 then (for k = 0 to n - 1 do buf.(k) <- v.(g.ins.(k)) done; Array.sub buf 0 n)
-      else Array.map (fun s -> v.(s)) g.ins in
-    v.(g.out) <- Cells.eval_prim g.prim xs) t.gates
+    let ins = g.ins in
+    let n = Array.length ins in
+    let all x = let r = ref true in for k = 0 to n - 1 do if v.(ins.(k)) <> x then r := false done; !r in
+    let parity () = let r = ref 0 in for k = 0 to n - 1 do r := !r lxor v.(ins.(k)) done; !r in
+    v.(g.out) <-
+      (match g.prim with
+       | Cells.And -> if all 1 then 1 else 0
+       | Or -> if all 0 then 0 else 1
+       | Nand -> if all 1 then 0 else 1
+       | Nor -> if all 0 then 1 else 0
+       | Xor -> parity ()
+       | Xnor -> 1 - parity ()
+       | Not -> 1 - v.(ins.(0))
+       | Buf -> v.(ins.(0))
+       | Mux2 -> if v.(ins.(2)) = 1 then v.(ins.(1)) else v.(ins.(0))
+       | Mux4 -> v.(ins.(v.(ins.(5)) * 2 + v.(ins.(4))))))
+    t.gates
 
 (* asynchronous set and reset, then settle again until nothing changes *)
 let apply_async t =
