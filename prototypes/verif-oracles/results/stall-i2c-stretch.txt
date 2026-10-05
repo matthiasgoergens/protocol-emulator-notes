@@ -1,21 +1,44 @@
-# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/stall/i2c_stretch.exe
-# commit: 02381a72826a9cea01ae57c25ae22e05286ab226 (with uncommitted changes)
+# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/verif-oracles/_build/default/stall/i2c_stretch.exe
+# commit: 61e8b0434af942db81aa64a2d74766d20d505576 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T08:12:27+08:00
-golden (no stretching): uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=true host-acks [00 00]; RTL vs interpreter: 0 clocks differ
-golden matches the demo's own expected bytes: true
+# date: 2026-10-05T08:58:42+08:00
+I2C programme before the fix: 63 words; after: 64 words (of 64)
+before, no stretching: uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=true host-acks [00 00]; RTL vs interpreter: 0 clocks differ; matches the demo's expected bytes: true
+after , no stretching: uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=true host-acks [00 00]; RTL vs interpreter: 0 clocks differ; matches the demo's expected bytes: true
 
-stretch p = 0.10 per SCL release, 1..  4 clocks: 30 runs, 204 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 0; RTL vs interpreter 0 clocks differ
-stretch p = 0.30 per SCL release, 1.. 16 clocks: 30 runs, 1536 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 1; RTL vs interpreter 0 clocks differ
+unstretched scl timing, in clocks (q = 4 slots = 16 clocks):
+  high widths before: 32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32
+  high widths after:  32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32
+  identical: true
+  low widths before:  28,32,32,32,32,32,32,32,32,44,32,32,32,32,32,32,32,32,36
+  low widths after:   36,32,32,32,32,32,32,32,32,40,32,32,32,32,32,32,32,32,36
+  low widths that differ: #1 28->36 #10 44->40 (expected: #1, after START, 28 -> 36; #10, between the bytes, 44 -> 40)
+
+before: stretch p = 0.10 per SCL release, 1..   4 clocks: 30 runs, 204 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 0; RTL vs interpreter 0 clocks differ; shortest scl high 28 clocks
+before: stretch p = 0.30 per SCL release, 1..  16 clocks: 30 runs, 1536 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 1; RTL vs interpreter 0 clocks differ; shortest scl high 16 clocks
     first differing i2c transcript: seed 9: uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=false host-acks [00 00]
-stretch p = 0.50 per SCL release, 1.. 64 clocks: 30 runs, 9210 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 30; RTL vs interpreter 0 clocks differ
+before: stretch p = 0.50 per SCL release, 1..  64 clocks: 30 runs, 9210 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 30; RTL vs interpreter 0 clocks differ; shortest scl high 1 clocks
     first differing i2c transcript: seed 1: uart [4f 4b 21] spi [a5 3c] i2c [07+] stop=true host-acks [01 01]
-stretch p = 1.00 per SCL release, 1..200 clocks: 30 runs, 32886 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 30; RTL vs interpreter 0 clocks differ
+before: stretch p = 1.00 per SCL release, 1.. 200 clocks: 30 runs, 32886 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 30; RTL vs interpreter 0 clocks differ; shortest scl high 1 clocks
     first differing i2c transcript: seed 1: uart [4f 4b 21] spi [a5 3c] i2c [] stop=false host-acks [01 01]
+before: stretch p = 1.00 per SCL release, 1..2000 clocks: 30 runs, 60325 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 30; RTL vs interpreter 0 clocks differ; shortest scl high 3 clocks
+    first differing i2c transcript: seed 1: uart [4f 4b 21] spi [a5 3c] i2c [] stop=false host-acks [01 01]
+after : stretch p = 0.10 per SCL release, 1..   4 clocks: 30 runs, 204 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 0; RTL vs interpreter 0 clocks differ; shortest scl high 29 clocks
+after : stretch p = 0.30 per SCL release, 1..  16 clocks: 30 runs, 1536 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 0; RTL vs interpreter 0 clocks differ; shortest scl high 29 clocks
+after : stretch p = 0.50 per SCL release, 1..  64 clocks: 30 runs, 9210 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 0; RTL vs interpreter 0 clocks differ; shortest scl high 29 clocks
+after : stretch p = 1.00 per SCL release, 1.. 200 clocks: 30 runs, 58293 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 0; RTL vs interpreter 0 clocks differ; shortest scl high 29 clocks
+after : stretch p = 1.00 per SCL release, 1..2000 clocks: 30 runs, 559093 stretched clocks; transcripts differing from golden: uart 0, spi 0, i2c 0; RTL vs interpreter 0 clocks differ; shortest scl high 29 clocks
 
-finding: UART and SPI transcripts are identical under every stretch pattern (they read no pins);
-the compiled I2C master's transcript BREAKS under stretching: it never samples SCL, so it does not honour clock stretching.
+I2C runs differing from golden under stretching: before 91 of 150, after 0 of 150
+
+stretch deadline (4095 slots = 16380 clocks):
+  rise 3 held low 16180 clocks: uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=true host-acks [00 00]; lines released at the end true, thread stopped true, RTL differs 0 clocks -> absorbed, as expected
+  rise 12 held low 16180 clocks: uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=true host-acks [00 00]; lines released at the end true, thread stopped true, RTL differs 0 clocks -> absorbed, as expected
+  rise 3 held low 16780 clocks: uart [4f 4b 21] spi [a5 3c] i2c [] stop=false host-acks []; lines released at the end true, thread stopped true, RTL differs 0 clocks -> timed out cleanly, as expected
+  rise 12 held low 16780 clocks: uart [4f 4b 21] spi [a5 3c] i2c [a0+] stop=false host-acks [00]; lines released at the end true, thread stopped true, RTL differs 0 clocks -> timed out cleanly, as expected
+  rise 19 held low 16780 clocks: uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=false host-acks [00 00]; lines released at the end true, thread stopped true, RTL differs 0 clocks -> timed out cleanly, as expected
+
 control: UART data bit 5 stretched by 9 slots (the demo's own fault), no I2C stretching: comparison flags it
 
-I2C STRETCH PASS (PASS = UART/SPI insensitive, RTL agrees, control flagged; the I2C result is a finding, reported above)
+I2C STRETCH PASS (PASS = UART/SPI insensitive, RTL agrees, the original breaks and the fix survives every stretch, scl high widths unchanged, the deadline absorbs or times out cleanly, control flagged)
 exit 0

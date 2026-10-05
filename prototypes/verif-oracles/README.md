@@ -13,8 +13,10 @@ Three cheap verification additions, each an idea taken from someone's public wor
   clause for each pair of micro-operations that may share a cycle, so a pair with no clause does
   not compile (item 4).
 
-Nothing outside this directory was changed. Other prototypes' files are used through
-symlinks, as `sequencer-v2/ports` does, and everything runs on ISA v2 (`../sequencer-v2`).
+Nothing outside this directory was changed when the oracles were written. Other prototypes'
+files are used through symlinks, as `sequencer-v2/ports` does, and everything runs on ISA v2
+(`../sequencer-v2`). The findings were fixed afterwards (branch fix-findings, 2026-10-05) in their
+own prototypes; each entry below says where.
 
 Build with `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17; nothing was
 installed). `./run_all.sh` regenerates every file in `results/`. It runs one job at a time,
@@ -33,11 +35,25 @@ Interpreter and RTL run in lockstep in every case.
 | JTAG host (driver and sampler threads) | host byte valid, bursts of 0 to 39 clocks started with p = 0.02, 0.2, 0.6 or 0.95 per clock (up to 1.4 M stalled clocks) | **latency-insensitive**: 80 sessions; the TDO transcript equals the golden one, and the IEEE 1149.1 TAP models are satisfied. At p = 0.95, 19 of 20 runs hit the bench's own cycle budget, each with a correct prefix | `results/stall-jtag-swd.txt` |
 | SWD host | the same host stalls, plus target WAIT with p up to 0.5 (566 retries) | **latency-insensitive**: every packet's ACK, data and parity equal the golden run's. At p = 0.95, 13 of 15 runs ran out of budget with a correct prefix | same |
 | UART TX and SPI master (deadline-sequencer demo) | none exists: the bytes are compiled in, and no pin is read | insensitive by construction; the transcripts stay identical under I2C stretching | `results/stall-i2c-stretch.txt` |
-| I2C master write (deadline-sequencer demo) | slave clock stretching | **assumes exact timing.** The compiled master never reads SCL. Stretches of 1 to 4 clocks are absorbed (0 of 30 runs differ); at 1 to 16 clocks 1 of 30 runs differs, and from 1 to 64 clocks all 30 do (wrong bytes, a lost STOP, wrong acks to the host). **Documented, not fixed:** the demo's closed-form timing checks depend on this programme. Bridge A's `i2c_master` honours stretching, with a 4095-slot bound | same |
+| I2C master write (deadline-sequencer demo) | slave clock stretching | **assumed exact timing; fixed 2026-10-05.** The compiled master never read SCL: stretches of 1 to 4 clocks were absorbed, at 1 to 16 clocks 1 of 30 runs differed, and from 1 to 64 clocks all 30 did (wrong bytes, a lost STOP, wrong acks to the host). The compiler now follows every SCL release with a 4095-slot `WAITP` on SCL (below the table). Before and after under the same five patterns: 91 of 150 runs differ before, **0 of 150 after**, up to 2,000-clock stretches | same |
 | 10BASE-T TX (sequencer-ethernet) | host byte valid per thread FIFO; the next byte arrives d clocks after the last was taken | **timing-exact, with a 95-clock slack.** Every byte up to 95 clocks late: exact. From 96 clocks the original firmware puts **wrong levels on the line with no indication** (49 of 50 runs with one byte 97 to 200 clocks late; 43 of 50 under random bursts). **Fixed** (below) | `results/stall-ethernet.txt` |
 | bridge A (UART ↔ I2C, mailboxes) | already perturbed by its own bench: host gaps, ±1.6 % baud, CTS, slave stretching up to 1,500 clocks | already latency-tolerant by test (12 seeds); not rerun here | `../sequencer-v2/results/ports/multi-proto-bridge_a.txt` |
 
-**The Ethernet fix** (`stall/eth_fixed.ml`). A timing-exact transmitter cannot produce an
+**The I2C fix** (`../deadline-sequencer/compiler.ml`, `i2c_write`). After each release of SCL the
+thread waits for SCL to read high (`LDD 4095; SETP; WAITP scl=1 -> fin`) and times the high phase
+from there; at the deadline it releases both lines and halts, so the host gets fewer ack bytes.
+The stretch-blind layout with these waits would need 76 words, more than the base ISA's 64, so
+the bit loop now puts SDA's change two slots after SCL falls instead of a quarter period. Without
+stretching, SCL's period and high time, the ack's sample point and the STOP are unchanged; two
+low phases change (after START 28 to 36 clocks, between the bytes 44 to 40), which the oracle
+prints. Under stretching the high time measured from the rise is at least 29 clocks (32
+nominal), because the rise is seen up to a slot late. Holds of 16,180 clocks are absorbed; holds
+of 16,780 end cleanly (lines released, thread halted, acks so far only). The demo, its v2 port
+(identical output), multi-proto's bridges (identical) and fpga-ulx3s's I2C tests checked against
+their predictions all pass; the board and its Verilator model were not rerun.
+
+**The Ethernet fix** (`stall/eth_fixed.ml`, since 2026-10-05 a symlink to
+`../sequencer-v2/ports/sequencer-ethernet/eth_fixed.ml`, where `main_fixed.exe` tests it). A timing-exact transmitter cannot produce an
 identical transcript under every stall, so the specification checked is weaker but explicit:
 
 > The line carries the golden frame, or a golden prefix followed by release (high impedance)
@@ -66,17 +82,36 @@ Controls, all flagged:
 - the fix without the report;
 - a golden transcript with one half-bit flipped.
 
-**Not run, read only.** A survey of the code found three more programmes whose IN sits inside a
-timed bit loop with no valid check. Each would need the same treatment.
+**Merged into the real firmware?** Only where the ISA allows it. `../sequencer-ethernet` and
+`../eth10-node` are base-ISA firmware, and the base ISA cannot see whether a host byte is waiting
+(IN blocks, and there is no host-valid condition), so the fix needs v2's `WAITC 9`. It now lives
+with the v2 port of sequencer-ethernet, whose `main_fixed.exe` runs `main.ml`'s checks on it
+(the model, the RTL, the controls) plus a stream cut short that must end released and reported.
 
-- **CAN TX** (`sequencer-v2/ports/can/can_fw.ml:79`): the mid-frame refill `WAITC c_byte; IN`.
-  A late byte lengthens a bit.
-- **Low-speed USB** (`usb-ls/firmware.ml:197`, `dloop`): IN inside the data-packet loop.
-  `usb-ls/controller.ml:14` states the assumption: the reply FIFO must not run dry mid-packet.
-  The bench sweeps latency but never `refill` above 160 clocks or depth 1.
-- **PS/2** (`sequencer-ps2-can/ps2_fw.ml:77`): the device's IN comes after its "data high"
-  check, so a late byte makes that check stale. At line 121 the host-to-device IN runs while
-  the device is already clocking.
+**The three other programmes with an IN inside a timed loop** (found by reading; run 2026-10-05):
+
+- **CAN TX** (`sequencer-v2/ports/can/can_fw.ml`, `more`): **confirmed and fixed.**
+  `ports/can/can_stall.exe` judges txd clock by clock against the unstalled run, as here. Before:
+  byte 5 more than 959 clocks late breaks the frame (20 of 20), random bursts break 17 of 20, and
+  a byte that never comes leaves the thread hung with no report. After: `WAITC 9` one slot before
+  the IN, and an underrun handler that releases txd and reports `OUT tag_tx 5`. 0 violations;
+  the slack drops from 960 to 956 clocks (one slot), as predicted.
+- **Low-speed USB** (`usb-ls/firmware.ml`, `dloop`): **confirmed and fixed in the FIFO contract.**
+  `usb-ls/stall_fw.exe` slows or bursts the controller's refills, judged by the bench's host.
+  Before (RDY = FIFO not empty, depth 4): every session breaks at a 200-clock refill and with
+  bursts (undecodable data packets), none at 160. The variant ISA cannot check validity inside
+  the loop (dl is the symbol timer, so `WAITP` there waits instead of branching), so RDY now rises
+  only when the whole reply is in the FIFO (depth 32; the longest reply is 29 bytes). After:
+  0 errors under every pattern, at the cost of NAKs while a reply is buffered.
+- **PS/2** (`sequencer-ps2-can/ps2_fw.ml`, `txgo` and `hgot`): **refuted under the doorbell
+  contract.** Both INs follow the doorbell pin, which the benches raise only when the byte is
+  valid. `sequencer-ps2-can/ps2_stall.exe` delays the byte by up to 2 ms: with that contract
+  every run passes in both roles. With the doorbell 500 us ahead of its byte both roles fail: the
+  host role sends late bits to a device that is already clocking (wrong bytes, parity errors), and
+  the device role loses the host's commands. The device's wait comes before it starts clocking,
+  so PS/2 itself tolerates that gap; what fails is consistent with its inhibit and
+  request-to-send checks going stale during the wait. 100 us early is absorbed. The firmware is unchanged and the contract is written down
+  at `ps2_fw.ml`'s pins type.
 
 **Mailbox readiness.** The ports' ready/valid inputs (MBX 4 to 7) are used by no ported
 firmware. Inbox readiness is internal: it depends on the neighbouring threads, which bridge A's
@@ -200,16 +235,19 @@ assignments, not from what the checker infers.
 
   `results/hazard-base.txt`.
 - **JTAG and SWD hosts:** accepted (`results/hazard-wide.txt`).
-- **Bridge A on v2:** **4 rejections, a real finding** (`results/hazard-bridge.txt`).
-  - The I2C master (T1) answers into inbox 2 with `SEND ch2 fail=self` at pc 78, 96, 100 and 103.
-    These waits never time out, and at pc 78 SCL is held low while it waits.
-  - It is safe today only because T2 (the UART TX) always drains inbox 2. The checker confirms
-    that T2 has no unbounded wait other than that RECV. That its JNZ loops end is argued, not
-    checked.
-  - The run is repeated with an explicit **waiver** carrying that argument. It is printed as
-    WAIVED with its reason, never silently.
-  - **Fix (not applied; bridge_lib.ml belongs to multi-proto):** `LDD n; SEND ch2 → error` with a
-    deadline of one UART byte, the pattern its `scl_rise` already uses.
+- **Bridge A on v2:** found 4 rejections, **fixed 2026-10-05** (`results/hazard-bridge.txt`).
+  - The I2C master (T1) answered into inbox 2 with `SEND ch2 fail=self` at four places. These
+    waits never timed out, and at one of them SCL was held low while it waited. It was safe
+    only because T2 (the UART TX) always drains inbox 2, which was accepted under a waiver.
+  - `multi-proto/bridge_lib.ml` now answers with `LDD 4095; SEND ch2 -> replylost; LDD 0`: on
+    expiry the answer is dropped and 0xFB goes to the host. The `LDD 0` matters: without it the
+    byte-code dispatch (`br_set`, a one-slot branch only at dl = 0) waited out the leftover
+    deadline, and the first attempt ran ten times slower until the bench caught it.
+  - The checker accepts bridge A with no waiver. As a control, the driver rebuilds the old code
+    (every SEND to inbox 2 pointed back at itself) and the checker rejects 4 of 4.
+  - Bridge tests (v1 and v2) pass and gain "answer deadline A": with T2 stopped, every answer
+    beyond the inbox depth is reported and the I2C traffic still matches the reference.
+  - Not changed: bridge B's SPI master still answers with `fail = self`; it was not checked here.
 
 **Not checked:**
 

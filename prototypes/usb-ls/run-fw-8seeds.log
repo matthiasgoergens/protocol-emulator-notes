@@ -89,17 +89,17 @@
     IN ep0                       4b 00 0a 7e 48 (5.70 bits)
     OUT ep0                      d2 (2.70 bits)
   firmware ppm +0: 931250 clocks, 113 packets sent, 55 replies (turnaround 2.62..5.88 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
-  controller: 88 programme patches, FIFO peak 4 bytes
+  controller: 88 programme patches, FIFO peak 27 bytes
   firmware ppm -15000: 928424 clocks, 113 packets sent, 55 replies (turnaround 2.69..5.99 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
   firmware ppm +15000: 934148 clocks, 113 packets sent, 55 replies (turnaround 2.56..5.71 bits), 0 NAKs while preparing, 4 silences as required, 3 keep-alives, 1 resets, lockstep mismatches 0, errors 0
 == 4. constrained random sessions
-  firmware(latency 558, prepare 0) ppm -15000: 1050629 clocks, 302 packets sent, 153 replies (turnaround 2.64..5.94 bits), 0 NAKs while preparing, 22 silences as required, 26 keep-alives, 5 resets, lockstep mismatches 0, errors 0
-  firmware(latency 373, prepare 0) ppm +15000: 1084429 clocks, 321 packets sent, 158 replies (turnaround 2.54..5.81 bits), 0 NAKs while preparing, 29 silences as required, 29 keep-alives, 9 resets, lockstep mismatches 0, errors 0
-  firmware(latency 1100, prepare 0) ppm +2438: 1085853 clocks, 322 packets sent, 153 replies (turnaround 2.59..5.86 bits), 0 NAKs while preparing, 26 silences as required, 28 keep-alives, 8 resets, lockstep mismatches 0, errors 0
-  firmware(latency 313, prepare 5000) ppm +588: 1582934 clocks, 500 packets sent, 325 replies (turnaround 2.60..5.87 bits), 156 NAKs while preparing, 20 silences as required, 35 keep-alives, 7 resets, lockstep mismatches 0, errors 0
-  firmware(latency 318, prepare 0) ppm -7765: 1159281 clocks, 328 packets sent, 158 replies (turnaround 2.65..6.00 bits), 0 NAKs while preparing, 25 silences as required, 20 keep-alives, 9 resets, lockstep mismatches 0, errors 0
+  firmware(latency 558, prepare 0) ppm -15000: 1329155 clocks, 396 packets sent, 213 replies (turnaround 2.66..6.07 bits), 35 NAKs while preparing, 25 silences as required, 24 keep-alives, 6 resets, lockstep mismatches 0, errors 0
+  firmware(latency 373, prepare 0) ppm +15000: 1044432 clocks, 303 packets sent, 151 replies (turnaround 2.54..5.81 bits), 6 NAKs while preparing, 29 silences as required, 27 keep-alives, 12 resets, lockstep mismatches 0, errors 0
+  firmware(latency 1100, prepare 0) ppm +2438: 1261891 clocks, 378 packets sent, 191 replies (turnaround 2.59..5.76 bits), 35 NAKs while preparing, 35 silences as required, 30 keep-alives, 7 resets, lockstep mismatches 0, errors 0
+  firmware(latency 313, prepare 5000) ppm +588: 1488521 clocks, 471 packets sent, 303 replies (turnaround 2.60..5.87 bits), 145 NAKs while preparing, 21 silences as required, 34 keep-alives, 6 resets, lockstep mismatches 0, errors 0
+  firmware(latency 318, prepare 0) ppm -7765: 1145119 clocks, 321 packets sent, 157 replies (turnaround 2.65..6.00 bits), 4 NAKs while preparing, 23 silences as required, 23 keep-alives, 10 resets, lockstep mismatches 0, errors 0
   firmware(latency 27, prepare 0) ppm +7772: 1232353 clocks, 357 packets sent, 169 replies (turnaround 2.51..5.90 bits), 0 NAKs while preparing, 30 silences as required, 19 keep-alives, 9 resets, lockstep mismatches 0, errors 0
-  firmware(latency 561, prepare 0) ppm +14185: 1084457 clocks, 311 packets sent, 147 replies (turnaround 2.54..5.67 bits), 0 NAKs while preparing, 31 silences as required, 24 keep-alives, 5 resets, lockstep mismatches 0, errors 0
+  firmware(latency 561, prepare 0) ppm +14185: 1254058 clocks, 366 packets sent, 195 replies (turnaround 2.54..5.84 bits), 23 NAKs while preparing, 20 silences as required, 28 keep-alives, 6 resets, lockstep mismatches 0, errors 0
   firmware(latency 147, prepare 0) ppm +8555: 1303482 clocks, 389 packets sent, 198 replies (turnaround 2.55..5.87 bits), 0 NAKs while preparing, 19 silences as required, 23 keep-alives, 8 resets, lockstep mismatches 0, errors 0
   device beyond +-1.5 % (directed): -4%:FAIL -3%:ok -2%:ok +2%:ok +3%:ok
 == 5. the reply path, clock by clock

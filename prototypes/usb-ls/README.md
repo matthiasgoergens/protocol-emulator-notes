@@ -152,10 +152,18 @@ The model and RTL agree over 200,000 random clocks for USB CRC16, USB CRC5 and C
 the fixed unit and as the programmable one. It needs no USB-specific logic. The PID skip is done
 by the firmware arming it after the PID.
 
-The reply FIFO is the other piece of hardware. It is a 4-byte FIFO in front of the sequencer's
-host port, with its non-empty flag on a pin, and it is generic: any protocol with a response
-deadline needs its first bytes on chip. It is modelled in OCaml and shared by both systems; there
-is no RTL for it yet. The pin streamer's FIFO is the obvious implementation.
+The reply FIFO is the other piece of hardware. It is a 32-byte FIFO in front of the sequencer's
+host port, with a "whole reply present" flag on the RDY pin, and it is generic: any protocol with
+a response deadline needs its first bytes on chip. It is modelled in OCaml and shared by both
+systems; there is no RTL for it yet. The pin streamer's FIFO is the obvious implementation.
+
+Until 2026-10-05 it was a 4-byte FIFO whose RDY pin was its non-empty flag. The data loop then
+relied on the controller refilling one byte per 160 clocks: stall injection (`stall_fw.exe`,
+`run-stall-fw.log`) showed every session breaking once refills came every 200 clocks or in
+bursts (undecodable data packets on the line), and nothing reported it. RDY now rises only when
+the whole reply, terminator included, is in the FIFO (29 bytes at most), so a slow controller
+costs NAKs (4 instead of 0 in three directed sessions at the default refill, up to a few dozen per
+random session) and never a broken packet: 0 errors under the same stalls.
 
 ### What the other generic pieces would buy
 

@@ -1,8 +1,8 @@
-# command: /home/matthias/prog/janestreet/emulator-wt-isa-v2/prototypes/sequencer-v2/_build/default/ports/can/can_tx.exe
-# commit: 715f4febbcf8c09b871e78c96e07e76ded9919b9 (with uncommitted changes)
+# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/sequencer-v2/_build/default/ports/can/can_tx.exe
+# commit: 16a9041343aafeaa1e644646adbc879235bdd53b (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-09-26T16:19:44+08:00
-CAN TX on v2, 500 kbit/s at 60 MHz (N=30 SP=23 SJW=3 slots): TX thread 60 words
+# date: 2026-10-05T09:04:21+08:00
+CAN TX on v2, 500 kbit/s at 60 MHz (N=30 SP=23 SJW=3 slots): TX thread 64 words
 Scenarios:
   A sends 3 frames (one remote) to two reference nodes at +0.3% / -0.2%  PASS (72001 cycles, 0 mismatches)
   A (0x123) and ref1 (0x0F0) start together: A lost 1 time(s), retransmitted PASS (54000 cycles, 0 mismatches)

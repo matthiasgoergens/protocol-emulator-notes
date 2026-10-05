@@ -92,7 +92,18 @@ a UART transmitter (8N1, any bit period of at least five slots), an SPI
 master (mode 0, any even period of at least eight slots) and an I2C master
 write (START, bytes with acknowledge clocks whose sampled acknowledge goes
 to the host, STOP, with a quarter period of at least four slots). Three
-protocols compiled onto three threads use 38, 27 and 63 of the 64 words.
+protocols compiled onto three threads use 38, 27 and 64 of the 64 words.
+
+The I2C master honours clock stretching (since 2026-10-05; the stall-injection
+oracle in `../verif-oracles` found that it did not). After every release of
+SCL it waits with `WAITP` for SCL to read high, with a deadline of 4095 slots,
+and times the high phase from there; at the deadline it releases both lines
+and halts, so the host receives fewer acknowledge bytes than bytes were sent.
+SCL's period and high time are unchanged without stretching. To fit two bytes
+into 64 words, SDA now changes two slots after SCL falls instead of a quarter
+period, and two low phases changed length (after START and between bytes);
+`compiler.ml` lists the slot positions. Evidence:
+`../verif-oracles/results/stall-i2c-stretch.txt`.
 
 Writing the I2C generator found an ISA gap: an open-drain line must be
 released for a one and pulled low for a zero, which the shift-out

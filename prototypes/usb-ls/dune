@@ -29,3 +29,8 @@
  (name matcher_exp)
  (modules matcher_model matcher_exp)
  (libraries hardcaml usbls))
+
+(executable
+ (name stall_fw)
+ (modules stall_fw)
+ (libraries hardcaml usbls))

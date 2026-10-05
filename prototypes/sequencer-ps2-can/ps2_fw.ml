@@ -19,7 +19,13 @@
 
 open Sim.Asm
 
-type pins = { clk : int; data : int; req : int }   (* req: doorbell from the host side *)
+(* req: doorbell from the host side. Contract: it rings only while a byte is valid on host_in
+   (the benches derive both from one queue). Both roles read their byte with IN after checks that
+   a wait would make stale: the device after its inhibit and request-to-send checks, the host
+   after the device has started clocking. Stall injection (ps2_stall.ml, 2026-10-05): with the
+   contract, a byte up to 2 ms late breaks nothing; with a doorbell 500 us ahead of its byte,
+   both roles fail (100 us is absorbed). *)
+type pins = { clk : int; data : int; req : int }
 
 type timing = {
   spu : int;          (* slots per microsecond *)

@@ -1,0 +1,44 @@
+# ./_build/default/ps2_stall.exe, 2026-10-05T08:57:34+08:00
+device role (our device firmware, the model host: 3 commands, 3 inhibits)
+  device contract       byte      0 us late: PASS
+  device contract       byte     20 us late: PASS
+  device contract       byte    100 us late: PASS
+  device contract       byte    500 us late: PASS
+  device contract       byte   2000 us late: PASS
+  device early doorbell byte      0 us late: PASS
+  device early doorbell byte     20 us late: PASS
+  device early doorbell byte    100 us late: PASS
+  device early doorbell byte    500 us late: FAIL
+      scan codes differ: got [33 33 24 f0 24 f0 4b]
+      a command was not acknowledged
+      device saw commands [ed]
+  device early doorbell byte   2000 us late: FAIL
+      a command was not acknowledged
+      device saw commands [ff ed]
+host role (our host firmware, the model device at 13 kHz: 3 commands)
+  host   contract       byte      0 us late: PASS
+  host   contract       byte     20 us late: PASS
+  host   contract       byte    100 us late: PASS
+  host   contract       byte    500 us late: PASS
+  host   contract       byte   2000 us late: PASS
+  host   early doorbell byte      0 us late: PASS
+  host   early doorbell byte     20 us late: PASS
+  host   early doorbell byte    100 us late: PASS
+  host   early doorbell byte    500 us late: FAIL
+      device model: 8502.3us host changed data while clock high (pulse 3); 9127.8us command stop bit not 1
+      host firmware got [33 f0 33 24 fa f0 24 4b c1! 4b], device sent [33 f0 33 24 fa f0 24 4b fe f0 4b fe]
+      parity verdicts not as expected
+      device received [ed 18! 20!]
+      command outcomes [7 7 8]
+  host   early doorbell byte   2000 us late: FAIL
+      device model: 4563.0us command stop bit not 1; 5002.3us host changed data while clock high (pulse 5); 9035.4us command stop bit not 1; 9953.6us command stop bit not 1; 15436.6us command stop bit not 1; 16354.8us command stop bit not 1
+      host firmware got [33 f0 33 24 f9 c1! fc fe fe f0 fe 24 4b f0 4b], device sent [33 f0 33 24 fe fe fe fe fe f0 fa fe 24 4b f0 4b]
+      parity verdicts not as expected
+      device received [00! c0! 00! 00! 83! 00! 80]
+      command outcomes [8 8 8]
+      device aborted 1 frames
+
+early-doorbell runs failing the benches' checks: 4 (must be at least one)
+
+PS/2 STALL PASS (PASS = every run with the doorbell contract passes, and the checks see the early-doorbell failures)
+exit 0

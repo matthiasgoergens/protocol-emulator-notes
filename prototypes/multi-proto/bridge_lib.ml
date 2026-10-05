@@ -82,12 +82,20 @@ let op_start = 0x01 and op_stop = 0x02 and op_write = 0x04 and op_read = 0x08 an
 let op_csl = 0x01 and op_csh = 0x02 and op_xfer = 0x04
 
 (* I2C master executing the byte code. Every SCL release waits for the line to be seen high
-   (clock stretching), bounded by the deadline: a line held low beyond 4095 slots answers 0xFD. *)
-let i2c_master ~sda ~scl ~own ~reply () =
+   (clock stretching), bounded by the deadline: a line held low beyond 4095 slots answers 0xFD.
+   Every answer to [reply] is a SEND with a deadline of [reply_deadline] slots (default 4095, the
+   longest LDD): bridge A's UART transmitter drains its inbox within one UART byte (10 bits of 16
+   slots), so the deadline only expires if the consumer has stopped. Then the answer is dropped
+   and 0xFB goes to the host instead (OUT), and the master takes the next byte code. Without the
+   deadline the master waited for ever, at the ninth clock with SCL held low. *)
+let i2c_master ?(reply_deadline = 4095) ~sda ~scl ~own ~reply () =
   let b = create () in
   let m p = 1 lsl p in
   let rel p = W (Isa.setp ~mask:(m p) ~value:0 ~oe:0) and low p = W (Isa.setp ~mask:(m p) ~value:0 ~oe:1) in
   let scl_rise () = emit b (rel scl); emit b (W (Isa.ldd 4095)); emit b (waitp scl 1 "buserr") in
+  (* the LDD 0 after a SEND that got through clears what is left of the deadline: the byte-code
+     dispatch at "top" (br_set) is a one-slot branch only at dl = 0 *)
+  let answer () = emit b (W (Isa.ldd reply_deadline)); emit b (send reply "replylost"); emit b (W (Isa.ldd 0)) in
   emit b (W (Isa.setp ~mask:(m sda lor m scl) ~value:0 ~oe:0));
   label b "top";
   emit b (recv own "top");
@@ -110,18 +118,20 @@ let i2c_master ~sda ~scl ~own ~reply () =
   label b "ninth";
   wait b q; scl_rise (); wait b q; emit b (W (Isa.shi ~pin:sda ~msb:1)); wait b q;
   emit b (low scl); emit b (rel sda); wait b q;
-  block_send b reply; emit b (jmp "top");
+  answer (); emit b (jmp "top");
   label b "read";
   emit b (rel sda); emit b (W (Isa.ldc 8));
   label b "rbit";
   wait b q; scl_rise (); wait b q; emit b (W (Isa.shi ~pin:sda ~msb:1)); wait b q; emit b (low scl);
   emit b (jnz "rbit");
   wait b q;
-  block_send b reply; emit b (jmp "top");
+  answer (); emit b (jmp "top");
   label b "buserr";
-  emit b (W (Isa.setp ~mask:(m sda lor m scl) ~value:0 ~oe:0)); emit b (W (Isa.lda 0xFD)); block_send b reply; emit b (jmp "top");
+  emit b (W (Isa.setp ~mask:(m sda lor m scl) ~value:0 ~oe:0)); emit b (W (Isa.lda 0xFD)); answer (); emit b (jmp "top");
   label b "protoerr";
-  emit b (W (Isa.lda 0xFC)); block_send b reply; emit b (jmp "top");
+  emit b (W (Isa.lda 0xFC)); answer (); emit b (jmp "top");
+  label b "replylost";
+  emit b (W (Isa.lda 0xFB)); emit b (W Isa.out); emit b (jmp "top");
   assemble b
 
 (* SPI master, mode 0, msb first, with the capture option for full duplex. *)

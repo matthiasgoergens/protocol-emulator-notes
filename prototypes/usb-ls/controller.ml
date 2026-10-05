@@ -11,9 +11,13 @@
    it, and the controller moves one byte into the FIFO every [refill] clocks while the FIFO has
    room ([depth] bytes), after [prepare] clocks for the first byte of a new reply. The firmware
    NAKs IN tokens until a reply is in the FIFO, so slow preparation costs retries, never
-   correctness; the FIFO must not run dry mid-reply, which one byte per four bit times (160
-   clocks) guarantees. One bound is real: the handshake after a data packet is patched on the
-   token's event, so an event must reach the controller within the shortest data packet
+   correctness. RDY rises only once the whole reply, terminator included, is in the FIFO
+   ([whole], the default since 2026-10-05), so the FIFO cannot run dry mid-reply whatever the
+   refill rate; the FIFO must hold the longest reply ([depth] 32; [queue_reply] checks). Before,
+   RDY meant "FIFO not empty" and the FIFO must not run dry mid-reply, which one byte per four
+   bit times (160 clocks) guaranteed: a slower controller made the firmware's IN wait with the
+   line held (stall_fw.ml). One bound is real: the handshake after a data packet is patched on
+   the token's event, so an event must reach the controller within the shortest data packet
    (32 bit times, 1,280 clocks); the tests use up to 1,100. *)
 
 module F = Firmware
@@ -31,6 +35,10 @@ type t = {
   img : F.images;
   jk_swap : bool;
   latency : int; refill : int; depth : int;
+  whole : bool;                        (* RDY only when the whole reply is in the FIFO *)
+  stall : int -> int;                  (* extra clocks before refill k (stall injection); a pure
+                                          function of k, so the model's and the RTL's controllers agree *)
+  mutable nrefill : int;
   prepare : int;                        (* clocks to compute a reply before its first byte is ready *)
   fifo : int Queue.t;                  (* the hardware FIFO in front of host_in *)
   staged : int Queue.t;                (* bytes of the queued reply not yet in the FIFO *)
@@ -54,8 +62,8 @@ type t = {
   log : Buffer.t;
 }
 
-let create ?(jk_swap = false) ?(latency = 200) ?(refill = 40) ?(depth = 4) ?(prepare = 0) img =
-  let c = { img; jk_swap; latency; refill; depth; prepare; fifo = Queue.create (); staged = Queue.create (); next_refill = 0;
+let create ?(jk_swap = false) ?(latency = 200) ?(refill = 40) ?(depth = 32) ?(whole = true) ?(stall = fun _ -> 0) ?(prepare = 0) img =
+  let c = { img; jk_swap; latency; refill; depth; whole; stall; nrefill = 0; prepare; fifo = Queue.create (); staged = Queue.create (); next_refill = 0;
             events = Queue.create (); now = 0; addr = 0; configured = false; ep0 = Idle; ep1_toggle = 0;
             reports = Queue.create (); queued = None; sent = None; sent_at = 0; token = `None; rx = None; patches = 0; max_fifo = 0; popped = 0; forget = false;
             log = Buffer.create 256 } in
@@ -104,6 +112,9 @@ let flush c =
 let queue_reply c ~ep ~pid payload =
   let pkt = Fw_codec.data_bytes pid payload in
   let bytes = Fw_codec.reply ~jk_swap:c.jk_swap pkt @ [ Fw_codec.terminator ] in
+  if c.whole && List.length bytes > c.depth then
+    failwith (Printf.sprintf "controller: a %d-byte reply does not fit the %d-byte FIFO, so RDY would never rise"
+                (List.length bytes) c.depth);
   c.queued <- Some { ep; bytes; pkt_len = List.length payload };
   c.popped <- 0;
   patch_choices c;
@@ -215,13 +226,19 @@ let tick c ~emitted ~popped =
   (* no ACK within 30 bit times of a reply being sent: it was lost, send again *)
   if c.sent <> None && c.now - c.sent_at > 1200 then unacked c;
   if (not (Queue.is_empty c.staged)) && Queue.length c.fifo < c.depth && c.now >= c.next_refill then begin
-    Queue.push (Queue.pop c.staged) c.fifo; c.next_refill <- c.now + c.refill
+    Queue.push (Queue.pop c.staged) c.fifo; c.nrefill <- c.nrefill + 1; c.next_refill <- c.now + c.refill + c.stall c.nrefill
   end;
   c.max_fifo <- max c.max_fifo (Queue.length c.fifo)
 
 let offer_report c r = Queue.push r c.reports; schedule c
 
-let rdy c = if Queue.is_empty c.fifo then 0 else 1
+(* host_in_valid: a byte is at the FIFO's head *)
+let valid c = not (Queue.is_empty c.fifo)
+(* the RDY pin the firmware checks once per IN token before it starts a data packet *)
+let rdy c =
+  if Queue.is_empty c.fifo then 0
+  else if c.whole && not (Queue.is_empty c.staged) then 0
+  else 1
 let head c = if Queue.is_empty c.fifo then 0 else Queue.peek c.fifo
 
 let init c = patch_address c; patch_choices c

@@ -6,10 +6,10 @@
 type t0cfg = Firmware.t0_cfg
 type sys = { img : Firmware.images; ctl : Controller.t }
 
-let make ?(name = "firmware") ?trace ?t0cfg ?t12cfg ?(jk_swap = false) ?latency ?refill ?depth ?prepare ?(verbose_mismatch = true) () =
+let make ?(name = "firmware") ?trace ?t0cfg ?t12cfg ?(jk_swap = false) ?latency ?refill ?depth ?whole ?stall ?prepare ?(verbose_mismatch = true) () =
   let mk () =
     let img = Firmware.build ?t0cfg ?t12cfg () in
-    let ctl = Controller.create ~jk_swap ?latency ?refill ?depth ?prepare img in
+    let ctl = Controller.create ~jk_swap ?latency ?refill ?depth ?whole ?stall ?prepare img in
     Controller.init ctl; { img; ctl } in
   let a = mk () and b = mk () in
   let model = Fw_sys.Model.create () in
@@ -21,10 +21,10 @@ let make ?(name = "firmware") ?trace ?t0cfg ?t12cfg ?(jk_swap = false) ?latency 
     dp, dm, (if oe_dp = 1 || oe_dm = 1 then 1 else 0) in
   let step ~dp ~dm =
     incr cycles;
-    let feed (s : sys) = Controller.rdy s.ctl, Controller.head s.ctl in
-    let rdy_a, head_a = feed a and rdy_b, head_b = feed b in
-    let ea = Fw_sys.Model.step model ~mem:a.img.mem ~dp ~dm ~rdy:rdy_a ~host_in:head_a ~host_in_valid:(rdy_a = 1) in
-    let eb = Fw_sys.Rtl_sim.step rtl ~mem:b.img.mem ~dp ~dm ~rdy:rdy_b ~host_in:head_b ~host_in_valid:(rdy_b = 1) in
+    let feed (s : sys) = Controller.rdy s.ctl, Controller.head s.ctl, Controller.valid s.ctl in
+    let rdy_a, head_a, valid_a = feed a and rdy_b, head_b, valid_b = feed b in
+    let ea = Fw_sys.Model.step model ~mem:a.img.mem ~dp ~dm ~rdy:rdy_a ~host_in:head_a ~host_in_valid:valid_a in
+    let eb = Fw_sys.Rtl_sim.step rtl ~mem:b.img.mem ~dp ~dm ~rdy:rdy_b ~host_in:head_b ~host_in_valid:valid_b in
     let pa = model.st.pin_out, model.st.pin_oe and pb = Fw_sys.Rtl_sim.pins rtl in
     let same = pa = pb && ea.host_out = eb.host_out && ea.host_in_ready = eb.host_in_ready
                && Array.to_list model.st.pcs = Fw_sys.Rtl_sim.pcs rtl in

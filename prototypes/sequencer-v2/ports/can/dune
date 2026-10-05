@@ -16,6 +16,6 @@
 (rule
  (copy orig/can_fw.ml can_fw_orig.ml))
 
-(executable
- (name can_tx)
+(executables
+ (names can_tx can_stall)
  (libraries hardcaml seqv2))

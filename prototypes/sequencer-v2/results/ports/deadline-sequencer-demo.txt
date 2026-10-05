@@ -1,7 +1,7 @@
-# command: /home/matthias/prog/janestreet/emulator-wt-isa-v2/prototypes/sequencer-v2/_build/default/ports/deadline-sequencer/demo.exe
-# commit: 715f4febbcf8c09b871e78c96e07e76ded9919b9 (with uncommitted changes)
+# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/sequencer-v2/_build/default/ports/deadline-sequencer/demo.exe
+# commit: b58ef4e4eebc095e715bfe81aa54f8e86229c517 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-09-26T16:16:08+08:00
+# date: 2026-10-05T09:00:42+08:00
 == uart_tx (38 words)
    0: setp mask=01 val=1 oe=1
    1: lda 0x4f
@@ -69,70 +69,71 @@
   24: jnz 17
   25: setp mask=08 val=1 oe=1
   26: halt
-== i2c_write (63 words)
-   0: setp mask=30 val=0 oe=0
-   1: setp mask=10 val=0 oe=1
-   2: ldd 1
-   3: waitd
-   4: setp mask=20 val=0 oe=1
-   5: lda 0xa0
-   6: ldc 8
-   7: sho pin4 msb od
-   8: ldd 1
-   9: waitd
+== i2c_write (64 words)
+   0: setp mask=10 val=0 oe=1
+   1: ldd 1
+   2: waitd
+   3: setp mask=20 val=0 oe=1
+   4: lda 0xa0
+   5: ldc 8
+   6: sho pin4 msb od
+   7: ldd 2
+   8: waitd
+   9: ldd 4095
   10: setp mask=20 val=0 oe=0
-  11: ldd 5
-  12: waitd
-  13: setp mask=20 val=0 oe=1
-  14: ldd 0
-  15: waitd
-  16: jnz 7
-  17: setp mask=10 val=0 oe=0
-  18: ldd 1
-  19: waitd
+  11: waitp pin5==1 fail=62
+  12: ldd 4
+  13: waitd
+  14: setp mask=20 val=0 oe=1
+  15: jnz 6
+  16: setp mask=10 val=0 oe=0
+  17: ldd 2
+  18: waitd
+  19: ldd 4095
   20: setp mask=20 val=0 oe=0
-  21: ldd 1
-  22: waitd
-  23: shi pin4 msb
-  24: ldd 1
-  25: waitd
-  26: setp mask=20 val=0 oe=1
-  27: ldd 1
-  28: waitd
-  29: out
-  30: lda 0x5a
-  31: ldc 8
-  32: sho pin4 msb od
-  33: ldd 1
-  34: waitd
+  21: waitp pin5==1 fail=62
+  22: ldd 0
+  23: waitd
+  24: shi pin4 msb
+  25: ldd 1
+  26: waitd
+  27: setp mask=20 val=0 oe=1
+  28: out
+  29: lda 0x5a
+  30: ldc 8
+  31: sho pin4 msb od
+  32: ldd 2
+  33: waitd
+  34: ldd 4095
   35: setp mask=20 val=0 oe=0
-  36: ldd 5
-  37: waitd
-  38: setp mask=20 val=0 oe=1
-  39: ldd 0
-  40: waitd
-  41: jnz 32
-  42: setp mask=10 val=0 oe=0
-  43: ldd 1
-  44: waitd
+  36: waitp pin5==1 fail=62
+  37: ldd 4
+  38: waitd
+  39: setp mask=20 val=0 oe=1
+  40: jnz 31
+  41: setp mask=10 val=0 oe=0
+  42: ldd 2
+  43: waitd
+  44: ldd 4095
   45: setp mask=20 val=0 oe=0
-  46: ldd 1
-  47: waitd
-  48: shi pin4 msb
-  49: ldd 1
-  50: waitd
-  51: setp mask=20 val=0 oe=1
-  52: ldd 1
-  53: waitd
-  54: out
-  55: setp mask=10 val=0 oe=1
-  56: ldd 1
-  57: waitd
+  46: waitp pin5==1 fail=62
+  47: ldd 0
+  48: waitd
+  49: shi pin4 msb
+  50: ldd 1
+  51: waitd
+  52: setp mask=20 val=0 oe=1
+  53: out
+  54: setp mask=10 val=0 oe=1
+  55: ldd 3
+  56: waitd
+  57: ldd 4095
   58: setp mask=20 val=0 oe=0
-  59: ldd 1
-  60: waitd
-  61: setp mask=10 val=0 oe=0
-  62: halt
+  59: waitp pin5==1 fail=62
+  60: ldd 0
+  61: waitd
+  62: setp mask=30 val=0 oe=0
+  63: halt
 RTL and interpreter agree on every cycle: true
 uart decoded: 0x4f@8 0x4b@648 0x21@1288
 spi decoded:  0xa5 0x3c
@@ -164,9 +165,9 @@ DEMO PASS
 exit 0
 
 # diff against the recorded result results/ports/original-deadline-sequencer-demo.txt (lines starting # and exit lines ignored):
-140d139
+141d140
 < 
-149d147
+150d148
 < 
-158d155
+159d156
 < 

@@ -23,3 +23,8 @@
  (name emit_v)
  (modules emit_v)
  (libraries hardcaml ps2can))
+
+(executable
+ (name ps2_stall)
+ (modules ps2_stall)
+ (libraries hardcaml ps2can))
