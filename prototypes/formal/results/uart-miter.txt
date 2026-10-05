@@ -1,0 +1,156 @@
+# command: uart-miter/run_uart_miter.sh 
+# commit: ec1650d3c5c869bb2aa2556908902efa77cb9e21 (with uncommitted changes)
+# hardcaml_hobby_boards: 9e6aeca1691a82d99711ef1ab5ba1637abed2ba1
+# yosys: Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+# z3: Z3 version 5.1.0 - 64 bit
+# date: 2026-10-05T22:22:06+08:00
+== simulation, 4 bytes 4f a5 3c 81, LOCKED=1 (iverilog): line edges and bytes taken, by clock
+clock 0 ours took byte x
+clock 0 js   took byte x
+clock 1 ours 1
+clock 1 js   1
+clock 1 ours took byte 0
+clock 1 js   took byte 0
+clock 6 ours took byte 1
+clock 7 js   0
+clock 7 js   took byte 1
+clock 10 ours 0
+clock 27 js   1
+clock 30 ours 1
+clock 107 js   0
+clock 110 ours 0
+clock 147 js   1
+clock 150 ours 1
+clock 167 js   0
+clock 170 ours 0
+clock 187 js   1
+clock 190 ours 1
+clock 206 ours took byte 2
+clock 208 js   0
+clock 208 js   took byte 2
+clock 210 ours 0
+clock 228 js   1
+clock 230 ours 1
+clock 248 js   0
+clock 250 ours 0
+clock 268 js   1
+clock 270 ours 1
+clock 288 js   0
+clock 290 ours 0
+clock 328 js   1
+clock 330 ours 1
+clock 348 js   0
+clock 350 ours 0
+clock 368 js   1
+clock 370 ours 1
+clock 406 ours took byte 3
+clock 409 js   0
+clock 409 js   took byte 3
+clock 410 ours 0
+clock 469 js   1
+clock 470 ours 1
+clock 549 js   0
+clock 550 ours 0
+clock 589 js   1
+clock 590 ours 1
+clock 606 ours took byte 4
+clock 610 ours 0
+clock 610 js   0
+clock 610 js   took byte 4
+clock 630 ours 1
+clock 630 js   1
+clock 650 ours 0
+clock 650 js   0
+clock 770 ours 1
+clock 770 js   1
+== simulation, 4 bytes 4f a5 3c 81, LOCKED=0 (iverilog): line edges and bytes taken, by clock
+clock 0 ours took byte x
+clock 0 js   took byte x
+clock 1 ours 1
+clock 1 js   1
+clock 1 ours took byte 0
+clock 1 js   took byte 0
+clock 2 js   0
+clock 2 js   took byte 1
+clock 6 ours took byte 1
+clock 10 ours 0
+clock 22 js   1
+clock 30 ours 1
+clock 102 js   0
+clock 110 ours 0
+clock 142 js   1
+clock 150 ours 1
+clock 162 js   0
+clock 170 ours 0
+clock 182 js   1
+clock 190 ours 1
+clock 203 js   0
+clock 203 js   took byte 2
+clock 206 ours took byte 2
+clock 210 ours 0
+clock 223 js   1
+clock 230 ours 1
+clock 243 js   0
+clock 250 ours 0
+clock 263 js   1
+clock 270 ours 1
+clock 283 js   0
+clock 290 ours 0
+clock 323 js   1
+clock 330 ours 1
+clock 343 js   0
+clock 350 ours 0
+clock 363 js   1
+clock 370 ours 1
+clock 404 js   0
+clock 404 js   took byte 3
+clock 406 ours took byte 3
+clock 410 ours 0
+clock 464 js   1
+clock 470 ours 1
+clock 544 js   0
+clock 550 ours 0
+clock 584 js   1
+clock 590 ours 1
+clock 605 js   0
+clock 605 js   took byte 4
+clock 606 ours took byte 4
+clock 610 ours 0
+clock 625 js   1
+clock 630 ours 1
+clock 645 js   0
+clock 650 ours 0
+clock 765 js   1
+clock 770 ours 1
+== bmc
+engine_0: No output asserted in 840 frames. Resource limit reached (conf limit 0). Time =     0.11 sec
+summary: engine_0 (abc bmc3) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== ante
+engine_0: Output 0 of miter "model/design_aiger" was asserted in frame 810. Time =     0.09 sec
+summary: engine_0 (abc bmc3) returned FAIL
+summary: engine_0 did not produce any traces
+DONE (FAIL, rc=2)
+== constant
+engine_0: Output 0 of miter "model/design_aiger" was asserted in frame 210. Time =     0.04 sec
+summary: engine_0 (abc bmc3) returned FAIL
+summary:   failed assertion uart_miter.line at uart_miter.sv:41.26-41.61 step 210
+DONE (FAIL, rc=2)
+== stretch
+engine_0: Output 0 of miter "model/design_aiger" was asserted in frame 90. Time =     0.02 sec
+summary: engine_0 (abc bmc3) returned FAIL
+summary:   failed assertion uart_miter.line at uart_miter.sv:41.26-41.61 step 90
+DONE (FAIL, rc=2)
+== flip
+engine_0: Output 0 of miter "model/design_aiger" was asserted in frame 170. Time =     0.03 sec
+summary: engine_0 (abc bmc3) returned FAIL
+summary:   failed assertion uart_miter.line at uart_miter.sv:41.26-41.61 step 170
+DONE (FAIL, rc=2)
+== per-task verdicts of the controls (each must FAIL)
+PROPERTY uart-miter-constant: FAILED at step 210
+PROPERTY uart-miter-stretch: FAILED at step 90
+PROPERTY uart-miter-flip: FAILED at step 170
+== per-property report: bmc with ante (the antecedent's reachability)
+PROPERTY line: PROVED to 840 clocks (abc bmc3), 4 bytes, every value; antecedent line_ante reachable (step 810)
+COVER line_ante: REACHABLE (step 810)

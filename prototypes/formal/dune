@@ -1,6 +1,7 @@
 ; Bounded model checking of sequencer programmes (README.md). isa2.ml, compat.ml, isa.ml and
-; compiler.ml are links to the prototypes' own files, not copies.
-(executable
- (name main)
- (modules isa2 compat isa compiler ownership smt props machine bmc programmes lustre main)
+; compiler.ml are links to the prototypes' own files, not copies. uart_rom writes the programme
+; store of the UART miter (uart-miter/).
+(executables
+ (names main uart_rom)
+ (modules isa2 compat isa compiler ownership smt props machine bmc programmes lustre main uart_rom)
  (libraries unix bridge_fw))

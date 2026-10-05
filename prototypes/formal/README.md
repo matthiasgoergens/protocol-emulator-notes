@@ -24,6 +24,7 @@ Everything was run on 2026-10-05.
 | 4 | RTL against specification (Yosys) | equal for 23 clocks after reset, for every instruction stream and input; **28 of 28** planted RTL bugs found |
 | 5 | power-up determinism (SymbiYosys) | two copies from arbitrary register contents agree on every output after a one-clock reset, **unbounded** (abc pdr); **found a fetch bug in the RTL** (Findings 5), now fixed; 2 of 2 planted un-reset registers that reach an output are caught, 3 that cannot are correctly passed |
 | 6 | per-property report | every property PROVED, VACUOUS, FAILED or UNDECIDED, every cover REACHABLE or UNREACHABLE, across all engines (`results/summary.txt`); a planted vacuous property is reported VACUOUS |
+| 7 | our UART against Jane Street's `Uart.Tx` (SymbiYosys) | pin-equivalent for 4 frames and every 4 byte values, with an offset that shrinks by exactly one clock per back-to-back frame (3, 2, 1, 0), and **why no constant offset can hold** |
 
 ## 1. One interpreter, several value domains
 
@@ -447,9 +448,9 @@ the same for every engine:
   frame is sampled; (e) some thread touches an inbox; e-bank: thread 0 reads the bank. For an
   induction step the antecedent is its hypotheses: unsatisfiable hypotheses make it VACUOUS.
 - **SymbiYosys** (`sby_report.py`): each `label: assert` needs a `label_ante: cover`; the script
-  combines the proof's log with the cover task's log. Where smtbmc's covers are too slow, the
-  antecedent can be asserted negated as `label_ante_reach` and checked by a bit-level BMC: a
-  failure at step n means reachable at step n.
+  combines the proof's log with the cover task's log. Where smtbmc's covers are too slow (the
+  UART miter, 840 clocks), the antecedent is asserted negated as `label_ante_reach` and checked
+  by abc bmc3: a failure at step n means reachable at step n.
 - `report.sh` collects every PROPERTY and COVER line into `results/summary.txt` and marks the
   planted faults and controls, where FAILED or VACUOUS is the expected answer.
 
@@ -458,12 +459,68 @@ programme never reaches; it has no violation, and is reported **VACUOUS**, not P
 `powerup.sv`, `vacuity_control` asserts an implication whose antecedent (the output enables
 differ) the other assertions rule out; it must be reported VACUOUS too.
 
-One thing this caught while it was being built: sby's summary listed only 5 of the 7 reached
+Two things this caught while it was being built. sby's summary listed only 5 of the 7 reached
 covers in one run, so a report read from the summary called two reachable antecedents undecided;
-`sby_report.py` reads the engine's own "Reached cover statement" lines.
+`sby_report.py` reads the engine's own "Reached cover statement" lines. And the first antecedent
+written for the UART miter counted falling edges on the lines, which data bits produce too: it
+was reached at step 606, before the last frame had started, and so certified less than it
+claimed. It now requires every byte taken by both transmitters and our last frame finished.
 
 Not in the report: Kind 2 (section 3) and the RTL-against-specification runs (section 4), whose
 non-vacuity evidence is the 28 of 28 planted bugs; and a-protocols (Findings 4).
+
+## 7. Our UART against Jane Street's `Uart.Tx`
+
+After MarcosAsh's `fsm_miter` (credits). The reference is `Uart.Tx` from
+github.com/janestreet/hardcaml_hobby_boards (MIT), `src/uart.ml`, commit 9e6aeca (2025-10-30). It
+is not vendored: `uart-miter/build_hobby_tx.sh` compiles the unmodified upstream files from a
+checkout in `/var/tmp` next to our `emit_hobby_tx.ml`, which fixes the configuration (8 data bits,
+no parity, one stop bit, 20 clocks per bit) and writes Verilog. The upstream source needs Hardcaml
+v0.18 and `ppx_hardcaml`, which the shared switch 5.3.0 lacks (v0.17, no ppx), so it builds in a
+project-local opam switch, `/var/tmp/formal-hygiene/hobby-switch`, with v0.18~preview.130.106+341
+from Jane Street's opam repository.
+
+Our side is the v2 core (the Verilog of `tt/src`) running the compiler's UART programme on
+thread 0, pin 0, 5 slots (20 clocks) per bit, taking each byte from the host with IN: the
+programme of property (d). `uart_rom.exe` writes it as the store's contents; the store reads
+in one clock, as on the chip. `uart-miter/uart_pair.v` runs both on the same bytes.
+
+**Measured first, in simulation** (`results/uart-miter.txt`, iverilog, 4 bytes). Our core takes
+byte k when its IN executes. The Tx takes a byte in its Start state while `data_in_valid` is high.
+
+| feeding the Tx | Tx frame starts | our frame starts | offset |
+|---|---|---|---|
+| each byte valid one clock after our core takes it ("locked") | 7, 208, 409, 610 | 10, 210, 410, 610 | 3, 2, 1, 0 |
+| every byte valid as soon as the Tx can take it | 2, 203, 404, 605 | 10, 210, 410, 610 | 8, 7, 6, 5 |
+
+**Why no constant offset holds.** Back to back, the Tx needs 10 × 20 + 1 = 201 clocks per frame:
+after the stop bit's last enable it spends one more bit period in Complete, then one clock in
+Start to take the next byte, so its stop bit is 21 clocks. Our frame is exactly 200 clocks: the
+next byte's IN sits inside the stop bit's 5 slots. In general the Tx's back-to-back period is
+10 × clocks_per_bit + 1, always odd, and ours is a whole number of 4-clock slots, so no
+clocks_per_bit makes them equal; the offset changes by one clock per frame whichever way the Tx
+is fed. Within a frame the waveforms are identical: start and data bits are 20 clocks on both.
+
+**The proof** (`uart-miter/uart_miter.sv`, SymbiYosys, abc bmc3): the bytes are free constants
+(every value of all four), the Tx is fed locked, and every clock from reset to 840 our line at t
+equals the Tx's line at t − d, with d = 3, 2, 1, 0 in our frames 1 to 4 (before the first, 3).
+The Tx's line before its reset has taken effect counts as idle.
+
+| task | what | result |
+|---|---|---|
+| bmc | 4 frames, every 4 byte values, offsets 3, 2, 1, 0 | **PASS to 840 clocks** (0.11 s) |
+| ante | antecedent: all four bytes taken by both, our last frame finished | reachable at clock 810 (our last frame started at 610) |
+| constant | the same with one constant offset, 3 | **FAIL** at clock 210, our second start bit |
+| flip | the Tx given each byte XOR 0x80 | **FAIL** at clock 170, bit 7 of the first byte |
+| stretch | our programme with the compiler's fault injector (data bit 3 of byte 1 three slots longer), 2 bytes | **FAIL** at clock 90 |
+
+abc decides the 840 clocks in a tenth of a second because, with the timing locked, everything
+but the byte values is deterministic; the three controls show the property is not vacuous
+(and the antecedent shows the whole horizon is compared).
+
+Limits: four frames, back to back, host always ready; a fifth would need the Tx to be behind
+ours (d = −1). The Tx's `data_in_ready` is high exactly in its Start state, which the feeding
+logic uses as its accept signal; that is read from the upstream source, not from a spec.
 
 ## Findings
 
@@ -509,11 +566,15 @@ non-vacuity evidence is the 28 of 28 planted bugs; and a-protocols (Findings 4).
     cycles since an edge) is the unbounded alternative to (a). **It has not been read yet**; the
     backlog's advice to read it before building ours still stands for the programme verifier.
 - **MarcosAsh**, github.com/MarcosAsh/protocol-emulator (Apache-2.0): power-up determinism as
-  a two-copy proof from arbitrary flop contents (`formal/powerup.sby`). Idea only; section 5 is
-  our own.
+  a two-copy proof from arbitrary flop contents (`formal/powerup.sby`), and a miter of firmware
+  against `hardcaml_hobby_boards`' `Uart.Tx` (`make -C formal fsm_miter`). Ideas only; sections
+  5 and 7 are our own.
 - **smprather**, github.com/smprather/janestreet-blog-serial-protocol-emulator (MIT): every
   property reported as PROVED, REACHABLE or VACUOUS, vacuous never counting as a pass
   (`formal/run_formal.sh`). Idea only; section 6 is our own.
+- **Jane Street**, github.com/janestreet/hardcaml_hobby_boards (MIT, Copyright (c) 2025 Jane
+  Street Group, LLC): `Uart.Tx` (`src/uart.ml`, `src/uart_types.ml`), the reference circuit of
+  section 7. Used unmodified from a checkout outside this repository; no code copied.
 - Tools: z3 (MIT, from the `z3-solver` wheel), Kind 2 (Apache-2.0), Yosys (ISC, in the
   LibreLane image), Hardcaml.
 
@@ -535,6 +596,9 @@ equiv/run_equiv.sh bug 12 "SKEQ skip lands on pc+1"
 ```
 
 Per-property report (section 6): `./report.sh` (reads the result files, runs nothing).
+
+UART miter (section 7): `uart-miter/run_uart_miter.sh [TASK...]`, after making the project-local
+switch as `uart-miter/build_hobby_tx.sh` describes.
 
 Power-up determinism (section 5): `powerup/run_powerup.sh [TASK...]`. It needs the LibreLane
 image and the z3 venv above (`Z3ENV`); the container has no `/lib64`, so the script runs the
