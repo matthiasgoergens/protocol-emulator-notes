@@ -1,0 +1,5 @@
+; Frozen copies of the pixel path before the Delayed rewrite, for test/test_latency.ml only.
+(library
+ (name hdmi_reference)
+ (wrapped false)
+ (libraries base hardcaml hdmi_hw))

@@ -1,0 +1,46 @@
+pattern, 640x480: built
+demo, 640x480: built
+PLANTED pattern, syncs one register short: REJECTED by the latency check
+PLANTED demo, syncs one register short: REJECTED by the latency check
+pattern, small mode, 5 frames: 0 of 1375 cycles differ (all of word_b, word_g, word_r, toggle, led_1hz)
+pattern, 640x480, 1 frame + 1000: 0 of 421000 cycles differ (all of word_b, word_g, word_r, toggle, led_1hz)
+e2e mutant 'latency', small mode, 5 frames: 0 of 1375 cycles differ (all of word_b, word_g, word_r, toggle, led_1hz)
+e2e mutant 'latency' against the good design: word_b differs on 440 cycles
+== hdmi_pixel (pattern, Delayed) (defaults): 0 finding(s)
+== hdmi_pixel_demo (Delayed) (hold_registers): 1 finding(s)
+reconvergence at & @ demo/console_hdmi.ml:74:14
+  measured from reg @ demo/console.ml:59:83:
+     17 cycles: reg @ demo/console.ml:78:65
+     18 cycles: not @ demo/console_hdmi.ml:74:24
+== hdmi_serial (bit clock) (defaults): 1 finding(s)
+reconvergence at ^ @ hw/serialiser.ml:40:13
+  measured from input toggle @ hw/hdmi.ml:99:15:
+      2 cycles: reg @ hw/serialiser.ml:38:11
+      3 cycles: reg @ hw/serialiser.ml:39:11
+== original plain hdmi_pixel (defaults): 0 finding(s)
+== PLANTED original plain hdmi_pixel, syncs one register short (defaults): 6 finding(s)
+reconvergence at mux @ hw/tmds.ml:90:4
+  measured from reg @ test/reference/video_timing_orig.ml:51:8:
+      0 cycles: & @ test/reference/video_timing_orig.ml:56:9
+      1 cycles: mux @ hw/tmds.ml:79:18
+reconvergence at mux @ hw/tmds.ml:90:4
+  measured from reg @ test/reference/video_timing_orig.ml:51:8:
+      0 cycles: & @ test/reference/video_timing_orig.ml:56:9
+      1 cycles: mux @ hw/tmds.ml:79:18
+reconvergence at mux @ hw/tmds.ml:90:4
+  measured from reg @ test/reference/video_timing_orig.ml:51:8:
+      0 cycles: & @ test/reference/video_timing_orig.ml:56:9
+      1 cycles: mux @ hw/tmds.ml:79:18
+reconvergence at mux @ hw/tmds.ml:91:4
+  measured from reg @ test/reference/video_timing_orig.ml:51:8:
+      0 cycles: & @ test/reference/video_timing_orig.ml:56:9
+      1 cycles: mux @ hw/tmds.ml:80:17
+reconvergence at mux @ hw/tmds.ml:91:4
+  measured from reg @ test/reference/video_timing_orig.ml:51:8:
+      0 cycles: & @ test/reference/video_timing_orig.ml:56:9
+      1 cycles: mux @ hw/tmds.ml:80:17
+reconvergence at mux @ hw/tmds.ml:91:4
+  measured from reg @ test/reference/video_timing_orig.ml:51:8:
+      0 cycles: & @ test/reference/video_timing_orig.ml:56:9
+      1 cycles: mux @ hw/tmds.ml:80:17
+== planted control, plain hdmi_pixel, syncs one register short: 6 new finding(s) -> caught

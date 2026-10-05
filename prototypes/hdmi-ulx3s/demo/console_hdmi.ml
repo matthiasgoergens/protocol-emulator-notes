@@ -80,19 +80,33 @@ let source ~fields ~packet_file : Hdmi_hw.Hdmi.source =
   let we = pvalid &: (sub_now ==:. 5) in
   let wline = select (vcount -:. Console.first_vis) 7 0 in
   let waddr = concat_msb [ wline; col_now ] in
-  (* --- reader: 2 x 2 scale, centred --- *)
+  (* --- reader: 2 x 2 scale, centred.  Latency-checked (Hardcaml_latency.Delayed): x and y come
+     in at the raster's latency, the frame buffer read is one register, and the colour leaves
+     three registers later; hdmi.ml delays the syncs to match.  The console and the writer above
+     are plain signals: they run on the console's own beam, and the frame buffer is where the
+     two time bases meet, so no latency relates them. --- *)
+  let module D = Hardcaml_latency.Delayed in
   let x0 = 64 in
-  let inside = x >=:. x0 &: (x <:. x0 + 512) &: (y <:. 480) in
-  let xr = x -:. x0 in
-  let raddr = reg spec (concat_msb [ select y 8 1; select xr 8 1 ]) in
-  let inside1 = reg spec inside in
-  let fb = Instantiation.create () ~name:"frame_buffer"
-             ~inputs:[ "clock", clock; "we", we; "waddr", waddr; "wdata", pcol; "raddr", raddr ]
-             ~outputs:[ "rdata", 8 ] in
-  let pix = Map.find_exn fb "rdata" (* valid one cycle after raddr: latency 2 from x, y *) in
-  let inside2 = reg spec inside1 in
-  let channel f =
-    let table = List.init 256 ~f:(fun c -> of_int ~width:8 (f (palette_rgb c))) in
-    reg spec (mux2 inside2 (mux pix table) (zero 8))
+  let inside = D.(x >=:. x0 &: (x <:. x0 + 512) &: (y <:. 480)) in
+  let xr = D.(x -:. x0) in
+  let raddr = D.(reg spec (concat_msb [ select y 8 1; select xr 8 1 ])) in
+  let inside1 = D.reg spec inside in
+  let pix =
+    D.lift ~name:"frame_buffer" ~latency:1
+      (function
+        | [ raddr ] ->
+          let fb =
+            Instantiation.create () ~name:"frame_buffer"
+              ~inputs:[ "clock", clock; "we", we; "waddr", waddr; "wdata", pcol; "raddr", raddr ]
+              ~outputs:[ "rdata", 8 ]
+          in
+          Map.find_exn fb "rdata"
+        | _ -> assert false)
+      [ raddr ]
   in
-  (channel (fun (r, _, _) -> r), channel (fun (_, g, _) -> g), channel (fun (_, _, b) -> b)), 3
+  let inside2 = D.reg spec inside1 in
+  let channel f =
+    let table = List.init 256 ~f:(fun c -> D.of_int ~width:8 (f (palette_rgb c))) in
+    D.(reg spec (mux2 inside2 (mux pix table) (zero 8)))
+  in
+  channel (fun (r, _, _) -> r), channel (fun (_, g, _) -> g), channel (fun (_, _, b) -> b)
