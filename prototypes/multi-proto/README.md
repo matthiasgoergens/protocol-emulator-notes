@@ -374,7 +374,12 @@ without the glitch has 74 frames. The stand-in gives 79 transmissions (12 contes
 
 - **T0, UART receive:** raises RTS when the I2C thread's inbox is full.
 - **T1, I2C master:** runs a byte code (START, STOP, WRITE b, READ, ACK, NACK) and honours clock
-  stretching on every SCL rise, bounded by its deadline. 99 words.
+  stretching on every SCL rise, bounded by its deadline. Its answers to T2's inbox are SENDs
+  with a 4095-slot deadline (since 2026-10-05; until then they waited for ever, which the hazard
+  checker in `../verif-oracles` rejected): if T2 has stopped, the answer is dropped, 0xFB goes to
+  the host, and the master takes the next byte code. 110 words. The control "answer deadline A"
+  in `bridges.exe all` stops T2 and checks that every answer that finds the inbox full is
+  reported and the I2C traffic still matches the reference.
 - **T2, UART transmit.**
 - **T3:** an unrelated SPI master.
 

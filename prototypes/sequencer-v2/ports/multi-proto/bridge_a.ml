@@ -68,10 +68,12 @@ type neigh = Compiled | Rand of int | Off
 type cfg = {
   which : which; seed : int; ntx : int; rtl : bool; neigh : neigh; fault : Isa_mb.fault; late : int;
   respect_cts : bool; err : float; gap_bits : int; max_stretch : int; bridge : bool; depth : int;
+  drain : bool;   (* false: T2, the UART transmitter that drains inbox 2, is stopped (HALT) *)
 }
 
 let base = { which = A; seed = 1; ntx = 12; rtl = true; neigh = Compiled; fault = Isa_mb.No_fault; late = 0;
-             respect_cts = true; err = 0.01; gap_bits = 2; max_stretch = 400; bridge = true; depth = 1 }
+             respect_cts = true; err = 0.01; gap_bits = 2; max_stretch = 400; bridge = true; depth = 1;
+             drain = true }
 
 type outcome = {
   answers : int list; expected : int list; regs_ok : bool; bus_ok : bool; mism : int; reports : (int * int) list;
@@ -106,6 +108,7 @@ let run (c : cfg) =
     | B -> uart_rx ~late:c.late ~rx ~rts:None ~dst:1 (), spi_master ~sclk:2 ~mosi:3 ~miso:4 ~cs:5 ~own:1 ~reply:2 (), uart_tx ~tx ~own:2 () in
   let rearm_pc = Hashtbl.find l0 "rearm" and stopchk_pc = Hashtbl.find l0 "stopchk" in
   let t0, t1, t2 = if c.bridge then t0, t1, t2 else halt, halt, halt in
+  let t2 = if c.drain then t2 else halt in
   let neigh_pins = match c.which with A -> 0xE0 | B -> 0xC0 in
   let t3 = match c.neigh with
     | Off -> halt
@@ -126,7 +129,7 @@ let run (c : cfg) =
   let nslave = new_i2c_slave ~seed:5 0x50 in               (* bridge B's neighbour bus: 0xA0 >> 1 *)
   let sdev = new_spi_dev () in
   let tr = ref (Array.make 1_000_000 0) in
-  let reports = ref [] in
+  let reports = ref [] and last_report = ref 0 in
   let rts_cycles = ref 0 and max_fill = ref 0 and min_slack = ref max_int in
   let bridge_hash = ref 0 and neigh_hash = ref 0 in
   let t_stop = ref (-1) in
@@ -177,14 +180,17 @@ let run (c : cfg) =
         t_stop := -1
       end
     end;
-    (match e.host_out with Some v when th = 0 -> reports := (th, v) :: !reports | _ -> ());
+    (match e.host_out with Some v when th = 0 || th = 1 -> reports := (th, v) :: !reports; last_report := now | _ -> ());  (* T0 overflow, T1 answer lost *)
     let fill = List.length d.st.inbox.(1) in if fill > !max_fill then max_fill := fill;
     let txl = pushpull tx in
     (if !txs_state < 0 then (if txl = 0 then txs_state := now)
      else if now - !txs_state >= 10 * 4 * bit_slots then (txs_state := -1; incr txs_count; last_tx := now));
     incr n;
     let sent_all = hs.next >= Array.length hs.bytes && hs.bitn < 0 in
-    if (c.bridge && sent_all && ((!txs_count >= List.length expected && now - !last_tx > 20000) || now - max !last_tx 0 > 400000))
+    if (c.bridge && c.drain && sent_all && ((!txs_count >= List.length expected && now - !last_tx > 20000) || now - max !last_tx 0 > 400000))
+       (* nothing is transmitted with the drain stopped: run until T1 has gone 100000 clocks (six
+          answer deadlines) without a report *)
+       || (c.bridge && (not c.drain) && sent_all && now - !last_report > 100_000)
        || now >= 6_000_000 || ((not c.bridge) && now >= 400_000) then fin := true
   done;
   if Sys.getenv_opt "DEBUG" <> None then
@@ -217,7 +223,7 @@ let describe name o =
     go 0 o.answers o.expected in
   let rec agree a b = match a, b with x :: r1, y :: r2 when x = y -> 1 + agree r1 r2 | _ -> 0 in
   Printf.printf "%-50s %s: %d bytes in, answers %d/%d in agreement before the first difference (%s); device %s, bus %s; \
-                 RTL mismatches %d; T0 reports %d; %d cycles; RTS high %d cycles; host waited on CTS %d cycles; \
+                 RTL mismatches %d; T0/T1 reports %d; %d cycles; RTS high %d cycles; host waited on CTS %d cycles; \
                  max inbox fill %d; slave stretched %d cycles; receive slack %d slots\n%!"
     name (if pass o then "PASS" else "FAIL") o.n_ops (agree o.answers o.expected) (List.length o.expected) first_diff
     (if o.regs_ok then "ok" else "WRONG") (if o.bus_ok then "ok" else "WRONG")
@@ -290,6 +296,18 @@ let () =
     Printf.printf "WAITC 11 executed with the last SEND elsewhere than the inbox the original waited on: %d of %d executions\n"
       !Isa_mb.lsend_violations !Isa_mb.lsend_checked;
     if !Isa_mb.lsend_violations <> 0 || !Isa_mb.lsend_checked = 0 then all_ok := false;
+    (* the answer deadline (bridge_lib's i2c_master): with the UART transmitter stopped, every
+       answer that finds inbox 2 full is dropped when its deadline expires and reported to the host
+       as 0xFB, and the master goes on serving the bus. Before the deadline existed it waited at
+       the first full inbox for ever, holding SCL low. *)
+    let st = run { base with rtl = false; drain = false } in
+    describe "answer deadline A: UART transmitter stopped (interp)" st;
+    let lost = List.length (List.filter (fun (th, v) -> th = 1 && v = 0xFB) st.reports) in
+    let ok_st = st.answers = [] && st.bus_ok && st.regs_ok && List.length st.reports = lost
+                && lost = List.length st.expected - base.depth in
+    Printf.printf "  T1 reported %d lost answers of %d (inbox 2 keeps %d); I2C bus and register file as the reference: %b -> %s\n%!"
+      lost (List.length st.expected) base.depth (st.bus_ok && st.regs_ok) (if ok_st then "as expected" else "UNEXPECTED");
+    if not ok_st then all_ok := false;
     print_endline (if !all_ok then "BRIDGES PASS" else "BRIDGES FAIL")
   end;
   Printf.printf "elapsed %.0f s\n" (Unix.gettimeofday () -. t0)

@@ -22,16 +22,19 @@ let () =
                              g (Pin 1) 2 [ Pin_drive ]; g (Inbox 2) 2 [ Recv_k; Poll ];
                              g (Pin 5) 3 [ Pin_drive ]; g (Pin 6) 3 [ Pin_drive ]; g (Pin 7) 3 [ Pin_drive ] ] } in
   let f = report ~name:"bridge A on v2: T0 UART RX -> inbox 1 -> T1 I2C master -> inbox 2 -> T2 UART TX; T3 SPI neighbour" ~fetch d in
-  Printf.printf "bridge A: %d rejected combination(s): T1's answer SENDs to inbox 2 have fail = their own address\n\n" (List.length f);
-  (* the drain argument: T2's only wait that can last for ever is its RECV on inbox 2 *)
-  let other = unbounded_waits ~fetch ~decl:d 2 ~except:[ Inbox 2 ] in
-  Printf.printf "evidence for a waiver: T2's unbounded waits other than RECV on inbox 2: [%s]\n\n" (String.concat "; " other);
-  let why = "T2 (UART TX) drains inbox 2: its only unbounded wait is that RECV (checked above), its loops are JNZ \
-             countdowns, so a blocked SEND waits at most one UART byte (10 bits of 64 clocks); argued, not proved" in
-  let f2 = report ~name:"bridge A with T1's inbox-2 SENDs waived by that argument" ~fetch
-      { d with waivers = [ (Inbox 2, Thread 1, Send_k, why) ] } in
-  Printf.printf "HAZARD BRIDGE %s (unwaived: %d rejections, the finding; waived: %d)\n"
-    (if f <> [] && f2 = [] && other = [] then "PASS" else "FAIL") (List.length f) (List.length f2)
+  Printf.printf "bridge A: %d rejected combination(s), no waiver (bridge_lib's i2c_master now answers into inbox 2 with \
+                 LDD 4095; SEND ch2 -> replylost)\n\n" (List.length f);
+  (* control: T1 as it was before the fix, rebuilt by pointing every SEND to inbox 2 back at itself
+     (fail = own address); the checker must reject exactly those *)
+  let is_send2 w = (w lsr 12) land 15 = 13 && (w lsr 11) land 1 = 0 && (w lsr 8) land 7 = 2 in
+  let t1_old = Array.mapi (fun pc w -> if is_send2 w then Isa2.send ~ch:2 ~fail:pc else w) t1 in
+  let n_send2 = Array.fold_left (fun n w -> if is_send2 w then n + 1 else n) 0 t1 in
+  let mem_old = [| t0; t1_old; t2; t3 |] in
+  let fetch_old a = let t = a lsr 8 and pc = a land 0xFF in if pc < Array.length mem_old.(t) then mem_old.(t).(pc) else Isa2.nop in
+  let f_old = report ~name:"control: the same with T1's SENDs to inbox 2 made fail = own address (the code before the fix)" ~fetch:fetch_old d in
+  Printf.printf "control: %d SEND(s) to inbox 2 in T1; with fail = own address the checker rejects %d\n\n" n_send2 (List.length f_old);
+  Printf.printf "HAZARD BRIDGE %s (bridge A accepted without a waiver: %d rejections; control: %d of %d sends rejected)\n"
+    (if f = [] && n_send2 > 0 && List.length f_old = n_send2 then "PASS" else "FAIL") (List.length f) (List.length f_old) n_send2
 
 let () =
   let (_, _, _), (t1, _, _), (_, _, _) =
