@@ -1,0 +1,11 @@
+# timing certificate
+# image watchdog sha256 ccc5d52eec158e07d56c6a309dda87fe95a172dd17e8106f9abea3d60f2ec56d (256 words, high byte first)
+# specification: watchdog, channel pins 6,7
+# verdict: PROVED; 6 table entries, 4 channel events checked
+# assumptions: kernel.ml A1-A5. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot
+# columns: pc, instruction, pins touched, specification state from -> to, slot of the event,
+#          gap since the previous channel event, declared gap
+  0  setp mask=80 val=0 oe=1 q=0 p7:set=0                     0 -> 1   slot 0          gap 0         declared 0
+  2  waitp pin6==1 fail=4       p6:seen=1                    1 -> 4   slot 2..22      gap 2..22     declared 2..22
+  2  waitp pin6==1 fail=4       p6:timeout(1)                1 -> 2   slot 22         gap 22        declared 22
+  4  setp mask=80 val=1 oe=1 q=0 p7:set=1                     2 -> 3   slot 23         gap 1         declared 1

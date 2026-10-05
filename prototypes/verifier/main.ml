@@ -74,7 +74,7 @@ let cert_text v =
   p "# specification: %s, channel pins %s\n" v.img.spec.name (String.concat "," (List.map string_of_int v.img.spec.pins));
   p "# verdict: %s; %d table entries, %d channel events checked\n" (if accepted v then "PROVED" else "REJECTED")
     v.rep.entries v.rep.events_checked;
-  p "# assumptions: kernel.ml A1-A4. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot\n";
+  p "# assumptions: kernel.ml A1-A5. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot\n";
   p "# columns: pc, instruction, pins touched, specification state from -> to, slot of the event,\n";
   p "#          gap since the previous channel event, declared gap\n";
   let preds = List.sort_uniq compare (List.map (fun (x : Kernel.prediction) ->
