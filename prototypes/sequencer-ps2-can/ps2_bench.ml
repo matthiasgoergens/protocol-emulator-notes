@@ -79,16 +79,34 @@ let report r =
 let is_response b = List.mem b [ 0xFA; 0xAA; 0xEE; 0xFE; 0xAB; 0x83 ]
 
 (* Our device firmware against the model host. *)
-let device_vs_model_host ?(faults = Ps2_fw.no_faults) ?(timing = timing) ?(rtl = true) ~name ~seed ~codes ~cmds ~inhibits ~rise () =
+(* Stall injection (ps2_stall.ml): the byte at the head of an application's queue becomes valid
+   on host_in [lag] fs after it became the head (and was due). With [early] the doorbell (req)
+   rings as soon as the byte is due, before it is valid, which breaks the contract the firmware
+   relies on (doorbell => byte valid); without it the doorbell waits for the byte. lag = 0 is the
+   bench as it always was. *)
+let lagged ~lag ~early ~now ~queue ~due =
+  let head = ref (queue ()) and since = ref 0 in
+  let valid () =
+    let q = queue () in
+    if q != !head then (head := q; since := now ());
+    q <> [] && now () >= max !since (due q) + lag in
+  (fun req -> if early then req else req && valid ()), valid
+
+let device_vs_model_host ?(faults = Ps2_fw.no_faults) ?(timing = timing) ?(rtl = true) ?(lag = 0) ?(early = false)
+    ~name ~seed ~codes ~cmds ~inhibits ~rise () =
   ignore seed;
   let clk = Sim.Oc.create ~rise and data = Sim.Oc.create ~rise in
   let prog, _, _ = Ps2_fw.device ~faults { clk = 0; data = 1; req = 2 } timing in
   let mem = Array.init 4 (fun t -> if t = 0 then prog else Array.make 256 Isa_v.halt) in
   let app = Kbd_app.create codes in
   let port = { fw_clk = 0; fw_data = 1; fw_req = 2; clk; data } in
+  let now_ref = ref 0 in
+  let gate, valid = lagged ~lag ~early ~now:(fun () -> !now_ref) ~queue:(fun () -> app.queue) ~due:(fun _ -> 0) in
   let m, contention, seq = seq_agent ~mem ~ports:[ 0, port ] ~rtl
-      ~req:(fun t -> t = 0 && Kbd_app.req app) ~host_in:(fun t -> if t = 0 then Kbd_app.host_in app else None)
+      ~req:(fun t -> t = 0 && gate (Kbd_app.req app))
+      ~host_in:(fun t -> if t = 0 && valid () then Kbd_app.host_in app else None)
       ~on_out:(fun t v -> if t = 0 then Kbd_app.on_out app v) in
+  let seq = { seq with fire = (fun now -> now_ref := now; seq.fire now) } in
   let host = Ps2_model.Host.create ~clk ~data () in
   host.cmds <- List.map (fun (at, byte, bad) -> { Ps2_model.Host.at; byte; bad_parity = bad }) cmds;
   host.inhibits <- inhibits;
@@ -96,7 +114,9 @@ let device_vs_model_host ?(faults = Ps2_fw.no_faults) ?(timing = timing) ?(rtl =
   let last_cmd = List.fold_left (fun a (t, _, _) -> max a t) 0 cmds in
   let stop () = app.queue = [] && host.cmds = [] && host.sending = None && host.inhibits = []
                 && host.inhibit_until = 0 in
-  ignore (Sim.run ~stop ~until:(last_cmd + Sim.us (3000. +. float (List.length codes + 10) *. 1500.)) [ seq; model ]);
+  (* a late byte (stall injection) lengthens the run by up to [lag] per byte *)
+  ignore (Sim.run ~stop ~until:(last_cmd + Sim.us (3000. +. float (List.length codes + 10) *. 1500.)
+                                + lag * (List.length codes + (3 * List.length cmds) + 10)) [ seq; model ]);
   (* checks *)
   let got = List.rev_map (fun (_, b, p) -> b, p) host.received in
   let bad_parity = List.filter (fun (_, p) -> not p) got in
@@ -117,16 +137,19 @@ let device_vs_model_host ?(faults = Ps2_fw.no_faults) ?(timing = timing) ?(rtl =
   (host, app, responses)
 
 (* The model device against our host firmware. *)
-let host_vs_model_device ?(faults = Ps2_fw.no_faults) ?(rtl = true) ~name ~codes ~cmds ~dev_hz ~rise ?(bad_parity_at = -1) () =
+let host_vs_model_device ?(faults = Ps2_fw.no_faults) ?(rtl = true) ?(lag = 0) ?(early = false)
+    ~name ~codes ~cmds ~dev_hz ~rise ?(bad_parity_at = -1) () =
   let clk = Sim.Oc.create ~rise and data = Sim.Oc.create ~rise in
   let prog, _, _ = Ps2_fw.host ~faults { clk = 4; data = 5; req = 6 } timing in
   let mem = Array.init 4 (fun t -> if t = 1 then prog else Array.make 256 Isa_v.halt) in
   let app = Pc_app.create cmds in
   let port = { fw_clk = 4; fw_data = 5; fw_req = 6; clk; data } in
   let now_ref = ref 0 in
+  let gate, valid = lagged ~lag ~early ~now:(fun () -> !now_ref) ~queue:(fun () -> app.cmds)
+      ~due:(function (at, _) :: _ -> at | [] -> 0) in
   let m, contention, seq = seq_agent ~mem ~ports:[ 1, port ] ~rtl
-      ~req:(fun t -> t = 1 && (app.now <- !now_ref; Pc_app.req app))
-      ~host_in:(fun t -> if t = 1 then Pc_app.host_in app else None)
+      ~req:(fun t -> t = 1 && (app.now <- !now_ref; gate (Pc_app.req app)))
+      ~host_in:(fun t -> if t = 1 && valid () then Pc_app.host_in app else None)
       ~on_out:(fun t v -> if t = 1 then Pc_app.on_out app v) in
   let seq = { seq with fire = (fun now -> now_ref := now; seq.fire now) } in
   let dev = Ps2_model.Device.create ~clk ~data ~hz:dev_hz () in
@@ -137,7 +160,8 @@ let host_vs_model_device ?(faults = Ps2_fw.no_faults) ?(rtl = true) ~name ~codes
       Ps2_model.Device.fire dev now; sent_count := List.length dev.sent) in
   let stop () = app.cmds = [] && dev.queue = [] && dev.state = Ps2_model.Device.Idle && !now_ref > 0 in
   let last_cmd = List.fold_left (fun a (t, _) -> max a t) 0 cmds in
-  ignore (Sim.run ~stop ~until:(last_cmd + Sim.us (float (List.length codes + List.length cmds + 10) *. 2000.)) [ seq; model ]);
+  ignore (Sim.run ~stop ~until:(last_cmd + Sim.us (float (List.length codes + List.length cmds + 10) *. 2000.)
+                                + lag * (List.length codes + List.length cmds + 10)) [ seq; model ]);
   let evs = List.rev app.events in
   let got = List.filter_map (fun (_, v, k) -> if k = 1 || k = 2 then Some (v, k = 1) else None) evs in
   let sent = List.rev_map snd dev.sent in
