@@ -41,7 +41,7 @@ let analyse spec (words : int array) =
     if Hashtbl.mem table k then k
     else
       let n = try Hashtbl.find per_site (k.pc, k.astate) with Not_found -> 0 in
-      if n < key_limit then k else { k with cnt = Any; acc = Any } in
+      if n < key_limit then k else { k with cnt = Any; acc = Any; oe_known = 0; oe = 0 } in
   let visit ~from k v =
     incr visits;
     let k = general k in
@@ -66,7 +66,7 @@ let analyse spec (words : int array) =
     List.iter (fun s -> visit ~from:(Some k) s.s_key s.s_value) succs
   done;
   let cert = Hashtbl.fold (fun k (v, _) acc -> (k, v) :: acc) table [] in
-  let cert = List.sort (fun (a, _) (b, _) -> compare (a.pc, a.astate, a.cnt, a.acc) (b.pc, b.astate, b.cnt, b.acc)) cert in
+  let cert = List.sort (fun (a, _) (b, _) -> compare a b) cert in
   { cert; parent; visits = !visits }
 
 (* the keys from the start to [k], first to last *)

@@ -23,7 +23,7 @@ type measured = {
 let is_wait w = match (w lsr 12) land 15 with 5 | 6 | 12 | 13 | 14 -> true | _ -> false
 
 let level_le (c : Spec.level) (a : Spec.level) =
-  c = a || (match a, c with Spec.LH, (Spec.L | Spec.H) | Spec.LZ, (Spec.L | Spec.Z) -> true | _ -> false)
+  c = a || (match a, c with Spec.LH, (Spec.L | Spec.H) | Spec.LZ, (Spec.L | Spec.Z) | Spec.X, _ -> true | _ -> false)
 
 let kind_le (c : Spec.kind) (a : Spec.kind) =
   match c, a with
@@ -53,13 +53,25 @@ let run ?(slots = 60_000) ?(stretch_max = 20_000) ~seed (cert : Kernel.certifica
   let uncovered = ref [] and n_entries = ref 0 and n_events = ref 0 and edges = ref [] in
   let fail_spec = ref None in
   let note_spec s = if !fail_spec = None then fail_spec := Some s in
-  let miss s = if List.length !uncovered < 20 then uncovered := s :: !uncovered in
+  (* after the run's first event the specification does not accept, the certificate has nothing
+     to say (the analysis stops each path there too), so the cross-check stops *)
+  let off_spec = ref false in
+  let miss s = if not !off_spec && List.length !uncovered < 20 then uncovered := s :: !uncovered in
   (* concrete specification state *)
   let astate = ref spec.Spec.start and last_ev = ref 0 in
   (* the slave model for I2C: after each release of SCL by the master, hold it low for a random
      number of clocks: mostly none, sometimes short, now and then past the stretch limit *)
+  let releases = ref 0 in
   let sl = { hold = 0; prev_scl = 1; rng;
-             stretch = (fun () -> match Random.State.int rng 10 with
+             (* seed 1: the slave never stretches; seed 2: at most one slot; others: mixed *)
+             (* seeds from 1000 are targeted: seed = 1000 + 64 n + m stretches only the n-th
+                release (from 1), by 4m clocks (m = 63: for ever) *)
+             stretch = (fun () -> if seed >= 1000 then begin
+                 incr releases;
+                 let n = (seed - 1000) / 64 and m = (seed - 1000) mod 64 in
+                 if !releases <> n then 0 else if m = 63 then 1_000_000 else 4 * m end
+               else if seed = 1 then 0 else if seed = 2 then Random.State.int rng 5 else
+                          match Random.State.int rng 10 with
                  | 0 | 1 | 2 | 3 | 4 -> 0 | 5 | 6 | 7 -> Random.State.int rng 40
                  | 8 -> Random.State.int rng 400 | _ -> Random.State.int rng stretch_max) } in
   let pin_in_of () =
@@ -110,7 +122,8 @@ let run ?(slots = 60_000) ?(stretch_max = 20_000) ~seed (cert : Kernel.certifica
        | _ -> ());
       if not continuation then begin
         incr n_entries;
-        let k = { Kernel.pc; astate = !astate; cnt = Known cnt; acc = Known acc } in
+        (* A5's view: the thread's enables are the chip's, other threads being halted *)
+        let k = { Kernel.pc; astate = !astate; cnt = Known cnt; acc = Known acc; oe_known = 0xFF; oe = st.pin_oe } in
         let v = { Kernel.dl = Interval.exactly dl; since = Interval.exactly since; time = Interval.exactly s } in
         let found = List.find_opt (fun (tk, tv) -> Kernel.key_covers ~table:tk k && Kernel.value_leq v tv)
             (try Hashtbl.find h (pc, !astate) with Not_found -> []) in
@@ -148,8 +161,8 @@ let run ?(slots = 60_000) ?(stretch_max = 20_000) ~seed (cert : Kernel.certifica
                 ev_le ev r.ev && Interval.contains r.at j && r.next_pc = next_pc
                 && Interval.contains (Interval.plus v.Kernel.time r.at) s
                 && Interval.contains (Interval.plus v.Kernel.since r.at) (s - !last_ev)) raws in
-            if not ok then miss (Printf.sprintf "slot %d pc %d: event %s not predicted from %s %s"
-                                   s pc (Spec.event_to_string ev) (Kernel.key_to_string k) (Kernel.value_to_string v)));
+            if not ok then miss (Printf.sprintf "slot %d pc %d (%s): event %s not predicted from %s %s"
+                                   s pc (Isa2.disasm w) (Spec.event_to_string ev) (Kernel.key_to_string k) (Kernel.value_to_string v)));
       (* the concrete specification *)
       (match Kernel.channel_event spec ev with
        | [] -> ()
@@ -157,7 +170,8 @@ let run ?(slots = 60_000) ?(stretch_max = 20_000) ~seed (cert : Kernel.certifica
          incr n_events;
          let gap = s - !last_ev in
          (match Spec.next spec !astate cev with
-          | None -> note_spec (Printf.sprintf "slot %d pc %d: event %s not accepted in state %s" s pc
+          | None -> off_spec := true;
+            note_spec (Printf.sprintf "slot %d pc %d: event %s not accepted in state %s" s pc
                                  (Spec.event_to_string cev) (spec.state_name !astate))
           | Some tr ->
             if not (Interval.contains tr.gap gap) then

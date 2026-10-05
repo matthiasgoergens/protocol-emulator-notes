@@ -11,7 +11,8 @@
      main.exe random N          random programmes: certificate against the interpreter
      main.exe controls          perturbed certificates: the kernel must reject each
      main.exe certs DIR         per-image timing certificates and the ledger
-     main.exe ledger-check FILE recompute every certificate and compare with the ledger *)
+     main.exe ledger-check FILE recompute every certificate and compare with the ledger
+     main.exe kernel-bugs       planted bugs in the kernel: each must make a check above fail *)
 
 open Programmes
 
@@ -103,7 +104,21 @@ let cmd_verify name =
   if accepted v then print_endline (summary v) else print_rejection v;
   print_string (cert_text v)
 
-let seeds_for img = match img.env with Pull_up -> [ 1 ] | I2c_slave _ -> List.init 12 (fun i -> i + 1) | Random_inputs -> List.init 12 (fun i -> i + 1)
+(* Seeds for the interpreter runs. An I2C image with a short stretch limit also gets the targeted
+   runs (Sim): each release in turn stretched by every whole number of slots up to the limit
+   and past it. *)
+let seeds_for img = match img.env with
+  | Pull_up -> [ 1 ]
+  | I2c_slave _ ->
+    let lm = List.fold_left (fun m (tr : Spec.transition) ->
+        match tr.pats with [ (_, Spec.Timeout _) ] -> max m tr.gap.Interval.lo | _ -> m) 0 img.spec.transitions in
+    let releases = List.length (List.filter (fun (tr : Spec.transition) ->
+        match tr.pats with [ (_, Spec.Timeout _) ] -> true | _ -> false) img.spec.transitions) in
+    List.init 12 (fun i -> i + 1)
+    @ (if lm > 16 then [] else
+         List.concat_map (fun n -> List.map (fun m -> 1000 + (64 * n) + m) (List.init (lm + 2) Fun.id @ [ 63 ]))
+           (List.init releases (fun i -> i + 1)))
+  | Random_inputs -> List.init 12 (fun i -> i + 1)
 
 (* run [img] on the interpreter with each seed: (all states covered, every run meets the spec,
    first message) *)
@@ -186,6 +201,14 @@ let cmd_compose () =
 
 (* ---- mutants ---- *)
 
+(* every reachable instruction has one outcome, taking a known number of slots: then one run of
+   the interpreter is the whole truth *)
+let deterministic v =
+  List.for_all (fun ((k : Kernel.key), (x : Kernel.value)) ->
+      match Kernel.transfer v.img.words.(k.pc) k x.dl with
+      | [ r ] -> Interval.is_exact r.elapsed && Interval.is_exact r.at
+      | _ -> false) v.res.cert
+
 let mutants_of img =
   let w = img.words in
   let len = let rec last i = if i < 0 then 0 else if w.(i) <> 0 then i + 1 else last (i - 1) in last 255 in
@@ -204,7 +227,8 @@ let mutants_of img =
       add (Printf.sprintf "pc %d target-1" i) (fun c -> c.(i) <- (x land 0xFF00) lor ((x - 1) land 0xFF))
     end;
     if i + 1 < len then add (Printf.sprintf "pc %d swap with next" i) (fun c -> c.(i) <- w.(i + 1); c.(i + 1) <- x);
-    add (Printf.sprintf "pc %d random word" i) (fun c -> c.(i) <- Random.State.int rng 0x10000)
+    let r = Random.State.int rng 0x10000 in
+    add (Printf.sprintf "pc %d random word %04x (%s)" i r (disasm r)) (fun c -> c.(i) <- r)
   done;
   List.rev !ms
 
@@ -220,7 +244,7 @@ let cmd_mutants () =
           let u, bad, _, _, _ = cross_check v in
           incr tot; incr b_n;
           if u <> [] then (incr uncov; Printf.printf "  CROSS-CHECK FAILED %s: %s\n" img.name (List.hd u));
-          let det = img.env = Pull_up in
+          let det = deterministic v in
           match accepted v, bad with
           | true, [] -> incr tn; incr b_tn; if det then incr ok_det
           | true, s :: _ -> incr unsound; Printf.printf "  UNSOUND %s: proved, but a run fails: %s\n" img.name s
@@ -359,8 +383,44 @@ let cmd_selftest () =
   print_endline (if !ok then "selftest: PASS" else "selftest: FAIL");
   if not !ok then exit 1
 
+(* Each planted kernel bug (Kernel.planted_bug) must make at least one of the verifier's own
+   checks fail; each check runs as a child process with the bug set. *)
+let kernel_bug_names = [
+  1, "a wait that proceeds takes one slot less at most";
+  2, "a wait that times out takes one slot less";
+  3, "LDD loads one less";
+  4, "JNZ falls through on cnt = 1";
+  5, "SKNE/SKEQ decided the wrong way";
+  6, "a push-pull SHO assumed driven whatever its enable";
+  7, "WAITD takes one slot less";
+  8, "no deadline check";
+  9, "no closure check (every state counts as covered)";
+  10, "no gap check" ]
+
+let cmd_kernel_bugs () =
+  let checks = [ [ "selftest" ]; [ "controls" ]; [ "random"; "150" ]; [ "sweep" ]; [ "planted" ] ] in
+  let missed = ref 0 in
+  List.iter (fun (n, desc) ->
+      let failed = List.filter (fun args ->
+          let cmd = Filename.quote_command Sys.executable_name ("--bug" :: string_of_int n :: args)
+              ~stdout:"/dev/null" ~stderr:"/dev/null" in
+          Sys.command cmd <> 0) checks in
+      if failed = [] then incr missed;
+      Printf.printf "kernel bug %2d (%s): %s
+%!" n desc
+        (if failed = [] then "NOT CAUGHT" else "caught by " ^ String.concat ", " (List.map (String.concat " ") failed)))
+    kernel_bug_names;
+  Printf.printf "kernel bugs: %d planted, %d not caught
+" (List.length kernel_bug_names) !missed;
+  if !missed > 0 then exit 1
+
 let () =
-  match Array.to_list Sys.argv |> List.tl with
+  let args = Array.to_list Sys.argv |> List.tl in
+  let args = match args with
+    | "--bug" :: n :: rest -> Kernel.planted_bug := int_of_string n; rest
+    | a -> a in
+  match args with
+  | [ "kernel-bugs" ] -> cmd_kernel_bugs ()
   | [ "selftest" ] -> cmd_selftest ()
   | [ "verify"; name ] -> cmd_verify name
   | [ "sweep" ] -> cmd_sweep ()
@@ -372,4 +432,4 @@ let () =
   | [ "certs"; dir ] -> cmd_certs dir
   | [ "ledger-check"; file ] -> cmd_ledger_check file
   | [ "list" ] -> List.iter (fun i -> print_endline i.name) (all_images ())
-  | _ -> prerr_endline "usage: main.exe selftest|verify NAME|sweep|planted|compose|mutants|random N|controls|certs DIR|ledger-check FILE|list"; exit 2
+  | _ -> prerr_endline "usage: main.exe [--bug N] selftest|verify NAME|sweep|planted|compose|mutants|random N|controls|certs DIR|ledger-check FILE|list|kernel-bugs"; exit 2

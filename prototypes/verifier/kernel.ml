@@ -34,16 +34,22 @@
       The page wraps at 256 words, as in Isa2.
    A4 (time) Timing is counted in whole slots. SETP and SHO quarter-clock sub-slots (q) and FINE
       offsets move an edge by less than one clock inside its slot; the certificate prints q,
-      and nothing here bounds FINE. *)
+      and nothing here bounds FINE.
+   A5 (output enables) The output enables are 0 after reset, and those of the pins this thread
+      writes change only by its own writes. The key keeps them, because a push-pull SHO changes
+      a pin's level, not its enable: on a released pin it shows nothing. For a channel's pins
+      [Main.compose] checks that no other thread writes them. *)
 
 type known = Known of int | Any
-type key = { pc : int; astate : int; cnt : known; acc : known }
+type key = { pc : int; astate : int; cnt : known; acc : known;
+             oe_known : int; oe : int }   (* A5: the enables known, as a mask, and their values *)
 type value = { dl : Interval.t; since : Interval.t; time : Interval.t }
 
 let known_to_string = function Known n -> string_of_int n | Any -> "?"
 
 let key_to_string k =
-  Printf.sprintf "pc=%d state=%d cnt=%s acc=%s" k.pc k.astate (known_to_string k.cnt) (known_to_string k.acc)
+  Printf.sprintf "pc=%d state=%d cnt=%s acc=%s oe=%02x/%02x" k.pc k.astate (known_to_string k.cnt)
+    (known_to_string k.acc) k.oe k.oe_known
 
 let value_to_string v =
   Printf.sprintf "dl=%s since=%s time=%s" (Interval.to_string v.dl) (Interval.to_string v.since)
@@ -60,12 +66,13 @@ let known_covers ~table x = match table, x with Any, _ -> true | Known a, Known 
 let key_covers ~table k =
   table.pc = k.pc && table.astate = k.astate && known_covers ~table:table.cnt k.cnt
   && known_covers ~table:table.acc k.acc
+  && table.oe_known land k.oe_known = table.oe_known && table.oe land table.oe_known = k.oe land table.oe_known
 
 (* ---- the abstract step ---- *)
 
 (* What one instruction does from its first issue to the first issue of the next instruction. *)
 type raw = {
-  next_pc : int; cnt' : known; acc' : known; dl' : Interval.t;
+  next_pc : int; cnt' : known; acc' : known; dl' : Interval.t; oe_known' : int; oe' : int;
   elapsed : Interval.t;            (* slots until the next instruction first issues *)
   at : Interval.t;                 (* the slot of the event, counted from the first issue *)
   ev : (int * Spec.kind) list;     (* pins this instruction touches, all eight, ascending *)
@@ -73,6 +80,13 @@ type raw = {
 }
 
 let dl_max = 4095
+
+(* Planted kernel bugs, for [Main]'s kernel-bugs command only: each must make some check of the
+   verifier fail (the interpreter cross-check, a planted programme accepted, ...). 0, the value
+   every other command runs with, is the kernel as specified; [Main] refuses to run any other
+   command with a planted bug set. *)
+let planted_bug = ref 0
+let bug n = !planted_bug = n
 
 let level_of ~od v = if od then (if v = 1 then Spec.Z else Spec.L) else (if v = 1 then Spec.H else Spec.L)
 
@@ -87,16 +101,19 @@ let transfer w (k : key) (dl : Interval.t) : raw list =
   let pc1 = (k.pc + 1) land 0xFF in
   let dec = Interval.sub_sat dl 1 in
   let dec_cnt = match k.cnt with Known c -> Known ((c - 1) land 0xFFF) | Any -> Any in
-  let one ?(ev = []) ?(q = 0) ?(cnt = k.cnt) ?(acc = k.acc) ?(dl' = dec) next_pc =
-    { next_pc; cnt' = cnt; acc' = acc; dl'; elapsed = Interval.exactly 1; at = Interval.exactly 0; ev; q } in
+  let one ?(ev = []) ?(q = 0) ?(cnt = k.cnt) ?(acc = k.acc) ?(dl' = dec) ?(oe = (k.oe_known, k.oe)) next_pc =
+    { next_pc; cnt' = cnt; acc' = acc; dl'; elapsed = Interval.exactly 1; at = Interval.exactly 0; ev; q;
+      oe_known' = fst oe; oe' = snd oe } in
+  let same_oe = (k.oe_known, k.oe) in
+  let oe_known' = k.oe_known and oe' = k.oe in
   let dlo = dl.Interval.lo and dhi = match dl.hi with Some h -> h | None -> dl_max in
   (* A1: a wait that may proceed on any slot 0..d, or fail after slot d *)
   let proceed ?(ev = []) ?(acc = k.acc) () =
     { next_pc = pc1; cnt' = k.cnt; acc' = acc; dl' = Interval.range 0 (max (dhi - 1) 0);
-      elapsed = Interval.range 1 (dhi + 1); at = Interval.range 0 dhi; ev; q = 0 } in
+      elapsed = Interval.range 1 (if bug 1 then dhi else dhi + 1); at = Interval.range 0 dhi; ev; q = 0; oe_known'; oe' } in
   let fail ?(ev = []) () =
     { next_pc = imm8; cnt' = k.cnt; acc' = k.acc; dl' = Interval.exactly 0;
-      elapsed = Interval.range (dlo + 1) (dhi + 1); at = Interval.range dlo dhi; ev; q = 0 } in
+      elapsed = (if bug 2 then Interval.range dlo dhi else Interval.range (dlo + 1) (dhi + 1)); at = Interval.range dlo dhi; ev; q = 0; oe_known'; oe' } in
   (* a wait whose condition is known: it holds on its first slot or never (nothing it reads
      changes while it waits) *)
   let decided holds = if holds then [ one pc1 ] else [ fail () ] in
@@ -107,42 +124,54 @@ let transfer w (k : key) (dl : Interval.t) : raw list =
     let level = if bit 2 then (if bit 3 then Spec.H else Spec.L) else Spec.Z in
     let ev = List.filter_map (fun p -> if (mask lsr p) land 1 = 1 then Some (p, Spec.Write { level; data = false }) else None)
         [ 0; 1; 2; 3; 4; 5; 6; 7 ] in
-    [ one ~ev ~q:(w land 3) pc1 ]
+    [ one ~ev ~q:(w land 3) ~oe:(k.oe_known lor mask, (k.oe land lnot mask) lor (if bit 2 then mask else 0)) pc1 ]
   | 2 -> [ one ~cnt:(Known imm12) pc1 ]                         (* LDC *)
-  | 3 -> [ one ~dl':(Interval.exactly imm12) pc1 ]              (* LDD: no decrement this slot *)
+  | 3 -> [ one ~dl':(Interval.exactly (if bug 3 then max 0 (imm12 - 1) else imm12)) pc1 ]              (* LDD: no decrement this slot *)
   | 4 -> [ one ~acc:(Known imm8) pc1 ]                          (* LDA *)
   | 5 ->                                                       (* WAITP *)
     [ proceed ~ev:[ (pin, Spec.Observe b8) ] (); fail ~ev:[ (pin, Spec.Expire b8) ] () ]
   | 6 ->                                                       (* WAITD: stays until dl = 0 *)
     [ { next_pc = pc1; cnt' = k.cnt; acc' = k.acc; dl' = Interval.exactly 0;
-        elapsed = Interval.range (dlo + 1) (dhi + 1); at = Interval.exactly 0; ev = []; q = 0 } ]
+        elapsed = (if bug 7 then Interval.range dlo dhi else Interval.range (dlo + 1) (dhi + 1)); at = Interval.exactly 0;
+        ev = []; q = 0; oe_known'; oe' } ]
   | 7 ->                                                       (* SHO *)
     let msb = b8 = 1 and od = bit 7 and pair = bit 6 and psel = bit 5 and cap = bit 4 in
     let p2 = (pin + 1) land 7 in
-    let ev, acc =
+    (* push-pull: the level is the data where the enable is known 1, released where it is known
+       0, unknown otherwise (A5); open drain: the enable is the inverted data *)
+    let pp_level p v =
+      if bug 6 then (match v with Some v -> level_of ~od:false v | None -> Spec.LH)
+      else if (k.oe_known lsr p) land 1 = 0 then Spec.X
+      else if (k.oe lsr p) land 1 = 0 then Spec.Z
+      else match v with Some v -> level_of ~od:false v | None -> Spec.LH in
+    let od_level v = match v with Some v -> level_of ~od:true v | None -> Spec.LZ in
+    let b0, b1, acc =
       match k.acc with
       | Known a ->
         let b0 = if msb then (a lsr 7) land 1 else a land 1 in
         let b1 = if psel then (if msb then (a lsr 6) land 1 else (a lsr 1) land 1) else 1 - b0 in
         let sh = if pair && psel then 2 else 1 in
-        let acc = if cap then Any else Known (if msb then (a lsl sh) land 0xFF else a lsr sh) in
-        let w v = Spec.Write { level = level_of ~od v; data = true } in
-        ((pin, w b0) :: (if pair then [ (p2, w b1) ] else [])), acc
-      | Any ->
-        let w = Spec.Write { level = (if od then Spec.LZ else Spec.LH); data = true } in
-        ((pin, w) :: (if pair then [ (p2, w) ] else [])), Any in
-    [ one ~ev:(List.sort compare ev) ~q:(if od then 0 else w land 3) ~cnt:dec_cnt ~acc pc1 ]
+        Some b0, Some b1, (if cap then Any else Known (if msb then (a lsl sh) land 0xFF else a lsr sh))
+      | Any -> None, None, Any in
+    let written = (pin, b0) :: (if pair then [ (p2, b1) ] else []) in
+    let ev = List.map (fun (p, v) -> (p, Spec.Write { level = (if od then od_level v else pp_level p v); data = true })) written in
+    let oe = if not od then same_oe else
+        List.fold_left (fun (kn, o) (p, v) -> match v with
+            | Some v -> (kn lor (1 lsl p), if v = 0 then o lor (1 lsl p) else o land lnot (1 lsl p))
+            | None -> (kn land lnot (1 lsl p), o land lnot (1 lsl p))) same_oe written in
+    [ one ~ev:(List.sort compare ev) ~q:(if od then 0 else w land 3) ~cnt:dec_cnt ~acc ~oe pc1 ]
   | 8 -> [ one ~ev:[ (pin, Spec.Sample) ] ~cnt:dec_cnt ~acc:Any pc1 ]   (* SHI *)
   | 9 -> [ one imm8 ]                                           (* JMP; HALT is JMP self *)
   | 10 ->                                                      (* JNZ *)
     (match k.cnt with
      | Known 0 -> [ one pc1 ]
+     | Known c when bug 4 && c = 1 -> [ one pc1 ]
      | Known _ -> [ one imm8 ]
      | Any -> [ one imm8; one ~cnt:(Known 0) pc1 ])
   | 11 -> [ one pc1 ]                                           (* OUT *)
   | 12 ->                                                      (* IN: A1, no bound *)
     [ { next_pc = pc1; cnt' = k.cnt; acc' = Any; dl' = Interval.range 0 (max (dhi - 1) 0);
-        elapsed = Interval.at_least 1; at = Interval.exactly 0; ev = []; q = 0 } ]
+        elapsed = Interval.at_least 1; at = Interval.exactly 0; ev = []; q = 0; oe_known'; oe' } ]
   | 13 ->                                                      (* MBX: A1 *)
     let recv = bit 11 in
     [ proceed ~acc:(if recv then Any else k.acc) (); fail () ]
@@ -158,7 +187,7 @@ let transfer w (k : key) (dl : Interval.t) : raw list =
        let skip_if_equal = sub = 1 in
        let pc2 = (k.pc + 2) land 0xFF in
        (match k.acc with
-        | Known a -> [ one (if (a = imm8) = skip_if_equal then pc2 else pc1) ]
+        | Known a -> [ one (if ((a = imm8) = skip_if_equal) <> bug 5 then pc2 else pc1) ]
         | Any -> [ one pc1; one pc2 ])
      | 3 -> [ one ~cnt:(match k.acc with Known a -> Known a | Any -> Any) pc1 ]   (* CNTA *)
      | 4 -> [ one ~acc:Any pc1 ]                                (* LDB: A1 *)
@@ -190,7 +219,7 @@ let step spec (words : int array) (k, v) =
   List.fold_left (fun (succs, viols, preds) r ->
       let time_ev = Interval.plus v.time r.at in
       let after = { dl = r.dl'; since = Interval.plus v.since r.elapsed; time = Interval.plus v.time r.elapsed } in
-      let key' astate = { pc = r.next_pc; astate; cnt = r.cnt'; acc = r.acc' } in
+      let key' astate = { pc = r.next_pc; astate; cnt = r.cnt'; acc = r.acc'; oe_known = r.oe_known'; oe = r.oe' } in
       let pred ?to_ ?gap ?allowed () =
         if r.ev = [] then [] else
           [ { p_pc = k.pc; p_word = words.(k.pc); p_from = k.astate; p_to = to_; p_ev = r.ev; p_time = time_ev;
@@ -203,7 +232,7 @@ let step spec (words : int array) (k, v) =
          | None ->
            (succs, Unexpected { from = k; value = v; event = ev; gap } :: viols, pred ~gap () @ preds)
          | Some tr ->
-           let viols = if Interval.leq gap tr.gap then viols
+           let viols = if bug 10 || Interval.leq gap tr.gap then viols
              else Bad_gap { from = k; value = v; event = ev; gap; tr } :: viols in
            ({ s_key = key' tr.dst; s_value = { after with since = Interval.exactly 1 }; s_event = true } :: succs,
             viols, pred ~to_:tr.dst ~gap ~allowed:tr.gap () @ preds)))
@@ -211,10 +240,10 @@ let step spec (words : int array) (k, v) =
 
 let deadline_violation spec (k, v) =
   match Spec.deadline spec k.astate with
-  | Some d when not (Interval.leq v.since (Interval.range 0 d)) -> Some (Deadline { at = k; value = v; deadline = d })
+  | Some d when not (bug 8) && not (Interval.leq v.since (Interval.range 0 d)) -> Some (Deadline { at = k; value = v; deadline = d })
   | _ -> None
 
-let start_key spec = { pc = 0; astate = spec.Spec.start; cnt = Known 0; acc = Known 0 }
+let start_key spec = { pc = 0; astate = spec.Spec.start; cnt = Known 0; acc = Known 0; oe_known = 0xFF; oe = 0 }
 let start_value = { dl = Interval.exactly 0; since = Interval.exactly 0; time = Interval.exactly 0 }
 
 (* ---- the certificate check ---- *)
@@ -236,6 +265,7 @@ let index (cert : certificate) =
   h
 
 let covered h k v =
+  bug 9 ||
   List.exists (fun (tk, tv) -> key_covers ~table:tk k && value_leq v tv)
     (try Hashtbl.find h (k.pc, k.astate) with Not_found -> [])
 

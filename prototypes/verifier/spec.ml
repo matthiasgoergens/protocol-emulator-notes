@@ -27,6 +27,7 @@ type level =
   | Z    (* released (output enable 0) *)
   | LH   (* driven, value from data, unknown here *)
   | LZ   (* open drain, value from data: driven 0 or released, unknown here *)
+  | X    (* a push-pull write to a pin whose output enable is unknown: anything *)
 
 type kind =
   | Write of { level : level; data : bool }   (* data: SHO (from the accumulator), else SETP *)
@@ -36,7 +37,7 @@ type kind =
 
 type event = (int * kind) list                (* the channel pins touched, in ascending order *)
 
-let level_to_string = function L -> "0" | H -> "1" | Z -> "z" | LH -> "d" | LZ -> "dz"
+let level_to_string = function L -> "0" | H -> "1" | Z -> "z" | LH -> "d" | LZ -> "dz" | X -> "x"
 
 let kind_to_string = function
   | Write { level; data } -> (if data then "sho" else "set") ^ "=" ^ level_to_string level
@@ -105,7 +106,7 @@ let overlap a b =
   let some_kind pa pb =
     let kinds = [ Write { level = L; data = false }; Write { level = H; data = false };
                   Write { level = Z; data = false } ]
-                @ List.concat_map (fun l -> [ Write { level = l; data = true } ]) [ L; H; Z; LH; LZ ]
+                @ List.concat_map (fun l -> [ Write { level = l; data = true } ]) [ L; H; Z; LH; LZ; X ]
                 @ [ Observe 0; Observe 1; Expire 0; Expire 1; Sample ] in
     List.exists (fun k -> matches_kind pa k && matches_kind pb k) kinds in
   let sa = List.sort compare a and sb = List.sort compare b in
