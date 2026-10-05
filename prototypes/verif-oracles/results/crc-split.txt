@@ -1,0 +1,13 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/crc/crc_oracle.exe split
+# commit: 02381a72826a9cea01ae57c25ae22e05286ab226 (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T08:11:47+08:00
+  CRC-16/XMODEM    segments 0 and 1, one PE each, feed registers: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-16/IBM-3740  segments 0 and 1, one PE each, feed registers: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-16/KERMIT    segments 0 and 1, one PE each, feed registers: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-16/USB       segments 0 and 1, one PE each, feed registers: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-32/ISO-HDLC  segments 1 and 2, a pair each, fixed ports, gaps: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-32/BZIP2     segments 1 and 2, a pair each, fixed ports, gaps: 15 splits, 0 wrong, 0 lockstep mismatches
+  CRC-32/MPEG-2    segments 1 and 2, a pair each, fixed ports, gaps: 15 splits, 0 wrong, 0 lockstep mismatches
+split: PASS
+exit 0

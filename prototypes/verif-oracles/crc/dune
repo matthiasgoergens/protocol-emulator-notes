@@ -1,0 +1,5 @@
+; The CRC combine oracle. spec, model, upe_rtl, rtlsim, refs, cells and lockstep are symlinks to
+; ../../unified-pe/verify (unchanged).
+(executable
+ (name crc_oracle)
+ (libraries hardcaml))

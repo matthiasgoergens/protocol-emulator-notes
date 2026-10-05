@@ -1,0 +1,83 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/stall/hazard_base.exe
+# commit: 02381a72826a9cea01ae57c25ae22e05286ab226 (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T08:13:53+08:00
+== deadline-sequencer demo: T0 UART TX, T1 SPI master, T2 I2C master write
+   uses: pin 0 T0: pin-drive
+   uses: pin 1 T1: pin-drive
+   uses: pin 2 T1: pin-drive
+   uses: pin 3 T1: pin-drive
+   uses: pin 4 T2: pin-drive, pin-sample
+   uses: pin 5 T2: pin-drive
+   ACCEPTED: no rejected combination
+
+== 10BASE-T TX (original), pin 0 declared a four-thread time-division group
+   uses: pin 0 T0: pin-drive
+   uses: pin 0 T1: pin-drive
+   uses: pin 0 T2: pin-drive
+   uses: pin 0 T3: pin-drive
+   ACCEPTED: no rejected combination
+
+== 10BASE-T TX (fixed, with the underrun path)
+   uses: pin 0 T0: pin-drive
+   uses: pin 0 T1: pin-drive
+   uses: pin 0 T2: pin-drive
+   uses: pin 0 T3: pin-drive
+   ACCEPTED: no rejected combination
+
+== control: 10BASE-T TX with the time-division table entry removed (must be rejected)
+   uses: pin 0 T0: pin-drive
+   uses: pin 0 T1: pin-drive
+   uses: pin 0 T2: pin-drive
+   uses: pin 0 T3: pin-drive
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+      at T0 page 0 pc 0 (SETP) / T1 page 1 pc 6 (SHO)
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+      at T0 page 0 pc 0 (SETP) / T2 page 2 pc 5 (SHO)
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+      at T0 page 0 pc 0 (SETP) / T3 page 3 pc 4 (SHO)
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+      at T1 page 1 pc 6 (SHO) / T2 page 2 pc 5 (SHO)
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+      at T1 page 1 pc 6 (SHO) / T3 page 3 pc 4 (SHO)
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+      at T2 page 2 pc 5 (SHO) / T3 page 3 pc 4 (SHO)
+
+== control: 10BASE-T TX without the sharing declaration (must be rejected)
+   uses: pin 0 T0: pin-drive
+   uses: pin 0 T1: pin-drive
+   uses: pin 0 T2: pin-drive
+   uses: pin 0 T3: pin-drive
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+      at T0 page 0 pc 0 (SETP) / T1 page 1 pc 6 (SHO)
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+      at T0 page 0 pc 0 (SETP) / T2 page 2 pc 5 (SHO)
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+      at T0 page 0 pc 0 (SETP) / T3 page 3 pc 4 (SHO)
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+      at T1 page 1 pc 6 (SHO) / T2 page 2 pc 5 (SHO)
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+      at T1 page 1 pc 6 (SHO) / T3 page 3 pc 4 (SHO)
+   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+      at T2 page 2 pc 5 (SHO) / T3 page 3 pc 4 (SHO)
+
+== control: the demo with SPI's cs (pin 3) granted to T0 instead (must be rejected)
+   uses: pin 0 T0: pin-drive
+   uses: pin 1 T1: pin-drive
+   uses: pin 2 T1: pin-drive
+   uses: pin 3 T1: pin-drive
+   uses: pin 4 T2: pin-drive, pin-sample
+   uses: pin 5 T2: pin-drive
+   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 3
+      at T1 page 1 pc 1 (SETP)
+   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 3
+      at T1 page 1 pc 3 (SETP)
+   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 3
+      at T1 page 1 pc 13 (SETP)
+   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 3
+      at T1 page 1 pc 15 (SETP)
+   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 3
+      at T1 page 1 pc 25 (SETP)
+
+HAZARD BASE PASS
+exit 0

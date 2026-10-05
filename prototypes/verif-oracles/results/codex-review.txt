@@ -1,0 +1,1192 @@
+Reading additional input from stdin...
+OpenAI Codex v0.160.0
+--------
+workdir: /home/matthias/prog/janestreet/emulator-wt-verif-oracles
+model: gpt-6-luna
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a10962-297b-70f0-b4b4-38ef98106734
+--------
+user
+Adversarial review, read-only. In prototypes/verif-oracles (OCaml, Hardcaml) there are three new verification tools; results in prototypes/verif-oracles/results/. Try to refute these specific claims by reading the code (do not trust the comments) and say concretely where each is wrong, citing file:line. (1) crc/crc_combine.ml: combine implements crc(a++b) = out((in(crc a) xor init) * x^(8|b|) mod P xor in(crc b)) correctly for every catalogue CRC including reflected ones and refin<>refout; the planted 'Zlib_formula' is exactly zlib's crc32_combine generalised. (2) stall/eth_fixed.ml + stall/eth_stall.ml: the fixed 10BASE-T firmware's underrun path never puts a wrong level on the line (only a golden prefix then release), its end-of-stream path (cnt = 0) never reports, and the judge in eth_stall.ml cannot pass a run that put a wrong level on the line; the host model respects valid/ready (valid never drops before ready). Is the WAITC 9 check sound given that host_in_valid is shared among four threads? (3) hazard/hazard.ml: sound over-approximation of the reachable uses of each thread (successors, data-flow for bank and lsend), correct clock-coincidence (gcd) between threads (clock t mod 4), refresh and array streams, and wait_class correctly calls a MBX/WAITC unbounded only when its failure path returns to itself; name any hazard of the stated kinds the checker would miss on a reachable path, and any false rejection. Be terse; at most 40 lines; list findings by severity.
+2026-10-05T00:06:31.432168Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when UnexpectedServerResponse("HTTP 401: {\"errors\":[\"Unauthorized\"]}")
+2026-10-05T00:06:31.465878Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/\"" })
+2026-10-05T00:06:32.182408Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when UnexpectedServerResponse("HTTP 401: {\"errors\":[\"Unauthorized\"]}")
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+I’ll inspect the implementations and their result artefacts, then trace the claims against the actual formulas, state transitions, and graph analysis. I’ll keep the review read-only and cite concrete locations.
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c 3 rg --files prototypes/verif-oracles' in /home/matthias/prog/janestreet/emulator-wt-verif-oracles
+ succeeded in 0ms:
+prototypes/verif-oracles/hazard/hazard.ml
+prototypes/verif-oracles/hazard/hazard_controls.ml
+prototypes/verif-oracles/hazard/dune
+prototypes/verif-oracles/hazard-mp/hazard_bridge.ml
+prototypes/verif-oracles/hazard-mp/dune
+prototypes/verif-oracles/stall/i2c_stretch.ml
+prototypes/verif-oracles/stall/hazard_base.ml
+prototypes/verif-oracles/stall/eth_fixed.ml
+prototypes/verif-oracles/stall/dune
+prototypes/verif-oracles/stall/eth_stall.ml
+prototypes/verif-oracles/crc/dune
+prototypes/verif-oracles/crc/crc_oracle.ml
+prototypes/verif-oracles/crc/zlib_check.py
+prototypes/verif-oracles/crc/crc_combine.ml
+prototypes/verif-oracles/dune-project
+prototypes/verif-oracles/stall-wide/jtag_swd_stall.ml
+prototypes/verif-oracles/stall-wide/hazard_wide.ml
+prototypes/verif-oracles/results/stall-i2c-stretch.txt
+prototypes/verif-oracles/results/stall-ethernet.txt
+prototypes/verif-oracles/results/crc-maths.txt
+prototypes/verif-oracles/results/hazard-base.txt
+prototypes/verif-oracles/results/crc-split.txt
+prototypes/verif-oracles/results/crc-shared-faults.txt
+prototypes/verif-oracles/results/crc-pe.txt
+prototypes/verif-oracles/results/crc-blind-spot.txt
+prototypes/verif-oracles/results/hazard-table.txt
+prototypes/verif-oracles/results/hazard-bridge.txt
+prototypes/verif-oracles/results/stall-jtag-swd.txt
+prototypes/verif-oracles/results/hazard-controls.txt
+prototypes/verif-oracles/results/hazard-wide.txt
+prototypes/verif-oracles/results/hazard-compile-controls.txt
+prototypes/verif-oracles/results/crc-zlib.txt
+prototypes/verif-oracles/results/crc-zlib-control.txt
+prototypes/verif-oracles/run_all.sh
+prototypes/verif-oracles/stall-wide/dune
+prototypes/verif-oracles/seq/dune
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c 3 nl -ba prototypes/verif-oracles/crc/crc_combine.ml' in /home/matthias/prog/janestreet/emulator-wt-verif-oracles
+ succeeded in 0ms:
+     1	(* The CRC of a concatenation from the CRCs of its parts, re-derived from first principles.
+     2	
+     3	   Idea credited to Edward Kmett, "Parallel and Incremental CRCs" (comonad.com, 2013): a CRC is a
+     4	   monoid homomorphism once each value is paired with its length. The derivation and the code
+     5	   below are ours (the post's code carries no stated licence, so none of it is used).
+     6	
+     7	   Model. Polynomials over GF(2) are ints, bit i the coefficient of x^i. P is the generator of
+     8	   degree w; [poly] holds P without its x^w term, as the CRC catalogue writes it. Feed the message
+     9	   bits m_1 .. m_n (in transmission order: MSB first, or LSB first for a reflected CRC) into the
+    10	   direct (non-augmented) shift register starting from state s. Each bit does
+    11	       r <- r * x + m_i * x^w   (mod P)
+    12	   so after n bits
+    13	       R(s, m) = s * x^n + M(x) * x^w   (mod P),   M(x) = sum m_i x^(n-i).
+    14	   R is affine in s and linear in m, hence for a message a followed by b (|b| bits):
+    15	       R(s, a ++ b) = R(R(s, a), b) = R(s, a) * x^|b| + R(0, b)               (1)
+    16	   and R(0, b) = R(s, b) + s * x^|b|, so with s = init:
+    17	       R(init, a ++ b) = (R(init, a) + init) * x^|b| + R(init, b)              (2)
+    18	   The catalogue CRC is out(R(init, m)) with out r = reflect_w(r) (if refout) xor xorout, an
+    19	   invertible map, so with in_ = out^-1:
+    20	       crc(a ++ b) = out( (in_(crc a) + init) * x^(8|b|) + in_(crc b) )        (3)
+    21	   The multiplication by x^(8|b|) mod P is computed as one w-bit carry-less multiply by the
+    22	   constant x^(8|b|) mod P, itself found by square-and-multiply in O(log |b|) multiplies. That
+    23	   is what makes the combine cheap: no pass over b's bytes, whatever its length.
+    24	
+    25	   zlib's crc32_combine is (3) specialised to CRC-32/ISO-HDLC, where init = xorout = all ones and
+    26	   the init term cancels; the planted control "zlib's formula on every CRC" below shows (3) is needed for the
+    27	   catalogue CRCs whose init differs from xorout (IBM-3740, MPEG-2). *)
+    28	
+    29	type crc = Refs.crc
+    30	
+    31	let mask w = (1 lsl w) - 1
+    32	
+    33	let reflect = Refs.reflect
+    34	
+    35	(* a * b mod P, a and b of degree < w: Horner over b's bits from the top *)
+    36	let mulmod ~w ~poly a b =
+    37	  let top = 1 lsl (w - 1) and m = mask w in
+    38	  let r = ref 0 in
+    39	  for i = w - 1 downto 0 do
+    40	    r := if !r land top <> 0 then ((!r lsl 1) land m) lxor poly else (!r lsl 1) land m;
+    41	    if (b lsr i) land 1 = 1 then r := !r lxor a
+    42	  done;
+    43	  !r
+    44	
+    45	(* x^n mod P for n >= 0, by square-and-multiply; x mod P = 2 since w >= 2 *)
+    46	let xpow ~w ~poly n =
+    47	  assert (n >= 0 && w >= 2);
+    48	  let rec go acc base n =
+    49	    if n = 0 then acc
+    50	    else go (if n land 1 = 1 then mulmod ~w ~poly acc base else acc) (mulmod ~w ~poly base base) (n lsr 1) in
+    51	  go 1 2 n
+    52	
+    53	(* the same, one bit at a time: the slow definition xpow is tested against *)
+    54	let xpow_slow ~w ~poly n =
+    55	  let r = ref 1 in
+    56	  for _ = 1 to n do r := mulmod ~w ~poly !r 2 done;
+    57	  !r
+    58	
+    59	(* r * x^nbits mod P *)
+    60	let shift_bits (c : crc) r nbits = mulmod ~w:c.width ~poly:c.poly r (xpow ~w:c.width ~poly:c.poly nbits)
+    61	
+    62	let out (c : crc) r = (if c.refout then reflect r c.width else r) lxor c.xorout
+    63	let in_ (c : crc) v = let v = v lxor c.xorout in if c.refout then reflect v c.width else v
+    64	
+    65	(* (3): the CRC of a ++ b, given crc a, crc b and the length of b in bytes *)
+    66	let combine (c : crc) ~crc_a ~crc_b ~len_b =
+    67	  out c (shift_bits c (in_ c crc_a lxor c.init) (8 * len_b) lxor in_ c crc_b)
+    68	
+    69	(* (1) on raw registers: a part run from init, the other from 0 (the two-segment split) *)
+    70	let combine_raw (c : crc) ~reg_a ~reg_b0 ~len_b = out c (shift_bits c reg_a (8 * len_b) lxor reg_b0)
+    71	
+    72	(* Planted faults: each must be caught by the tests in crc_oracle.ml. *)
+    73	type fault = Ok_ | Bits_not_bytes | No_init_term | No_reflection | Zlib_formula
+    74	
+    75	let combine_faulty fault (c : crc) ~crc_a ~crc_b ~len_b =
+    76	  match fault with
+    77	  | Ok_ -> combine c ~crc_a ~crc_b ~len_b
+    78	  | Bits_not_bytes -> out c (shift_bits c (in_ c crc_a lxor c.init) len_b lxor in_ c crc_b)
+    79	  | No_init_term -> out c (shift_bits c (in_ c crc_a) (8 * len_b) lxor in_ c crc_b)
+    80	  | No_reflection ->
+    81	    let in_ v = v lxor c.xorout and out r = r lxor c.xorout in
+    82	    out (shift_bits c (in_ crc_a lxor c.init) (8 * len_b) lxor in_ crc_b)
+    83	  | Zlib_formula ->
+    84	    (* zlib's crc32_combine generalised: shift the first CRC as it stands, xor the second;
+    85	       init and xorout are ignored, which is right exactly when init = xorout *)
+    86	    let rf v = if c.refout then reflect v c.width else v in
+    87	    rf (shift_bits c (rf crc_a) (8 * len_b)) lxor crc_b
+    88	
+    89	let fault_name = function
+    90	  | Ok_ -> "none" | Bits_not_bytes -> "shift by x^|b| (bits counted as bytes)"
+    91	  | No_init_term -> "init term dropped" | No_reflection -> "reflection ignored"
+    92	  | Zlib_formula -> "zlib's formula on every CRC"
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c 3 nl -ba prototypes/verif-oracles/stall/eth_fixed.ml prototypes/verif-oracles/stall/eth_stall.ml' in /home/matthias/prog/janestreet/emulator-wt-verif-oracles
+ succeeded in 0ms:
+     1	(* The fixed 10BASE-T transmitter firmware (see eth_stall.ml's header): the original 24-slot loop
+     2	   with WAITC 9 two slots before IN, and an underrun handler that releases the line and reports. *)
+     3	open Eth_fw
+     4	
+     5	let n_threads = Isa2.n_threads
+     6	
+     7	(* ---- the fixed firmware, in v2 words ---- *)
+     8	type item = W of int | L of string | Waitc of int * string | Jnz of string | Jmp of string | Halt
+     9	
+    10	let assemble items =
+    11	  let labels = Hashtbl.create 8 and pos = ref 0 in
+    12	  List.iter (function L l -> Hashtbl.replace labels l !pos | _ -> incr pos) items;
+    13	  let find l = Hashtbl.find labels l in
+    14	  let out = ref [] and pos = ref 0 in
+    15	  List.iter (fun it ->
+    16	      let w = match it with
+    17	        | L _ -> None
+    18	        | W w -> Some w
+    19	        | Waitc (cond, l) -> Some (Isa2.waitc ~cond ~fail:(find l))
+    20	        | Jnz l -> Some (Isa2.jnz (find l))
+    21	        | Jmp l -> Some (Isa2.jmp (find l))
+    22	        | Halt -> Some (Isa2.halt_at !pos) in
+    23	      match w with Some w -> out := w :: !out; incr pos | None -> ()) items;
+    24	  Array.of_list (List.rev !out)
+    25	
+    26	type plant = Sound | No_release | No_report
+    27	
+    28	let program_fixed ?(plant = Sound) t =
+    29	  let k0 = let rec f k = if owner k = t then k else f (k + 1) in f 0 in
+    30	  let first_sho_slot = (s + h * k0 - t) / n_threads in
+    31	  let nbits = 8 * Array.length streams.(t) in
+    32	  let pro =
+    33	    (if t = 0 then [ W (Isa2.setp ~mask:1 ~value:0 ~oe:1 ()) ] else [])
+    34	    @ [ W (Isa2.ldc nbits); Waitc (Isa2.c_host, "under_real"); W Isa2.in_ ] in
+    35	  let pad = first_sho_slot - List.length pro in
+    36	  assert (pad >= 0);
+    37	  let sho = W (Isa2.sho ~pin:0 ~msb:0 ()) and nop = W Isa2.nop in
+    38	  let body =
+    39	    [ L "body" ]
+    40	    @ List.concat (List.init 6 (fun _ -> [ sho; nop; nop ]))
+    41	    @ [ sho; nop; Waitc (Isa2.c_host, "under") ]
+    42	    @ [ sho; W Isa2.in_; Jmp "body" ] in
+    43	  let handler =
+    44	    [ L "under"; sho; Jnz "under_real"; Halt;          (* the byte's last bit on time; cnt = 0: end of stream *)
+    45	      L "under_real" ]
+    46	    @ (if plant = No_release then [ nop ] else [ W (Isa2.setp ~mask:1 ~value:0 ~oe:0 ()) ])
+    47	    @ (if plant = No_report then [ nop ] else [ W (Isa2.outi ~tag:7 t) ])
+    48	    @ [ Halt ] in
+    49	  assemble (pro @ List.init pad (fun _ -> nop) @ body @ handler)
+    50	
+    51	(* Stall injection on the 10BASE-T transmitter firmware (../../sequencer-ethernet), on ISA v2.
+    52	
+    53	   Idea credited to Gergo Erdi's clash-intel8080 test-sim.hs, which perturbs the "memory ready"
+    54	   input of a CPU with a random pattern and requires the identical golden output. Here the
+    55	   perturbed input is host byte availability (IN's handshake), and the golden transcript is the
+    56	   Ethernet model's own line encoding of the frame (Eth_model.encode_frame), clock for clock.
+    57	
+    58	   Ethernet transmission is timing-exact: a half-bit late is a wrong frame. So "identical
+    59	   transcript" cannot hold for every stall pattern, and the specification we check is:
+    60	
+    61	     the line carries the golden frame exactly; or it carries a prefix of the golden frame,
+    62	     after which the line is released (high impedance) for the rest of the frame window and
+    63	     the host receives an underrun report (OUT tag 7). A wrong level on the line is a violation
+    64	     ("silent corruption").
+    65	
+    66	   The host model: four per-thread FIFOs multiplexed onto the one host port by the executing
+    67	   thread, as the original bench does. When a thread consumes its head byte at clock c, the next
+    68	   byte becomes valid at clock c + 1 + d, d chosen by the stall pattern; once valid it stays
+    69	   valid until consumed (the valid/ready rule). The golden run has d = 0 always.
+    70	
+    71	   Two firmwares:
+    72	   - original: ../../sequencer-ethernet/main.ml's generator, unchanged (eth_fw.ml is that file
+    73	     up to its first test, cut by a dune rule), translated word by word into v2 (compat.ml);
+    74	   - fixed: the same 24-slot loop, with one NOP replaced by WAITC 9 ("host byte valid") at
+    75	     dl = 0, two slots before IN, branching to an underrun handler that still emits the byte's
+    76	     last bit on time, then tells the end of the stream (cnt = 0, loaded with the thread's bit
+    77	     count in the prologue) from an underrun, and on an underrun releases the line and reports. *)
+    78	
+    79	open Eth_fw
+    80	open Eth_fixed   (* the fixed firmware, program_fixed, and n_threads *)
+    81	
+    82	(* ---- the host ---- *)
+    83	type pattern = {
+    84	  pname : string;
+    85	  mk : Random.State.t -> t:int -> j:int -> int;   (* per run: extra clocks before byte j of thread t is valid *)
+    86	}
+    87	
+    88	let none = { pname = "none (golden)"; mk = (fun _ ~t:_ ~j:_ -> 0) }
+    89	let uniform d = { pname = Printf.sprintf "every byte %d clocks late" d; mk = (fun _ ~t:_ ~j -> if j = 0 then 0 else d) }
+    90	let bursts p maxb = { pname = Printf.sprintf "random: p = %.3f per byte, 1..%d clocks" p maxb;
+    91	                      mk = (fun r ~t:_ ~j:_ -> if Random.State.float r 1.0 < p then 1 + Random.State.int r maxb else 0) }
+    92	(* one byte, chosen per seed, late by 97..200 clocks: beyond the loop's slack *)
+    93	let one_late = { pname = "one random byte 97..200 clocks late";
+    94	                 mk = (fun r ->
+    95	                     let ct = Random.State.int r n_threads and cj = 1 + Random.State.int r 30 and d = 97 + Random.State.int r 104 in
+    96	                     fun ~t ~j -> if (t, j) = (ct, cj) then d else 0) }
+    97	
+    98	(* ---- one run ---- *)
+    99	type core = Interp | Rtl_lockstep
+   100	
+   101	type result = {
+   102	  window : int array;          (* per clock of the frame window: 0, 1, or 2 = released *)
+   103	  reports : (int * int) list;  (* host_out (tag, byte) *)
+   104	  rtl_diff : int;              (* clocks where the RTL's pins differ from the interpreter's *)
+   105	}
+   106	
+   107	let run ?(core = Interp) ~fetch ~(pattern : pattern) ~seed () =
+   108	  let rnd = Random.State.make [| seed |] in
+   109	  let delay = pattern.mk rnd in
+   110	  let st = Isa2.init ~boot:Compat.boot_by_thread () in
+   111	  let hs = match core with Rtl_lockstep -> Some (Harness2.make_f ~boot:Compat.boot_by_thread ~fetch ()) | Interp -> None in
+   112	  let next = Array.make n_threads 0 in
+   113	  let avail = Array.init n_threads (fun t -> delay ~t ~j:0) in
+   114	  let cycles = s + h * nhalf in
+   115	  let window = Array.make (h * nhalf) 2 and reports = ref [] and rtl_diff = ref 0 in
+   116	  for c = 0 to cycles - 1 do
+   117	    let t = st.thread in
+   118	    let valid = next.(t) < Array.length streams.(t) && c >= avail.(t) in
+   119	    let byte = if valid then streams.(t).(next.(t)) else 0 in
+   120	    let io = Isa2.io ~host_in:byte ~host_in_valid:valid 0 in
+   121	    let eff = Isa2.step_f st ~fetch io in
+   122	    (match hs with
+   123	     | Some hs ->
+   124	       let o = Harness2.cycle hs io in
+   125	       if o.pin_out <> st.pin_out || o.pin_oe <> st.pin_oe || o.host_out <> eff.host_out
+   126	          || o.host_in_ready <> eff.host_in_ready then incr rtl_diff
+   127	     | None -> ());
+   128	    if eff.host_in_ready then begin
+   129	      next.(t) <- next.(t) + 1;
+   130	      avail.(t) <- c + 1 + delay ~t ~j:next.(t)
+   131	    end;
+   132	    (match eff.host_out with Some r -> reports := r :: !reports | None -> ());
+   133	    if c >= s then window.(c - s) <- (if st.pin_oe land 1 = 0 then 2 else st.pin_out land 1)
+   134	  done;
+   135	  { window; reports = List.rev !reports; rtl_diff = !rtl_diff }
+   136	
+   137	let golden = Array.init (h * nhalf) (fun i -> if model_samples.(i) > 0 then 1 else 0)   (* the frame window, as main.ml compares it *)
+   138	
+   139	type verdict = Exact | Cut_reported of int | Violation of string
+   140	
+   141	let judge ?(golden = golden) r =
+   142	  let n = Array.length golden in
+   143	  let rec first i = if i >= n then None else if r.window.(i) <> golden.(i) then Some i else first (i + 1) in
+   144	  match first 0 with
+   145	  | None -> if r.reports = [] then Exact else Violation "exact frame but an underrun was reported"
+   146	  | Some i ->
+   147	    let released_after = let ok = ref true in for k = i to n - 1 do if r.window.(k) <> 2 then ok := false done; !ok in
+   148	    let reported = List.exists (fun (tag, _) -> tag = 7) r.reports in
+   149	    if not released_after then
+   150	      Violation (Printf.sprintf "wrong level on the line at half-bit %d (clock %d)" (i / h) (s + i))
+   151	    else if not reported then Violation (Printf.sprintf "line released at half-bit %d without an underrun report" (i / h))
+   152	    else Cut_reported (i / h)
+   153	
+   154	(* ---- fetch functions over the per-thread arrays ---- *)
+   155	let fetch_original = Compat.fetch_threads ~translate:Variant.translate (Array.init n_threads program)
+   156	let fetch_fixed ?plant () =
+   157	  let mem = Array.init n_threads (fun t -> program_fixed ?plant t) in
+   158	  fun a ->
+   159	    let t = a lsr Isa2.pc_bits and pc = a land (Isa2.page_len - 1) in
+   160	    if pc < Array.length mem.(t) then mem.(t).(pc) else Isa2.nop
+   161	
+   162	let pr = Printf.printf
+   163	
+   164	let campaign ?core ~name ~fetch ~pattern ~seeds () =
+   165	  let exact = ref 0 and cut = ref 0 and viol = ref 0 and first_viol = ref "" and cut_at = ref [] and rtl = ref 0 in
+   166	  for seed = 1 to seeds do
+   167	    let r = run ?core ~fetch ~pattern ~seed () in
+   168	    rtl := !rtl + r.rtl_diff;
+   169	    match judge r with
+   170	    | Exact -> incr exact
+   171	    | Cut_reported k -> incr cut; cut_at := k :: !cut_at
+   172	    | Violation m -> incr viol; if !first_viol = "" then first_viol := Printf.sprintf " (seed %d: %s)" seed m
+   173	  done;
+   174	  pr "  %-9s %-44s %3d runs: exact %3d, cut and reported %3d, VIOLATIONS %3d%s%s\n%!" name pattern.pname seeds !exact !cut !viol
+   175	    (match core with Some Rtl_lockstep -> Printf.sprintf ", RTL vs interpreter %d clocks differ" !rtl | _ -> "")
+   176	    !first_viol;
+   177	  (!exact, !cut, !viol, !rtl)
+   178	
+   179	let () =
+   180	  pr "10BASE-T TX firmware under host stalls: %d bytes on the wire, %d half-bits, frame window %d clocks\n" (List.length wire) nhalf (h * nhalf);
+   181	  pr "fixed firmware sizes (words per thread): %s; original: %s\n"
+   182	    (String.concat "," (List.init n_threads (fun t -> string_of_int (Array.length (program_fixed t)))))
+   183	    (String.concat "," (List.init n_threads (fun t -> string_of_int (List.length (List.filter (( <> ) Isa.halt) (Array.to_list (program t)))))));
+   184	  let ok = ref true in
+   185	  let need cond msg = if not cond then (ok := false; pr "  ** expectation failed: %s\n" msg) in
+   186	  pr "\n== golden: no stalls\n";
+   187	  let e, _, _, _ = campaign ~name:"original" ~fetch:fetch_original ~pattern:none ~seeds:1 () in
+   188	  need (e = 1) "original exact without stalls";
+   189	  let e, _, _, rd = campaign ~core:Rtl_lockstep ~name:"fixed" ~fetch:(fetch_fixed ()) ~pattern:none ~seeds:1 () in
+   190	  need (e = 1 && rd = 0) "fixed exact without stalls, RTL agrees";
+   191	  pr "\n== latency sweep: every byte after the first d clocks late (the slack of the 24-slot loop)\n";
+   192	  let last_exact name fetch =
+   193	    let best = ref (-1) in
+   194	    List.iter (fun d ->
+   195	        let r = run ~fetch ~pattern:(uniform d) ~seed:1 () in
+   196	        let v = judge r in
+   197	        pr "  %-9s d = %3d: %s\n" name d
+   198	          (match v with Exact -> "exact" | Cut_reported k -> Printf.sprintf "cut at half-bit %d, reported" k | Violation m -> "VIOLATION: " ^ m);
+   199	        if v = Exact && d > !best then best := d) [ 0; 40; 80; 82; 83; 84; 85; 87; 88; 92; 94; 95; 96; 120 ];
+   200	    !best in
+   201	  let bo = last_exact "original" fetch_original and bf = last_exact "fixed" (fetch_fixed ()) in
+   202	  pr "  largest exact delay: original %d clocks, fixed %d clocks\n" bo bf;
+   203	  pr "\n== random stall patterns (seeds 1..N)\n";
+   204	  List.iter (fun pattern ->
+   205	      let _, _, vo, _ = campaign ~name:"original" ~fetch:fetch_original ~pattern ~seeds:50 () in
+   206	      let _, _, vf, rd = campaign ~core:Rtl_lockstep ~name:"fixed" ~fetch:(fetch_fixed ()) ~pattern ~seeds:50 () in
+   207	      need (vf = 0 && rd = 0) ("fixed firmware meets the specification under " ^ pattern.pname);
+   208	      ignore vo)
+   209	    [ bursts 0.01 40; bursts 0.05 120; bursts 0.3 200; one_late ];
+   210	  pr "\n== controls (each must be flagged)\n";
+   211	  let p = bursts 0.05 120 in
+   212	  let _, _, v, _ = campaign ~name:"original" ~fetch:fetch_original ~pattern:p ~seeds:50 () in
+   213	  pr "  control original firmware (no underrun path): %s\n" (if v > 0 then "flagged" else "MISSED"); need (v > 0) "control: original flagged";
+   214	  let _, _, v, _ = campaign ~name:"no-rel" ~fetch:(fetch_fixed ~plant:No_release ()) ~pattern:p ~seeds:50 () in
+   215	  pr "  control fixed firmware without the line release: %s\n" (if v > 0 then "flagged" else "MISSED"); need (v > 0) "control: no release flagged";
+   216	  let _, _, v, _ = campaign ~name:"no-rep" ~fetch:(fetch_fixed ~plant:No_report ()) ~pattern:p ~seeds:50 () in
+   217	  pr "  control fixed firmware without the underrun report: %s\n" (if v > 0 then "flagged" else "MISSED"); need (v > 0) "control: no report flagged";
+   218	  let bad_golden = Array.copy golden in
+   219	  bad_golden.(h * 500) <- 1 - bad_golden.(h * 500);
+   220	  let v = judge ~golden:bad_golden (run ~fetch:(fetch_fixed ()) ~pattern:none ~seed:1 ()) in
+   221	  let flagged = match v with Violation _ -> true | _ -> false in
+   222	  pr "  control golden transcript with half-bit 500 flipped, no stalls: %s\n" (if flagged then "flagged" else "MISSED");
+   223	  need flagged "control: wrong golden flagged";
+   224	  pr "\nETH STALL %s\n" (if !ok then "PASS" else "FAIL");
+   225	  exit (if !ok then 0 else 1)
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c 3 nl -ba prototypes/verif-oracles/hazard/hazard.ml' in /home/matthias/prog/janestreet/emulator-wt-verif-oracles
+ succeeded in 0ms:
+     1	(* A static hazard checker for ISA v2 programmes: structural conflicts as an exhaustive case table
+     2	   in which a missing entry means REJECTED.
+     3	
+     4	   Idea credited to Gergo Erdi's typed microcode (his CPU microcode's "Combine" type family has a
+     5	   clause for each pair of micro-operations that may share a cycle; with no clause there is no
+     6	   type, so a conflicting pair does not compile). OCaml has no type families, so the same
+     7	   discipline is kept in two layers:
+     8	   - compile time: the decoder and the classifier below are matches over closed variants with no
+     9	     wildcard, and this file is compiled with warnings 4 (fragile match), 8 (non-exhaustive) and 9
+    10	     as errors (see dune). A new opcode, EXT operation or use kind does not compile until it is
+    11	     classified;
+    12	   - run time: the verdict tables are allow-lists. A combination with no entry is REJECTED, and
+    13	     the rejection names the missing key. A use the classifier cannot classify (a reserved EXT
+    14	     operation) raises Unhandled instead of being ignored.
+    15	
+    16	   What is checked, for one set of four thread programmes plus declarations (who owns what, the
+    17	   array's bank streams, the refresh schedule):
+    18	   - every reachable instruction of every thread, from its boot address, following every branch
+    19	     both ways (data-independent over-approximation: unreachable words are not checked);
+    20	   - SOLO: each use of a resource against its declaration (pin ownership, bank grants) and its
+    21	     wait class (a SEND whose failure path waits for ever on a full inbox is "unbounded");
+    22	   - PAIRS: every two uses of one resource by different actors, keyed by the two kinds, whether
+    23	     they can fall in the same clock (threads issue in clocks t mod 4; refresh and array streams
+    24	     in their declared clocks), and whether the resource is declared shared between them;
+    25	   - COUNTERPART: a SEND needs a reachable RECV on that inbox in another thread, and vice versa.
+    26	
+    27	   Not checked (stated, not hidden): runtime pc changes by the host (D1 of sequencer-v2); the bank
+    28	   pointer crossing from bank 0 into bank 1 by post-increment (the bank of LDB/STB comes from a
+    29	   data-flow pass over BANK's imm[1], see [flow]); programmes that patch their
+    30	   own words (usb-ls's controller); timing (deadlines met), which is the lockstep's and the
+    31	   protocol models' job; whether two bank users touch disjoint addresses (the allocator's job). *)
+    32	
+    33	exception Unhandled of string
+    34	exception Bad_table of string
+    35	
+    36	(* ---- decoding: every v2 opcode and EXT operation, no wildcard ---- *)
+    37	type instr =
+    38	  | Nop | Setp of { mask : int } | Ldc | Ldd | Lda | Waitp of { pin : int; fail : int } | Waitd
+    39	  | Sho of { pin : int; pair : bool; cap : bool } | Shi of { pin : int } | Jmp of int | Jnz of int
+    40	  | Out | In | Send of { ch : int; fail : int } | Recv of { ch : int; fail : int }
+    41	  | Waitc of { cond : int; fail : int }
+    42	  | Skne | Skeq | Fine | Cnta | Ldb | Stb | Bank of { hi : int } | Cfg | Ext_reserved of int
+    43	
+    44	let decode w =
+    45	  let f = w land 0xFFF in
+    46	  let pin = (f lsr 9) land 7 and a8 = f land 0xFF in
+    47	  match (w lsr 12) land 15 with
+    48	  | 0 -> Nop | 1 -> Setp { mask = (f lsr 4) land 0xFF } | 2 -> Ldc | 3 -> Ldd | 4 -> Lda
+    49	  | 5 -> Waitp { pin; fail = a8 } | 6 -> Waitd
+    50	  | 7 -> Sho { pin; pair = (f lsr 6) land 1 = 1; cap = (f lsr 4) land 1 = 1 }
+    51	  | 8 -> Shi { pin } | 9 -> Jmp a8 | 10 -> Jnz a8 | 11 -> Out | 12 -> In
+    52	  | 13 -> let ch = (f lsr 8) land 7 in if (f lsr 11) land 1 = 0 then Send { ch; fail = a8 } else Recv { ch; fail = a8 }
+    53	  | 14 -> Waitc { cond = (f lsr 8) land 15; fail = a8 }
+    54	  | 15 ->
+    55	    (match (f lsr 8) land 15 with
+    56	     | 0 -> Skne | 1 -> Skeq | 2 -> Fine | 3 -> Cnta | 4 -> Ldb | 5 -> Stb | 6 -> Bank { hi = a8 } | 7 -> Cfg
+    57	     | s -> Ext_reserved s)
+    58	  | _ -> assert false   (* four bits *)
+    59	
+    60	(* ---- resources, actors, use kinds ---- *)
+    61	type resource = Pin of int | Bankr of int | Inbox of int | Feed of int | Tap of int
+    62	type actor = Thread of int | Array_seg of int | Refresher
+    63	
+    64	type kind =
+    65	  | Pin_drive | Pin_sample
+    66	  | Bank_read | Bank_write | Bank_refresh | Bank_stream
+    67	  | Send_k | Space_wait | Recv_k | Poll
+    68	  | Feed_push | Tap_pop
+    69	
+    70	(* every kind, by an exhaustive successor function: a new constructor fails to compile here *)
+    71	let next_kind = function
+    72	  | Pin_drive -> Some Pin_sample | Pin_sample -> Some Bank_read | Bank_read -> Some Bank_write
+    73	  | Bank_write -> Some Bank_refresh | Bank_refresh -> Some Bank_stream | Bank_stream -> Some Send_k
+    74	  | Send_k -> Some Space_wait | Space_wait -> Some Recv_k | Recv_k -> Some Poll | Poll -> Some Feed_push
+    75	  | Feed_push -> Some Tap_pop | Tap_pop -> None
+    76	let all_kinds = let rec go k = k :: (match next_kind k with Some n -> go n | None -> []) in go Pin_drive
+    77	
+    78	type cls = C_pin | C_bank | C_inbox | C_feed | C_tap
+    79	let class_of = function
+    80	  | Pin_drive | Pin_sample -> C_pin
+    81	  | Bank_read | Bank_write | Bank_refresh | Bank_stream -> C_bank
+    82	  | Send_k | Space_wait | Recv_k | Poll -> C_inbox
+    83	  | Feed_push -> C_feed | Tap_pop -> C_tap
+    84	let class_of_res = function Pin _ -> C_pin | Bankr _ -> C_bank | Inbox _ -> C_inbox | Feed _ -> C_feed | Tap _ -> C_tap
+    85	
+    86	(* the wait class applies to mailbox and port kinds only *)
+    87	type wait = No_wait | Bounded | Unbounded
+    88	let waits_apply = function
+    89	  | Send_k | Space_wait | Recv_k | Poll | Feed_push | Tap_pop -> true
+    90	  | Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream -> false
+    91	
+    92	let kind_name = function
+    93	  | Pin_drive -> "pin-drive" | Pin_sample -> "pin-sample" | Bank_read -> "bank-read (LDB)"
+    94	  | Bank_write -> "bank-write (STB)" | Bank_refresh -> "bank-refresh" | Bank_stream -> "bank-stream (array)"
+    95	  | Send_k -> "send" | Space_wait -> "space-wait (WAITC 11)" | Recv_k -> "recv" | Poll -> "poll (WAITC 10)"
+    96	  | Feed_push -> "feed-push" | Tap_pop -> "tap-pop"
+    97	let wait_name = function No_wait -> "-" | Bounded -> "bounded" | Unbounded -> "UNBOUNDED"
+    98	let res_name = function
+    99	  | Pin p -> Printf.sprintf "pin %d" p | Bankr b -> Printf.sprintf "bank %d" b | Inbox i -> Printf.sprintf "inbox %d" i
+   100	  | Feed j -> Printf.sprintf "feed %d" j | Tap j -> Printf.sprintf "tap %d" j
+   101	let actor_name = function
+   102	  | Thread t -> Printf.sprintf "T%d" t | Array_seg s -> Printf.sprintf "array segment %d" s | Refresher -> "refresh"
+   103	
+   104	(* ---- declarations ---- *)
+   105	type decl = {
+   106	  grants : (resource * actor * kind list) list;   (* actor may use resource with these kinds *)
+   107	  shared : (resource * actor list) list;          (* declared sharing groups (e.g. a TDM pin) *)
+   108	  refresh : (int * int * int) list;               (* bank, period, offset: clocks the refresh owns *)
+   109	  streams : (int * int) list;                     (* bank, segment: the array uses the bank port every clock *)
+   110	  boot : (int * int) array;                       (* per thread (page, pc) *)
+   111	  waivers : (resource * actor * kind * string) list;
+   112	  (* a SOLO rejection the programme's author has argued away, with the argument; printed as
+   113	     WAIVED with its reason, never silent. The table itself is not changed by a waiver. *)
+   114	}
+   115	
+   116	let no_decl = { grants = []; shared = []; refresh = []; streams = []; boot = Array.init 4 (fun t -> (t, 0)); waivers = [] }
+   117	
+   118	(* ---- the tables ---- *)
+   119	type decl_rel = Declared | Undeclared
+   120	
+   121	(* SOLO allow-list: (kind, wait, declaration) -> reason *)
+   122	let solo_table = [
+   123	  (Pin_drive, No_wait, Declared), "the thread owns the pin";
+   124	  (Pin_sample, No_wait, Declared), "the thread reads its own pin";
+   125	  (Pin_sample, No_wait, Undeclared), "sampling any pin is harmless (monitors, loop-backs)";
+   126	  (Bank_read, No_wait, Declared), "bank granted to the thread";
+   127	  (Bank_write, No_wait, Declared), "bank granted to the thread";
+   128	  (Bank_refresh, No_wait, Declared), "refresh schedule (declared by construction)";
+   129	  (Bank_stream, No_wait, Declared), "array port use (declared by construction)";
+   130	  (Send_k, Bounded, Declared), "SEND with a failure path that leaves";
+   131	  (Space_wait, Bounded, Declared), "space wait with a failure path that leaves";
+   132	  (Recv_k, Bounded, Declared), "RECV with a failure path";
+   133	  (Recv_k, Unbounded, Declared), "a consumer may idle on an empty inbox";
+   134	  (Poll, Bounded, Declared), "own-inbox poll with a failure path";
+   135	  (Poll, Unbounded, Declared), "a consumer may idle on its own inbox";
+   136	  (Feed_push, Bounded, Declared), "feed write with a failure path";
+   137	  (Tap_pop, Bounded, Declared), "tap read with a failure path";
+   138	  (Tap_pop, Unbounded, Declared), "a consumer may idle on an empty tap";
+   139	]
+   140	(* Absent on purpose, so REJECTED: a pin driven by a thread that does not own it; any bank use
+   141	   not granted; SEND / space wait / feed push that waits for ever on a full target ("send to a
+   142	   full inbox without a deadline"); any mailbox or port use not declared. *)
+   143	
+   144	(* PAIR allow-list: (kind a, kind b, can share a clock, declared shared) -> reason; a <= b in
+   145	   all_kinds order. Pins hold their value between writes, so for pins the clock does not matter. *)
+   146	let pair_table =
+   147	  let both f = [ f false; f true ] in
+   148	  List.concat [
+   149	    both (fun c -> (Pin_drive, Pin_drive, c, true), "declared time-division group: each member drives in its own slots; the interleave is the protocol model's to check");
+   150	    List.concat_map (fun c -> both (fun s -> (Pin_drive, Pin_sample, c, s), "another actor reads the pin")) [ false; true ];
+   151	    List.concat_map (fun c -> both (fun s -> (Pin_sample, Pin_sample, c, s), "two readers")) [ false; true ];
+   152	    (* one bank port: any two users in different clocks; never two in the same clock *)
+   153	    List.concat_map (fun (a, b) -> both (fun s -> (a, b, false, s), "one port, different clocks"))
+   154	      [ (Bank_read, Bank_read); (Bank_read, Bank_write); (Bank_write, Bank_write);
+   155	        (Bank_read, Bank_refresh); (Bank_write, Bank_refresh); (Bank_read, Bank_stream);
+   156	        (Bank_write, Bank_stream); (Bank_refresh, Bank_stream) ];
+   157	    (* inboxes: one producer, one consumer *)
+   158	    List.concat_map (fun (a, b) -> List.concat_map (fun c -> both (fun s -> (a, b, c, s), "producer and consumer")) [ false; true ])
+   159	      [ (Send_k, Recv_k); (Send_k, Poll); (Space_wait, Recv_k); (Space_wait, Poll); (Send_k, Space_wait) ];
+   160	    List.concat_map (fun c -> [ (Send_k, Send_k, c, true), "declared multi-producer inbox" ]) [ false; true ];
+   161	  ]
+   162	(* Absent, so REJECTED: two undeclared drivers of a pin; two bank users in one clock (refresh
+   163	   against access, array stream against LDB/STB, read against write); two consumers of one
+   164	   inbox (RECV/RECV, RECV/POLL of another thread); undeclared multiple producers; two writers of
+   165	   one feed register or two readers of one tap. *)
+   166	
+   167	(* COUNTERPART: a mailbox use needs the other side somewhere (another actor, reachable) *)
+   168	let counterpart_kinds = function
+   169	  | Send_k | Space_wait -> Some [ Recv_k; Poll ]
+   170	  | Recv_k | Poll -> Some [ Send_k ]
+   171	  | Feed_push | Tap_pop -> None   (* the array side is configuration, declared through grants *)
+   172	  | Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream -> None
+   173	
+   174	let index k = let rec go i = function [] -> assert false | x :: r -> if x = k then i else go (i + 1) r in go 0 all_kinds
+   175	
+   176	(* table sanity, at start-up: keys well formed, no duplicates, every kind listed once *)
+   177	let () =
+   178	  let n = List.length all_kinds in
+   179	  if List.length (List.sort_uniq compare all_kinds) <> n then raise (Bad_table "all_kinds repeats a kind");
+   180	  List.iter (fun ((k, w, _), _) ->
+   181	      if waits_apply k = (w = No_wait) then raise (Bad_table ("solo entry with a wait class that does not apply: " ^ kind_name k)))
+   182	    solo_table;
+   183	  List.iter (fun ((a, b, _, _), _) ->
+   184	      if class_of a <> class_of b then raise (Bad_table (Printf.sprintf "pair entry across classes: %s / %s" (kind_name a) (kind_name b)));
+   185	      if index a > index b then raise (Bad_table (Printf.sprintf "pair entry not in canonical order: %s / %s" (kind_name a) (kind_name b))))
+   186	    pair_table;
+   187	  let dup l = List.length (List.sort_uniq compare (List.map fst l)) <> List.length l in
+   188	  if dup solo_table || dup pair_table then raise (Bad_table "duplicate key")
+   189	
+   190	type tables = { solo : ((kind * wait * decl_rel) * string) list; pairs : ((kind * kind * bool * bool) * string) list }
+   191	let default_tables = { solo = solo_table; pairs = pair_table }
+   192	
+   193	(* ---- uses of one instruction ---- *)
+   194	type use = { res : resource; kind : kind; actor : actor; addr : int; wait : wait; text : string }
+   195	
+   196	let n_threads = 4
+   197	
+   198	(* follow a failure target through unconditional jumps and NOPs: does it come back to [self]
+   199	   without passing anything else? Then the wait never leaves. *)
+   200	let wait_class ~fetch ~page ~self ~fail =
+   201	  let rec go pc steps =
+   202	    if pc = self then Unbounded
+   203	    else if steps > 8 then Bounded
+   204	    else match decode (fetch ((page lsl 8) lor pc)) with
+   205	      | Jmp a -> go a (steps + 1)
+   206	      | Nop -> go ((pc + 1) land 0xFF) (steps + 1)
+   207	      | Setp _ | Ldc | Ldd | Lda | Waitp _ | Waitd | Sho _ | Shi _ | Jnz _ | Out | In | Send _ | Recv _
+   208	      | Waitc _ | Skne | Skeq | Fine | Cnta | Ldb | Stb | Bank _ | Cfg | Ext_reserved _ -> Bounded in
+   209	  go fail 0
+   210	
+   211	(* the bank bit a BANK sets (bp <- {imm[1:0], acc}, bank = bp[9] = imm[1]), and a SEND's channel *)
+   212	let bank_hi = function
+   213	  | Bank { hi } -> Some ((hi lsr 1) land 1)
+   214	  | Nop | Setp _ | Ldc | Ldd | Lda | Waitp _ | Waitd | Sho _ | Shi _ | Jmp _ | Jnz _ | Out | In | Send _ | Recv _
+   215	  | Waitc _ | Skne | Skeq | Fine | Cnta | Ldb | Stb | Cfg | Ext_reserved _ -> None
+   216	let send_ch = function
+   217	  | Send { ch; _ } -> Some ch
+   218	  | Nop | Setp _ | Ldc | Ldd | Lda | Waitp _ | Waitd | Sho _ | Shi _ | Jmp _ | Jnz _ | Out | In | Bank _ | Recv _
+   219	  | Waitc _ | Skne | Skeq | Fine | Cnta | Ldb | Stb | Cfg | Ext_reserved _ -> None
+   220	
+   221	(* successors of the instruction at [pc] *)
+   222	let successors ~fetch ~page pc =
+   223	  let nx = (pc + 1) land 0xFF in
+   224	  match decode (fetch ((page lsl 8) lor pc)) with
+   225	  | Jmp a -> [ a ] | Jnz a -> [ a; nx ]
+   226	  | Waitp { fail; _ } | Send { fail; _ } | Recv { fail; _ } | Waitc { fail; _ } -> [ fail; nx ]
+   227	  | Waitd | In -> [ nx ]
+   228	  | Skne | Skeq -> [ nx; (pc + 2) land 0xFF ]
+   229	  | Nop | Setp _ | Ldc | Ldd | Lda | Sho _ | Shi _ | Out | Fine | Cnta | Ldb | Stb | Bank _ | Cfg -> [ nx ]
+   230	  | Ext_reserved s -> raise (Unhandled (Printf.sprintf "page %d pc %d: reserved EXT operation %d" page pc s))
+   231	
+   232	(* Reachable addresses with, at each, the banks the thread's pointer can be in and the channels
+   233	   its last SEND can name (bit sets), by a forward data-flow fixpoint from reset (bank 0, lsend
+   234	   0, as the RTL resets them). BANK sets the bank bit; SEND sets lsend on every path, taken or
+   235	   not (D3); everything else keeps both. The bank pointer's post-increment can carry from bank 0
+   236	   into bank 1 at address 511; that is not modelled. *)
+   237	let flow ~fetch ~page ~start =
+   238	  let banks = Array.make 256 0 and lsend = Array.make 256 0 and seen = Array.make 256 false in
+   239	  let work = Queue.create () in
+   240	  let join pc b l =
+   241	    let nb = banks.(pc) lor b and nl = lsend.(pc) lor l in
+   242	    if not seen.(pc) || nb <> banks.(pc) || nl <> lsend.(pc) then begin
+   243	      seen.(pc) <- true; banks.(pc) <- nb; lsend.(pc) <- nl; Queue.push pc work
+   244	    end in
+   245	  join start 1 1;
+   246	  while not (Queue.is_empty work) do
+   247	    let pc = Queue.pop work in
+   248	    let b = (match bank_hi (decode (fetch ((page lsl 8) lor pc))) with Some h -> 1 lsl h | None -> banks.(pc))
+   249	    and l = (match send_ch (decode (fetch ((page lsl 8) lor pc))) with Some c -> 1 lsl c | None -> lsend.(pc)) in
+   250	    List.iter (fun s -> join s b l) (successors ~fetch ~page pc)
+   251	  done;
+   252	  let bits m n = List.filter (fun i -> (m lsr i) land 1 = 1) (List.init n Fun.id) in
+   253	  List.filter_map (fun pc -> if seen.(pc) then Some (pc, bits banks.(pc) 2, bits lsend.(pc) 8) else None) (List.init 256 Fun.id)
+   254	
+   255	let uses_of_thread ~fetch ~(decl : decl) t =
+   256	  let page, start = decl.boot.(t) in
+   257	  let actor = Thread t in
+   258	  let at pc = (page lsl 8) lor pc in
+   259	  List.concat_map (fun (pc, banks, lsends) ->
+   260	      let i = decode (fetch (at pc)) in
+   261	      let mk ?(wait = No_wait) res kind text = { res; kind; actor; addr = at pc; wait; text } in
+   262	      let wc fail = wait_class ~fetch ~page ~self:pc ~fail in
+   263	      match i with
+   264	      | Setp { mask } -> List.filter_map (fun p -> if (mask lsr p) land 1 = 1 then Some (mk (Pin p) Pin_drive "SETP") else None) [ 0; 1; 2; 3; 4; 5; 6; 7 ]
+   265	      | Sho { pin; pair; cap } ->
+   266	        [ mk (Pin pin) Pin_drive "SHO" ]
+   267	        @ (if pair then [ mk (Pin ((pin + 1) land 7)) Pin_drive "SHO pair" ] else [])
+   268	        @ (if cap then [ mk (Pin (pin lxor 1)) Pin_sample "SHO capture" ] else [])
+   269	      | Waitp { pin; _ } -> [ mk (Pin pin) Pin_sample "WAITP" ]
+   270	      | Shi { pin } -> [ mk (Pin pin) Pin_sample "SHI" ]
+   271	      | Ldb -> List.map (fun b -> mk (Bankr b) Bank_read "LDB") banks
+   272	      | Stb -> List.map (fun b -> mk (Bankr b) Bank_write "STB") banks
+   273	      | Send { ch; fail } ->
+   274	        if ch < 4 then [ mk ~wait:(wc fail) (Inbox ch) Send_k "SEND" ] else [ mk ~wait:(wc fail) (Feed (ch - 4)) Feed_push "SEND port" ]
+   275	      | Recv { ch; fail } ->
+   276	        if ch < 4 then [ mk ~wait:(wc fail) (Inbox ch) Recv_k "RECV" ] else [ mk ~wait:(wc fail) (Tap (ch - 4)) Tap_pop "RECV port" ]
+   277	      | Waitc { cond; fail } ->
+   278	        if cond = Isa2.c_inbox then [ mk ~wait:(wc fail) (Inbox t) Poll "WAITC 10" ]
+   279	        else if cond = Isa2.c_space then
+   280	          List.map (fun ch -> if ch < 4 then mk ~wait:(wc fail) (Inbox ch) Space_wait "WAITC 11"
+   281	                     else mk ~wait:(wc fail) (Feed (ch - 4)) Feed_push "WAITC 11 (port)") lsends
+   282	        else []
+   283	      | Ext_reserved s -> raise (Unhandled (Printf.sprintf "T%d pc %d: reserved EXT operation %d" t pc s))
+   284	      | Nop | Ldc | Ldd | Lda | Waitd | Jmp _ | Jnz _ | Out | In | Skne | Skeq | Fine | Cnta | Bank _ | Cfg -> [])
+   285	    (flow ~fetch ~page ~start)
+   286	
+   287	let declared_uses (d : decl) =
+   288	  List.map (fun (b, period, offset) ->
+   289	      { res = Bankr b; kind = Bank_refresh; actor = Refresher; addr = -1; wait = No_wait;
+   290	        text = Printf.sprintf "refresh every %d clocks at %d" period offset }) d.refresh
+   291	  @ List.map (fun (b, seg) ->
+   292	      { res = Bankr b; kind = Bank_stream; actor = Array_seg seg; addr = -1; wait = No_wait; text = "array stream, every clock" }) d.streams
+   293	
+   294	(* clocks an actor can use a resource in: (period, offset) *)
+   295	let clocks (d : decl) u =
+   296	  match u.actor with
+   297	  | Thread t -> (n_threads, t)
+   298	  | Array_seg _ -> (1, 0)
+   299	  | Refresher -> (match u.res with
+   300	      | Bankr b -> (match List.find_opt (fun (b', _, _) -> b' = b) d.refresh with Some (_, p, o) -> (p, o) | None -> (1, 0))
+   301	      | Pin _ | Inbox _ | Feed _ | Tap _ -> (1, 0))
+   302	let rec gcd a b = if b = 0 then a else gcd b (a mod b)
+   303	let coincide d u v =
+   304	  let pa, oa = clocks d u and pb, ob = clocks d v in
+   305	  let g = gcd pa pb in ((oa - ob) mod g + g) mod g = 0
+   306	
+   307	let is_declared (d : decl) u =
+   308	  match u.actor with
+   309	  | Refresher | Array_seg _ -> true
+   310	  | Thread _ -> List.exists (fun (r, a, ks) -> r = u.res && a = u.actor && List.mem u.kind ks) d.grants
+   311	
+   312	let shared (d : decl) r a b = List.exists (fun (r', g) -> r' = r && List.mem a g && List.mem b g) d.shared
+   313	
+   314	type finding = { rule : string; key : string; where : string }
+   315	
+   316	let where_of u = if u.addr < 0 then Printf.sprintf "%s (%s)" (actor_name u.actor) u.text
+   317	  else Printf.sprintf "%s page %d pc %d (%s)" (actor_name u.actor) (u.addr lsr 8) (u.addr land 0xFF) u.text
+   318	
+   319	let last_waived : string list ref = ref []
+   320	
+   321	let check ?(tables = default_tables) ~fetch (d : decl) =
+   322	  let uses = List.concat (List.init n_threads (uses_of_thread ~fetch ~decl:d)) @ declared_uses d in
+   323	  let rejected = ref [] in
+   324	  last_waived := [];
+   325	  let reject rule key where = rejected := { rule; key; where } :: !rejected in
+   326	  (* SOLO *)
+   327	  List.iter (fun u ->
+   328	      if class_of u.kind <> class_of_res u.res then raise (Unhandled ("use of the wrong class: " ^ where_of u));
+   329	      let key = (u.kind, u.wait, (if is_declared d u then Declared else Undeclared)) in
+   330	      if not (List.mem_assoc key tables.solo) then
+   331	        let k, w, r = key in
+   332	        let text = Printf.sprintf "(%s, %s, %s) on %s" (kind_name k) (wait_name w) (if r = Declared then "declared" else "UNDECLARED") (res_name u.res) in
+   333	        match List.find_opt (fun (res, a, kd, _) -> res = u.res && a = u.actor && kd = u.kind) d.waivers with
+   334	        | Some (_, _, _, why) -> last_waived := Printf.sprintf "%s at %s -- %s" text (where_of u) why :: !last_waived
+   335	        | None -> reject "solo" text (where_of u))
+   336	    uses;
+   337	  (* PAIRS: one representative per (actor, kind, resource) *)
+   338	  let reps = List.sort_uniq (fun a b -> compare (a.res, a.actor, a.kind) (b.res, b.actor, b.kind)) uses in
+   339	  let seen = Hashtbl.create 16 in
+   340	  List.iter (fun u ->
+   341	      List.iter (fun v ->
+   342	          if u.res = v.res && u.actor <> v.actor
+   343	             && (index u.kind < index v.kind || (u.kind = v.kind && compare u.actor v.actor < 0)) then begin
+   344	            let c = coincide d u v and s = shared d u.res u.actor v.actor in
+   345	            let key = (u.kind, v.kind, c, s) in
+   346	            if not (List.mem_assoc key tables.pairs) && not (Hashtbl.mem seen (u.res, key, u.actor, v.actor)) then begin
+   347	              Hashtbl.replace seen (u.res, key, u.actor, v.actor) ();
+   348	              reject "pair" (Printf.sprintf "(%s, %s, %s, %s) on %s" (kind_name u.kind) (kind_name v.kind)
+   349	                               (if c then "SAME CLOCK possible" else "different clocks") (if s then "declared shared" else "not shared")
+   350	                               (res_name u.res)) (where_of u ^ " / " ^ where_of v)
+   351	            end
+   352	          end) reps) reps;
+   353	  (* COUNTERPART *)
+   354	  List.iter (fun u ->
+   355	      match counterpart_kinds u.kind with
+   356	      | None -> ()
+   357	      | Some ks ->
+   358	        if not (List.exists (fun v -> v.res = u.res && v.actor <> u.actor && List.mem v.kind ks) reps) then
+   359	          reject "counterpart" (Printf.sprintf "%s on %s with no %s by another thread" (kind_name u.kind) (res_name u.res)
+   360	                                  (String.concat "/" (List.map kind_name ks))) (where_of u)) reps;
+   361	  (uses, List.rev !rejected)
+   362	
+   363	(* ---- reports ---- *)
+   364	let print_table oc (t : tables) =
+   365	  let p fmt = Printf.fprintf oc fmt in
+   366	  p "SOLO table: every (kind, wait class, declaration); a row without a reason is REJECTED\n";
+   367	  List.iter (fun k ->
+   368	      List.iter (fun w ->
+   369	          if waits_apply k <> (w = No_wait) then
+   370	            List.iter (fun r ->
+   371	                let key = (k, w, r) in
+   372	                p "  %-24s %-9s %-10s %s\n" (kind_name k) (wait_name w) (if r = Declared then "declared" else "undeclared")
+   373	                  (match List.assoc_opt key t.solo with Some why -> "allowed: " ^ why | None -> "REJECTED"))
+   374	              [ Declared; Undeclared ]) [ No_wait; Bounded; Unbounded ]) all_kinds;
+   375	  p "\nPAIR table: every two kinds of one resource class used by different actors\n";
+   376	  List.iter (fun a ->
+   377	      List.iter (fun b ->
+   378	          if class_of a = class_of b && index a <= index b then
+   379	            List.iter (fun c ->
+   380	                List.iter (fun s ->
+   381	                    p "  %-22s %-22s %-14s %-10s %s\n" (kind_name a) (kind_name b) (if c then "same clock" else "other clocks")
+   382	                      (if s then "shared" else "not shared")
+   383	                      (match List.assoc_opt (a, b, c, s) t.pairs with Some why -> "allowed: " ^ why | None -> "REJECTED"))
+   384	                  [ false; true ]) [ false; true ]) all_kinds) all_kinds
+   385	
+   386	let summarise uses =
+   387	  let by = Hashtbl.create 16 in
+   388	  List.iter (fun u ->
+   389	      let k = (u.res, u.actor) in
+   390	      let l = Option.value ~default:[] (Hashtbl.find_opt by k) in
+   391	      let tag = kind_name u.kind ^ (if u.wait = No_wait then "" else "/" ^ wait_name u.wait) in
+   392	      if not (List.mem tag l) then Hashtbl.replace by k (tag :: l)) uses;
+   393	  Hashtbl.fold (fun (r, a) l acc -> Printf.sprintf "%s %s: %s" (res_name r) (actor_name a) (String.concat ", " (List.rev l)) :: acc) by []
+   394	  |> List.sort compare
+   395	
+   396	(* Check one programme set and print what was found; returns the findings. *)
+   397	let report ?tables ~name ~fetch (d : decl) =
+   398	  Printf.printf "== %s\n" name;
+   399	  match check ?tables ~fetch d with
+   400	  | uses, findings ->
+   401	    List.iter (Printf.printf "   uses: %s\n") (summarise uses);
+   402	    List.iter (Printf.printf "   WAIVED %s\n") (List.rev !last_waived);
+   403	    if findings = [] then Printf.printf "   ACCEPTED: no rejected combination\n"
+   404	    else List.iter (fun f -> Printf.printf "   REJECTED [%s] %s\n      at %s\n" f.rule f.key f.where) findings;
+   405	    print_newline ();
+   406	    findings
+   407	  | exception Unhandled m -> Printf.printf "   UNHANDLED (fails loudly): %s\n\n" m; [ { rule = "unhandled"; key = m; where = "" } ]
+   408	
+   409	(* the same table with some pair entries removed, to show an entry is load-bearing *)
+   410	let without_pairs pred (t : tables) = { t with pairs = List.filter (fun (k, _) -> not (pred k)) t.pairs }
+   411	
+   412	(* Evidence for a drain argument: the waits in thread [t]'s reachable code that can last for
+   413	   ever, other than [except] (e.g. its RECV on the inbox in question). IN, and any wait whose
+   414	   failure path returns to itself, count. JNZ loops are not judged here (they end when cnt does). *)
+   415	let unbounded_waits ~fetch ~(decl : decl) t ~except =
+   416	  let page, start = decl.boot.(t) in
+   417	  List.filter_map (fun (pc, _, _) ->
+   418	      let i = decode (fetch ((page lsl 8) lor pc)) in
+   419	      let w = match i with
+   420	        | In -> Some "IN"
+   421	        | Waitp { fail; _ } -> if wait_class ~fetch ~page ~self:pc ~fail = Unbounded then Some "WAITP" else None
+   422	        | Waitc { fail; _ } -> if wait_class ~fetch ~page ~self:pc ~fail = Unbounded then Some "WAITC" else None
+   423	        | Send { fail; _ } -> if wait_class ~fetch ~page ~self:pc ~fail = Unbounded then Some "SEND" else None
+   424	        | Recv { fail; ch } ->
+   425	          if List.mem (Inbox ch) except then None
+   426	          else if wait_class ~fetch ~page ~self:pc ~fail = Unbounded then Some "RECV" else None
+   427	        | Jmp a -> if a = pc then Some "HALT (JMP self)" else None
+   428	        | Nop | Setp _ | Ldc | Ldd | Lda | Waitd | Sho _ | Shi _ | Jnz _ | Out | Skne | Skeq | Fine | Cnta | Ldb | Stb
+   429	        | Bank _ | Cfg | Ext_reserved _ -> None in
+   430	      Option.map (fun w -> Printf.sprintf "%s at pc %d" w pc) w) (flow ~fetch ~page ~start)
+
+codex
+The CRC combination expression matches the stated affine formula syntactically, but the supporting derivation assumes the register advances by multiplying by \(x\) in the catalogue polynomial basis. I’m checking whether the implementation’s bit orientation actually matches that assumption for reflected catalogue entries, and whether the result files exercise that gap.
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc "nice ionice -c 3 rg -n 'crc|WAITC|cnt = 0|valid|hazard|gcd|refresh|false|REJECTED' prototypes/verif-oracles/results prototypes/verif-oracles/crc/crc_oracle.ml prototypes/verif-oracles/hazard/hazard_controls.ml" in /home/matthias/prog/janestreet/emulator-wt-verif-oracles
+ succeeded in 0ms:
+prototypes/verif-oracles/hazard/hazard_controls.ml:1:(* Planted violations for the hazard checker: each must be REJECTED (or raise), and a matching
+prototypes/verif-oracles/hazard/hazard_controls.ml:40:  (* bank port: refresh versus access, array stream versus access *)
+prototypes/verif-oracles/hazard/hazard_controls.ml:41:  "T1 LDB on bank 0, refresh every 8 clocks at offset 2 (T2's clocks)", Accept,
+prototypes/verif-oracles/hazard/hazard_controls.ml:42:  progs [ 1, [ I.ldb; halt_at 1 ] ], { no_decl with grants = [ grant (Bankr 0) 1 [ Bank_read ] ]; refresh = [ (0, 8, 2) ] };
+prototypes/verif-oracles/hazard/hazard_controls.ml:43:  "T1 LDB on bank 0, refresh every 8 clocks at offset 5 (T1's clocks)", Reject "pair",
+prototypes/verif-oracles/hazard/hazard_controls.ml:44:  progs [ 1, [ I.ldb; halt_at 1 ] ], { no_decl with grants = [ grant (Bankr 0) 1 [ Bank_read ] ]; refresh = [ (0, 8, 5) ] };
+prototypes/verif-oracles/hazard/hazard_controls.ml:45:  "T2 LDB on bank 0, refresh every 6 clocks at 0 (even clocks: T0's and T2's)", Reject "pair",
+prototypes/verif-oracles/hazard/hazard_controls.ml:46:  progs [ 2, [ I.ldb; halt_at 1 ] ], { no_decl with grants = [ grant (Bankr 0) 2 [ Bank_read ] ]; refresh = [ (0, 6, 0) ] };
+prototypes/verif-oracles/hazard/hazard_controls.ml:47:  "T1 LDB on bank 0, refresh every 6 clocks at 0 (never an odd clock)", Accept,
+prototypes/verif-oracles/hazard/hazard_controls.ml:48:  progs [ 1, [ I.ldb; halt_at 1 ] ], { no_decl with grants = [ grant (Bankr 0) 1 [ Bank_read ] ]; refresh = [ (0, 6, 0) ] };
+prototypes/verif-oracles/hazard/hazard_controls.ml:68:  "WAITC 11 spinning on a full inbox (no deadline)", Reject "solo",
+prototypes/verif-oracles/hazard/hazard_controls.ml:102:      if not pass then ok := false;
+prototypes/verif-oracles/crc/crc_oracle.ml:1:(* The CRC combine identity (crc_combine.ml) as an oracle.
+prototypes/verif-oracles/crc/crc_oracle.ml:3:     crc_oracle.exe maths            the identity against the direct CRC (Refs.crc), monoid laws,
+prototypes/verif-oracles/crc/crc_oracle.ml:5:     crc_oracle.exe zlib-vectors F   write CRC-32/ISO-HDLC vectors for zlib_check.py
+prototypes/verif-oracles/crc/crc_oracle.ml:6:     crc_oracle.exe pe N             the unified PE's CRC configurations (model and RTL in
+prototypes/verif-oracles/crc/crc_oracle.ml:9:     crc_oracle.exe shared-faults N  the same with faults planted in model AND RTL together
+prototypes/verif-oracles/crc/crc_oracle.ml:10:     crc_oracle.exe split            one CRC computed on two array segments at once *)
+prototypes/verif-oracles/crc/crc_oracle.ml:18:let direct = Refs.crc
+prototypes/verif-oracles/crc/crc_oracle.ml:19:let find name = List.find (fun (c : Refs.crc) -> c.name = name) Refs.catalogue
+prototypes/verif-oracles/crc/crc_oracle.ml:24:  let check name ok = if not ok then all_ok := false; pr "  %-66s %s\n" name (if ok then "ok" else "FAIL") in
+prototypes/verif-oracles/crc/crc_oracle.ml:26:  check "Refs.crc reproduces every catalogue check value"
+prototypes/verif-oracles/crc/crc_oracle.ml:27:    (List.for_all (fun (c : Refs.crc) -> direct c "123456789" = c.check) Refs.catalogue);
+prototypes/verif-oracles/crc/crc_oracle.ml:30:    (List.for_all (fun (c : Refs.crc) ->
+prototypes/verif-oracles/crc/crc_oracle.ml:34:           if xpow ~w ~poly n <> !slow then ok := false;
+prototypes/verif-oracles/crc/crc_oracle.ml:42:    (List.for_all (fun (c : Refs.crc) ->
+prototypes/verif-oracles/crc/crc_oracle.ml:50:  List.iter (fun (c : Refs.crc) ->
+prototypes/verif-oracles/crc/crc_oracle.ml:56:        if combine c ~crc_a:(direct c a) ~crc_b:(direct c b) ~len_b:(String.length b) <> direct c m then incr bad
+prototypes/verif-oracles/crc/crc_oracle.ml:58:      check (Printf.sprintf "%-16s combine(crc a, crc b, |b|) = crc(a ++ b), %d random splits" c.name trials) (!bad = 0))
+prototypes/verif-oracles/crc/crc_oracle.ml:60:  (* monoid laws on (crc, length) pairs: identity (crc "", 0) and associativity *)
+prototypes/verif-oracles/crc/crc_oracle.ml:61:  List.iter (fun (c : Refs.crc) ->
+prototypes/verif-oracles/crc/crc_oracle.ml:62:      let op (ca, la) (cb, lb) = (combine c ~crc_a:ca ~crc_b:cb ~len_b:lb, la + lb) in
+prototypes/verif-oracles/crc/crc_oracle.ml:68:        if op (op x y) z <> op x (op y z) || op e x <> x || op x e <> x then ok := false
+prototypes/verif-oracles/crc/crc_oracle.ml:70:      check (Printf.sprintf "%-16s monoid: identity (crc \"\", 0), associativity, 500 random triples" c.name) !ok)
+prototypes/verif-oracles/crc/crc_oracle.ml:74:      let caught = List.filter_map (fun (c : Refs.crc) ->
+prototypes/verif-oracles/crc/crc_oracle.ml:78:            if combine_faulty f c ~crc_a:(direct c a) ~crc_b:(direct c b) ~len_b:(String.length b) <> direct c (a ^ b) then incr bad
+prototypes/verif-oracles/crc/crc_oracle.ml:82:      if not ok then all_ok := false;
+prototypes/verif-oracles/crc/crc_oracle.ml:90:(* Lines: hex(a) hex(b) crc_a crc_b len_b combined_ours, plus lines with huge len_b where only
+prototypes/verif-oracles/crc/crc_oracle.ml:91:   the two combine implementations can be compared ("big crc_a crc_b len_b ours"). *)
+prototypes/verif-oracles/crc/crc_oracle.ml:101:    Printf.fprintf oc "pair %s %s %d %d %d %d\n" (hex a) (hex b) ca cb (String.length b) (combine c ~crc_a:ca ~crc_b:cb ~len_b:(String.length b))
+prototypes/verif-oracles/crc/crc_oracle.ml:107:    Printf.fprintf oc "big %d %d %d %d\n" ca cb len (combine c ~crc_a:ca ~crc_b:cb ~len_b:len)
+prototypes/verif-oracles/crc/crc_oracle.ml:114:let pe_crc mode (c : Refs.crc) msg =
+prototypes/verif-oracles/crc/crc_oracle.ml:116:  | `One_pe -> let v, _, mm = Cells.crc16_run c msg in (v, mm)
+prototypes/verif-oracles/crc/crc_oracle.ml:117:  | (`Continuous | `Follow) as m -> Cells.crc32_run m c msg
+prototypes/verif-oracles/crc/crc_oracle.ml:119:let modes_of (c : Refs.crc) = if c.width = 16 then [ `One_pe ] else [ `Continuous; `Follow ]
+prototypes/verif-oracles/crc/crc_oracle.ml:126:let pe_campaign ?(wrong_bit_order = false) ~n mode (c : Refs.crc) =
+prototypes/verif-oracles/crc/crc_oracle.ml:127:  let pe_crc mode c m = pe_crc mode c (if wrong_bit_order then rev8 m else m) in
+prototypes/verif-oracles/crc/crc_oracle.ml:136:    let pa, m1 = pe_crc mode c a and pb, m2 = pe_crc mode c b and pw, m3 = pe_crc mode c m in
+prototypes/verif-oracles/crc/crc_oracle.ml:138:    if combine c ~crc_a:pa ~crc_b:pb ~len_b:(String.length b) <> pw then incr id_bad;
+prototypes/verif-oracles/crc/crc_oracle.ml:145:  List.iter (fun (c : Refs.crc) ->
+prototypes/verif-oracles/crc/crc_oracle.ml:148:          if idb + rb + mm > 0 then ok := false;
+prototypes/verif-oracles/crc/crc_oracle.ml:160:      let rows = List.concat_map (fun (c : Refs.crc) ->
+prototypes/verif-oracles/crc/crc_oracle.ml:186:   crc = out((R_a * x^(8|b|) + R_b0) mod P), identity (1). *)
+prototypes/verif-oracles/crc/crc_oracle.ml:189:let split16 (c : Refs.crc) a b =
+prototypes/verif-oracles/crc/crc_oracle.ml:191:                      k = c.poly land 0xfffe; tap_p = false } in
+prototypes/verif-oracles/crc/crc_oracle.ml:194:  add [ Cells.ctrl 0 ~src:2 ~run:false (); Cells.ctrl 1 ~src:2 ~run:false () ];
+prototypes/verif-oracles/crc/crc_oracle.ml:208:let split32 (c : Refs.crc) a b =
+prototypes/verif-oracles/crc/crc_oracle.ml:214:  add [ Cells.ctrl 1 ~src:3 ~run:false (); Cells.ctrl 2 ~src:3 ~run:false () ];
+prototypes/verif-oracles/crc/crc_oracle.ml:235:  List.iter (fun (c : Refs.crc) ->
+prototypes/verif-oracles/crc/crc_oracle.ml:246:      if !bad + !mism > 0 then ok := false;
+prototypes/verif-oracles/crc/crc_oracle.ml:262:    | _ -> prerr_endline "usage: crc_oracle.exe maths | zlib-vectors FILE | pe N | shared-faults N | split"; false in
+prototypes/verif-oracles/results/stall-i2c-stretch.txt:10:    first differing i2c transcript: seed 9: uart [4f 4b 21] spi [a5 3c] i2c [a0+ 5a+] stop=false host-acks [00 00]
+prototypes/verif-oracles/results/stall-i2c-stretch.txt:14:    first differing i2c transcript: seed 1: uart [4f 4b 21] spi [a5 3c] i2c [] stop=false host-acks [01 01]
+prototypes/verif-oracles/results/crc-maths.txt:1:# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/crc/crc_oracle.exe maths
+prototypes/verif-oracles/results/crc-maths.txt:5:  Refs.crc reproduces every catalogue check value                    ok
+prototypes/verif-oracles/results/crc-maths.txt:9:  CRC-16/XMODEM    combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+prototypes/verif-oracles/results/crc-maths.txt:10:  CRC-16/IBM-3740  combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+prototypes/verif-oracles/results/crc-maths.txt:11:  CRC-16/KERMIT    combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+prototypes/verif-oracles/results/crc-maths.txt:12:  CRC-16/USB       combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+prototypes/verif-oracles/results/crc-maths.txt:13:  CRC-32/ISO-HDLC  combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+prototypes/verif-oracles/results/crc-maths.txt:14:  CRC-32/BZIP2     combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+prototypes/verif-oracles/results/crc-maths.txt:15:  CRC-32/MPEG-2    combine(crc a, crc b, |b|) = crc(a ++ b), 3000 random splits ok
+prototypes/verif-oracles/results/crc-maths.txt:16:  CRC-16/XMODEM    monoid: identity (crc "", 0), associativity, 500 random triples ok
+prototypes/verif-oracles/results/crc-maths.txt:17:  CRC-16/IBM-3740  monoid: identity (crc "", 0), associativity, 500 random triples ok
+prototypes/verif-oracles/results/crc-maths.txt:18:  CRC-16/KERMIT    monoid: identity (crc "", 0), associativity, 500 random triples ok
+prototypes/verif-oracles/results/crc-maths.txt:19:  CRC-16/USB       monoid: identity (crc "", 0), associativity, 500 random triples ok
+prototypes/verif-oracles/results/crc-maths.txt:20:  CRC-32/ISO-HDLC  monoid: identity (crc "", 0), associativity, 500 random triples ok
+prototypes/verif-oracles/results/crc-maths.txt:21:  CRC-32/BZIP2     monoid: identity (crc "", 0), associativity, 500 random triples ok
+prototypes/verif-oracles/results/crc-maths.txt:22:  CRC-32/MPEG-2    monoid: identity (crc "", 0), associativity, 500 random triples ok
+prototypes/verif-oracles/results/hazard-base.txt:1:# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/stall/hazard_base.exe
+prototypes/verif-oracles/results/hazard-base.txt:33:   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:35:   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:37:   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:39:   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:41:   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:43:   REJECTED [pair] (pin-drive, pin-drive, different clocks, declared shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:51:   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:53:   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:55:   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:57:   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:59:   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:61:   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0
+prototypes/verif-oracles/results/hazard-base.txt:71:   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 3
+prototypes/verif-oracles/results/hazard-base.txt:73:   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 3
+prototypes/verif-oracles/results/hazard-base.txt:75:   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 3
+prototypes/verif-oracles/results/hazard-base.txt:77:   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 3
+prototypes/verif-oracles/results/hazard-base.txt:79:   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 3
+prototypes/verif-oracles/results/crc-split.txt:1:# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/crc/crc_oracle.exe split
+prototypes/verif-oracles/results/crc-shared-faults.txt:1:# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/crc/crc_oracle.exe shared-faults 20
+prototypes/verif-oracles/results/crc-pe.txt:1:# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/crc/crc_oracle.exe pe 50
+prototypes/verif-oracles/results/crc-blind-spot.txt:1:# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/crc/crc_oracle.exe blind 20
+prototypes/verif-oracles/results/hazard-table.txt:1:# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/hazard/hazard_controls.exe table
+prototypes/verif-oracles/results/hazard-table.txt:5:SOLO table: every (kind, wait class, declaration); a row without a reason is REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:7:  pin-drive                -         undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:11:  bank-read (LDB)          -         undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:13:  bank-write (STB)         -         undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:14:  bank-refresh             -         declared   allowed: refresh schedule (declared by construction)
+prototypes/verif-oracles/results/hazard-table.txt:15:  bank-refresh             -         undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:17:  bank-stream (array)      -         undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:19:  send                     bounded   undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:20:  send                     UNBOUNDED declared   REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:21:  send                     UNBOUNDED undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:22:  space-wait (WAITC 11)    bounded   declared   allowed: space wait with a failure path that leaves
+prototypes/verif-oracles/results/hazard-table.txt:23:  space-wait (WAITC 11)    bounded   undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:24:  space-wait (WAITC 11)    UNBOUNDED declared   REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:25:  space-wait (WAITC 11)    UNBOUNDED undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:27:  recv                     bounded   undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:29:  recv                     UNBOUNDED undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:30:  poll (WAITC 10)          bounded   declared   allowed: own-inbox poll with a failure path
+prototypes/verif-oracles/results/hazard-table.txt:31:  poll (WAITC 10)          bounded   undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:32:  poll (WAITC 10)          UNBOUNDED declared   allowed: a consumer may idle on its own inbox
+prototypes/verif-oracles/results/hazard-table.txt:33:  poll (WAITC 10)          UNBOUNDED undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:35:  feed-push                bounded   undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:36:  feed-push                UNBOUNDED declared   REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:37:  feed-push                UNBOUNDED undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:39:  tap-pop                  bounded   undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:41:  tap-pop                  UNBOUNDED undeclared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:44:  pin-drive              pin-drive              other clocks   not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:46:  pin-drive              pin-drive              same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:58:  bank-read (LDB)        bank-read (LDB)        same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:59:  bank-read (LDB)        bank-read (LDB)        same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:62:  bank-read (LDB)        bank-write (STB)       same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:63:  bank-read (LDB)        bank-write (STB)       same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:64:  bank-read (LDB)        bank-refresh           other clocks   not shared allowed: one port, different clocks
+prototypes/verif-oracles/results/hazard-table.txt:65:  bank-read (LDB)        bank-refresh           other clocks   shared     allowed: one port, different clocks
+prototypes/verif-oracles/results/hazard-table.txt:66:  bank-read (LDB)        bank-refresh           same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:67:  bank-read (LDB)        bank-refresh           same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:70:  bank-read (LDB)        bank-stream (array)    same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:71:  bank-read (LDB)        bank-stream (array)    same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:74:  bank-write (STB)       bank-write (STB)       same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:75:  bank-write (STB)       bank-write (STB)       same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:76:  bank-write (STB)       bank-refresh           other clocks   not shared allowed: one port, different clocks
+prototypes/verif-oracles/results/hazard-table.txt:77:  bank-write (STB)       bank-refresh           other clocks   shared     allowed: one port, different clocks
+prototypes/verif-oracles/results/hazard-table.txt:78:  bank-write (STB)       bank-refresh           same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:79:  bank-write (STB)       bank-refresh           same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:82:  bank-write (STB)       bank-stream (array)    same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:83:  bank-write (STB)       bank-stream (array)    same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:84:  bank-refresh           bank-refresh           other clocks   not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:85:  bank-refresh           bank-refresh           other clocks   shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:86:  bank-refresh           bank-refresh           same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:87:  bank-refresh           bank-refresh           same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:88:  bank-refresh           bank-stream (array)    other clocks   not shared allowed: one port, different clocks
+prototypes/verif-oracles/results/hazard-table.txt:89:  bank-refresh           bank-stream (array)    other clocks   shared     allowed: one port, different clocks
+prototypes/verif-oracles/results/hazard-table.txt:90:  bank-refresh           bank-stream (array)    same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:91:  bank-refresh           bank-stream (array)    same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:92:  bank-stream (array)    bank-stream (array)    other clocks   not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:93:  bank-stream (array)    bank-stream (array)    other clocks   shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:94:  bank-stream (array)    bank-stream (array)    same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:95:  bank-stream (array)    bank-stream (array)    same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:96:  send                   send                   other clocks   not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:98:  send                   send                   same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:100:  send                   space-wait (WAITC 11)  other clocks   not shared allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:101:  send                   space-wait (WAITC 11)  other clocks   shared     allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:102:  send                   space-wait (WAITC 11)  same clock     not shared allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:103:  send                   space-wait (WAITC 11)  same clock     shared     allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:108:  send                   poll (WAITC 10)        other clocks   not shared allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:109:  send                   poll (WAITC 10)        other clocks   shared     allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:110:  send                   poll (WAITC 10)        same clock     not shared allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:111:  send                   poll (WAITC 10)        same clock     shared     allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:112:  space-wait (WAITC 11)  space-wait (WAITC 11)  other clocks   not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:113:  space-wait (WAITC 11)  space-wait (WAITC 11)  other clocks   shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:114:  space-wait (WAITC 11)  space-wait (WAITC 11)  same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:115:  space-wait (WAITC 11)  space-wait (WAITC 11)  same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:116:  space-wait (WAITC 11)  recv                   other clocks   not shared allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:117:  space-wait (WAITC 11)  recv                   other clocks   shared     allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:118:  space-wait (WAITC 11)  recv                   same clock     not shared allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:119:  space-wait (WAITC 11)  recv                   same clock     shared     allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:120:  space-wait (WAITC 11)  poll (WAITC 10)        other clocks   not shared allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:121:  space-wait (WAITC 11)  poll (WAITC 10)        other clocks   shared     allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:122:  space-wait (WAITC 11)  poll (WAITC 10)        same clock     not shared allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:123:  space-wait (WAITC 11)  poll (WAITC 10)        same clock     shared     allowed: producer and consumer
+prototypes/verif-oracles/results/hazard-table.txt:124:  recv                   recv                   other clocks   not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:125:  recv                   recv                   other clocks   shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:126:  recv                   recv                   same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:127:  recv                   recv                   same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:128:  recv                   poll (WAITC 10)        other clocks   not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:129:  recv                   poll (WAITC 10)        other clocks   shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:130:  recv                   poll (WAITC 10)        same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:131:  recv                   poll (WAITC 10)        same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:132:  poll (WAITC 10)        poll (WAITC 10)        other clocks   not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:133:  poll (WAITC 10)        poll (WAITC 10)        other clocks   shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:134:  poll (WAITC 10)        poll (WAITC 10)        same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:135:  poll (WAITC 10)        poll (WAITC 10)        same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:136:  feed-push              feed-push              other clocks   not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:137:  feed-push              feed-push              other clocks   shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:138:  feed-push              feed-push              same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:139:  feed-push              feed-push              same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:140:  tap-pop                tap-pop                other clocks   not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:141:  tap-pop                tap-pop                other clocks   shared     REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:142:  tap-pop                tap-pop                same clock     not shared REJECTED
+prototypes/verif-oracles/results/hazard-table.txt:143:  tap-pop                tap-pop                same clock     shared     REJECTED
+prototypes/verif-oracles/results/hazard-bridge.txt:1:# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/hazard-mp/hazard_bridge.exe
+prototypes/verif-oracles/results/hazard-bridge.txt:6:   uses: inbox 1 T0: send/bounded, space-wait (WAITC 11)/bounded
+prototypes/verif-oracles/results/hazard-bridge.txt:18:   REJECTED [solo] (send, UNBOUNDED, declared) on inbox 2
+prototypes/verif-oracles/results/hazard-bridge.txt:20:   REJECTED [solo] (send, UNBOUNDED, declared) on inbox 2
+prototypes/verif-oracles/results/hazard-bridge.txt:22:   REJECTED [solo] (send, UNBOUNDED, declared) on inbox 2
+prototypes/verif-oracles/results/hazard-bridge.txt:24:   REJECTED [solo] (send, UNBOUNDED, declared) on inbox 2
+prototypes/verif-oracles/results/hazard-bridge.txt:32:   uses: inbox 1 T0: send/bounded, space-wait (WAITC 11)/bounded
+prototypes/verif-oracles/results/hazard-controls.txt:1:# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/hazard/hazard_controls.exe
+prototypes/verif-oracles/results/hazard-controls.txt:13:ok   T1 LDB on bank 0, refresh every 8 clocks at offset 2 (T2's clocks)       expected accepted             got accepted                   
+prototypes/verif-oracles/results/hazard-controls.txt:14:ok   T1 LDB on bank 0, refresh every 8 clocks at offset 5 (T1's clocks)       expected rejected:pair        got rejected:pair              [pair] (bank-read (LDB), bank-refresh, SAME CLOCK possible, not shared) on bank 0 at T1 page 1 pc 0 (LDB) / refresh (refresh every 8 clocks at 5)
+prototypes/verif-oracles/results/hazard-controls.txt:15:ok   T2 LDB on bank 0, refresh every 6 clocks at 0 (even clocks: T0's and T2's) expected rejected:pair        got rejected:pair              [pair] (bank-read (LDB), bank-refresh, SAME CLOCK possible, not shared) on bank 0 at T2 page 2 pc 0 (LDB) / refresh (refresh every 6 clocks at 0)
+prototypes/verif-oracles/results/hazard-controls.txt:16:ok   T1 LDB on bank 0, refresh every 6 clocks at 0 (never an odd clock)       expected accepted             got accepted                   
+prototypes/verif-oracles/results/hazard-controls.txt:24:ok   WAITC 11 spinning on a full inbox (no deadline)                          expected rejected:solo        got rejected:solo              [solo] (space-wait (WAITC 11), UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 2 (WAITC 11)
+prototypes/verif-oracles/results/hazard-controls.txt:25:ok   SEND to inbox 2, which nobody reads                                      expected rejected:counterpart got rejected:counterpart       [counterpart] send on inbox 2 with no recv/poll (WAITC 10) by another thread at T0 page 0 pc 1 (SEND)
+prototypes/verif-oracles/results/hazard-wide.txt:1:# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/stall-wide/hazard_wide.exe
+prototypes/verif-oracles/results/hazard-wide.txt:25:   REJECTED [solo] (pin-drive, -, UNDECLARED) on pin 2
+prototypes/verif-oracles/results/hazard-wide.txt:27:   REJECTED [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 2
+prototypes/verif-oracles/results/hazard-compile-controls.txt:1:File "hazard/hazard.ml", line 376, characters 15-47:
+prototypes/verif-oracles/results/hazard-compile-controls.txt:6:File "hazard/hazard.ml", lines 71-75, characters 16-47:
+prototypes/verif-oracles/results/hazard-compile-controls.txt:9:73 |   | Bank_write -> Some Bank_refresh | Bank_refresh -> Some Bank_stream | Bank_stream -> Some Send_k
+prototypes/verif-oracles/results/hazard-compile-controls.txt:16:File "hazard/hazard.ml", lines 79-83, characters 15-42:
+prototypes/verif-oracles/results/hazard-compile-controls.txt:19:81 |   | Bank_read | Bank_write | Bank_refresh | Bank_stream -> C_bank
+prototypes/verif-oracles/results/hazard-compile-controls.txt:26:File "hazard/hazard.ml", lines 88-90, characters 18-89:
+prototypes/verif-oracles/results/hazard-compile-controls.txt:29:90 |   | Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream -> false
+prototypes/verif-oracles/results/hazard-compile-controls.txt:34:File "hazard/hazard.ml", lines 92-96, characters 16-51:
+prototypes/verif-oracles/results/hazard-compile-controls.txt:37:94 |   | Bank_write -> "bank-write (STB)" | Bank_refresh -> "bank-refresh" | Bank_stream -> "bank-stream (array)"
+prototypes/verif-oracles/results/hazard-compile-controls.txt:38:95 |   | Send_k -> "send" | Space_wait -> "space-wait (WAITC 11)" | Recv_k -> "recv" | Poll -> "poll (WAITC 10)"
+prototypes/verif-oracles/results/hazard-compile-controls.txt:44:File "hazard/hazard.ml", lines 165-169, characters 24-88:
+prototypes/verif-oracles/results/hazard-compile-controls.txt:49:169 |   | Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream -> None
+prototypes/verif-oracles/results/crc-zlib.txt:1:# command: uv run --no-project python crc/zlib_check.py /var/tmp/verif-oracles-zlib-vectors.txt
+prototypes/verif-oracles/results/crc-zlib.txt:5:zlib 1.3.2: 2000 split vectors (zlib.crc32 of the whole and libz crc32_combine), 2000 large-length vectors (crc32_combine): 0 mismatches -> PASS
+prototypes/verif-oracles/results/crc-zlib-control.txt:3:zlib 1.3.2: 2000 split vectors (zlib.crc32 of the whole and libz crc32_combine), 2000 large-length vectors (crc32_combine): 2 mismatches -> FAIL
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c 3 nl -ba prototypes/verif-oracles/stall/eth_fw.ml prototypes/verif-oracles/results/stall-ethernet.txt' in /home/matthias/prog/janestreet/emulator-wt-verif-oracles
+ exited 1 in 0ms:
+nl: prototypes/verif-oracles/stall/eth_fw.ml: No such file or directory
+     1	# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/stall/eth_stall.exe
+     2	# commit: e61c102f2bc1dc1e0ade77ba6361623a69f03fe2 (with uncommitted changes)
+     3	# ocaml 5.3.0, hardcaml (version: v0.17.0)
+     4	# date: 2026-10-05T08:04:42+08:00
+     5	10BASE-T TX firmware under host stalls: 73 bytes on the wire, 1168 half-bits, frame window 3504 clocks
+     6	fixed firmware sizes (words per thread): 34,36,35,34; original: 28,30,29,28
+     7	
+     8	== golden: no stalls
+     9	  original  none (golden)                                  1 runs: exact   1, cut and reported   0, VIOLATIONS   0
+    10	  fixed     none (golden)                                  1 runs: exact   1, cut and reported   0, VIOLATIONS   0, RTL vs interpreter 0 clocks differ
+    11	
+    12	== latency sweep: every byte after the first d clocks late (the slack of the 24-slot loop)
+    13	  original  d =   0: exact
+    14	  original  d =  40: exact
+    15	  original  d =  80: exact
+    16	  original  d =  82: exact
+    17	  original  d =  83: exact
+    18	  original  d =  84: exact
+    19	  original  d =  85: exact
+    20	  original  d =  87: exact
+    21	  original  d =  88: exact
+    22	  original  d =  92: exact
+    23	  original  d =  94: exact
+    24	  original  d =  95: exact
+    25	  original  d =  96: VIOLATION: wrong level on the line at half-bit 65 (clock 211)
+    26	  original  d = 120: VIOLATION: wrong level on the line at half-bit 33 (clock 115)
+    27	  fixed     d =   0: exact
+    28	  fixed     d =  40: exact
+    29	  fixed     d =  80: exact
+    30	  fixed     d =  82: exact
+    31	  fixed     d =  83: exact
+    32	  fixed     d =  84: cut at half-bit 30, reported
+    33	  fixed     d =  85: cut at half-bit 30, reported
+    34	  fixed     d =  87: cut at half-bit 30, reported
+    35	  fixed     d =  88: cut at half-bit 30, reported
+    36	  fixed     d =  92: cut at half-bit 30, reported
+    37	  fixed     d =  94: cut at half-bit 30, reported
+    38	  fixed     d =  95: cut at half-bit 30, reported
+    39	  fixed     d =  96: cut at half-bit 30, reported
+    40	  fixed     d = 120: cut at half-bit 30, reported
+    41	  largest exact delay: original 95 clocks, fixed 83 clocks
+    42	
+    43	== random stall patterns (seeds 1..N)
+    44	  original  random: p = 0.010 per byte, 1..40 clocks      50 runs: exact  48, cut and reported   0, VIOLATIONS   2 (seed 14: wrong level on the line at half-bit 7 (clock 38))
+    45	  fixed     random: p = 0.010 per byte, 1..40 clocks      50 runs: exact  48, cut and reported   2, VIOLATIONS   0, RTL vs interpreter 0 clocks differ
+    46	  original  random: p = 0.050 per byte, 1..120 clocks     50 runs: exact   7, cut and reported   0, VIOLATIONS  43 (seed 1: wrong level on the line at half-bit 736 (clock 2224))
+    47	  fixed     random: p = 0.050 per byte, 1..120 clocks     50 runs: exact   5, cut and reported  45, VIOLATIONS   0, RTL vs interpreter 0 clocks differ
+    48	  original  random: p = 0.300 per byte, 1..200 clocks     50 runs: exact   0, cut and reported   0, VIOLATIONS  50 (seed 1: wrong level on the line at half-bit 1 (clock 19))
+    49	  fixed     random: p = 0.300 per byte, 1..200 clocks     50 runs: exact   0, cut and reported  50, VIOLATIONS   0, RTL vs interpreter 0 clocks differ
+    50	  original  one random byte 97..200 clocks late           50 runs: exact   1, cut and reported   0, VIOLATIONS  49 (seed 1: wrong level on the line at half-bit 162 (clock 502))
+    51	  fixed     one random byte 97..200 clocks late           50 runs: exact   0, cut and reported  50, VIOLATIONS   0, RTL vs interpreter 0 clocks differ
+    52	
+    53	== controls (each must be flagged)
+    54	  original  random: p = 0.050 per byte, 1..120 clocks     50 runs: exact   7, cut and reported   0, VIOLATIONS  43 (seed 1: wrong level on the line at half-bit 736 (clock 2224))
+    55	  control original firmware (no underrun path): flagged
+    56	  no-rel    random: p = 0.050 per byte, 1..120 clocks     50 runs: exact   5, cut and reported   0, VIOLATIONS  45 (seed 1: wrong level on the line at half-bit 736 (clock 2224))
+    57	  control fixed firmware without the line release: flagged
+    58	  no-rep    random: p = 0.050 per byte, 1..120 clocks     50 runs: exact   5, cut and reported   0, VIOLATIONS  45 (seed 1: line released at half-bit 734 without an underrun report)
+    59	  control fixed firmware without the underrun report: flagged
+    60	  control golden transcript with half-bit 500 flipped, no stalls: flagged
+    61	
+    62	ETH STALL PASS
+    63	exit 0
+
+codex
+## High
+
+- **Hazard checker misses unbounded failure loops.** [`hazard.ml:200-209`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/hazard/hazard.ml:200) follows only `JMP` and `NOP`; any other instruction on the failure path is called `Bounded`. More directly, it returns `Bounded` after eight steps, even if the ninth reaches the wait again. A reachable `WAITC` whose failure target loops through nine NOPs back to itself is therefore misclassified. This breaks the “unbounded only when its failure path returns to itself” claim.
+
+- **The CRC result does not establish coverage of every CRC variant claimed.** [`crc_oracle.ml:50-58`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/crc/crc_oracle.ml:50) tests the finite `Refs.catalogue`, and [`crc-maths.txt:9-15`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/results/crc-maths.txt:9) lists seven CRCs. That evidence does not cover a catalogue entry with `refin <> refout`. The planted `Zlib_formula` is a deliberately incorrect expression at [`crc_combine.ml:83-87`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/crc/crc_combine.ml:83); calling it “exactly zlib’s formula generalised” overstates what this check demonstrates. The implemented `combine` expression itself matches the displayed formula at [`crc_combine.ml:65-67`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/crc/crc_combine.ml:65).
+
+## Medium
+
+- **The fixed Ethernet firmware can report on an end-of-stream underrun.** At [`eth_fixed.ml:44-47`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/stall/eth_fixed.ml:44), `Jnz "under_real"` selects the end-of-stream `Halt` only when the count is zero. But the earlier `WAITC` branches to `under_real` on invalid host input at [`eth_fixed.ml:34`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/stall/eth_fixed.ml:34). If the last byte has been consumed and the next byte is not valid, this path reaches `Halt` without another `IN`; the shown code does not substantiate the unconditional “end-of-stream path never reports” claim.
+
+- **The host model’s valid/ready claim depends on the active thread staying fixed while stalled.** The model computes `valid` from `next.(t)` and `avail.(t)` for the currently executing thread at [`eth_stall.ml:116-120`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/stall/eth_stall.ml:116), then advances that thread’s availability only after `host_in_ready` at [`eth_stall.ml:128-131`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/stall/eth_stall.ml:128). That supports persistence while the same thread is stalled, but not a general four-thread valid/ready guarantee if the core can change threads during the stall. The displayed run does not demonstrate that case.
+
+## Lower
+
+- **The judge can accept a wrong level if the trace later stays released.** After the first mismatch, [`eth_stall.ml:147-152`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/stall/eth_stall.ml:147) accepts the trace when every remaining sample is released and any tag-7 report exists. A wrong driven level at the mismatch sample followed by release would pass, because `released_after` checks from that sample onward but does not require the mismatching sample itself to be released.
+
+- **`WAITC 9` is not checked by this hazard analysis.** It records uses only for inbox/space conditions at [`hazard.ml:277-282`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/hazard/hazard.ml:277). Thus the checker provides no evidence about `WAITC 9`’s shared `host_in_valid` semantics; the separate Ethernet model’s per-thread `valid` calculation is the relevant code to audit.
+tokens used
+40,404
+## High
+
+- **Hazard checker misses unbounded failure loops.** [`hazard.ml:200-209`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/hazard/hazard.ml:200) follows only `JMP` and `NOP`; any other instruction on the failure path is called `Bounded`. More directly, it returns `Bounded` after eight steps, even if the ninth reaches the wait again. A reachable `WAITC` whose failure target loops through nine NOPs back to itself is therefore misclassified. This breaks the “unbounded only when its failure path returns to itself” claim.
+
+- **The CRC result does not establish coverage of every CRC variant claimed.** [`crc_oracle.ml:50-58`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/crc/crc_oracle.ml:50) tests the finite `Refs.catalogue`, and [`crc-maths.txt:9-15`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/results/crc-maths.txt:9) lists seven CRCs. That evidence does not cover a catalogue entry with `refin <> refout`. The planted `Zlib_formula` is a deliberately incorrect expression at [`crc_combine.ml:83-87`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/crc/crc_combine.ml:83); calling it “exactly zlib’s formula generalised” overstates what this check demonstrates. The implemented `combine` expression itself matches the displayed formula at [`crc_combine.ml:65-67`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/crc/crc_combine.ml:65).
+
+## Medium
+
+- **The fixed Ethernet firmware can report on an end-of-stream underrun.** At [`eth_fixed.ml:44-47`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/stall/eth_fixed.ml:44), `Jnz "under_real"` selects the end-of-stream `Halt` only when the count is zero. But the earlier `WAITC` branches to `under_real` on invalid host input at [`eth_fixed.ml:34`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/stall/eth_fixed.ml:34). If the last byte has been consumed and the next byte is not valid, this path reaches `Halt` without another `IN`; the shown code does not substantiate the unconditional “end-of-stream path never reports” claim.
+
+- **The host model’s valid/ready claim depends on the active thread staying fixed while stalled.** The model computes `valid` from `next.(t)` and `avail.(t)` for the currently executing thread at [`eth_stall.ml:116-120`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/stall/eth_stall.ml:116), then advances that thread’s availability only after `host_in_ready` at [`eth_stall.ml:128-131`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/stall/eth_stall.ml:128). That supports persistence while the same thread is stalled, but not a general four-thread valid/ready guarantee if the core can change threads during the stall. The displayed run does not demonstrate that case.
+
+## Lower
+
+- **The judge can accept a wrong level if the trace later stays released.** After the first mismatch, [`eth_stall.ml:147-152`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/stall/eth_stall.ml:147) accepts the trace when every remaining sample is released and any tag-7 report exists. A wrong driven level at the mismatch sample followed by release would pass, because `released_after` checks from that sample onward but does not require the mismatching sample itself to be released.
+
+- **`WAITC 9` is not checked by this hazard analysis.** It records uses only for inbox/space conditions at [`hazard.ml:277-282`](/home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/hazard/hazard.ml:277). Thus the checker provides no evidence about `WAITC 9`’s shared `host_in_valid` semantics; the separate Ethernet model’s per-thread `valid` calculation is the relevant code to audit.

@@ -1,0 +1,51 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/hazard-mp/hazard_bridge.exe
+# commit: 02381a72826a9cea01ae57c25ae22e05286ab226 (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T08:13:53+08:00
+== bridge A on v2: T0 UART RX -> inbox 1 -> T1 I2C master -> inbox 2 -> T2 UART TX; T3 SPI neighbour
+   uses: inbox 1 T0: send/bounded, space-wait (WAITC 11)/bounded
+   uses: inbox 1 T1: recv/UNBOUNDED, recv/bounded
+   uses: inbox 2 T1: send/UNBOUNDED
+   uses: inbox 2 T2: recv/UNBOUNDED
+   uses: pin 0 T0: pin-sample
+   uses: pin 1 T2: pin-drive
+   uses: pin 2 T0: pin-drive
+   uses: pin 3 T1: pin-drive, pin-sample
+   uses: pin 4 T1: pin-drive, pin-sample
+   uses: pin 5 T3: pin-drive
+   uses: pin 6 T3: pin-drive
+   uses: pin 7 T3: pin-drive
+   REJECTED [solo] (send, UNBOUNDED, declared) on inbox 2
+      at T1 page 1 pc 78 (SEND)
+   REJECTED [solo] (send, UNBOUNDED, declared) on inbox 2
+      at T1 page 1 pc 96 (SEND)
+   REJECTED [solo] (send, UNBOUNDED, declared) on inbox 2
+      at T1 page 1 pc 100 (SEND)
+   REJECTED [solo] (send, UNBOUNDED, declared) on inbox 2
+      at T1 page 1 pc 103 (SEND)
+
+bridge A: 4 rejected combination(s): T1's answer SENDs to inbox 2 have fail = their own address
+
+evidence for a waiver: T2's unbounded waits other than RECV on inbox 2: []
+
+== bridge A with T1's inbox-2 SENDs waived by that argument
+   uses: inbox 1 T0: send/bounded, space-wait (WAITC 11)/bounded
+   uses: inbox 1 T1: recv/UNBOUNDED, recv/bounded
+   uses: inbox 2 T1: send/UNBOUNDED
+   uses: inbox 2 T2: recv/UNBOUNDED
+   uses: pin 0 T0: pin-sample
+   uses: pin 1 T2: pin-drive
+   uses: pin 2 T0: pin-drive
+   uses: pin 3 T1: pin-drive, pin-sample
+   uses: pin 4 T1: pin-drive, pin-sample
+   uses: pin 5 T3: pin-drive
+   uses: pin 6 T3: pin-drive
+   uses: pin 7 T3: pin-drive
+   WAIVED (send, UNBOUNDED, declared) on inbox 2 at T1 page 1 pc 78 (SEND) -- T2 (UART TX) drains inbox 2: its only unbounded wait is that RECV (checked above), its loops are JNZ countdowns, so a blocked SEND waits at most one UART byte (10 bits of 64 clocks); argued, not proved
+   WAIVED (send, UNBOUNDED, declared) on inbox 2 at T1 page 1 pc 96 (SEND) -- T2 (UART TX) drains inbox 2: its only unbounded wait is that RECV (checked above), its loops are JNZ countdowns, so a blocked SEND waits at most one UART byte (10 bits of 64 clocks); argued, not proved
+   WAIVED (send, UNBOUNDED, declared) on inbox 2 at T1 page 1 pc 100 (SEND) -- T2 (UART TX) drains inbox 2: its only unbounded wait is that RECV (checked above), its loops are JNZ countdowns, so a blocked SEND waits at most one UART byte (10 bits of 64 clocks); argued, not proved
+   WAIVED (send, UNBOUNDED, declared) on inbox 2 at T1 page 1 pc 103 (SEND) -- T2 (UART TX) drains inbox 2: its only unbounded wait is that RECV (checked above), its loops are JNZ countdowns, so a blocked SEND waits at most one UART byte (10 bits of 64 clocks); argued, not proved
+   ACCEPTED: no rejected combination
+
+HAZARD BRIDGE PASS (unwaived: 4 rejections, the finding; waived: 0)
+exit 0

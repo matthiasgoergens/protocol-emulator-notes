@@ -1,0 +1,144 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/hazard/hazard_controls.exe table
+# commit: 02381a72826a9cea01ae57c25ae22e05286ab226 (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T08:13:53+08:00
+SOLO table: every (kind, wait class, declaration); a row without a reason is REJECTED
+  pin-drive                -         declared   allowed: the thread owns the pin
+  pin-drive                -         undeclared REJECTED
+  pin-sample               -         declared   allowed: the thread reads its own pin
+  pin-sample               -         undeclared allowed: sampling any pin is harmless (monitors, loop-backs)
+  bank-read (LDB)          -         declared   allowed: bank granted to the thread
+  bank-read (LDB)          -         undeclared REJECTED
+  bank-write (STB)         -         declared   allowed: bank granted to the thread
+  bank-write (STB)         -         undeclared REJECTED
+  bank-refresh             -         declared   allowed: refresh schedule (declared by construction)
+  bank-refresh             -         undeclared REJECTED
+  bank-stream (array)      -         declared   allowed: array port use (declared by construction)
+  bank-stream (array)      -         undeclared REJECTED
+  send                     bounded   declared   allowed: SEND with a failure path that leaves
+  send                     bounded   undeclared REJECTED
+  send                     UNBOUNDED declared   REJECTED
+  send                     UNBOUNDED undeclared REJECTED
+  space-wait (WAITC 11)    bounded   declared   allowed: space wait with a failure path that leaves
+  space-wait (WAITC 11)    bounded   undeclared REJECTED
+  space-wait (WAITC 11)    UNBOUNDED declared   REJECTED
+  space-wait (WAITC 11)    UNBOUNDED undeclared REJECTED
+  recv                     bounded   declared   allowed: RECV with a failure path
+  recv                     bounded   undeclared REJECTED
+  recv                     UNBOUNDED declared   allowed: a consumer may idle on an empty inbox
+  recv                     UNBOUNDED undeclared REJECTED
+  poll (WAITC 10)          bounded   declared   allowed: own-inbox poll with a failure path
+  poll (WAITC 10)          bounded   undeclared REJECTED
+  poll (WAITC 10)          UNBOUNDED declared   allowed: a consumer may idle on its own inbox
+  poll (WAITC 10)          UNBOUNDED undeclared REJECTED
+  feed-push                bounded   declared   allowed: feed write with a failure path
+  feed-push                bounded   undeclared REJECTED
+  feed-push                UNBOUNDED declared   REJECTED
+  feed-push                UNBOUNDED undeclared REJECTED
+  tap-pop                  bounded   declared   allowed: tap read with a failure path
+  tap-pop                  bounded   undeclared REJECTED
+  tap-pop                  UNBOUNDED declared   allowed: a consumer may idle on an empty tap
+  tap-pop                  UNBOUNDED undeclared REJECTED
+
+PAIR table: every two kinds of one resource class used by different actors
+  pin-drive              pin-drive              other clocks   not shared REJECTED
+  pin-drive              pin-drive              other clocks   shared     allowed: declared time-division group: each member drives in its own slots; the interleave is the protocol model's to check
+  pin-drive              pin-drive              same clock     not shared REJECTED
+  pin-drive              pin-drive              same clock     shared     allowed: declared time-division group: each member drives in its own slots; the interleave is the protocol model's to check
+  pin-drive              pin-sample             other clocks   not shared allowed: another actor reads the pin
+  pin-drive              pin-sample             other clocks   shared     allowed: another actor reads the pin
+  pin-drive              pin-sample             same clock     not shared allowed: another actor reads the pin
+  pin-drive              pin-sample             same clock     shared     allowed: another actor reads the pin
+  pin-sample             pin-sample             other clocks   not shared allowed: two readers
+  pin-sample             pin-sample             other clocks   shared     allowed: two readers
+  pin-sample             pin-sample             same clock     not shared allowed: two readers
+  pin-sample             pin-sample             same clock     shared     allowed: two readers
+  bank-read (LDB)        bank-read (LDB)        other clocks   not shared allowed: one port, different clocks
+  bank-read (LDB)        bank-read (LDB)        other clocks   shared     allowed: one port, different clocks
+  bank-read (LDB)        bank-read (LDB)        same clock     not shared REJECTED
+  bank-read (LDB)        bank-read (LDB)        same clock     shared     REJECTED
+  bank-read (LDB)        bank-write (STB)       other clocks   not shared allowed: one port, different clocks
+  bank-read (LDB)        bank-write (STB)       other clocks   shared     allowed: one port, different clocks
+  bank-read (LDB)        bank-write (STB)       same clock     not shared REJECTED
+  bank-read (LDB)        bank-write (STB)       same clock     shared     REJECTED
+  bank-read (LDB)        bank-refresh           other clocks   not shared allowed: one port, different clocks
+  bank-read (LDB)        bank-refresh           other clocks   shared     allowed: one port, different clocks
+  bank-read (LDB)        bank-refresh           same clock     not shared REJECTED
+  bank-read (LDB)        bank-refresh           same clock     shared     REJECTED
+  bank-read (LDB)        bank-stream (array)    other clocks   not shared allowed: one port, different clocks
+  bank-read (LDB)        bank-stream (array)    other clocks   shared     allowed: one port, different clocks
+  bank-read (LDB)        bank-stream (array)    same clock     not shared REJECTED
+  bank-read (LDB)        bank-stream (array)    same clock     shared     REJECTED
+  bank-write (STB)       bank-write (STB)       other clocks   not shared allowed: one port, different clocks
+  bank-write (STB)       bank-write (STB)       other clocks   shared     allowed: one port, different clocks
+  bank-write (STB)       bank-write (STB)       same clock     not shared REJECTED
+  bank-write (STB)       bank-write (STB)       same clock     shared     REJECTED
+  bank-write (STB)       bank-refresh           other clocks   not shared allowed: one port, different clocks
+  bank-write (STB)       bank-refresh           other clocks   shared     allowed: one port, different clocks
+  bank-write (STB)       bank-refresh           same clock     not shared REJECTED
+  bank-write (STB)       bank-refresh           same clock     shared     REJECTED
+  bank-write (STB)       bank-stream (array)    other clocks   not shared allowed: one port, different clocks
+  bank-write (STB)       bank-stream (array)    other clocks   shared     allowed: one port, different clocks
+  bank-write (STB)       bank-stream (array)    same clock     not shared REJECTED
+  bank-write (STB)       bank-stream (array)    same clock     shared     REJECTED
+  bank-refresh           bank-refresh           other clocks   not shared REJECTED
+  bank-refresh           bank-refresh           other clocks   shared     REJECTED
+  bank-refresh           bank-refresh           same clock     not shared REJECTED
+  bank-refresh           bank-refresh           same clock     shared     REJECTED
+  bank-refresh           bank-stream (array)    other clocks   not shared allowed: one port, different clocks
+  bank-refresh           bank-stream (array)    other clocks   shared     allowed: one port, different clocks
+  bank-refresh           bank-stream (array)    same clock     not shared REJECTED
+  bank-refresh           bank-stream (array)    same clock     shared     REJECTED
+  bank-stream (array)    bank-stream (array)    other clocks   not shared REJECTED
+  bank-stream (array)    bank-stream (array)    other clocks   shared     REJECTED
+  bank-stream (array)    bank-stream (array)    same clock     not shared REJECTED
+  bank-stream (array)    bank-stream (array)    same clock     shared     REJECTED
+  send                   send                   other clocks   not shared REJECTED
+  send                   send                   other clocks   shared     allowed: declared multi-producer inbox
+  send                   send                   same clock     not shared REJECTED
+  send                   send                   same clock     shared     allowed: declared multi-producer inbox
+  send                   space-wait (WAITC 11)  other clocks   not shared allowed: producer and consumer
+  send                   space-wait (WAITC 11)  other clocks   shared     allowed: producer and consumer
+  send                   space-wait (WAITC 11)  same clock     not shared allowed: producer and consumer
+  send                   space-wait (WAITC 11)  same clock     shared     allowed: producer and consumer
+  send                   recv                   other clocks   not shared allowed: producer and consumer
+  send                   recv                   other clocks   shared     allowed: producer and consumer
+  send                   recv                   same clock     not shared allowed: producer and consumer
+  send                   recv                   same clock     shared     allowed: producer and consumer
+  send                   poll (WAITC 10)        other clocks   not shared allowed: producer and consumer
+  send                   poll (WAITC 10)        other clocks   shared     allowed: producer and consumer
+  send                   poll (WAITC 10)        same clock     not shared allowed: producer and consumer
+  send                   poll (WAITC 10)        same clock     shared     allowed: producer and consumer
+  space-wait (WAITC 11)  space-wait (WAITC 11)  other clocks   not shared REJECTED
+  space-wait (WAITC 11)  space-wait (WAITC 11)  other clocks   shared     REJECTED
+  space-wait (WAITC 11)  space-wait (WAITC 11)  same clock     not shared REJECTED
+  space-wait (WAITC 11)  space-wait (WAITC 11)  same clock     shared     REJECTED
+  space-wait (WAITC 11)  recv                   other clocks   not shared allowed: producer and consumer
+  space-wait (WAITC 11)  recv                   other clocks   shared     allowed: producer and consumer
+  space-wait (WAITC 11)  recv                   same clock     not shared allowed: producer and consumer
+  space-wait (WAITC 11)  recv                   same clock     shared     allowed: producer and consumer
+  space-wait (WAITC 11)  poll (WAITC 10)        other clocks   not shared allowed: producer and consumer
+  space-wait (WAITC 11)  poll (WAITC 10)        other clocks   shared     allowed: producer and consumer
+  space-wait (WAITC 11)  poll (WAITC 10)        same clock     not shared allowed: producer and consumer
+  space-wait (WAITC 11)  poll (WAITC 10)        same clock     shared     allowed: producer and consumer
+  recv                   recv                   other clocks   not shared REJECTED
+  recv                   recv                   other clocks   shared     REJECTED
+  recv                   recv                   same clock     not shared REJECTED
+  recv                   recv                   same clock     shared     REJECTED
+  recv                   poll (WAITC 10)        other clocks   not shared REJECTED
+  recv                   poll (WAITC 10)        other clocks   shared     REJECTED
+  recv                   poll (WAITC 10)        same clock     not shared REJECTED
+  recv                   poll (WAITC 10)        same clock     shared     REJECTED
+  poll (WAITC 10)        poll (WAITC 10)        other clocks   not shared REJECTED
+  poll (WAITC 10)        poll (WAITC 10)        other clocks   shared     REJECTED
+  poll (WAITC 10)        poll (WAITC 10)        same clock     not shared REJECTED
+  poll (WAITC 10)        poll (WAITC 10)        same clock     shared     REJECTED
+  feed-push              feed-push              other clocks   not shared REJECTED
+  feed-push              feed-push              other clocks   shared     REJECTED
+  feed-push              feed-push              same clock     not shared REJECTED
+  feed-push              feed-push              same clock     shared     REJECTED
+  tap-pop                tap-pop                other clocks   not shared REJECTED
+  tap-pop                tap-pop                other clocks   shared     REJECTED
+  tap-pop                tap-pop                same clock     not shared REJECTED
+  tap-pop                tap-pop                same clock     shared     REJECTED
+exit 0
