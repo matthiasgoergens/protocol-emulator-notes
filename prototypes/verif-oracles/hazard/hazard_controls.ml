@@ -62,6 +62,12 @@ let cases = [
   "T0 SEND whose fail path jumps straight back (no deadline)", Reject "solo",
   progs [ 0, [ I.send ~ch:1 ~fail:2; halt_at 1; I.jmp 0 ]; 1, [ I.recv ~ch:1 ~fail:0; halt_at 1 ] ],
   { no_decl with grants = [ grant (Inbox 1) 0 [ Send_k ]; grant (Inbox 1) 1 [ Recv_k ] ] };
+  "T0 SEND whose fail path runs through nine NOPs and jumps back (review finding)", Reject "solo",
+  progs [ 0, [ I.send ~ch:1 ~fail:2; halt_at 1 ] @ List.init 9 (fun _ -> I.nop) @ [ I.jmp 0 ]; 1, [ I.recv ~ch:1 ~fail:0; halt_at 1 ] ],
+  { no_decl with grants = [ grant (Inbox 1) 0 [ Send_k ]; grant (Inbox 1) 1 [ Recv_k ] ] };
+  "T0 SEND whose fail path ends in a HALT elsewhere (gives up: accepted)", Accept,
+  progs [ 0, [ I.send ~ch:1 ~fail:2; halt_at 1; I.jmp 2 ]; 1, [ I.recv ~ch:1 ~fail:0; halt_at 1 ] ],
+  { no_decl with grants = [ grant (Inbox 1) 0 [ Send_k ]; grant (Inbox 1) 1 [ Recv_k ] ] };
   "T0 LDD 50; SEND with a give-up path (deadline), T1 RECV", Accept,
   progs [ 0, [ I.ldd 50; I.send ~ch:1 ~fail:3; halt_at 2; I.outi ~tag:7 1; halt_at 4 ]; 1, [ I.recv ~ch:1 ~fail:0; halt_at 1 ] ],
   { no_decl with grants = [ grant (Inbox 1) 0 [ Send_k ]; grant (Inbox 1) 1 [ Recv_k ] ] };

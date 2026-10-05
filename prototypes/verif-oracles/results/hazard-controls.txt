@@ -1,7 +1,7 @@
 # command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/hazard/hazard_controls.exe
-# commit: e61c102f2bc1dc1e0ade77ba6361623a69f03fe2 (with uncommitted changes)
+# commit: 46d053daa4693ec4ce76a6f444021d641c3a6a63 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T08:06:11+08:00
+# date: 2026-10-05T08:11:23+08:00
 ok   T0 drives pin 0, which it owns                                           expected accepted             got accepted                   
 ok   T0 and T1 both drive pin 0 (T0 owns it)                                  expected rejected:pair        got rejected:pair+solo         [solo] (pin-drive, -, UNDECLARED) on pin 0 at T1 page 1 pc 0 (SETP); [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0 at T0 page 0 pc 0 (SETP) / T1 page 1 pc 0 (SETP)
 ok   T1 drives pin 3, owned by T0 (T0 never touches it)                       expected rejected:solo        got rejected:solo              [solo] (pin-drive, -, UNDECLARED) on pin 3 at T1 page 1 pc 0 (SHO)
@@ -20,6 +20,8 @@ ok   T3 STB on bank 1 granted bank 0 only                                     ex
 ok   T0 reads and T2 writes bank 0 (different clocks)                         expected accepted             got accepted                   
 ok   T0 SEND to inbox 1 with fail = itself (no deadline), T1 RECV             expected rejected:solo        got rejected:solo              [solo] (send, UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 0 (SEND)
 ok   T0 SEND whose fail path jumps straight back (no deadline)                expected rejected:solo        got rejected:solo              [solo] (send, UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 0 (SEND)
+ok   T0 SEND whose fail path runs through nine NOPs and jumps back (review finding) expected rejected:solo        got rejected:solo              [solo] (send, UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 0 (SEND)
+ok   T0 SEND whose fail path ends in a HALT elsewhere (gives up: accepted)    expected accepted             got accepted                   
 ok   T0 LDD 50; SEND with a give-up path (deadline), T1 RECV                  expected accepted             got accepted                   
 ok   WAITC 11 spinning on a full inbox (no deadline)                          expected rejected:solo        got rejected:solo              [solo] (space-wait (WAITC 11), UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 2 (WAITC 11)
 ok   SEND to inbox 2, which nobody reads                                      expected rejected:counterpart got rejected:counterpart       [counterpart] send on inbox 2 with no recv/poll (WAITC 10) by another thread at T0 page 0 pc 1 (SEND)
@@ -28,5 +30,5 @@ ok   two producers (T0, T3) of inbox 1, not declared shared                   ex
 ok   RECV on inbox 1 by a thread with no grant                                expected rejected:solo        got rejected:solo              [solo] (recv, UNBOUNDED, UNDECLARED) on inbox 1 at T1 page 1 pc 0 (RECV)
 ok   a reachable reserved EXT operation (EXT 9)                               expected raised               got raised                     Unhandled: page 0 pc 0: reserved EXT operation 9
 
-25 cases; HAZARD CONTROLS PASS
+27 cases; HAZARD CONTROLS PASS
 exit 0

@@ -1,7 +1,7 @@
 # command: /home/matthias/prog/janestreet/emulator-wt-verif-oracles/prototypes/verif-oracles/_build/default/hazard-mp/hazard_bridge.exe
-# commit: e61c102f2bc1dc1e0ade77ba6361623a69f03fe2 (with uncommitted changes)
+# commit: 46d053daa4693ec4ce76a6f444021d641c3a6a63 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T08:06:11+08:00
+# date: 2026-10-05T08:11:23+08:00
 == bridge A on v2: T0 UART RX -> inbox 1 -> T1 I2C master -> inbox 2 -> T2 UART TX; T3 SPI neighbour
    uses: inbox 1 T0: send/bounded, space-wait (WAITC 11)/bounded
    uses: inbox 1 T1: recv/UNBOUNDED, recv/bounded

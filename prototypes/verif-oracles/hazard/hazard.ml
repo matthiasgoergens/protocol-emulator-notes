@@ -195,18 +195,24 @@ type use = { res : resource; kind : kind; actor : actor; addr : int; wait : wait
 
 let n_threads = 4
 
-(* follow a failure target through unconditional jumps and NOPs: does it come back to [self]
-   without passing anything else? Then the wait never leaves. *)
+(* follow a failure target through unconditional jumps and NOPs: if that path comes back to
+   [self], the wait never leaves. A path that loops elsewhere (a HALT, JMP self) has left the
+   wait: the thread gave up. No step limit: a page has 256 addresses, and a revisited address
+   other than [self] ends the search. *)
 let wait_class ~fetch ~page ~self ~fail =
-  let rec go pc steps =
+  let seen = Array.make 256 false in
+  let rec go pc =
     if pc = self then Unbounded
-    else if steps > 8 then Bounded
-    else match decode (fetch ((page lsl 8) lor pc)) with
-      | Jmp a -> go a (steps + 1)
-      | Nop -> go ((pc + 1) land 0xFF) (steps + 1)
+    else if seen.(pc) then Bounded
+    else begin
+      seen.(pc) <- true;
+      match decode (fetch ((page lsl 8) lor pc)) with
+      | Jmp a -> go a
+      | Nop -> go ((pc + 1) land 0xFF)
       | Setp _ | Ldc | Ldd | Lda | Waitp _ | Waitd | Sho _ | Shi _ | Jnz _ | Out | In | Send _ | Recv _
-      | Waitc _ | Skne | Skeq | Fine | Cnta | Ldb | Stb | Bank _ | Cfg | Ext_reserved _ -> Bounded in
-  go fail 0
+      | Waitc _ | Skne | Skeq | Fine | Cnta | Ldb | Stb | Bank _ | Cfg | Ext_reserved _ -> Bounded
+    end in
+  go fail
 
 (* the bank bit a BANK sets (bp <- {imm[1:0], acc}, bank = bp[9] = imm[1]), and a SEND's channel *)
 let bank_hi = function
