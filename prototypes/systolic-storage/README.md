@@ -168,7 +168,9 @@ The honest reading (written for the estimate basis; the synth basis keeps every 
 Traces (`traces/`, from `gen_traces.py` and `seqtrace/`):
 - **Sequencer, instrumented:** the deadline sequencer's own interpreter, unchanged. It runs the
   demo's three compiled protocols at 115200 baud, 1 MHz SPI and 100 kHz I2C. `seqtrace/check.sh`
-  verifies the copied sources.
+  verifies that its `isa.ml` and `compiler.ml` are symlinks to the prototype's current files and that
+  `traces/seq.csv` is what they produce now (it caught a stale copy on 2026-10-05; the trace was
+  regenerated).
 - **Line buffer, a model:** the Ethernet-fed buffer in front of the semiring ring, with 100 µs
   margin and 0–200 µs of host jitter.
 - **Vertical filters, a model:** 2- and 3-tap vertical filters at 10 clocks per pixel.
@@ -287,10 +289,10 @@ which is scratch and not in the repository.
     uv run lef_areas.py > results/lef_areas.txt
     uv run storage_options.py > results/storage_options.txt
     cd seqtrace
-    nice ionice ./check.sh
-    nice ionice opam exec --switch=5.3.0 -- dune build
+    nice ionice opam exec --switch=5.3.0 -- dune build --root .
     cd ..
     nice ionice seqtrace/_build/default/trace.exe > traces/seq.csv
+    nice ionice seqtrace/check.sh
     uv run gen_traces.py > results/gen_traces.txt
     uv run allocator.py summary > results/summary.txt
     nice ionice uv run allocator.py mixes > results/mixes.txt     # about 70 s
