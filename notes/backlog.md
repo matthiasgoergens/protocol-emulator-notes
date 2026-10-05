@@ -147,6 +147,13 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   `dune test` on a latency regression. The small 5-frame Cyclesim test
   now detects the end-to-end latency mutant too (555 of 1,375 cycles differ against the good design; `small-fixes`, 2026-10-05). Fourteen improvement proposals for hardcaml-latency are in
   `notes/latency-adoption.md`.
+- **Layout round trip ported to sg13cmos5l (`roundtrip-cmos5l`, merged 2026-10-05):** via joins now
+  need real overlap (4 of 11 synthetic cases were wrong before); placements and nets match the
+  place-and-route record exactly (2,983 of 2,983, and 2,080 of 2,080 nets as endpoint sets); X
+  simulation shows every flop leaves X after one clear cycle. **Blocker:** LibreLane 3.0.14 cannot
+  finish a cmos5l run (the PDK's Magic techfile needs Magic 8.3.657; the image has 8.3.623, and
+  StreamOut hangs), so the cmos5l GDS came from KLayout at step 56. Tiny Tapeout's action installs
+  LibreLane 3.1.0.dev3: move to that for every cmos5l run (groups E and F, the TT harness).
 - **sigrok judge landed (`tools/sigrok-judge`, `tools/peers`, merged 2026-10-05):** sigrok-cli
   0.7.2, pinned in a container and run only as an external program, decodes UART, SPI, I2C,
   PS/2, CAN, USB-LS and S/PDIF traces. Every clean trace passes and each protocol has two planted
