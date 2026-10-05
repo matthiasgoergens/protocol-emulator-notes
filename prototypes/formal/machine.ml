@@ -108,14 +108,18 @@ let clock m ~k (io : Sym.io) =
    A's UART receiver) double their term graph every few dozen clocks. A Fixed thread's pc keeps
    its split: the addresses it can be at (the leaves of its expression) become [reach]. The bank
    is left as it is. *)
+(* [cut_value ~prefix ~k name x eqs]: [x] itself if it is a constant or a variable, else a fresh
+   variable, with "variable = x" added to [eqs]; for ghost state that should be cut too *)
+let cut_value ~prefix ~k name (x : Smt.term) eqs =
+  match x.node with
+  | Smt.K _ | Smt.B _ | Smt.Var _ -> x
+  | Smt.App _ ->
+    let v = Smt.var (Printf.sprintf "%scut.%s@%d" prefix name k) x.sort in
+    eqs := Smt.eq v x :: !eqs; v
+
 let cut m ~k =
   let eqs = ref [] in
-  let fresh name (x : Smt.term) =
-    match x.node with
-    | Smt.K _ | Smt.B _ | Smt.Var _ -> x
-    | Smt.App _ ->
-      let v = Smt.var (Printf.sprintf "%scut.%s@%d" m.prefix name k) x.sort in
-      eqs := Smt.eq v x :: !eqs; v in
+  let fresh name x = cut_value ~prefix:m.prefix ~k name x eqs in
   let st = m.st in
   let arr name a = Array.iteri (fun i x -> a.(i) <- fresh (Printf.sprintf "%s%d" name i) x) a in
   Array.iteri (fun t x ->
