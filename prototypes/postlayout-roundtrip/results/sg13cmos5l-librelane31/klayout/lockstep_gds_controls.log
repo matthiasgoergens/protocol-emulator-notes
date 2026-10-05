@@ -1,0 +1,79 @@
+deadline_sequencer.gds: extracted in 0.39 s
+deadline_sequencer.gds: structural check: 0 errors
+deadline_sequencer.gds: 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.5 s)
+cut01.gds: extracted in 0.36 s
+cut02.gds: extracted in 0.36 s
+cut03.gds: extracted in 0.36 s
+cut04.gds: extracted in 0.36 s
+cut05.gds: extracted in 0.35 s
+cut06.gds: extracted in 0.36 s
+cut07.gds: extracted in 0.36 s
+cut08.gds: extracted in 0.36 s
+cut09.gds: extracted in 0.36 s
+cut10.gds: extracted in 0.36 s
+short01.gds: extracted in 0.36 s
+short02.gds: extracted in 0.36 s
+short03.gds: extracted in 0.36 s
+short04.gds: extracted in 0.36 s
+short05.gds: extracted in 0.36 s
+short06.gds: extracted in 0.37 s
+short07.gds: extracted in 0.36 s
+short08.gds: extracted in 0.36 s
+short09.gds: extracted in 0.36 s
+short10.gds: extracted in 0.37 s
+cut01.gds: structural check: 1 errors (first: undriven net n1827, read by 1: u1596@130.08,143.64/sg13cmos5l_nand2b_1.B)
+  seed 1: first mismatch at cycle 0: pin_out rtl=0 gate=40; pin_sub rtl=0 gate=f000000
+cut01.gds: 20 programmes x 2000 cycles, 31303 mismatching cycles in 20 programmes, 192837 output-bit toggles (lockstep 3.4 s)
+cut02.gds: structural check: 2 errors (first: undriven net n1319, read by 1: u1066@67.68,136.08/sg13cmos5l_dfrbpq_1.CLK)
+cut02.gds: 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.5 s)
+cut03.gds: structural check: 1 errors (first: undriven net n827, read by 1: u578@91.20,52.92/sg13cmos5l_buf_1.A)
+  seed 2: first mismatch at cycle 13: pcs rtl=c2b0b gate=c210b
+cut03.gds: 20 programmes x 2000 cycles, 15762 mismatching cycles in 8 programmes, 188859 output-bit toggles (lockstep 3.5 s)
+cut04.gds: structural check: 1 errors (first: undriven net n1853, read by 1: u1629@126.72,173.88/sg13cmos5l_buf_1.A)
+  seed 3: first mismatch at cycle 59: pin_out rtl=f3 gate=73
+cut04.gds: 20 programmes x 2000 cycles, 10397 mismatching cycles in 8 programmes, 192351 output-bit toggles (lockstep 3.4 s)
+cut05.gds: structural check: 0 errors
+cut05.gds: 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.4 s)
+cut06.gds: structural check: 1 errors (first: undriven net n1643, read by 3: u1497@165.12,136.08/sg13cmos5l_o21ai_1.B1, u1425@162.24,128.52/sg13cmos5l_o21ai_1.B1, u1422@160.32,120.96/sg13cmos5l_o21ai_1.B1)
+  seed 2: first mismatch at cycle 1: pin_oe rtl=b gate=2
+cut06.gds: 20 programmes x 2000 cycles, 25625 mismatching cycles in 14 programmes, 192249 output-bit toggles (lockstep 3.4 s)
+cut07.gds: structural check: 2 errors (first: undriven net n1986, read by 1: u1880@95.04,158.76/sg13cmos5l_dfrbpq_1.CLK)
+cut07.gds: 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.4 s)
+cut08.gds: structural check: 1 errors (first: undriven net n643, read by 1: u390@144.96,105.84/sg13cmos5l_a21oi_1.B1)
+  seed 2: first mismatch at cycle 15: host_out rtl=8b gate=cb
+cut08.gds: 20 programmes x 2000 cycles, 5279 mismatching cycles in 7 programmes, 192360 output-bit toggles (lockstep 3.4 s)
+cut09.gds: structural check: 1 errors (first: undriven net n915, read by 1: u677@23.52,22.68/sg13cmos5l_a21oi_1.A1)
+  seed 1: first mismatch at cycle 8: pcs rtl=82083 gate=82082
+cut09.gds: 20 programmes x 2000 cycles, 15920 mismatching cycles in 8 programmes, 189226 output-bit toggles (lockstep 3.5 s)
+cut10.gds: structural check: 1 errors (first: undriven net n1042, read by 1: u798@17.76,68.04/sg13cmos5l_dfrbpq_1.D)
+  seed 1: first mismatch at cycle 12: pcs rtl=c30c4 gate=c30c0
+cut10.gds: 20 programmes x 2000 cycles, 29864 mismatching cycles in 15 programmes, 202380 output-bit toggles (lockstep 3.5 s)
+short01.gds: structural check: 1 errors (first: net n1492 has 2 drivers: u1847@98.88,173.88/sg13cmos5l_dlygate4sd3_1.X, u1256@92.64,173.88/sg13cmos5l_tiehi.L_HI)
+  seed 3: first mismatch at cycle 16: pcs rtl=100105 gate=10010b
+short01.gds: 20 programmes x 2000 cycles, 5988 mismatching cycles in 4 programmes, 191277 output-bit toggles (lockstep 3.4 s)
+short02.gds: structural check: 1 errors (first: net n473 has 2 drivers: u814@95.04,75.60/sg13cmos5l_buf_1.X, u232@99.84,75.60/sg13cmos5l_buf_1.X)
+  seed 1: first mismatch at cycle 0: host_in_ready rtl=0 gate=1; pcs rtl=1 gate=0
+short02.gds: 20 programmes x 2000 cycles, 39939 mismatching cycles in 20 programmes, 237447 output-bit toggles (lockstep 3.5 s)
+short03.gds: structural check: 1 errors (first: net n1139 has 2 drivers: u1126@12.96,151.20/sg13cmos5l_tiehi.L_HI, u886@74.40,98.28/sg13cmos5l_a21oi_1.Y)
+  seed 1: first mismatch at cycle 4: pcs rtl=41042 gate=41040
+short03.gds: 20 programmes x 2000 cycles, 39925 mismatching cycles in 20 programmes, 152044 output-bit toggles (lockstep 3.4 s)
+short04.gds: structural check: 1 errors (first: net n1014 has 3 drivers: u1086@37.44,120.96/sg13cmos5l_mux4_1.X, u878@79.68,90.72/sg13cmos5l_nand2_1.Y, u767@43.68,90.72/sg13cmos5l_nand2_1.Y)
+  seed 1: first mismatch at cycle 0: pcs rtl=1 gate=11
+short04.gds: 20 programmes x 2000 cycles, 40000 mismatching cycles in 20 programmes, 258368 output-bit toggles (lockstep 3.5 s)
+short05.gds: structural check: 1 errors (first: net n1652 has 3 drivers: u1607@113.28,113.40/sg13cmos5l_dfrbpq_1.Q, u1525@129.60,120.96/sg13cmos5l_buf_1.X, u1507@126.24,113.40/sg13cmos5l_a21oi_1.Y)
+  seed 1: first mismatch at cycle 1: pin_out rtl=0 gate=42; pin_sub rtl=0 gate=c0000c0
+short05.gds: 20 programmes x 2000 cycles, 36482 mismatching cycles in 20 programmes, 263417 output-bit toggles (lockstep 3.4 s)
+short06.gds: structural check: 1 errors (first: net n1286 has 2 drivers: u1510@124.32,113.40/sg13cmos5l_o21ai_1.Y, u1228@47.04,189.00/sg13cmos5l_buf_1.X)
+  seed 3: first mismatch at cycle 59: pin_sub rtl=eeff00ee gate=ffff00ff
+short06.gds: 20 programmes x 2000 cycles, 243 mismatching cycles in 6 programmes, 192408 output-bit toggles (lockstep 3.4 s)
+short07.gds: structural check: 1 errors (first: net n1294 has 2 drivers: u1655@116.16,173.88/sg13cmos5l_a21oi_1.Y, u1224@29.76,189.00/sg13cmos5l_buf_1.X)
+short07.gds: 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.4 s)
+short08.gds: structural check: 1 errors (first: net n876 has 5 drivers: u921@10.56,60.48/sg13cmos5l_o21ai_1.Y, u781@42.72,98.28/sg13cmos5l_buf_1.X, u710@8.64,68.04/sg13cmos5l_a21oi_1.Y, u635@6.72,52.92/sg13cmos5l_tiehi.L_HI, u634@5.76,45.36/sg13cmos5l_buf_1.X)
+  seed 1: first mismatch at cycle 0: pcs rtl=1 gate=d
+short08.gds: 20 programmes x 2000 cycles, 39999 mismatching cycles in 20 programmes, 239085 output-bit toggles (lockstep 3.5 s)
+short09.gds: structural check: 1 errors (first: net n499 has 2 drivers: u269@104.64,98.28/sg13cmos5l_o21ai_1.Y, u255@99.84,90.72/sg13cmos5l_a21oi_1.Y)
+short09.gds: 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.4 s)
+short10.gds: structural check: 1 errors (first: net n267 has 2 drivers: u341@170.88,68.04/sg13cmos5l_o21ai_1.Y, u293@138.72,98.28/sg13cmos5l_buf_1.X)
+  seed 1: first mismatch at cycle 64: host_out rtl=a4 gate=a6
+short10.gds: 20 programmes x 2000 cycles, 18239 mismatching cycles in 16 programmes, 193156 output-bit toggles (lockstep 3.4 s)
+planted faults: 20; behaviour differs or cannot be simulated: 15; caught only by the structural check: 4; caught by neither: 1

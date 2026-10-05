@@ -50,7 +50,7 @@ reads as 0, so both kinds of tool agree with the broken chip unless the structur
 | `generic_lockstep.ml` | block-independent lockstep: random values on every input, every output compared |
 | `seq_lockstep.ml` | the deadline sequencer's lockstep with its real harness, plus planted crossed wires |
 | `compare_def.ml` | the extraction against the run's DEF and `nl.v`, per placement and per net, as partitions |
-| `run_pnr.sh` | LibreLane 3.0.14 in its container, in a scratch directory, keeping the GDS (`sg13g2` or `sg13cmos5l`) |
+| `run_pnr.sh` | LibreLane in its container (3.0.14 for `sg13g2`, 3.1.0.dev3 from `../../tools/librelane-tt` for `sg13cmos5l`), in a scratch directory, keeping the GDS |
 | `roundtrip.sh` | the whole round trip for one block |
 | `results/` | the logs behind every number below |
 
@@ -187,8 +187,8 @@ were written from the PDK files, no code was copied.
   minutes in `Magic.StreamOut`, 7 in `Magic.WriteLEF`; 4 and 8 s on `sg13g2`). Every step up to
   and including KLayout's stream-out (the primary GDS writer) completes, so the round trip uses
   that step's GDS and the DEF and `nl.v` it was written from (steps 56, 53, 52), and the run was
-  stopped there. Tiny Tapeout's own action installs LibreLane 3.1.0.dev3, which presumably carries a
-  newer Magic; not tried here. Same design and constraints as above: die 190.31 x 209.03 um,
+  stopped there. Tiny Tapeout's own action installs LibreLane 3.1.0.dev3, whose image carries Magic
+  8.3.674; that run finishes and is reported in the next section. Same design and constraints as above: die 190.31 x 209.03 um,
   2,983 components (2,016 logic cells), worst setup slack +6.69 ns at the slow corner, no hold,
   slew or capacitance violations (`sta_summary.rpt`).
 
@@ -209,6 +209,45 @@ cuts had no effect. The cut planting now also removes paths and via references (
 as before. Two via-metal pairs in this GDS touch without overlapping (a Via1 and a Via2 abutting the
 ends of short Metal2 pieces at one stack); both pairs lie in one component anyway, so the
 touch-versus-overlap rule changes nothing here either, and the extractor now names such pairs.
+
+### The same block with LibreLane 3.1.0.dev3, as Tiny Tapeout runs it
+
+`run_pnr.sh` now defaults to LibreLane 3.1.0.dev3 for `sg13cmos5l`: the image Tiny Tapeout's
+ihp-cmos5l action uses, pinned by digest in `../../tools/librelane-tt/` (its README says why
+3.0.14 fails). Same design, constraints and PDK checkout (IHP-Open-PDK 2bbec755). The whole flow
+finishes, 67 steps in 197 s with exit 0, including Magic's stream-out and LEF (7.2 s each), Magic's
+SPICE extraction and every signoff checker. As in the TT flow, the final GDS is KLayout's
+(`PRIMARY_GDSII_STREAMOUT_TOOL` in the PDK's LibreLane config; `final/gds` is byte-identical to
+`final/klayout_gds`); Magic's is in `final/mag_gds`. The round trip ran on both. Logs are in
+`results/sg13cmos5l-librelane31/`, the run in
+`/var/tmp/librelane-tt/pnr/runs/seq15ns_cmos5l_ll31/`.
+
+Synthesis differs (Yosys 0.66 against 0.62), so the netlist is not the step-56 one: 91 fewer
+logic cells. Every check passes on both GDS files.
+
+| | step 56 (3.0.14, KLayout GDS) | 3.1.0.dev3, KLayout GDS (final) | 3.1.0.dev3, Magic GDS |
+| --- | --- | --- | --- |
+| flow | stopped in `Magic.WriteLEF` | complete, 197 s | (same run) |
+| die | 190.31 x 209.03 um | 190.025 x 208.745 um | |
+| components (DEF) / logic cells | 2,983 / 2,016 | 2,900 / 1,925 | |
+| worst setup slack (slow corner) | +6.69 ns | +6.82 ns | |
+| worst hold slack (fast corner); hold, slew, cap violations | none | +0.14 ns; 0, 0, 0 | |
+| extraction | 84,198 shapes, 6,491 components, 2,016 instances, 2,085 nets | 80,727 shapes, 6,473 components, 1,925 instances, 1,994 nets, 0.40 s | 55,451 shapes, same components, instances and nets, 0.40 s |
+| structural check | clean | clean | clean |
+| placements matched (DEF) | 2,983 of 2,983 | 2,900 of 2,900 (N 1,021, S 448, FN 524, FS 907) | 2,900 of 2,900 |
+| nets identical as endpoint sets, vs DEF and vs `nl.v` | 2,080 of 2,080 | 1,989 of 1,989 (5,893 endpoints) | 1,989 of 1,989 |
+| pins on no wire set aside | 3 (`clkload0-2/Y`) | 3 (`clkload0-2/Y`) | 3 |
+| lockstep with the sequencer's harness, 300 x 2,000 | 0 mismatching cycles, 2.89 million toggles | 0 mismatching cycles, 2,887,468 toggles | 0, 2,887,468 toggles |
+| generic random-input lockstep, 300 x 2,000 | 0 | 0 | not run |
+| planted cuts and shorts, `controls 10 1` | 16 of 16 effective caught structurally | 19 of 19 (1 cut had no effect) | 20 of 20 |
+| lockstep on those GDS copies (20 programmes) | 13 of 16 effective | 15 of 19 effective; the other 4 only structurally (`cut02` and `cut07` on the clock tree, `short07`, `short09`) | not run |
+| crossed wires (`--swaps 50 1`) | 47 differ, 1 only structurally, 2 by neither | 48 differ, 0 only structurally, 2 by neither | not run |
+| power-up: flip-flops X after 1 cycle of `clear`; X output bits | 0 of 189; 0 | 0 of 189; 0 (no clear: 33.9 million) | not run |
+| cell models against liberty | 2,636 comparisons, 0 disagreements | the same | |
+
+The lockstep log counts 20 plants with one "caught by neither": that is `cut05`, the cut with no
+effect on the connectivity, so nothing effective escaped the structural check. The Magic GDS flattens every wire and cut into boundaries, as the `sg13g2` GDS
+does, hence fewer shapes for the same components.
 
 ## Per placement and per net against the P&R run's own record
 

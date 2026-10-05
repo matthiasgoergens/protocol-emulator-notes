@@ -1,0 +1,47 @@
+models: 84 cells read in 0.00 s; RTL ports: 157 bits
+  technology sg13cmos5l
+  55451 conductor shapes, 1925 cell instances
+  6473 connected components; 0 via-metal pairs touch without overlapping (not joined)
+extract: 0.40 s (55451 shapes, 6473 components, 1925 instances, 1994 nets)
+check: 0.002 s
+  instances                    1925
+  nets                         1994
+  flip-flops                   189
+  undriven nets                0
+  pins on undriven nets        0
+  multiply driven nets         0
+  driven nets nobody reads     3
+  unresolved labels            0
+  cell sg13cmos5l_a21o_1       10
+  cell sg13cmos5l_a21oi_1      224
+  cell sg13cmos5l_a221oi_1     16
+  cell sg13cmos5l_a22oi_1      57
+  cell sg13cmos5l_and2_1       17
+  cell sg13cmos5l_and3_1       3
+  cell sg13cmos5l_and4_1       3
+  cell sg13cmos5l_buf_1        347
+  cell sg13cmos5l_buf_8        49
+  cell sg13cmos5l_dfrbpq_1     189
+  cell sg13cmos5l_dlygate4sd3_1 177
+  cell sg13cmos5l_inv_1        115
+  cell sg13cmos5l_mux2_1       29
+  cell sg13cmos5l_mux4_1       30
+  cell sg13cmos5l_nand2_1      41
+  cell sg13cmos5l_nand2b_1     20
+  cell sg13cmos5l_nand3_1      9
+  cell sg13cmos5l_nand3b_1     3
+  cell sg13cmos5l_nand4_1      6
+  cell sg13cmos5l_nor2_1       77
+  cell sg13cmos5l_nor2b_1      28
+  cell sg13cmos5l_nor3_1       8
+  cell sg13cmos5l_nor4_1       5
+  cell sg13cmos5l_o21ai_1      236
+  cell sg13cmos5l_or2_1        13
+  cell sg13cmos5l_or3_1        3
+  cell sg13cmos5l_or4_1        3
+  cell sg13cmos5l_tiehi        189
+  cell sg13cmos5l_xnor2_1      12
+  cell sg13cmos5l_xor2_1       6
+  errors: 0, warnings: 0
+simulator: 3712 primitive gates, 189 flip-flops, built in 0.00 s
+STRUCTURE CLEAN

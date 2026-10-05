@@ -34,3 +34,10 @@ M = the PDK's sg13g2_stdcell.v, L = sg13g2_stdcell_typ_1p20V_25C.lib.
   *_swap on GDS written by plant_placement.py (gdstk).
 - powerup.log: seq_lockstep.exe $G $M 300 2000 --powerup 0 1; powerup_controls.log: ... 20 2000 --powerup hold:0 hold:100;
   sg13cmos5l/powerup*.log: the same on G5 with M5.
+- sg13cmos5l-librelane31/ (2026-10-05, branch librelane-tt): P&R with LibreLane 3.1.0.dev3
+  (localhost/librelane-tt:3.1.0.dev3 from ../../tools/librelane-tt), `PDK_ROOT=/var/tmp/roundtrip-cmos5l/pdk
+  ./run_pnr.sh ../deadline-sequencer /var/tmp/librelane-tt/pnr seq15ns_cmos5l_ll31 ihp-sg13cmos5l`, complete run;
+  `run.sh` there is the exact round-trip batch: on final/gds (KLayout's) check, compare_def against final/def and
+  final/nl, controls OUTDIR 10 1, lockstep 300 2000, --generic, the 20 control GDS, --swaps 50 1, --powerup 0 1
+  and hold:0 hold:100; on final/mag_gds (Magic's) check, compare_def, controls and lockstep 300 2000.
+  test_cells.log is from roundtrip.sh on the same PDK. pnr_metrics.json is a subset of final/metrics.json.

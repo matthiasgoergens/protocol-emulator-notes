@@ -1,8 +1,11 @@
 # tt/: Tiny Tapeout submission harness
 
-Group A of `notes/learned-from-others.md` (items T1, T2, V28, V32, A12), first step. Nothing here has
-been through LibreLane, precheck or any place-and-route; the timing script has only been run on a
-metrics file from another project.
+Group A of `notes/learned-from-others.md` (items T1, T2, V28, V32, A12), first step. `scripts/harden.sh`
+has hardened it once, as Tiny Tapeout's ihp-cmos5l action would (2026-10-05, LibreLane 3.1.0.dev3,
+6x4 tiles, 20 ns): 9,621 cells, 0 routing DRC, 0 Magic DRC, 0 LVS errors, worst setup slack
++10.39 ns, hold +0.12 ns, in 29 minutes (17 of them Magic DRC). Record in
+`../tools/librelane-tt/results/tt-harden/`. It has not been through the precheck, and the timing
+script has only been run on a metrics file from another project.
 
 ## Contents
 
@@ -14,6 +17,7 @@ metrics file from another project.
 | `scripts/regen.sh` | generates the core's Verilog; rewrites it only when its contents change |
 | `test/` | cocotb test (`make` for RTL, `make GATES=yes` for a gate-level netlist once one exists) |
 | `scripts/corner-report.py` | setup and hold slack per corner from a LibreLane run directory |
+| `scripts/harden.sh` | hardens the project as Tiny Tapeout's ihp-cmos5l GDS action does (tt-support-tools d66cf17, LibreLane 3.1.0.dev3), in a scratch directory, with the pinned image from `../tools/librelane-tt` |
 | `../.github/workflows/tt-harness.yaml` | generates the Verilog and runs the RTL test; no secrets, read-only token |
 
 Top level: `deadline_sequencer_v2` is the sequencer-v2 core, which group A of `notes/learned-from-others.md` names (sequencer-v2) as the
@@ -23,6 +27,7 @@ integrated top, see `notes/codex-brainstorm-2026-09-25.md`), so the wrapper is m
 ## Commands
 
     cd tt/test && uv run --no-project --python 3.12 --with-requirements requirements.txt make
+    tt/scripts/harden.sh /var/tmp/tt-harden/NEW-DIR        # needs tools/librelane-tt/build.sh once
     tt/scripts/corner-report.py <librelane-run-dir>
 
 `make` generates `src/deadline_sequencer_v2.v` first, which needs Hardcaml v0.17 (opam switch 5.3.0
