@@ -193,7 +193,9 @@ Simulated with the pads, 1:1 magnetics (350 µH, 0.3 µH leakage) and 1 m of lin
 | jitter p-p | 0.53 ns | 0.82 ns | 0.48 ns | ≤ 1.4 ns |
 
 **It is close.**
-- **The rise time is just under the template's minimum.** 33 pF across the primary gives 4.8-5.4 ns and ≤ 5 % overshoot, so about 15 pF should land in range (untested).
+- **The rise time is just under the template's minimum, and a capacitor across the primary fixes it:**
+  - 15 pF gives 3.5-4.1 ns, with overshoot 5.4-6.5 %, just over the limit because the capacitor rings with the leakage inductance. A small series resistor on the capacitor should damp that (untested).
+  - 33 pF overshoots the rise time, to 4.8-5.4 ns.
 - **The amplitude tracks IOVDD and the pad resistance.** The ss and ff corners also move IOVDD to 3.0 and 3.6 V; on a board with a regulated 3.3 V the spread is smaller.
 - **Marginal symbols reach the partner as CRC failures, not a link drop.** The scrambled idle keeps the partner's descrambler locked. The partner drops the link only if its receiver loses lock, and the pin-pair waveform's timing is fixed by our clock.
 
@@ -257,7 +259,7 @@ One TT tile is about 31 300 µm². Timing at 62.5 MHz is not checked.
 | 2 × 150 Ω, 0603 | FX transmit | series, at the chip |
 | receive gain: an LVPECL/LVDS-to-LVCMOS receiver, or a Mini-Circuits ADT4-1WT (1:4 impedance) | FX receive | plus a divider or PWM + RC bias at about 0.59 V |
 | RJ45 with integrated 10/100 magnetics (1:1, 350 µH), e.g. HanRun HR911105A or Würth 7499010211A | TX | part numbers from memory, check the pinout |
-| 2 × 47 Ω, 1 × 249 Ω, about 15 pF (C0G) | TX transmit | |
+| 2 × 47 Ω, 1 × 249 Ω, 15 pF C0G across the primary | TX transmit | |
 | divider for the receive centre tap (to about 0.34 V), or a PWM pin + 10 kΩ / 100 nF | TX receive | a 1:2 step-up with Ethernet-class inductance helps the slow corner |
 | a PC or switch with a 10/100 port, and a short Cat5e cable (1-2 m) | both | |
 

@@ -199,6 +199,10 @@ def eye_txcp():
     """the same with 33 pF across the primary (CP_TX=33p), three corners"""
     eye_tx(case="eye_txcp", note="with 33 pF across the primary")
 
+def eye_txcp15():
+    """the same with 15 pF across the primary (CP_TX=15p), three corners"""
+    eye_tx(case="eye_txcp15", note="with 15 pF across the primary")
+
 def eye_tx(case="eye_tx", note=""):
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import padsim
