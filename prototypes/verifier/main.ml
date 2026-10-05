@@ -157,6 +157,14 @@ let cmd_sweep () =
     !runs !entries !events !uncov !unsound;
   if !uncov > 0 || !unsound > 0 then exit 1
 
+let cmd_precision () =
+  List.iter (fun img ->
+      let v = verify img in
+      let _, bad, _, _, nr = cross_check v in
+      if accepted v then print_endline (summary v) else print_rejection v;
+      Printf.printf "    interpreter (%d runs): %s\n" nr
+        (match bad with s :: _ -> "fails: " ^ s | [] -> "every run meets the specification")) (precision_cases ())
+
 let cmd_planted () =
   let missed = ref 0 in
   List.iter (fun img ->
@@ -425,6 +433,7 @@ let () =
   | [ "verify"; name ] -> cmd_verify name
   | [ "sweep" ] -> cmd_sweep ()
   | [ "planted" ] -> cmd_planted ()
+  | [ "precision" ] -> cmd_precision ()
   | [ "compose" ] -> cmd_compose ()
   | [ "mutants" ] -> cmd_mutants ()
   | [ "random"; n ] -> cmd_random (int_of_string n)

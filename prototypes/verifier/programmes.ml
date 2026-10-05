@@ -39,18 +39,23 @@ let ex = Interval.exactly
    longer when [stretch = Some (k, d)] (compiler.ml: "Start bit ... width 4+x = bit_slots",
    "Data bit: ... 4+x", "Stop: ... 4+x"). The idle level is set within one bit of the start, the
    first start bit follows within a bit time, and every later cell boundary is exact. *)
-let uart_spec ~u ~b ~nbytes ~stretch =
+let uart_spec ?(host = false) ~u ~b ~nbytes ~stretch () =
   let bl = builder () in
   step bl [ (u, Set H) ] (Interval.range 0 b) "idle high";
   for i = 0 to nbytes - 1 do
     let width j = b + (match stretch with Some (k, d) when i = 0 && k = j -> d | _ -> 0) in
-    step bl [ (u, Set L) ] (if i = 0 then Interval.range 1 b else ex b) (Printf.sprintf "byte %d start bit" i);
+    (* with the bytes from the host (IN), a start bit may come any time after the idle level or
+       the stop bit has lasted its bit time: there is no deadline there *)
+    let start_gap = match host, i with
+      | false, 0 -> Interval.range 1 b | false, _ -> ex b
+      | true, 0 -> Interval.at_least 1 | true, _ -> Interval.at_least b in
+    step bl [ (u, Set L) ] start_gap (Printf.sprintf "byte %d start bit" i);
     for j = 1 to 8 do
       step bl [ (u, Data_pp) ] (ex (if j = 1 then b else width (j - 1))) (Printf.sprintf "byte %d data bit %d" i j)
     done;
     step bl [ (u, Set H) ] (ex (width 8)) (Printf.sprintf "byte %d stop bit" i)
   done;
-  finish bl ~name:(Printf.sprintf "uart b=%d bytes=%d%s" b nbytes
+  finish bl ~name:(Printf.sprintf "uart b=%d bytes=%d%s%s" b nbytes (if host then " from host" else "")
                      (match stretch with Some (k, d) -> Printf.sprintf " stretch=%d+%d" k d | None -> ""))
     ~pins:[ u ]
 
@@ -137,7 +142,15 @@ let uart ?(thread = 0) ?stretch ~b bytes =
   let p, _ = Compiler.uart_tx { upin = 0; bit_slots = b; ubytes = bytes; stretch } in
   { name = Printf.sprintf "uart_b%d_n%d%s" b (List.length bytes)
         (match stretch with Some (k, d) -> Printf.sprintf "_s%d+%d" k d | None -> "");
-    words = v2_of_base p; spec = uart_spec ~u:0 ~b ~nbytes:(List.length bytes) ~stretch; thread; env = Pull_up }
+    words = v2_of_base p; spec = uart_spec ~u:0 ~b ~nbytes:(List.length bytes) ~stretch (); thread; env = Pull_up }
+
+(* the same, each byte from the host (IN in place of LDA), as ../formal/programmes.ml's
+   uart_from_host: the data and the wait for it are inputs *)
+let uart_host ?(thread = 0) ~b n =
+  let p, _ = Compiler.uart_tx { upin = 0; bit_slots = b; ubytes = List.init n (fun _ -> 0); stretch = None } in
+  let p = Array.map (fun w -> if (w lsr 12) land 15 = 4 then Isa.in_ else w) p in
+  { name = Printf.sprintf "uart_host_b%d_n%d" b n; words = v2_of_base p;
+    spec = uart_spec ~host:true ~u:0 ~b ~nbytes:n ~stretch:None (); thread; env = Random_inputs }
 
 let spi ?(thread = 1) ~p bytes =
   let w, _ = Compiler.spi_master { sclk = 1; mosi = 2; cs = 3; period = p; sbytes = bytes } in
@@ -195,7 +208,8 @@ let sweep () =
   let i2cs = List.concat_map (fun q -> List.concat_map (fun lm ->
       List.filter_map (fun bs -> fits (fun () -> i2c ~q ~lm bs)) [ [ 0xA0 ]; [ 0xA0; 0x5A ] ])
       [ 1; 2; 7; 100; 4095 ]) (List.init 13 (fun i -> i + 4)) in
-  uarts @ uart_stretch @ spis @ i2cs @ [ deadline (); deadline ~ldd:0 (); deadline ~ldd:4095 (); watchdog () ]
+  let hosts = List.concat_map (fun b -> List.map (fun n -> uart_host ~b n) [ 1; 2; 4 ]) [ 5; 8; 16; 33 ] in
+  uarts @ uart_stretch @ hosts @ spis @ i2cs @ [ deadline (); deadline ~ldd:0 (); deadline ~ldd:4095 (); watchdog () ]
 
 (* ---- planted bugs: each must be rejected ---- *)
 
@@ -242,3 +256,34 @@ let planted () =
   let in_wait = with_words uart16 ~name:"PLANTED uart, LDA replaced by IN (waits for the host)" (fun w ->
       let i = nth_op w Isa2.op_lda 1 in w.(i) <- Isa2.in_; w) in
   [ spi8; no_waitp; one_waitp; no_limit; wrong_fail; uart_off; uart_halt; uart_ldc; spi_cs; dl30; in_wait ]
+
+(* ---- hand-written programmes that are correct but hard for the analysis (precision) ---- *)
+
+(* A data-dependent branch whose two arms reach one deadline by different routes: arm A loads
+   the deadline register a slot earlier with a larger count, arm B a slot later with a smaller
+   one, so the WAITD after the join ends on the same slot on both. The SETP after it is exactly
+   11 slots after the first. A non-relational analysis joins (since, dl) = (6, 4) and (7, 3)
+   into ([6, 7], [3, 4]) and loses that. *)
+let balanced () =
+  let w = Array.make Isa2.page_len 0 in
+  List.iteri (fun i x -> w.(i) <- x)
+    [ Isa2.setp ~mask:1 ~value:1 ~oe:1 ();  (* 0  slot 0 *)
+      Isa2.shi ~pin:1 ~msb:0 ();            (* 1  acc unknown *)
+      Isa2.skeq 0x80;                       (* 2  arm B when acc = 0x80 *)
+      Isa2.jmp 8;                           (* 3  arm A *)
+      Isa2.nop;                             (* 4  arm B, slot 3 *)
+      Isa2.nop;                             (* 5 *)
+      Isa2.ldd 4;                           (* 6  slot 5: dl reaches 0 on slot 10 *)
+      Isa2.jmp 10;                          (* 7 *)
+      Isa2.ldd 5;                           (* 8  arm A, slot 4: dl reaches 0 on slot 10 *)
+      Isa2.nop;                             (* 9 *)
+      Isa2.waitd;                           (* 10 *)
+      Isa2.setp ~mask:1 ~value:0 ~oe:1 ();  (* 11 slot 11 *)
+      Isa2.halt_at 12 ];
+  let bl = builder () in
+  step bl [ (0, Set H) ] (ex 0) "high";
+  step bl [ (0, Set L) ] (ex 11) "low, 11 slots later";
+  { name = "balanced_branch"; words = w; spec = finish bl ~name:"balanced branch" ~pins:[ 0 ]; thread = 0;
+    env = Random_inputs }
+
+let precision_cases () = [ balanced () ]
