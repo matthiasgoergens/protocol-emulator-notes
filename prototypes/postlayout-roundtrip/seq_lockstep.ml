@@ -154,8 +154,98 @@ let swap_inputs (lib : (string, Cells.cell) Hashtbl.t) (nl : Extract.netlist) =
   (Printf.sprintf "swap %s.%s (n%d) with %s.%s (n%d)" insts.(i).iname p n insts.(j).iname q m,
    { nl with instances = insts })
 
+(* Power-up states.  Every one of the sequencer's flip-flops is a
+   dfrbpq whose RESET_B is tied high, so none has a working asynchronous
+   reset: the synchronous clear is all there is.  Start the three-valued
+   simulator with every flip-flop and every input at X, hold clear for
+   [clear_cycles] cycles (with every other input still X), then run the same
+   random programmes as the lockstep.  An output bit that is 0 or 1 is that
+   value for every power-up state; it must equal the RTL's.  If no output bit
+   and no flip-flop is X after the clear, the clear covers every power-up
+   state of the gate-level netlist.  With clear_cycles = 0 the same run is the
+   control: nothing initialises the flip-flops, and X must show. *)
+let powerup ~lib ~runs ~cycles ~clear_cycles (nl : Extract.netlist) =
+  let sim = Sim.create lib nl in
+  let max_unknown = ref 0 and x_cycles = ref 0 and x_bits = ref 0 and wrong = ref 0 and first = ref None in
+  for seed = 1 to runs do
+    Random.init seed;
+    let mem = Array.init Isa.n_threads (fun _ -> Array.init Isa.prog_len (fun _ -> Random.int 0x10000)) in
+    let h = Harness.make mem in
+    let t = Sim3.create sim in
+    Sim3.set_input t "clear" 1;
+    for _ = 1 to clear_cycles do Sim3.cycle t done;
+    Sim3.set_input t "clear" 0;
+    let unknown = List.length (Sim3.unknown_ffs t) in
+    if unknown > !max_unknown then max_unknown := unknown;
+    let outs = Cyclesim.outputs h.sim in
+    let set3 name width value =
+      for i = 0 to width - 1 do
+        Sim3.set_input t (Generic_lockstep.bit_name name width i) ((value lsr i) land 1) done in
+    let get3 name width i = Sim3.get t (Generic_lockstep.bit_name name width i) in
+    for c = 0 to cycles - 1 do
+      let pin_in = Random.int 256 and host_in = Random.int 256 and host_in_valid = Random.bool () in
+      let pin_in4 = (Random.bits () lor (Random.bits () lsl 30)) land 0xFFFFFFFF in
+      (* the instruction memory answers the RTL's address: where the gate
+         level's address is X, its outputs will show it *)
+      let addr = h.current_addr in
+      ignore (Harness.cycle h ~pin_in ~pin_in4 ~host_in ~host_in_valid);
+      set3 "imem_data" 16 (Harness.fetch mem addr);
+      set3 "pin_in" 8 pin_in;
+      set3 "pin_in4" 32 pin_in4;
+      set3 "host_in" 8 host_in;
+      set3 "host_in_valid" 1 (if host_in_valid then 1 else 0);
+      Sim3.cycle t;
+      let xs = ref 0 in
+      List.iter (fun (name, b) ->
+        let w = Bits.width !b and rtl = Bits.to_int !b in
+        for i = 0 to w - 1 do
+          match get3 name w i with
+          | 2 -> incr xs
+          | v when v <> (rtl lsr i) land 1 ->
+            incr wrong;
+            if !first = None then first := Some (seed, c, Generic_lockstep.bit_name name w i)
+          | _ -> ()
+        done) outs;
+      if !xs > 0 then incr x_cycles;
+      x_bits := !x_bits + !xs
+    done
+  done;
+  Printf.printf "power-up (clear held %d cycles, every flip-flop and input X before): %d programmes x %d cycles: \
+                 at most %d of %d flip-flops X after the clear; %d cycles with an X output, %d X output bits; \
+                 %d known output bits differ from the RTL%s\n%!"
+    clear_cycles runs cycles !max_unknown (Array.length sim.ffs) !x_cycles !x_bits !wrong
+    (match !first with Some (s, c, b) -> Printf.sprintf " (first: seed %d cycle %d %s)" s c b | None -> "");
+  !max_unknown = 0 && !x_cycles = 0 && !wrong = 0
+
 let () =
   match Array.to_list Sys.argv |> List.tl with
+  | gds :: models :: runs :: cycles :: "--powerup" :: clear_cycles ->
+    let lib = Cells.parse_library models in
+    let nl = extract gds in
+    (* "hold:K": the control that the check can see an unreset flip-flop.
+       The K-th flip-flop's D pin is rewired to its own Q, so it keeps its
+       power-up value for ever; with clear held one cycle it must stay X. *)
+    let hold k =
+      let ffs = List.filter (fun (_, (i : Extract.inst)) ->
+          (Hashtbl.find lib i.icell).Cells.ffs <> []) (List.mapi (fun j i -> (j, i)) (Array.to_list nl.instances)) in
+      let j, inst = List.nth ffs k in
+      let q = List.assoc "Q" inst.nets in
+      let insts = Array.copy nl.instances in
+      insts.(j) <- { inst with nets = List.map (fun (p, n) -> if p = "D" then (p, q) else (p, n)) inst.nets };
+      Printf.printf "control: %s/%s holds its power-up value (D wired to Q)\n" inst.iname inst.icell;
+      { nl with instances = insts } in
+    let results = List.map (fun c ->
+        match String.split_on_char ':' c with
+        | [ "hold"; k ] ->
+          ignore (powerup ~lib ~runs:(int_of_string runs) ~cycles:(int_of_string cycles) ~clear_cycles:1
+                    (hold (int_of_string k)));
+          true
+        | _ ->
+          powerup ~lib ~runs:(int_of_string runs) ~cycles:(int_of_string cycles)
+            ~clear_cycles:(int_of_string c) nl) clear_cycles in
+    (* the run that matters is the harness's own: clear held one cycle *)
+    exit (if List.for_all Fun.id (List.filteri (fun i _ -> List.nth clear_cycles i <> "0") results) then 0 else 1)
+    (* controls ("0", "hold:K") report but do not set the exit status *)
   | gds :: models :: runs :: cycles :: more ->
     let lib = Cells.parse_library models in
     let runs = int_of_string runs and cycles = int_of_string cycles in

@@ -1,0 +1,5 @@
+deadline_sequencer.gds: extracted in 0.42 s
+control: u61@158.88,189.00/sg13g2_dfrbpq_1 holds its power-up value (D wired to Q)
+power-up (clear held 1 cycles, every flip-flop and input X before): 20 programmes x 2000 cycles: at most 1 of 189 flip-flops X after the clear; 9183 cycles with an X output, 13855 X output bits; 0 known output bits differ from the RTL
+control: u1051@37.44,98.28/sg13g2_dfrbpq_1 holds its power-up value (D wired to Q)
+power-up (clear held 1 cycles, every flip-flop and input X before): 20 programmes x 2000 cycles: at most 1 of 189 flip-flops X after the clear; 16748 cycles with an X output, 108852 X output bits; 0 known output bits differ from the RTL

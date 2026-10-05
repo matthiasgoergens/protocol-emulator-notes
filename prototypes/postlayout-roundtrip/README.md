@@ -41,6 +41,7 @@ reads as 0, so both kinds of tool agree with the broken chip unless the structur
 | `extract.ml` | SG13G2 and SG13CMOS5L layer maps, connectivity, pins and ports, routing on unknown layers |
 | `cells.ml` | reads the PDK Verilog models into gates and flip-flops |
 | `sim.ml` | two-valued cycle simulator of the extracted netlist |
+| `sim3.ml` | the same netlist with X, for power-up states |
 | `check.ml` | structural checks |
 | `mutate.ml` | writes GDS copies with an element removed or a rectangle added |
 | `roundtrip_check.ml` | block-independent: `check` and `controls` (planted cuts and shorts) |
@@ -249,6 +250,31 @@ mirrored in place and one `nand2_1` replaced by the `nor2_1` of the same footpri
 (`plant_placement.py`, written with gdstk) each leave exactly one DEF component unmatched, named,
 and one instance unnamed. The master swap is the case retrace reports surviving every
 extraction-level check of its own; here the placement key includes the master, so it is caught.
+
+## Power-up states
+
+`Sim` starts every flip-flop at 0; silicon does not. In this block all 189 flip-flops are
+`dfrbpq_1` with `RESET_B` tied to a tie-high cell, so none has a working reset and the synchronous
+`clear` is all there is. Enumerating power-up states, as Soto Franco did for the puzzle chip's four
+unreset flip-flops, is out of reach at 2^189, so `sim3.ml` evaluates the same flattened netlist with
+a third value X instead (as Ebert's and JGalil's simulators do;
+[JGalil/gds2netlist-asic-puzzle](https://github.com/JGalil/gds2netlist-asic-puzzle)). X propagates
+pessimistically, so a 0 or 1 there holds for every power-up state. `seq_lockstep.exe GDS MODELS RUNS
+CYCLES --powerup 0 1` starts with every flip-flop and every input at X, holds `clear` for 0 or 1
+cycles with the other inputs still X, then runs the harness's random programmes against the RTL:
+
+| | sg13g2 | sg13cmos5l |
+| --- | --- | --- |
+| clear held 1 cycle: flip-flops still X afterwards | 0 of 189 | 0 of 189 |
+| clear held 1 cycle: X output bits in 300 x 2,000 cycles | 0 | 0 |
+| known output bits differing from the RTL | 0 | 0 |
+| control, no clear: X output bits | 33.9 million (every cycle) | 33.9 million (every cycle) |
+| control, one flip-flop's D wired to its Q (`hold:0`, `hold:100`, 20 x 2,000) | 1 flip-flop X; 13,855 and 108,852 X bits | 1 flip-flop X; 200,000 and 30,044 X bits |
+
+So one cycle of `clear`, whatever the other inputs do in that cycle, puts the gate-level netlist in
+one state from every power-up state, and from there it agrees with the RTL. Because no X survives,
+there is nothing left to enumerate. The X evaluation is checked against the two-valued one
+implicitly: with no X present it computed every output bit of 600,000 cycles and all equal the RTL's.
 
 ## What it does not check
 

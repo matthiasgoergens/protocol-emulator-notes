@@ -32,3 +32,5 @@ M = the PDK's sg13g2_stdcell.v, L = sg13g2_stdcell_typ_1p20V_25C.lib.
   RUN/final/nl/deadline_sequencer.nl.v sg13g2_stdcell.lef; compare_cmos5l.log: the same on G5 with the DEF of step 53,
   nl.v of step 52 and sg13cmos5l_stdcell.lef; the *_cutNN/_shortNN logs on the controls' GDS copies, *_mirror and
   *_swap on GDS written by plant_placement.py (gdstk).
+- powerup.log: seq_lockstep.exe $G $M 300 2000 --powerup 0 1; powerup_controls.log: ... 20 2000 --powerup hold:0 hold:100;
+  sg13cmos5l/powerup*.log: the same on G5 with M5.
