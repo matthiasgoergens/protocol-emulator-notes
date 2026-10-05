@@ -1,0 +1,10 @@
+(library
+ (name roundtrip)
+ (wrapped false)
+ (modules gds extract cells sim check mutate)
+ (flags (:standard -w -69)))
+
+(executable
+ (name roundtrip_check)
+ (modules roundtrip_check)
+ (libraries roundtrip unix))
