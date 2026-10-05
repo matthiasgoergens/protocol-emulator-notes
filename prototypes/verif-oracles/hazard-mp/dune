@@ -1,0 +1,12 @@
+; The hazard checker on multi-proto's bridge A as ported to v2. asm.ml and isa_mb.ml are the v2
+; port's (../../sequencer-v2/ports/multi-proto), bridge_lib.ml and compiler.ml multi-proto's own;
+; all are symlinks, unchanged.
+(rule
+ (with-stdout-to
+  isa.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
+
+(executable
+ (name hazard_bridge)
+ (flags (:standard -w -37))
+ (libraries hardcaml seqv2 hazard))

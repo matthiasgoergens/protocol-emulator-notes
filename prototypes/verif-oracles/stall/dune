@@ -19,5 +19,5 @@
   (run sed "/^let () =/,$d" %{dep:orig/demo.ml})))
 
 (executables
- (names eth_stall i2c_stretch)
- (libraries hardcaml seqv2))
+ (names eth_stall i2c_stretch hazard_base)
+ (libraries hardcaml seqv2 hazard))

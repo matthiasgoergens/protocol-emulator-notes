@@ -1,0 +1,13 @@
+; The hazard checker. hazard.ml is compiled with fragile and non-exhaustive matches as errors, so
+; a new opcode or use kind does not compile until it is classified (the OCaml stand-in for
+; Gergo Erdi's "no clause, no type").
+(library
+ (name hazard)
+ (modules hazard)
+ (flags (:standard -w +4+8+9 -warn-error +4+8+9))
+ (libraries seqv2))
+
+(executable
+ (name hazard_controls)
+ (modules hazard_controls)
+ (libraries hazard seqv2))

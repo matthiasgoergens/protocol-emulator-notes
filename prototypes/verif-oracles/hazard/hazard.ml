@@ -1,0 +1,430 @@
+(* A static hazard checker for ISA v2 programmes: structural conflicts as an exhaustive case table
+   in which a missing entry means REJECTED.
+
+   Idea credited to Gergo Erdi's typed microcode (his CPU microcode's "Combine" type family has a
+   clause for each pair of micro-operations that may share a cycle; with no clause there is no
+   type, so a conflicting pair does not compile). OCaml has no type families, so the same
+   discipline is kept in two layers:
+   - compile time: the decoder and the classifier below are matches over closed variants with no
+     wildcard, and this file is compiled with warnings 4 (fragile match), 8 (non-exhaustive) and 9
+     as errors (see dune). A new opcode, EXT operation or use kind does not compile until it is
+     classified;
+   - run time: the verdict tables are allow-lists. A combination with no entry is REJECTED, and
+     the rejection names the missing key. A use the classifier cannot classify (a reserved EXT
+     operation) raises Unhandled instead of being ignored.
+
+   What is checked, for one set of four thread programmes plus declarations (who owns what, the
+   array's bank streams, the refresh schedule):
+   - every reachable instruction of every thread, from its boot address, following every branch
+     both ways (data-independent over-approximation: unreachable words are not checked);
+   - SOLO: each use of a resource against its declaration (pin ownership, bank grants) and its
+     wait class (a SEND whose failure path waits for ever on a full inbox is "unbounded");
+   - PAIRS: every two uses of one resource by different actors, keyed by the two kinds, whether
+     they can fall in the same clock (threads issue in clocks t mod 4; refresh and array streams
+     in their declared clocks), and whether the resource is declared shared between them;
+   - COUNTERPART: a SEND needs a reachable RECV on that inbox in another thread, and vice versa.
+
+   Not checked (stated, not hidden): runtime pc changes by the host (D1 of sequencer-v2); the bank
+   pointer crossing from bank 0 into bank 1 by post-increment (the bank of LDB/STB comes from a
+   data-flow pass over BANK's imm[1], see [flow]); programmes that patch their
+   own words (usb-ls's controller); timing (deadlines met), which is the lockstep's and the
+   protocol models' job; whether two bank users touch disjoint addresses (the allocator's job). *)
+
+exception Unhandled of string
+exception Bad_table of string
+
+(* ---- decoding: every v2 opcode and EXT operation, no wildcard ---- *)
+type instr =
+  | Nop | Setp of { mask : int } | Ldc | Ldd | Lda | Waitp of { pin : int; fail : int } | Waitd
+  | Sho of { pin : int; pair : bool; cap : bool } | Shi of { pin : int } | Jmp of int | Jnz of int
+  | Out | In | Send of { ch : int; fail : int } | Recv of { ch : int; fail : int }
+  | Waitc of { cond : int; fail : int }
+  | Skne | Skeq | Fine | Cnta | Ldb | Stb | Bank of { hi : int } | Cfg | Ext_reserved of int
+
+let decode w =
+  let f = w land 0xFFF in
+  let pin = (f lsr 9) land 7 and a8 = f land 0xFF in
+  match (w lsr 12) land 15 with
+  | 0 -> Nop | 1 -> Setp { mask = (f lsr 4) land 0xFF } | 2 -> Ldc | 3 -> Ldd | 4 -> Lda
+  | 5 -> Waitp { pin; fail = a8 } | 6 -> Waitd
+  | 7 -> Sho { pin; pair = (f lsr 6) land 1 = 1; cap = (f lsr 4) land 1 = 1 }
+  | 8 -> Shi { pin } | 9 -> Jmp a8 | 10 -> Jnz a8 | 11 -> Out | 12 -> In
+  | 13 -> let ch = (f lsr 8) land 7 in if (f lsr 11) land 1 = 0 then Send { ch; fail = a8 } else Recv { ch; fail = a8 }
+  | 14 -> Waitc { cond = (f lsr 8) land 15; fail = a8 }
+  | 15 ->
+    (match (f lsr 8) land 15 with
+     | 0 -> Skne | 1 -> Skeq | 2 -> Fine | 3 -> Cnta | 4 -> Ldb | 5 -> Stb | 6 -> Bank { hi = a8 } | 7 -> Cfg
+     | s -> Ext_reserved s)
+  | _ -> assert false   (* four bits *)
+
+(* ---- resources, actors, use kinds ---- *)
+type resource = Pin of int | Bankr of int | Inbox of int | Feed of int | Tap of int
+type actor = Thread of int | Array_seg of int | Refresher
+
+type kind =
+  | Pin_drive | Pin_sample
+  | Bank_read | Bank_write | Bank_refresh | Bank_stream
+  | Send_k | Space_wait | Recv_k | Poll
+  | Feed_push | Tap_pop
+
+(* every kind, by an exhaustive successor function: a new constructor fails to compile here *)
+let next_kind = function
+  | Pin_drive -> Some Pin_sample | Pin_sample -> Some Bank_read | Bank_read -> Some Bank_write
+  | Bank_write -> Some Bank_refresh | Bank_refresh -> Some Bank_stream | Bank_stream -> Some Send_k
+  | Send_k -> Some Space_wait | Space_wait -> Some Recv_k | Recv_k -> Some Poll | Poll -> Some Feed_push
+  | Feed_push -> Some Tap_pop | Tap_pop -> None
+let all_kinds = let rec go k = k :: (match next_kind k with Some n -> go n | None -> []) in go Pin_drive
+
+type cls = C_pin | C_bank | C_inbox | C_feed | C_tap
+let class_of = function
+  | Pin_drive | Pin_sample -> C_pin
+  | Bank_read | Bank_write | Bank_refresh | Bank_stream -> C_bank
+  | Send_k | Space_wait | Recv_k | Poll -> C_inbox
+  | Feed_push -> C_feed | Tap_pop -> C_tap
+let class_of_res = function Pin _ -> C_pin | Bankr _ -> C_bank | Inbox _ -> C_inbox | Feed _ -> C_feed | Tap _ -> C_tap
+
+(* the wait class applies to mailbox and port kinds only *)
+type wait = No_wait | Bounded | Unbounded
+let waits_apply = function
+  | Send_k | Space_wait | Recv_k | Poll | Feed_push | Tap_pop -> true
+  | Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream -> false
+
+let kind_name = function
+  | Pin_drive -> "pin-drive" | Pin_sample -> "pin-sample" | Bank_read -> "bank-read (LDB)"
+  | Bank_write -> "bank-write (STB)" | Bank_refresh -> "bank-refresh" | Bank_stream -> "bank-stream (array)"
+  | Send_k -> "send" | Space_wait -> "space-wait (WAITC 11)" | Recv_k -> "recv" | Poll -> "poll (WAITC 10)"
+  | Feed_push -> "feed-push" | Tap_pop -> "tap-pop"
+let wait_name = function No_wait -> "-" | Bounded -> "bounded" | Unbounded -> "UNBOUNDED"
+let res_name = function
+  | Pin p -> Printf.sprintf "pin %d" p | Bankr b -> Printf.sprintf "bank %d" b | Inbox i -> Printf.sprintf "inbox %d" i
+  | Feed j -> Printf.sprintf "feed %d" j | Tap j -> Printf.sprintf "tap %d" j
+let actor_name = function
+  | Thread t -> Printf.sprintf "T%d" t | Array_seg s -> Printf.sprintf "array segment %d" s | Refresher -> "refresh"
+
+(* ---- declarations ---- *)
+type decl = {
+  grants : (resource * actor * kind list) list;   (* actor may use resource with these kinds *)
+  shared : (resource * actor list) list;          (* declared sharing groups (e.g. a TDM pin) *)
+  refresh : (int * int * int) list;               (* bank, period, offset: clocks the refresh owns *)
+  streams : (int * int) list;                     (* bank, segment: the array uses the bank port every clock *)
+  boot : (int * int) array;                       (* per thread (page, pc) *)
+  waivers : (resource * actor * kind * string) list;
+  (* a SOLO rejection the programme's author has argued away, with the argument; printed as
+     WAIVED with its reason, never silent. The table itself is not changed by a waiver. *)
+}
+
+let no_decl = { grants = []; shared = []; refresh = []; streams = []; boot = Array.init 4 (fun t -> (t, 0)); waivers = [] }
+
+(* ---- the tables ---- *)
+type decl_rel = Declared | Undeclared
+
+(* SOLO allow-list: (kind, wait, declaration) -> reason *)
+let solo_table = [
+  (Pin_drive, No_wait, Declared), "the thread owns the pin";
+  (Pin_sample, No_wait, Declared), "the thread reads its own pin";
+  (Pin_sample, No_wait, Undeclared), "sampling any pin is harmless (monitors, loop-backs)";
+  (Bank_read, No_wait, Declared), "bank granted to the thread";
+  (Bank_write, No_wait, Declared), "bank granted to the thread";
+  (Bank_refresh, No_wait, Declared), "refresh schedule (declared by construction)";
+  (Bank_stream, No_wait, Declared), "array port use (declared by construction)";
+  (Send_k, Bounded, Declared), "SEND with a failure path that leaves";
+  (Space_wait, Bounded, Declared), "space wait with a failure path that leaves";
+  (Recv_k, Bounded, Declared), "RECV with a failure path";
+  (Recv_k, Unbounded, Declared), "a consumer may idle on an empty inbox";
+  (Poll, Bounded, Declared), "own-inbox poll with a failure path";
+  (Poll, Unbounded, Declared), "a consumer may idle on its own inbox";
+  (Feed_push, Bounded, Declared), "feed write with a failure path";
+  (Tap_pop, Bounded, Declared), "tap read with a failure path";
+  (Tap_pop, Unbounded, Declared), "a consumer may idle on an empty tap";
+]
+(* Absent on purpose, so REJECTED: a pin driven by a thread that does not own it; any bank use
+   not granted; SEND / space wait / feed push that waits for ever on a full target ("send to a
+   full inbox without a deadline"); any mailbox or port use not declared. *)
+
+(* PAIR allow-list: (kind a, kind b, can share a clock, declared shared) -> reason; a <= b in
+   all_kinds order. Pins hold their value between writes, so for pins the clock does not matter. *)
+let pair_table =
+  let both f = [ f false; f true ] in
+  List.concat [
+    both (fun c -> (Pin_drive, Pin_drive, c, true), "declared time-division group: each member drives in its own slots; the interleave is the protocol model's to check");
+    List.concat_map (fun c -> both (fun s -> (Pin_drive, Pin_sample, c, s), "another actor reads the pin")) [ false; true ];
+    List.concat_map (fun c -> both (fun s -> (Pin_sample, Pin_sample, c, s), "two readers")) [ false; true ];
+    (* one bank port: any two users in different clocks; never two in the same clock *)
+    List.concat_map (fun (a, b) -> both (fun s -> (a, b, false, s), "one port, different clocks"))
+      [ (Bank_read, Bank_read); (Bank_read, Bank_write); (Bank_write, Bank_write);
+        (Bank_read, Bank_refresh); (Bank_write, Bank_refresh); (Bank_read, Bank_stream);
+        (Bank_write, Bank_stream); (Bank_refresh, Bank_stream) ];
+    (* inboxes: one producer, one consumer *)
+    List.concat_map (fun (a, b) -> List.concat_map (fun c -> both (fun s -> (a, b, c, s), "producer and consumer")) [ false; true ])
+      [ (Send_k, Recv_k); (Send_k, Poll); (Space_wait, Recv_k); (Space_wait, Poll); (Send_k, Space_wait) ];
+    List.concat_map (fun c -> [ (Send_k, Send_k, c, true), "declared multi-producer inbox" ]) [ false; true ];
+  ]
+(* Absent, so REJECTED: two undeclared drivers of a pin; two bank users in one clock (refresh
+   against access, array stream against LDB/STB, read against write); two consumers of one
+   inbox (RECV/RECV, RECV/POLL of another thread); undeclared multiple producers; two writers of
+   one feed register or two readers of one tap. *)
+
+(* COUNTERPART: a mailbox use needs the other side somewhere (another actor, reachable) *)
+let counterpart_kinds = function
+  | Send_k | Space_wait -> Some [ Recv_k; Poll ]
+  | Recv_k | Poll -> Some [ Send_k ]
+  | Feed_push | Tap_pop -> None   (* the array side is configuration, declared through grants *)
+  | Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream -> None
+
+let index k = let rec go i = function [] -> assert false | x :: r -> if x = k then i else go (i + 1) r in go 0 all_kinds
+
+(* table sanity, at start-up: keys well formed, no duplicates, every kind listed once *)
+let () =
+  let n = List.length all_kinds in
+  if List.length (List.sort_uniq compare all_kinds) <> n then raise (Bad_table "all_kinds repeats a kind");
+  List.iter (fun ((k, w, _), _) ->
+      if waits_apply k = (w = No_wait) then raise (Bad_table ("solo entry with a wait class that does not apply: " ^ kind_name k)))
+    solo_table;
+  List.iter (fun ((a, b, _, _), _) ->
+      if class_of a <> class_of b then raise (Bad_table (Printf.sprintf "pair entry across classes: %s / %s" (kind_name a) (kind_name b)));
+      if index a > index b then raise (Bad_table (Printf.sprintf "pair entry not in canonical order: %s / %s" (kind_name a) (kind_name b))))
+    pair_table;
+  let dup l = List.length (List.sort_uniq compare (List.map fst l)) <> List.length l in
+  if dup solo_table || dup pair_table then raise (Bad_table "duplicate key")
+
+type tables = { solo : ((kind * wait * decl_rel) * string) list; pairs : ((kind * kind * bool * bool) * string) list }
+let default_tables = { solo = solo_table; pairs = pair_table }
+
+(* ---- uses of one instruction ---- *)
+type use = { res : resource; kind : kind; actor : actor; addr : int; wait : wait; text : string }
+
+let n_threads = 4
+
+(* follow a failure target through unconditional jumps and NOPs: does it come back to [self]
+   without passing anything else? Then the wait never leaves. *)
+let wait_class ~fetch ~page ~self ~fail =
+  let rec go pc steps =
+    if pc = self then Unbounded
+    else if steps > 8 then Bounded
+    else match decode (fetch ((page lsl 8) lor pc)) with
+      | Jmp a -> go a (steps + 1)
+      | Nop -> go ((pc + 1) land 0xFF) (steps + 1)
+      | Setp _ | Ldc | Ldd | Lda | Waitp _ | Waitd | Sho _ | Shi _ | Jnz _ | Out | In | Send _ | Recv _
+      | Waitc _ | Skne | Skeq | Fine | Cnta | Ldb | Stb | Bank _ | Cfg | Ext_reserved _ -> Bounded in
+  go fail 0
+
+(* the bank bit a BANK sets (bp <- {imm[1:0], acc}, bank = bp[9] = imm[1]), and a SEND's channel *)
+let bank_hi = function
+  | Bank { hi } -> Some ((hi lsr 1) land 1)
+  | Nop | Setp _ | Ldc | Ldd | Lda | Waitp _ | Waitd | Sho _ | Shi _ | Jmp _ | Jnz _ | Out | In | Send _ | Recv _
+  | Waitc _ | Skne | Skeq | Fine | Cnta | Ldb | Stb | Cfg | Ext_reserved _ -> None
+let send_ch = function
+  | Send { ch; _ } -> Some ch
+  | Nop | Setp _ | Ldc | Ldd | Lda | Waitp _ | Waitd | Sho _ | Shi _ | Jmp _ | Jnz _ | Out | In | Bank _ | Recv _
+  | Waitc _ | Skne | Skeq | Fine | Cnta | Ldb | Stb | Cfg | Ext_reserved _ -> None
+
+(* successors of the instruction at [pc] *)
+let successors ~fetch ~page pc =
+  let nx = (pc + 1) land 0xFF in
+  match decode (fetch ((page lsl 8) lor pc)) with
+  | Jmp a -> [ a ] | Jnz a -> [ a; nx ]
+  | Waitp { fail; _ } | Send { fail; _ } | Recv { fail; _ } | Waitc { fail; _ } -> [ fail; nx ]
+  | Waitd | In -> [ nx ]
+  | Skne | Skeq -> [ nx; (pc + 2) land 0xFF ]
+  | Nop | Setp _ | Ldc | Ldd | Lda | Sho _ | Shi _ | Out | Fine | Cnta | Ldb | Stb | Bank _ | Cfg -> [ nx ]
+  | Ext_reserved s -> raise (Unhandled (Printf.sprintf "page %d pc %d: reserved EXT operation %d" page pc s))
+
+(* Reachable addresses with, at each, the banks the thread's pointer can be in and the channels
+   its last SEND can name (bit sets), by a forward data-flow fixpoint from reset (bank 0, lsend
+   0, as the RTL resets them). BANK sets the bank bit; SEND sets lsend on every path, taken or
+   not (D3); everything else keeps both. The bank pointer's post-increment can carry from bank 0
+   into bank 1 at address 511; that is not modelled. *)
+let flow ~fetch ~page ~start =
+  let banks = Array.make 256 0 and lsend = Array.make 256 0 and seen = Array.make 256 false in
+  let work = Queue.create () in
+  let join pc b l =
+    let nb = banks.(pc) lor b and nl = lsend.(pc) lor l in
+    if not seen.(pc) || nb <> banks.(pc) || nl <> lsend.(pc) then begin
+      seen.(pc) <- true; banks.(pc) <- nb; lsend.(pc) <- nl; Queue.push pc work
+    end in
+  join start 1 1;
+  while not (Queue.is_empty work) do
+    let pc = Queue.pop work in
+    let b = (match bank_hi (decode (fetch ((page lsl 8) lor pc))) with Some h -> 1 lsl h | None -> banks.(pc))
+    and l = (match send_ch (decode (fetch ((page lsl 8) lor pc))) with Some c -> 1 lsl c | None -> lsend.(pc)) in
+    List.iter (fun s -> join s b l) (successors ~fetch ~page pc)
+  done;
+  let bits m n = List.filter (fun i -> (m lsr i) land 1 = 1) (List.init n Fun.id) in
+  List.filter_map (fun pc -> if seen.(pc) then Some (pc, bits banks.(pc) 2, bits lsend.(pc) 8) else None) (List.init 256 Fun.id)
+
+let uses_of_thread ~fetch ~(decl : decl) t =
+  let page, start = decl.boot.(t) in
+  let actor = Thread t in
+  let at pc = (page lsl 8) lor pc in
+  List.concat_map (fun (pc, banks, lsends) ->
+      let i = decode (fetch (at pc)) in
+      let mk ?(wait = No_wait) res kind text = { res; kind; actor; addr = at pc; wait; text } in
+      let wc fail = wait_class ~fetch ~page ~self:pc ~fail in
+      match i with
+      | Setp { mask } -> List.filter_map (fun p -> if (mask lsr p) land 1 = 1 then Some (mk (Pin p) Pin_drive "SETP") else None) [ 0; 1; 2; 3; 4; 5; 6; 7 ]
+      | Sho { pin; pair; cap } ->
+        [ mk (Pin pin) Pin_drive "SHO" ]
+        @ (if pair then [ mk (Pin ((pin + 1) land 7)) Pin_drive "SHO pair" ] else [])
+        @ (if cap then [ mk (Pin (pin lxor 1)) Pin_sample "SHO capture" ] else [])
+      | Waitp { pin; _ } -> [ mk (Pin pin) Pin_sample "WAITP" ]
+      | Shi { pin } -> [ mk (Pin pin) Pin_sample "SHI" ]
+      | Ldb -> List.map (fun b -> mk (Bankr b) Bank_read "LDB") banks
+      | Stb -> List.map (fun b -> mk (Bankr b) Bank_write "STB") banks
+      | Send { ch; fail } ->
+        if ch < 4 then [ mk ~wait:(wc fail) (Inbox ch) Send_k "SEND" ] else [ mk ~wait:(wc fail) (Feed (ch - 4)) Feed_push "SEND port" ]
+      | Recv { ch; fail } ->
+        if ch < 4 then [ mk ~wait:(wc fail) (Inbox ch) Recv_k "RECV" ] else [ mk ~wait:(wc fail) (Tap (ch - 4)) Tap_pop "RECV port" ]
+      | Waitc { cond; fail } ->
+        if cond = Isa2.c_inbox then [ mk ~wait:(wc fail) (Inbox t) Poll "WAITC 10" ]
+        else if cond = Isa2.c_space then
+          List.map (fun ch -> if ch < 4 then mk ~wait:(wc fail) (Inbox ch) Space_wait "WAITC 11"
+                     else mk ~wait:(wc fail) (Feed (ch - 4)) Feed_push "WAITC 11 (port)") lsends
+        else []
+      | Ext_reserved s -> raise (Unhandled (Printf.sprintf "T%d pc %d: reserved EXT operation %d" t pc s))
+      | Nop | Ldc | Ldd | Lda | Waitd | Jmp _ | Jnz _ | Out | In | Skne | Skeq | Fine | Cnta | Bank _ | Cfg -> [])
+    (flow ~fetch ~page ~start)
+
+let declared_uses (d : decl) =
+  List.map (fun (b, period, offset) ->
+      { res = Bankr b; kind = Bank_refresh; actor = Refresher; addr = -1; wait = No_wait;
+        text = Printf.sprintf "refresh every %d clocks at %d" period offset }) d.refresh
+  @ List.map (fun (b, seg) ->
+      { res = Bankr b; kind = Bank_stream; actor = Array_seg seg; addr = -1; wait = No_wait; text = "array stream, every clock" }) d.streams
+
+(* clocks an actor can use a resource in: (period, offset) *)
+let clocks (d : decl) u =
+  match u.actor with
+  | Thread t -> (n_threads, t)
+  | Array_seg _ -> (1, 0)
+  | Refresher -> (match u.res with
+      | Bankr b -> (match List.find_opt (fun (b', _, _) -> b' = b) d.refresh with Some (_, p, o) -> (p, o) | None -> (1, 0))
+      | Pin _ | Inbox _ | Feed _ | Tap _ -> (1, 0))
+let rec gcd a b = if b = 0 then a else gcd b (a mod b)
+let coincide d u v =
+  let pa, oa = clocks d u and pb, ob = clocks d v in
+  let g = gcd pa pb in ((oa - ob) mod g + g) mod g = 0
+
+let is_declared (d : decl) u =
+  match u.actor with
+  | Refresher | Array_seg _ -> true
+  | Thread _ -> List.exists (fun (r, a, ks) -> r = u.res && a = u.actor && List.mem u.kind ks) d.grants
+
+let shared (d : decl) r a b = List.exists (fun (r', g) -> r' = r && List.mem a g && List.mem b g) d.shared
+
+type finding = { rule : string; key : string; where : string }
+
+let where_of u = if u.addr < 0 then Printf.sprintf "%s (%s)" (actor_name u.actor) u.text
+  else Printf.sprintf "%s page %d pc %d (%s)" (actor_name u.actor) (u.addr lsr 8) (u.addr land 0xFF) u.text
+
+let last_waived : string list ref = ref []
+
+let check ?(tables = default_tables) ~fetch (d : decl) =
+  let uses = List.concat (List.init n_threads (uses_of_thread ~fetch ~decl:d)) @ declared_uses d in
+  let rejected = ref [] in
+  last_waived := [];
+  let reject rule key where = rejected := { rule; key; where } :: !rejected in
+  (* SOLO *)
+  List.iter (fun u ->
+      if class_of u.kind <> class_of_res u.res then raise (Unhandled ("use of the wrong class: " ^ where_of u));
+      let key = (u.kind, u.wait, (if is_declared d u then Declared else Undeclared)) in
+      if not (List.mem_assoc key tables.solo) then
+        let k, w, r = key in
+        let text = Printf.sprintf "(%s, %s, %s) on %s" (kind_name k) (wait_name w) (if r = Declared then "declared" else "UNDECLARED") (res_name u.res) in
+        match List.find_opt (fun (res, a, kd, _) -> res = u.res && a = u.actor && kd = u.kind) d.waivers with
+        | Some (_, _, _, why) -> last_waived := Printf.sprintf "%s at %s -- %s" text (where_of u) why :: !last_waived
+        | None -> reject "solo" text (where_of u))
+    uses;
+  (* PAIRS: one representative per (actor, kind, resource) *)
+  let reps = List.sort_uniq (fun a b -> compare (a.res, a.actor, a.kind) (b.res, b.actor, b.kind)) uses in
+  let seen = Hashtbl.create 16 in
+  List.iter (fun u ->
+      List.iter (fun v ->
+          if u.res = v.res && u.actor <> v.actor
+             && (index u.kind < index v.kind || (u.kind = v.kind && compare u.actor v.actor < 0)) then begin
+            let c = coincide d u v and s = shared d u.res u.actor v.actor in
+            let key = (u.kind, v.kind, c, s) in
+            if not (List.mem_assoc key tables.pairs) && not (Hashtbl.mem seen (u.res, key, u.actor, v.actor)) then begin
+              Hashtbl.replace seen (u.res, key, u.actor, v.actor) ();
+              reject "pair" (Printf.sprintf "(%s, %s, %s, %s) on %s" (kind_name u.kind) (kind_name v.kind)
+                               (if c then "SAME CLOCK possible" else "different clocks") (if s then "declared shared" else "not shared")
+                               (res_name u.res)) (where_of u ^ " / " ^ where_of v)
+            end
+          end) reps) reps;
+  (* COUNTERPART *)
+  List.iter (fun u ->
+      match counterpart_kinds u.kind with
+      | None -> ()
+      | Some ks ->
+        if not (List.exists (fun v -> v.res = u.res && v.actor <> u.actor && List.mem v.kind ks) reps) then
+          reject "counterpart" (Printf.sprintf "%s on %s with no %s by another thread" (kind_name u.kind) (res_name u.res)
+                                  (String.concat "/" (List.map kind_name ks))) (where_of u)) reps;
+  (uses, List.rev !rejected)
+
+(* ---- reports ---- *)
+let print_table oc (t : tables) =
+  let p fmt = Printf.fprintf oc fmt in
+  p "SOLO table: every (kind, wait class, declaration); a row without a reason is REJECTED\n";
+  List.iter (fun k ->
+      List.iter (fun w ->
+          if waits_apply k <> (w = No_wait) then
+            List.iter (fun r ->
+                let key = (k, w, r) in
+                p "  %-24s %-9s %-10s %s\n" (kind_name k) (wait_name w) (if r = Declared then "declared" else "undeclared")
+                  (match List.assoc_opt key t.solo with Some why -> "allowed: " ^ why | None -> "REJECTED"))
+              [ Declared; Undeclared ]) [ No_wait; Bounded; Unbounded ]) all_kinds;
+  p "\nPAIR table: every two kinds of one resource class used by different actors\n";
+  List.iter (fun a ->
+      List.iter (fun b ->
+          if class_of a = class_of b && index a <= index b then
+            List.iter (fun c ->
+                List.iter (fun s ->
+                    p "  %-22s %-22s %-14s %-10s %s\n" (kind_name a) (kind_name b) (if c then "same clock" else "other clocks")
+                      (if s then "shared" else "not shared")
+                      (match List.assoc_opt (a, b, c, s) t.pairs with Some why -> "allowed: " ^ why | None -> "REJECTED"))
+                  [ false; true ]) [ false; true ]) all_kinds) all_kinds
+
+let summarise uses =
+  let by = Hashtbl.create 16 in
+  List.iter (fun u ->
+      let k = (u.res, u.actor) in
+      let l = Option.value ~default:[] (Hashtbl.find_opt by k) in
+      let tag = kind_name u.kind ^ (if u.wait = No_wait then "" else "/" ^ wait_name u.wait) in
+      if not (List.mem tag l) then Hashtbl.replace by k (tag :: l)) uses;
+  Hashtbl.fold (fun (r, a) l acc -> Printf.sprintf "%s %s: %s" (res_name r) (actor_name a) (String.concat ", " (List.rev l)) :: acc) by []
+  |> List.sort compare
+
+(* Check one programme set and print what was found; returns the findings. *)
+let report ?tables ~name ~fetch (d : decl) =
+  Printf.printf "== %s\n" name;
+  match check ?tables ~fetch d with
+  | uses, findings ->
+    List.iter (Printf.printf "   uses: %s\n") (summarise uses);
+    List.iter (Printf.printf "   WAIVED %s\n") (List.rev !last_waived);
+    if findings = [] then Printf.printf "   ACCEPTED: no rejected combination\n"
+    else List.iter (fun f -> Printf.printf "   REJECTED [%s] %s\n      at %s\n" f.rule f.key f.where) findings;
+    print_newline ();
+    findings
+  | exception Unhandled m -> Printf.printf "   UNHANDLED (fails loudly): %s\n\n" m; [ { rule = "unhandled"; key = m; where = "" } ]
+
+(* the same table with some pair entries removed, to show an entry is load-bearing *)
+let without_pairs pred (t : tables) = { t with pairs = List.filter (fun (k, _) -> not (pred k)) t.pairs }
+
+(* Evidence for a drain argument: the waits in thread [t]'s reachable code that can last for
+   ever, other than [except] (e.g. its RECV on the inbox in question). IN, and any wait whose
+   failure path returns to itself, count. JNZ loops are not judged here (they end when cnt does). *)
+let unbounded_waits ~fetch ~(decl : decl) t ~except =
+  let page, start = decl.boot.(t) in
+  List.filter_map (fun (pc, _, _) ->
+      let i = decode (fetch ((page lsl 8) lor pc)) in
+      let w = match i with
+        | In -> Some "IN"
+        | Waitp { fail; _ } -> if wait_class ~fetch ~page ~self:pc ~fail = Unbounded then Some "WAITP" else None
+        | Waitc { fail; _ } -> if wait_class ~fetch ~page ~self:pc ~fail = Unbounded then Some "WAITC" else None
+        | Send { fail; _ } -> if wait_class ~fetch ~page ~self:pc ~fail = Unbounded then Some "SEND" else None
+        | Recv { fail; ch } ->
+          if List.mem (Inbox ch) except then None
+          else if wait_class ~fetch ~page ~self:pc ~fail = Unbounded then Some "RECV" else None
+        | Jmp a -> if a = pc then Some "HALT (JMP self)" else None
+        | Nop | Setp _ | Ldc | Ldd | Lda | Waitd | Sho _ | Shi _ | Jnz _ | Out | Skne | Skeq | Fine | Cnta | Ldb | Stb
+        | Bank _ | Cfg | Ext_reserved _ -> None in
+      Option.map (fun w -> Printf.sprintf "%s at pc %d" w pc) w) (flow ~fetch ~page ~start)

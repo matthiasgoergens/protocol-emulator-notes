@@ -37,4 +37,8 @@ run crc-zlib uv run --no-project python crc/zlib_check.py /var/tmp/verif-oracles
 run stall-ethernet $B/stall/eth_stall.exe
 run stall-i2c-stretch $B/stall/i2c_stretch.exe
 run stall-jtag-swd $B/stall-wide/jtag_swd_stall.exe
-if [ -x "$B/hazard/hazard.exe" ]; then run hazard $B/hazard/hazard.exe; fi
+run hazard-table $B/hazard/hazard_controls.exe table
+run hazard-controls $B/hazard/hazard_controls.exe
+run hazard-base $B/stall/hazard_base.exe
+run hazard-wide $B/stall-wide/hazard_wide.exe
+run hazard-bridge $B/hazard-mp/hazard_bridge.exe

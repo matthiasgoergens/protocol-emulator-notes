@@ -1,0 +1,52 @@
+File "hazard/hazard.ml", line 376, characters 15-47:
+376 | let _fragile = function Pin_drive -> 1 | _ -> 0
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 4 [fragile-match]): this pattern-matching is fragile.
+It will remain exhaustive when constructors are added to type kind.
+File "hazard/hazard.ml", lines 71-75, characters 16-47:
+71 | ................function
+72 |   | Pin_drive -> Some Pin_sample | Pin_sample -> Some Bank_read | Bank_read -> Some Bank_write
+73 |   | Bank_write -> Some Bank_refresh | Bank_refresh -> Some Bank_stream | Bank_stream -> Some Send_k
+74 |   | Send_k -> Some Space_wait | Space_wait -> Some Recv_k | Recv_k -> Some Poll | Poll -> Some Feed_push
+75 |   | Feed_push -> Some Tap_pop | Tap_pop -> None
+Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+Planted_kind
+
+File "hazard/hazard.ml", lines 79-83, characters 15-42:
+79 | ...............function
+80 |   | Pin_drive | Pin_sample -> C_pin
+81 |   | Bank_read | Bank_write | Bank_refresh | Bank_stream -> C_bank
+82 |   | Send_k | Space_wait | Recv_k | Poll -> C_inbox
+83 |   | Feed_push -> C_feed | Tap_pop -> C_tap
+Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+Planted_kind
+
+File "hazard/hazard.ml", lines 88-90, characters 18-89:
+88 | ..................function
+89 |   | Send_k | Space_wait | Recv_k | Poll | Feed_push | Tap_pop -> true
+90 |   | Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream -> false
+Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+Planted_kind
+
+File "hazard/hazard.ml", lines 92-96, characters 16-51:
+92 | ................function
+93 |   | Pin_drive -> "pin-drive" | Pin_sample -> "pin-sample" | Bank_read -> "bank-read (LDB)"
+94 |   | Bank_write -> "bank-write (STB)" | Bank_refresh -> "bank-refresh" | Bank_stream -> "bank-stream (array)"
+95 |   | Send_k -> "send" | Space_wait -> "space-wait (WAITC 11)" | Recv_k -> "recv" | Poll -> "poll (WAITC 10)"
+96 |   | Feed_push -> "feed-push" | Tap_pop -> "tap-pop"
+Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+Planted_kind
+
+File "hazard/hazard.ml", lines 165-169, characters 24-88:
+165 | ........................function
+166 |   | Send_k | Space_wait -> Some [ Recv_k; Poll ]
+167 |   | Recv_k | Poll -> Some [ Send_k ]
+168 |   | Feed_push | Tap_pop -> None   (* the array side is configuration, declared through grants *)
+169 |   | Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream -> None
+Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+Planted_kind

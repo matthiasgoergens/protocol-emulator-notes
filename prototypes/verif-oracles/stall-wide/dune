@@ -5,6 +5,6 @@
   isa_enc.ml
   (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
 
-(executable
- (name jtag_swd_stall)
- (libraries hardcaml seqv2))
+(executables
+ (names jtag_swd_stall hazard_wide)
+ (libraries hardcaml seqv2 hazard))
