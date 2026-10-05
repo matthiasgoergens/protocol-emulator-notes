@@ -1,0 +1,17 @@
+sbc (pe CRC): 2 channels, 2250 frames decoded, 0 rejected, 288000 samples per channel
+  per frame: 88 CRC bits, 246 allocation operations, 165 dequantisations (divisions), 6656 MACs
+  PE array clocks for the CRCs: 402759 (179 per frame)
+48k j51 bit-exact (PE CRC)
+sbc (pe CRC): 2 channels, 2068 frames decoded, 0 rejected, 264704 samples per channel
+  per frame: 88 CRC bits, 246 allocation operations, 174 dequantisations (divisions), 6656 MACs
+  PE array clocks for the CRCs: 370181 (179 per frame)
+a2dp_j53 bit-exact (PE CRC)
+sbc (pe-rtl CRC): 2 channels, 8272 frames decoded, 0 rejected, 264704 samples per channel
+  per frame: 48 CRC bits, 114 allocation operations, 55 dequantisations (divisions), 1152 MACs
+  PE array clocks for the CRCs: 818937 (99 per frame); Hardcaml RTL in lockstep: 0 mismatches
+s4_dual20 bit-exact (PE CRC, RTL lockstep)
+clean: 2068 frames, 0 rejected
+control 1, CRC byte of frame 10 flipped, CRC on the PE: 2067 decoded, 1 rejected -> CAUGHT
+control 2, a scale-factor bit of frame 20 flipped: 2067 decoded, 1 rejected -> CAUGHT
+control 3, loudness offset of subband 0 off by one: 397017 of 529408 samples differ from the clean decode -> CAUGHT (the reference comparison fails)
+control 4, the PE CRC's result with one bit wrong: 0 decoded, 2068 rejected -> CAUGHT

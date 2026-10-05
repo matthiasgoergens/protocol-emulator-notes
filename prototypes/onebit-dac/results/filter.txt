@@ -1,0 +1,20 @@
+Reconstruction filter: 1 kohm / 2.2 nF (72 kHz), buffer, Sallen-Key Butterworth 40 kHz (10k, 10k, 560p, 270p)
+  |H(    1.0 kHz)| =    -0.0 dB
+  |H(   10.0 kHz)| =    -0.1 dB
+  |H(   20.0 kHz)| =    -0.5 dB
+  |H(   24.1 kHz)| =    -0.9 dB
+  |H(   43.1 kHz)| =    -4.6 dB
+  |H(  100.0 kHz)| =   -20.2 dB
+  |H(  176.5 kHz)| =   -33.9 dB
+  |H( 1000.0 kHz)| =   -80.9 dB
+  |H( 3000.0 kHz)| =  -424.2 dB
+  o3, idle: rms above 20 kHz at the filter output 0.22 mV (3.3 V pin), signal rms 0.0 mV
+  o3, -1 dBFS 997 Hz: rms above 20 kHz at the filter output 0.69 mV (3.3 V pin), signal rms 368.9 mV
+  mode A: image at   43.1 kHz   -37.4 dB re the tone (after the filter)
+  mode A: image at   45.1 kHz   -38.3 dB re the tone (after the filter)
+  mode A: image at   87.2 kHz   -56.0 dB re the tone (after the filter)
+  mode A: image at  175.5 kHz   -80.5 dB re the tone (after the filter)
+  mode B: image at   43.1 kHz   -98.9 dB re the tone (after the filter)
+  mode B: image at   45.1 kHz   -99.8 dB re the tone (after the filter)
+  mode B: image at   87.2 kHz   -98.5 dB re the tone (after the filter)
+  mode B: image at  175.5 kHz   -80.2 dB re the tone (after the filter)

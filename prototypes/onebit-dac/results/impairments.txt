@@ -1,0 +1,70 @@
+Impairments (see dac_common.Impair); same bitstreams for every row of an order.
+== o3 mode B
+ideal                                        THD+N(-1 dBFS)   -91.9 dB  THD+N(-20)   -72.9  DR   92.7 (  95.4 A)  SNR idle   93.0 (  95.7 A)  H2 -114.9 H3 -115.5
+jitter 10 ps rms                             THD+N(-1 dBFS)   -87.3 dB  THD+N(-20)   -68.0  DR   87.9 (  90.1 A)  SNR idle   88.4 (  90.7 A)  H2 -109.8 H3 -110.1
+jitter 30 ps rms                             THD+N(-1 dBFS)   -79.2 dB  THD+N(-20)   -60.0  DR   79.9 (  81.9 A)  SNR idle   80.5 (  82.5 A)  H2 -101.4 H3 -102.2
+jitter 100 ps rms                            THD+N(-1 dBFS)   -68.9 dB  THD+N(-20)   -49.7  DR   69.7 (  71.7 A)  SNR idle   70.2 (  72.2 A)  H2  -91.0 H3  -92.1
+jitter 300 ps rms                            THD+N(-1 dBFS)   -59.4 dB  THD+N(-20)   -40.2  DR   60.2 (  62.2 A)  SNR idle   60.7 (  62.7 A)  H2  -81.5 H3  -82.7
+jitter 1000 ps rms                           THD+N(-1 dBFS)   -48.9 dB  THD+N(-20)   -29.7  DR   50.0 (  52.0 A)  SNR idle   50.2 (  52.2 A)  H2  -71.0 H3  -72.2
+asym 50 ps                                   THD+N(-1 dBFS)   -84.3 dB  THD+N(-20)   -66.7  DR   83.6 (  84.0 A)  SNR idle   89.0 (  91.3 A)  H2  -87.9 H3 -108.6
+asym 200 ps                                  THD+N(-1 dBFS)   -72.9 dB  THD+N(-20)   -55.7  DR   72.6 (  72.7 A)  SNR idle   79.0 (  81.0 A)  H2  -75.8 H3  -96.9
+asym 1000 ps                                 THD+N(-1 dBFS)   -59.0 dB  THD+N(-20)   -41.8  DR   64.4 (  64.5 A)  SNR idle   65.2 (  67.2 A)  H2  -61.8 H3  -82.9
+supply 1 uV in-band                          THD+N(-1 dBFS)   -91.9 dB  THD+N(-20)   -72.8  DR   92.7 (  95.4 A)  SNR idle   93.0 (  95.6 A)  H2 -114.8 H3 -115.5
+supply 10 uV in-band                         THD+N(-1 dBFS)   -90.8 dB  THD+N(-20)   -71.9  DR   91.7 (  94.3 A)  SNR idle   91.9 (  94.5 A)  H2 -113.1 H3 -114.4
+supply 100 uV in-band                        THD+N(-1 dBFS)   -77.2 dB  THD+N(-20)   -58.5  DR   78.4 (  80.5 A)  SNR idle   78.4 (  80.5 A)  H2  -99.8 H3  -99.2
+8 pads x 0.20 V bounce, 1.0 ps/mV            THD+N(-1 dBFS)   -72.0 dB  THD+N(-20)   -52.8  DR   72.8 (  74.7 A)  SNR idle   73.2 (  75.2 A)  H2  -94.8 H3  -94.2
+8 pads x 0.20 V bounce, 0.3 ps/mV            THD+N(-1 dBFS)   -82.1 dB  THD+N(-20)   -62.9  DR   82.8 (  84.8 A)  SNR idle   83.2 (  85.3 A)  H2 -104.9 H3 -104.7
+differential, asym 200 ps                    THD+N(-1 dBFS)   -91.9 dB  THD+N(-20)   -72.9  DR   92.7 (  95.4 A)  SNR idle   93.0 (  95.7 A)  H2 -114.9 H3 -115.5
+differential, jitter 100 ps rms              THD+N(-1 dBFS)   -68.9 dB  THD+N(-20)   -49.7  DR   69.7 (  71.7 A)  SNR idle   70.2 (  72.2 A)  H2  -91.0 H3  -92.1
+differential, supply 10 uV in-band           THD+N(-1 dBFS)   -91.8 dB  THD+N(-20)   -72.9  DR   92.7 (  95.4 A)  SNR idle   93.0 (  95.6 A)  H2 -114.7 H3 -115.8
+RZ, asym 200 ps                              THD+N(-1 dBFS)   -91.9 dB  THD+N(-20)   -72.9  DR   92.7 (  95.4 A)  SNR idle   93.0 (  95.7 A)  H2 -114.9 H3 -115.5
+RZ, jitter 100 ps rms                        THD+N(-1 dBFS)   -61.3 dB  THD+N(-20)   -42.3  DR   62.4 (  64.5 A)  SNR idle   62.3 (  64.3 A)  H2  -82.4 H3  -83.8
+RZ, supply 10 uV in-band                     THD+N(-1 dBFS)   -90.8 dB  THD+N(-20)   -71.9  DR   91.7 (  94.3 A)  SNR idle   91.9 (  94.5 A)  H2 -113.1 H3 -114.4
+asym 100 ps, jitter 30 ps rms, supply 3 uV in-band THD+N(-1 dBFS)   -76.1 dB  THD+N(-20)   -57.8  DR   76.0 (  76.8 A)  SNR idle   79.3 (  81.2 A)  H2  -81.8 H3  -99.9
+asym 100 ps, jitter 30 ps rms, supply 3 uV in-band, 8 pads x 0.20 V bounce, 1.0 ps/mV THD+N(-1 dBFS)   -70.6 dB  THD+N(-20)   -51.5  DR   71.2 (  72.7 A)  SNR idle   72.2 (  74.2 A)  H2  -82.1 H3  -95.0
+== o2 mode B
+ideal                                        THD+N(-1 dBFS)   -85.5 dB  THD+N(-20)   -66.6  DR   85.7 (  90.9 A)  SNR idle   91.0 (  94.8 A)  H2 -114.8 H3 -114.4
+jitter 10 ps rms                             THD+N(-1 dBFS)   -83.9 dB  THD+N(-20)   -64.9  DR   84.4 (  88.4 A)  SNR idle   87.9 (  90.7 A)  H2 -109.4 H3 -111.2
+jitter 30 ps rms                             THD+N(-1 dBFS)   -78.5 dB  THD+N(-20)   -59.4  DR   79.3 (  81.8 A)  SNR idle   80.7 (  82.9 A)  H2 -100.4 H3 -102.7
+jitter 100 ps rms                            THD+N(-1 dBFS)   -69.0 dB  THD+N(-20)   -49.7  DR   69.8 (  71.8 A)  SNR idle   70.6 (  72.6 A)  H2  -89.9 H3  -92.1
+jitter 300 ps rms                            THD+N(-1 dBFS)   -59.6 dB  THD+N(-20)   -40.3  DR   60.3 (  62.3 A)  SNR idle   61.1 (  63.1 A)  H2  -80.3 H3  -82.5
+jitter 1000 ps rms                           THD+N(-1 dBFS)   -49.1 dB  THD+N(-20)   -29.9  DR   50.0 (  52.0 A)  SNR idle   50.7 (  52.6 A)  H2  -69.8 H3  -72.0
+asym 50 ps                                   THD+N(-1 dBFS)   -81.7 dB  THD+N(-20)   -63.4  DR   80.5 (  81.4 A)  SNR idle   90.5 (  94.7 A)  H2  -87.3 H3 -109.6
+asym 200 ps                                  THD+N(-1 dBFS)   -71.8 dB  THD+N(-20)   -54.0  DR   70.7 (  70.7 A)  SNR idle   86.2 (  94.0 A)  H2  -75.2 H3  -98.7
+asym 1000 ps                                 THD+N(-1 dBFS)   -57.9 dB  THD+N(-20)   -40.2  DR   64.0 (  63.8 A)  SNR idle   73.8 (  86.8 A)  H2  -61.2 H3  -84.7
+supply 1 uV in-band                          THD+N(-1 dBFS)   -85.5 dB  THD+N(-20)   -66.6  DR   85.7 (  90.9 A)  SNR idle   91.0 (  94.8 A)  H2 -114.7 H3 -114.4
+supply 10 uV in-band                         THD+N(-1 dBFS)   -85.3 dB  THD+N(-20)   -66.3  DR   85.5 (  90.5 A)  SNR idle   90.3 (  93.8 A)  H2 -113.1 H3 -113.4
+supply 100 uV in-band                        THD+N(-1 dBFS)   -76.8 dB  THD+N(-20)   -57.9  DR   77.8 (  80.2 A)  SNR idle   78.3 (  80.4 A)  H2 -100.2 H3  -99.0
+8 pads x 0.20 V bounce, 1.0 ps/mV            THD+N(-1 dBFS)   -72.0 dB  THD+N(-20)   -52.7  DR   72.7 (  74.7 A)  SNR idle   73.6 (  75.7 A)  H2  -95.1 H3  -94.6
+8 pads x 0.20 V bounce, 0.3 ps/mV            THD+N(-1 dBFS)   -80.9 dB  THD+N(-20)   -61.7  DR   81.4 (  84.3 A)  SNR idle   83.3 (  85.6 A)  H2 -105.2 H3 -104.8
+differential, asym 200 ps                    THD+N(-1 dBFS)   -85.5 dB  THD+N(-20)   -66.6  DR   85.7 (  90.9 A)  SNR idle   91.0 (  94.8 A)  H2 -114.8 H3 -114.4
+differential, jitter 100 ps rms              THD+N(-1 dBFS)   -69.0 dB  THD+N(-20)   -49.7  DR   69.8 (  71.8 A)  SNR idle   70.6 (  72.6 A)  H2  -89.9 H3  -92.1
+differential, supply 10 uV in-band           THD+N(-1 dBFS)   -85.5 dB  THD+N(-20)   -66.6  DR   85.7 (  90.9 A)  SNR idle   91.0 (  94.8 A)  H2 -114.7 H3 -114.5
+RZ, asym 200 ps                              THD+N(-1 dBFS)   -85.5 dB  THD+N(-20)   -66.6  DR   85.7 (  90.9 A)  SNR idle   91.0 (  94.8 A)  H2 -114.8 H3 -114.4
+RZ, jitter 100 ps rms                        THD+N(-1 dBFS)   -61.3 dB  THD+N(-20)   -42.3  DR   62.4 (  64.5 A)  SNR idle   62.3 (  64.3 A)  H2  -82.4 H3  -83.8
+RZ, supply 10 uV in-band                     THD+N(-1 dBFS)   -85.3 dB  THD+N(-20)   -66.3  DR   85.5 (  90.5 A)  SNR idle   90.3 (  93.8 A)  H2 -113.1 H3 -113.4
+asym 100 ps, jitter 30 ps rms, supply 3 uV in-band THD+N(-1 dBFS)   -75.3 dB  THD+N(-20)   -56.8  DR   74.5 (  75.0 A)  SNR idle   80.4 (  82.7 A)  H2  -81.3 H3  -99.7
+asym 100 ps, jitter 30 ps rms, supply 3 uV in-band, 8 pads x 0.20 V bounce, 1.0 ps/mV THD+N(-1 dBFS)   -70.4 dB  THD+N(-20)   -51.3  DR   70.8 (  72.2 A)  SNR idle   72.8 (  74.8 A)  H2  -81.2 H3  -95.6
+== o4 mode B
+ideal                                        THD+N(-1 dBFS)   -90.0 dB  THD+N(-20)   -70.9  DR   90.9 (  94.7 A)  SNR idle   90.9 (  94.8 A)  H2 -114.9 H3 -115.4
+jitter 10 ps rms                             THD+N(-1 dBFS)   -85.6 dB  THD+N(-20)   -66.6  DR   86.6 (  89.1 A)  SNR idle   87.0 (  89.7 A)  H2 -109.3 H3 -108.7
+jitter 30 ps rms                             THD+N(-1 dBFS)   -77.7 dB  THD+N(-20)   -58.8  DR   78.8 (  80.8 A)  SNR idle   79.4 (  81.5 A)  H2 -101.3 H3  -99.9
+jitter 100 ps rms                            THD+N(-1 dBFS)   -67.5 dB  THD+N(-20)   -48.6  DR   68.7 (  70.6 A)  SNR idle   69.3 (  71.3 A)  H2  -91.1 H3  -89.5
+jitter 300 ps rms                            THD+N(-1 dBFS)   -58.0 dB  THD+N(-20)   -39.1  DR   59.3 (  61.2 A)  SNR idle   59.8 (  61.7 A)  H2  -81.6 H3  -80.0
+jitter 1000 ps rms                           THD+N(-1 dBFS)   -47.5 dB  THD+N(-20)   -28.7  DR   49.4 (  51.3 A)  SNR idle   49.3 (  51.3 A)  H2  -71.2 H3  -69.5
+asym 50 ps                                   THD+N(-1 dBFS)   -83.9 dB  THD+N(-20)   -65.0  DR   84.3 (  84.5 A)  SNR idle   87.9 (  90.8 A)  H2  -89.1 H3 -110.8
+asym 200 ps                                  THD+N(-1 dBFS)   -72.9 dB  THD+N(-20)   -54.2  DR   74.3 (  73.9 A)  SNR idle   78.6 (  80.8 A)  H2  -77.0 H3 -100.8
+asym 1000 ps                                 THD+N(-1 dBFS)   -59.0 dB  THD+N(-20)   -40.3  DR   68.5 (  68.0 A)  SNR idle   64.9 (  67.0 A)  H2  -62.9 H3  -87.1
+supply 1 uV in-band                          THD+N(-1 dBFS)   -90.0 dB  THD+N(-20)   -70.9  DR   90.9 (  94.7 A)  SNR idle   90.9 (  94.8 A)  H2 -114.8 H3 -115.4
+supply 10 uV in-band                         THD+N(-1 dBFS)   -89.1 dB  THD+N(-20)   -70.1  DR   90.0 (  93.4 A)  SNR idle   90.1 (  93.6 A)  H2 -113.0 H3 -113.9
+supply 100 uV in-band                        THD+N(-1 dBFS)   -76.3 dB  THD+N(-20)   -57.4  DR   77.4 (  79.5 A)  SNR idle   77.4 (  79.5 A)  H2  -99.3 H3  -98.2
+8 pads x 0.20 V bounce, 1.0 ps/mV            THD+N(-1 dBFS)   -70.6 dB  THD+N(-20)   -51.7  DR   71.7 (  73.6 A)  SNR idle   72.3 (  74.3 A)  H2  -91.5 H3  -92.2
+8 pads x 0.20 V bounce, 0.3 ps/mV            THD+N(-1 dBFS)   -80.7 dB  THD+N(-20)   -61.7  DR   81.6 (  83.7 A)  SNR idle   82.2 (  84.3 A)  H2 -101.7 H3 -102.3
+differential, asym 200 ps                    THD+N(-1 dBFS)   -90.0 dB  THD+N(-20)   -70.9  DR   90.9 (  94.7 A)  SNR idle   90.9 (  94.8 A)  H2 -114.9 H3 -115.4
+differential, jitter 100 ps rms              THD+N(-1 dBFS)   -67.5 dB  THD+N(-20)   -48.6  DR   68.7 (  70.6 A)  SNR idle   69.3 (  71.3 A)  H2  -91.1 H3  -89.5
+differential, supply 10 uV in-band           THD+N(-1 dBFS)   -89.9 dB  THD+N(-20)   -70.9  DR   90.9 (  94.7 A)  SNR idle   90.9 (  94.8 A)  H2 -114.8 H3 -115.7
+RZ, asym 200 ps                              THD+N(-1 dBFS)   -90.0 dB  THD+N(-20)   -70.9  DR   90.9 (  94.7 A)  SNR idle   90.9 (  94.8 A)  H2 -114.9 H3 -115.4
+RZ, jitter 100 ps rms                        THD+N(-1 dBFS)   -60.3 dB  THD+N(-20)   -41.3  DR   61.5 (  63.5 A)  SNR idle   61.3 (  63.3 A)  H2  -81.4 H3  -82.7
+RZ, supply 10 uV in-band                     THD+N(-1 dBFS)   -89.1 dB  THD+N(-20)   -70.1  DR   90.0 (  93.4 A)  SNR idle   90.1 (  93.6 A)  H2 -113.0 H3 -113.9
+asym 100 ps, jitter 30 ps rms, supply 3 uV in-band THD+N(-1 dBFS)   -75.2 dB  THD+N(-20)   -56.5  DR   76.2 (  77.0 A)  SNR idle   78.4 (  80.4 A)  H2  -83.0 H3  -99.7
+asym 100 ps, jitter 30 ps rms, supply 3 uV in-band, 8 pads x 0.20 V bounce, 1.0 ps/mV THD+N(-1 dBFS)   -69.1 dB  THD+N(-20)   -50.5  DR   70.6 (  72.2 A)  SNR idle   71.3 (  73.2 A)  H2  -81.9 H3  -91.6

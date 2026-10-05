@@ -1,0 +1,93 @@
+sat_off_by_one       caught: fastest lane         48 cycles; 13 of 13 generators  (saturating add clamps to 0x7ffe)
+    first diff: PE3: S=7fff P=44e9 Pv=false F=true L=false cfg=00008590630e473b | S=7ffe P=44e9 Pv=false F=true L=false cfg=00008590630e473b
+sat_as_wrap          caught: fastest lane         57 cycles; 13 of 13 generators  (saturating add wraps when the carry-in is the lane)
+    first diff: PE4: S=7fff P=00d9 Pv=false F=true L=false cfg=c8a5f8000c44d94f | S=9ee2 P=00d9 Pv=false F=true L=true cfg=c8a5f8000c44d94f
+carry_bit15          caught: fastest gf2          12 cycles; 13 of 13 generators  (carry out taken from bit 15)
+    first diff: PE0: S=7fff P=0000 Pv=false F=false L=true cfg=001823d6d74309bb | S=7fff P=0000 Pv=false F=false L=false cfg=001823d6d74309bb
+cin_ignored          caught: fastest gf2          11 cycles; 13 of 13 generators  (lane carry-in dropped)
+    first diff: PE0: S=ffff P=0000 Pv=false F=false L=false cfg=00001823d6d74309 | S=0000 P=0000 Pv=false F=false L=false cfg=00001823d6d74309
+max_unsigned         caught: fastest logic        20 cycles; 13 of 13 generators  (max compares unsigned)
+    first diff: PE0: S=fffe P=084a Pv=false F=false L=true cfg=00084a561ea48599 | S=fffe P=fffc Pv=false F=false L=true cfg=00084a561ea48599
+min_is_max           caught: fastest arith        12 cycles; 13 of 13 generators  (min returns the larger)
+    first diff: PE0: S=0000 P=0000 Pv=false F=false L=false cfg=00184b5070970001 | S=0000 P=0001 Pv=false F=false L=false cfg=00184b5070970001
+max_loser_x          caught: fastest maxmin       44 cycles; 13 of 13 generators  (max always reports X as the loser)
+    first diff: PE2: S=002f P=6e4b Pv=false F=false L=true cfg=00000e92dcd0cddf | S=002f P=7000 Pv=false F=false L=true cfg=00000e92dcd0cddf
+and_not              caught: fastest logic        13 cycles; 13 of 13 generators  (AND computes X AND NOT Y)
+    first diff: PE0: S=fffe P=0000 Pv=false F=false L=false cfg=1822f5d4227fff00 | S=fffe P=0000 Pv=false F=true L=false cfg=1822f5d4227fff00
+or_is_xor            caught: fastest maxmin       17 cycles; 13 of 13 generators  (OR computes XOR)
+    first diff: PE0: S=48da P=48da Pv=false F=false L=true cfg=089f76000848921e | S=40da P=40da Pv=false F=false L=true cfg=089f76000848921e
+gate_inverted        caught: fastest pair         20 cycles; 13 of 13 generators  (gating passes Y when g = 0)
+    first diff: PE1: S=b7ac P=4854 Pv=false F=false L=false cfg=001923d4546a09bb | S=b7ac P=4854 Pv=false F=false L=true cfg=001923d4546a09bb
+neg_no_plus1         caught: fastest stream       20 cycles; 13 of 13 generators  (negation without the +1)
+    first diff: PE1: S=0000 P=0000 Pv=false F=false L=false cfg=000041c79de0c6a4 | S=0000 P=ffff Pv=false F=false L=false cfg=000041c79de0c6a4
+gneg_always          caught: fastest stream       12 cycles; 13 of 13 generators  (negate-by-g negates regardless of g)
+    first diff: PE0: S=0000 P=2a44 Pv=true F=false L=false cfg=000041c79de0c6a4 | S=0000 P=0000 Pv=true F=false L=false cfg=000041c79de0c6a4
+bit_off_by_one       caught: fastest chains       34 cycles; 13 of 13 generators  (bit test reads A[i+1])
+    first diff: PE2: S=0001 P=f27f Pv=true F=false L=false cfg=c020d2d9b3ac0000 | S=fffe P=f200 Pv=false F=false L=false cfg=c020d2d9b3ac0000
+s15_xor_uses_s14     caught: fastest lane         36 cycles; 13 of 13 generators  (S[15] ^ lane uses S[14])
+    first diff: PE2: S=a39e P=1683 Pv=false F=false L=false cfg=630e473b00168310 | S=a39e P=1683 Pv=false F=false L=true cfg=630e473b00168310
+crc_pairlo_ignored   caught: fastest pair         12 cycles; 13 of 13 generators  (CRC feedback ignores pairlo)
+    first diff: PE0: S=ffff P=0000 Pv=false F=false L=false cfg=001923d4546a09bb | S=ffff P=0000 Pv=false F=true L=false cfg=001923d4546a09bb
+g_from_F_inverted    caught: fastest stream       13 cycles; 13 of 13 generators  (g = F reads NOT F)
+    first diff: PE0: S=0000 P=038c Pv=true F=false L=false cfg=0041c79de0c6a400 | S=0000 P=03a4 Pv=true F=true L=false cfg=0041c79de0c6a400
+window_17            caught: fastest window      100 cycles;  9 of 13 generators  (window accepts d = 16)
+    first diff: PE1: S=9b27 P=d632 Pv=true F=false L=false cfg=000001c79ee0c6a4 | S=9b27 P=d6a4 Pv=true F=true L=false cfg=000001c79ee0c6a4
+window_bit_order     caught: fastest window       63 cycles; 13 of 13 generators  (window tests S[d] instead of S[15 - d])
+    first diff: PE1: S=9b27 P=c9a4 Pv=true F=true L=false cfg=000001c79ee0c6a4 | S=9b27 P=c958 Pv=true F=false L=false cfg=000001c79ee0c6a4
+merge_colour_hi      caught: fastest lane         13 cycles; 13 of 13 generators  (merge takes K[15:8] as colour)
+    first diff: PE0: S=55d3 P=00d1 Pv=false F=false L=true cfg=0033d9d20255d100 | S=55d3 P=0055 Pv=false F=false L=true cfg=0033d9d20255d100
+g_in_zero            caught: fastest pair        101 cycles; 13 of 13 generators  (g_in tied to 0 across the segment 2/3 cut)
+    first diff: PE8: S=230d P=230d Pv=false F=false L=false cfg=016254675294a800 | S=6240 P=6240 Pv=false F=false L=false cfg=016254675294a800
+shr_sin_bit14        caught: fastest gf2          12 cycles; 13 of 13 generators  (right shift inserts sin at bit 14)
+    first diff: PE0: S=7fff P=0000 Pv=false F=false L=true cfg=001823d6d74309bb | S=3fff P=0000 Pv=false F=false L=true cfg=001823d6d74309bb
+sin_s15_uses_own     caught: fastest stream       33 cycles; 13 of 13 generators  (sin = s15_in uses own S[15])
+    first diff: PE2: S=0000 P=0054 Pv=false F=true L=true cfg=007ad938da265400 | S=ffff P=0054 Pv=false F=false L=false cfg=007ad938da265400
+swb_cond_inverted    caught: fastest lane         12 cycles; 13 of 13 generators  (conditional writeback writes when g = 0)
+    first diff: PE0: S=0000 P=0000 Pv=false F=false L=true cfg=000033d9d20255d1 | S=ffff P=0000 Pv=false F=false L=true cfg=000033d9d20255d1
+pwb_loser_is_winner  caught: fastest maxmin       16 cycles; 13 of 13 generators  (P <- loser gives the winner)
+    first diff: PE0: S=0848 P=0001 Pv=false F=false L=false cfg=3a089f7600084892 | S=0848 P=0848 Pv=false F=false L=false cfg=3a089f7600084892
+zero_on_x            caught: fastest maxmin       12 cycles; 13 of 13 generators  (zero flag tests X)
+    first diff: PE0: S=0001 P=0000 Pv=false F=false L=false cfg=00021cfb3a089f76 | S=0001 P=0000 Pv=false F=true L=false cfg=00021cfb3a089f76
+lout_s15_old         caught: fastest lane         43 cycles; 13 of 13 generators  (lane out S[15] registers the old S)
+    first diff: PE3: S=dfe5 P=47bf Pv=false F=false L=false cfg=00008590630e473b | S=dfe5 P=47bf Pv=false F=false L=true cfg=00008590630e473b
+lane_bc_wrong_seg    caught: fastest arith        92 cycles; 13 of 13 generators  (PEs of segment 3 take segment 2's broadcast bit)
+    first diff: PE8: S=0000 P=0000 Pv=false F=true L=true cfg=0012f819ec440001 | S=0000 P=0000 Pv=false F=false L=false cfg=0012f819ec440001
+stream_ignored       caught: fastest arith        13 cycles; 13 of 13 generators  (stream mode steps every clock)
+    first diff: PE0: S=0000 P=0000 Pv=false F=false L=false cfg=184b507097000100 | S=0000 P=0000 Pv=false F=false L=true cfg=184b507097000100
+del_ignored          caught: fastest stream       18 cycles; 13 of 13 generators  (deletion never drops)
+    first diff: PE0: S=0000 P=35df Pv=false F=false L=false cfg=c6a4000868741ea4 | S=0000 P=35df Pv=true F=false L=false cfg=c6a4000868741ea4
+follow_ignored       caught: fastest pair         13 cycles; 13 of 13 generators  (follow steps every clock)
+    first diff: PE0: S=ffff P=0000 Pv=false F=false L=false cfg=1923d4546a09bb00 | S=0001 P=00bb Pv=false F=false L=false cfg=1923d4546a09bb00
+loop_from_prev       caught: fastest stream        6 cycles; 13 of 13 generators  (segment 2's loop-back takes segment 1's end)
+    first diff: PE4: S=0000 P=0000 Pv=false F=false L=false cfg=0000000000000000 | S=0000 P=8001 Pv=true F=false L=false cfg=0000000000000000
+join_lane_zero       caught: fastest lane          4 cycles; 13 of 13 generators  (join does not pass the lane)
+    first diff: PE2: S=0000 P=0000 Pv=false F=false L=true cfg=0000000000000000 | S=0000 P=0000 Pv=false F=false L=false cfg=0000000000000000
+feed_valid_sticky    caught: fastest dac          16 cycles; 13 of 13 generators  (feed valid lasts two clocks)
+    first diff: PE4: S=0000 P=0000 Pv=false F=false L=false cfg=0000000000000000 | S=0000 P=0000 Pv=true F=false L=false cfg=0000000000000000
+fixed_swapped        caught: fastest gf2           5 cycles; 13 of 13 generators  (segment 3 takes segment 2's fixed port)
+    first diff: PE8: S=0000 P=9a19 Pv=false F=false L=false cfg=0000000000000000 | S=0000 P=0001 Pv=false F=false L=false cfg=0000000000000000
+cfg_chain_order      caught: fastest arith         8 cycles; 13 of 13 generators  (configuration bytes 2 and 3 swapped in the chain)
+    first diff: PE0: S=0000 P=0000 Pv=false F=false L=false cfg=0000000000184b50 | S=0000 P=0000 Pv=false F=false L=false cfg=0000000018004b50
+init_no_shift        caught: fastest gf2          21 cycles; 13 of 13 generators  (init chain overwrites S instead of shifting)
+    first diff: PE0: S=ff28 P=1fff Pv=false F=false L=false cfg=000848541b42cf5a | S=0028 P=1fff Pv=false F=false L=false cfg=000848541b42cf5a
+tap_always_s         caught: fastest chains       23 cycles; 13 of 13 generators  (tap ignores tap_p)
+    first diff: tap0: 0000/0068 v false/false f false/false
+bc_chain_ignored     caught: fastest lane          4 cycles; 13 of 13 generators  (control bit 5 (broadcast from the previous segment) ignored)
+    first diff: PE4: S=0000 P=0000 Pv=false F=false L=true cfg=0000000000000000 | S=0000 P=0000 Pv=false F=false L=false cfg=0000000000000000
+pv_hold_on_stop      caught: fastest window      237 cycles; 13 of 13 generators  (valid clears when the segment stops)
+    first diff: PE3: S=8661 P=c20b Pv=true F=false L=false cfg=000019c93ed82654 | S=8661 P=c20b Pv=false F=false L=false cfg=000019c93ed82654
+yone_is_two          caught: fastest logic        11 cycles; 13 of 13 generators  (Y = 1 gives 2)
+    first diff: PE0: S=fffe P=0000 Pv=false F=false L=false cfg=00001822f5d4227f | S=fffd P=0000 Pv=false F=false L=false cfg=00001822f5d4227f
+xsel_a_is_s          caught: fastest logic        54 cycles; 13 of 13 generators  (X = A gives S when the op is XOR)
+    first diff: PE4: S=0000 P=0000 Pv=false F=false L=true cfg=ba9c64ee01000000 | S=ffff P=ffff Pv=false F=false L=true cfg=ba9c64ee01000000
+ashr_logical         caught: fastest gsrc         74 cycles; 13 of 13 generators  (onebit-dac X1: A >> ashr is logical, not arithmetic)
+    first diff: PE4: S=0001 P=8000 Pv=false F=false L=true cfg=989a001ec5d9b256 | S=0001 P=8000 Pv=false F=false L=false cfg=989a001ec5d9b256
+lane_loop_own_end    caught: fastest logic        16 cycles; 12 of 13 generators  (onebit-dac E1: lane loop takes the segment's own end, not the run's)
+    first diff: PE0: S=fffe P=084a Pv=false F=false L=true cfg=d4227fff00084a56 | S=fffe P=084a Pv=false F=false L=false cfg=d4227fff00084a56
+repeat_off_by_one    caught: fastest dac           8 cycles; 13 of 13 generators  (onebit-dac E2: repeat ticks every R + 1 clocks)
+    first diff: seg0: flo 00/00 fhi 00/00 fv true/false ctrl 58/58 rep 3/3 cnt 0/3 fw 0000/0000
+repeat_hi_token      caught: fastest dac         184 cycles; 13 of 13 generators  (onebit-dac E2: a high-byte write still makes a token in repeat mode)
+    first diff: seg0: flo 00/00 fhi 97/97 fv false/true ctrl 38/38 rep 3/3 cnt 2/2 fw 9700/9700
+repeat_not_atomic    caught: fastest gf2         454 cycles; 13 of 13 generators  (onebit-dac E2: repeat mode presents {high, low} live instead of the committed word)
+    first diff: PE2: S=0000 P=8015 Pv=false F=false L=false cfg=000e2bd5e343db84 | S=0000 P=803b Pv=false F=false L=false cfg=000e2bd5e343db84
+46 of 46 planted bugs caught

@@ -1,0 +1,43 @@
+
+7. Printing statistics.
+
+=== seg_ext ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      376        - wires
+      655        - wire bits
+       32        - public wires
+      311        - public wire bits
+       15        - ports
+      178        - port bits
+      544 1.19E+04 cells
+        6   76.205   sg13g2_a21o_1
+       20   181.44   sg13g2_a21oi_1
+        2    29.03   sg13g2_a221oi_1
+        1   10.849   sg13g2_a22oi_1
+       16  145.152   sg13g2_and2_1
+        4   50.803   sg13g2_and3_1
+        5   72.576   sg13g2_and4_1
+      132 6.47E+03   sg13g2_dfrbpq_1
+       17   92.534   sg13g2_inv_1
+      161 2.92E+03   sg13g2_mux2_1
+       15  108.864   sg13g2_nand2_1
+        4   36.288   sg13g2_nand2b_1
+        8   72.576   sg13g2_nand3_1
+        2   25.402   sg13g2_nand3b_1
+        8   87.091   sg13g2_nand4_1
+       28  203.213   sg13g2_nor2_1
+        3   27.216   sg13g2_nor2b_1
+       26  235.872   sg13g2_nor3_1
+        7   76.205   sg13g2_nor4_1
+       22  199.584   sg13g2_o21ai_1
+       10  127.008   sg13g2_or3_1
+        4   58.061   sg13g2_or4_1
+       33  479.002   sg13g2_xnor2_1
+       10  145.152   sg13g2_xor2_1
+
+   Chip area for module '\seg_ext': 11927.827800
+     of which used for sequential elements: 6466.521600 (54.21%)
+

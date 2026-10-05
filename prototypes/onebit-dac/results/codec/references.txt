@@ -1,0 +1,36 @@
+ffmpeg: ffmpeg version n9.0.2 Copyright (c) 2000-2026 the FFmpeg developers; BlueZ SBC encoder utility ver 2.2
+adpcm: 2 channels, 261 blocks of 1017 samples, 265437 samples per channel; predictor PE steps 1157253 (2.18 per sample)
+IMA ADPCM: bit-exact with ffmpeg (1061748 bytes)
+== a2dp_j53: Subbands  8 Block length  16 Sampling frequency 44.1 kHz Channel mode  Joint Stereo Allocation method Loudness Bitpool   53 Number of frames 2068 
+a2dp_j53: sbcdec and ffmpeg agree bit for bit
+sbc (pe CRC): 2 channels, 2068 frames decoded, 0 rejected, 264704 samples per channel
+  per frame: 88 CRC bits, 246 allocation operations, 174 dequantisations (divisions), 6656 MACs
+  PE array clocks for the CRCs: 370181 (179 per frame)
+a2dp_j53: OUR DECODER (CRC on the PE array model) bit-exact with both (1058816 bytes)
+== s8_snr35: Subbands  8 Block length  16 Sampling frequency 44.1 kHz Channel mode  Stereo Allocation method SNR Bitpool   35 Number of frames 2068 
+s8_snr35: sbcdec and ffmpeg agree bit for bit
+sbc (pe CRC): 2 channels, 2068 frames decoded, 0 rejected, 264704 samples per channel
+  per frame: 80 CRC bits, 216 allocation operations, 113 dequantisations (divisions), 6656 MACs
+  PE array clocks for the CRCs: 337093 (163 per frame)
+s8_snr35: OUR DECODER (CRC on the PE array model) bit-exact with both (1058816 bytes)
+== s4_dual20: Subbands  4 Block length  8 Sampling frequency 44.1 kHz Channel mode  Dual Channel Allocation method Loudness Bitpool   20 Number of frames 8272 
+s4_dual20: sbcdec and ffmpeg agree bit for bit
+sbc (pe CRC): 2 channels, 8272 frames decoded, 0 rejected, 264704 samples per channel
+  per frame: 48 CRC bits, 114 allocation operations, 55 dequantisations (divisions), 1152 MACs
+  PE array clocks for the CRCs: 818937 (99 per frame)
+s4_dual20: OUR DECODER (CRC on the PE array model) bit-exact with both (1058816 bytes)
+== a2dp48_j51: Subbands  8 Block length  16 Sampling frequency 48 kHz Channel mode  Joint Stereo Allocation method Loudness Bitpool   51 Number of frames 2250 
+a2dp48_j51: sbcdec and ffmpeg agree bit for bit
+sbc (pe CRC): 2 channels, 2250 frames decoded, 0 rejected, 288000 samples per channel
+  per frame: 88 CRC bits, 246 allocation operations, 165 dequantisations (divisions), 6656 MACs
+  PE array clocks for the CRCs: 402759 (179 per frame)
+a2dp48_j51: OUR DECODER (CRC on the PE array model) bit-exact with both (1152000 bytes)
+sbc (pe-rtl CRC): 2 channels, 8272 frames decoded, 0 rejected, 264704 samples per channel
+  per frame: 48 CRC bits, 114 allocation operations, 55 dequantisations (divisions), 1152 MACs
+  PE array clocks for the CRCs: 818937 (99 per frame); Hardcaml RTL in lockstep: 0 mismatches
+s4_dual20: bit-exact with the CRC on the PE model and the Hardcaml RTL in lockstep
+clean: 2068 frames, 0 rejected
+control 1, CRC byte of frame 10 flipped, CRC on the PE: 2067 decoded, 1 rejected -> CAUGHT
+control 2, a scale-factor bit of frame 20 flipped: 2067 decoded, 1 rejected -> CAUGHT
+control 3, loudness offset of subband 0 off by one: 397017 of 529408 samples differ from the clean decode -> CAUGHT (the reference comparison fails)
+control 4, the PE CRC's result with one bit wrong: 0 decoded, 2068 rejected -> CAUGHT

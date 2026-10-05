@@ -1,0 +1,32 @@
+sample period 1360 clocks (136 steps)
+commits: 1010; (segment, clock mod 1360) -> count:
+  seg 0 phase   81: 505
+  seg 3 phase   97: 505
+sample periods with commits: 505; with other than one left and one right commit (torn): 0
+underrun reports: 84 (host stalled mid-frame from clock 400000 to 519999)
+  clock 406656 byte 0
+  clock 408016 byte 0
+  clock 409376 byte 0
+  clock 518176 byte 0
+  clock 519536 byte 0
+left: 80000 steps; run lengths of equal consecutive words (length -> count):
+  8 -> 1
+  136 -> 503
+  11560 -> 1
+host bytes sent 2036 of 2368; frames consumed 505
+sample period 340 clocks (34 steps)
+commits: 4008; (segment, clock mod 340) -> count:
+  seg 0 phase   81: 2004
+  seg 3 phase   97: 2004
+sample periods with commits: 2004; with other than one left and one right commit (torn): 0
+underrun reports: 349 (host stalled mid-frame from clock 400000 to 519999)
+  clock 401580 byte 2
+  clock 401920 byte 2
+  clock 402260 byte 2
+  clock 519560 byte 2
+  clock 519900 byte 2
+left: 80000 steps; run lengths of equal consecutive words (length -> count):
+  8 -> 1
+  34 -> 2002
+  11900 -> 1
+host bytes sent 8032 of 9424; frames consumed 2004
