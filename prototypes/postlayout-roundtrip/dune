@@ -18,3 +18,8 @@
  (name test_cells)
  (modules test_cells)
  (libraries roundtrip))
+
+(executable
+ (name test_via_overlap)
+ (modules test_via_overlap)
+ (libraries roundtrip))

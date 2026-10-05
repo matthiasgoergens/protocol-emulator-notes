@@ -1,7 +1,7 @@
 models: 84 cells read in 0.00 s; RTL ports: 157 bits
   60230 conductor shapes, 2017 cell instances
-  6495 connected components
-extract: 0.45 s (60230 shapes, 6495 components, 2017 instances, 2086 nets)
+  6495 connected components; 0 via-metal pairs touch without overlapping (not joined)
+extract: 0.42 s (60230 shapes, 6495 components, 2017 instances, 2086 nets)
 check: 0.002 s
   instances                    2017
   nets                         2086

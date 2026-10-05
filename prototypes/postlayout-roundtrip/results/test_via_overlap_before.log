@@ -1,0 +1,12 @@
+via_overlaps_both        expected joined    got joined    ok
+via_abuts_m1_edge        expected separate  got joined    WRONG
+via_abuts_m2_edge        expected separate  got joined    WRONG
+via_touches_m1_corner    expected separate  got joined    WRONG
+via_inside_both          expected joined    got joined    ok
+via_equal_to_m1          expected joined    got joined    ok
+via_on_diagonal_vertex   expected separate  got joined    WRONG
+via_cuts_diagonal        expected joined    got joined    ok
+metal1_abuts_metal1      expected joined    got joined    ok
+metal1_corner_metal1     expected joined    got joined    ok
+metal1_gap_metal1        expected separate  got separate  ok
+4 of 11 cases wrong

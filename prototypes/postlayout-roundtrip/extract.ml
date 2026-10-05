@@ -144,6 +144,84 @@ let poly_intersect (s1 : shape) (s2 : shape) =
           done;
           !found))
 
+(* Positive-area overlap, for via cuts.  A via joins a metal only where the
+   cut overlaps it with positive area; a cut that shares only an edge or a
+   corner with a metal is not in contact with it (Shapovalov's paper on
+   FigureZig/asicrev, section II-C, and JGalil/gds2netlist-asic-puzzle's
+   README reach this rule independently).  [poly_intersect] above is closed,
+   which is right for two shapes on the same metal (a wire drawn as abutting
+   rectangles is one conductor) and wrong for a via: test_via_overlap.ml has
+   the cases, four of which the closed test joined.
+
+   Sutherland-Hodgman clipping of one polygon by the other, which must be
+   convex (cuts are rectangles); the clipped area is exact for Manhattan
+   geometry, since every intersection then lies on the integer grid. *)
+let signed_area2 (pts : (float * float) array) =
+  let n = Array.length pts in
+  let s = ref 0.0 in
+  for i = 0 to n - 1 do
+    let x0, y0 = pts.(i) and x1, y1 = pts.((i + 1) mod n) in
+    s := !s +. (x0 *. y1 -. x1 *. y0)
+  done;
+  !s
+
+let is_convex (pts : pt array) =
+  let n = Array.length pts in
+  let pos = ref false and neg = ref false in
+  for i = 0 to n - 1 do
+    let c = cross pts.(i) pts.((i + 1) mod n) pts.((i + 2) mod n) in
+    if c > 0L then pos := true else if c < 0L then neg := true
+  done;
+  n >= 3 && not (!pos && !neg)
+
+let fpt ((x, y) : pt) = (Int64.to_float x, Int64.to_float y)
+
+let clip_area2 ~(clipper : pt array) (subject : pt array) =
+  let c = Array.map fpt clipper in
+  let ccw = signed_area2 c > 0.0 in
+  let n = Array.length c in
+  let side (ax, ay) (bx, by) (px, py) =
+    let v = ((bx -. ax) *. (py -. ay)) -. ((by -. ay) *. (px -. ax)) in
+    if ccw then v else -.v
+  in
+  let poly = ref (Array.to_list (Array.map fpt subject)) in
+  for i = 0 to n - 1 do
+    let a = c.(i) and b = c.((i + 1) mod n) in
+    let input = Array.of_list !poly in
+    let m = Array.length input in
+    let out = ref [] in
+    for j = 0 to m - 1 do
+      let p = input.(j) and q = input.((j + 1) mod m) in
+      let sp = side a b p and sq = side a b q in
+      let cut () =
+        let t = sp /. (sp -. sq) in
+        let (px, py), (qx, qy) = (p, q) in
+        (px +. t *. (qx -. px), py +. t *. (qy -. py))
+      in
+      if sp >= 0.0 then begin
+        out := p :: !out;
+        if sq < 0.0 then out := cut () :: !out
+      end
+      else if sq >= 0.0 then out := cut () :: !out
+    done;
+    poly := List.rev !out
+  done;
+  Float.abs (signed_area2 (Array.of_list !poly))
+
+let poly_overlap_positive (s1 : shape) (s2 : shape) =
+  let ax0, ay0, ax1, ay1 = s1.bbox and bx0, by0, bx1, by1 = s2.bbox in
+  ax0 < bx1 && bx0 < ax1 && ay0 < by1 && by0 < ay1
+  && begin
+    let clipper, subject =
+      if is_convex s1.pts then (s1.pts, s2.pts)
+      else if is_convex s2.pts then (s2.pts, s1.pts)
+      else failwith "via-metal overlap: neither shape is convex (a non-convex via cut?)"
+    in
+    (* twice the area, in centi-dbu squared; the smallest real overlap on a
+       1 nm grid is 100 x 100 *)
+    clip_area2 ~clipper subject >= 1.0
+  end
+
 let kinds_connect k1 k2 =
   match k1, k2 with
   | Metal a, Metal b -> a = b
@@ -188,6 +266,9 @@ type netlist = {
   nshapes : int;
   ncomponents : int;
   foreign_layers : (int * int * int) list;
+  via_touches : int;
+  (* via-metal pairs that touch along an edge or at a corner without
+     overlapping, and so are not joined *)
   (* layer, datatype, count of shapes drawn in the top cell itself (the
      routing) on layers the extractor does not follow: a route on such a
      layer would silently split a net, so the check reports them *)
@@ -282,6 +363,7 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
       (cells_of_bbox s.bbox)) shapes;
   let uf = uf_create nshapes in
   let stamp = Array.make nshapes (-1) in
+  let via_touches = ref 0 in
   for i = 0 to nshapes - 1 do
     let si = shapes.(i) in
     List.iter (fun key ->
@@ -292,11 +374,17 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
           if j > i && stamp.(j) <> i then begin
             stamp.(j) <- i;
             let sj = shapes.(j) in
-            if kinds_connect si.kind sj.kind && poly_intersect si sj then uf_union uf i j
+            if kinds_connect si.kind sj.kind then
+              match si.kind, sj.kind with
+              | Metal _, Metal _ -> if poly_intersect si sj then uf_union uf i j
+              | _ ->
+                if poly_overlap_positive si sj then uf_union uf i j
+                else if poly_intersect si sj then incr via_touches
           end) js)
       (cells_of_bbox si.bbox)
   done;
-  log (Printf.sprintf "%d connected components" uf.count);
+  log (Printf.sprintf "%d connected components; %d via-metal pairs touch without overlapping (not joined)"
+         uf.count !via_touches);
   let point_net (p : pt) layer =
     match metal_index layer with
     | None -> None
@@ -357,7 +445,8 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
       { inst with nets = List.map (fun (p, n) -> (p, Option.map canon n)) inst.nets }) inst_arr in
   let shape_net = Array.init nshapes (fun i -> Hashtbl.find_opt remap (uf_find uf i)) in
   ({ instances = inst_arr; ports; nnets = Hashtbl.length remap;
-     unresolved = List.rev !unresolved; nshapes; ncomponents = uf.count; foreign_layers },
+     unresolved = List.rev !unresolved; nshapes; ncomponents = uf.count; foreign_layers;
+     via_touches = !via_touches },
    { shapes; shape_net; dbu_um = dbu })
 
 (* Plain-text netlist, one instance per line, for diffing between runs. *)

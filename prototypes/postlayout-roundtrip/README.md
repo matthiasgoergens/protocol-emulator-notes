@@ -45,6 +45,7 @@ reads as 0, so both kinds of tool agree with the broken chip unless the structur
 | `mutate.ml` | writes GDS copies with an element removed or a rectangle added |
 | `roundtrip_check.ml` | block-independent: `check` and `controls` (planted cuts and shorts) |
 | `test_cells.ml` | Verilog-model interpreter against the liberty functions, every cell, exhaustively |
+| `test_via_overlap.ml` | synthetic GDS cases for the join rule (vias must overlap, same-layer metal may abut) |
 | `generic_lockstep.ml` | block-independent lockstep: random values on every input, every output compared |
 | `seq_lockstep.ml` | the deadline sequencer's lockstep with its real harness, plus planted crossed wires |
 | `run_pnr.sh` | LibreLane 3.0.14 in its container, in a scratch directory, keeping the GDS |
@@ -125,6 +126,22 @@ the GDS controls). A first version of the short planting put the rectangle betwe
 centres, which lie outside L-shaped wires; two "shorts" touched nothing and were reported as
 missed. They are now planted from a vertex and checked for effect, so a no-op plant is reported as
 such rather than counted.
+
+### Touch versus overlap at vias
+
+Two solvers of the puzzle found independently that a via joins a metal only where the cut overlaps
+it with positive area, while shapes on the same metal that merely abut are one wire (Shapovalov's
+paper on [FigureZig/asicrev](https://github.com/FigureZig/asicrev), section II-C, and the README of
+[JGalil/gds2netlist-asic-puzzle](https://github.com/JGalil/gds2netlist-asic-puzzle)). Our extractor
+used one closed intersection test for both. `test_via_overlap.ml` writes eleven two-port cases to a
+GDS and reads them back through the extractor: before the change, four were wrong (a cut sharing
+only an edge with Metal1, only an edge with Metal2, only a corner, and only a vertex of a diagonal
+edge were all joined; `results/test_via_overlap_before.log`). Via-to-metal joins now require
+positive clipped area, and the eleven cases pass (`results/test_via_overlap.log`). On the
+sequencer's GDS the change does nothing: the extracted netlist is byte-identical, 0 via-metal pairs
+touch without overlapping (the extractor now counts and logs them), and the 20 planted controls give
+the same log as before. So this was a latent false short that LibreLane's routing never produced,
+and the eleven cases stay as a regression test.
 
 ## What it does not check
 
