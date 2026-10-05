@@ -49,8 +49,10 @@ if [ "${1:-all}" = all ]; then
 fi
 run deadline-sequencer-demo results/ports/original-deadline-sequencer-demo.txt "$B/ports/deadline-sequencer/demo.exe"
 run sequencer-ethernet results/ports/original-sequencer-ethernet.txt "$B/ports/sequencer-ethernet/main.exe"
+run sequencer-ethernet-fixed "" "$B/ports/sequencer-ethernet/main_fixed.exe"
 run jtag-swd "$P/proto-jtag-swd/results/wide-all.txt" "$B/ports/jtag-swd/main.exe"
 run usb-ls "$P/usb-ls/run-fw-8seeds.log" "$B/ports/usb-ls/main_fw.exe"
 run ps2 "$P/sequencer-ps2-can/logs/2026-09-25/ps2.txt" "$B/ports/ps2/ps2_main.exe" 8
 run can-tx "" "$B/ports/can/can_tx.exe"
+run can-stall "" "$B/ports/can/can_stall.exe"
 run multi-proto-bridge_a "" "$B/ports/multi-proto/bridge_a.exe" all
