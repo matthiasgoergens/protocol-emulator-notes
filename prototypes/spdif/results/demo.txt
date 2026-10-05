@@ -1,14 +1,14 @@
 # command: main.exe demo 1.0
-# commit: 8de2de4f7af45dfdbf09e272cb5b182ad3a24f10 (with uncommitted changes)
+# commit: b17dccc3b1f78c3d90ba1543de083e7ce8b4d1b8 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T18:13:48+08:00
+# date: 2026-10-05T18:19:43+08:00
 demo: synthesiser (16 upe_v0 PEs, one step per frame) -> TX firmware -> NCO pacer: 60000000 clocks (1.00 s), 44101 frames sourced, underruns 0 (101 s)
 demo: oracle decoded 44099 frames, 0 violations, 0 parity errors, 229 cs blocks; 44099 of 44099 frames equal the synthesiser's tap word (left and right)
-demo: chip RX (137 s): 44099 frames, errors 1, parity 0, 229 cs blocks; 44099 of 44099 frames equal the oracle's (offset 0)
+demo: chip RX (137 s): 44099 frames, errors 0 (+1 after the last edge), parity 0, 229 cs blocks; 44099 of 44099 frames equal the oracle's (offset 0)
   |S/PDIF ANALYSER                         |
   |rate   44106.6 Hz (measured)            |
   |frames 44099  blocks 229                |
-  |errors parity 0  framing 1  invalid 0   |
+  |errors parity 0  framing 0  invalid 0   |
   |L #####################...   -6.3 dBFS  |
   |R #####################...   -6.3 dBFS  |
   |channel status (left):                  |
