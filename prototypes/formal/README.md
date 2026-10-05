@@ -13,7 +13,7 @@ Everything was run on 2026-10-05.
 
 | task | what | result |
 |---|---|---|
-| 1 | interpreter generic over values | lockstep and all seven ported suites unchanged; interpreter slower (below) |
+| 1 | interpreter generic over values | lockstep and all ported suites unchanged; integer speed restored (bridge A 31.7 s → 11.3 s, 10.1 s before the functor) |
 | 2a | deadline waits | `main.ml`'s deadline programme: no violation to 160 clocks, with the other three threads unconstrained; planted bug found at clock 89 |
 | 2a | every WAITD of UART + SPI + I2C | 15 contracts, 720 clocks; **found a latent SPI compiler bug** (Findings) |
 | 2b | pin ownership | four programmes, 720 clocks; planted bug found at clock 95 |
@@ -49,13 +49,35 @@ Evidence that the rewrite changed nothing:
   recorded results: the UART/SPI/I2C demo, 10BASE-T, JTAG and SWD, low-speed USB, PS/2, CAN TX
   and multi-proto bridge A. The one exception is bridge A's own "elapsed" line.
 
-The cost is speed. Without flambda, every value operation is an indirect call through the
-functor, and every opcode's result is computed on every clock. Measured on this machine:
-- lockstep: 2 min 02 s before, 2 min 23 s after (the RTL simulation dominates);
-- bridge A, mostly interpreter: 9 s before, 26 s after (an A/B run of both builds).
+**Speed** (restored 2026-10-05, branch formal-followups). Through the functor, without flambda,
+every value operation was an indirect call and every opcode's result was computed on every
+clock: bridge A of the multi-proto port went from 10.1 s to 31.7 s. Three changes, none of
+which forks the semantics:
+- `Isa2.Spec` is `Make`'s body written out over `Int_value`, between two markers, so that
+  ocamlopt sees the integer operations as known functions and inlines them (`[@inline]`). The
+  build fails unless the copy is verbatim (`../sequencer-v2/specialise.awk`, run from its `dune`);
+  `../sequencer-v2/specialise.sh` rewrites the copy after an edit of `Make`.
+- `VALUE.known_false` guards each opcode's group: a value used only where its opcode holds is
+  not computed when the opcode is known not to hold. On integers that is every other opcode; on
+  SMT terms it skips terms that would fold away; on Hardcaml signals it is never taken, so the
+  circuit is the whole instruction set as before.
+- the `cases` lists became `ite` chains, the field and opcode helpers became top-level, and
+  `sub_of` spreads the old and new pins once instead of four times.
 
-`perf` puts `caml_apply2`/`caml_apply3` and the value operations at the top. Not tried: an
-flambda switch, or a lazy `ite` for the per-opcode groups.
+The record types (`state_of`, `io_of`, `effects_of`) moved out of the functor, parameterised, so
+that `Spec.state` is the same type as `Make (Int_value).state`.
+
+Measured on this machine, each run back to back (`/var/tmp/formal-followups/runs/`):
+
+| run | before the functor | functor | now |
+|---|---|---|---|
+| bridge A, `bridge_a.exe all` (3 runs each) | 10.1 s | 31.7 s | 11.3 s |
+| interpreter alone, 20 M random clocks | 1.0 s | 8.9 s (generic instance) | 1.6 s |
+| lockstep 1000 × 5000 (RTL simulation dominates) | 133 s | 152 s | 143 s |
+
+The lockstep output and all nine ported suites are byte-identical to the recorded results, and
+the interpreter benchmark's final state hashes agree for all three. The remaining gap on the
+interpreter alone is the dataflow form itself (every common field is computed every clock).
 
 ## 2. Incremental bounded model checking, ScottCheck style
 

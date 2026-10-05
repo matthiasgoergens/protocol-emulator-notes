@@ -115,7 +115,10 @@ let cut_value ~prefix ~k name (x : Smt.term) eqs =
   | Smt.K _ | Smt.B _ | Smt.Var _ -> x
   | Smt.App _ ->
     let v = Smt.var (Printf.sprintf "%scut.%s@%d" prefix name k) x.sort in
-    eqs := Smt.eq v x :: !eqs; v
+    let same = match x.sort with
+      | Smt.Bool -> Smt.or_ (Smt.and_ v x) (Smt.and_ (Smt.not_ v) (Smt.not_ x))
+      | Smt.Bv _ | Smt.Mem -> Smt.eq v x in
+    eqs := same :: !eqs; v
 
 let cut m ~k =
   let eqs = ref [] in

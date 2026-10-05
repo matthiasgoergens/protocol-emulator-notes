@@ -446,18 +446,21 @@ let resources ~name ?(plant = fun (_ : int array array) -> ()) ~owns ~depth () =
   (* one witness for every cover: the host sends ACK (0x10), which T0 receives and passes to T1,
      whose I2C master acknowledges and answers into inbox 2; replayed on Isa2.Spec first *)
   let w = uart_stimulus ~start:8 ~byte:Bridge_fw.Bridge_a_words.op_ack in
+  (* the replay runs past the bound, to show where the covers the bound cannot reach are reached *)
+  let horizon = max depth 1200 in
   let model = Hashtbl.create 4096 in
   List.iter (fun k -> List.iter (fun b -> let n = Printf.sprintf "%s@%d" b k in Hashtbl.replace model n (Option.get (w n))) [ "pin_in"; "pin_in4" ])
-    (List.init depth Fun.id);
+    (List.init horizon Fun.id);
   let seen = Hashtbl.create 8 in
-  replay ~store ~code model ~upto:(depth - 1) (fun k _ t _ _ e _ ->
+  replay ~store ~code model ~upto:(horizon - 1) (fun k _ t _ _ e _ ->
       List.iter (fun i -> if (e.inbox_send lsr i) land 1 = 1 && not (Hashtbl.mem seen (Printf.sprintf "T%d sends to inbox %d" t i)) then
                     Hashtbl.replace seen (Printf.sprintf "T%d sends to inbox %d" t i) k) [ 0; 1; 2; 3 ];
       List.iter (fun i -> if (e.inbox_recv lsr i) land 1 = 1 && not (Hashtbl.mem seen (Printf.sprintf "T%d receives from inbox %d" t i)) then
                     Hashtbl.replace seen (Printf.sprintf "T%d receives from inbox %d" t i) k) [ 0; 1; 2; 3 ]);
   pr "  witness (the host sends 0x%02x from clock 8), replayed on Isa2.Spec: %s\n" Bridge_fw.Bridge_a_words.op_ack
     (String.concat "; " (List.sort compare (Hashtbl.fold (fun n k acc -> Printf.sprintf "%s at clock %d" n k :: acc) seen [])));
-  let witnesses = Hashtbl.fold (fun n _ acc -> (n, w) :: acc) seen [] in
+  let witnesses = Hashtbl.fold (fun n k acc -> if k < depth then (n, w) :: acc else acc) seen [] in
+  Hashtbl.iter (fun n k -> if k >= depth then pr "  (cover '%s' is reached at clock %d, beyond the bound of %d)\n" n k depth) seen;
   let r = Bmc.run ~progress:50 ~witnesses ~name ~depth ~step ~covers () in
   Bmc.report r;
   (match r.violation with
