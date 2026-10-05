@@ -40,7 +40,6 @@ for job in selftest planted precision sweep compose mutants random controls kern
     certs)
       rm --recursive --force /var/tmp/verifier-certs
       run ledger certs /var/tmp/verifier-certs || status=1
-      grep --invert-match '^#' results/ledger.txt | grep --invert-match '^$' > results/ledger.only || true
       mkdir --parents results/certs
       for n in uart_b16_n3 spi_p16_n2 i2c_q4_n2_l4095 deadline_ldd20 watchdog; do
         cp /var/tmp/verifier-certs/$n.cert results/certs/ 2>/dev/null || true
