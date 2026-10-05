@@ -1,0 +1,3620 @@
+platformer_video: 4410 of 6331 nodes checked; 158 loop registers; 2 memories/instances cut
+== platformer_video (defaults): 630 finding(s)
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: & @ pex.ml:51:15
+     10 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: & @ pex.ml:51:15
+     15 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: & @ pex.ml:51:15
+     20 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: & @ pex.ml:51:15
+     25 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: & @ pex.ml:51:15
+     30 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: & @ pex.ml:51:15
+     35 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: & @ pex.ml:51:15
+     40 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: & @ pex.ml:51:15
+     45 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: & @ pex.ml:51:15
+     50 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: & @ pex.ml:51:15
+     55 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: & @ pex.ml:51:15
+     60 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: & @ pex.ml:51:15
+     65 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: & @ pex.ml:51:15
+     70 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: & @ pex.ml:51:15
+     75 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: & @ pex.ml:51:15
+     80 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: & @ pex.ml:51:15
+     85 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: & @ pex.ml:51:15
+     90 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+      2 cycles: mux @ pex.ml:55:44
+      1 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: mux @ pex.ml:55:44
+      6 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: mux @ pex.ml:55:44
+     11 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: mux @ pex.ml:55:44
+     16 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: mux @ pex.ml:55:44
+     21 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     27 cycles: mux @ pex.ml:55:44
+     26 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     32 cycles: mux @ pex.ml:55:44
+     31 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     37 cycles: mux @ pex.ml:55:44
+     36 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     42 cycles: mux @ pex.ml:55:44
+     41 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     47 cycles: mux @ pex.ml:55:44
+     46 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     52 cycles: mux @ pex.ml:55:44
+     51 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     57 cycles: mux @ pex.ml:55:44
+     56 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     62 cycles: mux @ pex.ml:55:44
+     61 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     67 cycles: mux @ pex.ml:55:44
+     66 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     72 cycles: mux @ pex.ml:55:44
+     71 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     77 cycles: mux @ pex.ml:55:44
+     76 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     82 cycles: mux @ pex.ml:55:44
+     81 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:55:10
+  measured from input cfg_in @ video.ml:130:15:
+     87 cycles: mux @ pex.ml:55:44
+     86 cycles: mux @ pex.ml:54:13
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[15:8] @ pex.ml:66:14
+      2 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: select[15:8] @ pex.ml:66:14
+      7 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[15:8] @ pex.ml:66:14
+     12 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: select[15:8] @ pex.ml:66:14
+     17 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: select[15:8] @ pex.ml:66:14
+     22 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[15:8] @ pex.ml:66:14
+     27 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: select[15:8] @ pex.ml:66:14
+     32 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[15:8] @ pex.ml:66:14
+     37 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: select[15:8] @ pex.ml:66:14
+     42 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: select[15:8] @ pex.ml:66:14
+     47 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[15:8] @ pex.ml:66:14
+     52 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: select[15:8] @ pex.ml:66:14
+     57 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[15:8] @ pex.ml:66:14
+     62 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: select[15:8] @ pex.ml:66:14
+     67 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: select[15:8] @ pex.ml:66:14
+     72 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[15:8] @ pex.ml:66:14
+     77 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: select[15:8] @ pex.ml:66:14
+     82 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:67:43
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[15:8] @ pex.ml:66:14
+     87 cycles: select[7:0] @ pex.ml:67:53
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: & @ pex.ml:68:14
+      2 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: & @ pex.ml:68:14
+      2 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: == @ video.ml:122:12
+      1 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: & @ pex.ml:68:14
+      7 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: & @ pex.ml:68:14
+      7 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: & @ pex.ml:68:14
+     12 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: & @ pex.ml:68:14
+     12 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: == @ video.ml:122:12
+     11 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: & @ pex.ml:68:14
+     17 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: & @ pex.ml:68:14
+     17 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: == @ video.ml:122:12
+     16 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: & @ pex.ml:68:14
+     22 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: & @ pex.ml:68:14
+     22 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: == @ video.ml:122:12
+     21 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: & @ pex.ml:68:14
+     27 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: & @ pex.ml:68:14
+     27 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: == @ video.ml:122:12
+     26 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: & @ pex.ml:68:14
+     32 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: & @ pex.ml:68:14
+     32 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: == @ video.ml:122:12
+     31 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: & @ pex.ml:68:14
+     37 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: & @ pex.ml:68:14
+     37 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: == @ video.ml:122:12
+     36 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: & @ pex.ml:68:14
+     42 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: & @ pex.ml:68:14
+     42 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: == @ video.ml:122:12
+     41 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: & @ pex.ml:68:14
+     47 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: & @ pex.ml:68:14
+     47 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: == @ video.ml:122:12
+     46 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: & @ pex.ml:68:14
+     52 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: & @ pex.ml:68:14
+     52 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: == @ video.ml:122:12
+     51 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: & @ pex.ml:68:14
+     57 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: & @ pex.ml:68:14
+     57 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: == @ video.ml:122:12
+     56 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: & @ pex.ml:68:14
+     62 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: & @ pex.ml:68:14
+     62 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: == @ video.ml:122:12
+     61 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: & @ pex.ml:68:14
+     67 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: & @ pex.ml:68:14
+     67 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: == @ video.ml:122:12
+     66 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: & @ pex.ml:68:14
+     72 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: & @ pex.ml:68:14
+     72 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: == @ video.ml:122:12
+     71 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: & @ pex.ml:68:14
+     77 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: & @ pex.ml:68:14
+     77 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: == @ video.ml:122:12
+     76 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: & @ pex.ml:68:14
+     82 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: & @ pex.ml:68:14
+     82 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: == @ video.ml:122:12
+     81 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: & @ pex.ml:68:14
+     87 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: & @ pex.ml:68:14
+     87 cycles: not @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: == @ video.ml:122:12
+     86 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+      2 cycles: select[7:7] @ video.ml:122:12
+      5 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[7:7] @ video.ml:122:12
+      6 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[7:7] @ video.ml:122:12
+      7 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[7:7] @ video.ml:122:12
+      8 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[7:7] @ video.ml:122:12
+      9 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     27 cycles: select[7:7] @ video.ml:122:12
+     10 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     32 cycles: select[7:7] @ video.ml:122:12
+     11 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     37 cycles: select[7:7] @ video.ml:122:12
+     12 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     42 cycles: select[7:7] @ video.ml:122:12
+     13 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     47 cycles: select[7:7] @ video.ml:122:12
+     14 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     52 cycles: select[7:7] @ video.ml:122:12
+     15 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     57 cycles: select[7:7] @ video.ml:122:12
+     16 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     62 cycles: select[7:7] @ video.ml:122:12
+     17 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     67 cycles: select[7:7] @ video.ml:122:12
+     18 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     72 cycles: select[7:7] @ video.ml:122:12
+     19 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     77 cycles: select[7:7] @ video.ml:122:12
+     20 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     82 cycles: select[7:7] @ video.ml:122:12
+     21 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     87 cycles: select[7:7] @ video.ml:122:12
+     22 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: reg @ pex.ml:46:15
+      2 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: reg @ pex.ml:46:15
+      7 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: reg @ pex.ml:46:15
+     12 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: reg @ pex.ml:46:15
+     17 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: reg @ pex.ml:46:15
+     22 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: reg @ pex.ml:46:15
+     27 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: reg @ pex.ml:46:15
+     32 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: reg @ pex.ml:46:15
+     37 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: reg @ pex.ml:46:15
+     42 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: reg @ pex.ml:46:15
+     47 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: reg @ pex.ml:46:15
+     52 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: reg @ pex.ml:46:15
+     57 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: reg @ pex.ml:46:15
+     62 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: reg @ pex.ml:46:15
+     67 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: reg @ pex.ml:46:15
+     72 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: reg @ pex.ml:46:15
+     77 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: reg @ pex.ml:46:15
+     82 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: reg @ pex.ml:46:15
+     87 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: reg @ pex.ml:46:15
+      2 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: reg @ pex.ml:46:15
+      7 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: reg @ pex.ml:46:15
+     12 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: reg @ pex.ml:46:15
+     17 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: reg @ pex.ml:46:15
+     22 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: reg @ pex.ml:46:15
+     27 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: reg @ pex.ml:46:15
+     32 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: reg @ pex.ml:46:15
+     37 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: reg @ pex.ml:46:15
+     42 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: reg @ pex.ml:46:15
+     47 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: reg @ pex.ml:46:15
+     52 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: reg @ pex.ml:46:15
+     57 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: reg @ pex.ml:46:15
+     62 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: reg @ pex.ml:46:15
+     67 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: reg @ pex.ml:46:15
+     72 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: reg @ pex.ml:46:15
+     77 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: reg @ pex.ml:46:15
+     82 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: reg @ pex.ml:46:15
+     87 cycles: == @ video.ml:122:12
+reconvergence at & @ video.ml:35:11
+  measured from reg @ video.ml:68:12:
+      1 cycles: reg @ video.ml:34:16
+      0 cycles: not @ video.ml:35:22
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: select[2:2] @ video.ml:122:12
+     10 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[2:2] @ video.ml:122:12
+     15 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: select[2:2] @ video.ml:122:12
+     20 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: select[2:2] @ video.ml:122:12
+     25 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[2:2] @ video.ml:122:12
+     30 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: select[2:2] @ video.ml:122:12
+     35 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[2:2] @ video.ml:122:12
+     40 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: select[2:2] @ video.ml:122:12
+     45 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: select[2:2] @ video.ml:122:12
+     50 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[2:2] @ video.ml:122:12
+     55 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: select[2:2] @ video.ml:122:12
+     60 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[2:2] @ video.ml:122:12
+     65 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: select[2:2] @ video.ml:122:12
+     70 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: select[2:2] @ video.ml:122:12
+     75 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[2:2] @ video.ml:122:12
+     80 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: select[2:2] @ video.ml:122:12
+     85 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[2:2] @ video.ml:122:12
+     90 cycles: select[6:6] @ video.ml:122:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+      4 cycles: reg @ pex.ml:11:12
+      3 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: reg @ pex.ml:11:12
+      8 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: reg @ pex.ml:11:12
+     13 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: reg @ pex.ml:11:12
+     18 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     24 cycles: reg @ pex.ml:11:12
+     23 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     29 cycles: reg @ pex.ml:11:12
+     28 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     34 cycles: reg @ pex.ml:11:12
+     33 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     39 cycles: reg @ pex.ml:11:12
+     38 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     44 cycles: reg @ pex.ml:11:12
+     43 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     49 cycles: reg @ pex.ml:11:12
+     48 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     54 cycles: reg @ pex.ml:11:12
+     53 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     59 cycles: reg @ pex.ml:11:12
+     58 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     64 cycles: reg @ pex.ml:11:12
+     63 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     69 cycles: reg @ pex.ml:11:12
+     68 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     74 cycles: reg @ pex.ml:11:12
+     73 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     79 cycles: reg @ pex.ml:11:12
+     78 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     84 cycles: reg @ pex.ml:11:12
+     83 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     89 cycles: reg @ pex.ml:11:12
+     88 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: reg @ video.ml:40:52
+      2 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: reg @ pex.ml:48:52
+      7 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: reg @ pex.ml:48:52
+     12 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: reg @ pex.ml:48:52
+     17 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: reg @ pex.ml:48:52
+     22 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: reg @ pex.ml:48:52
+     27 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: reg @ pex.ml:48:52
+     32 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: reg @ pex.ml:48:52
+     37 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: reg @ pex.ml:48:52
+     42 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: reg @ pex.ml:48:52
+     47 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: reg @ pex.ml:48:52
+     52 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: reg @ pex.ml:48:52
+     57 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: reg @ pex.ml:48:52
+     62 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: reg @ pex.ml:48:52
+     67 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: reg @ pex.ml:48:52
+     72 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: reg @ pex.ml:48:52
+     77 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: reg @ pex.ml:48:52
+     82 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:86:41
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: reg @ pex.ml:48:52
+     87 cycles: select[15:0] @ pex.ml:86:60
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+      2 cycles: select[31:16] @ pex.ml:87:54
+      5 cycles: reg @ video.ml:40:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[31:16] @ pex.ml:87:54
+      6 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[31:16] @ pex.ml:87:54
+      7 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[31:16] @ pex.ml:87:54
+      8 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[31:16] @ pex.ml:87:54
+      9 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     27 cycles: select[31:16] @ pex.ml:87:54
+     10 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     32 cycles: select[31:16] @ pex.ml:87:54
+     11 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     37 cycles: select[31:16] @ pex.ml:87:54
+     12 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     42 cycles: select[31:16] @ pex.ml:87:54
+     13 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     47 cycles: select[31:16] @ pex.ml:87:54
+     14 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     52 cycles: select[31:16] @ pex.ml:87:54
+     15 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     57 cycles: select[31:16] @ pex.ml:87:54
+     16 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     62 cycles: select[31:16] @ pex.ml:87:54
+     17 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     67 cycles: select[31:16] @ pex.ml:87:54
+     18 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     72 cycles: select[31:16] @ pex.ml:87:54
+     19 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     77 cycles: select[31:16] @ pex.ml:87:54
+     20 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     82 cycles: select[31:16] @ pex.ml:87:54
+     21 cycles: reg @ pex.ml:48:52
+reconvergence at concat @ pex.ml:87:41
+  measured from input cfg_in @ video.ml:130:15:
+     87 cycles: select[31:16] @ pex.ml:87:54
+     22 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+      2 cycles: select[1:0] @ pex.ml:37:11
+      5 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[1:0] @ pex.ml:37:11
+     10 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[1:0] @ pex.ml:37:11
+     15 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[1:0] @ pex.ml:37:11
+     20 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[1:0] @ pex.ml:37:11
+     25 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     27 cycles: select[1:0] @ pex.ml:37:11
+     30 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     32 cycles: select[1:0] @ pex.ml:37:11
+     35 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     37 cycles: select[1:0] @ pex.ml:37:11
+     40 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     42 cycles: select[1:0] @ pex.ml:37:11
+     45 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     47 cycles: select[1:0] @ pex.ml:37:11
+     50 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     52 cycles: select[1:0] @ pex.ml:37:11
+     55 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     57 cycles: select[1:0] @ pex.ml:37:11
+     60 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     62 cycles: select[1:0] @ pex.ml:37:11
+     65 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     67 cycles: select[1:0] @ pex.ml:37:11
+     70 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     72 cycles: select[1:0] @ pex.ml:37:11
+     75 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     77 cycles: select[1:0] @ pex.ml:37:11
+     80 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     82 cycles: select[1:0] @ pex.ml:37:11
+     85 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:21
+  measured from input cfg_in @ video.ml:130:15:
+     87 cycles: select[1:0] @ pex.ml:37:11
+     90 cycles: mux @ pex.ml:64:28
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[7:7] @ video.ml:122:12
+      2 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[7:7] @ video.ml:122:12
+      2 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[7:7] @ video.ml:122:12
+      2 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[7:7] @ video.ml:122:12
+      2 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[7:7] @ video.ml:122:12
+      7 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[7:7] @ video.ml:122:12
+      7 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[7:7] @ video.ml:122:12
+      7 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[7:7] @ video.ml:122:12
+      7 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[7:7] @ video.ml:122:12
+     12 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[7:7] @ video.ml:122:12
+     12 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[7:7] @ video.ml:122:12
+     12 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[7:7] @ video.ml:122:12
+     12 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[7:7] @ video.ml:122:12
+     17 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[7:7] @ video.ml:122:12
+     17 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[7:7] @ video.ml:122:12
+     17 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[7:7] @ video.ml:122:12
+     17 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[7:7] @ video.ml:122:12
+     22 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[7:7] @ video.ml:122:12
+     22 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[7:7] @ video.ml:122:12
+     22 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[7:7] @ video.ml:122:12
+     22 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[7:7] @ video.ml:122:12
+     27 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[7:7] @ video.ml:122:12
+     27 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[7:7] @ video.ml:122:12
+     27 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[7:7] @ video.ml:122:12
+     27 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[7:7] @ video.ml:122:12
+     32 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[7:7] @ video.ml:122:12
+     32 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[7:7] @ video.ml:122:12
+     32 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[7:7] @ video.ml:122:12
+     32 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[7:7] @ video.ml:122:12
+     37 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[7:7] @ video.ml:122:12
+     37 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[7:7] @ video.ml:122:12
+     37 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[7:7] @ video.ml:122:12
+     37 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[7:7] @ video.ml:122:12
+     42 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[7:7] @ video.ml:122:12
+     42 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[7:7] @ video.ml:122:12
+     42 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[7:7] @ video.ml:122:12
+     42 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[7:7] @ video.ml:122:12
+     47 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[7:7] @ video.ml:122:12
+     47 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[7:7] @ video.ml:122:12
+     47 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[7:7] @ video.ml:122:12
+     47 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[7:7] @ video.ml:122:12
+     52 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[7:7] @ video.ml:122:12
+     52 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[7:7] @ video.ml:122:12
+     52 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[7:7] @ video.ml:122:12
+     52 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[7:7] @ video.ml:122:12
+     57 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[7:7] @ video.ml:122:12
+     57 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[7:7] @ video.ml:122:12
+     57 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[7:7] @ video.ml:122:12
+     57 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[7:7] @ video.ml:122:12
+     62 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[7:7] @ video.ml:122:12
+     62 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[7:7] @ video.ml:122:12
+     62 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[7:7] @ video.ml:122:12
+     62 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[7:7] @ video.ml:122:12
+     67 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[7:7] @ video.ml:122:12
+     67 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[7:7] @ video.ml:122:12
+     67 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[7:7] @ video.ml:122:12
+     67 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[7:7] @ video.ml:122:12
+     72 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[7:7] @ video.ml:122:12
+     72 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[7:7] @ video.ml:122:12
+     72 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[7:7] @ video.ml:122:12
+     72 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[7:7] @ video.ml:122:12
+     77 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[7:7] @ video.ml:122:12
+     77 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[7:7] @ video.ml:122:12
+     77 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[7:7] @ video.ml:122:12
+     77 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[7:7] @ video.ml:122:12
+     82 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[7:7] @ video.ml:122:12
+     82 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[7:7] @ video.ml:122:12
+     82 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[7:7] @ video.ml:122:12
+     82 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[7:7] @ video.ml:122:12
+     87 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[7:7] @ video.ml:122:12
+     87 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[7:7] @ video.ml:122:12
+     87 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:64:28
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[7:7] @ video.ml:122:12
+     87 cycles: concat @ pex.ml:64:69
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+      2 cycles: select[1:0] @ pex.ml:37:11
+      5 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[1:0] @ pex.ml:37:11
+     10 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[1:0] @ pex.ml:37:11
+     15 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[1:0] @ pex.ml:37:11
+     20 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[1:0] @ pex.ml:37:11
+     25 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     27 cycles: select[1:0] @ pex.ml:37:11
+     30 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     32 cycles: select[1:0] @ pex.ml:37:11
+     35 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     37 cycles: select[1:0] @ pex.ml:37:11
+     40 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     42 cycles: select[1:0] @ pex.ml:37:11
+     45 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     47 cycles: select[1:0] @ pex.ml:37:11
+     50 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     52 cycles: select[1:0] @ pex.ml:37:11
+     55 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     57 cycles: select[1:0] @ pex.ml:37:11
+     60 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     62 cycles: select[1:0] @ pex.ml:37:11
+     65 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     67 cycles: select[1:0] @ pex.ml:37:11
+     70 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     72 cycles: select[1:0] @ pex.ml:37:11
+     75 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     77 cycles: select[1:0] @ pex.ml:37:11
+     80 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     82 cycles: select[1:0] @ pex.ml:37:11
+     85 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:22
+  measured from input cfg_in @ video.ml:130:15:
+     87 cycles: select[1:0] @ pex.ml:37:11
+     90 cycles: mux @ pex.ml:65:29
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[7:7] @ video.ml:122:12
+      2 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[7:7] @ video.ml:122:12
+      2 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[7:7] @ video.ml:122:12
+      2 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[7:7] @ video.ml:122:12
+      2 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[7:7] @ video.ml:122:12
+      7 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[7:7] @ video.ml:122:12
+      7 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[7:7] @ video.ml:122:12
+      7 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[7:7] @ video.ml:122:12
+      7 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[7:7] @ video.ml:122:12
+     12 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[7:7] @ video.ml:122:12
+     12 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[7:7] @ video.ml:122:12
+     12 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[7:7] @ video.ml:122:12
+     12 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[7:7] @ video.ml:122:12
+     17 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[7:7] @ video.ml:122:12
+     17 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[7:7] @ video.ml:122:12
+     17 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[7:7] @ video.ml:122:12
+     17 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[7:7] @ video.ml:122:12
+     22 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[7:7] @ video.ml:122:12
+     22 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[7:7] @ video.ml:122:12
+     22 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[7:7] @ video.ml:122:12
+     22 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[7:7] @ video.ml:122:12
+     27 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[7:7] @ video.ml:122:12
+     27 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[7:7] @ video.ml:122:12
+     27 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[7:7] @ video.ml:122:12
+     27 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[7:7] @ video.ml:122:12
+     32 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[7:7] @ video.ml:122:12
+     32 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[7:7] @ video.ml:122:12
+     32 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[7:7] @ video.ml:122:12
+     32 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[7:7] @ video.ml:122:12
+     37 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[7:7] @ video.ml:122:12
+     37 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[7:7] @ video.ml:122:12
+     37 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[7:7] @ video.ml:122:12
+     37 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[7:7] @ video.ml:122:12
+     42 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[7:7] @ video.ml:122:12
+     42 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[7:7] @ video.ml:122:12
+     42 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[7:7] @ video.ml:122:12
+     42 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[7:7] @ video.ml:122:12
+     47 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[7:7] @ video.ml:122:12
+     47 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[7:7] @ video.ml:122:12
+     47 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[7:7] @ video.ml:122:12
+     47 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[7:7] @ video.ml:122:12
+     52 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[7:7] @ video.ml:122:12
+     52 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[7:7] @ video.ml:122:12
+     52 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[7:7] @ video.ml:122:12
+     52 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[7:7] @ video.ml:122:12
+     57 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[7:7] @ video.ml:122:12
+     57 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[7:7] @ video.ml:122:12
+     57 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[7:7] @ video.ml:122:12
+     57 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[7:7] @ video.ml:122:12
+     62 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[7:7] @ video.ml:122:12
+     62 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[7:7] @ video.ml:122:12
+     62 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[7:7] @ video.ml:122:12
+     62 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[7:7] @ video.ml:122:12
+     67 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[7:7] @ video.ml:122:12
+     67 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[7:7] @ video.ml:122:12
+     67 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[7:7] @ video.ml:122:12
+     67 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[7:7] @ video.ml:122:12
+     72 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[7:7] @ video.ml:122:12
+     72 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[7:7] @ video.ml:122:12
+     72 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[7:7] @ video.ml:122:12
+     72 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[7:7] @ video.ml:122:12
+     77 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[7:7] @ video.ml:122:12
+     77 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[7:7] @ video.ml:122:12
+     77 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[7:7] @ video.ml:122:12
+     77 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[7:7] @ video.ml:122:12
+     82 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[7:7] @ video.ml:122:12
+     82 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[7:7] @ video.ml:122:12
+     82 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[7:7] @ video.ml:122:12
+     82 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[7:7] @ video.ml:122:12
+     87 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[7:7] @ video.ml:122:12
+     87 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[7:7] @ video.ml:122:12
+     87 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:65:29
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[7:7] @ video.ml:122:12
+     87 cycles: concat @ pex.ml:65:70
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[3:3] @ video.ml:122:12
+      2 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[3:3] @ video.ml:122:12
+      6 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[3:3] @ video.ml:122:12
+      7 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[3:3] @ video.ml:122:12
+      8 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[3:3] @ video.ml:122:12
+      9 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[3:3] @ video.ml:122:12
+     10 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[3:3] @ video.ml:122:12
+     11 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[3:3] @ video.ml:122:12
+     12 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[3:3] @ video.ml:122:12
+     13 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[3:3] @ video.ml:122:12
+     14 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[3:3] @ video.ml:122:12
+     15 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[3:3] @ video.ml:122:12
+     16 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[3:3] @ video.ml:122:12
+     17 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[3:3] @ video.ml:122:12
+     18 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[3:3] @ video.ml:122:12
+     19 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[3:3] @ video.ml:122:12
+     20 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[3:3] @ video.ml:122:12
+     21 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[3:3] @ video.ml:122:12
+     22 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[2:2] @ video.ml:122:12
+      2 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[2:2] @ video.ml:122:12
+      7 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[2:2] @ video.ml:122:12
+     12 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[2:2] @ video.ml:122:12
+     17 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[2:2] @ video.ml:122:12
+     22 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[2:2] @ video.ml:122:12
+     27 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[2:2] @ video.ml:122:12
+     32 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[2:2] @ video.ml:122:12
+     37 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[2:2] @ video.ml:122:12
+     42 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[2:2] @ video.ml:122:12
+     47 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[2:2] @ video.ml:122:12
+     52 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[2:2] @ video.ml:122:12
+     57 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[2:2] @ video.ml:122:12
+     62 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[2:2] @ video.ml:122:12
+     67 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[2:2] @ video.ml:122:12
+     72 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[2:2] @ video.ml:122:12
+     77 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[2:2] @ video.ml:122:12
+     82 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[2:2] @ video.ml:122:12
+     87 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: & @ pex.ml:52:16
+      2 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: & @ pex.ml:80:16
+      2 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: == @ pex.ml:75:2
+      2 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: == @ pex.ml:75:2
+      2 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: == @ video.ml:122:12
+      2 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: == @ video.ml:122:12
+      2 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: == @ video.ml:122:12
+      2 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[4:4] @ video.ml:122:12
+      2 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: & @ pex.ml:52:16
+      7 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: & @ pex.ml:80:16
+      7 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: == @ pex.ml:75:2
+      7 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: == @ pex.ml:75:2
+      7 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: == @ video.ml:122:12
+      7 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: == @ video.ml:122:12
+      7 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: == @ video.ml:122:12
+      7 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: & @ pex.ml:52:16
+     12 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: & @ pex.ml:80:16
+     12 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: == @ pex.ml:75:2
+     12 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: == @ pex.ml:75:2
+     12 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: == @ video.ml:122:12
+     12 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: == @ video.ml:122:12
+     12 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: == @ video.ml:122:12
+     12 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: & @ pex.ml:52:16
+     17 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: & @ pex.ml:80:16
+     17 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: == @ pex.ml:75:2
+     17 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: == @ pex.ml:75:2
+     17 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: == @ video.ml:122:12
+     17 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: == @ video.ml:122:12
+     17 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: == @ video.ml:122:12
+     17 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: & @ pex.ml:52:16
+     22 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: & @ pex.ml:80:16
+     22 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: == @ pex.ml:75:2
+     22 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: == @ pex.ml:75:2
+     22 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: == @ video.ml:122:12
+     22 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: == @ video.ml:122:12
+     22 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: == @ video.ml:122:12
+     22 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: & @ pex.ml:52:16
+     27 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: & @ pex.ml:80:16
+     27 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: == @ pex.ml:75:2
+     27 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: == @ pex.ml:75:2
+     27 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: == @ video.ml:122:12
+     27 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: == @ video.ml:122:12
+     27 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: == @ video.ml:122:12
+     27 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[4:4] @ video.ml:122:12
+      7 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: & @ pex.ml:52:16
+     32 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: & @ pex.ml:80:16
+     32 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: == @ pex.ml:75:2
+     32 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: == @ pex.ml:75:2
+     32 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: == @ video.ml:122:12
+     32 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: == @ video.ml:122:12
+     32 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: == @ video.ml:122:12
+     32 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: & @ pex.ml:52:16
+     37 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: & @ pex.ml:80:16
+     37 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: == @ pex.ml:75:2
+     37 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: == @ pex.ml:75:2
+     37 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: == @ video.ml:122:12
+     37 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: == @ video.ml:122:12
+     37 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: == @ video.ml:122:12
+     37 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: & @ pex.ml:52:16
+     42 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: & @ pex.ml:80:16
+     42 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: == @ pex.ml:75:2
+     42 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: == @ pex.ml:75:2
+     42 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: == @ video.ml:122:12
+     42 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: == @ video.ml:122:12
+     42 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: == @ video.ml:122:12
+     42 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: & @ pex.ml:52:16
+     47 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: & @ pex.ml:80:16
+     47 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: == @ pex.ml:75:2
+     47 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: == @ pex.ml:75:2
+     47 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: == @ video.ml:122:12
+     47 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: == @ video.ml:122:12
+     47 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: == @ video.ml:122:12
+     47 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: & @ pex.ml:52:16
+     52 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: & @ pex.ml:80:16
+     52 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: == @ pex.ml:75:2
+     52 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: == @ pex.ml:75:2
+     52 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: == @ video.ml:122:12
+     52 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: == @ video.ml:122:12
+     52 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: == @ video.ml:122:12
+     52 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[4:4] @ video.ml:122:12
+     12 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: & @ pex.ml:52:16
+     57 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: & @ pex.ml:80:16
+     57 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: == @ pex.ml:75:2
+     57 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: == @ pex.ml:75:2
+     57 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: == @ video.ml:122:12
+     57 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: == @ video.ml:122:12
+     57 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: == @ video.ml:122:12
+     57 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: & @ pex.ml:52:16
+     62 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: & @ pex.ml:80:16
+     62 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: == @ pex.ml:75:2
+     62 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: == @ pex.ml:75:2
+     62 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: == @ video.ml:122:12
+     62 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: == @ video.ml:122:12
+     62 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: == @ video.ml:122:12
+     62 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: & @ pex.ml:52:16
+     67 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: & @ pex.ml:80:16
+     67 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: == @ pex.ml:75:2
+     67 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: == @ pex.ml:75:2
+     67 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: == @ video.ml:122:12
+     67 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: == @ video.ml:122:12
+     67 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: == @ video.ml:122:12
+     67 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: & @ pex.ml:52:16
+     72 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: & @ pex.ml:80:16
+     72 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: == @ pex.ml:75:2
+     72 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: == @ pex.ml:75:2
+     72 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: == @ video.ml:122:12
+     72 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: == @ video.ml:122:12
+     72 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: == @ video.ml:122:12
+     72 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: & @ pex.ml:52:16
+     77 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: & @ pex.ml:80:16
+     77 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: == @ pex.ml:75:2
+     77 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: == @ pex.ml:75:2
+     77 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: == @ video.ml:122:12
+     77 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: == @ video.ml:122:12
+     77 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: == @ video.ml:122:12
+     77 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[4:4] @ video.ml:122:12
+     17 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: & @ pex.ml:52:16
+     82 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: & @ pex.ml:80:16
+     82 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: == @ pex.ml:75:2
+     82 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: == @ pex.ml:75:2
+     82 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: == @ video.ml:122:12
+     82 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: == @ video.ml:122:12
+     82 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: == @ video.ml:122:12
+     82 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: & @ pex.ml:52:16
+     87 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: & @ pex.ml:80:16
+     87 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: == @ pex.ml:75:2
+     87 cycles: concat @ pex.ml:87:41
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: == @ pex.ml:75:2
+     87 cycles: reg @ pex.ml:45:53
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: == @ video.ml:122:12
+     87 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: == @ video.ml:122:12
+     87 cycles: reg @ pex.ml:44:46
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: == @ video.ml:122:12
+     87 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[4:4] @ video.ml:122:12
+     22 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[4:4] @ video.ml:122:12
+     27 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[4:4] @ video.ml:122:12
+     32 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[4:4] @ video.ml:122:12
+     37 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[4:4] @ video.ml:122:12
+     42 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[4:4] @ video.ml:122:12
+     47 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[4:4] @ video.ml:122:12
+     52 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[4:4] @ video.ml:122:12
+     57 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[4:4] @ video.ml:122:12
+     62 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[4:4] @ video.ml:122:12
+     67 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[4:4] @ video.ml:122:12
+     72 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[4:4] @ video.ml:122:12
+     77 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[4:4] @ video.ml:122:12
+     82 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[4:4] @ video.ml:122:12
+     87 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[15:15] @ video.ml:122:12
+      2 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: select[15:15] @ video.ml:122:12
+      7 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[15:15] @ video.ml:122:12
+     12 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: select[15:15] @ video.ml:122:12
+     17 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: select[15:15] @ video.ml:122:12
+     22 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[15:15] @ video.ml:122:12
+     27 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: select[15:15] @ video.ml:122:12
+     32 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[15:15] @ video.ml:122:12
+     37 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: select[15:15] @ video.ml:122:12
+     42 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: select[15:15] @ video.ml:122:12
+     47 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[15:15] @ video.ml:122:12
+     52 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: select[15:15] @ video.ml:122:12
+     57 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[15:15] @ video.ml:122:12
+     62 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: select[15:15] @ video.ml:122:12
+     67 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: select[15:15] @ video.ml:122:12
+     72 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[15:15] @ video.ml:122:12
+     77 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: select[15:15] @ video.ml:122:12
+     82 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[15:15] @ video.ml:122:12
+     87 cycles: == @ video.ml:122:12
+reconvergence at mux @ video.ml:73:2
+  measured from input cfg_in @ video.ml:130:15:
+     23 cycles: == @ video.ml:125:43
+      3 cycles: reg @ video.ml:68:12
+reconvergence at mux @ video.ml:73:2
+  measured from input hw_en @ video.ml:131:14:
+     19 cycles: == @ video.ml:125:43
+     -1 cycles: mux @ video.ml:73:2
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[7:0] @ pex.ml:69:62
+      2 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: select[7:0] @ pex.ml:69:62
+      7 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[7:0] @ pex.ml:69:62
+     12 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: select[7:0] @ pex.ml:69:62
+     17 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: select[7:0] @ pex.ml:69:62
+     22 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[7:0] @ pex.ml:69:62
+     27 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: select[7:0] @ pex.ml:69:62
+     32 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[7:0] @ pex.ml:69:62
+     37 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: select[7:0] @ pex.ml:69:62
+     42 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: select[7:0] @ pex.ml:69:62
+     47 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[7:0] @ pex.ml:69:62
+     52 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: select[7:0] @ pex.ml:69:62
+     57 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[7:0] @ pex.ml:69:62
+     62 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: select[7:0] @ pex.ml:69:62
+     67 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: select[7:0] @ pex.ml:69:62
+     72 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[7:0] @ pex.ml:69:62
+     77 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: select[7:0] @ pex.ml:69:62
+     82 cycles: mux @ pex.ml:60:14
+reconvergence at | @ pex.ml:69:62
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[7:0] @ pex.ml:69:62
+     87 cycles: mux @ pex.ml:60:14
+platformer_video: 3906 of 6331 nodes checked; 158 loop registers; 2 memories/instances cut
+== platformer_video (hold_registers): 3 finding(s)
+reconvergence at & @ video.ml:35:11
+  measured from reg @ video.ml:68:12:
+      1 cycles: reg @ video.ml:34:16
+      0 cycles: not @ video.ml:35:22
+reconvergence at mux @ video.ml:73:2
+  measured from input hw_en @ video.ml:131:14:
+     19 cycles: == @ video.ml:125:43
+     -1 cycles: mux @ video.ml:73:2
+reconvergence at mux @ video.ml:73:2
+  measured from reg @ video.ml:67:54:
+      0 cycles: == @ video.ml:125:43
+    -20 cycles: reg @ video.ml:68:12
+platformer_video lean: 3150 of 4819 nodes checked; 158 loop registers; 2 memories/instances cut
+== platformer_video lean (defaults): 267 finding(s)
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: & @ pex.ml:51:15
+     10 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: & @ pex.ml:51:15
+     15 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: & @ pex.ml:51:15
+     20 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: & @ pex.ml:51:15
+     25 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: & @ pex.ml:51:15
+     30 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: & @ pex.ml:51:15
+     35 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: & @ pex.ml:51:15
+     40 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: & @ pex.ml:51:15
+     45 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: & @ pex.ml:51:15
+     50 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: & @ pex.ml:51:15
+     55 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: & @ pex.ml:51:15
+     60 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: & @ pex.ml:51:15
+     65 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: & @ pex.ml:51:15
+     70 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: & @ pex.ml:51:15
+     75 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: & @ pex.ml:51:15
+     80 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: & @ pex.ml:51:15
+     85 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:52:16
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: & @ pex.ml:51:15
+     90 cycles: select[5:5] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: & @ pex.ml:68:14
+      1 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: == @ video.ml:122:12
+      1 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: & @ pex.ml:68:14
+     11 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: == @ video.ml:122:12
+     11 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: & @ pex.ml:68:14
+     16 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: == @ video.ml:122:12
+     16 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: & @ pex.ml:68:14
+     21 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: == @ video.ml:122:12
+     21 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: & @ pex.ml:68:14
+     26 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: == @ video.ml:122:12
+     26 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: & @ pex.ml:68:14
+     31 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: == @ video.ml:122:12
+     31 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: & @ pex.ml:68:14
+     36 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: == @ video.ml:122:12
+     36 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: & @ pex.ml:68:14
+     41 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: == @ video.ml:122:12
+     41 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: & @ pex.ml:68:14
+     46 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: == @ video.ml:122:12
+     46 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: & @ pex.ml:68:14
+     51 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: == @ video.ml:122:12
+     51 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: & @ pex.ml:68:14
+     56 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: == @ video.ml:122:12
+     56 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: & @ pex.ml:68:14
+     61 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: == @ video.ml:122:12
+     61 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: & @ pex.ml:68:14
+     66 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: == @ video.ml:122:12
+     66 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: & @ pex.ml:68:14
+     71 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: == @ video.ml:122:12
+     71 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: & @ pex.ml:68:14
+     76 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: == @ video.ml:122:12
+     76 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: & @ pex.ml:68:14
+     81 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: == @ video.ml:122:12
+     81 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: & @ pex.ml:68:14
+     86 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:68:14
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: == @ video.ml:122:12
+     86 cycles: select[4:4] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+      2 cycles: select[7:7] @ video.ml:122:12
+      5 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[7:7] @ video.ml:122:12
+      6 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[7:7] @ video.ml:122:12
+      7 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[7:7] @ video.ml:122:12
+      8 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[7:7] @ video.ml:122:12
+      9 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     27 cycles: select[7:7] @ video.ml:122:12
+     10 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     32 cycles: select[7:7] @ video.ml:122:12
+     11 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     37 cycles: select[7:7] @ video.ml:122:12
+     12 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     42 cycles: select[7:7] @ video.ml:122:12
+     13 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     47 cycles: select[7:7] @ video.ml:122:12
+     14 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     52 cycles: select[7:7] @ video.ml:122:12
+     15 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     57 cycles: select[7:7] @ video.ml:122:12
+     16 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     62 cycles: select[7:7] @ video.ml:122:12
+     17 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     67 cycles: select[7:7] @ video.ml:122:12
+     18 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     72 cycles: select[7:7] @ video.ml:122:12
+     19 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     77 cycles: select[7:7] @ video.ml:122:12
+     20 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     82 cycles: select[7:7] @ video.ml:122:12
+     21 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:26
+  measured from input cfg_in @ video.ml:130:15:
+     87 cycles: select[7:7] @ video.ml:122:12
+     22 cycles: select[15:15] @ video.ml:122:12
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+      2 cycles: & @ pex.ml:73:47
+      1 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: & @ pex.ml:73:47
+      6 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: & @ pex.ml:73:47
+     11 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: & @ pex.ml:73:47
+     16 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: & @ pex.ml:73:47
+     21 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     27 cycles: & @ pex.ml:73:47
+     26 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     32 cycles: & @ pex.ml:73:47
+     31 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     37 cycles: & @ pex.ml:73:47
+     36 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     42 cycles: & @ pex.ml:73:47
+     41 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     47 cycles: & @ pex.ml:73:47
+     46 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     52 cycles: & @ pex.ml:73:47
+     51 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     57 cycles: & @ pex.ml:73:47
+     56 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     62 cycles: & @ pex.ml:73:47
+     61 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     67 cycles: & @ pex.ml:73:47
+     66 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     72 cycles: & @ pex.ml:73:47
+     71 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     77 cycles: & @ pex.ml:73:47
+     76 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     82 cycles: & @ pex.ml:73:47
+     81 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:46
+  measured from input cfg_in @ video.ml:130:15:
+     87 cycles: & @ pex.ml:73:47
+     86 cycles: not @ pex.ml:73:73
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: reg @ pex.ml:46:15
+      2 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: reg @ pex.ml:46:15
+      7 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: reg @ pex.ml:46:15
+     12 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: reg @ pex.ml:46:15
+     17 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: reg @ pex.ml:46:15
+     22 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: reg @ pex.ml:46:15
+     27 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: reg @ pex.ml:46:15
+     32 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: reg @ pex.ml:46:15
+     37 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: reg @ pex.ml:46:15
+     42 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: reg @ pex.ml:46:15
+     47 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: reg @ pex.ml:46:15
+     52 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: reg @ pex.ml:46:15
+     57 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: reg @ pex.ml:46:15
+     62 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: reg @ pex.ml:46:15
+     67 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: reg @ pex.ml:46:15
+     72 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: reg @ pex.ml:46:15
+     77 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: reg @ pex.ml:46:15
+     82 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:73:9
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: reg @ pex.ml:46:15
+     87 cycles: | @ pex.ml:73:25
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: reg @ pex.ml:46:15
+      1 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: reg @ pex.ml:46:15
+     11 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: reg @ pex.ml:46:15
+     16 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: reg @ pex.ml:46:15
+     21 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: reg @ pex.ml:46:15
+     26 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: reg @ pex.ml:46:15
+     31 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: reg @ pex.ml:46:15
+     36 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: reg @ pex.ml:46:15
+     41 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: reg @ pex.ml:46:15
+     46 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: reg @ pex.ml:46:15
+     51 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: reg @ pex.ml:46:15
+     56 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: reg @ pex.ml:46:15
+     61 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: reg @ pex.ml:46:15
+     66 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: reg @ pex.ml:46:15
+     71 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: reg @ pex.ml:46:15
+     76 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: reg @ pex.ml:46:15
+     81 cycles: == @ video.ml:122:12
+reconvergence at & @ pex.ml:80:16
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: reg @ pex.ml:46:15
+     86 cycles: == @ video.ml:122:12
+reconvergence at & @ video.ml:35:11
+  measured from reg @ video.ml:68:12:
+      1 cycles: reg @ video.ml:34:16
+      0 cycles: not @ video.ml:35:22
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: select[2:2] @ video.ml:122:12
+     10 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[2:2] @ video.ml:122:12
+     15 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: select[2:2] @ video.ml:122:12
+     20 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: select[2:2] @ video.ml:122:12
+     25 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[2:2] @ video.ml:122:12
+     30 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: select[2:2] @ video.ml:122:12
+     35 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[2:2] @ video.ml:122:12
+     40 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: select[2:2] @ video.ml:122:12
+     45 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: select[2:2] @ video.ml:122:12
+     50 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[2:2] @ video.ml:122:12
+     55 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: select[2:2] @ video.ml:122:12
+     60 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[2:2] @ video.ml:122:12
+     65 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: select[2:2] @ video.ml:122:12
+     70 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: select[2:2] @ video.ml:122:12
+     75 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[2:2] @ video.ml:122:12
+     80 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: select[2:2] @ video.ml:122:12
+     85 cycles: select[6:6] @ video.ml:122:12
+reconvergence at == @ pex.ml:51:29
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[2:2] @ video.ml:122:12
+     90 cycles: select[6:6] @ video.ml:122:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+      4 cycles: reg @ pex.ml:11:12
+      3 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: reg @ pex.ml:11:12
+      8 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: reg @ pex.ml:11:12
+     13 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: reg @ pex.ml:11:12
+     18 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     24 cycles: reg @ pex.ml:11:12
+     23 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     29 cycles: reg @ pex.ml:11:12
+     28 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     34 cycles: reg @ pex.ml:11:12
+     33 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     39 cycles: reg @ pex.ml:11:12
+     38 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     44 cycles: reg @ pex.ml:11:12
+     43 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     49 cycles: reg @ pex.ml:11:12
+     48 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     54 cycles: reg @ pex.ml:11:12
+     53 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     59 cycles: reg @ pex.ml:11:12
+     58 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     64 cycles: reg @ pex.ml:11:12
+     63 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     69 cycles: reg @ pex.ml:11:12
+     68 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     74 cycles: reg @ pex.ml:11:12
+     73 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     79 cycles: reg @ pex.ml:11:12
+     78 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     84 cycles: reg @ pex.ml:11:12
+     83 cycles: reg @ pex.ml:11:12
+reconvergence at concat @ pex.ml:34:25
+  measured from input cfg_in @ video.ml:130:15:
+     89 cycles: reg @ pex.ml:11:12
+     88 cycles: reg @ pex.ml:11:12
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[3:3] @ video.ml:122:12
+      1 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[3:3] @ video.ml:122:12
+      6 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[3:3] @ video.ml:122:12
+      7 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[3:3] @ video.ml:122:12
+      8 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[3:3] @ video.ml:122:12
+      9 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[3:3] @ video.ml:122:12
+     10 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[3:3] @ video.ml:122:12
+     11 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[3:3] @ video.ml:122:12
+     12 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[3:3] @ video.ml:122:12
+     13 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[3:3] @ video.ml:122:12
+     14 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[3:3] @ video.ml:122:12
+     15 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[3:3] @ video.ml:122:12
+     16 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[3:3] @ video.ml:122:12
+     17 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[3:3] @ video.ml:122:12
+     18 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[3:3] @ video.ml:122:12
+     19 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[3:3] @ video.ml:122:12
+     20 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[3:3] @ video.ml:122:12
+     21 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:10
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[3:3] @ video.ml:122:12
+     22 cycles: reg @ pex.ml:48:52
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[2:2] @ video.ml:122:12
+      1 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[2:2] @ video.ml:122:12
+      6 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[2:2] @ video.ml:122:12
+     11 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[2:2] @ video.ml:122:12
+     16 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[2:2] @ video.ml:122:12
+     21 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[2:2] @ video.ml:122:12
+     26 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[2:2] @ video.ml:122:12
+     31 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[2:2] @ video.ml:122:12
+     36 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[2:2] @ video.ml:122:12
+     41 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[2:2] @ video.ml:122:12
+     46 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[2:2] @ video.ml:122:12
+     51 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[2:2] @ video.ml:122:12
+     56 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[2:2] @ video.ml:122:12
+     61 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[2:2] @ video.ml:122:12
+     66 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[2:2] @ video.ml:122:12
+     71 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[2:2] @ video.ml:122:12
+     76 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[2:2] @ video.ml:122:12
+     81 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:74:43
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[2:2] @ video.ml:122:12
+     86 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: == @ video.ml:122:12
+      1 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: == @ video.ml:122:12
+      2 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[4:4] @ video.ml:122:12
+      1 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: == @ video.ml:122:12
+      7 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      6 cycles: == @ video.ml:122:12
+     10 cycles: mux @ pex.ml:75:2
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: == @ video.ml:122:12
+     11 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: == @ video.ml:122:12
+     12 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: == @ video.ml:122:12
+     16 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: == @ video.ml:122:12
+     17 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: == @ video.ml:122:12
+     21 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: == @ video.ml:122:12
+     22 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: == @ video.ml:122:12
+     26 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: == @ video.ml:122:12
+     27 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[4:4] @ video.ml:122:12
+      6 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: == @ video.ml:122:12
+     31 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: == @ video.ml:122:12
+     32 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: == @ video.ml:122:12
+     36 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: == @ video.ml:122:12
+     37 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: == @ video.ml:122:12
+     41 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: == @ video.ml:122:12
+     42 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: == @ video.ml:122:12
+     46 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: == @ video.ml:122:12
+     47 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: == @ video.ml:122:12
+     51 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: == @ video.ml:122:12
+     52 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[4:4] @ video.ml:122:12
+     11 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: == @ video.ml:122:12
+     56 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: == @ video.ml:122:12
+     57 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: == @ video.ml:122:12
+     61 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: == @ video.ml:122:12
+     62 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: == @ video.ml:122:12
+     66 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: == @ video.ml:122:12
+     67 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: == @ video.ml:122:12
+     71 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: == @ video.ml:122:12
+     72 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: == @ video.ml:122:12
+     76 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: == @ video.ml:122:12
+     77 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[4:4] @ video.ml:122:12
+     16 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: == @ video.ml:122:12
+     81 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: == @ video.ml:122:12
+     82 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: == @ video.ml:122:12
+     86 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: == @ video.ml:122:12
+     87 cycles: reg @ pex.ml:47:14
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     25 cycles: select[4:4] @ video.ml:122:12
+     21 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     30 cycles: select[4:4] @ video.ml:122:12
+     26 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     35 cycles: select[4:4] @ video.ml:122:12
+     31 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     40 cycles: select[4:4] @ video.ml:122:12
+     36 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     45 cycles: select[4:4] @ video.ml:122:12
+     41 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     50 cycles: select[4:4] @ video.ml:122:12
+     46 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     55 cycles: select[4:4] @ video.ml:122:12
+     51 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     60 cycles: select[4:4] @ video.ml:122:12
+     56 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     65 cycles: select[4:4] @ video.ml:122:12
+     61 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     70 cycles: select[4:4] @ video.ml:122:12
+     66 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     75 cycles: select[4:4] @ video.ml:122:12
+     71 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     80 cycles: select[4:4] @ video.ml:122:12
+     76 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     85 cycles: select[4:4] @ video.ml:122:12
+     81 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:75:2
+  measured from input cfg_in @ video.ml:130:15:
+     90 cycles: select[4:4] @ video.ml:122:12
+     86 cycles: reg @ pex.ml:44:10
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+      5 cycles: select[15:15] @ video.ml:122:12
+      1 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+      7 cycles: select[15:15] @ video.ml:122:12
+     11 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+      8 cycles: select[15:15] @ video.ml:122:12
+     16 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+      9 cycles: select[15:15] @ video.ml:122:12
+     21 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     10 cycles: select[15:15] @ video.ml:122:12
+     26 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     11 cycles: select[15:15] @ video.ml:122:12
+     31 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     12 cycles: select[15:15] @ video.ml:122:12
+     36 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     13 cycles: select[15:15] @ video.ml:122:12
+     41 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     14 cycles: select[15:15] @ video.ml:122:12
+     46 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     15 cycles: select[15:15] @ video.ml:122:12
+     51 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     16 cycles: select[15:15] @ video.ml:122:12
+     56 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     17 cycles: select[15:15] @ video.ml:122:12
+     61 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     18 cycles: select[15:15] @ video.ml:122:12
+     66 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     19 cycles: select[15:15] @ video.ml:122:12
+     71 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     20 cycles: select[15:15] @ video.ml:122:12
+     76 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     21 cycles: select[15:15] @ video.ml:122:12
+     81 cycles: == @ video.ml:122:12
+reconvergence at mux @ pex.ml:82:20
+  measured from input cfg_in @ video.ml:130:15:
+     22 cycles: select[15:15] @ video.ml:122:12
+     86 cycles: == @ video.ml:122:12
+reconvergence at mux @ video.ml:73:2
+  measured from input cfg_in @ video.ml:130:15:
+     23 cycles: == @ video.ml:125:43
+      3 cycles: reg @ video.ml:68:12
+reconvergence at mux @ video.ml:73:2
+  measured from input hw_en @ video.ml:131:14:
+     19 cycles: == @ video.ml:125:43
+     -1 cycles: mux @ video.ml:73:2
+platformer_video lean: 2790 of 4819 nodes checked; 158 loop registers; 2 memories/instances cut
+== platformer_video lean (hold_registers): 3 finding(s)
+reconvergence at & @ video.ml:35:11
+  measured from reg @ video.ml:68:12:
+      1 cycles: reg @ video.ml:34:16
+      0 cycles: not @ video.ml:35:22
+reconvergence at mux @ video.ml:73:2
+  measured from input hw_en @ video.ml:131:14:
+     19 cycles: == @ video.ml:125:43
+     -1 cycles: mux @ video.ml:73:2
+reconvergence at mux @ video.ml:73:2
+  measured from reg @ video.ml:67:54:
+      0 cycles: == @ video.ml:125:43
+    -20 cycles: reg @ video.ml:68:12

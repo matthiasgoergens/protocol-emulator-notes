@@ -207,6 +207,9 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   vendored or path dependency when the video pipelines adopt the wrapper. Publishing it is a
   later step, with any issue text to Jane Street reviewed by Matthias first. The decision is
   cheap to revisit.
+  Adopted 2026-10-05 (branch `latency-adopt`): vendored at f59e57a, the HDMI pixel path
+  rewritten with `Delayed`, the lint in `dune test` of five prototypes, and 14 proposed
+  improvements: `notes/latency-adoption.md`.
 
 - **Our own reverse-engineering tooling from the August puzzle**
   (`~/prog/janestreet/hardware-2026-08/`, `WRITEUP.md`). Reuse it on our own layout:

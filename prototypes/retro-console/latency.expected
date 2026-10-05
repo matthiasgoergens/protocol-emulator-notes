@@ -1,0 +1,135 @@
+== retro_console (hold_registers): 5 finding(s)
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     17 cycles: & @ console.ml:60:15
+      0 cycles: mux @ console.ml:66:2
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     17 cycles: & @ console.ml:60:15
+      0 cycles: mux @ console.ml:66:2
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     17 cycles: & @ console.ml:60:15
+      0 cycles: mux @ console.ml:66:2
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     17 cycles: & @ console.ml:60:15
+      0 cycles: mux @ console.ml:66:2
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     17 cycles: & @ console.ml:60:15
+      0 cycles: mux @ console.ml:66:2
+== PLANTED retro_console, valid lane one register short (hold_registers): 28 finding(s)
+reconvergence at & @ console.ml:79:16
+  measured from reg @ console.ml:62:83:
+      2 cycles: reg @ console.ml:74:64
+      1 cycles: < @ console.ml:113:4
+reconvergence at & @ console.ml:79:16
+  measured from reg @ console.ml:62:83:
+      3 cycles: reg @ console.ml:81:59
+      2 cycles: < @ console.ml:113:4
+reconvergence at & @ console.ml:79:16
+  measured from reg @ console.ml:62:83:
+      4 cycles: reg @ console.ml:81:59
+      3 cycles: < @ console.ml:113:4
+reconvergence at & @ console.ml:79:16
+  measured from reg @ console.ml:62:83:
+      5 cycles: reg @ console.ml:81:59
+      4 cycles: < @ console.ml:113:4
+reconvergence at & @ console.ml:79:16
+  measured from reg @ console.ml:62:83:
+      6 cycles: reg @ console.ml:81:59
+      5 cycles: < @ console.ml:113:4
+reconvergence at & @ console.ml:79:16
+  measured from reg @ console.ml:62:83:
+      7 cycles: reg @ console.ml:81:59
+      6 cycles: < @ console.ml:113:4
+reconvergence at & @ console.ml:79:16
+  measured from reg @ console.ml:62:83:
+      8 cycles: reg @ console.ml:81:59
+      7 cycles: < @ console.ml:113:4
+reconvergence at & @ console.ml:79:16
+  measured from reg @ console.ml:62:83:
+      9 cycles: reg @ console.ml:81:59
+      8 cycles: < @ console.ml:113:4
+reconvergence at & @ console.ml:79:16
+  measured from reg @ console.ml:62:83:
+     10 cycles: reg @ console.ml:81:59
+      9 cycles: < @ console.ml:113:4
+reconvergence at & @ console.ml:82:41
+  measured from reg @ console.ml:62:83:
+      2 cycles: & @ console.ml:79:16
+      1 cycles: mux @ console.ml:80:12
+reconvergence at & @ console.ml:82:41
+  measured from reg @ console.ml:62:83:
+      3 cycles: & @ console.ml:79:16
+      2 cycles: mux @ console.ml:80:12
+reconvergence at & @ console.ml:82:41
+  measured from reg @ console.ml:62:83:
+      4 cycles: & @ console.ml:79:16
+      3 cycles: mux @ console.ml:80:12
+reconvergence at & @ console.ml:82:41
+  measured from reg @ console.ml:62:83:
+      5 cycles: & @ console.ml:79:16
+      4 cycles: mux @ console.ml:80:12
+reconvergence at & @ console.ml:82:41
+  measured from reg @ console.ml:62:83:
+      6 cycles: & @ console.ml:79:16
+      5 cycles: mux @ console.ml:80:12
+reconvergence at & @ console.ml:82:41
+  measured from reg @ console.ml:62:83:
+      7 cycles: & @ console.ml:79:16
+      6 cycles: mux @ console.ml:80:12
+reconvergence at & @ console.ml:82:41
+  measured from reg @ console.ml:62:83:
+      8 cycles: & @ console.ml:79:16
+      7 cycles: mux @ console.ml:80:12
+reconvergence at & @ console.ml:82:41
+  measured from reg @ console.ml:62:83:
+      9 cycles: & @ console.ml:79:16
+      8 cycles: mux @ console.ml:80:12
+reconvergence at & @ console.ml:82:41
+  measured from reg @ console.ml:62:83:
+     10 cycles: & @ console.ml:79:16
+      9 cycles: mux @ console.ml:80:12
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+      0 cycles: == @ console.ml:113:4
+     -1 cycles: mux @ console.ml:66:2
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+      0 cycles: == @ console.ml:113:4
+     -1 cycles: reg @ console.ml:62:83
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+      0 cycles: reg @ console.ml:63:48
+     -1 cycles: reg @ console.ml:62:83
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     -1 cycles: == @ console.ml:113:4
+      0 cycles: reg @ console.ml:63:48
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     16 cycles: & @ console.ml:60:15
+      0 cycles: mux @ console.ml:66:2
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     16 cycles: & @ console.ml:60:15
+      0 cycles: mux @ console.ml:66:2
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     16 cycles: & @ console.ml:60:15
+      0 cycles: mux @ console.ml:66:2
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     16 cycles: & @ console.ml:60:15
+      0 cycles: mux @ console.ml:66:2
+reconvergence at mux @ console.ml:66:2
+  measured from reg @ console.ml:62:46:
+     16 cycles: & @ console.ml:60:15
+      0 cycles: mux @ console.ml:66:2
+reconvergence at mux @ console.ml:82:35
+  measured from reg @ console.ml:62:46:
+      9 cycles: & @ console.ml:82:41
+     10 cycles: reg @ console.ml:82:26
+== planted control, retro_console, valid lane one register short: 28 new finding(s) -> caught

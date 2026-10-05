@@ -1,0 +1,60 @@
+== platformer_video (hold_registers): 3 finding(s)
+reconvergence at & @ video.ml:35:11
+  measured from reg @ video.ml:72:12:
+      1 cycles: reg @ video.ml:34:16
+      0 cycles: not @ video.ml:35:22
+reconvergence at mux @ video.ml:77:2
+  measured from input hw_en @ video.ml:136:14:
+     19 cycles: == @ video.ml:130:43
+     -1 cycles: mux @ video.ml:77:2
+reconvergence at mux @ video.ml:77:2
+  measured from reg @ video.ml:71:54:
+      0 cycles: == @ video.ml:130:43
+    -20 cycles: reg @ video.ml:72:12
+== platformer_video, lean PE-X (hold_registers): 3 finding(s)
+reconvergence at & @ video.ml:35:11
+  measured from reg @ video.ml:72:12:
+      1 cycles: reg @ video.ml:34:16
+      0 cycles: not @ video.ml:35:22
+reconvergence at mux @ video.ml:77:2
+  measured from input hw_en @ video.ml:136:14:
+     19 cycles: == @ video.ml:130:43
+     -1 cycles: mux @ video.ml:77:2
+reconvergence at mux @ video.ml:77:2
+  measured from reg @ video.ml:71:54:
+      0 cycles: == @ video.ml:130:43
+    -20 cycles: reg @ video.ml:72:12
+== PLANTED platformer_video, sync levels one register late (hold_registers): 8 finding(s)
+reconvergence at & @ video.ml:35:11
+  measured from reg @ video.ml:72:12:
+      1 cycles: reg @ video.ml:34:16
+      0 cycles: not @ video.ml:35:22
+reconvergence at & @ video.ml:99:12
+  measured from reg @ pex.ml:45:13:
+    -18 cycles: | @ video.ml:91:12
+    -19 cycles: select[12:12] @ video.ml:130:43
+reconvergence at & @ video.ml:99:42
+  measured from input hw_en @ video.ml:136:14:
+      0 cycles: | @ video.ml:91:12
+     -1 cycles: select[13:13] @ video.ml:130:43
+reconvergence at concat @ video.ml:100:11
+  measured from input hw_en @ video.ml:136:14:
+      0 cycles: & @ video.ml:99:42
+     -1 cycles: not @ video.ml:98:14
+reconvergence at mux @ video.ml:77:2
+  measured from input hw_en @ video.ml:136:14:
+     19 cycles: == @ video.ml:130:43
+      0 cycles: mux @ video.ml:77:2
+reconvergence at mux @ video.ml:77:2
+  measured from reg @ video.ml:71:54:
+      0 cycles: == @ video.ml:130:43
+    -20 cycles: reg @ video.ml:72:12
+reconvergence at mux @ video.ml:94:13
+  measured from reg @ pex.ml:45:13:
+    -18 cycles: not @ video.ml:130:43
+    -19 cycles: select[3:0] @ video.ml:94:26
+reconvergence at | @ video.ml:91:12
+  measured from reg @ pex.ml:45:13:
+    -18 cycles: not @ video.ml:130:43
+    -19 cycles: select[7:7] @ video.ml:130:43
+== planted control, platformer_video, sync levels one register late: 6 new finding(s) -> caught

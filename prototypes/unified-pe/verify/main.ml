@@ -62,6 +62,7 @@ let coverage trials run_cycles =
 
 let () =
   match Array.to_list Sys.argv with
+  | [ _; "latency" ] -> Latency_check.main ()
   | [ _; "verilog-pe" ] -> Hardcaml.Rtl.print Verilog (Upe_rtl.pe_circuit ())
   | [ _; "verilog-array" ] -> Hardcaml.Rtl.print Verilog (Upe_rtl.array_circuit ~state_ports:false ())
   | [ _; "lockstep"; n; c ] -> lockstep (int_of_string n) (int_of_string c)

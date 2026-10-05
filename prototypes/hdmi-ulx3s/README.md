@@ -146,6 +146,22 @@ the evidence.
 - **LEDs**: 0 and 1 blink at 1 Hz from the pixel and the bit clock (Gergo's standing first check,
   now in `BRINGUP.md`), 2 PLL locked, 3 serialiser armed, 4 slip.
 
+## Latency checking (`Hardcaml_latency.Delayed`)
+
+The pixel path carries its latencies (`../../vendor/hardcaml_latency`, through the `src`
+symlink). The raster counters are the time origin. The test pattern and the demo's
+frame-buffer reader are written over `Delayed`, the TMDS encoder is lifted with latency 1,
+and the syncs are delayed by `Delayed.align` to whatever the source's registers make the
+pixel. A source that combines signals of different latencies, or syncs delayed by hand to
+the wrong count, does not build: `emit.exe` and so `build.sh` and `e2e/run.sh` stop with a
+message naming the operands and their source lines. `dune test` runs
+`test/test_latency.ml`. It checks that both sources build and that the planted short syncs
+are rejected. It also checks that the rewrite is cycle-identical to frozen copies of the
+original (`test/reference/`), and it compares the lint's output with
+`test/latency.expected`. `test/rtl-compare/run.sh` compares the old and new generated
+Verilog under iverilog. The results are 0 of 900,000 cycles different for the pattern and
+0 of 2,500,000 for the demo (`results/latency/`). See `../../notes/latency-adoption.md`.
+
 ## End-to-end simulation (`e2e/`)
 
 `e2e/run.sh sdr|ddr PHASE_PS [MUTANT]` simulates `hdmi_top.v` and the generated Verilog under
@@ -159,7 +175,7 @@ configurations and five negative controls, which must fail:
 
 | control | caught by |
 | --- | --- |
-| pattern latency declared 0 (syncs one pixel off) | frame mismatch |
+| pattern's registered colour declared at the raster's latency (syncs one pixel off) | frame mismatch |
 | Gergo's XOR/XNOR rule | strict decoding: invalid word |
 | Gergo's q_m[8] correction | running disparity 646 on blue |
 | wrong control code | inconsistent HSYNC period |

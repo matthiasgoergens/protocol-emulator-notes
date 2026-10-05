@@ -62,7 +62,11 @@ let feeder ~spec ~line_go_n ~rdata =
                 ; when_ (bit etag 1) [ otag <-- etag; odata <-- edata; rptr <-- rptr.value +:. 1 ] ] ] ] ];
   go, rbank.value, rptr.value, otag.value, odata.value
 
-let outport ~clock ~spec ~tag ~data ~seq_pins =
+(* [plant_sync_late] passes the sequencer's sync and blanking levels through one more register
+   than the burst gate taken from the same pins: a negative control for the latency lint
+   (latency_check.ml) only.  (There is no register on this path to remove, so the planted
+   misalignment adds one.) *)
+let outport ?(plant_sync_late = false) ~clock ~spec ~tag ~data ~seq_pins () =
   let open Always in
   let in_rec = Variable.reg spec ~width:1 and waddr = Variable.reg spec ~width:6 in
   let idx = Variable.reg spec ~width:6 and hold = Variable.reg spec ~width:4 in
@@ -86,7 +90,8 @@ let outport ~clock ~spec ~tag ~data ~seq_pins =
   let showing = hold.value <>:. 0 in
   let use = showing |: burst in
   (* blanking and sync levels always come from the sequencer; the burst only adds chroma *)
-  let luma = mux2 showing (select entry 3 0) (select seq_pins 3 0) in
+  let levels = if plant_sync_late then reg spec (select seq_pins 3 0) else select seq_pins 3 0 in
+  let luma = mux2 showing (select entry 3 0) levels in
   let phase = select entry 11 4 in
   let phase = mux2 vs (of_int ~width:8 reflect -: phase) phase in
   let acc = reg_fb spec ~width:32 ~f:(fun a -> a +:. nco_inc) in
@@ -98,7 +103,7 @@ let rom ~spec ~addr (mem : int array array) =
   let words = List.concat_map (fun t -> Array.to_list (Array.map (of_int ~width:16) t)) (Array.to_list mem) in
   reg spec (mux addr words)
 
-let create ?(fault = 0) ?(lean = false) ~clock ~clear ~cfg_in ~cfg_strobe ~hw_en ~hw_data () =
+let create ?(fault = 0) ?(lean = false) ?plant_sync_late ~clock ~clear ~cfg_in ~cfg_strobe ~hw_en ~hw_data () =
   let spec = Reg_spec.create ~clock ~clear () in
   (* sequencer with its programme in a ROM (one-cycle read, as the core expects) *)
   let imem_data = wire 16 in
@@ -122,14 +127,14 @@ let create ?(fault = 0) ?(lean = false) ~clock ~clear ~cfg_in ~cfg_strobe ~hw_en
     let o = Pex.create ~fault ~lean ~clock ~clear ~cfg_in:!cfg ~cfg_strobe ~tag:!tag ~data:!data () in
     tag := o.tag; data := o.data; cfg := o.cfg_out
   done;
-  let pins, lut_we, lut_waddr, lut_raddr = outport ~clock ~spec ~tag:!tag ~data:!data ~seq_pins:pin_out in
+  let pins, lut_we, lut_waddr, lut_raddr = outport ?plant_sync_late ~clock ~spec ~tag:!tag ~data:!data ~seq_pins:pin_out () in
   pins, pin_out, !tag, !data, lut_we, lut_waddr, lut_raddr
 
-let circuit ?fault ?lean () =
+let circuit ?fault ?lean ?plant_sync_late () =
   let clock = input "clock" 1 and clear = input "clear" 1 in
   let cfg_in = input "cfg_in" 8 and cfg_strobe = input "cfg_strobe" 1 in
   let hw_en = input "hw_en" 1 and hw_data = input "hw_data" entry_bits in
-  let pins, seq, tag, data, we, wa, ra = create ?fault ?lean ~clock ~clear ~cfg_in ~cfg_strobe ~hw_en ~hw_data () in
+  let pins, seq, tag, data, we, wa, ra = create ?fault ?lean ?plant_sync_late ~clock ~clear ~cfg_in ~cfg_strobe ~hw_en ~hw_data () in
   Circuit.create_exn ~name:"platformer_video"
     [ output "pins" pins; output "seq_pins" seq; output "arr_tag" tag; output "arr_data" data
     ; output "lut_we" we; output "lut_waddr" wa; output "lut_raddr" ra ]
