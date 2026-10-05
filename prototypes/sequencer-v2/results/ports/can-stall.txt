@@ -1,7 +1,7 @@
-# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/sequencer-v2/_build/default/ports/can/can_stall.exe
-# commit: 16a9041343aafeaa1e644646adbc879235bdd53b (with uncommitted changes)
+# command: /home/matthias/prog/janestreet/emulator-wt-formal-followups/prototypes/sequencer-v2/_build/default/ports/can/can_stall.exe
+# commit: ab9e69f97fdd4e66e3f2bb6f46b9d74d1e227e20 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T09:04:36+08:00
+# date: 2026-10-05T18:43:52+08:00
 CAN TX stall injection, 500 kbit/s (N = 30 slots per bit, SP = 23): TX thread 60 words before the fix, 64 after
 frame 123[8] 00 ff 55 0f f0 81 7e c3, 15 stream bytes (byte 0 the bit count, then the stuffed frame)
 
