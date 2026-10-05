@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+# Runs the Tiny Tapeout harness checks that need no secrets and no place-and-route:
+# the RTL cocotb test. The check-generated step needs the Hardcaml toolchain and is run locally
+# (tt/scripts/regen.sh --check); it is not repeated here.
+name: tt-harness
+on:
+  push:
+    paths: ["tt/**", ".github/workflows/tt-harness.yaml"]
+  pull_request:
+    paths: ["tt/**"]
+permissions:
+  contents: read
+jobs:
+  rtl:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install --yes iverilog
+      - uses: astral-sh/setup-uv@v5
+      - name: cocotb RTL test
+        working-directory: tt/test
+        run: uv run --no-project --python 3.12 --with-requirements requirements.txt make
