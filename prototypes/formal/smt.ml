@@ -228,6 +228,7 @@ module Value = struct
   let mem_write m s a v = mem_ite s (store m a v) m
   let mem_ite = mem_ite
   let mem_copy m = m
+  let known_false x = (x == ff)
 end
 
 (* ---- SMT-LIB text ---- *)

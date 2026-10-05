@@ -1,7 +1,7 @@
 (library
  (name seqv2)
  (wrapped false)
- (modules isa2 sequencer2 harness2 compat)
+ (modules isa2 isa2_spec_check sequencer2 harness2 compat)
  (libraries hardcaml))
 
 (executable
@@ -13,3 +13,10 @@
  (name emit2)
  (modules emit2)
  (libraries hardcaml seqv2))
+
+; isa2.ml's Spec must be a verbatim copy of the body of its functor Make (see isa2.ml); the
+; library does not build otherwise. ./specialise.sh rewrites the copy.
+(rule
+ (with-stdout-to
+  isa2_spec_check.ml
+  (run awk --file %{dep:specialise.awk} %{dep:isa2.ml})))

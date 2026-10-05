@@ -206,9 +206,9 @@ let isolation_induction ?(assume = true) ~name ~ldb () =
   done;
   let eq0 f = Smt.eq (f a.st).(0) (f b.st).(0) in
   let r_after = List.fold_left Smt.and_ (Smt.eq a.st.latch b.st.latch)
-      [ eq0 (fun s -> s.Sym.pcs); eq0 (fun s -> s.Sym.accs); eq0 (fun s -> s.Sym.cnts); eq0 (fun s -> s.Sym.dls);
-        eq0 (fun s -> s.Sym.bps); eq0 (fun s -> s.Sym.fines); eq0 (fun s -> s.Sym.armed); eq0 (fun s -> s.Sym.cfgs);
-        eq0 (fun s -> s.Sym.lsend) ] in
+      [ eq0 (fun s -> s.Isa2.pcs); eq0 (fun s -> s.Isa2.accs); eq0 (fun s -> s.Isa2.cnts); eq0 (fun s -> s.Isa2.dls);
+        eq0 (fun s -> s.Isa2.bps); eq0 (fun s -> s.Isa2.fines); eq0 (fun s -> s.Isa2.armed); eq0 (fun s -> s.Isa2.cfgs);
+        eq0 (fun s -> s.Isa2.lsend) ] in
   let goal = Smt.or_ !differ (Smt.not_ r_after) in
   let t0 = Unix.gettimeofday () in
   let sv = Smt.Solver.start ?log:(Option.map (fun d -> Filename.concat d (name ^ ".smt2")) (Bmc.log_dir ())) () in

@@ -67,7 +67,7 @@ let create ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_in ~host_in_valid ~po
     | (_, s3, e3) :: rest ->
       List.fold_left (fun (s, e) (t, s_t, e_t) ->
           let g = fst thread ==:. t in
-          let s_t = { s_t with H.thread = s.H.thread } in
+          let s_t = { s_t with Isa2.thread = s.Isa2.thread } in
           (H.merge g s_t s, merge_effects g e_t e)) (s3, e3) rest
     | [] -> assert false in
   for ht = 0 to Isa2.n_threads - 1 do
