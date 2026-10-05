@@ -1,7 +1,7 @@
 # command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/sequencer-v2/_build/default/ports/sequencer-ethernet/main_fixed.exe
-# commit: 85a197d7cd80ac1228eea24be8fbaaf34b78f968
+# commit: b58ef4e4eebc095e715bfe81aa54f8e86229c517 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T08:48:48+08:00
+# date: 2026-10-05T09:00:42+08:00
 10BASE-T TX on v2 with the underrun check: 73 bytes on the wire, 1168 half-bits; words per thread 34,36,35,34
 pin vs Ethernet model encoder: 0 mismatching clocks of 3504, 0 host reports -> PASS
 RTL: 0 clocks where the line differs from the Ethernet model, 0 where the RTL differs from the interpreter -> PASS
