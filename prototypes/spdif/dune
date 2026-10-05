@@ -1,0 +1,11 @@
+(library
+ (name spdif)
+ (wrapped false)
+ (modules isa2 edge_sampler upe row synth iec60958 pacer asm tx_fw line rx oracle tie analyser)
+ (flags (:standard -w -32-27-26-69-37))
+ (libraries hardcaml))
+
+(executable
+ (name main)
+ (modules main)
+ (libraries hardcaml unix spdif))
