@@ -40,7 +40,7 @@ for s in "${SUITES[@]}"; do
     jitter) run jitter jitter ;;
     tolerance) run tolerance tolerance ;;
     rx) run rx-random rx 40 2026 ;;
-    demo) run demo demo 2.0 ;;
+    demo) run demo demo 1.0 ;;
     sigrok) wait_load; { header "sigrok_check.sh"; ./sigrok_check.sh 2>&1; echo "exit $?"; } > results/sigrok.txt || true; tail --lines=2 results/sigrok.txt ;;
     *) echo "unknown suite $s" >&2; exit 2 ;;
   esac
