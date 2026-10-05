@@ -1,0 +1,1586 @@
+Reading additional input from stdin...
+OpenAI Codex v0.157.0
+--------
+workdir: /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+model: gpt-6-luna
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a0d72f-e50e-7c13-b6b9-17af87c7a50b
+--------
+user
+You are reviewing a hardware design prototype in this directory (prototypes/platformer of a Hardcaml repo). Read-only review; do not modify files.
+
+Context: a programmable chip (a 4-thread deadline sequencer, generic pin primitives, a systolic array of one generic PE, gain-cell memory) is being shown to run a side-scrolling tile platformer by configuration alone. The generic PE of ../pe-synth/pe_rtl.ml (pe16: 16-bit state, add/sub/max/min saturating ALU, one neighbour input, pipeline register, byte config chain; 6,586 um2) was extended to PE-X (pex_model.ml is the spec, pex.ml the RTL) with: a 3-bit tagged link (none/step/record word/last word + class bit), record loading ("first empty PE of the class consumes records passing by"), a window predicate on s, a 32-bit shift register emitting 1/2/4/8 bits per step MSB- or LSB-first, and a conditional write into the passing word gated by a flag mask. Tile cells (2, looped: reloaded mid-line with the next 16-pixel slice) and sprite cells (16) are configurations (Pex_model.tile_cfg / sprite_cfg). video.ml wires: sequencer running vprog.ml's firmware -> line_go pin -> feeder (memory-to-array streamer playing a line buffer of 19-bit entries: WAIT/PIXELS/record words/END) -> 18 PE-X -> output port (64-entry colour table written by class-1 records, NCO with phase input and a V-switch reflection). scene.ml has the reference renderer and the host encoder; check.ml compares RTL output with the reference on random lines (0 mismatches; three planted faults caught); pecheck.ml does PE lockstep vs the model. Synthesis: PE-X 18,110 um2 (lean variant 14,363), feeder 5,994, output port 5,305, sequencer 18,995, the special-purpose retro console it replaces 100,432 (reports/).
+
+Please try to BREAK this, and say where I am wrong. Specifically:
+1. Find inputs (a scanline description that Scene.encode accepts, or a sequence of lines/fields) for which the chip would draw something different from Scene.reference, i.e. holes in the record-consumption protocol, the release conditions (rel_win, rel_eol, pprev), the WAIT timing of mid-line tile records, fine scroll 0 vs 15, sprites clipped at x<0 or x>240, flipped sprites clipped on the left, more than 16 sprites, blank lines/vblank (PEs left loaded?), the first field after reset, LUT records being consumed by PEs. The random check draws x in [-20,270), fine in [0,16), up to 21 sprites. Is anything important never exercised by it?
+2. Is the claim "sprite and tile cells are only configurations of one generic PE" honest, or is something video-specific hidden in the feeder/output port/PE-X? Which of the four PE extensions is least justified as generic, and what smaller alternative would do the same job?
+3. Is streaming tile slices per line (line buffer 2 x 256 x 19 bits in thick gain cells, no refresh, host link at 2 bits/clock) really better for this chip than an on-chip tile cache? Check budget.py's arithmetic and assumptions (results/budget.txt).
+4. Anything in the area comparison that is unfair (e.g. memories counted differently, lean variant vs full).
+Be concrete: file:line, the failing input, and the arithmetic. Say plainly where the design holds up.
+2026-09-25T06:10:36.913596Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when UnexpectedServerResponse("HTTP 401: {\"errors\":[\"Unauthorized\"]}")
+2026-09-25T06:10:37.755007Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/\"" })
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+I’ll read the model, RTL, checker, budget arithmetic, and synthesis reports, then trace edge cases against the reference renderer. I’ll keep this read-only and distinguish confirmed mismatches from coverage gaps or design trade-offs.
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice ionice -c 3 rg --files' in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+main.ml
+pex_model.ml
+dune-project
+reports/pex.stat.txt
+reports/pex_lean.stat.txt
+reports/feeder.stat.txt
+reports/deadline_sequencer.stat.txt
+reports/outport.stat.txt
+reports/retro_console.stat.txt
+synth_circuits.ml
+preview.py
+scene.ml
+check.ml
+synth.sh
+pex.ml
+dune
+rtl/retro_console.v
+rtl/deadline_sequencer.v
+rtl/outport.v
+rtl/feeder.v
+rtl/pex.v
+rtl/pex_lean.v
+vprog.ml
+pins.ml
+_build/trace.csexp
+_build/default/pex.ml
+_build/default/console.ml
+_build/default/main.ml
+_build/default/vprog.ml
+_build/default/scene.ml
+_build/default/sim.ml
+_build/default/sequencer.ml
+_build/default/isa.ml
+_build/default/synth_circuits.ml
+_build/default/video.ml
+_build/default/pex_model.ml
+_build/default/main.mli
+_build/default/font.ml
+_build/default/pins.ml
+_build/default/game.ml
+_build/default/check.ml
+_build/default/preview.ml
+_build/default/main.exe
+_build/default/pecheck.ml
+_build/default/art.ml
+_build/trace.csexp.old
+game.ml
+video.ml
+logs/deadline_sequencer.log
+logs/pex_lean.log
+logs/feeder.log
+logs/retro_console.log
+logs/outport.log
+logs/pex.log
+results/palette.png
+results/pecheck.txt
+results/check.txt
+results/timing.txt
+results/palette-compare.txt
+results/palette.json
+results/budget.txt
+out/prev_312.png
+out/prev_174.idx
+out/prev_162.png
+out/prev_240.png
+out/prev_018.png
+out/prev_114.png
+out/prev_294.png
+out/prev_006.idx
+out/prev_030.png
+out/prev_156.png
+out/prev_402.idx
+out/prev_228.png
+out/prev_312.idx
+out/prev_306.idx
+out/prev_366.png
+out/prev_336.idx
+out/prev_372.png
+out/prev_174.png
+out/prev_300.idx
+out/prev_288.png
+out/prev_234.idx
+out/prev_282.idx
+out/prev_126.idx
+out/prev_138.png
+out/prev_156.idx
+out/prev_144.idx
+out/prev_288.idx
+out/prev_378.idx
+out/prev_264.png
+out/prev_072.png
+out/prev_258.idx
+out/prev_114.idx
+out/prev_342.idx
+out/prev_240.idx
+out/prev_048.idx
+out/prev_390.png
+out/prev_198.idx
+out/prev_012.png
+out/prev_246.idx
+out/prev_048.png
+out/prev_030.idx
+out/prev_300.png
+out/prev_042.idx
+out/prev_408.idx
+out/prev_066.idx
+out/prev_000.png
+out/prev_090.png
+out/prev_372.idx
+out/preview.gif
+out/prev_024.idx
+out/prev_000.idx
+out/prev_204.png
+out/prev_096.idx
+out/prev_336.png
+out/prev_354.png
+out/prev_396.idx
+out/prev_084.idx
+out/prev_228.idx
+out/prev_348.idx
+out/prev_276.idx
+out/palette_000.bin
+out/prev_036.idx
+out/prev_234.png
+out/prev_402.png
+out/prev_216.idx
+out/prev_270.idx
+out/prev_006.png
+out/prev_366.idx
+out/prev_180.idx
+out/prev_264.idx
+out/palette.png
+out/prev_408.png
+out/prev_222.idx
+out/prev_018.idx
+out/prev_192.idx
+out/prev_378.png
+out/prev_078.idx
+out/prev_384.png
+out/prev_324.idx
+out/prev_246.png
+out/prev_186.png
+out/prev_084.png
+out/prev_414.png
+out/prev_120.png
+out/prev_318.idx
+out/prev_384.idx
+out/prev_072.idx
+out/prev_162.idx
+out/prev_342.png
+out/prev_354.idx
+out/prev_360.png
+out/prev_360.idx
+out/prev_318.png
+out/prev_024.png
+out/prev_396.png
+out/prev_222.png
+out/prev_414.idx
+out/prev_270.png
+out/prev_138.idx
+out/prev_216.png
+out/prev_060.idx
+out/prev_108.idx
+out/prev_144.png
+out/prev_060.png
+out/prev_252.idx
+out/prev_330.png
+out/prev_252.png
+out/prev_150.idx
+out/prev_210.idx
+out/prev_108.png
+out/prev_258.png
+out/prev_330.idx
+out/prev_102.idx
+out/palette.json
+out/prev_096.png
+out/prev_282.png
+out/prev_276.png
+out/prev_012.idx
+out/prev_054.png
+out/prev_042.png
+out/prev_078.png
+out/prev_036.png
+out/prev_204.idx
+out/prev_306.png
+out/prev_324.png
+out/prev_120.idx
+out/prev_054.idx
+out/prev_186.idx
+out/prev_132.idx
+out/prev_126.png
+out/prev_180.png
+out/prev_198.png
+out/prev_210.png
+out/prev_066.png
+out/prev_192.png
+out/game.gif
+out/prev_150.png
+out/prev_132.png
+out/prev_168.png
+out/prev_090.idx
+out/prev_168.idx
+out/prev_102.png
+out/prev_lut.txt
+out/prev_390.idx
+out/prev_294.idx
+out/prev_348.png
+budget.py
+preview.ml
+sim.ml
+art.ml
+pecheck.ml
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,260p' pex_model.ml" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,260p' budget.py" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,260p' results/budget.txt" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+hook: PreToolUse Completed
+ succeeded in 0ms:
+(* PE-X: the generic 16-bit PE of ../pe-synth (pe16) with four generic extensions, as an
+   executable specification. pex.ml is the RTL and must match this cycle for cycle.
+
+   pe16, unchanged: a 16-bit state s, updated when a step arrives by
+     s <- sat (op x y), op in {add, sub, max, min} (signed, saturating),
+     x = s or the neighbour's data, y = the constant k or s,
+   a byte-wide configuration chain, and a pipeline register passing the neighbour's word on.
+   pe16's "en" input becomes a tag on the word itself (a step is a word tagged STEP).
+
+   The extensions:
+   1. A tagged link. Each word carries a 3-bit tag: bits 1:0 = 0 none, 1 step, 2 record word,
+      3 last word of a record (like AXI-stream's TLAST); bit 2 = a record class.
+   2. Record loading ("the first empty cell takes it"). A PE with load_en set and not loaded
+      consumes record words of its class as they pass (they leave as tag none) and writes them to
+      R0 attr, R1 a[31:16], R2 a[15:0], R3 s, R4 attr2 (9 bits) in that order; the last word sets
+      loaded. A PE releases (loaded <- 0) on a step whose data has bit 15 set (end of run) if
+      rel_eol, or on the first step outside its window after one inside it if rel_win.
+   3. A window predicate on s: p = ((s >> w) & (2^n - 1)) = 0, so n = 0 means always.
+   4. A 32-bit shift register a, shifting (or rotating) by b = 1, 2, 4 or 8 bits on every step
+      inside the window while loaded, MSB first, or LSB first when attr2 bit 8 (dir) is set. The
+      field shifted out is the top (or bottom) b bits.
+   5. A conditional write into the passing word, split into an 8-bit value lane (bits 7:0) and an
+      8-bit flag lane (bits 15:8): on a step with write_en, loaded, p, field <> 0 and
+      (flags & attr2[7:0]) = 0, value <- attr[7:0] | field and flags <- flags | attr[15:8].
+
+   Configuration bytes (shifted in first to last):
+     c0: [1:0] alu op, [2] y = k (else s), [3] x = s (else neighbour data), [4] step s,
+         [5] load_en, [6] class, [7] rotate a (else shift in zeros)
+     c1, c2: k, high byte first
+     c3: [1:0] log2 b, [5:2] w, [6] rel_win, [7] rel_eol
+     c4: [3:0] n, [4] write_en *)
+
+let tag_none = 0 and tag_step = 1 and tag_word = 2 and tag_last = 3
+
+type cfg = {
+  op : int; ysel_k : bool; xsel_s : bool; s_en : bool; load_en : bool; cls : int; rot : bool;
+  k : int; lb : int; w : int; rel_win : bool; rel_eol : bool; n : int; write_en : bool;
+}
+
+let cfg_of_bytes (c : int array) =
+  let b x i = (x lsr i) land 1 = 1 in
+  { op = c.(0) land 3; ysel_k = b c.(0) 2; xsel_s = b c.(0) 3; s_en = b c.(0) 4; load_en = b c.(0) 5;
+    cls = (c.(0) lsr 6) land 1; rot = b c.(0) 7; k = (c.(1) lsl 8) lor c.(2);
+    lb = c.(3) land 3; w = (c.(3) lsr 2) land 15; rel_win = b c.(3) 6; rel_eol = b c.(3) 7;
+    n = c.(4) land 15; write_en = b c.(4) 4 }
+
+type t = {
+  cfg : cfg;
+  mutable s : int; mutable a : int; mutable attr : int; mutable attr2 : int;
+  mutable loaded : bool; mutable widx : int; mutable pprev : bool;
+  mutable out_tag : int; mutable out_data : int;
+}
+
+let create cfg = { cfg; s = 0; a = 0; attr = 0; attr2 = 0; loaded = false; widx = 0; pprev = false;
+                   out_tag = 0; out_data = 0 }
+
+let m16 = 0xFFFF and m32 = 0xFFFFFFFF
+let signed16 v = if v land 0x8000 <> 0 then v - 0x10000 else v
+
+(* pe16's ALU, 16 bits: 0 add, 1 sub (saturating), 2 max, 3 min (signed) *)
+let alu op x y =
+  let x = signed16 x and y = signed16 y in
+  let sat v = if v > 32767 then 32767 else if v < -32768 then -32768 else v in
+  let r = match op with 0 -> sat (x + y) | 1 -> sat (x - y) | 2 -> max x y | _ -> min x y in
+  r land m16
+
+let window c s = c.n = 0 || ((s lsr c.w) land ((1 lsl c.n) - 1)) = 0
+
+let step t ~tag ~data =
+  let c = t.cfg in
+  let kind = tag land 3 and cls_in = (tag lsr 2) land 1 in
+  let is_step = kind = tag_step in
+  let is_rec = kind >= tag_word && cls_in = c.cls in
+  let p = window c t.s in
+  let b = 1 lsl c.lb in
+  let bm = (1 lsl b) - 1 in
+  let dir = (t.attr2 lsr 8) land 1 = 1 in
+  let field = if dir then t.a land bm else (t.a lsr (32 - b)) land bm in
+  let flags = (data lsr 8) land 0xFF in
+  let blocked = flags land (t.attr2 land 0xFF) <> 0 in
+  let write = is_step && c.write_en && t.loaded && p && field <> 0 && not blocked in
+  let consume = is_rec && c.load_en && not t.loaded in
+  (* outputs, registered *)
+  let out_data =
+    if write then ((flags lor (t.attr lsr 8)) lsl 8) lor (((t.attr land 0xFF) lor field) land 0xFF)
+    else data in
+  let out_tag = if consume then tag_none else tag in
+  (* next state, all from the old values *)
+  let s' = ref t.s and a' = ref t.a and attr' = ref t.attr and attr2' = ref t.attr2 in
+  let loaded' = ref t.loaded and widx' = ref t.widx and pprev' = ref t.pprev in
+  if is_step then begin
+    if c.s_en then begin
+      let x = if c.xsel_s then t.s else data and y = if c.ysel_k then c.k else t.s in
+      s' := alu c.op x y
+    end;
+    if t.loaded && p then begin
+      let a = t.a in
+      a' := (if dir then
+               (a lsr b) lor (if c.rot then (a land bm) lsl (32 - b) else 0)
+             else
+               ((a lsl b) land m32) lor (if c.rot then (a lsr (32 - b)) land bm else 0))
+    end;
+    let eol = flags land 0x80 <> 0 in
+    if t.loaded && ((c.rel_eol && eol) || (c.rel_win && t.pprev && not p)) then loaded' := false;
+    pprev' := (if eol then false else p)
+  end;
+  if consume then begin
+    (match t.widx with
+     | 0 -> attr' := data
+     | 1 -> a' := (t.a land 0xFFFF) lor (data lsl 16)
+     | 2 -> a' := (t.a land 0xFFFF0000) lor data
+     | 3 -> s' := data
+     | 4 -> attr2' := data land 0x1FF
+     | _ -> ());
+    if kind = tag_last then (loaded' := true; widx' := 0) else widx' := min 7 (t.widx + 1)
+  end;
+  t.s <- !s'; t.a <- !a'; t.attr <- !attr'; t.attr2 <- !attr2'; t.loaded <- !loaded';
+  t.widx <- !widx'; t.pprev <- !pprev'; t.out_tag <- out_tag; t.out_data <- out_data
+
+(* Configuration byte helpers *)
+let c0 ?(op = 0) ?(ysel_k = false) ?(xsel_s = false) ?(s_en = false) ?(load_en = false) ?(cls = 0)
+    ?(rot = false) () =
+  let b v i = if v then 1 lsl i else 0 in
+  op lor b ysel_k 2 lor b xsel_s 3 lor b s_en 4 lor b load_en 5 lor (cls lsl 6) lor b rot 7
+let c3 ~lb ~w ?(rel_win = false) ?(rel_eol = false) () =
+  lb lor (w lsl 2) lor (if rel_win then 0x40 else 0) lor (if rel_eol then 0x80 else 0)
+let c4 ~n ?(write_en = false) () = n lor (if write_en then 0x10 else 0)
+let bytes ~c0 ~k ~c3 ~c4 = [| c0; (k lsr 8) land 0xFF; k land 0xFF; c3; c4 |]
+
+(* The two video configurations used by the platformer. Both count steps (s <- s + 1) and draw
+   2 bits per pixel from a 16-pixel window; they differ in the window test and when they let go. *)
+let counter_c0 = c0 ~op:0 ~ysel_k:true ~xsel_s:true ~s_en:true ~load_en:true ()
+(* a looped tile cell in a set of [kcells] (a power of two): window when s mod 16 kcells < 16 *)
+let tile_cfg ~kcells =
+  let rec log2 x = if x <= 1 then 0 else 1 + log2 (x / 2) in
+  bytes ~c0:counter_c0 ~k:1 ~c3:(c3 ~lb:1 ~w:4 ~rel_win:true ~rel_eol:true ()) ~c4:(c4 ~n:(log2 kcells) ~write_en:true ())
+(* a sprite cell: window when 0 <= s < 16 *)
+let sprite_cfg = bytes ~c0:counter_c0 ~k:1 ~c3:(c3 ~lb:1 ~w:4 ~rel_eol:true ()) ~c4:(c4 ~n:12 ~write_en:true ())
+
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,260p' scene.ml" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+# /// script
+# requires-python = ">=3.11"
+# ///
+"""Line-packet bandwidth and where tile patterns should live, with the sources of every input.
+    uv run budget.py > results/budget.txt"""
+
+CLK = 53.203425e6                  # 12 x PAL fsc
+LINE_CLOCKS = 3404                 # vprog.ml (851 sequencer slots)
+LINE_US = LINE_CLOCKS / CLK * 1e6
+FIELD_MS = 312 * LINE_CLOCKS / CLK * 1e3
+ENTRY_BITS = 19                    # video.ml: 3-bit tag + 16-bit data
+NIBBLE_CLOCKS = 2                  # sim.ml: pin sampler, clocked mode, 4 pins, one strobe edge per 2 clocks
+ENTRY_CLOCKS = 5 * NIBBLE_CLOCKS   # 19 bits in five nibbles
+
+# storage costs (../systolic-storage/results/storage_options.txt, periphery estimated from standard cells)
+GC_THICK_UM2_PER_BIT = {256 * 32: 33777 / 8192, 128 * 32: 17992 / 4096, 32 * 16: 3802 / 512, 32 * 32: 6153 / 1024}
+FLOP_UM2 = 48.99                   # dfrbpq_1, the same file
+LATCH_UM2_PER_BIT = 46.3           # latch register file, same file
+THICK_LIFE_WORST_US = 3100.0       # thick 3T at ff/85 C, same file (lower bound)
+THIN_LIFE_TT27_US = 118.8          # thin 3T at tt/27 C, same file
+PUMPED_LIFE_WORST_MS = 368.0       # ../gain-cell/tricks-thick/README.md, all-thick + pumped WWL + 1 fF (not drawn)
+
+print(f"line {LINE_CLOCKS} clocks = {LINE_US:.2f} us; field 312 lines = {FIELD_MS:.2f} ms\n")
+
+print("== Line packet per visible line (scene.ml encode; counts in entries of 19 bits)")
+fixed = 1 + 2 * 5 + 15 * (1 + 3) + 1        # PIXELS, 2 tile records of 5, 15 x (WAIT + 3-word record), END
+lut = 1 + 4                                  # rolling colour-table refresh, sim.ml
+for nspr in (0, 4, 8, 16):
+    n = fixed + lut + 5 * nspr
+    print(f"  {nspr:2d} sprite cells: {n:3d} entries = {n * ENTRY_BITS / 8:6.1f} bytes; host link busy {n * ENTRY_CLOCKS} of {LINE_CLOCKS} clocks ({100 * n * ENTRY_CLOCKS / LINE_CLOCKS:.0f} %)")
+cap = LINE_CLOCKS // ENTRY_CLOCKS
+print(f"  link capacity at one nibble per {NIBBLE_CLOCKS} clocks: {cap} entries per line "
+      f"({4 / NIBBLE_CLOCKS * CLK / 8 / 1e6:.1f} MB/s of payload bits)")
+print(f"  the special-purpose console: 54 bytes per line (../retro-console/console.ml)")
+peak = (fixed + lut + 5 * 16) * ENTRY_BITS / 8 / (LINE_US * 1e-6) / 1e6
+print(f"  peak (16 sprites on every visible line): {peak:.2f} MB/s\n")
+
+print("== Where tile patterns live")
+lb_bits = 2 * 256 * ENTRY_BITS
+print(f"  (a) streamed per line into a ping-pong line buffer (chosen): {lb_bits} bits "
+      f"(2 banks x 256 x {ENTRY_BITS}); a value lives at most 2 lines = {2 * LINE_US:.0f} us")
+print(f"      thick gain cells at {GC_THICK_UM2_PER_BIT[256 * 32]:.2f} um2/bit (256x32 bank): {lb_bits * GC_THICK_UM2_PER_BIT[256 * 32]:,.0f} um2;"
+      f" lifetime {THICK_LIFE_WORST_US:.0f} us worst >> {2 * LINE_US:.0f} us: no refresh ever")
+print(f"      thin cells: {THIN_LIFE_TT27_US} us at tt/27 C < {2 * LINE_US:.0f} us: too short even at room temperature")
+print(f"      flops instead: {lb_bits * FLOP_UM2:,.0f} um2")
+for ntiles in (64, 128):
+    bits = ntiles * 256 * 2
+    area = bits * GC_THICK_UM2_PER_BIT[256 * 32]
+    words = bits // 32
+    rate = words / (0.8 * THICK_LIFE_WORST_US * 1e-6)
+    print(f"  (b) on-chip cache of {ntiles} tiles (16x16, 2 bpp): {bits} bits = {area:,.0f} um2 in thick gain cells"
+          f" (+ tile map or per-line indices)")
+    print(f"      each tile row is read once per frame ({FIELD_MS:.1f} ms) but lives >= {THICK_LIFE_WORST_US / 1000:.1f} ms:"
+          f" reads cannot keep it alive; refresh {rate / 1e6:.2f} M words/s = {100 * rate / CLK:.2f} % of a 32-bit port")
+    print(f"      with the pumped all-thick cell ({PUMPED_LIFE_WORST_MS:.0f} ms worst, not drawn, needs a 2.2 V word-line pump and a sense amplifier):"
+          f" a rewrite-on-read keeps on-screen tiles alive, off-screen ones expire after {PUMPED_LIFE_WORST_MS / FIELD_MS:.0f} fields;"
+          f" or the host re-sends the whole set every {PUMPED_LIFE_WORST_MS * 0.8 / FIELD_MS:.0f} fields = {bits / 8 / (PUMPED_LIFE_WORST_MS * 0.8 / FIELD_MS * 312):.1f} bytes per line")
+    print(f"  (c) the same {ntiles} tiles in flops: {bits * FLOP_UM2:,.0f} um2")
+print(f"  (d) a 16-tile flop cache: {16 * 512 * FLOP_UM2:,.0f} um2")
+print(f"  RP2350 SRAM: 520 KB; 128 tiles are {128 * 256 * 2 // 8} bytes of it\n")
+
+print("== Colour lookup table (64 x 14 bits)")
+bits = 64 * 14
+print(f"  {bits} bits: flops {bits * FLOP_UM2:,.0f} um2; latches {bits * LATCH_UM2_PER_BIT:,.0f} um2;"
+      f" thick gain cells {bits * GC_THICK_UM2_PER_BIT[32 * 32]:,.0f} um2 (32x32 bank estimate)")
+print(f"  read every pixel, but the 3T read does not restore: the host rewrites 4 entries per line,"
+      f" all 64 every 16 lines = {16 * LINE_US / 1000:.2f} ms < {THICK_LIFE_WORST_US / 1000:.1f} ms (sim.ml measures the oldest entry read)")
+
+ succeeded in 0ms:
+line 3404 clocks = 63.98 us; field 312 lines = 19.96 ms
+
+== Line packet per visible line (scene.ml encode; counts in entries of 19 bits)
+   0 sprite cells:  77 entries =  182.9 bytes; host link busy 770 of 3404 clocks (23 %)
+   4 sprite cells:  97 entries =  230.4 bytes; host link busy 970 of 3404 clocks (28 %)
+   8 sprite cells: 117 entries =  277.9 bytes; host link busy 1170 of 3404 clocks (34 %)
+  16 sprite cells: 157 entries =  372.9 bytes; host link busy 1570 of 3404 clocks (46 %)
+  link capacity at one nibble per 2 clocks: 340 entries per line (13.3 MB/s of payload bits)
+  the special-purpose console: 54 bytes per line (../retro-console/console.ml)
+  peak (16 sprites on every visible line): 5.83 MB/s
+
+== Where tile patterns live
+  (a) streamed per line into a ping-pong line buffer (chosen): 9728 bits (2 banks x 256 x 19); a value lives at most 2 lines = 128 us
+      thick gain cells at 4.12 um2/bit (256x32 bank): 40,110 um2; lifetime 3100 us worst >> 128 us: no refresh ever
+      thin cells: 118.8 us at tt/27 C < 128 us: too short even at room temperature
+      flops instead: 476,575 um2
+  (b) on-chip cache of 64 tiles (16x16, 2 bpp): 32768 bits = 135,108 um2 in thick gain cells (+ tile map or per-line indices)
+      each tile row is read once per frame (20.0 ms) but lives >= 3.1 ms: reads cannot keep it alive; refresh 0.41 M words/s = 0.78 % of a 32-bit port
+      with the pumped all-thick cell (368 ms worst, not drawn, needs a 2.2 V word-line pump and a sense amplifier): a rewrite-on-read keeps on-screen tiles alive, off-screen ones expire after 18 fields; or the host re-sends the whole set every 15 fields = 0.9 bytes per line
+  (c) the same 64 tiles in flops: 1,605,304 um2
+  (b) on-chip cache of 128 tiles (16x16, 2 bpp): 65536 bits = 270,216 um2 in thick gain cells (+ tile map or per-line indices)
+      each tile row is read once per frame (20.0 ms) but lives >= 3.1 ms: reads cannot keep it alive; refresh 0.83 M words/s = 1.55 % of a 32-bit port
+      with the pumped all-thick cell (368 ms worst, not drawn, needs a 2.2 V word-line pump and a sense amplifier): a rewrite-on-read keeps on-screen tiles alive, off-screen ones expire after 18 fields; or the host re-sends the whole set every 15 fields = 1.8 bytes per line
+  (c) the same 128 tiles in flops: 3,210,609 um2
+  (d) a 16-tile flop cache: 401,326 um2
+  RP2350 SRAM: 520 KB; 128 tiles are 8192 bytes of it
+
+== Colour lookup table (64 x 14 bits)
+  896 bits: flops 43,895 um2; latches 41,485 um2; thick gain cells 5,384 um2 (32x32 bank estimate)
+  read every pixel, but the 3T read does not restore: the host rewrites 4 entries per line, all 64 every 16 lines = 1.02 ms < 3.1 ms (sim.ml measures the oldest entry read)
+
+ succeeded in 0ms:
+(* What the host (the RP2350) knows about one scanline, the reference renderer that defines what the
+   chip must draw from it, and the encoder that turns it into the line-buffer entries the chip's
+   feeder plays into the PE array.
+
+   Colour indices (the tail's lookup table, 64 entries of luma code, chroma phase and two chroma
+   enables): 1-15 background tiles (palette * 4 + pixel, pixel 1-3), 17-31 sprites
+   (16 + palette * 4 + pixel), 32-62 backdrop colours (a per-line choice: copper-style gradients),
+   63 the colour burst. *)
+
+let npix = 256
+let kcells = 2              (* looped tile cells *)
+let nspr = 16               (* sprite cells *)
+let ntiles = 17             (* tile slices per line: 256 pixels with fine scroll need 17 *)
+
+type tile = { pix : int array; (* 16 pixels, 0-3, 0 transparent *) pal : int; front : bool }
+type sprite = { x : int; spix : int array; spal : int; flip : bool; behind : bool }
+type line = { backdrop : int; fine : int; tiles : tile array; sprites : sprite list (* lowest priority first *) }
+
+let blank_tile = { pix = Array.make 16 0; pal = 0; front = false }
+
+(* the sprites the chip is given: on-screen ones, at most nspr, the highest-priority ones kept *)
+let visible_sprites l =
+  let v = List.filter (fun s -> s.x > -16 && s.x < npix && Array.exists (( <> ) 0) s.spix) l.sprites in
+  let n = List.length v in
+  if n > nspr then List.filteri (fun i _ -> i >= n - nspr) v else v
+
+(* Reference: what each pixel must show, straight from the description. *)
+let reference l =
+  Array.init npix (fun px ->
+    let xs = px + l.fine in
+    let t = l.tiles.(xs / 16) in
+    let v = t.pix.(xs mod 16) in
+    let c = ref l.backdrop and opaque = ref false and front = ref false in
+    if v <> 0 then (c := t.pal * 4 + v; opaque := true; front := t.front);
+    List.iter (fun s ->
+      let d = px - s.x in
+      if d >= 0 && d < 16 then begin
+        let v = s.spix.(if s.flip then 15 - d else d) in
+        if v <> 0 && not !front && not (s.behind && !opaque) then c := 16 + s.spal * 4 + v
+      end) (visible_sprites l);
+    !c)
+
+(* Line-buffer entries: 3-bit tag and 16-bit data. Tags 2/3 (6/7) are record words / last words
+   of class 0 (1) and go onto the link unchanged. *)
+let t_wait = 0 and t_pixels = 1 and t_word = 2 and t_last = 3 and t_end = 4
+let t_word1 = 6 and t_last1 = 7
+
+let pattern pix = Array.fold_left (fun (a, i) v -> (a lor (v lsl (30 - 2 * i)), i + 1)) (0, 0) pix |> fst
+let m32 = 0xFFFFFFFF
+
+let record ~cls words =
+  let n = List.length words in
+  List.mapi (fun i w ->
+    let last = i = n - 1 in
+    ((if cls = 1 then (if last then t_last1 else t_word1) else if last then t_last else t_word), w land 0xFFFF))
+    words
+
+(* a lookup-table update: start address, then the entries *)
+let lut_record ~addr entries = record ~cls:1 (addr :: entries)
+
+let encode ?(lut = []) l =
+  let tile_attr t = ((0x01 lor (if t.front then 0x02 else 0)) lsl 8) lor (t.pal * 4) in
+  let first_tiles = List.concat (List.init kcells (fun k ->
+    let t = l.tiles.(k) in
+    let a = pattern t.pix in
+    let a = if k = 0 then (a lsl (2 * l.fine)) land m32 else a in
+    record ~cls:0 [ tile_attr t; a lsr 16; a; l.fine - 16 * k; 0 ])) in
+  let sprites = List.concat_map (fun s ->
+    let a = pattern s.spix in
+    let a = if s.x >= 0 then a else if s.flip then a lsr (2 * -s.x) else (a lsl (2 * -s.x)) land m32 in
+    let attr2 = (if s.behind then 0x03 else 0x02) lor (if s.flip then 0x100 else 0) in
+    record ~cls:0 [ 16 + s.spal * 4; a lsr 16; a; -s.x; attr2 ]) (visible_sprites l) in
+  let later = List.concat (List.init (ntiles - kcells) (fun i ->
+    let j = i + kcells in
+    let t = l.tiles.(j) in
+    let a = pattern t.pix in
+    (t_wait, 16 * (j - kcells + 1)) :: record ~cls:0 [ tile_attr t; a lsr 16; a ])) in
+  [ (t_pixels, l.backdrop) ] @ first_tiles @ sprites @ lut @ later @ [ (t_end, 0) ]
+
+let encode_blank ?(lut = []) () = lut @ [ (t_end, 0) ]
+
+(* random lines for the lockstep check *)
+let random_line () =
+  let rpix () = Array.init 16 (fun _ -> if Random.int 3 = 0 then 0 else Random.int 4) in
+  { backdrop = 32 + Random.int 31; fine = Random.int 16;
+    tiles = Array.init ntiles (fun _ ->
+      if Random.int 5 = 0 then blank_tile else { pix = rpix (); pal = Random.int 4; front = Random.int 4 = 0 });
+    sprites = List.init (Random.int 22) (fun _ ->
+      { x = Random.int 290 - 20; spix = rpix (); spal = Random.int 4; flip = Random.bool (); behind = Random.int 3 = 0 }) }
+
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,260p' check.ml" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,260p' video.ml" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+(* Lockstep of the whole chip (sequencer, line buffer, feeder, PE-X row, output port) against the
+   reference renderer: random scanline descriptions (random tiles with fine scroll and priority,
+   0-21 random sprites with flip, behind-priority and clipping at both edges), encoded by the host
+   code, played through the RTL; the colour index of every step arriving at the output port is
+   compared with Scene.reference. *)
+open Hardcaml
+
+let palette_lut () =
+  Array.init 64 (fun i -> if i = 63 then Sim.burst_entry else Sim.lut_entry ~hue:(i mod 13) ~luma:(i mod 11))
+
+let run ?fault ?lean ~fields () =
+  Random.init 5;
+  let s = Sim.make ?fault ?lean () in
+  let descs = Hashtbl.create 1024 and got = Hashtbl.create 1024 in
+  let lut = palette_lut () in
+  let packet ~field ~line =
+    if line >= Sim.first_vis && line < Sim.first_vis + Sim.nvis then begin
+      let l = Scene.random_line () in
+      Hashtbl.replace descs (field, line) l;
+      Scene.encode l
+    end else Scene.encode_blank () in
+  let st = Sim.run s ~fields ~lut:(fun () -> lut) ~packet ~on_cycle:(fun s ~field ~line ->
+    if Bits.to_int !(s.Sim.arr_tag) = 1 then begin
+      let key = (field, line) in
+      let l = try Hashtbl.find got key with Not_found -> [] in
+      Hashtbl.replace got key ((Bits.to_int !(s.arr_data) land 63) :: l)
+    end) in
+  let lines = ref 0 and bad_px = ref 0 and bad_lines = ref 0 in
+  Hashtbl.iter (fun key l ->
+    incr lines;
+    let r = Scene.reference l in
+    let g = Array.of_list (List.rev (try Hashtbl.find got key with Not_found -> [])) in
+    if Array.length g <> Scene.npix then (incr bad_lines; bad_px := !bad_px + Scene.npix)
+    else begin
+      let b = ref 0 in
+      Array.iteri (fun i c -> if g.(i) <> c then incr b) r;
+      if !b > 0 then incr bad_lines;
+      bad_px := !bad_px + !b
+    end) descs;
+  !lines, !bad_lines, !bad_px, st
+
+let main () =
+  let t0 = Unix.gettimeofday () in
+  let lines, bl, bp, st = run ~fields:1 () in
+  Printf.printf "chip lockstep: %d random lines x 256 pixels against the reference: %d lines, %d pixels differ (%.0f s)\n"
+    lines bl bp (Unix.gettimeofday () -. t0);
+  print_string (Sim.print_stats st);
+  let lines, bl, bp_lean, _ = run ~lean:true ~fields:1 () in
+  Printf.printf "  the same with the lean PE-X (2 bits per step, window above bit 4, no rotate): %d of %d lines, %d pixels differ\n"
+    bl lines bp_lean;
+  List.iter (fun (f, name) ->
+    let lines, bl, bp, _ = run ~fault:f ~fields:1 () in
+    Printf.printf "  planted fault %d (%s): %d of %d lines, %d pixels differ\n" f name bl lines bp)
+    [ 1, "no horizontal flip"; 2, "flag block ignored"; 3, "release at window start" ];
+  bp = 0 && bp_lean = 0
+
+ succeeded in 0ms:
+(* The platformer's chip, built only from generic blocks:
+     - the deadline sequencer (sequencer.ml, unchanged) running Vprog's firmware from a ROM;
+     - a line buffer, two banks of 256 x 19 bits (a gain-cell bank on silicon; Hardcaml memory
+       here), written by the host link and read by the feeder;
+     - the feeder, a memory-to-array streamer: on the line event it plays the entries of the
+       current bank onto the array link and generates the step (pixel) slots, [period] clocks
+       apart, [nsteps] of them, starting [start] clocks after the event;
+     - a row of PE-Xs (pex.ml): kcells looped tile cells, then nspr sprite cells, each only a
+       configuration of the same PE;
+     - the output port: a lookup table (64 x 14, written by class-1 records that fall off the end
+       of the array), a hold of [period] clocks per step, and the NCO with a phase input.
+   Pins, as ../retro-console's dumps: bits 3:0 luma DAC code, 4 chroma level, 5 chroma enable 1,
+   6 chroma enable 2. *)
+open Hardcaml
+open Signal
+
+let period = 10
+let nsteps = Scene.npix
+let kcells = Scene.kcells
+let nspr = Scene.nspr
+let npe = kcells + nspr
+let bank_bits = 8                 (* 256 entries per bank *)
+let entry_bits = 19
+let start = 641                   (* feeder: first step this many clocks after line_go falls *)
+
+(* NCO: 12 clocks per subcarrier cycle; acc starts half a clock in so that no sample sits on a
+   phase boundary. Phase in 1/256 cycle; the V-switch reflects the phase about [reflect]. *)
+let nco_inc = 357913941           (* floor (2^32 / 12) *)
+let nco_acc0 = 178956971          (* 2^32 / 24 *)
+let reflect = 235                 (* 11 steps of 256/12: maps hue step p to 11 - p *)
+
+let feeder ~spec ~line_go_n ~rdata =
+  let open Always in
+  let prev_go = reg spec line_go_n in
+  let go = prev_go &: ~:line_go_n in
+  let rbank = Variable.reg spec ~width:1 and rptr = Variable.reg spec ~width:bank_bits in
+  let active = Variable.reg spec ~width:1 and pix_en = Variable.reg spec ~width:1 in
+  let cd = Variable.reg spec ~width:12 and cnt = Variable.reg spec ~width:9 in
+  let pix_val = Variable.reg spec ~width:16 in
+  let otag = Variable.reg spec ~width:3 and odata = Variable.reg spec ~width:16 in
+  let etag = select rdata 18 16 and edata = select rdata 15 0 in
+  let slot = (cd.value ==:. 0) &: pix_en.value &: (cnt.value <:. nsteps) in
+  let last = cnt.value ==:. (nsteps - 1) in
+  compile
+    [ otag <--. 0; odata <--. 0
+    ; if_ go
+        [ rbank <-- ~:(rbank.value); rptr <--. 0; active <-- vdd; pix_en <-- gnd
+        ; cd <--. start; cnt <--. 0 ]
+        [ if_ slot
+            [ otag <--. Pex_model.tag_step
+            ; odata <-- (pix_val.value |: concat_msb [ last; zero 15 ])
+            ; cnt <-- cnt.value +:. 1; cd <--. (period - 1) ]
+            [ when_ (cd.value <>:. 0) [ cd <-- cd.value -:. 1 ]
+            ; when_ active.value
+                [ switch etag
+                    [ of_int ~width:3 Scene.t_wait,
+                      [ when_ (uresize cnt.value 16 >: edata) [ rptr <-- rptr.value +:. 1 ] ]
+                    ; of_int ~width:3 Scene.t_pixels,
+                      [ pix_val <-- edata; pix_en <-- vdd; rptr <-- rptr.value +:. 1 ]
+                    ; of_int ~width:3 Scene.t_end, [ active <-- gnd ]
+                    ; of_int ~width:3 5, [ active <-- gnd ] ]
+                ; when_ (bit etag 1) [ otag <-- etag; odata <-- edata; rptr <-- rptr.value +:. 1 ] ] ] ] ];
+  go, rbank.value, rptr.value, otag.value, odata.value
+
+let outport ~clock ~spec ~tag ~data ~seq_pins =
+  let open Always in
+  let in_rec = Variable.reg spec ~width:1 and waddr = Variable.reg spec ~width:6 in
+  let idx = Variable.reg spec ~width:6 and hold = Variable.reg spec ~width:4 in
+  let kind = select tag 1 0 in
+  let rec1 = bit kind 1 &: bit tag 2 in
+  let is_last = kind ==:. 3 in
+  let lut_we = rec1 &: in_rec.value in
+  compile
+    [ when_ rec1
+        [ if_ in_rec.value [ waddr <-- waddr.value +:. 1; when_ is_last [ in_rec <-- gnd ] ]
+            [ waddr <-- select data 5 0; in_rec <-- ~:is_last ] ]
+    ; if_ (kind ==:. Pex_model.tag_step) [ idx <-- select data 5 0; hold <--. period ]
+        [ when_ (hold.value <>:. 0) [ hold <-- hold.value -:. 1 ] ] ];
+  let burst = bit seq_pins 7 and vs = bit seq_pins 6 in
+  let raddr = mux2 burst (ones 6) idx.value in
+  let entry =
+    (multiport_memory 64
+       ~write_ports:[| { write_clock = clock; write_address = waddr.value; write_enable = lut_we;
+                         write_data = select data 13 0 } |]
+       ~read_addresses:[| raddr |]).(0) in
+  let showing = hold.value <>:. 0 in
+  let use = showing |: burst in
+  (* blanking and sync levels always come from the sequencer; the burst only adds chroma *)
+  let luma = mux2 showing (select entry 3 0) (select seq_pins 3 0) in
+  let phase = select entry 11 4 in
+  let phase = mux2 vs (of_int ~width:8 reflect -: phase) phase in
+  let acc = reg_fb spec ~width:32 ~f:(fun a -> a +:. nco_inc) in
+  let level = ~:(msb (acc +:. nco_acc0 +: concat_msb [ phase; zero 24 ])) in
+  let oe1 = use &: bit entry 12 and oe2 = use &: bit entry 13 in
+  reg spec (concat_msb [ oe2; oe1; level; luma ]), lut_we, waddr.value, raddr
+
+let rom ~spec ~addr (mem : int array array) =
+  let words = List.concat_map (fun t -> Array.to_list (Array.map (of_int ~width:16) t)) (Array.to_list mem) in
+  reg spec (mux addr words)
+
+let create ?(fault = 0) ?(lean = false) ~clock ~clear ~cfg_in ~cfg_strobe ~hw_en ~hw_data () =
+  let spec = Reg_spec.create ~clock ~clear () in
+  (* sequencer with its programme in a ROM (one-cycle read, as the core expects) *)
+  let imem_data = wire 16 in
+  let imem_addr, pin_out, _pin_oe, _, _, _, _, _ =
+    Sequencer.create ~clock ~clear ~imem_data ~pin_in:(zero 8) ~pin_in4:(zero 32) ~host_in:(zero 8)
+      ~host_in_valid:gnd in
+  imem_data <== rom ~spec ~addr:imem_addr (Vprog.programme ());
+  let line_go_n = bit pin_out 4 in
+  (* line buffer: the host writes the bank the feeder is not reading *)
+  let rdata = wire entry_bits in
+  let go, rbank, rptr, ftag, fdata = feeder ~spec ~line_go_n ~rdata in
+  let wptr = reg_fb spec ~width:bank_bits ~f:(fun p -> mux2 go (zero bank_bits) (mux2 hw_en (p +:. 1) p)) in
+  let wbank = ~:rbank in
+  rdata <== (multiport_memory (2 lsl bank_bits)
+               ~write_ports:[| { write_clock = clock; write_address = concat_msb [ wbank; wptr ];
+                                 write_enable = hw_en; write_data = hw_data } |]
+               ~read_addresses:[| concat_msb [ rbank; rptr ] |]).(0);
+  (* the PE row *)
+  let tag = ref ftag and data = ref fdata and cfg = ref cfg_in in
+  for _ = 1 to npe do
+    let o = Pex.create ~fault ~lean ~clock ~clear ~cfg_in:!cfg ~cfg_strobe ~tag:!tag ~data:!data () in
+    tag := o.tag; data := o.data; cfg := o.cfg_out
+  done;
+  let pins, lut_we, lut_waddr, lut_raddr = outport ~clock ~spec ~tag:!tag ~data:!data ~seq_pins:pin_out in
+  pins, pin_out, !tag, !data, lut_we, lut_waddr, lut_raddr
+
+let circuit ?fault ?lean () =
+  let clock = input "clock" 1 and clear = input "clear" 1 in
+  let cfg_in = input "cfg_in" 8 and cfg_strobe = input "cfg_strobe" 1 in
+  let hw_en = input "hw_en" 1 and hw_data = input "hw_data" entry_bits in
+  let pins, seq, tag, data, we, wa, ra = create ?fault ?lean ~clock ~clear ~cfg_in ~cfg_strobe ~hw_en ~hw_data () in
+  Circuit.create_exn ~name:"platformer_video"
+    [ output "pins" pins; output "seq_pins" seq; output "arr_tag" tag; output "arr_data" data
+    ; output "lut_we" we; output "lut_waddr" wa; output "lut_raddr" ra ]
+
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,260p' results/pecheck.txt" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+PE-X lockstep: 300 rows of 4 PEs x 2000 cycles, random configurations and streams: 0 mismatching cycles
+  planted fault 1 (no horizontal flip): 2850 mismatching cycles in 211 of 300 runs
+  planted fault 2 (flag block ignored): 39508 mismatching cycles in 241 of 300 runs
+  planted fault 3 (release at window start): 353663 mismatching cycles in 249 of 300 runs
+
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,260p' pex.ml" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+(* PE-X RTL: pe16 (../pe-synth/pe_rtl.ml) plus the generic extensions specified in pex_model.ml.
+   [fault] plants a bug for the lockstep controls: 1 ignores dir (no horizontal flip), 2 ignores
+   the flag block, 3 releases on the window's first step instead of after it. *)
+open Hardcaml
+open Signal
+
+let chain spec ~enable ~din len =
+  let regs = Array.make len (zero 8) in
+  let prev = ref din in
+  for j = 0 to len - 1 do
+    let r = reg spec ~enable !prev in
+    regs.(j) <- r;
+    prev := r
+  done;
+  (fun k -> regs.(len - 1 - k)), !prev
+
+let sat16 v =
+  let over = msb v ^: bit v 15 in
+  mux2 over (mux2 (msb v) (of_int ~width:16 (-32768)) (of_int ~width:16 32767)) (select v 15 0)
+
+(* pe16's ALU *)
+let alu op x y =
+  let is_add = op ==:. 0 in
+  let y1 = sresize y 17 in
+  let t = sresize x 17 +: mux2 is_add y1 ~:y1 +: uresize ~:is_add 17 in
+  let lt = msb t in
+  mux op [ sat16 t; sat16 t; mux2 lt y x; mux2 lt x y ]
+
+type out = { tag : Signal.t; data : Signal.t; s : Signal.t; cfg_out : Signal.t }
+
+let create ?(fault = 0) ?(lean = false) ~clock ~clear ~cfg_in ~cfg_strobe ~tag ~data () =
+  let spec = Reg_spec.create ~clock ~clear () in
+  let cfg, cfg_out = chain (Reg_spec.create ~clock ()) ~enable:cfg_strobe ~din:cfg_in 5 in
+  let c0 = cfg 0 and k = concat_msb [ cfg 1; cfg 2 ] and c3 = cfg 3 and c4 = cfg 4 in
+  let op = select c0 1 0 and ysel_k = bit c0 2 and xsel_s = bit c0 3 and s_en = bit c0 4 in
+  let load_en = bit c0 5 and cls = bit c0 6 and rot = bit c0 7 in
+  let lb = select c3 1 0 and w = select c3 5 2 and rel_win = bit c3 6 and rel_eol = bit c3 7 in
+  (* lean: only what the video configurations use (2 bits per step, window above bit 4, no
+     rotate); those configuration bits are then ignored *)
+  let lb = if lean then of_int ~width:2 1 else lb and w = if lean then of_int ~width:4 4 else w in
+  let rot = if lean then gnd else rot in
+  let n = select c4 3 0 and write_en = bit c4 4 in
+  let open Always in
+  let s = Variable.reg spec ~width:16 and a = Variable.reg spec ~width:32 in
+  let attr = Variable.reg spec ~width:16 and attr2 = Variable.reg spec ~width:9 in
+  let loaded = Variable.reg spec ~width:1 and widx = Variable.reg spec ~width:3 in
+  let pprev = Variable.reg spec ~width:1 in
+  let otag = Variable.reg spec ~width:3 and odata = Variable.reg spec ~width:16 in
+  let kind = select tag 1 0 in
+  let is_step = kind ==:. 1 in
+  let is_rec = bit kind 1 &: (bit tag 2 ==: cls) in
+  let consume = is_rec &: load_en &: ~:(loaded.value) in
+  (* window predicate *)
+  let mask = mux n (List.init 16 (fun i -> of_int ~width:16 ((1 lsl i) - 1))) in
+  let p = ((if lean then srl s.value 4 else log_shift srl s.value w) &: mask) ==:. 0 in
+  (* field and shift, b = 1 lsl lb *)
+  let dir = if fault = 1 then gnd else bit attr2.value 8 in
+  let av = a.value in
+  let bm = mux lb (List.map (of_int ~width:8) [ 1; 3; 15; 255 ]) in
+  let field = mux2 dir (select av 7 0 &: bm)
+      (mux lb [ uresize (select av 31 31) 8; uresize (select av 31 30) 8;
+                uresize (select av 31 28) 8; select av 31 24 ]) in
+  let bits_list = [ 1; 2; 4; 8 ] in
+  let shifted_left = mux lb (List.map (fun b -> mux2 rot (rotl av b) (sll av b)) bits_list) in
+  let shifted_right = mux lb (List.map (fun b -> mux2 rot (rotr av b) (srl av b)) bits_list) in
+  let flags = select data 15 8 in
+  let blocked = if fault = 2 then gnd else (flags &: select attr2.value 7 0) <>:. 0 in
+  let write = is_step &: write_en &: loaded.value &: p &: (field <>:. 0) &: ~:blocked in
+  let written = concat_msb [ flags |: select attr.value 15 8; select attr.value 7 0 |: field ] in
+  let eol = bit data 15 in
+  let release =
+    if fault = 3 then loaded.value &: ((rel_eol &: eol) |: (rel_win &: ~:(pprev.value) &: p))
+    else loaded.value &: ((rel_eol &: eol) |: (rel_win &: pprev.value &: ~:p)) in
+  let x = mux2 xsel_s s.value data and y = mux2 ysel_k k s.value in
+  compile
+    [ odata <-- mux2 write written data
+    ; otag <-- mux2 consume (zero 3) tag
+    ; when_ is_step
+        [ when_ s_en [ s <-- alu op x y ]
+        ; when_ (loaded.value &: p) [ a <-- mux2 dir shifted_right shifted_left ]
+        ; when_ release [ loaded <-- gnd ]
+        ; pprev <-- mux2 eol gnd p ]
+    ; when_ consume
+        [ switch widx.value
+            [ of_int ~width:3 0, [ attr <-- data ]
+            ; of_int ~width:3 1, [ a <-- concat_msb [ data; select av 15 0 ] ]
+            ; of_int ~width:3 2, [ a <-- concat_msb [ select av 31 16; data ] ]
+            ; of_int ~width:3 3, [ s <-- data ]
+            ; of_int ~width:3 4, [ attr2 <-- select data 8 0 ] ]
+        ; if_ (kind ==:. 3) [ loaded <-- vdd; widx <--. 0 ]
+            [ when_ (widx.value <>:. 7) [ widx <-- widx.value +:. 1 ] ] ] ];
+  { tag = otag.value; data = odata.value; s = s.value; cfg_out }
+
+(* a row of n PE-Xs, the link and the configuration chain running through them *)
+let row ?(fault = 0) ?(lean = false) n () =
+  let clock = input "clock" 1 and clear = input "clear" 1 in
+  let cfg_in = input "cfg_in" 8 and cfg_strobe = input "cfg_strobe" 1 in
+  let tag = ref (input "tag_in" 3) and data = ref (input "data_in" 16) and cfg = ref cfg_in in
+  let outs = List.concat (List.init n (fun i ->
+    let o = create ~fault ~lean ~clock ~clear ~cfg_in:!cfg ~cfg_strobe ~tag:!tag ~data:!data () in
+    tag := o.tag; data := o.data; cfg := o.cfg_out;
+    [ output (Printf.sprintf "s%d" i) o.s ])) in
+  Circuit.create_exn ~name:(Printf.sprintf "pex_row%d" n)
+    (outs @ [ output "tag_out" !tag; output "data_out" !data; output "cfg_out" !cfg ])
+
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,260p' results/check.txt" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+chip lockstep: 240 random lines x 256 pixels against the reference: 0 lines, 0 pixels differ (18 s)
+line packets: 312 sent, mean 97.6 entries, max 157 (visible lines max 157); oldest lookup-table entry read: 54250 clocks = 1.020 ms
+  the same with the lean PE-X (2 bits per step, window above bit 4, no rotate): 0 of 240 lines, 0 pixels differ
+  planted fault 1 (no horizontal flip): 217 of 240 lines, 7788 pixels differ
+  planted fault 2 (flag block ignored): 218 of 240 lines, 2999 pixels differ
+  planted fault 3 (release at window start): 240 of 240 lines, 27423 pixels differ
+
+exec
+/bin/bash -lc "nice ionice -c 3 sed -n '1,260p' feeder.ml" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ exited 2 in 0ms:
+sed: can't read feeder.ml: No such file or directory
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc "nice ionice -c 3 nl -ba reports/pex.stat.txt | sed -n '1,280p'" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 19ms:
+     1	
+     2	7. Printing statistics.
+     3	
+     4	=== pex ===
+     5	
+     6	        +----------Local Count, excluding submodules.
+     7	        |        +-Local Area, excluding submodules.
+     8	        |        | 
+     9	     1252        - wires
+    10	     3399        - wire bits
+    11	      165        - public wires
+    12	     2298        - public wire bits
+    13	       10        - ports
+    14	       73        - port bits
+    15	     1239 1.81E+04 cells
+    16	       10  127.008   sg13g2_a21o_1
+    17	      178 1.61E+03   sg13g2_a21oi_1
+    18	       68  987.034   sg13g2_a221oi_1
+    19	       79  857.039   sg13g2_a22oi_1
+    20	       30   272.16   sg13g2_and2_1
+    21	        5   63.504   sg13g2_and3_1
+    22	      152 7.45E+03   sg13g2_dfrbpq_1
+    23	       89  484.445   sg13g2_inv_1
+    24	       70  1270.08   sg13g2_mux2_1
+    25	       78  566.093   sg13g2_nand2_1
+    26	       18  163.296   sg13g2_nand2b_1
+    27	       18  163.296   sg13g2_nand3_1
+    28	        6   65.318   sg13g2_nand4_1
+    29	       95  689.472   sg13g2_nor2_1
+    30	       17  154.224   sg13g2_nor2b_1
+    31	       13  117.936   sg13g2_nor3_1
+    32	        3   32.659   sg13g2_nor4_1
+    33	      260  2358.72   sg13g2_o21ai_1
+    34	        8   72.576   sg13g2_or2_1
+    35	        3   38.102   sg13g2_or3_1
+    36	       29  420.941   sg13g2_xnor2_1
+    37	       10  145.152   sg13g2_xor2_1
+    38	
+    39	   Chip area for module '\pex': 18110.169000
+    40	     of which used for sequential elements: 7446.297600 (41.12%)
+    41	
+
+exec
+/bin/bash -lc "nice ionice -c 3 nl -ba sim.ml | sed -n '1,280p'" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+     1	(* Cyclesim harness: the chip plus the host. The host (the RP2350, here OCaml) writes the next
+     2	   line's entries into the line buffer during the current line, one entry every [wstride] clocks,
+     3	   starting when it sees the line_go pin fall; it refreshes the lookup table four entries per line.
+     4	
+     5	   Host link: an entry is 19 bits, sent as five 4-bit nibbles on the pin sampler's clocked mode
+     6	   (../pin-sampler), one nibble per strobe edge, strobe edges every 2 clocks: 10 clocks per entry
+     7	   at most. [wstride] = 10 models exactly that rate. *)
+     8	open Hardcaml
+     9	
+    10	let wstride = 10
+    11	let cpl = Vprog.cpl and lpf = Vprog.lpf
+    12	let first_vis = 40 and nvis = 240
+    13	
+    14	type t = {
+    15	  sim : Cyclesim.t_port_list;
+    16	  clear : Bits.t ref; cfg_in : Bits.t ref; cfg_strobe : Bits.t ref; hw_en : Bits.t ref; hw_data : Bits.t ref;
+    17	  pins : Bits.t ref; seq : Bits.t ref; arr_tag : Bits.t ref; arr_data : Bits.t ref;
+    18	  lut_we : Bits.t ref; lut_waddr : Bits.t ref;
+    19	}
+    20	
+    21	let make ?fault ?lean () =
+    22	  let sim = Cyclesim.create (Video.circuit ?fault ?lean ()) in
+    23	  let i = Cyclesim.in_port sim and o = Cyclesim.out_port sim in
+    24	  let s = { sim; clear = i "clear"; cfg_in = i "cfg_in"; cfg_strobe = i "cfg_strobe"; hw_en = i "hw_en";
+    25	            hw_data = i "hw_data"; pins = o "pins"; seq = o "seq_pins"; arr_tag = o "arr_tag";
+    26	            arr_data = o "arr_data"; lut_we = o "lut_we"; lut_waddr = o "lut_waddr" } in
+    27	  (* configure the PE row (the last PE's bytes first), then reset the rest *)
+    28	  let cfgs = Array.init Video.npe (fun k -> if k < Video.kcells then Pex_model.tile_cfg ~kcells:Video.kcells else Pex_model.sprite_cfg) in
+    29	  s.cfg_strobe := Bits.vdd;
+    30	  for k = Video.npe - 1 downto 0 do
+    31	    Array.iter (fun b -> s.cfg_in := Bits.of_int ~width:8 b; Cyclesim.cycle sim) cfgs.(k)
+    32	  done;
+    33	  s.cfg_strobe := Bits.gnd;
+    34	  s.clear := Bits.vdd; Cyclesim.cycle sim; s.clear := Bits.gnd;
+    35	  s
+    36	
+    37	(* LUT entries *)
+    38	let lut_entry ~hue ~luma =
+    39	  let code = 4 + max 0 (min 10 luma) in
+    40	  if hue = 0 then code
+    41	  else code lor ((((hue - 1) * 256 + 6) / 12) lsl 4) lor (1 lsl 12) lor (1 lsl 13)
+    42	let burst_entry = 4 lor (85 lsl 4) lor (1 lsl 12)
+    43	
+    44	type stats = { mutable lut_age_max : int; mutable entries_max : int; mutable entries_sum : int;
+    45	               mutable lines_sent : int; mutable vis_entries_max : int }
+    46	
+    47	(* Run [fields] fields. [packet ~field ~line] returns the entries for a line (without the LUT
+    48	   refresh, which is added here from [lut ()]). [on_cycle] sees every cycle. *)
+    49	let run s ~fields ~(lut : unit -> int array) ~(packet : field:int -> line:int -> (int * int) list) ~on_cycle =
+    50	  let st = { lut_age_max = 0; entries_max = 0; entries_sum = 0; lines_sent = 0; vis_entries_max = 0 } in
+    51	  let field = ref 0 and line = ref 0 and prev_go = ref 0 and global = ref 0 and prev_field = ref 0 in
+    52	  let pending = ref [||] and wstart = ref max_int in
+    53	  let last_write = Array.make 64 (-1) in
+    54	  let cyc = ref 0 in
+    55	  while !field < fields do
+    56	    (* host writes *)
+    57	    let k = !cyc - !wstart in
+    58	    if k >= 0 && k mod wstride = 0 && k / wstride < Array.length !pending then begin
+    59	      let tg, d = !pending.(k / wstride) in
+    60	      s.hw_en := Bits.vdd; s.hw_data := Bits.of_int ~width:Video.entry_bits ((tg lsl 16) lor (d land 0xFFFF))
+    61	    end else s.hw_en := Bits.gnd;
+    62	    Cyclesim.cycle s.sim;
+    63	    let seq = Bits.to_int !(s.seq) in
+    64	    let go_n = (seq lsr 4) land 1 in
+    65	    if !prev_go = 1 && go_n = 0 then begin
+    66	      (* a new line has started: which one? *)
+    67	      let field_n = (seq lsr 5) land 1 in
+    68	      let next = (!line + 1) mod lpf in
+    69	      (* the field pin is low from the start of line 0 to h 248 of line 3 *)
+    70	      let starts_field = field_n = 0 && !prev_field = 1 in
+    71	      if (next = 0) <> starts_field && !global > 0 then failwith (Printf.sprintf "field pin disagrees at line %d" next);
+    72	      prev_field := field_n;
+    73	      if next = 0 then incr field;
+    74	      line := next;
+    75	      incr global;
+    76	      (* send the packet for the following line *)
+    77	      let target = (next + 1) mod lpf in
+    78	      let tfield = if target = 0 then !field + 1 else !field in
+    79	      let l = lut () in
+    80	      let m = !global mod 16 in
+    81	      let refresh = Scene.lut_record ~addr:(4 * m) (List.init 4 (fun i -> l.(4 * m + i))) in
+    82	      let p = Array.of_list (refresh @ packet ~field:tfield ~line:target) in
+    83	      let n = Array.length p in
+    84	      if n > 1 lsl Video.bank_bits then failwith "packet overflows the bank";
+    85	      st.entries_max <- max st.entries_max n; st.entries_sum <- st.entries_sum + n; st.lines_sent <- st.lines_sent + 1;
+    86	      if target >= first_vis && target < first_vis + nvis then st.vis_entries_max <- max st.vis_entries_max n;
+    87	      pending := p; wstart := !cyc + 4
+    88	    end;
+    89	    prev_go := go_n;
+    90	    if Bits.to_int !(s.lut_we) = 1 then last_write.(Bits.to_int !(s.lut_waddr)) <- !cyc;
+    91	    let tag = Bits.to_int !(s.arr_tag) in
+    92	    let use_idx = if tag = 1 then Some (Bits.to_int !(s.arr_data) land 63)
+    93	      else if (seq lsr 7) land 1 = 1 then Some 63 else None in
+    94	    (match use_idx with
+    95	     | Some i when !field > 0 || !line >= 20 ->
+    96	       if last_write.(i) < 0 then failwith (Printf.sprintf "LUT entry %d read before written" i);
+    97	       st.lut_age_max <- max st.lut_age_max (!cyc - last_write.(i))
+    98	     | _ -> ());
+    99	    on_cycle s ~field:!field ~line:!line;
+   100	    incr cyc
+   101	  done;
+   102	  st
+   103	
+   104	let print_stats st =
+   105	  Printf.sprintf "line packets: %d sent, mean %.1f entries, max %d (visible lines max %d); \
+   106	                  oldest lookup-table entry read: %d clocks = %.3f ms\n"
+   107	    st.lines_sent (float st.entries_sum /. float st.lines_sent) st.entries_max st.vis_entries_max
+   108	    st.lut_age_max (float st.lut_age_max /. 53.203425e3)
+
+exec
+/bin/bash -lc "nice ionice -c 3 nl -ba reports/pex_lean.stat.txt | sed -n '1,280p'" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+     1	
+     2	7. Printing statistics.
+     3	
+     4	=== pex_lean ===
+     5	
+     6	        +----------Local Count, excluding submodules.
+     7	        |        +-Local Area, excluding submodules.
+     8	        |        | 
+     9	      793        - wires
+    10	     1764        - wire bits
+    11	      103        - public wires
+    12	     1060        - public wire bits
+    13	       10        - ports
+    14	       73        - port bits
+    15	      839 1.44E+04 cells
+    16	        3   38.102   sg13g2_a21o_1
+    17	      106  961.632   sg13g2_a21oi_1
+    18	       19  275.789   sg13g2_a221oi_1
+    19	       42  455.641   sg13g2_a22oi_1
+    20	       16  145.152   sg13g2_and2_1
+    21	        2   25.402   sg13g2_and3_1
+    22	      149  7.3E+03   sg13g2_dfrbpq_1
+    23	       69  375.581   sg13g2_inv_1
+    24	       93 1.69E+03   sg13g2_mux2_1
+    25	       70  508.032   sg13g2_nand2_1
+    26	       10    90.72   sg13g2_nand2b_1
+    27	        9   81.648   sg13g2_nand3_1
+    28	        1   12.701   sg13g2_nand3b_1
+    29	        3   32.659   sg13g2_nand4_1
+    30	       51  370.138   sg13g2_nor2_1
+    31	        8   72.576   sg13g2_nor2b_1
+    32	        8   72.576   sg13g2_nor3_1
+    33	      132  1.2E+03   sg13g2_o21ai_1
+    34	        6   54.432   sg13g2_or2_1
+    35	        2   25.402   sg13g2_or3_1
+    36	       27   391.91   sg13g2_xnor2_1
+    37	       13  188.698   sg13g2_xor2_1
+    38	
+    39	   Chip area for module '\pex_lean': 14363.017200
+    40	     of which used for sequential elements: 7299.331200 (50.82%)
+    41	
+
+exec
+/bin/bash -lc "nice ionice -c 3 nl -ba pexcheck.ml | sed -n '1,280p'" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+nl: pexcheck.ml: No such file or directory
+
+exec
+/bin/bash -lc "nice ionice -c 3 nl -ba reports/feeder.stat.txt | sed -n '1,280p'" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+     1	
+     2	7. Printing statistics.
+     3	
+     4	=== feeder ===
+     5	
+     6	        +----------Local Count, excluding submodules.
+     7	        |        +-Local Area, excluding submodules.
+     8	        |        | 
+     9	      307        - wires
+    10	      646        - wire bits
+    11	       52        - public wires
+    12	      391        - public wire bits
+    13	        9        - ports
+    14	       60        - port bits
+    15	      332 5.99E+03 cells
+    16	        4   50.803   sg13g2_a21o_1
+    17	       38  344.736   sg13g2_a21oi_1
+    18	        3   43.546   sg13g2_a221oi_1
+    19	       18  195.275   sg13g2_a22oi_1
+    20	       11   99.792   sg13g2_and2_1
+    21	        8  101.606   sg13g2_and3_1
+    22	       76 3.72E+03   sg13g2_dfrbpq_1
+    23	       35  190.512   sg13g2_inv_1
+    24	       23  166.925   sg13g2_nand2_1
+    25	        9   81.648   sg13g2_nand2b_1
+    26	        8   72.576   sg13g2_nand3_1
+    27	        1   12.701   sg13g2_nand3b_1
+    28	        4   43.546   sg13g2_nand4_1
+    29	       21   152.41   sg13g2_nor2_1
+    30	       10    90.72   sg13g2_nor2b_1
+    31	       12  108.864   sg13g2_nor3_1
+    32	        3   32.659   sg13g2_nor4_1
+    33	       37  335.664   sg13g2_o21ai_1
+    34	        2   18.144   sg13g2_or2_1
+    35	        1   12.701   sg13g2_or3_1
+    36	        1   14.515   sg13g2_or4_1
+    37	        4   58.061   sg13g2_xnor2_1
+    38	        3   43.546   sg13g2_xor2_1
+    39	
+    40	   Chip area for module '\feeder': 5994.097200
+    41	     of which used for sequential elements: 3723.148800 (62.11%)
+    42	
+
+exec
+/bin/bash -lc "nice ionice -c 3 nl -ba reports/retro_console.stat.txt | sed -n '1,280p'" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+     1	
+     2	7. Printing statistics.
+     3	
+     4	=== retro_console ===
+     5	
+     6	        +----------Local Count, excluding submodules.
+     7	        |        +-Local Area, excluding submodules.
+     8	        |        | 
+     9	     4773        - wires
+    10	     6498        - wire bits
+    11	      402        - public wires
+    12	     2127        - public wire bits
+    13	       13        - ports
+    14	       49        - port bits
+    15	     5641    1E+05 cells
+    16	       18  228.614   sg13g2_a21o_1
+    17	     1157 1.05E+04   sg13g2_a21oi_1
+    18	       10  145.152   sg13g2_a221oi_1
+    19	       47  509.884   sg13g2_a22oi_1
+    20	       37  335.664   sg13g2_and2_1
+    21	        9  114.307   sg13g2_and3_1
+    22	        3   43.546   sg13g2_and4_1
+    23	     1269 6.22E+04   sg13g2_dfrbpq_1
+    24	      594 3.23E+03   sg13g2_inv_1
+    25	        5    90.72   sg13g2_mux2_1
+    26	       21   800.15   sg13g2_mux4_1
+    27	      570 4.14E+03   sg13g2_nand2_1
+    28	      516 4.68E+03   sg13g2_nand2b_1
+    29	       55   498.96   sg13g2_nand3_1
+    30	       16  203.213   sg13g2_nand3b_1
+    31	       33  359.251   sg13g2_nand4_1
+    32	      144 1.05E+03   sg13g2_nor2_1
+    33	      225   2041.2   sg13g2_nor2b_1
+    34	       40   362.88   sg13g2_nor3_1
+    35	       15  163.296   sg13g2_nor4_1
+    36	      653 5.92E+03   sg13g2_o21ai_1
+    37	       16  145.152   sg13g2_or2_1
+    38	       12   152.41   sg13g2_or3_1
+    39	        4   58.061   sg13g2_or4_1
+    40	      100  1451.52   sg13g2_xnor2_1
+    41	       72 1.05E+03   sg13g2_xor2_1
+    42	
+    43	   Chip area for module '\retro_console': 100432.521000
+    44	     of which used for sequential elements: 62166.787200 (61.90%)
+    45	
+
+exec
+/bin/bash -lc "nice ionice -c 3 nl -ba reports/deadline_sequencer.stat.txt | sed -n '1,280p'" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+     1	
+     2	7. Printing statistics.
+     3	
+     4	=== deadline_sequencer ===
+     5	
+     6	        +----------Local Count, excluding submodules.
+     7	        |        +-Local Area, excluding submodules.
+     8	        |        | 
+     9	     1201        - wires
+    10	     1800        - wire bits
+    11	      249        - public wires
+    12	      848        - public wire bits
+    13	       15        - ports
+    14	      157        - port bits
+    15	     1174  1.9E+04 cells
+    16	        9  114.307   sg13g2_a21o_1
+    17	      225   2041.2   sg13g2_a21oi_1
+    18	       12  174.182   sg13g2_a221oi_1
+    19	      100  1084.86   sg13g2_a22oi_1
+    20	       12  108.864   sg13g2_and2_1
+    21	        5   63.504   sg13g2_and3_1
+    22	        2    29.03   sg13g2_and4_1
+    23	      189 9.26E+03   sg13g2_dfrbpq_1
+    24	       92  500.774   sg13g2_inv_1
+    25	       38  689.472   sg13g2_mux2_1
+    26	       20  762.048   sg13g2_mux4_1
+    27	       70  508.032   sg13g2_nand2_1
+    28	       14  127.008   sg13g2_nand2b_1
+    29	       19  172.368   sg13g2_nand3_1
+    30	        2   25.402   sg13g2_nand3b_1
+    31	        6   65.318   sg13g2_nand4_1
+    32	       63  457.229   sg13g2_nor2_1
+    33	       24  217.728   sg13g2_nor2b_1
+    34	        9   81.648   sg13g2_nor3_1
+    35	        7   76.205   sg13g2_nor4_1
+    36	      226 2.05E+03   sg13g2_o21ai_1
+    37	        9   81.648   sg13g2_or2_1
+    38	       12  174.182   sg13g2_xnor2_1
+    39	        9  130.637   sg13g2_xor2_1
+    40	
+    41	   Chip area for module '\deadline_sequencer': 18994.802400
+    42	     of which used for sequential elements: 9258.883200 (48.74%)
+    43	
+
+exec
+/bin/bash -lc "nice ionice -c 3 nl -ba vprog.ml | sed -n '1,280p'" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+     1	(* The video timing firmware for the deadline sequencer (ISA in isa.ml, unchanged). Thread 0 makes
+     2	   the sync pulses, the line event and the burst gate; thread 1 makes the PAL V-switch; threads 2
+     3	   and 3 are free.
+     4	
+     5	   Sequencer pins (the luma DAC pins are overridden by the array's output while it shows pixels):
+     6	     0-3 luma DAC code (0 sync tip, 4 blank), 4 line_go (active low: falls at the start of every
+     7	     line), 5 field (active low on the three vsync lines), 6 V-switch, 7 burst gate.
+     8	
+     9	   A thread issues once every 4 clocks, so a line is 3404 clocks (851 slots) rather than PAL's
+    10	   3405.02 at 12 x fsc: the line rate is 294 ppm fast, which a TV's line oscillator follows
+    11	   without noticing; the colour burst is regenerated on every line, so hue is unaffected.
+    12	
+    13	   Each line body is written as events at slots 0-850 and assembled by [timed], which fills gaps
+    14	   with LDD n; WAITD (n + 2 slots) or NOP, so every body is exactly 851 slots. *)
+    15	open Isa
+    16	
+    17	let slots_per_line = 851
+    18	let cpl = 4 * slots_per_line
+    19	let lpf = 312
+    20	
+    21	(* [events]: (slot, instruction), sorted, first at slot 0. [end_slot]: where the next body starts
+    22	   (for a loop body, the JNZ is the last event at end_slot - 1). *)
+    23	let timed events ~end_slot =
+    24	  let code = ref [] and cursor = ref 0 in
+    25	  let emit i = code := i :: !code; incr cursor in
+    26	  let gap_to e =
+    27	    let g = e - !cursor in
+    28	    if g < 0 then failwith (Printf.sprintf "event at slot %d but cursor at %d" e !cursor);
+    29	    if g = 1 then emit nop
+    30	    else if g >= 2 then (code := waitd :: ldd (g - 2) :: !code; cursor := e) in
+    31	  List.iter (fun (e, i) -> gap_to e; emit i) events;
+    32	  gap_to end_slot;
+    33	  List.rev !code
+    34	
+    35	let luma_sync = setp ~mask:0x0F ~value:0 ~oe:1
+    36	let sho_dec = shi ~pin:0 ~msb:0          (* SHI only to decrement the loop counter *)
+    37	
+    38	(* Thread 0. Layout: V0 at 0 (first vsync line, sets the count), V (loops), N0 (first normal line),
+    39	   N0 jumps to N, which ends at address 63 so that falling out of it wraps to V0; the padding
+    40	   between them never runs. *)
+    41	let thread0 () =
+    42	  let v_events ~first ~loop_to =
+    43	    [ 0, setp ~mask:0x3F ~value:0 ~oe:1 ]                      (* sync tip, line_go, field *)
+    44	    @ (if first then [ 1, ldc 2 ] else [])
+    45	    @ [ 363, setp ~mask:0x14 ~value:1 ~oe:1                     (* h 1452: blank, line_go up *)
+    46	      ; 425, luma_sync                                         (* h 1700: second broad pulse *)
+    47	      ; 788, setp ~mask:0x04 ~value:1 ~oe:1 ]                   (* h 3152 *)
+    48	    @ (match loop_to with Some a -> [ 789, sho_dec; 850, jnz a ] | None -> []) in
+    49	  let n_events ~first ~loop_to =
+    50	    [ 0, setp ~mask:0x1F ~value:0 ~oe:1 ]                      (* sync tip and line_go *)
+    51	    @ (if first then [ 1, ldc 308 ] else [])
+    52	    @ [ 62, setp ~mask:0x34 ~value:1 ~oe:1                      (* h 248: blank, line_go, field up *)
+    53	      ; 74, setp ~mask:0x80 ~value:1 ~oe:1                      (* h 296: burst on *)
+    54	      ; 104, setp ~mask:0x80 ~value:0 ~oe:1 ]                   (* h 416: burst off *)
+    55	    @ (match loop_to with Some a -> [ 105, sho_dec; 850, jnz a ] | None -> []) in
+    56	  let v0 = timed (v_events ~first:true ~loop_to:None) ~end_slot:851 in
+    57	  let v_addr = List.length v0 in
+    58	  let v = timed (v_events ~first:false ~loop_to:(Some v_addr)) ~end_slot:851 in
+    59	  let n_len = List.length (timed (n_events ~first:false ~loop_to:(Some 0)) ~end_slot:851) in
+    60	  let n_addr = prog_len - n_len in
+    61	  (* N0 jumps to N (in its last slot), so the padding before N is never executed *)
+    62	  let n0 = timed (n_events ~first:true ~loop_to:None @ [ 850, jmp n_addr ]) ~end_slot:851 in
+    63	  let n = timed (n_events ~first:false ~loop_to:(Some n_addr)) ~end_slot:851 in
+    64	  let used = v0 @ v @ n0 in
+    65	  if List.length used > n_addr then failwith "thread 0 programme too long";
+    66	  Array.of_list (used @ List.init (n_addr - List.length used) (fun _ -> nop) @ n)
+    67	
+    68	(* Thread 1: the V-switch, a two-line loop in lockstep with thread 0 (312 lines per field is even). *)
+    69	let thread1 () =
+    70	  let code = timed [ 0, setp ~mask:0x40 ~value:1 ~oe:1; 851, setp ~mask:0x40 ~value:0 ~oe:1; 1701, jmp 0 ]
+    71	      ~end_slot:1702 in
+    72	  Array.of_list (code @ List.init (prog_len - List.length code) (fun _ -> nop))
+    73	
+    74	let programme () =
+    75	  [| thread0 (); thread1 (); Array.make prog_len halt; Array.make prog_len halt |]
+    76	
+    77	(* Run the interpreter for [fields] fields and check the timing of every pin edge. *)
+    78	let check ?(fields = 2) () =
+    79	  let mem = programme () in
+    80	  let st = Isa.init () in
+    81	  let cycles = fields * lpf * cpl + 8 in
+    82	  let prev = ref 0 in
+    83	  let falls = ref [] and go = ref [] and burst = ref [] and vs = ref [] in
+    84	  for c = 0 to cycles - 1 do
+    85	    ignore (Isa.step st ~mem ~pin_in:0 ~host_in:0 ~host_in_valid:false);
+    86	    let p = st.pin_out in
+    87	    let fell b = (!prev lsr b) land 1 = 1 && (p lsr b) land 1 = 0 in
+    88	    let rose b = (!prev lsr b) land 1 = 0 && (p lsr b) land 1 = 1 in
+    89	    if !prev land 0xF <> 0 && p land 0xF = 0 then falls := c :: !falls;
+    90	    if fell 4 then go := c :: !go;
+    91	    if rose 7 then burst := c :: !burst;
+    92	    if rose 6 || fell 6 then vs := c :: !vs;
+    93	    prev := p
+    94	  done;
+    95	  let diffs l = let l = List.rev l in List.map2 ( - ) (List.tl l) (List.rev (List.tl (List.rev l))) in
+    96	  let hist l =
+    97	    let h = Hashtbl.create 8 in
+    98	    List.iter (fun d -> Hashtbl.replace h d (1 + try Hashtbl.find h d with Not_found -> 0)) (diffs l);
+    99	    Hashtbl.fold (fun k v acc -> Printf.sprintf "%s %d x%d" acc k v) h "" in
+   100	  Printf.sprintf "sync falls: %d, spacing:%s\nline_go falls: %d, spacing:%s\nburst starts: %d, spacing:%s\nV-switch edges: %d, spacing:%s\n"
+   101	    (List.length !falls) (hist !falls) (List.length !go) (hist !go) (List.length !burst) (hist !burst)
+   102	    (List.length !vs) (hist !vs)
+
+exec
+/bin/bash -lc "nice ionice -c 3 nl -ba reports/outport.stat.txt | sed -n '1,280p'" in /home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer
+ succeeded in 0ms:
+     1	
+     2	7. Printing statistics.
+     3	
+     4	=== outport ===
+     5	
+     6	        +----------Local Count, excluding submodules.
+     7	        |        +-Local Area, excluding submodules.
+     8	        |        | 
+     9	      323        - wires
+    10	      681        - wire bits
+    11	       52        - public wires
+    12	      410        - public wire bits
+    13	       11        - ports
+    14	       77        - port bits
+    15	      334 5.31E+03 cells
+    16	        9  114.307   sg13g2_a21o_1
+    17	       52  471.744   sg13g2_a21oi_1
+    18	        3   43.546   sg13g2_a221oi_1
+    19	        1   10.849   sg13g2_a22oi_1
+    20	        3   27.216   sg13g2_and2_1
+    21	        5   63.504   sg13g2_and3_1
+    22	       56 2.74E+03   sg13g2_dfrbpq_1
+    23	       26  141.523   sg13g2_inv_1
+    24	       15  108.864   sg13g2_nand2_1
+    25	        9   81.648   sg13g2_nand2b_1
+    26	       10    90.72   sg13g2_nand3_1
+    27	        4   50.803   sg13g2_nand3b_1
+    28	        3   32.659   sg13g2_nand4_1
+    29	       34  246.758   sg13g2_nor2_1
+    30	        9   81.648   sg13g2_nor2b_1
+    31	       14  127.008   sg13g2_nor3_1
+    32	        3   32.659   sg13g2_nor4_1
+    33	       38  344.736   sg13g2_o21ai_1
+    34	       16  145.152   sg13g2_or2_1
+    35	        1   12.701   sg13g2_or3_1
+    36	       14  203.213   sg13g2_xnor2_1
+    37	        9  130.637   sg13g2_xor2_1
+    38	
+    39	   Chip area for module '\outport': 5305.267800
+    40	     of which used for sequential elements: 2743.372800 (51.71%)
+    41	
+
+codex
+## Confirmed drawing mismatch
+
+**Left-clipped flipped sprites are encoded incorrectly.** In [scene.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/scene.ml:56), sprites with `x < 0` are shifted right to clip them. The PE then reads the shifted pattern LSB first for a flipped sprite. But the reference renderer selects pixel `15 - d` at screen position `d = px - x` ([scene.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/scene.ml:33)).
+
+For example, make a sprite at `x = -1`, set `flip = true`, and set only `spix.(15) = 1`. The reference shows that pixel at screen `x = 0`. The encoder shifts the pattern right by two bits, moving pixel 15 out of the LSB-first sequence; the chip shows transparency there. This is reachable through `Scene.encode`. A focused check with an asymmetric sprite at negative x would expose it; random testing may hit such cases, but its finite run and broad random coverage don’t establish this case independently.
+
+The other listed edge cases look substantially better covered by inspection and by the random checker:
+
+- `fine` is sampled across 0–15; the reference indexes the 17-tile array through `px + fine`, and the encoder emits the additional slice needed at the right edge.
+- Sprite x is sampled from −20 to 269, including both clipping edges; lists can contain up to 21 sprites, and `visible_sprites` retains the highest-priority 16.
+- Blank lines are included in the simulated field, but the chip comparison records only visible lines. That leaves room to test loaded-state transitions directly across visible/blank sequences; the encoder’s EOL step should release loaded cells at the end of each drawn line.
+- The first simulated field starts from reset and includes blank lines before the first visible line. That exercises a reset-to-visible transition, though it does not prove every unusual host packet sequence safe.
+- LUT class-1 records are inserted ahead of the line packet and are intended to pass through class-0 cells to the output port. The checker’s 0-mismatch result supports that path for its generated packets.
+
+The checker reports 240 random lines, zero mismatches, and three planted faults caught ([results/check.txt](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/results/check.txt)). That is useful evidence for the exercised cases; it does not cover every possible accepted `Scene.encode` input or arbitrary packet ordering.
+
+## Generic PE claim
+
+The claim is **substantially honest at the cell level**: tile and sprite behaviour comes from the same PE-X configuration, and the lockstep PE model test reports zero mismatching cycles over 300 random runs ([results/pecheck.txt](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/results/pecheck.txt)). The surrounding chip is still video-specific: the feeder interprets `WAIT`, `PIXELS`, and `END`, and the output port implements the colour table, pixel hold, burst selection, and NCO ([video.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/video.ml:19), [video.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/video.ml:43)).
+
+The least convincing “generic” extension is the **conditional write into the passing word**. Its field extraction followed by OR-ing into an 8-bit value lane, with a separate 8-bit flag lane and mask, is a pixel-compositing rule in disguise ([pex_model.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/pex_model.ml:47)). A smaller reusable primitive would be a generic masked merge: select a configurable field, then replace bits selected by a mask. That would avoid baking pixel opacity and palette composition into the PE, while retaining sprite priority and tile-front behaviour.
+
+## Streaming versus a tile cache
+
+The line-buffer arithmetic is internally consistent: two banks of 256 × 19 bits are 9,728 bits, or about 40,110 µm² at the stated 4.12 µm²/bit. The packet peak is 157 entries per line at 10 clocks each, 1,570 of 3,404 line clocks, so the stated 46% host-link occupancy has room to spare ([budget.py](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/budget.py:20), [results/budget.txt](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/results/budget.txt)).
+
+The comparison is **not enough to establish that streaming is better than an on-chip cache**. Under the same area estimate, 64 thick-gain-cell tiles cost about 135,108 µm² and 128 cost about 270,216 µm², versus about 40,110 µm² for the line buffer. The line buffer is smaller, and its assumed 3.1 ms retention comfortably exceeds its 128 µs maximum data lifetime. But the cache’s stated refresh load—0.78% and 1.55% of a 32-bit port—is also modest. Whether that cache works depends on the memory’s refresh/read timing and peripheral design; the budget compares area and an estimated port rate, not a complete cache implementation against the streamer. It also counts “tile patterns” for the cache but full tagged line entries for the buffer, and omits the tile map or indices from the cache total.
+
+## Area comparison
+
+The reported 100,432 µm² for the retro console is **not an apples-to-apples total against the proposed video chip**. Summing the supplied platformer blocks gives approximately:
+
+- 18 PE-X cells: 18 × 18,110 = **325,980 µm²**
+- feeder: **5,994 µm²**
+- output port: **5,305 µm²**
+- sequencer: **18,995 µm²**
+
+That is about **356,274 µm²**, before accounting for the line buffer’s memory implementation. Even the lean PE-X figure gives a PE-row area of about 258,534 µm², and roughly 288,828 µm² for those same blocks. These are block totals from separate reports, so treat them as an approximate comparison; still, neither supports a claim that the full programmable chip is smaller than the 100,432 µm² console.
+
+The full and lean PE-X figures also describe different designs: the lean variant fixes the window and shift settings used by this video configuration and removes rotation support ([pex.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/pex.ml:32)). It is fair to report both as a general PE-X and a video-specialised variant, but not to present the lean number as the area of the fully generic PE-X.
+
+**Where the design holds up:** the configuration-based tile/sprite datapath is real, the packet budget has clear headroom, and the random lockstep checker plus planted faults are meaningful evidence. The negative-x flipped-sprite case is a concrete counterexample to renderer equivalence, and the area comparison needs to distinguish the PE-X cell, the whole video chip, and the specialised console.
+tokens used
+38,744
+## Confirmed drawing mismatch
+
+**Left-clipped flipped sprites are encoded incorrectly.** In [scene.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/scene.ml:56), sprites with `x < 0` are shifted right to clip them. The PE then reads the shifted pattern LSB first for a flipped sprite. But the reference renderer selects pixel `15 - d` at screen position `d = px - x` ([scene.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/scene.ml:33)).
+
+For example, make a sprite at `x = -1`, set `flip = true`, and set only `spix.(15) = 1`. The reference shows that pixel at screen `x = 0`. The encoder shifts the pattern right by two bits, moving pixel 15 out of the LSB-first sequence; the chip shows transparency there. This is reachable through `Scene.encode`. A focused check with an asymmetric sprite at negative x would expose it; random testing may hit such cases, but its finite run and broad random coverage don’t establish this case independently.
+
+The other listed edge cases look substantially better covered by inspection and by the random checker:
+
+- `fine` is sampled across 0–15; the reference indexes the 17-tile array through `px + fine`, and the encoder emits the additional slice needed at the right edge.
+- Sprite x is sampled from −20 to 269, including both clipping edges; lists can contain up to 21 sprites, and `visible_sprites` retains the highest-priority 16.
+- Blank lines are included in the simulated field, but the chip comparison records only visible lines. That leaves room to test loaded-state transitions directly across visible/blank sequences; the encoder’s EOL step should release loaded cells at the end of each drawn line.
+- The first simulated field starts from reset and includes blank lines before the first visible line. That exercises a reset-to-visible transition, though it does not prove every unusual host packet sequence safe.
+- LUT class-1 records are inserted ahead of the line packet and are intended to pass through class-0 cells to the output port. The checker’s 0-mismatch result supports that path for its generated packets.
+
+The checker reports 240 random lines, zero mismatches, and three planted faults caught ([results/check.txt](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/results/check.txt)). That is useful evidence for the exercised cases; it does not cover every possible accepted `Scene.encode` input or arbitrary packet ordering.
+
+## Generic PE claim
+
+The claim is **substantially honest at the cell level**: tile and sprite behaviour comes from the same PE-X configuration, and the lockstep PE model test reports zero mismatching cycles over 300 random runs ([results/pecheck.txt](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/results/pecheck.txt)). The surrounding chip is still video-specific: the feeder interprets `WAIT`, `PIXELS`, and `END`, and the output port implements the colour table, pixel hold, burst selection, and NCO ([video.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/video.ml:19), [video.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/video.ml:43)).
+
+The least convincing “generic” extension is the **conditional write into the passing word**. Its field extraction followed by OR-ing into an 8-bit value lane, with a separate 8-bit flag lane and mask, is a pixel-compositing rule in disguise ([pex_model.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/pex_model.ml:47)). A smaller reusable primitive would be a generic masked merge: select a configurable field, then replace bits selected by a mask. That would avoid baking pixel opacity and palette composition into the PE, while retaining sprite priority and tile-front behaviour.
+
+## Streaming versus a tile cache
+
+The line-buffer arithmetic is internally consistent: two banks of 256 × 19 bits are 9,728 bits, or about 40,110 µm² at the stated 4.12 µm²/bit. The packet peak is 157 entries per line at 10 clocks each, 1,570 of 3,404 line clocks, so the stated 46% host-link occupancy has room to spare ([budget.py](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/budget.py:20), [results/budget.txt](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/results/budget.txt)).
+
+The comparison is **not enough to establish that streaming is better than an on-chip cache**. Under the same area estimate, 64 thick-gain-cell tiles cost about 135,108 µm² and 128 cost about 270,216 µm², versus about 40,110 µm² for the line buffer. The line buffer is smaller, and its assumed 3.1 ms retention comfortably exceeds its 128 µs maximum data lifetime. But the cache’s stated refresh load—0.78% and 1.55% of a 32-bit port—is also modest. Whether that cache works depends on the memory’s refresh/read timing and peripheral design; the budget compares area and an estimated port rate, not a complete cache implementation against the streamer. It also counts “tile patterns” for the cache but full tagged line entries for the buffer, and omits the tile map or indices from the cache total.
+
+## Area comparison
+
+The reported 100,432 µm² for the retro console is **not an apples-to-apples total against the proposed video chip**. Summing the supplied platformer blocks gives approximately:
+
+- 18 PE-X cells: 18 × 18,110 = **325,980 µm²**
+- feeder: **5,994 µm²**
+- output port: **5,305 µm²**
+- sequencer: **18,995 µm²**
+
+That is about **356,274 µm²**, before accounting for the line buffer’s memory implementation. Even the lean PE-X figure gives a PE-row area of about 258,534 µm², and roughly 288,828 µm² for those same blocks. These are block totals from separate reports, so treat them as an approximate comparison; still, neither supports a claim that the full programmable chip is smaller than the 100,432 µm² console.
+
+The full and lean PE-X figures also describe different designs: the lean variant fixes the window and shift settings used by this video configuration and removes rotation support ([pex.ml](/home/matthias/prog/janestreet/emulator-wt-platformer/prototypes/platformer/pex.ml:32)). It is fair to report both as a general PE-X and a video-specialised variant, but not to present the lean number as the area of the fully generic PE-X.
+
+**Where the design holds up:** the configuration-based tile/sprite datapath is real, the packet budget has clear headroom, and the random lockstep checker plus planted faults are meaningful evidence. The negative-x flipped-sprite case is a concrete counterexample to renderer equivalence, and the area comparison needs to distinguish the PE-X cell, the whole video chip, and the specialised console.
+exit 0

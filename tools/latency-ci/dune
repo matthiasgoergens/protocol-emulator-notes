@@ -1,0 +1,6 @@
+; Shared by the prototypes' latency tests; each prototype reaches it through a symlink
+; (<prototype>/latency_ci -> ../../tools/latency-ci), as it does the vendored library
+; (<prototype>/src -> ../../vendor/hardcaml_latency/src).
+(library
+ (name latency_ci)
+ (libraries base stdio hardcaml hardcaml_latency))

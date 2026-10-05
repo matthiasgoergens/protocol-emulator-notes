@@ -1,0 +1,46 @@
+NW.a                 Min. NWell width = 0.62
+    via: Act_Nsram, Act_Nsram_or_Activ_mask, Cont_Nsram, GP_Nsram, GP_Nsram_Gat_a, GP_Nsram_Gat_b, M1_Nsram, M2_Nsram, M3_Nsram, M4_Nsram, M5_Nsram, NWell_Nsram, V1_Nsram, V1_Nsram_outside_EdgeSeal, V2_Nsram, V2_Nsram_outside_EdgeSeal, V3_Nsram, V3_Nsram_outside_EdgeSeal, V4_Nsram, V4_Nsram_outside_EdgeSeal, pSDHV_Nsram, pSD_Nsram
+NW.c                 Min. NWell enclosure of P+Activ not inside ThickGateOx = 0.31
+    via: NWell_Nsram
+NW.d                 Min. NWell space to external N+Activ not inside ThickGateOx = 0.31
+    via: NWell_Nsram
+Act.c                Min. Activ drain/source extension = 0.23
+    via: Act_Nsram
+Gat.c                Min. GatPoly extension over Activ (end cap) = 0.18
+    via: GP_Nsram
+pSD.e                Min. pSD overlap of Activ at one position when forming abutted substrate tie (These rules are for abutted ties: An electrical connection from P+Activ to NWell tie (or N+ Activ to P-sub tie) is made through the source/drain silicide. For a good electrical connection rule pSD.g is important together with rule pSD.e or pSD.f (see Fig. 5.10).) = 0.30
+    via: Act_Nsram
+pSD.i                Min. pSD enclosure of PFET gate not inside ThickGateOx = 0.30
+    via: pSD_Nsram
+pSD.i1               Min. pSD enclosure of PFET gate inside ThickGateOx = 0.40
+    via: pSDHV_Nsram
+pSD.j                Min. pSD space to NFET gate not inside ThickGateOx = 0.30
+    via: pSD_Nsram
+pSD.j1               Min. pSD space to NFET gate inside ThickGateOx = 0.40
+    via: pSD_Nsram
+Cnt.f                Min. Cont on Activ space to GatPoly = 0.11
+    via: GP_Nsram
+M1.c                 Min. Metal1 enclosure of Cont = 0.00
+    via: Cont_Nsram, M1_Nsram
+M1.c1                Min. Metal1 endcap enclosure of Cont (For contacts at Metal1 corners at least one side must be treated as an endcap and for the other sides rule M1.c can be applied.) = 0.05
+    via: Cont_Nsram
+M2.c1                Min. Metal2 endcap enclosure of Via1 (For vias at Metal2 corners at least one side must be treated as an endcap and for the other sides rule M2.c can be applied.) = 0.05
+    via: V1_Nsram_outside_EdgeSeal
+M3.c1                Min. Metal3 endcap enclosure of Via2 (For vias at Metal3 corners at least one side must be treated as an endcap and for the other sides rule M3.c can be applied.) = 0.05
+    via: V2_Nsram_outside_EdgeSeal
+M4.c1                Min. Metal4 endcap enclosure of Via3 (For vias at Metal4 corners at least one side must be treated as an endcap and for the other sides rule M4.c can be applied.) = 0.05
+    via: V3_Nsram_outside_EdgeSeal
+M5.c1                Min. Metal5 endcap enclosure of Via4 (For vias at Metal5 corners at least one side must be treated as an endcap and for the other sides rule M5.c can be applied.) = 0.05
+    via: V4_Nsram_outside_EdgeSeal
+V1.c1                Min. Metal1 endcap enclosure of Via1 (For Via1 at Metal1 corners at least one side must be treated as an endcap and for the other sides rule V1.c can be applied.) = 0.05
+    via: V1_Nsram_outside_EdgeSeal
+V2.c1                Min. Metal2 endcap enclosure of Via2 (For Via2 at Metal2 corners at least one side must be treated as an endcap and for the other sides rule V2.c can be applied.) = 0.05
+    via: V2_Nsram_outside_EdgeSeal
+V3.c1                Min. Metal3 endcap enclosure of Via3 (For Via3 at Metal3 corners at least one side must be treated as an endcap and for the other sides rule V3.c can be applied.) = 0.05
+    via: V3_Nsram_outside_EdgeSeal
+V4.c1                Min. Metal4 endcap enclosure of Via4 (For Via4 at Metal4 corners at least one side must be treated as an endcap and for the other sides rule V4.c can be applied.) = 0.05
+    via: V4_Nsram_outside_EdgeSeal
+npnG2.d1             Min. unrelated GatPoly space to TRANS = 0.90
+    via: GP_Nsram
+Cnt.c.Digi           Min. Activ enclosure of Cont inside DigiBnd = 0.05
+    via: Act_Nsram_or_Activ_mask

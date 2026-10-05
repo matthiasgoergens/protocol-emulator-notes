@@ -2,9 +2,12 @@
 # suffix -y069: Yosys 0.69+77 (oss-cad-suite); none: Yosys 0.62 (LibreLane 3.0.14 container)
 report                               area um2   seq um2  cells  flops latches
 gc_periph_128x38                         8363       441    670      9      38
+gc_periph_128x39                         8417       441    673      9      39
 gc_periph_32x21                          3028       343    216      7      21
+gc_periph_32x22                          3083       343    219      7      22
 gc_periph_32x64                          5369       343    345      7      64
 gc_periph_8x21                           1784       245    109      5      21
+gc_periph_8x22                           1838       245    112      5      22
 latch_rf_8x16                            5343         0    250      0     136
 mac16-y069                              23130      3135   2004     64       0
 mac16                                   23437      3135   2044     64       0

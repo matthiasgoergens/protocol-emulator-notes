@@ -1,0 +1,10 @@
+You are an adversarial reviewer. Read prototypes/rule-breaks/README.md in this repository and try to REFUTE its load-bearing claims by checking the evidence files it cites (under prototypes/rule-breaks/: deck/, drc/*.summary.txt and logs, layout/gain_rb.py and sram6t_rb.py, layout/rule-costs*.txt, sim/results/, yield/). The IHP DRC deck is at ~/.ciel/ihp-sg13g2/ihp-sg13g2/libs.tech/klayout/tech/drc (read-only) and an upstream copy at /var/tmp/spice-rule-breaks/upstream-pdk/ihp-sg13g2/libs.tech/klayout/tech/drc. Do not modify any files. Treat "looks fine" as failure: find errors.
+
+Specifically attack:
+1. That Tiny Tapeout's IHP precheck runs only the main table and that the main table does not check Gat.c, NW.c/d, TGO.a-e, pSD.i/j, Cnt.f (check the feol rule decks and deck/tt-precheck-*).
+2. That the maximal deck exempts those rules under the SRAM marker 25/0, and that upstream adds Cnt.c.SRAM 0.006.
+3. The area arithmetic per tier (reproduce from gain_rb.py / sram6t_rb.py geometry) and whether the "relaxed deck" DRC results genuinely check what is claimed (deck/mkdeck.py: does removing the SRAM exemption and substituting values actually enforce the relaxed values? could a substitution have silently hit the wrong literal or missed a rule?).
+4. The SPICE conclusions: W 0.20 read path breaks the thick-write cell at ss/27 C; level-shifted thin cell survives only with per-corner bar. Check the life.py outputs in sim/results/*.txt against the raw hold/read files and whether the baselines compared are like for like (same read sweep settings, LUMP, VLO).
+5. The physics claims (TGO keep-out only risks diffusion, not gates; Cnt.c on the storage node adds junction leakage; M2 floor of the PDK cell; tap-row estimate) and the yield arithmetic.
+6. Anything missing that would change the verdict (e.g. rules not checked, LVS not run, strap/edge cells, the dogbone geometry change in gain_rb.py relative to draw2.py).
+Report a numbered list of findings, each with: the claim, the evidence you checked (file:line), and whether it is WRONG, UNSUPPORTED, or OK. Finish with an overall verdict.

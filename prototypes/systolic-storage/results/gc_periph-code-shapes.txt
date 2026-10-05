@@ -1,0 +1,23 @@
+# Synthesis of the gain-cell bank periphery with check-inclusive column counts, 2026-09-26
+#
+# The old 128x38, 32x21 and 8x21 reports in ../pe-synth used Berger check columns. The
+# shortened extended-Hamming code needs seven, six and six check columns respectively, so
+# these shapes were synthesised with the same Yosys 0.62 flow and typical IHP liberty as
+# ../pe-synth/periph.sh. The physical check columns are included; parity generation and
+# checking logic are not. The checked-in periph.sh regenerates these shapes; this file records
+# the direct reproduction for the replacement code.
+#
+# Source: ../pe-synth/rtl/gc_periph.v. Run ../pe-synth/periph.sh from prototypes/pe-synth;
+# it uses the LibreLane 3.0.14 container with Yosys 0.62 and
+# sg13g2_stdcell_typ_1p20V_25C.lib. It preserves the Yosys log and stat report for each shape.
+# Shapes: 8x22/A=3, 32x22/A=5, 128x39/A=7.
+#
+# shape   cell area (um2)  cells  flops  output columns
+8x22               1837.99    112      5             22
+32x22              3082.67    219      7             22
+128x39             8417.00    673      9             39
+#
+# Yosys 0.62, git 7326bb7d6641500ecb285c291a54a662cb1e76cf. The source RTL explicitly
+# instantiates two word-line buffers per row and one write driver, sense inverter and output
+# latch per column. The only ABC warning was that its combinational network was already
+# reduced and did not need fraig.

@@ -1,0 +1,94 @@
+====================================================================================================
+Programmable delay-line + thermometer-code TDC: arithmetic area estimate
+(N sized from the FAST corner's FO1 tap delay -- the worst case for tap count;
+ resolution then reported at all three corners for that fixed N; no wire
+ parasitics, no select-line decoder logic, no layout effects included)
+====================================================================================================
+
+--- tap cell=sg13g2_buf_1  target=60MHz (16.6667 ns period)  coverage=full period (16.6667 ns) ---
+  FAST-corner tap delay = 42.60 ps -> N = ceil(16.6667/0.0426) = 392 taps
+  corner  tap_delay_ps  total_delay_ns  margin_ns
+  fast           42.60         16.7011     0.0345
+  typ            63.18         24.7660     8.0994
+  slow          101.01         39.5942    22.9276
+  area: tap chain (392xsg13g2_buf_1) = 2844.98 um^2
+        sampling flops (392xsg13g2_dfrbp_1) = 20626.10 um^2
+        mux2-tree (391x mux2_1) = 7094.30 um^2  -> total (mux2 variant) = 30565.38 um^2
+        mux4-tree (131x mux4_1) = 4991.41 um^2  -> total (mux4 variant) = 28462.49 um^2
+
+--- tap cell=sg13g2_buf_1  target=60MHz (16.6667 ns period)  coverage=quarter period (4.1667 ns) ---
+  FAST-corner tap delay = 42.60 ps -> N = ceil(4.1667/0.0426) = 98 taps
+  corner  tap_delay_ps  total_delay_ns  margin_ns
+  fast           42.60          4.1753     0.0086
+  typ            63.18          6.1915     2.0248
+  slow          101.01          9.8986     5.7319
+  area: tap chain (98xsg13g2_buf_1) = 711.24 um^2
+        sampling flops (98xsg13g2_dfrbp_1) = 5156.52 um^2
+        mux2-tree (97x mux2_1) = 1759.97 um^2  -> total (mux2 variant) = 7627.74 um^2
+        mux4-tree (33x mux4_1) = 1257.38 um^2  -> total (mux4 variant) = 7125.15 um^2
+
+--- tap cell=sg13g2_buf_1  target=50MHz (20.0000 ns period)  coverage=full period (20.0000 ns) ---
+  FAST-corner tap delay = 42.60 ps -> N = ceil(20.0000/0.0426) = 470 taps
+  corner  tap_delay_ps  total_delay_ns  margin_ns
+  fast           42.60         20.0243     0.0243
+  typ            63.18         29.6940     9.6940
+  slow          101.01         47.4727    27.4727
+  area: tap chain (470xsg13g2_buf_1) = 3411.07 um^2
+        sampling flops (470xsg13g2_dfrbp_1) = 24730.27 um^2
+        mux2-tree (469x mux2_1) = 8509.54 um^2  -> total (mux2 variant) = 36650.88 um^2
+        mux4-tree (157x mux4_1) = 5982.08 um^2  -> total (mux4 variant) = 34123.42 um^2
+
+--- tap cell=sg13g2_buf_1  target=50MHz (20.0000 ns period)  coverage=quarter period (5.0000 ns) ---
+  FAST-corner tap delay = 42.60 ps -> N = ceil(5.0000/0.0426) = 118 taps
+  corner  tap_delay_ps  total_delay_ns  margin_ns
+  fast           42.60          5.0274     0.0274
+  typ            63.18          7.4551     2.4551
+  slow          101.01         11.9187     6.9187
+  area: tap chain (118xsg13g2_buf_1) = 856.40 um^2
+        sampling flops (118xsg13g2_dfrbp_1) = 6208.88 um^2
+        mux2-tree (117x mux2_1) = 2122.85 um^2  -> total (mux2 variant) = 9188.12 um^2
+        mux4-tree (39x mux4_1) = 1485.99 um^2  -> total (mux4 variant) = 8551.27 um^2
+
+--- tap cell=sg13g2_dlygate4sd1_1  target=60MHz (16.6667 ns period)  coverage=full period (16.6667 ns) ---
+  FAST-corner tap delay = 89.30 ps -> N = ceil(16.6667/0.0893) = 187 taps
+  corner  tap_delay_ps  total_delay_ns  margin_ns
+  fast           89.30         16.6987     0.0320
+  typ           134.30         25.1148     8.4481
+  slow          216.36         40.4590    23.7923
+  area: tap chain (187xsg13g2_dlygate4sd1_1) = 2714.34 um^2
+        sampling flops (187xsg13g2_dfrbp_1) = 9839.49 um^2
+        mux2-tree (186x mux2_1) = 3374.78 um^2  -> total (mux2 variant) = 15928.62 um^2
+        mux4-tree (62x mux4_1) = 2362.35 um^2  -> total (mux4 variant) = 14916.18 um^2
+
+--- tap cell=sg13g2_dlygate4sd1_1  target=60MHz (16.6667 ns period)  coverage=quarter period (4.1667 ns) ---
+  FAST-corner tap delay = 89.30 ps -> N = ceil(4.1667/0.0893) = 47 taps
+  corner  tap_delay_ps  total_delay_ns  margin_ns
+  fast           89.30          4.1970     0.0303
+  typ           134.30          6.3123     2.1456
+  slow          216.36         10.1688     6.0022
+  area: tap chain (47xsg13g2_dlygate4sd1_1) = 682.21 um^2
+        sampling flops (47xsg13g2_dfrbp_1) = 2473.03 um^2
+        mux2-tree (46x mux2_1) = 834.62 um^2  -> total (mux2 variant) = 3989.87 um^2
+        mux4-tree (16x mux4_1) = 609.64 um^2  -> total (mux4 variant) = 3764.88 um^2
+
+--- tap cell=sg13g2_dlygate4sd1_1  target=50MHz (20.0000 ns period)  coverage=full period (20.0000 ns) ---
+  FAST-corner tap delay = 89.30 ps -> N = ceil(20.0000/0.0893) = 224 taps
+  corner  tap_delay_ps  total_delay_ns  margin_ns
+  fast           89.30         20.0027     0.0027
+  typ           134.30         30.0840    10.0840
+  slow          216.36         48.4642    28.4642
+  area: tap chain (224xsg13g2_dlygate4sd1_1) = 3251.40 um^2
+        sampling flops (224xsg13g2_dfrbp_1) = 11786.34 um^2
+        mux2-tree (223x mux2_1) = 4046.11 um^2  -> total (mux2 variant) = 19083.86 um^2
+        mux4-tree (75x mux4_1) = 2857.68 um^2  -> total (mux4 variant) = 17895.43 um^2
+
+--- tap cell=sg13g2_dlygate4sd1_1  target=50MHz (20.0000 ns period)  coverage=quarter period (5.0000 ns) ---
+  FAST-corner tap delay = 89.30 ps -> N = ceil(5.0000/0.0893) = 56 taps
+  corner  tap_delay_ps  total_delay_ns  margin_ns
+  fast           89.30          5.0007     0.0007
+  typ           134.30          7.5210     2.5210
+  slow          216.36         12.1161     7.1161
+  area: tap chain (56xsg13g2_dlygate4sd1_1) = 812.85 um^2
+        sampling flops (56xsg13g2_dfrbp_1) = 2946.59 um^2
+        mux2-tree (55x mux2_1) = 997.92 um^2  -> total (mux2 variant) = 4757.36 um^2
+        mux4-tree (19x mux4_1) = 723.95 um^2  -> total (mux4 variant) = 4483.38 um^2

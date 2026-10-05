@@ -1,0 +1,20 @@
+## pdk:cnt_c=0.07
+3T_thin_L13n: pitch 0.98 x 2.1 um = 2.058 um2 per bit core; 2.097
+3T_thick_L45n: pitch 0.98 x 2.75 um = 2.695 um2 per bit core; 2.747
+3T_allthick_L45n: pitch 0.98 x 2.96 um = 2.901 um2 per bit core; 2.956
+## pdk:cnt_c=0.07,cnt_c_end=0.02
+3T_thin_L13n: pitch 0.98 x 1.99 um = 1.950 um2 per bit core; 1.988
+3T_thick_L45n: pitch 0.98 x 2.64 um = 2.587 um2 per bit core; 2.637
+3T_allthick_L45n: pitch 0.98 x 2.85 um = 2.793 um2 per bit core; 2.846
+## pdk:cnt_c=0.07,cnt_c_end=0.02,tgo_a=0.105,tgo_b=0.105
+3T_thin_L13n: pitch 0.98 x 1.99 um = 1.950 um2 per bit core; 1.988
+3T_thick_L45n: pitch 0.98 x 2.31 um = 2.264 um2 per bit core; 2.307
+3T_allthick_L45n: pitch 0.98 x 2.85 um = 2.793 um2 per bit core; 2.846
+## pdk:cnt_c=0.07,cnt_c_end=0.02,tgo_a=0.105,tgo_b=0.105,cnt_f=0.07
+3T_thin_L13n: pitch 0.98 x 1.91 um = 1.872 um2 per bit core; 1.908
+3T_thick_L45n: pitch 0.98 x 2.23 um = 2.185 um2 per bit core; 2.227
+3T_allthick_L45n: pitch 0.98 x 2.77 um = 2.715 um2 per bit core; 2.767
+## standard:tgo_a=0.105,tgo_b=0.105
+3T_thin_L13n: pitch 1.03 x 2.1 um = 2.163 um2 per bit core; 2.202
+3T_thick_L45n: pitch 1.03 x 2.42 um = 2.493 um2 per bit core; 2.538
+3T_allthick_L45n: pitch 1.03 x 2.96 um = 3.049 um2 per bit core; 3.104

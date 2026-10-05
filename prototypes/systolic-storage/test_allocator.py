@@ -1,4 +1,4 @@
-"""Tests for the toy allocator: Berger detection, a planted weak row, and the allocator's invariants.
+"""Tests for the toy allocator: two-sided error detection, a planted weak row, and invariants.
 
 uv run --with pytest pytest -q test_allocator.py
 """
@@ -7,29 +7,108 @@ import itertools, random
 import allocator as a
 
 
-def test_berger_detects_every_unidirectional_error_8bit():
-    """Exhaustive over 8-bit data and every set of 1->0 decays in data and check bits."""
-    w, cb = 8, a.berger_bits(8)
+def _check_columns(width):
+    r = a.hamming_parity_bits(width)
+    data = [position | (1 << r) for position in a._data_positions(width)]
+    parity = [(1 << bit) | (1 << r) for bit in range(r)]
+    return data + parity + [1 << r]
+
+
+def test_check_columns_certify_distance_at_least_four():
+    """Nonzero, distinct columns, with no column equal to the sum of two others, certify d >= 4."""
+    for width in (8, 12, 16, 32):
+        columns = _check_columns(width)
+        assert all(columns)
+        assert len(columns) == len(set(columns))
+        unique = set(columns)
+        for i, left in enumerate(columns):
+            for right in columns[:i]:
+                assert left ^ right not in unique, (width, left, right)
+
+
+def test_extended_hamming_detects_every_error_up_to_three_8bit():
+    """Exhaustive over 8-bit data and every 1-, 2- or 3-bit transition, in either direction."""
+    w, cb = 8, a.check_bits(8)
     for data in range(256):
-        stored = data | (a.berger(data, w) << w)
-        ones = [b for b in range(w + cb) if (stored >> b) & 1]
-        for k in range(1, len(ones) + 1):
-            for drop in itertools.combinations(ones, k):
+        stored = a.encode(data, w)
+        for k in range(1, 4):
+            for flips in itertools.combinations(range(w + cb), k):
                 got = stored
-                for b in drop:
-                    got &= ~(1 << b)
-                d, c = got & 0xFF, got >> w
-                assert a.berger(d, w) != c, (data, drop)
+                for b in flips:
+                    got ^= 1 << b
+                assert not a.code_valid(got, w), (data, flips)
 
 
-def test_berger_misses_a_0_to_1_error():
-    """Control: the code is only for one-directional errors. A 1->0 plus a 0->1 in the data
-    keeps the count of 0s and passes, so the test above is not vacuous."""
+def test_four_transitions_can_be_undetectable():
+    """The guarantee stops at three: this weight-four error is another valid codeword."""
+    w = 8
+    stored = a.encode(0, w)
+    flips = (0, 1, 2, 12)
+    got = stored ^ sum(1 << bit for bit in flips)
+    assert a.code_valid(got, w)
+
+
+def test_code_valid_rejects_unused_high_bits():
+    stored = a.encode(0x5A, 8)
+    assert a.code_valid(stored, 8)
+    assert not a.code_valid(stored | (1 << (8 + a.check_bits(8))), 8)
+
+
+def test_extended_hamming_catches_mixed_direction_error():
+    """Control: the code handles both decay directions, unlike a Berger count of zeroes."""
     w = 8
     data = 0b0000_0001
-    stored = data | (a.berger(data, w) << w)
-    got = (stored & ~1) | 0b10
-    assert a.berger(got & 0xFF, w) == got >> w
+    stored = a.encode(data, w)
+    got = stored ^ (1 << 0) ^ (1 << 1)  # one 1->0 and one 0->1
+    assert not a.code_valid(got, w)
+
+
+def test_decay_models_both_directions():
+    w = 8
+    row = a.Row(0, "thin", true=1.0, profiled=1.0)
+    row.bit_spread = [1e9] * (w + a.check_bits(w))
+    row.rise_spread = [1e9] * (w + a.check_bits(w))
+    row.bit_spread[0] = 1.0
+    d = a.Decay("ff85", w)
+    one = d.encode(0b1)
+    got = d.read(row, one, 0b1, 0, int(a.LIFE_ONE["thin"]["ff85"]) + 1)
+    assert (got & 1) == 0 and d.detected == 1 and d.check_only == 0
+
+    row.bit_spread = [1e9] * (w + a.check_bits(w))
+    row.rise_spread = [1e9] * (w + a.check_bits(w))
+    row.rise_spread[0] = 1.0
+    d = a.Decay("ff85", w)
+    zero = d.encode(0)
+    got = d.read(row, zero, 0, 0, int(a.LIFE_ZERO["thin"]["ff85"]) + 1)
+    assert (got & 1) == 1 and d.detected == 1 and d.check_only == 0
+
+
+def test_decay_detects_one_fall_and_one_rise():
+    w = 8
+    row = a.Row(0, "thin", true=1.0, profiled=1.0)
+    row.bit_spread = [1e9] * (w + a.check_bits(w))
+    row.rise_spread = [1e9] * (w + a.check_bits(w))
+    row.bit_spread[0] = 1.0
+    row.rise_spread[1] = 1.0
+    d = a.Decay("ff85", w)
+    stored = d.encode(0b01)
+    t = max(int(a.LIFE_ONE["thin"]["ff85"]), int(a.LIFE_ZERO["thin"]["ff85"])) + 1
+    got = d.read(row, stored, 0b01, 0, t)
+    assert got & 0xFF == 0b10
+    assert d.corrupt == d.detected == 1 and d.silent == d.check_only == 0
+
+
+def test_decay_uses_thin_tt85_stored_zero_read_deadline():
+    w = 8
+    row = a.Row(0, "thin", true=1.0, profiled=1.0)
+    row.bit_spread = [1e9] * (w + a.check_bits(w))
+    row.rise_spread = [1e9] * (w + a.check_bits(w))
+    row.rise_spread[0] = 1.0
+    d = a.Decay("tt85", w)
+    zero = d.encode(0)
+    got = d.read(row, zero, 0, 0, int(a.LIFE_ZERO["thin"]["tt85"]) + 1)
+    assert a.LIFE_ZERO["thin"]["tt85"] == 106.9e-6 * a.CLK
+    assert (got & 1) == 1 and d.detected == 1 and d.check_only == 0
 
 
 def _vfir2():
@@ -47,22 +126,31 @@ def test_clean_rows_no_errors():
 
 
 def test_planted_weak_row_is_detected_and_promotion_fixes_it():
-    """A thin row that really lives 25 % of nominal, but was profiled as nominal. vfir2 values
-    live 63.4 us; nominal thin at tt/27 C is 118.8 us (95 us with the guard), the weak row 29.7 us.
-    Every corrupt read must be flagged (no silent corruption), and flags come only from that row.
-    Then promote the row (profile it as 0.25) and re-run: no corruption, no flags."""
+    """One physical bit in a thin row lives 25 % of nominal, while the row is profiled as
+    nominal. vfir2 values live 63.4 us; nominal thin at tt/27 C is 118.8 us (95 us with the
+    guard), and the physical weak-bit deadline is 29.7 us. Every corrupt read must be flagged
+    (no silent corruption), and flags come only from that row. Then promote its row with a 0.25
+    profile while retaining the same physical 0.25 bit-spread and re-run: no corruption, no flags."""
     vs = _vfir2()
     weak = 17
-    rows = a.make_rows(0, 64, 32, weak=[(weak, 0.25, 1.0)])
+    rows = a.make_rows(0, 64, 32, weak=[(weak, 1.0, 1.0)])
+    rows[weak].rise_spread = [1e9] * len(rows[weak].rise_spread)
+    rows[weak].bit_spread = [1e9] * len(rows[weak].bit_spread)
+    rows[weak].bit_spread[0] = 0.25
+    assert rows[weak].true == 1.0 and rows[weak].bit_spread[0] == 0.25
     d = a.Decay("tt27", 32)
     a.allocate(vs, rows, "tt27", guard=0.8, decay=d)
     assert d.corrupt > 0, "the planted row should corrupt something"
     assert d.silent == 0
     assert set(d.detect_rows) == {weak}
     print(f"weak row: {d.reads} reads, {d.corrupt} corrupt, {d.detected} flagged, "
-          f"{d.false_alarm} false alarms, silent {d.silent}")
+          f"{d.check_only} check-only, silent {d.silent}")
 
-    rows = a.make_rows(0, 64, 32, weak=[(weak, 0.25, 0.25)])
+    rows = a.make_rows(0, 64, 32, weak=[(weak, 1.0, 0.25)])
+    rows[weak].rise_spread = [1e9] * len(rows[weak].rise_spread)
+    rows[weak].bit_spread = [1e9] * len(rows[weak].bit_spread)
+    rows[weak].bit_spread[0] = 0.25
+    assert rows[weak].true == 1.0 and rows[weak].bit_spread[0] == 0.25
     d2 = a.Decay("tt27", 32)
     s2 = a.allocate(vs, rows, "tt27", guard=0.8, decay=d2)
     assert d2.corrupt == 0 and d2.detected == 0
@@ -96,7 +184,9 @@ def test_decayed_refresh_stays_decayed():
     L = int(a.LIFE["thin"]["ff85"])                    # 60 cycles
     vs = [a.Value("x", 1, 1, 0, 3 * L)]
     rows = a.make_rows(0, 1, 1, weak=[(0, 0.5, 1.0)])
-    rows[0].bit_spread = [1.0] * len(rows[0].bit_spread)
+    rows[0].bit_spread = [1e9] * len(rows[0].bit_spread)
+    rows[0].bit_spread[0] = 1.0
+    rows[0].rise_spread = [1e9] * len(rows[0].rise_spread)
     d = a.Decay("ff85", 1)
     s = a.allocate(vs, rows, "ff85", guard=0.8, decay=d)
     assert s["refreshes"] >= 2

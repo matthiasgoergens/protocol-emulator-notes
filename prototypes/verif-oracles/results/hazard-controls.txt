@@ -1,0 +1,34 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/verif-oracles/_build/default/hazard/hazard_controls.exe
+# commit: 61e8b0434af942db81aa64a2d74766d20d505576 (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T09:00:29+08:00
+ok   T0 drives pin 0, which it owns                                           expected accepted             got accepted                   
+ok   T0 and T1 both drive pin 0 (T0 owns it)                                  expected rejected:pair        got rejected:pair+solo         [solo] (pin-drive, -, UNDECLARED) on pin 0 at T1 page 1 pc 0 (SETP); [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0 at T0 page 0 pc 0 (SETP) / T1 page 1 pc 0 (SETP)
+ok   T1 drives pin 3, owned by T0 (T0 never touches it)                       expected rejected:solo        got rejected:solo              [solo] (pin-drive, -, UNDECLARED) on pin 3 at T1 page 1 pc 0 (SHO)
+ok   SHO pair on pin 7 drives pin 0 too (wraps), pin 0 not granted            expected rejected:solo        got rejected:solo              [solo] (pin-drive, -, UNDECLARED) on pin 0 at T2 page 2 pc 0 (SHO pair)
+ok   T0..T3 drive pin 0, declared a time-division group                       expected accepted             got accepted                   
+ok   T1 samples T0's pin (a monitor)                                          expected accepted             got accepted                   
+ok   a foreign drive only in unreachable code                                 expected accepted             got accepted                   
+ok   a foreign drive behind a conditional branch (JNZ), reachable             expected rejected:solo        got rejected:solo              [solo] (pin-drive, -, UNDECLARED) on pin 5 at T0 page 0 pc 3 (SETP)
+ok   T1 LDB on bank 0, refresh every 8 clocks at offset 2 (T2's clocks)       expected accepted             got accepted                   
+ok   T1 LDB on bank 0, refresh every 8 clocks at offset 5 (T1's clocks)       expected rejected:pair        got rejected:pair              [pair] (bank-read (LDB), bank-refresh, SAME CLOCK possible, not shared) on bank 0 at T1 page 1 pc 0 (LDB) / refresh (refresh every 8 clocks at 5)
+ok   T2 LDB on bank 0, refresh every 6 clocks at 0 (even clocks: T0's and T2's) expected rejected:pair        got rejected:pair              [pair] (bank-read (LDB), bank-refresh, SAME CLOCK possible, not shared) on bank 0 at T2 page 2 pc 0 (LDB) / refresh (refresh every 6 clocks at 0)
+ok   T1 LDB on bank 0, refresh every 6 clocks at 0 (never an odd clock)       expected accepted             got accepted                   
+ok   T3 STB on bank 1 (BANK imm 2) while segment 4 streams bank 1             expected rejected:pair        got rejected:pair              [pair] (bank-write (STB), bank-stream (array), SAME CLOCK possible, not shared) on bank 1 at T3 page 3 pc 2 (STB) / array segment 3 (array stream, every clock)
+ok   T3 STB on bank 1 while segment 3 streams bank 0                          expected accepted             got accepted                   
+ok   T3 STB on bank 1 granted bank 0 only                                     expected rejected:solo        got rejected:solo              [solo] (bank-write (STB), -, UNDECLARED) on bank 1 at T3 page 3 pc 2 (STB)
+ok   T0 reads and T2 writes bank 0 (different clocks)                         expected accepted             got accepted                   
+ok   T0 SEND to inbox 1 with fail = itself (no deadline), T1 RECV             expected rejected:solo        got rejected:solo              [solo] (send, UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 0 (SEND)
+ok   T0 SEND whose fail path jumps straight back (no deadline)                expected rejected:solo        got rejected:solo              [solo] (send, UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 0 (SEND)
+ok   T0 SEND whose fail path runs through nine NOPs and jumps back (review finding) expected rejected:solo        got rejected:solo              [solo] (send, UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 0 (SEND)
+ok   T0 SEND whose fail path ends in a HALT elsewhere (gives up: accepted)    expected accepted             got accepted                   
+ok   T0 LDD 50; SEND with a give-up path (deadline), T1 RECV                  expected accepted             got accepted                   
+ok   WAITC 11 spinning on a full inbox (no deadline)                          expected rejected:solo        got rejected:solo              [solo] (space-wait (WAITC 11), UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 2 (WAITC 11)
+ok   SEND to inbox 2, which nobody reads                                      expected rejected:counterpart got rejected:counterpart       [counterpart] send on inbox 2 with no recv/poll (WAITC 10) by another thread at T0 page 0 pc 1 (SEND)
+ok   two consumers (T1 and T2 RECV) of inbox 1                                expected rejected:pair        got rejected:pair              [pair] (recv, recv, different clocks, not shared) on inbox 1 at T1 page 1 pc 0 (RECV) / T2 page 2 pc 0 (RECV)
+ok   two producers (T0, T3) of inbox 1, not declared shared                   expected rejected:pair        got rejected:pair              [pair] (send, send, different clocks, not shared) on inbox 1 at T0 page 0 pc 1 (SEND) / T3 page 3 pc 1 (SEND)
+ok   RECV on inbox 1 by a thread with no grant                                expected rejected:solo        got rejected:solo              [solo] (recv, UNBOUNDED, UNDECLARED) on inbox 1 at T1 page 1 pc 0 (RECV)
+ok   a reachable reserved EXT operation (EXT 9)                               expected raised               got raised                     Unhandled: page 0 pc 0: reserved EXT operation 9
+
+27 cases; HAZARD CONTROLS PASS
+exit 0

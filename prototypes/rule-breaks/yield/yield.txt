@@ -1,0 +1,30 @@
+1. Overlay-limited breaks: fraction of dies whose whole array fails
+   break                                         margin   3s=45nm   3s=60nm
+   Cnt.c 0.02: contact off Activ edge (STI)       0.020  1.82e-01  3.17e-01
+   Cnt.c 0.07 (standard)                          0.070  3.06e-06  4.65e-04
+   Cnt.f 0.07: contact onto spacer/gate (clear. 0.03)   0.040  7.66e-03  4.55e-02
+   Cnt.f 0.11 (standard, clearance 0.03)          0.080  9.64e-08  6.33e-05
+   TGO 0.105: edge onto S/D Activ (no gate hit)   0.105  2.56e-12  1.52e-07
+   TGO.c/d 0.34 kept: edge onto a gate            0.340 9.56e-114  8.21e-65
+   NW 0.24 (well edge, overlay part only)         0.120  1.24e-15  1.97e-09
+   Cnt.c 0.02 fails at almost any overlay: the contact then lands partly on STI. IHP's own
+   bit cell does exactly this (0.02, upstream deck allows 0.006 under the SRAM marker), so the
+   process must tolerate a contact straddling the Activ edge; the cost is contact resistance
+   and junction leakage at that contact, not a hard failure. Keep it off storage nodes.
+
+2. Random per-bit failures absorbed by mapping out rows (64 kbit)
+   256 rows x 256 bits:
+     p = 1e-07:     0.01 failing bits,    0.01 rows mapped out,        2 bits lost (0.00 %)
+     p = 1e-06:     0.07 failing bits,    0.07 rows mapped out,       17 bits lost (0.03 %)
+     p = 1e-05:     0.66 failing bits,    0.65 rows mapped out,      168 bits lost (0.26 %)
+     p = 1e-04:     6.55 failing bits,    6.47 rows mapped out,     1657 bits lost (2.53 %)
+     p = 1e-03:    65.54 failing bits,   57.85 rows mapped out,    14808 bits lost (22.60 %)
+   512 rows x 128 bits:
+     p = 1e-07:     0.01 failing bits,    0.01 rows mapped out,        1 bits lost (0.00 %)
+     p = 1e-06:     0.07 failing bits,    0.07 rows mapped out,        8 bits lost (0.01 %)
+     p = 1e-05:     0.66 failing bits,    0.65 rows mapped out,       84 bits lost (0.13 %)
+     p = 1e-04:     6.55 failing bits,    6.51 rows mapped out,      834 bits lost (1.27 %)
+     p = 1e-03:    65.54 failing bits,   61.54 rows mapped out,     7878 bits lost (12.02 %)
+
+   The same with column sparing is not modelled: bit lines are shared by all rows, so a
+   column fault (a short on the RBL/WBL) costs a column, which the compiler model does not map.

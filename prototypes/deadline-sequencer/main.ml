@@ -20,11 +20,12 @@ let lockstep ~seed ~cycles =
   let mismatches = ref 0 in
   for c = 0 to cycles - 1 do
     let pin_in = Random.int 256 and host_in = Random.int 256 and host_in_valid = Random.bool () in
-    let eff = Isa.step st ~mem ~pin_in ~host_in ~host_in_valid in
-    let o = Harness.cycle s ~pin_in ~host_in ~host_in_valid in
+    let pin_in4 = (Random.bits () lor (Random.bits () lsl 30)) land 0xFFFFFFFF in
+    let eff = Isa.step st ~mem ~pin_in ~pin_in4 ~host_in ~host_in_valid in
+    let o = Harness.cycle s ~pin_in ~pin_in4 ~host_in ~host_in_valid in
     let (po, poe, ho, hir, pcs) = (o.pin_out, o.pin_oe, o.host_out, o.host_in_ready, o.pcs) in
     let ok = po = st.pin_out && poe = st.pin_oe && ho = eff.host_out && hir = eff.host_in_ready
-             && pcs = Array.to_list st.pcs in
+             && pcs = Array.to_list st.pcs && o.pin_sub = st.pin_sub in
     if not ok then begin
       incr mismatches;
       if !mismatches <= 3 then

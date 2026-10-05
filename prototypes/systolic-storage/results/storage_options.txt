@@ -33,10 +33,10 @@ SRAM RM_IHPSG13_1P_512x16_c2_bm_bist           8192     45309     5.53  LEF (sma
 SRAM RM_IHPSG13_1P_1024x8_c2_bm_bist           8192     49419     6.03  LEF (smallest 1P macros)
 SRAM RM_IHPSG13_1P_256x32_c2_bm_bist           8192     49488     6.04  LEF (smallest 1P macros)
 
-# lifetimes of a stored 1 (10 ns sense), in us and in 50 MHz cycles
-gain-cell thick tt27:    12060.0 us =     603000 cycles
-gain-cell thick tt85:    12210.0 us =     610500 cycles
-gain-cell thick ff85:     3100.0 us =     155000 cycles
-gain-cell thin  tt27:      118.8 us =       5940 cycles
-gain-cell thin  tt85:        8.0 us =        400 cycles
-gain-cell thin  ff85:        1.2 us =         60 cycles
+# directional retention bounds (10 ns sense), in us and in 50 MHz cycles
+gain-cell thick tt27: 1->0    12060.0 us, 0->1    10000.0 us, min    10000.0 us =     500000 cycles
+gain-cell thick tt85: 1->0    12210.0 us, 0->1    10000.0 us, min    10000.0 us =     500000 cycles
+gain-cell thick ff85: 1->0     3100.0 us, 0->1    10000.0 us, min     3100.0 us =     155000 cycles
+gain-cell thin  tt27: 1->0      118.8 us, 0->1     5270.0 us, min      118.8 us =       5940 cycles
+gain-cell thin  tt85: 1->0        8.0 us, 0->1      106.9 us, min        8.0 us =        400 cycles
+gain-cell thin  ff85: 1->0        1.2 us, 0->1        3.2 us, min        1.2 us =         60 cycles

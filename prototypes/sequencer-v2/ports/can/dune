@@ -1,0 +1,21 @@
+; ../../../sequencer-ps2-can: CAN transmit on v2. can_model.ml and can_bench.ml unchanged (symlinks);
+; sim.ml the original with the edit of ../ps2/dune; can_fw_orig.ml a copy of the original firmware
+; module, which can_fw.ml includes before replacing tx (re-assembled) and rx (not ported);
+; can_tx.ml the scenarios, controls and random runs that need no receiver of ours.
+(rule
+ (with-stdout-to
+  isa_v_enc.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa_v.ml})))
+
+(rule
+ (with-stdout-to
+  sim.ml
+  (run sed -e "/let dbg_of (st : Isa_v.state)/,+1d" -e "s/&& o.dbg = dbg_of m.st in/in/"
+   %{dep:orig/sim.ml})))
+
+(rule
+ (copy orig/can_fw.ml can_fw_orig.ml))
+
+(executables
+ (names can_tx can_stall)
+ (libraries hardcaml seqv2))

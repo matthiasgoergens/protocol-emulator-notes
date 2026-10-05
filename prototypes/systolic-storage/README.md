@@ -11,29 +11,50 @@ Source: `storage_options.py` → `results/storage_options.txt`, with LEF areas i
 `results/lef_areas.txt`. Flop, latch and SRAM areas come from the PDK LEF. Gain-cell bit cells
 are the drawn, DRC-clean ones. **Their periphery is an estimate from standard cells, not a
 drawing:** per row, two word-line buffers and a decode gate; per column, a write driver, a sense
-inverter and a latch. `../pe-synth` has since synthesised this periphery. For the two banks used in
-§3 it comes out 17 % and 29 % larger than the estimate (3,028 and 8,363 µm²). The table below
-still uses the estimate; §3 gives both.
+inverter and a latch. `../pe-synth` has since synthesised this periphery. With shortened
+extended-Hamming check columns, the relevant shapes synthesise to 1,838, 3,083 and 8,417 µm²
+for 8×22, 32×22 and 128×39 (`results/gc_periph-code-shapes.txt`). The table below still uses
+the estimate; §3 gives both. These synthesis figures size the physical check columns but do not
+include parity-generation or checking logic.
 
-| option | µm²/bit | lifetime of a stored 1 | fits which values |
+| option | µm²/bit | minimum modelled retention deadline | fits which values |
 |---|---|---|---|
 | flop delay line (`dfrbpq_1`, 48.99 µm²; the library has no flop without reset) | 49.0 | static | pipeline registers, delays of a few cycles |
 | flop register file, 8–64 words | 80 | static | not worth it: 8 words cost 10.2k µm², about two PEs |
 | latch register file (`dlhq_1`, 30.84 µm²), 8–64 words | 45.6–46.3 | static | per-PE coefficients and config, where they must drive logic continuously |
-| thick 3T gain cell, bank of 16×16 / 32×32 / 128×32 | 10.0 / 6.0 / 4.4 | ≥ 3.1 ms at ff/85 °C; 12 ms at tt | anything that dies within a frame's worth of lines; resident data with 0.01–0.4 % refresh |
-| thin 3T gain cell, same banks | 9.3 / 5.3 / 3.7 | 118.8 µs at tt/27 °C; about 8 µs at tt/85 °C; ≥ 1.2 µs at ff/85 °C | values dying within a line at room temperature; register-like values (< 1 µs) everywhere |
+| thick 3T gain cell, bank of 16×16 / 32×32 / 128×32 | 10.0 / 6.0 / 4.4 | 10 ms at tt; ≥ 3.1 ms at ff/85 °C | anything that dies within a frame's worth of lines; resident data with 0.01–0.4 % refresh |
+| thin 3T gain cell, same banks | 9.3 / 5.3 / 3.7 | 118.8 µs at tt/27 °C; about 8 µs at tt/85 °C; ≥ 1.2 µs at ff/85 °C | values dying within a line at room temperature; sub-1 µs values in nominal/corner models, not an array-wide guarantee |
 | smallest SRAM macro, `1P_256x8` (2 kbit) / `1P_256x16` (4 kbit) | 8.57 / 6.87 | static | edge buffers of ≥ 2 kbit; one port per macro |
 
-The thin-oxide lifetimes come from `../gain-cell/retention/results/v6-3T-lv-w0.15-l0.13.txt`,
-the level reached at the 10 ns sense threshold. The thick-oxide ones come from
-`lifetimes-3t.txt`, line `v5-3T-w0.15-l0.45`. The ff figures are lower bounds, because the
-readable level there lies below the sweep's floor.
+Retention is two-sided: a stored 1 falls and a stored 0 rises, so the table takes the earlier
+directional deadline. The thin stored-1 crossings come from
+`../gain-cell/retention/results/v6-3T-lv-w0.15-l0.13.txt`, and the thick ones from
+`lifetimes-3t.txt`, line `v5-3T-w0.15-l0.45`. Thin stored-0 proxy deadlines come from
+`../gain-cell/tricks-thin/results/hold-lv-vlo0.txt`: 106.9 µs to the 0.20 V tt/85 °C read
+threshold, and a conservative 5.27 ms to 0.20 V at tt/27 °C (the 0.25 V tt/27 °C threshold is
+not crossed in the 50 ms sweep). The 505.2 µs point at tt/85 °C is a 0.25 V crossing, not the
+10 ns read threshold. The read-inclusive ff/85 °C bound is 3.2 µs; Monte Carlo also
+has the stored 0 fail first in 43 of 200 samples
+(`../gain-cell/tricks-thin/results/mc-base-summary.txt`). Thick stored 0s stay below 0.017 V
+through the 10 ms sweep in every listed corner
+(`../gain-cell/retention/results/v5-3T-w0.15-l0.45.txt`), making 10 ms a conservative deadline
+rather than a measured failure time. The ff figures for stored 1s are lower bounds because the
+readable level lies below the sweep's floor.
 
 **The main result of the table:** per-PE storage in standard cells costs 46–80 µm²/bit. A
-16-bit PE synthesises to 6,559 µm² (`../pe-synth`; the original estimate was 5,000). An 8-word latch
-register file synthesises to 5,343 µm², so it costs about as much as the PE. Gain-cell banks are 5–13× denser at the sizes a PE wants. Unlike SRAM they come in any size,
-with no 2 kbit, 17.5k µm² minimum. At 4 kbit and above, a gain-cell bank beats the SRAM macro
-only by 1.3–1.9×, or 1.4× once it carries Berger columns (`results/candidates.txt`).
+16-bit PE synthesises to 6,559 µm² (`../pe-synth`; the original estimate was 5,000). An 8-word
+latch register file synthesises to 5,343 µm², so it costs about as much as the PE. The raw cell
+area is 2.20–2.89 µm²/bit. The 5–13× figure is a check-column-free payload comparison in
+`results/storage_options.txt`; it still includes estimated periphery and is not code-inclusive
+payload density. With shortened extended-Hamming columns and the
+estimated periphery, code-inclusive thick-bank areas are 18.88585 µm²/payload bit for 8×16,
+9.147625 for 32×16 and 5.1177609375 for 128×32: about 2.41×, 4.98× and 8.91× denser than the
+45.59 µm²/bit latch storage. Using `storage_options.py` and the exact synthesis reports, the
+corresponding figures are 18.333025, 9.99458125 and
+5.57711953125 µm²/payload bit. Unlike SRAM, gain-cell banks come in any size, with no
+2 kbit, 17.5k µm² minimum. At 4 kbit and above, a gain-cell bank beats the SRAM macro only by
+1.3–1.9×; `results/candidates.txt` includes the shortened extended-Hamming check columns in
+that comparison.
 
 ## 2. What the workloads need
 
@@ -62,8 +83,9 @@ Source: `candidates.py [estimate|synth|placed]` → `results/candidates.txt`,
     8,762–9,339 µm² (`../pe-synth/README.md`).
 - **synth:** Yosys cell areas from `../pe-synth/results/areas.txt`.
   - The PE is 6,559 µm²: a row of eight of the PE described in `candidates.py`, divided by 8.
-  - The latch file and the bank periphery are synthesised (5,343; 8,363 for 128×38; 3,028 for
-    32×21).
+  - The latch file and bank periphery sized for the check-inclusive column counts are synthesised
+    (5,343; 1,838 for 8×22; 3,083 for 32×22; 8,417 for 128×39;
+    `results/gc_periph-code-shapes.txt`). Parity generation and checking are not included.
   - The same kind of number as the old estimate, so the table compares like with like.
 - **placed:** floor area. The PE is 9,852 µm² of core per PE, from LibreLane place and route of the
   row of eight at 90 % final utilisation (`../pe-synth/results/pnr.txt`).
@@ -89,7 +111,7 @@ estimate basis. The changes under the other two follow the table.
 | D1 8×16 latch RF in every PE | 18 / 16 / 11 | 2,304 bits, 18 × 16-bit ports | **the only design that feeds weights to 8 PEs every cycle** (8×8 product, 128 bits per cycle). Too small for any line buffer or the programme |
 | **D2** edge column, 2 thick banks of 128×32 | **31 / 23 / 14** | 8,192 bits, 2 × 32-bit ports | line filters, Ethernet line buffer up to 5 lines per packet, USB packets, programme store (0.1 % refresh), a 16-PE merge at 64 bits per cycle (its ports at 100 %, no headroom) |
 | D2s the same bits in 2 SRAM `1P_256x16` | 28 / 21 / 14 | 8,192 bits, 2 × 16-bit ports | the same without refresh, but half the port width, so no merge; 3 fewer PEs |
-| **D3** graded: thin 32×16 bank per 4 PEs, 2 thick banks at the edge | 26 / 20 / 12 | 11,776 bits, 7 × 16 + 2 × 32-bit ports | as D2, plus the 20-lines-per-packet buffer: the thin banks take the overflow, with refresh at 1.3 % of the busiest bank's port at tt/27 °C, 20 % at tt/85 °C, and not at all at ff/85 °C |
+| **D3** graded: thin 32×16 bank per 4 PEs, 2 thick banks at the edge | 25 / 19 / 12 | 11,776 bits, 7 × 16 + 2 × 32-bit ports | as D2, plus the 20-lines-per-packet buffer: the thin banks take the overflow, with refresh at 1.3 % of the busiest bank's port at tt/27 °C and 20 % at tt/85 °C; it does not fit at ff/85 °C |
 | D4 the array as its own delay line | 40 / 30 / 20 | 32 bits per PE given up | short buffers (a 64-byte packet costs 16 PEs) |
 
 **What changes with synthesised and placed areas** (diff the three result files):
@@ -102,7 +124,7 @@ estimate basis. The changes under the other two follow the table.
     matcher and the 16-PE merge. D0 and D4 still run the matcher.
   - D1's 1,408 bits no longer hold the 2-tap filter.
   - **D2 and D2s tie at 14 PEs.** The gain-cell bank's periphery grows with placement (by the
-    assumed 1.50) and the macro does not, and the bank's advantage shrinks to 26,618 against 28,127 µm² per 4 kbit.
+    assumed 1.50) and the macro does not, and the bank's advantage shrinks to 27,069 against 28,127 µm² per 4 kbit.
     D2 keeps twice the port width.
 - **Other PE kinds** (`../pe-synth`), per 200k µm²:
   - min-plus, 4,443 synthesised / 7,679 placed: about 45 / 26 PEs;
@@ -118,10 +140,11 @@ The honest reading (written for the estimate basis; the synth basis keeps every 
   8 PEs; none of ours does except the weight product. There, D3's two local banks per 8 PEs give
   32 bits per cycle, not the 128 needed.
 - **D1 is not dominated.** It is the only design for weight-stationary products, at a cost of
-  22 PEs. A cheaper version would put an 8-word gain-cell bank with Berger columns in each PE:
-  about 2,340 µm² (18.3 µm²/bit, periphery estimated) against 5,835 µm² of latches. Synthesised,
-  the figures are 2,270 µm² (486 of thick cells plus 1,784 of periphery,
-  `../pe-synth/reports/gc_periph_8x21.stat.txt`) against 5,343. It is not evaluated here.
+  22 PEs. A cheaper version would put an 8-word gain-cell bank with shortened extended-Hamming
+  columns in each PE: about 2,417 µm² (18.9 µm²/bit, periphery estimated) against 5,835 µm² of
+  latches. With the synthesised 8×22 periphery it is about 2,347 µm² (509 of thick cells plus
+  1,838 of periphery, `results/gc_periph-code-shapes.txt`) against 5,343. It is not evaluated
+  here.
 - **Refresh helps only where D3's thin banks overflow.** No workload needs refresh of a thick
   bank except resident data.
 
@@ -136,7 +159,11 @@ The honest reading (written for the estimate basis; the synth basis keeps every 
 - **Feasibility is exact:** a mix fits exactly when it has at least as many rows as the peak
   number of live values, because refresh and migration never change how many rows are occupied
   (checked in the tests).
-- **Every word carries a Berger check,** and a per-bit decay model applies the *true* lifetimes.
+- **Every word carries a shortened extended-Hamming check,** and a per-bit decay model applies
+  the *true* directional lifetimes. Its minimum distance is four, so it detects every one-, two-
+  or three-bit transition, whether the bits rise or fall. Four or more simultaneous transitions
+  can be undetectable. Detection begins with a valid codeword: hardware must stop or recover on
+  a flag rather than continue from a damaged check word.
 
 Traces (`traces/`, from `gen_traces.py` and `seqtrace/`):
 - **Sequencer, instrumented:** the deadline sequencer's own interpreter, unchanged. It runs the
@@ -152,12 +179,12 @@ thick rows. The all-thick mix never needs a refresh.
 
 | trace | all thick | tt/27 °C | tt/85 °C | ff/85 °C |
 |---|---|---|---|---|
-| seq-regs (13 rows × 12 bit) | 2,338 µm² | 0+13, 0 %, −6 % | 0+13, 1.2 %, −6 % | 1+12, 6.7 %, −6 % |
-| seq-imem (165 × 16) | 16,711 | 0+165, 1.2 %, −14 % | 57+108, 9.9 %, −9 % | 105+60, 9.7 %, −5 % |
-| linebuf-P5 (117 × 32) | 18,991 | 0+117, 2.6 %, −16 % | 63+54, 9.8 %, −7 % | 87+30, 9.3 %, −4 % |
-| linebuf-P20 (296 × 32) | 44,170 | 0+296, 7.7 %, −18 % | 215+81, 9.7 %, −5 % | 254+42, 9.5 %, −2 % |
-| vfir2 (64 × 32) | 11,535 | 0+64, **0 %**, −15 % | 44+20, 9.7 %, −5 % | 61+3, 9.1 %, −1 % |
-| vfir3 (128 × 32) | 20,538 | 0+128, 3.5 %, −16 % | 109+19, 9.7 %, −2 % | 125+3, 9.1 %, −0.4 % |
+| seq-regs (13 rows × 12 bit) | 2,522 µm² | 0+13, 0 %, −6.4 % | 0+13, 1.2 %, −6.4 % | 1+12, 6.7 %, −5.9 % |
+| seq-imem (165 × 16) | 17,242 | 0+165, 1.2 %, −14.5 % | 57+108, 9.9 %, −9.5 % | 105+60, 9.7 %, −5.3 % |
+| linebuf-P5 (117 × 32) | 19,383 | 0+117, 2.6 %, −16.2 % | 63+54, 9.8 %, −7.5 % | 87+30, 9.3 %, −4.2 % |
+| linebuf-P20 (296 × 32) | 45,080 | 0+296, 7.7 %, −17.7 % | 215+81, 9.7 %, −4.8 % | 254+42, 9.5 %, −2.5 % |
+| vfir2 (64 × 32) | 11,775 | 0+64, **0 %**, −14.6 % | 44+20, 9.7 %, −4.6 % | 61+3, 9.1 %, −0.7 % |
+| vfir3 (128 × 32) | 20,962 | 0+128, 3.5 %, −16.4 % | 109+19, 9.7 %, −2.4 % | 125+3, 9.1 %, −0.4 % |
 
 Entries are thick+thin rows, refresh bandwidth, and area against all thick. The seq-imem trace
 covers only the 349 µs run, so its values are not resident here. Kept for ever, it is the
@@ -167,13 +194,16 @@ resident case in `results/resident.txt`.
   mix does 1.6–2.0× the operations on the video traces at 27 °C, and 1.4–18× at ff/85 °C. vfir2
   at 27 °C needs none against the blind controller's 23,780. For linebuf-P5 at ff/85 °C it is
   82,527 against 1,113,540.
-- **The planted weak row is caught** (`test_allocator.py`, `results/test_allocator.txt`). The
-  row lives 25 % of nominal but was profiled as nominal. Of 6,000 reads, 94 were corrupt and all
-  94 were flagged: no silent corruption and no false alarms, and every flag came from that row.
-  After promoting the row, 0 reads were corrupt, at a cost of 248 refresh or migration
-  operations.
-- **The Berger code is tested exhaustively on 8 bits.** A control test shows that a mixed-direction
-  error passes it, so the exhaustive test is not vacuous.
+- **The planted weak row is caught** (`test_allocator.py`, `results/test_allocator.txt`). One
+  physical bit lives 25 % of nominal while the row is profiled as nominal. In the controlled
+  single-bit case, 55 of 6,000 reads were corrupt and all 55 were flagged: no silent data
+  corruption and no check-only detections, and every flag came from that row. After promoting
+  its row with a 0.25 profile while retaining the same physical 0.25 bit-spread, 0 reads were
+  corrupt, at a cost of 248 refresh or migration operations.
+- **The replacement code is tested two ways.** All one-, two- and three-bit transitions over
+  every 8-bit codeword are exhaustive. For widths 8, 12, 16 and 32, the parity-check columns are
+  nonzero and distinct and no column is the sum of two others, the standard certificate for
+  minimum distance at least four. Separate controls exercise one fall plus one rise.
 
 ## Review
 
@@ -196,7 +226,7 @@ An adversarial review by codex found ten problems, and the numbers above are aft
 - **No trace needs to refresh a thick row, even at ff/85 °C.** The longest-lived value, 1.56 ms,
   is below 3.1 ms × 0.8. Refresh is only for resident data and for thin rows.
 - **The thin/thick mix is a second-order knob.** It saves at most 18 %, and only at room
-  temperature; hot, it saves 0.4–9 % for close to 10 % of the port in refresh: the cells differ by 2.20 against 2.89 µm², and periphery and Berger columns dilute
+  temperature; hot, it saves 0.4–9 % for close to 10 % of the port in refresh: the cells differ by 2.20 against 2.89 µm², and periphery and check columns dilute
   that. The first-order win is gain cells against flops: 8–10× on the video traces and the
   programme store, but only 3.3× on the 13 sequencer registers, where periphery dominates.
 - **The vertical 3-tap filter misses thin tt/27 °C by 7 %.** Its line pair lives 127.4 µs against
@@ -213,6 +243,9 @@ An adversarial review by codex found ten problems, and the numbers above are aft
   depends on it.
 - **Thin-oxide Monte Carlo:** a 4σ cell leaks one to two decades more (`../gain-cell` notes).
   That could remove D3's thin banks at 85 °C altogether.
+- **The check is detection-only.** The allocator demonstrates detection but not recovery, and
+  its guarantee is limited to at most three transitions from a valid codeword. A real design
+  needs a trap or recovery path on every check flag.
 - **Refresh without a spare cycle:** the 3T cell's separate read and write ports would let a
   refresh write back behind an ordinary read, such as an instruction fetch. This is not
   modelled.
@@ -253,12 +286,20 @@ which is scratch and not in the repository.
 
     uv run lef_areas.py > results/lef_areas.txt
     uv run storage_options.py > results/storage_options.txt
-    (cd seqtrace && ./check.sh && opam exec --switch=5.3.0 -- dune build) && seqtrace/_build/default/trace.exe > traces/seq.csv
+    cd seqtrace
+    nice ionice ./check.sh
+    nice ionice opam exec --switch=5.3.0 -- dune build
+    cd ..
+    nice ionice seqtrace/_build/default/trace.exe > traces/seq.csv
     uv run gen_traces.py > results/gen_traces.txt
     uv run allocator.py summary > results/summary.txt
     nice ionice uv run allocator.py mixes > results/mixes.txt     # about 70 s
     uv run allocator.py resident > results/resident.txt
+    cd ../pe-synth
+    nice ionice bash periph.sh > ../systolic-storage/results/gc_periph-code-shapes-run.txt
+    nice ionice uv run summary.py > results/areas.txt
+    cd ../systolic-storage
     uv run candidates.py > results/candidates.txt
     uv run candidates.py synth > results/candidates-synth.txt
     uv run candidates.py placed > results/candidates-placed.txt
-    uv run --with pytest pytest -q -s test_allocator.py
+    nice ionice uv run --with pytest pytest -q -s test_allocator.py > results/test_allocator.txt

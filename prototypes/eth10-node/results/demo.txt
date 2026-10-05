@@ -1,0 +1,57 @@
+== directed and random requests (seed 1)
+39 requests written to results/demo/requests-1.txt, 29 expecting a reply
+== node demo (node.ml): requests results/demo/requests-1.txt -> replies results/demo/replies-1.txt
+  39 requests, 29 replies sent (engine counter 29); drops: bad FCS 1, runt 1, too long 0, no match 8, busy 0
+  transmit line: 1 link pulses, 29 frames, TP_IDL 297.9..347.9 ns, 0 clause-14 violations
+  replies equal to the engine model's, request by request: true
+  latency from the end of a request to the start of its reply: 10.3..37.2 us
+node (simulation side): PASS
+29 of 29 expected replies correct; 10 requests correctly unanswered: 10
+host stack verdict: PASS
+== directed and 100 random requests (seed 2)
+119 requests written to results/demo/requests-2.txt, 109 expecting a reply
+== node demo (node.ml): requests results/demo/requests-2.txt -> replies results/demo/replies-2.txt
+  119 requests, 109 replies sent (engine counter 109); drops: bad FCS 1, runt 1, too long 0, no match 8, busy 0
+  transmit line: 1 link pulses, 109 frames, TP_IDL 297.9..347.9 ns, 0 clause-14 violations
+  replies equal to the engine model's, request by request: true
+  latency from the end of a request to the start of its reply: 10.3..37.2 us
+node (simulation side): PASS
+109 of 109 expected replies correct; 10 requests correctly unanswered: 10
+host stack verdict: PASS
+== busy: requests 20 us apart
+== node with requests 20 us apart (faster than replies go out; in half duplex these would collide with the replies, the model ignores that)
+  39 requests, 15 replies sent (engine counter 15); drops: bad FCS 1, runt 1, too long 0, no match 8, busy 14
+  transmit line: 0 link pulses, 15 frames, TP_IDL 297.9..347.9 ns, 0 clause-14 violations
+  replies equal to the engine model's, request by request: true
+  latency from the end of a request to the start of its reply: 10.3..20.0 us
+node-busy: PASS
+== planted faults (each must FAIL at the host stack)
+control ICMP checksum adjusted by 0x0801 instead of 0x0800   simulation-side checks FAIL; replies in results/demo/replies-control0.txt
+control ICMP reply without the IP address swap               simulation-side checks FAIL; replies in results/demo/replies-control1.txt
+control ARP template ignores the target IP                   simulation-side checks FAIL; replies in results/demo/replies-control2.txt
+control FCS appended most significant byte first             simulation-side checks FAIL; replies in results/demo/replies-control3.txt
+control transmit firmware: thread 1 one slot late            simulation-side checks FAIL; replies in results/demo/replies-control4.txt
+-- control 0
+  FAIL ping-0: ICMP checksum wrong
+  FAIL ping-1: ICMP checksum wrong
+  FAIL ping-18: ICMP checksum wrong
+host stack verdict: FAIL
+-- control 1
+  FAIL ping-0: IPs 10.0.0.1->10.0.0.2
+  FAIL ping-1: IPs 10.0.0.1->10.0.0.2
+  FAIL ping-18: IPs 10.0.0.1->10.0.0.2
+host stack verdict: FAIL
+-- control 2
+  FAIL arp-other-ip: replied although it must not
+host stack verdict: FAIL
+host stack verdict: FAIL
+-- control 3
+  FAIL arp-bcast: FCS wrong
+  FAIL arp-unicast: FCS wrong
+  FAIL ping-0: FCS wrong
+host stack verdict: FAIL
+-- control 4
+  FAIL arp-bcast: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not ARP
+  FAIL arp-unicast: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not ARP
+  FAIL ping-0: FCS wrong, MACs 55:55:55:55:55:6a->55:55:55:55:95:6a, not IP/ICMP
+host stack verdict: FAIL

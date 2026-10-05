@@ -1,0 +1,12 @@
+## w20 sense 10
+  mos_ss   27C  a 1 reads above 0.441 V, a 0 reads below 0.41 V
+  mos_ss   27C  1: written 0.382 end 0.257  ->  0 (written wrong)   0: written -0.100 end 0.107 ->               >50m   lifetime 0 (written wrong)
+## w20 sense 20
+  mos_ss   27C  a 1 reads above 0.392 V, a 0 reads below 0.363 V
+  mos_ss   27C  1: written 0.382 end 0.257  ->  0 (written wrong)   0: written -0.100 end 0.107 ->               >50m   lifetime 0 (written wrong)
+## w30 sense 10
+  mos_ss   27C  a 1 reads above 0.406 V, a 0 reads below 0.372 V
+  mos_ss   27C  1: written 0.418 end 0.274  ->            74.4 us   0: written -0.082 end 0.093 ->               >50m   lifetime 74.4 us
+## w30 sense 20
+  mos_ss   27C  a 1 reads above 0.354 V, a 0 reads below 0.324 V
+  mos_ss   27C  1: written 0.418 end 0.274  ->            16.5 ms   0: written -0.082 end 0.093 ->               >50m   lifetime 16.5 ms

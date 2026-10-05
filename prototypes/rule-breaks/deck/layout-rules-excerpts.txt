@@ -1,0 +1,97 @@
+3.1 Grid Rules
+   • All rules are defined in microns [µm] by default if there is no other unit mentioned
+   • All features are on a drawing grid of 5 nm (0.005 µm)
+   • Shapes with acute angles <87 degree are not allowed on any layer
+   • Following layers are only allowed on 90, 180 degree angles: Cont, Via1, Via2, Via3, Via4, Vmim,
+     TopVia1, TopVia2
+   • Following layers are only allowed on 90, 135, 180, 225, and 270 degree angles: GatPoly, Activ, Metal1,
+     Metal2, Metal3, Metal4, Metal5, TopMetal1, TopMetal2
+   • Self-intersecting polygons must be avoided
+   • Design elements, which are snapped to grid must not violate any geometries in this document.
+
+There are several layers which are not considered for mask generation. Offgrid and angle checks are
+not applied on the following layers (in alphabetical order): DigiBnd, DigiSub, dfpad, EdgeSeal, HeatRes,
+HeatTrans, IND, NoDRC, NoMetFiller, NoRCX, RadHard, Recog, RES, Scribe, SRAM, TEXT
+3.2 Forbidden Layers
+Following layers are forbidden in designs submitted for all 0.13 µm technologies. Layout data containing
+these layers will be rejected from the tape-in procedure automatically.
+
+ Layer name                Purpose          GDS            GDS
+                                           Number        Datatype
+ BiWind                    drawing            3              0
+ PEmWind                   drawing            11             0
+ BasPoly                   drawing            13             0
+ DeepCo                    drawing            35             0
+ PEmPoly                   drawing            53             0
+ EmPoly                    drawing            55             0
+ LDMOS                     drawing            57             0
+ PBiWind                   drawing            58             0
+ NoDRC                     drawing            62             0
+ Flash                     drawing            71             0
+ ColWind                   drawing           139             0
+
+
+
+
+                                                                                                  15 of 75
+                                             SG13G2 Layout Rules Rev. 0.4
+
+
+
+
+4 Terminology
+
+
+4.1 Design Rule Terminology
+Critical design rules are defined in [RD 2]. These rules are checked during tape-in. If any of them are vio-
+lated, the layout is rejected. Critical design rules ensure that violations in your own layout do not negatively
+influence other customer layouts and no damage occurs in the cleanroom.
+Since no waivers are granted, IHP recommends performing the online MPW Rejection Test (https://dk.ihp-
+microelectronics.com) at an early stage.
+
+Standard design rules define criteria that a layout must satisfy to ensure correct fabrication. Violations
+typically lead to errors that prevent successful chip production.
+
+Recommended design rules are non-mandatory design rules. These rules focus on improving design
+manufacturability and reliablity. They offer hints for optimizing layouts to minimize variability and improve
+yield.
+
+unrelated - two regions which do not touch each other
+abut - two edges of two different layers touching each other
+
+
+
+8 Rules of Digital Design
+
+
+8.1 DigiBnd Layer
+Digital designs can be marked with the DigiBnd layer. This layer must be used when using IHP’s standard
+digital libraries. DigiBnd must enclose the complete layout of the digital components. Within the DigiBnd
+layer the following design rules are changed compared to the analog flow.
+8.1.1 NWell
+Refer to section 5.1 for NWell standard rule definitions.
+
+ Rule               Description                                                               Value
+ NW.c1              Min. NWell enclosure of P+Activ inside ThickGateOx inside                  0.31
+                    DigiBnd
+ NW.d1              Min. NWell space to external N+Activ inside ThickGateOx inside             0.31
+                    DigiBnd
+ NW.e1              Min. NWell enclosure of NWell tie surrounded entirely by NWell in          0.24
+                    N+Activ inside ThickGateOx inside DigiBnd
+ NW.f1              Min. NWell space to substrate tie in P+Activ inside ThickGateOx            0.24
+                    inside DigiBnd
+
+8.1.2 Cont
+Refer to section 5.14 for Cont standard rule definitions.
+
+ Rule               Description                                                               Value
+ Cnt.c              Min. Activ enclosure of Cont inside DigiBnd                                0.05
+
+8.2 DigiSub Layer
+The DigiSub layer is used to define an area of a layout in which substrate contacts are extracted as a short
+instead of a resistive component. It is assumed that the substrate in which the components are located has
+the same potential as the metal connections that are connected to the substrate contact. There is no voltage
+drop within the substrate.
+8.3 SRAM Layer
+Work in progress.
+

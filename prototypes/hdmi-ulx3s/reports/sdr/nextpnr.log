@@ -1,0 +1,286 @@
+Info: constraining clock net 'clk_25mhz' to 25.00 MHz
+
+Info: Logic utilisation before packing:
+Info:     Total LUT4s:       837/83640     1%
+Info:         logic LUTs:    649/83640     0%
+Info:         carry LUTs:    188/83640     0%
+Info:           RAM LUTs:      0/10455     0%
+Info:          RAMW LUTs:      0/20910     0%
+
+Info:      Total DFFs:       211/83640     0%
+
+Info: Packing IOs..
+Info: pin 'wifi_gpio0$tr_io' constrained to Bel 'X0/Y86/PIOD'.
+Info: pin 'led[7]$tr_io' constrained to Bel 'X0/Y41/PIOD'.
+Info: pin 'led[6]$tr_io' constrained to Bel 'X0/Y38/PIOD'.
+Info: pin 'led[5]$tr_io' constrained to Bel 'X0/Y44/PIOD'.
+Info: pin 'led[4]$tr_io' constrained to Bel 'X0/Y38/PIOB'.
+Info: pin 'led[3]$tr_io' constrained to Bel 'X0/Y38/PIOC'.
+Info: pin 'led[2]$tr_io' constrained to Bel 'X0/Y38/PIOA'.
+Info: pin 'led[1]$tr_io' constrained to Bel 'X0/Y35/PIOD'.
+Info: pin 'led[0]$tr_io' constrained to Bel 'X0/Y35/PIOC'.
+Info: pin 'gpdi_dp[3]$tr_io' constrained to Bel 'X116/Y0/PIOA'.
+Info: pin 'gpdi_dp[2]$tr_io' constrained to Bel 'X76/Y0/PIOA'.
+Info: pin 'gpdi_dp[1]$tr_io' constrained to Bel 'X83/Y0/PIOA'.
+Info: pin 'gpdi_dp[0]$tr_io' constrained to Bel 'X110/Y0/PIOA'.
+Info: pin 'clk_25mhz$tr_io' constrained to Bel 'X0/Y47/PIOA'.
+Info: placed PLL 'hdmi.pll.pll_i' at bel 'X1/Y4/EHXPLL_UL'
+Info: Packing constants..
+Info: Packing carries...
+Info: Packing LUTs...
+Info: Packing LUT5-7s...
+Info: Packing FFs...
+Info:     170 FFs paired with LUTs.
+Info: Generating derived timing constraints...
+Info:     Input frequency of PLL 'hdmi.pll.pll_i' is constrained to 25.0 MHz
+Info:     Derived frequency constraint of 250.0 MHz for net hdmi.clk_bit
+Info:     Derived frequency constraint of 25.0 MHz for net hdmi.clk_pix
+Info: Promoting globals...
+Info:     promoting clock net hdmi.clk_pix to global network
+Info:     promoting clock net hdmi.clk_bit to global network
+Info: Checksum: 0xadf62d4a
+
+Info: Device utilisation:
+Info: 	          TRELLIS_IO:      14/    365     3%
+Info: 	                DCCA:       2/     56     3%
+Info: 	              DP16KD:       0/    208     0%
+Info: 	          MULT18X18D:       1/    156     0%
+Info: 	              ALU54B:       0/     78     0%
+Info: 	             EHXPLLL:       1/      4    25%
+Info: 	             EXTREFB:       0/      2     0%
+Info: 	                DCUA:       0/      2     0%
+Info: 	           PCSCLKDIV:       0/      2     0%
+Info: 	             IOLOGIC:       0/    224     0%
+Info: 	            SIOLOGIC:       0/    141     0%
+Info: 	                 GSR:       0/      1     0%
+Info: 	               JTAGG:       0/      1     0%
+Info: 	                OSCG:       0/      1     0%
+Info: 	               SEDGA:       0/      1     0%
+Info: 	                 DTR:       0/      1     0%
+Info: 	             USRMCLK:       0/      1     0%
+Info: 	             CLKDIVF:       0/      4     0%
+Info: 	           ECLKSYNCB:       0/     10     0%
+Info: 	             DLLDELD:       0/      8     0%
+Info: 	              DDRDLL:       0/      4     0%
+Info: 	             DQSBUFM:       0/     14     0%
+Info: 	     TRELLIS_ECLKBUF:       0/      8     0%
+Info: 	        ECLKBRIDGECS:       0/      2     0%
+Info: 	                DCSC:       0/      2     0%
+Info: 	          TRELLIS_FF:     211/  83640     0%
+Info: 	        TRELLIS_COMB:     935/  83640     1%
+Info: 	        TRELLIS_RAMW:       0/  10455     0%
+
+Info: Placed 15 cells based on constraints.
+Info: Creating initial analytic placement for 417 cells, random placement wirelen = 51467.
+Info:     at initial placer iter 0, wirelen = 1347
+Info:     at initial placer iter 1, wirelen = 1119
+Info:     at initial placer iter 2, wirelen = 1048
+Info:     at initial placer iter 3, wirelen = 1059
+Info: Running main analytical placer, max placement attempts per cell = 169362.
+Info:     at iteration #1, type ALL: wirelen solved = 1078, spread = 3011, legal = 3280; time = 0.02s
+Info:     at iteration #2, type ALL: wirelen solved = 1233, spread = 2884, legal = 3054; time = 0.01s
+Info:     at iteration #3, type ALL: wirelen solved = 1345, spread = 2815, legal = 3038; time = 0.01s
+Info:     at iteration #4, type ALL: wirelen solved = 1407, spread = 2697, legal = 2981; time = 0.01s
+Info:     at iteration #5, type ALL: wirelen solved = 1464, spread = 2706, legal = 2915; time = 0.01s
+Info:     at iteration #6, type ALL: wirelen solved = 1477, spread = 2629, legal = 2936; time = 0.01s
+Info:     at iteration #7, type ALL: wirelen solved = 1557, spread = 2699, legal = 2950; time = 0.01s
+Info:     at iteration #8, type ALL: wirelen solved = 1631, spread = 2868, legal = 3032; time = 0.01s
+Info:     at iteration #9, type ALL: wirelen solved = 1769, spread = 2687, legal = 2894; time = 0.01s
+Info:     at iteration #10, type ALL: wirelen solved = 1745, spread = 2725, legal = 2960; time = 0.01s
+Info:     at iteration #11, type ALL: wirelen solved = 1769, spread = 2684, legal = 2941; time = 0.01s
+Info:     at iteration #12, type ALL: wirelen solved = 1805, spread = 2673, legal = 2881; time = 0.01s
+Info:     at iteration #13, type ALL: wirelen solved = 1806, spread = 2721, legal = 2931; time = 0.01s
+Info:     at iteration #14, type ALL: wirelen solved = 1791, spread = 2792, legal = 3018; time = 0.01s
+Info:     at iteration #15, type ALL: wirelen solved = 1860, spread = 2637, legal = 2907; time = 0.01s
+Info:     at iteration #16, type ALL: wirelen solved = 1837, spread = 2602, legal = 2790; time = 0.01s
+Info:     at iteration #17, type ALL: wirelen solved = 1824, spread = 2530, legal = 2753; time = 0.01s
+Info:     at iteration #18, type ALL: wirelen solved = 1843, spread = 2563, legal = 2808; time = 0.01s
+Info:     at iteration #19, type ALL: wirelen solved = 1865, spread = 2654, legal = 2921; time = 0.01s
+Info:     at iteration #20, type ALL: wirelen solved = 1867, spread = 2555, legal = 2832; time = 0.01s
+Info:     at iteration #21, type ALL: wirelen solved = 1864, spread = 2741, legal = 2895; time = 0.01s
+Info:     at iteration #22, type ALL: wirelen solved = 1965, spread = 2668, legal = 2909; time = 0.01s
+Info: HeAP Placer Time: 0.40s
+Info:   of which solving equations: 0.24s
+Info:   of which spreading cells: 0.04s
+Info:   of which strict legalisation: 0.01s
+
+Info: Running simulated annealing placer for refinement.
+Info:   at iteration #1: temp = 0.000000, timing cost = 486, wirelen = 2753
+Info:   at iteration #5: temp = 0.000000, timing cost = 559, wirelen = 2446
+Info:   at iteration #6: temp = 0.000000, timing cost = 509, wirelen = 2450 
+Info: SA placement time 0.15s
+
+Info: Max frequency for clock '$glbnet$hdmi.clk_pix': 76.62 MHz (PASS at 25.00 MHz)
+Info: Max frequency for clock '$glbnet$hdmi.clk_bit': 160.64 MHz (FAIL at 250.00 MHz)
+
+Info: Max delay posedge $glbnet$hdmi.clk_bit -> <async>                     : 5.32 ns
+Info: Max delay posedge $glbnet$hdmi.clk_pix -> <async>                     : 5.41 ns
+Info: Max delay posedge $glbnet$hdmi.clk_pix -> posedge $glbnet$hdmi.clk_bit: 1.72 ns
+
+Info: Slack histogram:
+Info:  legend: * represents 1 endpoint(s)
+Info:          + represents [1,1) endpoint(s)
+Info: [ -2225,   -151) |***********************+
+Info: [  -151,   1923) |**********************************************+
+Info: [  1923,   3997) |***************+
+Info: [  3997,   6071) | 
+Info: [  6071,   8145) | 
+Info: [  8145,  10219) | 
+Info: [ 10219,  12293) | 
+Info: [ 12293,  14367) | 
+Info: [ 14367,  16441) | 
+Info: [ 16441,  18515) | 
+Info: [ 18515,  20589) | 
+Info: [ 20589,  22663) | 
+Info: [ 22663,  24737) | 
+Info: [ 24737,  26811) | 
+Info: [ 26811,  28885) |*********************+
+Info: [ 28885,  30959) |*******************+
+Info: [ 30959,  33033) |************************************************************ 
+Info: [ 33033,  35107) |***+
+Info: [ 35107,  37181) |***************************+
+Info: [ 37181,  39255) |*************************************+
+Info: Checksum: 0xf237243a
+Info: Routing globals...
+Info:     routing clock net $glbnet$hdmi.clk_bit using global 0
+Info:     routing clock net $glbnet$hdmi.clk_pix using global 1
+
+Info: Routing..
+Info: Setting up routing queue.
+Info: Routing 3770 arcs.
+Info:            |   (re-)routed arcs  |   delta    | remaining|       time spent     |
+Info:    IterCnt |  w/ripup   wo/ripup |  w/r  wo/r |      arcs| batch(sec) total(sec)|
+Info:       1000 |      295        704 |  295   704 |      3087|       0.12       0.12|
+Info:       2000 |      774       1225 |  479   521 |      2618|       0.11       0.23|
+Info:       3000 |     1408       1591 |  634   366 |      2306|       0.11       0.34|
+Info:       4000 |     1889       2110 |  481   519 |      1935|       0.10       0.44|
+Info:       5000 |     2214       2671 |  325   561 |      1328|       0.08       0.52|
+Info:       6000 |     2473       3303 |  259   632 |       635|       0.09       0.61|
+Info:       6655 |     2494       3818 |   21   515 |         0|       0.04       0.65|
+Info: Routing complete.
+Info: Router1 time 0.65s
+Info: Checksum: 0x135e2165
+
+Info: Critical path report for clock '$glbnet$hdmi.clk_pix' (posedge -> posedge):
+Info:       type curr  total name
+Info:   clk-to-q  0.52  0.52 Source hdmi.pixel._14_TRELLIS_FF_Q_5.Q
+Info:    routing  0.92  1.45 Net hdmi.pixel._14[7] (58,7) -> (58,8)
+Info:                          Sink hdmi.pixel._73_MULT18X18D_P9_A8_LUT4_Z_D_LUT4_Z.C
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/emulator-wt-hdmi-ulx3s/prototypes/hdmi-ulx3s/rtl/gen/hdmi_pixel.v:152.16-152.19
+Info:      logic  0.24  1.68 Source hdmi.pixel._73_MULT18X18D_P9_A8_LUT4_Z_D_LUT4_Z.F
+Info:    routing  0.44  2.13 Net hdmi.pixel._314_TRELLIS_FF_Q_4_DI_LUT4_Z_C_CCU2C_S1_S0_PFUMX_Z_C0_LUT4_B_D_LUT4_Z_2_D[0] (58,8) -> (58,8)
+Info:                          Sink hdmi.pixel._73_MULT18X18D_P9_A9_LUT4_Z_D_LUT4_Z.D
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:      logic  0.24  2.37 Source hdmi.pixel._73_MULT18X18D_P9_A9_LUT4_Z_D_LUT4_Z.F
+Info:    routing  0.75  3.12 Net hdmi.pixel._73_MULT18X18D_P9_A9_LUT4_Z_D[1] (58,8) -> (61,7)
+Info:                          Sink hdmi.pixel._73_MULT18X18D_P9_A9_LUT4_Z.D
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:      logic  0.24  3.35 Source hdmi.pixel._73_MULT18X18D_P9_A9_LUT4_Z.F
+Info:    routing  1.16  4.51 Net hdmi.pixel._73_MULT18X18D_P9_A9 (61,7) -> (62,10)
+Info:                          Sink hdmi.pixel._73_MULT18X18D_P9.A9
+Info:      logic  3.93  8.44 Source hdmi.pixel._73_MULT18X18D_P9.P15
+Info:    routing  1.25  9.69 Net hdmi.pixel._73[15] (62,10) -> (62,7)
+Info:                          Sink hdmi.pixel._314_TRELLIS_FF_Q_4_DI_LUT4_Z_C_CCU2C_S1_S0_PFUMX_Z_C0_LUT4_B_Z_LUT4_Z_B_LUT4_C_Z_LUT4_C_Z_LUT4_Z_D_LUT4_Z.A
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:      logic  0.24  9.93 Source hdmi.pixel._314_TRELLIS_FF_Q_4_DI_LUT4_Z_C_CCU2C_S1_S0_PFUMX_Z_C0_LUT4_B_Z_LUT4_Z_B_LUT4_C_Z_LUT4_C_Z_LUT4_Z_D_LUT4_Z.F
+Info:    routing  0.71  10.64 Net hdmi.pixel._314_TRELLIS_FF_Q_4_DI_LUT4_Z_C_CCU2C_S1_S0_PFUMX_Z_C0_LUT4_B_Z_LUT4_Z_B_LUT4_C_Z_LUT4_C_Z_LUT4_Z_D[3] (62,7) -> (62,6)
+Info:                          Sink hdmi.pixel._314_TRELLIS_FF_Q_4_DI_LUT4_Z_C_CCU2C_S1_S0_PFUMX_Z_C0_LUT4_B_Z_LUT4_Z_B_LUT4_C_Z_LUT4_C_Z_LUT4_Z_D_LUT4_D_1.D
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:      logic  0.24  10.88 Source hdmi.pixel._314_TRELLIS_FF_Q_4_DI_LUT4_Z_C_CCU2C_S1_S0_PFUMX_Z_C0_LUT4_B_Z_LUT4_Z_B_LUT4_C_Z_LUT4_C_Z_LUT4_Z_D_LUT4_D_1.F
+Info:    routing  0.91  11.79 Net hdmi.pixel._314_TRELLIS_FF_Q_4_DI_LUT4_Z_C_CCU2C_S1_S0_PFUMX_Z_C0_LUT4_B_Z_LUT4_Z_B_LUT4_C_Z_LUT4_C_Z_LUT4_Z_D_LUT4_D_1_Z[3] (62,6) -> (63,4)
+Info:                          Sink hdmi.pixel._349_TRELLIS_FF_Q_DI_LUT4_Z.D
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:      logic  0.24  12.02 Source hdmi.pixel._349_TRELLIS_FF_Q_DI_LUT4_Z.F
+Info:    routing  0.13  12.15 Net hdmi.pixel._349_TRELLIS_FF_Q_DI (63,4) -> (63,4)
+Info:                          Sink hdmi.pixel._349_TRELLIS_FF_Q.DI
+Info:      setup  0.00  12.15 Source hdmi.pixel._349_TRELLIS_FF_Q.DI
+Info: 5.87 ns logic, 6.29 ns routing
+
+Info: Critical path report for clock '$glbnet$hdmi.clk_bit' (posedge -> posedge):
+Info:       type curr  total name
+Info:   clk-to-q  0.52  0.52 Source hdmi.serial._16_TRELLIS_FF_Q_2.Q
+Info:    routing  0.84  1.37 Net hdmi.serial._16[2] (5,17) -> (5,17)
+Info:                          Sink hdmi.serial._52_LUT4_Z.B
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:      logic  0.24  1.60 Source hdmi.serial._52_LUT4_Z.F
+Info:    routing  2.49  4.09 Net hdmi.serial._109_TRELLIS_FF_Q_DI[0] (5,17) -> (29,5)
+Info:                          Sink hdmi.serial._68_TRELLIS_FF_Q_DI_LUT4_Z.B
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/emulator-wt-hdmi-ulx3s/prototypes/hdmi-ulx3s/rtl/gen/hdmi_serial_sdr.v:88.10-88.13
+Info:      logic  0.24  4.32 Source hdmi.serial._68_TRELLIS_FF_Q_DI_LUT4_Z.F
+Info:    routing  0.13  4.45 Net hdmi.serial._68_TRELLIS_FF_Q_DI (29,5) -> (29,5)
+Info:                          Sink hdmi.serial._68_TRELLIS_FF_Q.DI
+Info:      setup  0.00  4.45 Source hdmi.serial._68_TRELLIS_FF_Q.DI
+Info: 1.00 ns logic, 3.46 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$hdmi.clk_bit' -> '<async>':
+Info:       type curr  total name
+Info:   clk-to-q  0.52  0.52 Source gpdi_dp_TRELLIS_FF_Q.Q
+Info:    routing  3.01  3.53 Net gpdi_dp[3]$TRELLIS_IO_OUT (75,4) -> (116,0)
+Info:                          Sink gpdi_dp[3]$tr_io.I
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/emulator-wt-hdmi-ulx3s/prototypes/hdmi-ulx3s/rtl/hdmi_out.v:67.13-67.14
+Info: 0.52 ns logic, 3.01 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$hdmi.clk_pix' -> '<async>':
+Info:       type curr  total name
+Info:   clk-to-q  0.52  0.52 Source hdmi.pixel._32_TRELLIS_FF_Q.Q
+Info:    routing  3.46  3.99 Net led[0]$TRELLIS_IO_OUT (16,6) -> (0,35)
+Info:                          Sink led[0]$tr_io.I
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/emulator-wt-hdmi-ulx3s/prototypes/hdmi-ulx3s/rtl/hdmi_top.v:23.21-23.24
+Info: 0.52 ns logic, 3.46 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$hdmi.clk_pix' -> 'posedge $glbnet$hdmi.clk_bit':
+Info:       type curr  total name
+Info:   clk-to-q  0.52  0.52 Source hdmi.pixel.word_b_TRELLIS_FF_Q_1.Q
+Info:    routing  0.98  1.50 Net hdmi.pixel.word_b[7] (68,6) -> (69,6)
+Info:                          Sink hdmi.serial._21_TRELLIS_FF_Q_7_DI_LUT4_Z.D
+Info:                          Defined in:
+Info:                               /home/matthias/prog/janestreet/emulator-wt-hdmi-ulx3s/prototypes/hdmi-ulx3s/rtl/gen/hdmi_pixel.v:13.18-13.24
+Info:      logic  0.24  1.74 Source hdmi.serial._21_TRELLIS_FF_Q_7_DI_LUT4_Z.F
+Info:    routing  0.13  1.87 Net hdmi.serial._21_TRELLIS_FF_Q_7_DI (69,6) -> (69,6)
+Info:                          Sink hdmi.serial._21_TRELLIS_FF_Q_7.DI
+Info:      setup  0.00  1.87 Source hdmi.serial._21_TRELLIS_FF_Q_7.DI
+Info: 0.76 ns logic, 1.11 ns routing
+
+Info: Max frequency for clock '$glbnet$hdmi.clk_pix': 82.27 MHz (PASS at 25.00 MHz)
+ERROR: Max frequency for clock '$glbnet$hdmi.clk_bit': 224.57 MHz (FAIL at 250.00 MHz)
+
+Info: Max delay posedge $glbnet$hdmi.clk_bit -> <async>                     : 3.53 ns
+Info: Max delay posedge $glbnet$hdmi.clk_pix -> <async>                     : 3.99 ns
+Info: Max delay posedge $glbnet$hdmi.clk_pix -> posedge $glbnet$hdmi.clk_bit: 1.87 ns
+
+Info: Slack histogram:
+Info:  legend: * represents 1 endpoint(s)
+Info:          + represents [1,1) endpoint(s)
+Info: [  -453,   1523) |************************************************************ 
+Info: [  1523,   3499) |*****************+
+Info: [  3499,   5475) | 
+Info: [  5475,   7451) | 
+Info: [  7451,   9427) | 
+Info: [  9427,  11403) | 
+Info: [ 11403,  13379) | 
+Info: [ 13379,  15355) | 
+Info: [ 15355,  17331) | 
+Info: [ 17331,  19307) | 
+Info: [ 19307,  21283) | 
+Info: [ 21283,  23259) | 
+Info: [ 23259,  25235) | 
+Info: [ 25235,  27211) | 
+Info: [ 27211,  29187) |**************+
+Info: [ 29187,  31163) |*******************+
+Info: [ 31163,  33139) |****+
+Info: [ 33139,  35115) |*************************************************+
+Info: [ 35115,  37091) |*************************************+
+Info: [ 37091,  39067) |***************************+
+0 warnings, 1 error
+
+Info: Program finished normally.

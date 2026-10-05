@@ -55,6 +55,24 @@ The core closes the competition's 66 MHz with 7 ns to spare at the slow
 corner, so its worst path is under 8 ns there, against about 45 ns for a
 FABulous LUT tile. The die is about 1.2 Tiny Tapeout tiles.
 
+## Quarter-clock pin timing (`../multiphase`)
+
+The ISA gained three things for the four-phase output and input stage in `../multiphase`, all in
+bits that were unused, so every existing programme behaves exactly as before:
+
+- SETP and SHO take a 2-bit sub-slot q (bits 1:0): the new level starts at quarter q of the clock
+  instead of at the clock edge. q = 0 is the old behaviour. (Ignored in SHO's open-drain mode.)
+- SHI has a quad bit (bit 7): the pin's four quarter-clock samples of the last clock shift into the
+  accumulator at once, in time order.
+- The core exports `pin_sub`, four bits per pin (the level during each quarter of the clock), and
+  takes `pin_in4`, the four samples per pin. `pin_sub` costs 10 flip-flops (the previous pin levels
+  and q), not a 32-bit register.
+
+The lockstep test compares `pin_sub` every cycle and feeds random `pin_in4`; three planted faults in
+the new logic are caught (`../multiphase/results/isa-controls.txt`). The regenerated
+`deadline_sequencer.v` has the new ports; the area and place-and-route figures above are from before
+the change.
+
 ## What it does not yet have
 
 Programme memory (a 1024x16 SRAM macro is the intended store: 256 words per
@@ -74,7 +92,18 @@ a UART transmitter (8N1, any bit period of at least five slots), an SPI
 master (mode 0, any even period of at least eight slots) and an I2C master
 write (START, bytes with acknowledge clocks whose sampled acknowledge goes
 to the host, STOP, with a quarter period of at least four slots). Three
-protocols compiled onto three threads use 38, 27 and 63 of the 64 words.
+protocols compiled onto three threads use 38, 27 and 64 of the 64 words.
+
+The I2C master honours clock stretching (since 2026-10-05; the stall-injection
+oracle in `../verif-oracles` found that it did not). After every release of
+SCL it waits with `WAITP` for SCL to read high, with a deadline of 4095 slots,
+and times the high phase from there; at the deadline it releases both lines
+and halts, so the host receives fewer acknowledge bytes than bytes were sent.
+SCL's period and high time are unchanged without stretching. To fit two bytes
+into 64 words, SDA now changes two slots after SCL falls instead of a quarter
+period, and two low phases changed length (after START and between bytes);
+`compiler.ml` lists the slot positions. Evidence:
+`../verif-oracles/results/stall-i2c-stretch.txt`.
 
 Writing the I2C generator found an ISA gap: an open-drain line must be
 released for a one and pulled low for a zero, which the shift-out

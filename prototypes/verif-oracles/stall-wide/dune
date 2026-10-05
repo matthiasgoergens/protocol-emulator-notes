@@ -1,0 +1,10 @@
+; Host-stall injection on the wide-variant JTAG/SWD firmware, run on ISA v2. isa.ml and
+; harness.ml are the v2 shim; everything else is a symlink to ../../proto-jtag-swd/wide (unchanged).
+(rule
+ (with-stdout-to
+  isa_enc.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
+
+(executables
+ (names jtag_swd_stall hazard_wide)
+ (libraries hardcaml seqv2 hazard))

@@ -1,0 +1,7 @@
+# recorded with the ORIGINAL prototypes/sequencer-ethernet main.exe (base ISA and RTL) at commit f3a392e2a796cebbca3e273830e8dd5c48fb700f, for comparison
+frame 73 bytes on the wire (1168 half-bits, 3504 clocks); program sizes 28,30,29,28 of 64; host bytes per thread 37,37,37,37
+pin vs Ethernet model encoder: 0 mismatching clocks of 3504 -> PASS
+control one bit flipped in thread 2's 10th byte      3 mismatching clocks (first at 886) -> caught
+control threads' streams rotated by two           1536 mismatching clocks (first at 16) -> caught
+control thread 1 one slot late (extra NOP)         835 mismatching clocks (first at 25) -> caught
+RTL: 0 clocks where its pin differs from the Ethernet model, 0 where it differs from the interpreter -> PASS

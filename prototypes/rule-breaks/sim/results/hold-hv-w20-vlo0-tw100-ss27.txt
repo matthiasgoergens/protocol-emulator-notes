@@ -1,0 +1,4 @@
+# 2026-09-25T12:50:24+08:00 run hold-hv-w20-vlo0-tw100-ss27: cell.py  --env MW=hv --env WMS=0.20 --env WMR=0.20 --env TWRITE=100 --env CORNERS=mos_ss --env TEMPS=27   (commit 4bf22a5)
+hold: WMS=0.20 WMR=0.20 MW=hv MS=nlv VLO=0.0 VHI=1.2 VBAR=0.0 WBLH=opp VWWL=0.0 TWRITE=100.0ns TSTOP=50m
+mos_ss   27C stored 1  vw  0.382  v1u  0.384  v10u  0.384  v100u  0.384  v1m  0.381  v10m  0.350  vend  0.257  crossings 0.275@0.04023 0.300@0.02862 0.325@0.01863 0.350@0.01001 0.375@0.002561
+mos_ss   27C stored 0  vw -0.100  v1u -0.080  v10u -0.059  v100u -0.039  v1m -0.021  v10m  0.004  vend  0.107  crossings 0.050@0.02771 0.075@0.03737 0.100@0.04723

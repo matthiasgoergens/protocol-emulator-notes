@@ -1,0 +1,5 @@
+== main (deck: stock, options: --disable_extra_rules): DRC Check Passed: No DRC violations detected in the layout. --- ✅
+0 violations (clean)
+== full (deck: stock, options: none): Violated rules are : {'Gat.c'}
+36 violations
+  Gat.c                       36  min measured 0.130 um

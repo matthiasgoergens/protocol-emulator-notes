@@ -1,0 +1,37 @@
+Demo B: one-pin delta-sigma ADC (dsadc.py). Circuit: Rin 1000, Rf 2640 + 50 pin, Rb 1430 to 3.3 V;
+duty 0 V -> 0.096, 1 V -> 0.911. Sine 0.5 +- 0.4 V at 200 kHz, SNR in dB against bandwidth.
+
+fs    60 MS/s  C    100 pF  threshold noise   0 mV rms  0.5MHz: 38.4  1MHz: 27.8  2MHz: 20.2  4.2MHz: 18.6  5MHz: 17.9  gain: 0.7448
+fs    60 MS/s  C    100 pF  threshold noise   1 mV rms  0.5MHz: 35.8  1MHz: 27.2  2MHz: 19.9  4.2MHz: 18.3  5MHz: 17.6  gain: 0.7449
+fs    60 MS/s  C    100 pF  threshold noise   5 mV rms  0.5MHz: 33.4  1MHz: 25.9  2MHz: 19.9  4.2MHz: 18.0  5MHz: 17.2  gain: 0.7414
+fs    60 MS/s  C    470 pF  threshold noise   0 mV rms  0.5MHz: 43.7  1MHz: 36.7  2MHz: 31.2  4.2MHz: 24.8  5MHz: 22.3  gain: 0.9305
+fs    60 MS/s  C    470 pF  threshold noise   1 mV rms  0.5MHz: 42.6  1MHz: 38.1  2MHz: 31.7  4.2MHz: 23.1  5MHz: 21.2  gain: 0.9311
+fs    60 MS/s  C    470 pF  threshold noise   5 mV rms  0.5MHz: 38.9  1MHz: 34.3  2MHz: 28.0  4.2MHz: 19.3  5MHz: 17.1  gain: 0.9307
+fs    60 MS/s  C   2200 pF  threshold noise   0 mV rms  0.5MHz: 48.6  1MHz: 42.2  2MHz: 30.5  4.2MHz: 23.6  5MHz: 22.4  gain: 0.9855
+fs    60 MS/s  C   2200 pF  threshold noise   1 mV rms  0.5MHz: 46.2  1MHz: 38.0  2MHz: 29.2  4.2MHz: 19.8  5MHz: 17.4  gain: 0.9842
+fs    60 MS/s  C   2200 pF  threshold noise   5 mV rms  0.5MHz: 36.1  1MHz: 27.8  2MHz: 19.5  4.2MHz: 10.3  5MHz: 8.5  gain: 0.97
+fs   240 MS/s  C    100 pF  threshold noise   0 mV rms  0.5MHz: 52.1  1MHz: 49.1  2MHz: 42.5  4.2MHz: 35.4  5MHz: 34.7  gain: 0.9226
+fs   240 MS/s  C    100 pF  threshold noise   1 mV rms  0.5MHz: 49.2  1MHz: 45.0  2MHz: 41.0  4.2MHz: 35.2  5MHz: 34.3  gain: 0.9213
+fs   240 MS/s  C    100 pF  threshold noise   5 mV rms  0.5MHz: 45.1  1MHz: 41.9  2MHz: 38.5  4.2MHz: 33.8  5MHz: 32.5  gain: 0.9202
+fs   240 MS/s  C    470 pF  threshold noise   0 mV rms  0.5MHz: 66.9  1MHz: 56.6  2MHz: 50.4  4.2MHz: 42.5  5MHz: 39.8  gain: 0.9819
+fs   240 MS/s  C    470 pF  threshold noise   1 mV rms  0.5MHz: 57.6  1MHz: 53.2  2MHz: 46.8  4.2MHz: 38.1  5MHz: 35.9  gain: 0.9819
+fs   240 MS/s  C    470 pF  threshold noise   5 mV rms  0.5MHz: 47.8  1MHz: 43.4  2MHz: 37.1  4.2MHz: 28.5  5MHz: 26.3  gain: 0.9692
+fs   240 MS/s  C   2200 pF  threshold noise   0 mV rms  0.5MHz: 66.6  1MHz: 58.4  2MHz: 49.6  4.2MHz: 40.1  5MHz: 37.9  gain: 0.9961
+fs   240 MS/s  C   2200 pF  threshold noise   1 mV rms  0.5MHz: 55.8  1MHz: 47.3  2MHz: 38.7  4.2MHz: 29.1  5MHz: 26.9  gain: 0.9935
+fs   240 MS/s  C   2200 pF  threshold noise   5 mV rms  0.5MHz: 42.9  1MHz: 34.5  2MHz: 26.1  4.2MHz: 17.4  5MHz: 15.5  gain: 0.9753
+
+Loop delay (samples from a pin sample to the output level it sets), C 470 pF, 1 mV noise:
+fs    60 MS/s  delay  1 samples ( 16.7 ns)  0.5MHz: 42.6  1MHz: 38.1  2MHz: 31.7  4.2MHz: 23.1  5MHz: 21.2  gain: 0.9311
+fs    60 MS/s  delay  2 samples ( 33.3 ns)  0.5MHz: 41.1  1MHz: 33.7  2MHz: 27.7  4.2MHz: 20.1  5MHz: 18.2  gain: 0.8981
+fs    60 MS/s  delay  3 samples ( 50.0 ns)  0.5MHz: 39.6  1MHz: 31.8  2MHz: 26.2  4.2MHz: 11.4  5MHz: 1.8  gain: 0.8582
+fs   240 MS/s  delay  1 samples (  4.2 ns)  0.5MHz: 57.6  1MHz: 53.2  2MHz: 46.8  4.2MHz: 38.1  5MHz: 35.9  gain: 0.9819
+fs   240 MS/s  delay  4 samples ( 16.7 ns)  0.5MHz: 50.7  1MHz: 43.8  2MHz: 38.5  4.2MHz: 30.5  5MHz: 28.2  gain: 0.9431
+fs   240 MS/s  delay  8 samples ( 33.3 ns)  0.5MHz: 48.6  1MHz: 43.2  2MHz: 36.8  4.2MHz: 26.8  5MHz: 22.1  gain: 0.8854
+fs   240 MS/s  delay 12 samples ( 50.0 ns)  0.5MHz: 46.6  1MHz: 41.5  2MHz: 34.8  4.2MHz: 3.5  5MHz: -1.5  gain: 0.8358
+
+PAL test card at 60 MS/s, loop delay 1: picture_psnr_vs_ideal_db 26.0, seconds 1.9, cell_err_line_rms_mV 11.92, cell_err_grid_rms_mV 10.55, cell_err_grid_max_mV 30.45, hsync_found 309, hsync_width_us_mean 4.539, hsync_width_us_sd 0.022, line_period_us_sd 0.0245, broad_pulses 5, other_pulses 233
+PAL test card at 60 MS/s, loop delay 2: picture_psnr_vs_ideal_db 22.9, seconds 1.5, cell_err_line_rms_mV 16.91, cell_err_grid_rms_mV 14.45, cell_err_grid_max_mV 47.31, hsync_found 309, hsync_width_us_mean 4.502, hsync_width_us_sd 0.05, line_period_us_sd 0.0411, broad_pulses 5, other_pulses 266
+PAL test card at 240 MS/s, loop delay 4: picture_psnr_vs_ideal_db 32.2, seconds 3.4, cell_err_line_rms_mV 10.08, cell_err_grid_rms_mV 8.92, cell_err_grid_max_mV 27.93, hsync_found 309, hsync_width_us_mean 4.603, hsync_width_us_sd 0.028, line_period_us_sd 0.0257, broad_pulses 5, other_pulses 130
+PAL test card at 240 MS/s, loop delay 8: picture_psnr_vs_ideal_db 25.1, seconds 4.9, cell_err_line_rms_mV 20.22, cell_err_grid_rms_mV 17.75, cell_err_grid_max_mV 49.16, hsync_found 309, hsync_width_us_mean 4.53, hsync_width_us_sd 0.04, line_period_us_sd 0.0448, broad_pulses 5, other_pulses 11
+
+Audio: 1 kHz, 0.4 V peak, 60 MS/s, C 2.2 nF, boxcar decimation to 48 kS/s: SNR in 15 kHz 60.1 dB

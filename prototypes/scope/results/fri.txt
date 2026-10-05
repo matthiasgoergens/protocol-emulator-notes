@@ -1,0 +1,16 @@
+# fri.exe (seed 11): edges at random times, >= 3 samples apart; RC kernel; samples every 33.3 ns
+   amp = edge height at the pin (inside the kick's 210 mV range); sigma = per-sample noise; t_jit = sample-instant
+   error known to the host only through the calibrated time base (15 ps rms)
+   tau      amp     sigma   edges  rms edge-time error   (TDC on the same edge: about 20 ps rms, 1 timestamp per edge)
+    10.0 ns  200 mV   5.5 mV  1976      4089 ps
+    20.0 ns  200 mV   5.5 mV  2000      1875 ps
+    40.0 ns  200 mV   5.5 mV  2000      2288 ps
+    20.0 ns  200 mV   1.4 mV  2000       484 ps
+    20.0 ns  200 mV   0.2 mV  2000        67 ps
+   sigma 1.4 mV = 16 kicks averaged (repetitive signal); 0.2 mV = the pad's own thermal noise only
+
+Reading: from two or three multi-bit samples 33 ns apart the edge is located to about a nanosecond,
+far below the sample period but far above the TDC's 20 ps. For digital edges the TDC is the right
+tool: a comparator plus a timestamp IS a one-edge FRI sampler with an ideal kernel. FRI earns its
+keep where no comparator can see the event: pulses smaller than the pad's decision overdrive, edges
+behind an unknown offset, or amplitude and time wanted jointly from a slow, averaged channel.

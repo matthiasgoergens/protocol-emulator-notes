@@ -1,0 +1,23 @@
+Quarter-clock replay summary
+============================
+
+Status: complete in RTL simulation.
+
+- OCaml build: PASS. Raw log: ocaml-dune-build.log.
+- Host syntax check: PASS. Raw log: host-py-compile.log.
+- Plain RTL model build: PASS. Raw log: sim-build-plain-cpb60.log.
+- Four-phase RTL model build: PASS. Raw log: sim-build-mp-cpb60.log.
+- Planted-fault RTL model build: PASS. Raw log:
+  sim-build-mp-fault-cpb60.log.
+- Plain suite: 22 of 22 as expected. Raw log and results:
+  plain-cpb60.log and plain-cpb60/.
+- Four-phase suite: 22 of 22 as expected. Raw log and results:
+  mp-cpb60.log and mp-cpb60/.
+- Planted-fault control: 2 of 2 as expected; both quad tests failed.
+  Raw log and results: mp-fault-cpb60.log and mp-fault-cpb60/.
+- Quarter VCDs: PASS. Both converted to FST with vcd2fst. Raw files:
+  subslot_train-quarter.vcd, subslot_train-quarter.fst,
+  quad_rx-quarter.vcd and quad_rx-quarter.fst.
+
+The existing bitstream and synthesis reports predate the 144-bit trace and
+were not rebuilt. Physical quarter-edge timing remains unmeasured.

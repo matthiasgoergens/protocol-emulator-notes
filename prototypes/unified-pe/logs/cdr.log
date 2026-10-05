@@ -1,0 +1,900 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Running command `read_verilog -sv  rtl/assists.v;  hierarchy -check -top cdr_unit; synth -top cdr_unit -flatten; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/cdr.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Verilog-2005 frontend: rtl/assists.v
+Parsing SystemVerilog input from `rtl/assists.v' to AST representation.
+Generating RTLIL representation for module `\crc_unit'.
+Generating RTLIL representation for module `\stuff_unit'.
+Generating RTLIL representation for module `\linecode_unit'.
+Generating RTLIL representation for module `\seg_xbar'.
+rtl/assists.v:145: Warning: Range [-1:-17] select out of bounds on signal `\pe_p': Setting 17 LSB bits to undef.
+Generating RTLIL representation for module `\seg_xbar_cfg'.
+Generating RTLIL representation for module `\pin_nco'.
+Generating RTLIL representation for module `\cdr_unit'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \cdr_unit
+
+2.2. Analyzing design hierarchy..
+Top module:  \cdr_unit
+Removing unused module `\pin_nco'.
+Removing unused module `\seg_xbar_cfg'.
+Removing unused module `\seg_xbar'.
+Removing unused module `\linecode_unit'.
+Removing unused module `\stuff_unit'.
+Removing unused module `\crc_unit'.
+Removed 6 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \cdr_unit
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \cdr_unit
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 5 switch rules as full_case in process $proc$rtl/assists.v:240$159 in module cdr_unit.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 2 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~5 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\cdr_unit.$proc$rtl/assists.v:240$159'.
+     1/5: $0\bit_valid[0:0]
+     2/5: $0\last[0:0]
+     3/5: $0\since[11:0]
+     4/5: $0\ctr[11:0]
+     5/5: $0\bit_out[0:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\cdr_unit.\last' using process `\cdr_unit.$proc$rtl/assists.v:240$159'.
+  created $dff cell `$procdff$222' with positive edge clock.
+Creating register for signal `\cdr_unit.\bit_out' using process `\cdr_unit.$proc$rtl/assists.v:240$159'.
+  created $dff cell `$procdff$223' with positive edge clock.
+Creating register for signal `\cdr_unit.\bit_valid' using process `\cdr_unit.$proc$rtl/assists.v:240$159'.
+  created $dff cell `$procdff$224' with positive edge clock.
+Creating register for signal `\cdr_unit.\ctr' using process `\cdr_unit.$proc$rtl/assists.v:240$159'.
+  created $dff cell `$procdff$225' with positive edge clock.
+Creating register for signal `\cdr_unit.\since' using process `\cdr_unit.$proc$rtl/assists.v:240$159'.
+  created $dff cell `$procdff$226' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 5 empty switches in `\cdr_unit.$proc$rtl/assists.v:240$159'.
+Removing empty process `cdr_unit.$proc$rtl/assists.v:240$159'.
+Cleaned up 5 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.3. Executing FLATTEN pass (flatten design).
+
+3.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+Removed 0 unused cells and 32 unused wires.
+<suppressed ~1 debug messages>
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module cdr_unit...
+Found and reported 0 problems.
+
+3.7. Executing OPT pass (performing simple optimizations).
+
+3.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 44 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \cdr_unit..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~27 debug messages>
+
+3.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \cdr_unit.
+Performed a total of 0 changes.
+
+3.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 44 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+
+3.7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.7.9. Finished fast OPT passes. (There is nothing left to do.)
+
+3.8. Executing FSM pass (extract and optimize FSM).
+
+3.8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+
+3.8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.9. Executing OPT pass (performing simple optimizations).
+
+3.9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 44 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \cdr_unit..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~27 debug messages>
+
+3.9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \cdr_unit.
+Performed a total of 0 changes.
+
+3.9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 44 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.9.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$226 ($dff) from module cdr_unit (D = $procmux$190_Y, Q = \since, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$227 ($sdff) from module cdr_unit (D = $procmux$188_Y, Q = \since).
+Adding SRST signal on $procdff$225 ($dff) from module cdr_unit (D = $procmux$202_Y, Q = \ctr, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$229 ($sdff) from module cdr_unit (D = $procmux$199_Y, Q = \ctr).
+Adding SRST signal on $procdff$224 ($dff) from module cdr_unit (D = $procmux$178_Y, Q = \bit_valid, rval = 1'0).
+Adding SRST signal on $procdff$223 ($dff) from module cdr_unit (D = $procmux$217_Y, Q = \bit_out, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$232 ($sdff) from module cdr_unit (D = $procmux$217_Y, Q = \bit_out).
+Adding SRST signal on $procdff$222 ($dff) from module cdr_unit (D = \s4 [3], Q = \last, rval = 1'0).
+
+3.9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+Removed 7 unused cells and 7 unused wires.
+<suppressed ~8 debug messages>
+
+3.9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+<suppressed ~1 debug messages>
+
+3.9.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \cdr_unit..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~19 debug messages>
+
+3.9.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \cdr_unit.
+Performed a total of 0 changes.
+
+3.9.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 41 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.9.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+
+3.9.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.9.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.10. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 2) from port B of cell cdr_unit.$auto$opt_dff.cc:235:make_patterns_logic$239 ($ne).
+Removed top 1 bits (of 2) from mux cell cdr_unit.$ternary$rtl/assists.v:235$153 ($mux).
+Removed top 1 bits (of 12) from port A of cell cdr_unit.$add$rtl/assists.v:237$156 ($add).
+Removed top 2 bits (of 12) from port B of cell cdr_unit.$add$rtl/assists.v:237$156 ($add).
+Removed top 5 bits (of 12) from port B of cell cdr_unit.$add$rtl/assists.v:238$157 ($add).
+Removed top 6 bits (of 12) from port B of cell cdr_unit.$add$rtl/assists.v:239$158 ($add).
+Removed top 5 bits (of 12) from port A of cell cdr_unit.$sub$rtl/assists.v:248$162 ($sub).
+Removed top 6 bits (of 12) from port B of cell cdr_unit.$sub$rtl/assists.v:248$162 ($sub).
+Removed top 4 bits (of 12) from port Y of cell cdr_unit.$sub$rtl/assists.v:248$162 ($sub).
+Removed top 5 bits (of 12) from port B of cell cdr_unit.$add$rtl/assists.v:249$163 ($add).
+Removed top 1 bits (of 12) from port A of cell cdr_unit.$add$rtl/assists.v:251$164 ($add).
+Removed top 5 bits (of 12) from port B of cell cdr_unit.$add$rtl/assists.v:251$164 ($add).
+Removed top 6 bits (of 12) from port B of cell cdr_unit.$sub$rtl/assists.v:251$165 ($sub).
+Removed top 1 bits (of 2) from wire cdr_unit.$ternary$rtl/assists.v:235$153_Y.
+Removed top 1 bits (of 12) from wire cdr_unit.half.
+
+3.11. Executing PEEPOPT pass (run peephole optimizers).
+
+3.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+3.13. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module cdr_unit:
+  creating $macc model for $add$rtl/assists.v:237$156 ($add).
+  creating $macc model for $add$rtl/assists.v:238$157 ($add).
+  creating $macc model for $add$rtl/assists.v:239$158 ($add).
+  creating $macc model for $add$rtl/assists.v:249$163 ($add).
+  creating $macc model for $add$rtl/assists.v:251$164 ($add).
+  creating $macc model for $sub$rtl/assists.v:248$162 ($sub).
+  creating $macc model for $sub$rtl/assists.v:251$165 ($sub).
+  creating $macc model for $sub$rtl/assists.v:253$167 ($sub).
+  merging $macc model for $add$rtl/assists.v:251$164 into $sub$rtl/assists.v:251$165.
+  creating $alu model for $macc $sub$rtl/assists.v:248$162.
+  creating $alu model for $macc $sub$rtl/assists.v:253$167.
+  creating $alu model for $macc $add$rtl/assists.v:249$163.
+  creating $alu model for $macc $add$rtl/assists.v:239$158.
+  creating $alu model for $macc $add$rtl/assists.v:238$157.
+  creating $alu model for $macc $add$rtl/assists.v:237$156.
+  creating $macc cell for $sub$rtl/assists.v:251$165: $auto$alumacc.cc:382:replace_macc$245
+  creating $alu model for $ge$rtl/assists.v:247$160 ($ge): new $alu
+  creating $alu model for $ge$rtl/assists.v:252$166 ($ge): merged with $sub$rtl/assists.v:253$167.
+  creating $alu cell for $ge$rtl/assists.v:247$160: $auto$alumacc.cc:512:replace_alu$247
+  creating $alu cell for $add$rtl/assists.v:237$156: $auto$alumacc.cc:512:replace_alu$260
+  creating $alu cell for $add$rtl/assists.v:238$157: $auto$alumacc.cc:512:replace_alu$263
+  creating $alu cell for $add$rtl/assists.v:239$158: $auto$alumacc.cc:512:replace_alu$266
+  creating $alu cell for $add$rtl/assists.v:249$163: $auto$alumacc.cc:512:replace_alu$269
+  creating $alu cell for $sub$rtl/assists.v:253$167, $ge$rtl/assists.v:252$166: $auto$alumacc.cc:512:replace_alu$272
+  creating $alu cell for $sub$rtl/assists.v:248$162: $auto$alumacc.cc:512:replace_alu$285
+  created 7 $alu and 1 $macc cells.
+
+3.14. Executing SHARE pass (SAT-based resource sharing).
+
+3.15. Executing OPT pass (performing simple optimizations).
+
+3.15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 50 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \cdr_unit..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~19 debug messages>
+
+3.15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \cdr_unit.
+Performed a total of 0 changes.
+
+3.15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 50 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+Removed 1 unused cells and 3 unused wires.
+<suppressed ~2 debug messages>
+
+3.15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.15.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.15.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \cdr_unit..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~19 debug messages>
+
+3.15.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \cdr_unit.
+Performed a total of 0 changes.
+
+3.15.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 49 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.15.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+
+3.15.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.15.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.16. Executing MEMORY pass.
+
+3.16.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.16.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.16.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.16.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.16.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+3.16.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+
+3.16.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.16.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.16.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+
+3.16.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+
+3.18. Executing OPT pass (performing simple optimizations).
+
+3.18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+<suppressed ~20 debug messages>
+
+3.18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 44 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.18.3. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $auto$ff.cc:337:slice$230 ($sdffe) from module cdr_unit (D = $procmux$199_Y [5:0], Q = \ctr [5:0]).
+Adding EN signal on $auto$ff.cc:337:slice$228 ($sdffe) from module cdr_unit (D = $procmux$188_Y [5:0], Q = \since [5:0]).
+
+3.18.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+Removed 0 unused cells and 11 unused wires.
+<suppressed ~1 debug messages>
+
+3.18.5. Rerunning OPT passes. (Removed registers in this run.)
+
+3.18.6. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+<suppressed ~2 debug messages>
+
+3.18.7. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 50 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.18.8. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.18.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+Removed 0 unused cells and 1 unused wires.
+<suppressed ~1 debug messages>
+
+3.18.10. Finished fast OPT passes.
+
+3.19. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.20. Executing OPT pass (performing simple optimizations).
+
+3.20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 50 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \cdr_unit..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~13 debug messages>
+
+3.20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \cdr_unit.
+    Consolidated identical input bits for $mux cell $procmux$188:
+      Old ports: A={ $add$rtl/assists.v:249$163_Y [11:6] 6'x }, B={ 5'00000 $sub$rtl/assists.v:248$162_Y [6:4] 4'0000 }, Y=$procmux$188_Y
+      New ports: A={ $add$rtl/assists.v:249$163_Y [11:6] 3'x }, B={ 5'00000 $sub$rtl/assists.v:248$162_Y [6:4] 1'0 }, Y={ $procmux$188_Y [11:4] $procmux$188_Y [0] }
+      New connections: $procmux$188_Y [3:1] = { $procmux$188_Y [0] $procmux$188_Y [0] $procmux$188_Y [0] }
+  Optimizing cells in module \cdr_unit.
+Performed a total of 1 changes.
+
+3.20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 50 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.20.6. Executing OPT_SHARE pass.
+
+3.20.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+
+3.20.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.20.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.20.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \cdr_unit..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~13 debug messages>
+
+3.20.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \cdr_unit.
+Performed a total of 0 changes.
+
+3.20.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 50 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.20.14. Executing OPT_SHARE pass.
+
+3.20.15. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+
+3.20.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+
+3.20.18. Finished fast OPT passes. (There is nothing left to do.)
+
+3.21. Executing TECHMAP pass (map to technology primitives).
+
+3.21.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.21.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using template $paramod$78e969f2586efcf3a5b0b0440bcca0db83d5cca2\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $or.
+Using template $paramod$32efbfac1c4dc57230cf86180788fdfd12e3b511\_90_alu for cells of type $alu.
+Using template $paramod$ee3d784672cdb1cb32d9a801a3af776716f16b74\_90_alu for cells of type $alu.
+Using template $paramod$a950948e19702336540a1f557d0a91306bdb9188\_90_alu for cells of type $alu.
+Using template $paramod$9503ccbdaa0d43eea34db1a74a4be1091d99b327\_90_alu for cells of type $alu.
+Using extmapper maccmap for cells of type $macc_v2.
+  add \period [11:1] (11 bits, unsigned)
+  sub { \epos 4'0000 } (6 bits, unsigned)
+  add 12'000001000000 (12 bits, unsigned)
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $ne.
+Using extmapper simplemap for cells of type $xor.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $logic_and.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001100 for cells of type $fa.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001100 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001000 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001000 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000110 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000110 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000011 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+Using extmapper simplemap for cells of type $and.
+No more expansions possible.
+<suppressed ~1077 debug messages>
+
+3.22. Executing OPT pass (performing simple optimizations).
+
+3.22.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+<suppressed ~496 debug messages>
+
+3.22.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 539 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Computing hashes of 486 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Computing hashes of 482 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+<suppressed ~171 debug messages>
+Removed a total of 57 cells.
+
+3.22.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.22.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+Removed 54 unused cells and 438 unused wires.
+<suppressed ~55 debug messages>
+
+3.22.5. Finished fast OPT passes.
+
+3.23. Executing ABC pass (technology mapping using ABC).
+
+3.23.1. Extracting gate netlist of module `\cdr_unit' to `<abc-temp-dir>/input.blif'..
+Replacing 9 occurrences of constant undef bits with constant zero bits
+
+3.23.1.1. Executed ABC.
+Extracted 404 gates and 446 wires to a netlist network with 39 inputs and 26 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library /tmp/yosys-abc-UAYd2x/stdcells.genlib 
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+3.23.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       17
+ABC RESULTS:            ANDNOT cells:      132
+ABC RESULTS:               MUX cells:       22
+ABC RESULTS:              NAND cells:       19
+ABC RESULTS:               NOR cells:       31
+ABC RESULTS:               NOT cells:       25
+ABC RESULTS:                OR cells:       28
+ABC RESULTS:             ORNOT cells:       11
+ABC RESULTS:              XNOR cells:       24
+ABC RESULTS:               XOR cells:       75
+ABC RESULTS:              ZERO cells:        1
+ABC RESULTS:        internal signals:      381
+ABC RESULTS:           input signals:       39
+ABC RESULTS:          output signals:       26
+Removing temp directory.
+Removing global temp directory.
+
+3.24. Executing OPT pass (performing simple optimizations).
+
+3.24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+<suppressed ~2 debug messages>
+
+3.24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 408 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Computing hashes of 406 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+<suppressed ~6 debug messages>
+Removed a total of 2 cells.
+
+3.24.3. Executing OPT_DFF pass (perform DFF optimizations).
+Setting constant 0-bit at position 0 on $auto$ff.cc:337:slice$403 ($_SDFFE_PP0P_) from module cdr_unit.
+
+3.24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+Removed 1 unused cells and 209 unused wires.
+<suppressed ~9 debug messages>
+
+3.24.5. Rerunning OPT passes. (Removed registers in this run.)
+
+3.24.6. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cdr_unit.
+<suppressed ~7 debug messages>
+
+3.24.7. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cdr_unit'.
+Computing hashes of 401 cells of `\cdr_unit'.
+Finding duplicate cells in `\cdr_unit'.
+Removed a total of 0 cells.
+
+3.24.8. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.24.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+Removed 0 unused cells and 7 unused wires.
+<suppressed ~1 debug messages>
+
+3.24.10. Finished fast OPT passes.
+
+3.25. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `cdr_unit'. Setting top module to cdr_unit.
+
+3.25.1. Analyzing design hierarchy..
+Top module:  \cdr_unit
+
+3.25.2. Analyzing design hierarchy..
+Top module:  \cdr_unit
+Removed 0 unused modules.
+
+3.26. Printing statistics.
+
+=== cdr_unit ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      391 wires
+      459 wire bits
+       13 public wires
+       81 public wire bits
+        7 ports
+       21 port bits
+      401 cells
+      132   $_ANDNOT_
+       17   $_AND_
+       22   $_MUX_
+       19   $_NAND_
+       31   $_NOR_
+       27   $_NOT_
+       11   $_ORNOT_
+       26   $_OR_
+        6   $_SDFFE_PP0N_
+       15   $_SDFFE_PP0P_
+        2   $_SDFF_PP0_
+       24   $_XNOR_
+       69   $_XOR_
+
+3.27. Executing CHECK pass (checking for obvious problems).
+Checking module cdr_unit...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\cdr_unit':
+  mapped 23 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Extracting gate netlist of module `\cdr_unit' to `<abc-temp-dir>/input.blif'..
+
+5.1.1. Executed ABC.
+Extracted 422 gates and 464 wires to a netlist network with 40 inputs and 23 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.02 sec
+ABC: Memory =    2.85 MB. Time =     0.02 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+5.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:        4
+ABC RESULTS:    sg13g2_a21oi_1 cells:       24
+ABC RESULTS:   sg13g2_a221oi_1 cells:       18
+ABC RESULTS:    sg13g2_a22oi_1 cells:        2
+ABC RESULTS:     sg13g2_and2_1 cells:       15
+ABC RESULTS:     sg13g2_and3_1 cells:        5
+ABC RESULTS:      sg13g2_inv_1 cells:       19
+ABC RESULTS:    sg13g2_nand2_1 cells:       20
+ABC RESULTS:   sg13g2_nand2b_1 cells:        4
+ABC RESULTS:    sg13g2_nand3_1 cells:       13
+ABC RESULTS:    sg13g2_nand4_1 cells:        1
+ABC RESULTS:     sg13g2_nor2_1 cells:       37
+ABC RESULTS:    sg13g2_nor2b_1 cells:       16
+ABC RESULTS:     sg13g2_nor3_1 cells:       15
+ABC RESULTS:     sg13g2_nor4_1 cells:        1
+ABC RESULTS:    sg13g2_o21ai_1 cells:       24
+ABC RESULTS:      sg13g2_or2_1 cells:        7
+ABC RESULTS:      sg13g2_or3_1 cells:        4
+ABC RESULTS:    sg13g2_xnor2_1 cells:       22
+ABC RESULTS:     sg13g2_xor2_1 cells:       26
+ABC RESULTS:        internal signals:      401
+ABC RESULTS:           input signals:       40
+ABC RESULTS:          output signals:       23
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cdr_unit..
+Removed 0 unused cells and 462 unused wires.
+<suppressed ~1 debug messages>
+
+7. Printing statistics.
+
+=== cdr_unit ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      290        - wires
+      358        - wire bits
+       13        - public wires
+       81        - public wire bits
+        7        - ports
+       21        - port bits
+      300 3.88E+03 cells
+        4   50.803   sg13g2_a21o_1
+       24  217.728   sg13g2_a21oi_1
+       18  261.274   sg13g2_a221oi_1
+        2   21.697   sg13g2_a22oi_1
+       15   136.08   sg13g2_and2_1
+        5   63.504   sg13g2_and3_1
+       23 1.13E+03   sg13g2_dfrbpq_1
+       19  103.421   sg13g2_inv_1
+       20  145.152   sg13g2_nand2_1
+        4   36.288   sg13g2_nand2b_1
+       13  117.936   sg13g2_nand3_1
+        1   10.886   sg13g2_nand4_1
+       37  268.531   sg13g2_nor2_1
+       16  145.152   sg13g2_nor2b_1
+       15   136.08   sg13g2_nor3_1
+        1   10.886   sg13g2_nor4_1
+       24  217.728   sg13g2_o21ai_1
+        7   63.504   sg13g2_or2_1
+        4   50.803   sg13g2_or3_1
+       22  319.334   sg13g2_xnor2_1
+       26  377.395   sg13g2_xor2_1
+
+   Chip area for module '\cdr_unit': 3880.926000
+     of which used for sequential elements: 1126.742400 (29.03%)
+
+Warnings: 1 unique messages, 1 total
+End of script. Logfile hash: 3e7b89e1eb, CPU: user 0.20s system 0.04s, MEM: 30.61 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 56% 2x abc (0 sec), 8% 26x opt_expr (0 sec), ...

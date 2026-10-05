@@ -1,0 +1,5 @@
+(library
+ (name hardcaml_latency)
+ (libraries base stdio hardcaml)
+ (preprocess
+  (pps ppx_jane)))

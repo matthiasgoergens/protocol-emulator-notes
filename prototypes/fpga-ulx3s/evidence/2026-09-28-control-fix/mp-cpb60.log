@@ -1,0 +1,203 @@
+== uart_loop (simulation, four-phase build)
+  replay through interpreter   PASS  2600 cycles, every output equal, pin_sub on all 10400 quarters
+  prediction (whole trace)     PASS  2600 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  uart decode pin 7            PASS  got [4f 4b 21] expected [4f 4b 21]
+  host bytes                   PASS  got [4f 4b 21] expected [4f 4b 21]
+RESULT uart_loop PASS
+  (88 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.40 s)
+OK   uart_loop: PASS
+
+== uart_jumper (simulation, four-phase build)
+  replay through interpreter   PASS  2600 cycles, every output equal, pin_sub on all 10400 quarters
+  prediction (whole trace)     PASS  2600 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  uart decode pin 7            PASS  got [4f 4b 21] expected [4f 4b 21]
+  host bytes                   PASS  got [4f 4b 21] expected [4f 4b 21]
+RESULT uart_jumper PASS
+  (68 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.31 s)
+OK   uart_jumper: PASS
+
+== demo3_noslave (simulation, four-phase build)
+  replay through interpreter   PASS  6000 cycles, every output equal, pin_sub on all 24000 quarters
+  prediction (whole trace)     PASS  6000 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  spi decode (mosi)            PASS  got [a5 3c] expected prefix [a5 3c]
+  i2c decode                   PASS  got [a0 5a] acks NN stop=true expected [a0 5a]
+RESULT demo3_noslave PASS
+  (287 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 1.29 s)
+OK   demo3_noslave: PASS
+
+== demo3 (simulation, four-phase build)
+  replay through interpreter   PASS  6000 cycles, every output equal, pin_sub on all 24000 quarters
+  prediction (whole trace)     PASS  6000 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  spi decode (mosi)            PASS  got [a5 3c] expected prefix [a5 3c]
+  i2c decode                   PASS  got [a0 5a] acks AA stop=true expected [a0 5a] acks AA
+  host bytes                   PASS  got [00 00] expected [00 00]
+RESULT demo3 PASS
+  (287 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 1.29 s)
+OK   demo3: PASS
+
+== rtc_ack (simulation, four-phase build)
+  replay through interpreter   PASS  15220 cycles, every output equal, pin_sub on all 60880 quarters
+  prediction (whole trace)     PASS  15220 cycles identical to the OCaml board model
+  i2c decode                   PASS  got [de 00] acks AA stop=true expected [de 00] acks AA
+  host bytes                   PASS  got [00 00] expected [00 00]
+RESULT rtc_ack PASS
+  (101 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.47 s)
+OK   rtc_ack: PASS
+
+== rtc_ack_pcf8523 (simulation, four-phase build)
+  replay through interpreter   PASS  15220 cycles, every output equal, pin_sub on all 60880 quarters
+  prediction (whole trace)     PASS  15220 cycles identical to the OCaml board model
+  i2c decode                   PASS  got [d0 00] acks AA stop=true expected [d0 00] acks AA
+  host bytes                   PASS  got [00 00] expected [00 00]
+RESULT rtc_ack_pcf8523 PASS
+  (101 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.46 s)
+OK   rtc_ack_pcf8523: PASS
+
+== rtc_nack (simulation, four-phase build)
+  replay through interpreter   PASS  9460 cycles, every output equal, pin_sub on all 37840 quarters
+  prediction (whole trace)     PASS  9460 cycles identical to the OCaml board model
+  i2c decode                   PASS  got [90] acks N stop=true expected [90] acks N
+  host bytes                   PASS  got [01] expected [01]
+RESULT rtc_nack PASS
+  (59 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.27 s)
+OK   rtc_nack: PASS
+
+== flash_id (simulation, four-phase build)
+  replay through interpreter   PASS  3472 cycles, every output equal, pin_sub on all 13888 quarters
+  prediction (whole trace)     PASS  3472 cycles identical to the OCaml board model
+  spi decode (mosi)            PASS  got [9f ff ff ff] expected prefix [9f]
+  host bytes (known ids)       PASS  got [ef 40 18]; known: [9d 60 18], [9d 60 16], [ef 40 18], [ef 70 18], [01 60 18]
+  flash commands (model)       PASS  9f
+RESULT flash_id PASS
+  (148 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.66 s)
+OK   flash_id: PASS
+
+== stream_loop (simulation, four-phase build)
+  replay through interpreter   PASS  3784 cycles, every output equal, pin_sub on all 15136 quarters
+  prediction (whole trace)     PASS  3784 cycles identical to the OCaml board model
+  sampler capture decode       PASS  3 words, got [48 69 21] expected [48 69 21]
+RESULT stream_loop PASS
+  (1 trace entries, 3 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.01 s)
+OK   stream_loop: PASS
+
+== stream_jumper (simulation, four-phase build)
+  replay through interpreter   PASS  3784 cycles, every output equal, pin_sub on all 15136 quarters
+  prediction (whole trace)     PASS  3784 cycles identical to the OCaml board model
+  sampler capture decode       PASS  3 words, got [48 69 21] expected [48 69 21]
+RESULT stream_jumper PASS
+  (1 trace entries, 3 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.01 s)
+OK   stream_jumper: PASS
+
+== trace_overflow (simulation, four-phase build)
+  trace buffer overflowed: checking cycles 0..4915 only
+  replay through interpreter   PASS  4916 cycles, every output equal, pin_sub on all 19664 quarters
+  prediction (whole trace)     PASS  4916 cycles identical to the OCaml board model
+  trace overflow reported      PASS  overflow true, cycles checked 4916 of 20000
+RESULT trace_overflow PASS
+  (2048 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 1}, 9.08 s)
+OK   trace_overflow: PASS
+
+== host_echo (simulation, four-phase build)
+  replay through interpreter   PASS  3200 cycles, every output equal, pin_sub on all 12800 quarters
+  prediction (whole trace)     PASS  3200 cycles identical to the OCaml board model
+  host bytes                   PASS  got [12 34 56 a5] expected [12 34 56 a5]
+  uart decode pin 0            PASS  got [12 34 56 a5] expected [12 34 56 a5]
+RESULT host_echo PASS
+  (102 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.46 s)
+OK   host_echo: PASS
+
+== eeprom_ack (simulation, four-phase build)
+  replay through interpreter   PASS  15220 cycles, every output equal, pin_sub on all 60880 quarters
+  prediction (whole trace)     PASS  15220 cycles identical to the OCaml board model
+  i2c decode                   PASS  got [a0 00] acks AA stop=true expected [a0 00] acks AA
+  host bytes                   PASS  got [00 00] expected [00 00]
+RESULT eeprom_ack PASS
+  (101 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.46 s)
+OK   eeprom_ack: PASS
+
+== spi_flash_header (simulation, four-phase build)
+  replay through interpreter   PASS  3472 cycles, every output equal, pin_sub on all 13888 quarters
+  prediction (whole trace)     PASS  3472 cycles identical to the OCaml board model
+  spi decode (mosi)            PASS  got [9f ff ff ff] expected prefix [9f]
+  host bytes (known ids)       PASS  got [ef 40 17]; known: [ef 40 17], [ef 70 17], [ef 40 18]
+RESULT spi_flash_header PASS
+  (214 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.96 s)
+OK   spi_flash_header: PASS
+
+== uart_adapter (simulation, four-phase build)
+  replay through interpreter   PASS  27440 cycles, every output equal, pin_sub on all 109760 quarters
+  prediction (whole trace)     PASS  27440 cycles identical to the OCaml board model
+  uart decode pin 0            PASS  got [4f 4b 21 0d 0a] expected [4f 4b 21 0d 0a]
+RESULT uart_adapter PASS
+  (98 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.45 s)
+OK   uart_adapter: PASS
+
+== flash_interlock (simulation, four-phase build)
+  replay through interpreter   PASS  1168 cycles, every output equal, pin_sub on all 4672 quarters
+  prediction (whole trace)     PASS  1168 cycles identical to the OCaml board model
+RESULT flash_interlock PASS
+  (44 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.20 s)
+  interlock (sim flash log)    PASS  flash saw: no complete command byte
+OK   flash_interlock: PASS
+
+== subslot_train (simulation, four-phase build)
+  replay through interpreter   PASS  700 cycles, every output equal, pin_sub on all 2800 quarters
+  prediction (whole trace)     PASS  700 cycles identical to the OCaml board model
+  pin_sub edges pin 1          PASS  165 edges on the quarter grid, spacings all 17 quarters: true
+  quad loopback pin 1          PASS  2784 quarters: stage samples = recorded pin_sub through the stage, 0 differ
+RESULT subslot_train PASS
+  (493 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 2.19 s)
+OK   subslot_train: PASS
+
+== quad_rx (simulation, four-phase build)
+  replay through interpreter   PASS  132 cycles, every output equal, pin_sub on all 528 quarters
+  prediction (whole trace)     PASS  132 cycles identical to the OCaml board model
+  host bytes (quad samples)    PASS  got [78 3c 1e 0f] expected [78 3c 1e 0f] for the four-phase build
+  quad loopback pin 0          PASS  512 quarters: stage samples = recorded pin_sub through the stage, 0 differ
+RESULT quad_rx PASS
+  (42 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.19 s)
+OK   quad_rx: PASS
+
+== uart_loop (simulation, four-phase build)
+  replay through interpreter   FAIL  2 mismatching cycles, first at 969: pin_out fpga 01 interp 00
+  prediction (whole trace)     FAIL  cycle 969: captured in=ff out=01 oe=01 fl=00 sub=00000000 in4=ffffffff, predicted in=ff out=00 oe=01 fl=00 sub=00000000 in4=ffffffff
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  uart decode pin 7            PASS  got [4f 4b 21] expected [4f 4b 21]
+  host bytes                   PASS  got [4f 4b 21] expected [4f 4b 21]
+RESULT uart_loop FAIL
+  (88 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.40 s)
+OK   uart_loop [control: trace]: control failed as it must
+
+== uart_loop (simulation, four-phase build)
+  replay through interpreter   FAIL  76 mismatching cycles, first at 73: pin_out fpga 00 interp 01
+  prediction (whole trace)     FAIL  cycle 73: captured in=7e out=00 oe=01 fl=00 sub=00000000 in4=0ffffff0, predicted in=7e out=01 oe=01 fl=00 sub=0000000f in4=0ffffff0
+  uart decode pin 0            PASS  got [4f 4b 21] expected [4f 4b 21]
+  uart decode pin 7            PASS  got [4f 4b 21] expected [4f 4b 21]
+  host bytes                   PASS  got [4f 4b 21] expected [4f 4b 21]
+RESULT uart_loop FAIL
+  (88 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.40 s)
+OK   uart_loop [control: imem]: control failed as it must
+
+== subslot_train (simulation, four-phase build)
+  replay through interpreter   FAIL  11 mismatching cycles, first at 5: pin_sub pin 1 quarter 1: fpga 1 interp 0
+  prediction (whole trace)     FAIL  cycle 5: captured in=ff out=00 oe=02 fl=00 sub=00000030 in4=ffffffff, predicted in=ff out=00 oe=02 fl=00 sub=00000010 in4=ffffffff
+  pin_sub edges pin 1          FAIL  165 edges on the quarter grid, spacings all 17 quarters: false (first other spacing 18)
+  quad loopback pin 1          PASS  2784 quarters: stage samples = recorded pin_sub through the stage, 0 differ
+RESULT subslot_train FAIL
+  (493 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 2.21 s)
+OK   subslot_train [control: q]: control failed as it must
+
+== subslot_train (simulation, four-phase build)
+  replay through interpreter   FAIL  1 mismatching cycles, first at 9: pin_sub pin 1 quarter 1: fpga 1 interp 0
+  prediction (whole trace)     FAIL  cycle 9: captured in=fd out=02 oe=02 fl=00 sub=000000a0 in4=ffffff0f, predicted in=fd out=02 oe=02 fl=00 sub=000000c0 in4=ffffff0f
+  pin_sub edges pin 1          FAIL  167 edges on the quarter grid, spacings all 17 quarters: false (first other spacing 16)
+  quad loopback pin 1          FAIL  2784 quarters: stage samples = recorded pin_sub through the stage, 2 differ
+RESULT subslot_train FAIL
+  (493 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 2.19 s)
+OK   subslot_train [control: swap]: control failed as it must
+
+22 of 22 as expected (0 skipped, 0 errors); results in evidence/2026-09-28-control-fix/mp-cpb60

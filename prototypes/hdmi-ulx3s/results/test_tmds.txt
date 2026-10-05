@@ -1,0 +1,8 @@
+encoder                                  vs-ref  roundtr  invalid cnt=disp  control  bound>8  max|rd|
+faithful                                      0        0        0        0        0        0        8
+xnor rule tests d[1] (Gergo)                270        0      270        0        0        0        8
+2*q_m[8] correction inverted (Gergo)       1632        0        0     1632        0   729392      276
+control 01 sends code of 10                   0        0        0        0        9        0        8
+no DC balance                               816        0        0        2        0   951769     4556
+(exhaustive: 9 disparity states x 256 values + 4 control codes x 9 states; stream: 1000000 words, seed 42)
+ALL PASS

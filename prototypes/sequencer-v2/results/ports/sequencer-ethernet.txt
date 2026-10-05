@@ -1,0 +1,14 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/sequencer-v2/_build/default/ports/sequencer-ethernet/main.exe
+# commit: b58ef4e4eebc095e715bfe81aa54f8e86229c517 (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T09:00:42+08:00
+frame 73 bytes on the wire (1168 half-bits, 3504 clocks); program sizes 28,30,29,28 of 64; host bytes per thread 37,37,37,37
+pin vs Ethernet model encoder: 0 mismatching clocks of 3504 -> PASS
+control one bit flipped in thread 2's 10th byte      3 mismatching clocks (first at 886) -> caught
+control threads' streams rotated by two           1536 mismatching clocks (first at 16) -> caught
+control thread 1 one slot late (extra NOP)         835 mismatching clocks (first at 25) -> caught
+RTL: 0 clocks where its pin differs from the Ethernet model, 0 where it differs from the interpreter -> PASS
+exit 0
+
+# diff against the recorded result results/ports/original-sequencer-ethernet.txt (lines starting # and exit lines ignored):
+# identical

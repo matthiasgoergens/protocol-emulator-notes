@@ -1,0 +1,9 @@
+# validate_artifacts.py: checked-in artefact consistency
+# Scope: reduced checked-in evidence only; raw SPICE replay is unavailable (see README.md).
+# This is not an independent SPICE or silicon validation.
+PASS required result files
+PASS fitted parameters and OCaml CSV agreement
+PASS pad IV NPZ/CSV grids and currents
+PASS kick NPZ/CSV aperture tables
+PASS Python padcheck fixture (worst difference 0.0 ps)
+RESULT PASS (5 checks)

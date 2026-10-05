@@ -1,0 +1,8 @@
+== flash_id (simulation)
+  replay through interpreter   PASS  3472 cycles, every output equal
+  prediction (whole trace)     PASS  3472 cycles identical to the OCaml board model
+  spi decode (mosi)            PASS  got [9f ff ff ff] expected prefix [9f]
+  host bytes (known ids)       PASS  got [ef 40 18]; known: [9d 60 18], [9d 60 16], [ef 40 18], [ef 70 18], [01 60 18]
+  flash commands (model)       PASS  9f
+RESULT flash_id PASS
+  (148 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.03 s)

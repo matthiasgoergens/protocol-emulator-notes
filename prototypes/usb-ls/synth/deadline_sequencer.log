@@ -1,0 +1,1925 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69+77 (git sha1 9ff27d29c-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+-- Running command `read_verilog deadline_sequencer.v; hierarchy -check -top deadline_sequencer; synth -top deadline_sequencer -flatten; dfflibmap -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; stat -liberty /home/matthias/prog/janestreet/pio-area-notes/sg13g2/sg13g2_stdcell_typ_1p20V_25C.lib' --
+
+1. Executing Verilog-2005 frontend: deadline_sequencer.v
+Parsing Verilog input from `deadline_sequencer.v' to AST representation.
+Generating RTLIL representation for module `\deadline_sequencer'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \deadline_sequencer
+
+2.2. Analyzing design hierarchy..
+Top module:  \deadline_sequencer
+Removed 0 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \deadline_sequencer
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \deadline_sequencer
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:822$170 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:807$168 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:801$167 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:764$151 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:758$150 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:748$147 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:738$144 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:717$137 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:711$136 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:690$126 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:682$124 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:674$122 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:657$118 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:651$117 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:635$110 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:627$108 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:619$106 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:595$102 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:575$99 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:542$90 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:536$89 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:502$76 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:494$74 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:486$72 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:411$36 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:347$9 in module deadline_sequencer.
+Marked 1 switch rules as full_case in process $proc$deadline_sequencer.v:336$6 in module deadline_sequencer.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 27 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~27 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:822$170'.
+     1/1: $0\_72[1:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:807$168'.
+     1/1: $0\_369[5:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:801$167'.
+     1/1: $0\_52[5:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:764$151'.
+     1/1: $0\_341[5:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:758$150'.
+     1/1: $0\_49[5:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:748$147'.
+     1/1: $0\_46[5:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:738$144'.
+     1/1: $0\_43[5:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:717$137'.
+     1/1: $0\_318[11:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:711$136'.
+     1/1: $0\_317[11:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:690$126'.
+     1/1: $0\_309[11:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:682$124'.
+     1/1: $0\_305[11:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:674$122'.
+     1/1: $0\_301[11:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:657$118'.
+     1/1: $0\_290[11:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:651$117'.
+     1/1: $0\_289[11:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:635$110'.
+     1/1: $0\_283[11:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:627$108'.
+     1/1: $0\_279[11:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:619$106'.
+     1/1: $0\_275[11:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:595$102'.
+     1/1: $0\_171[0:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:575$99'.
+     1/1: $0\_195[7:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:542$90'.
+     1/1: $0\_85[7:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:536$89'.
+     1/1: $0\_75[7:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:502$76'.
+     1/1: $0\_78[7:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:494$74'.
+     1/1: $0\_81[7:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:486$72'.
+     1/1: $0\_84[7:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:411$36'.
+     1/1: $0\_93[7:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:347$9'.
+     1/1: $0\_69[7:0]
+Creating decoders for process `\deadline_sequencer.$proc$deadline_sequencer.v:336$6'.
+     1/1: $0\_65[0:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\deadline_sequencer.\_369' from process `\deadline_sequencer.$proc$deadline_sequencer.v:807$168'.
+No latch inferred for signal `\deadline_sequencer.\_341' from process `\deadline_sequencer.$proc$deadline_sequencer.v:764$151'.
+No latch inferred for signal `\deadline_sequencer.\_318' from process `\deadline_sequencer.$proc$deadline_sequencer.v:717$137'.
+No latch inferred for signal `\deadline_sequencer.\_290' from process `\deadline_sequencer.$proc$deadline_sequencer.v:657$118'.
+No latch inferred for signal `\deadline_sequencer.\_171' from process `\deadline_sequencer.$proc$deadline_sequencer.v:595$102'.
+No latch inferred for signal `\deadline_sequencer.\_85' from process `\deadline_sequencer.$proc$deadline_sequencer.v:542$90'.
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\deadline_sequencer.\_72' using process `\deadline_sequencer.$proc$deadline_sequencer.v:822$170'.
+  created $dff cell `$procdff$269' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_52' using process `\deadline_sequencer.$proc$deadline_sequencer.v:801$167'.
+  created $dff cell `$procdff$270' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_49' using process `\deadline_sequencer.$proc$deadline_sequencer.v:758$150'.
+  created $dff cell `$procdff$271' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_46' using process `\deadline_sequencer.$proc$deadline_sequencer.v:748$147'.
+  created $dff cell `$procdff$272' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_43' using process `\deadline_sequencer.$proc$deadline_sequencer.v:738$144'.
+  created $dff cell `$procdff$273' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_317' using process `\deadline_sequencer.$proc$deadline_sequencer.v:711$136'.
+  created $dff cell `$procdff$274' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_309' using process `\deadline_sequencer.$proc$deadline_sequencer.v:690$126'.
+  created $dff cell `$procdff$275' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_305' using process `\deadline_sequencer.$proc$deadline_sequencer.v:682$124'.
+  created $dff cell `$procdff$276' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_301' using process `\deadline_sequencer.$proc$deadline_sequencer.v:674$122'.
+  created $dff cell `$procdff$277' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_289' using process `\deadline_sequencer.$proc$deadline_sequencer.v:651$117'.
+  created $dff cell `$procdff$278' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_283' using process `\deadline_sequencer.$proc$deadline_sequencer.v:635$110'.
+  created $dff cell `$procdff$279' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_279' using process `\deadline_sequencer.$proc$deadline_sequencer.v:627$108'.
+  created $dff cell `$procdff$280' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_275' using process `\deadline_sequencer.$proc$deadline_sequencer.v:619$106'.
+  created $dff cell `$procdff$281' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_195' using process `\deadline_sequencer.$proc$deadline_sequencer.v:575$99'.
+  created $dff cell `$procdff$282' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_75' using process `\deadline_sequencer.$proc$deadline_sequencer.v:536$89'.
+  created $dff cell `$procdff$283' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_78' using process `\deadline_sequencer.$proc$deadline_sequencer.v:502$76'.
+  created $dff cell `$procdff$284' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_81' using process `\deadline_sequencer.$proc$deadline_sequencer.v:494$74'.
+  created $dff cell `$procdff$285' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_84' using process `\deadline_sequencer.$proc$deadline_sequencer.v:486$72'.
+  created $dff cell `$procdff$286' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_93' using process `\deadline_sequencer.$proc$deadline_sequencer.v:411$36'.
+  created $dff cell `$procdff$287' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_69' using process `\deadline_sequencer.$proc$deadline_sequencer.v:347$9'.
+  created $dff cell `$procdff$288' with positive edge clock.
+Creating register for signal `\deadline_sequencer.\_65' using process `\deadline_sequencer.$proc$deadline_sequencer.v:336$6'.
+  created $dff cell `$procdff$289' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:822$170'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:822$170'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:807$168'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:807$168'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:801$167'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:801$167'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:764$151'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:764$151'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:758$150'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:758$150'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:748$147'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:748$147'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:738$144'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:738$144'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:717$137'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:717$137'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:711$136'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:711$136'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:690$126'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:690$126'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:682$124'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:682$124'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:674$122'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:674$122'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:657$118'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:657$118'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:651$117'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:651$117'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:635$110'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:635$110'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:627$108'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:627$108'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:619$106'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:619$106'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:595$102'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:595$102'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:575$99'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:575$99'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:542$90'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:542$90'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:536$89'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:536$89'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:502$76'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:502$76'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:494$74'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:494$74'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:486$72'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:486$72'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:411$36'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:411$36'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:347$9'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:347$9'.
+Found and cleaned up 1 empty switch in `\deadline_sequencer.$proc$deadline_sequencer.v:336$6'.
+Removing empty process `deadline_sequencer.$proc$deadline_sequencer.v:336$6'.
+Cleaned up 27 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+<suppressed ~15 debug messages>
+
+3.3. Executing CHECK pass (checking for obvious problems).
+Checking module deadline_sequencer...
+Found and reported 0 problems.
+
+3.4. Executing FLATTEN pass (flatten design).
+
+3.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module deadline_sequencer...
+Found and reported 0 problems.
+
+3.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+Removed 1 unused cells and 199 unused wires.
+<suppressed ~3 debug messages>
+
+3.8. Executing OPT pass (performing simple optimizations).
+
+3.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 213 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Computing hashes of 165 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+<suppressed ~144 debug messages>
+Removed a total of 48 cells.
+
+3.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~259 debug messages>
+
+3.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer.
+Performed a total of 0 changes.
+
+3.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 165 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.8.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+Removed 0 unused cells and 19 unused wires.
+<suppressed ~1 debug messages>
+
+3.8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.8.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.8.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~259 debug messages>
+
+3.8.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer.
+Performed a total of 0 changes.
+
+3.8.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 165 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.8.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.8.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.8.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.8.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.9. Executing FSM pass (extract and optimize FSM).
+
+3.9.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.9.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.9.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.9.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.9.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.9.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.9.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.9.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.10. Executing OPT pass (performing simple optimizations).
+
+3.10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 165 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~259 debug messages>
+
+3.10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer.
+Performed a total of 0 changes.
+
+3.10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 165 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.10.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$286 ($dff) from module deadline_sequencer (D = \_10, Q = \_84, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$290 ($sdff) from module deadline_sequencer (D = \_14, Q = \_84).
+Adding SRST signal on $procdff$287 ($dff) from module deadline_sequencer (D = \_145, Q = \_93, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$292 ($sdff) from module deadline_sequencer (D = \_145 [0], Q = \_93 [0]).
+Adding EN signal on $auto$ff.cc:337:slice$292 ($sdff) from module deadline_sequencer (D = \_145 [1], Q = \_93 [1]).
+Adding EN signal on $auto$ff.cc:337:slice$292 ($sdff) from module deadline_sequencer (D = \_145 [2], Q = \_93 [2]).
+Adding EN signal on $auto$ff.cc:337:slice$292 ($sdff) from module deadline_sequencer (D = \_145 [3], Q = \_93 [3]).
+Adding EN signal on $auto$ff.cc:337:slice$292 ($sdff) from module deadline_sequencer (D = \_145 [4], Q = \_93 [4]).
+Adding EN signal on $auto$ff.cc:337:slice$292 ($sdff) from module deadline_sequencer (D = \_145 [5], Q = \_93 [5]).
+Adding EN signal on $auto$ff.cc:337:slice$292 ($sdff) from module deadline_sequencer (D = \_145 [6], Q = \_93 [6]).
+Adding EN signal on $auto$ff.cc:337:slice$292 ($sdff) from module deadline_sequencer (D = \_145 [7], Q = \_93 [7]).
+Adding SRST signal on $procdff$288 ($dff) from module deadline_sequencer (D = \_6, Q = \_69, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$365 ($sdff) from module deadline_sequencer (D = \_85, Q = \_69).
+Adding SRST signal on $procdff$269 ($dff) from module deadline_sequencer (D = \_366, Q = \_72, rval = 2'00).
+Adding SRST signal on $procdff$270 ($dff) from module deadline_sequencer (D = \_35, Q = \_52, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$368 ($sdff) from module deadline_sequencer (D = \_34, Q = \_52).
+Adding SRST signal on $procdff$271 ($dff) from module deadline_sequencer (D = \_32, Q = \_49, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$370 ($sdff) from module deadline_sequencer (D = \_34, Q = \_49).
+Adding SRST signal on $procdff$272 ($dff) from module deadline_sequencer (D = \_31, Q = \_46, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$372 ($sdff) from module deadline_sequencer (D = \_34, Q = \_46).
+Adding SRST signal on $procdff$273 ($dff) from module deadline_sequencer (D = \_30, Q = \_43, rval = 6'000000).
+Adding EN signal on $auto$ff.cc:337:slice$374 ($sdff) from module deadline_sequencer (D = \_34, Q = \_43).
+Adding SRST signal on $procdff$274 ($dff) from module deadline_sequencer (D = \_28, Q = \_317, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$376 ($sdff) from module deadline_sequencer (D = \_27, Q = \_317).
+Adding SRST signal on $procdff$275 ($dff) from module deadline_sequencer (D = \_26, Q = \_309, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$378 ($sdff) from module deadline_sequencer (D = \_27, Q = \_309).
+Adding SRST signal on $procdff$289 ($dff) from module deadline_sequencer (D = \_4, Q = \_65, rval = 1'0).
+Adding SRST signal on $procdff$276 ($dff) from module deadline_sequencer (D = \_25, Q = \_305, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$381 ($sdff) from module deadline_sequencer (D = \_27, Q = \_305).
+Adding SRST signal on $procdff$277 ($dff) from module deadline_sequencer (D = \_24, Q = \_301, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$383 ($sdff) from module deadline_sequencer (D = \_27, Q = \_301).
+Adding SRST signal on $procdff$278 ($dff) from module deadline_sequencer (D = \_23, Q = \_289, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$385 ($sdff) from module deadline_sequencer (D = \_22, Q = \_289).
+Adding SRST signal on $procdff$279 ($dff) from module deadline_sequencer (D = \_21, Q = \_283, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$387 ($sdff) from module deadline_sequencer (D = \_22, Q = \_283).
+Adding SRST signal on $procdff$280 ($dff) from module deadline_sequencer (D = \_20, Q = \_279, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$389 ($sdff) from module deadline_sequencer (D = \_22, Q = \_279).
+Adding SRST signal on $procdff$281 ($dff) from module deadline_sequencer (D = \_19, Q = \_275, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$391 ($sdff) from module deadline_sequencer (D = \_22, Q = \_275).
+Adding SRST signal on $procdff$282 ($dff) from module deadline_sequencer (D = \_16, Q = \_195, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$393 ($sdff) from module deadline_sequencer (D = \_16 [0], Q = \_195 [0]).
+Adding EN signal on $auto$ff.cc:337:slice$393 ($sdff) from module deadline_sequencer (D = \_16 [1], Q = \_195 [1]).
+Adding EN signal on $auto$ff.cc:337:slice$393 ($sdff) from module deadline_sequencer (D = \_16 [2], Q = \_195 [2]).
+Adding EN signal on $auto$ff.cc:337:slice$393 ($sdff) from module deadline_sequencer (D = \_16 [3], Q = \_195 [3]).
+Adding EN signal on $auto$ff.cc:337:slice$393 ($sdff) from module deadline_sequencer (D = \_16 [4], Q = \_195 [4]).
+Adding EN signal on $auto$ff.cc:337:slice$393 ($sdff) from module deadline_sequencer (D = \_16 [5], Q = \_195 [5]).
+Adding EN signal on $auto$ff.cc:337:slice$393 ($sdff) from module deadline_sequencer (D = \_16 [6], Q = \_195 [6]).
+Adding EN signal on $auto$ff.cc:337:slice$393 ($sdff) from module deadline_sequencer (D = \_16 [7], Q = \_195 [7]).
+Adding SRST signal on $procdff$283 ($dff) from module deadline_sequencer (D = \_15, Q = \_75, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$450 ($sdff) from module deadline_sequencer (D = \_14, Q = \_75).
+Adding SRST signal on $procdff$284 ($dff) from module deadline_sequencer (D = \_12, Q = \_78, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$452 ($sdff) from module deadline_sequencer (D = \_14, Q = \_78).
+Adding SRST signal on $procdff$285 ($dff) from module deadline_sequencer (D = \_11, Q = \_81, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$454 ($sdff) from module deadline_sequencer (D = \_14, Q = \_81).
+
+3.10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+Removed 38 unused cells and 55 unused wires.
+<suppressed ~73 debug messages>
+
+3.10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+<suppressed ~40 debug messages>
+
+3.10.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.10.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~78 debug messages>
+
+3.10.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer.
+Performed a total of 0 changes.
+
+3.10.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 197 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Computing hashes of 167 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+<suppressed ~90 debug messages>
+Removed a total of 30 cells.
+
+3.10.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.10.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+Removed 0 unused cells and 30 unused wires.
+<suppressed ~1 debug messages>
+
+3.10.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.10.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.10.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~78 debug messages>
+
+3.10.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer.
+Performed a total of 0 changes.
+
+3.10.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 167 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.10.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.10.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.10.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.10.23. Finished fast OPT passes. (There is nothing left to do.)
+
+3.11. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer.$eq$deadline_sequencer.v:531$86 ($eq).
+Removed top 3 bits (of 4) from port B of cell deadline_sequencer.$eq$deadline_sequencer.v:572$97 ($eq).
+Removed top 11 bits (of 12) from port B of cell deadline_sequencer.$sub$deadline_sequencer.v:642$111 ($sub).
+Removed top 2 bits (of 4) from port B of cell deadline_sequencer.$eq$deadline_sequencer.v:646$114 ($eq).
+Removed top 11 bits (of 12) from port B of cell deadline_sequencer.$sub$deadline_sequencer.v:698$128 ($sub).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer.$eq$deadline_sequencer.v:703$131 ($eq).
+Removed top 2 bits (of 4) from port B of cell deadline_sequencer.$eq$deadline_sequencer.v:706$133 ($eq).
+Removed top 5 bits (of 6) from port B of cell deadline_sequencer.$add$deadline_sequencer.v:776$152 ($add).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer.$eq$deadline_sequencer.v:790$161 ($eq).
+Removed top 1 bits (of 4) from port B of cell deadline_sequencer.$eq$deadline_sequencer.v:794$163 ($eq).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer.$add$deadline_sequencer.v:828$171 ($add).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer.$procmux$178_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer.$procmux$236_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell deadline_sequencer.$procmux$237_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell deadline_sequencer.$procmux$238_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell deadline_sequencer.$procmux$246_CMP0 ($eq).
+
+3.12. Executing PEEPOPT pass (run peephole optimizers).
+
+3.13. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.14. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module deadline_sequencer:
+  creating $macc model for $add$deadline_sequencer.v:828$171 ($add).
+  creating $macc model for $add$deadline_sequencer.v:776$152 ($add).
+  creating $macc model for $sub$deadline_sequencer.v:698$128 ($sub).
+  creating $macc model for $sub$deadline_sequencer.v:642$111 ($sub).
+  creating $alu model for $macc $sub$deadline_sequencer.v:642$111.
+  creating $alu model for $macc $sub$deadline_sequencer.v:698$128.
+  creating $alu model for $macc $add$deadline_sequencer.v:776$152.
+  creating $alu model for $macc $add$deadline_sequencer.v:828$171.
+  creating $alu cell for $add$deadline_sequencer.v:828$171: $auto$alumacc.cc:548:replace_alu$456
+  creating $alu cell for $add$deadline_sequencer.v:776$152: $auto$alumacc.cc:548:replace_alu$459
+  creating $alu cell for $sub$deadline_sequencer.v:698$128: $auto$alumacc.cc:548:replace_alu$462
+  creating $alu cell for $sub$deadline_sequencer.v:642$111: $auto$alumacc.cc:548:replace_alu$465
+  created 4 $alu and 0 $macc cells.
+
+3.15. Executing SHARE pass (SAT-based resource sharing).
+
+3.16. Executing OPT pass (performing simple optimizations).
+
+3.16.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.16.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 167 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.16.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~78 debug messages>
+
+3.16.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer.
+Performed a total of 0 changes.
+
+3.16.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 167 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.16.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.16.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.16.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.16.9. Finished fast OPT passes. (There is nothing left to do.)
+
+3.17. Executing MEMORY pass.
+
+3.17.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.17.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.17.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.17.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.17.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+
+3.17.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.17.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.17.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.17.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.17.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.18. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.19. Executing OPT pass (performing simple optimizations).
+
+3.19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+<suppressed ~30 debug messages>
+
+3.19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 138 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.19.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.19.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.19.5. Finished fast OPT passes.
+
+3.20. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.21. Executing OPT pass (performing simple optimizations).
+
+3.21.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.21.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 138 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.21.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~46 debug messages>
+
+3.21.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer.
+    Consolidated identical input bits for $mux cell $ternary$deadline_sequencer.v:568$94:
+      Old ports: A={ \_102 \_102 \_102 \_102 \_102 \_102 \_102 \_102 }, B=8'00000000, Y=\_262
+      New ports: A=\_102, B=1'0, Y=\_262 [0]
+      New connections: \_262 [7:1] = { \_262 [0] \_262 [0] \_262 [0] \_262 [0] \_262 [0] \_262 [0] \_262 [0] }
+  Optimizing cells in module \deadline_sequencer.
+Performed a total of 1 changes.
+
+3.21.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 138 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.21.6. Executing OPT_SHARE pass.
+
+3.21.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.21.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.21.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.21.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.21.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \deadline_sequencer..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~46 debug messages>
+
+3.21.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \deadline_sequencer.
+Performed a total of 0 changes.
+
+3.21.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 138 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Removed a total of 0 cells.
+
+3.21.14. Executing OPT_SHARE pass.
+
+3.21.15. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.21.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+
+3.21.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+
+3.21.18. Finished fast OPT passes. (There is nothing left to do.)
+
+3.22. Executing TECHMAP pass (map to technology primitives).
+
+3.22.1. Executing Verilog-2005 frontend: /home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/techmap.v
+Parsing Verilog input from `/home/matthias/prog/janestreet/fabulous-notes/oss-cad-suite/lib/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.22.2. Continuing TECHMAP pass.
+Using template $paramod$6831557730818fb92b11a295f9eb33ff8fa62af1\_90_alu for cells of type $alu.
+Using template $paramod$32efbfac1c4dc57230cf86180788fdfd12e3b511\_90_alu for cells of type $alu.
+Using template $paramod$175e67c02b86e96b1288b9dc100122520d7240d8\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $pmux.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000010 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000010 for cells of type $lcu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000110 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000110 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001100 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001100 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~731 debug messages>
+
+3.23. Executing OPT pass (performing simple optimizations).
+
+3.23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+<suppressed ~494 debug messages>
+
+3.23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 1079 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Computing hashes of 1018 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Computing hashes of 998 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+<suppressed ~243 debug messages>
+Removed a total of 81 cells.
+
+3.23.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+Removed 36 unused cells and 369 unused wires.
+<suppressed ~52 debug messages>
+
+3.23.5. Finished fast OPT passes.
+
+3.24. Executing ABC pass (technology mapping using ABC).
+
+3.24.1. Summary of detected clock domains:
+  6 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$363, arst={ }, srst=\clear
+  6 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$345, arst={ }, srst=\clear
+  11 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$399, arst={ }, srst=\clear
+  10 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$406, arst={ }, srst=\clear
+  6 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$327, arst={ }, srst=\clear
+  10 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$413, arst={ }, srst=\clear
+  11 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$448, arst={ }, srst=\clear
+  7 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$300, arst={ }, srst=\clear
+  6 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$336, arst={ }, srst=\clear
+  6 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$354, arst={ }, srst=\clear
+  7 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$309, arst={ }, srst=\clear
+  10 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$441, arst={ }, srst=\clear
+  10 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$434, arst={ }, srst=\clear
+  10 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$427, arst={ }, srst=\clear
+  10 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$318, arst={ }, srst=\clear
+  17 cells in clk=\clock, en=$auto$simple.cc:210:make_patterns_logic$420, arst={ }, srst=\clear
+  133 cells in clk=\clock, en=\_150, arst={ }, srst=\clear
+  84 cells in clk=\clock, en=\_153, arst={ }, srst=\clear
+  130 cells in clk=\clock, en=\_189, arst={ }, srst=\clear
+  10 cells in clk=\clock, en={ }, arst={ }, srst=\clear
+  36 cells in clk=\clock, en=\_4, arst={ }, srst=\clear
+  426 cells in clk=\clock, en=\_147, arst={ }, srst=\clear
+
+3.24.2. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$363, synchronously reset by \clear
+
+3.24.3. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$345, synchronously reset by \clear
+
+3.24.4. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$399, synchronously reset by \clear
+
+3.24.5. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$406, synchronously reset by \clear
+
+3.24.6. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$327, synchronously reset by \clear
+
+3.24.7. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$413, synchronously reset by \clear
+
+3.24.8. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$448, synchronously reset by \clear
+
+3.24.9. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$300, synchronously reset by \clear
+
+3.24.10. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$336, synchronously reset by \clear
+
+3.24.11. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$354, synchronously reset by \clear
+
+3.24.12. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$309, synchronously reset by \clear
+
+3.24.13. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$441, synchronously reset by \clear
+
+3.24.14. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$434, synchronously reset by \clear
+
+3.24.15. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$427, synchronously reset by \clear
+
+3.24.16. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$318, synchronously reset by \clear
+
+3.24.17. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by $auto$simple.cc:210:make_patterns_logic$420, synchronously reset by \clear
+
+3.24.18. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_150, synchronously reset by \clear
+
+3.24.19. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_153, synchronously reset by \clear
+
+3.24.20. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_189, synchronously reset by \clear
+
+3.24.21. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, synchronously reset by \clear
+
+3.24.22. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_4, synchronously reset by \clear
+
+3.24.23. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clock, enabled by \_147, synchronously reset by \clear
+
+3.24.23.1. Executed ABC.
+Extracted 5 gates and 13 wires to a netlist network with 8 inputs and 2 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:        3
+ABC RESULTS:        internal signals:        3
+ABC RESULTS:           input signals:        8
+ABC RESULTS:          output signals:        2
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 5 gates and 13 wires to a netlist network with 8 inputs and 2 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:        3
+ABC RESULTS:        internal signals:        3
+ABC RESULTS:           input signals:        8
+ABC RESULTS:          output signals:        2
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 10 gates and 20 wires to a netlist network with 10 inputs and 5 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:        3
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        2
+ABC RESULTS:        internal signals:        5
+ABC RESULTS:           input signals:       10
+ABC RESULTS:          output signals:        5
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 9 gates and 20 wires to a netlist network with 11 inputs and 4 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:        3
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:                OR cells:        2
+ABC RESULTS:        internal signals:        5
+ABC RESULTS:           input signals:       11
+ABC RESULTS:          output signals:        4
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 5 gates and 13 wires to a netlist network with 8 inputs and 2 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:        3
+ABC RESULTS:        internal signals:        3
+ABC RESULTS:           input signals:        8
+ABC RESULTS:          output signals:        2
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 9 gates and 20 wires to a netlist network with 11 inputs and 4 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:        3
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:                OR cells:        2
+ABC RESULTS:        internal signals:        5
+ABC RESULTS:           input signals:       11
+ABC RESULTS:          output signals:        4
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 10 gates and 19 wires to a netlist network with 9 inputs and 4 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               MUX cells:        2
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        2
+ABC RESULTS:        internal signals:        6
+ABC RESULTS:           input signals:        9
+ABC RESULTS:          output signals:        4
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 6 gates and 13 wires to a netlist network with 7 inputs and 3 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        2
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:        3
+ABC RESULTS:           input signals:        7
+ABC RESULTS:          output signals:        3
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 5 gates and 13 wires to a netlist network with 8 inputs and 2 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:        3
+ABC RESULTS:        internal signals:        3
+ABC RESULTS:           input signals:        8
+ABC RESULTS:          output signals:        2
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 5 gates and 13 wires to a netlist network with 8 inputs and 2 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:        3
+ABC RESULTS:        internal signals:        3
+ABC RESULTS:           input signals:        8
+ABC RESULTS:          output signals:        2
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 6 gates and 13 wires to a netlist network with 7 inputs and 3 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        2
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:        3
+ABC RESULTS:           input signals:        7
+ABC RESULTS:          output signals:        3
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 9 gates and 18 wires to a netlist network with 9 inputs and 4 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:        internal signals:        5
+ABC RESULTS:           input signals:        9
+ABC RESULTS:          output signals:        4
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 9 gates and 18 wires to a netlist network with 9 inputs and 4 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:        internal signals:        5
+ABC RESULTS:           input signals:        9
+ABC RESULTS:          output signals:        4
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 9 gates and 18 wires to a netlist network with 9 inputs and 4 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:        internal signals:        5
+ABC RESULTS:           input signals:        9
+ABC RESULTS:          output signals:        4
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 9 gates and 19 wires to a netlist network with 10 inputs and 6 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:               MUX cells:        3
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:        internal signals:        3
+ABC RESULTS:           input signals:       10
+ABC RESULTS:          output signals:        6
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 16 gates and 29 wires to a netlist network with 12 inputs and 10 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:            ANDNOT cells:        2
+ABC RESULTS:               MUX cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:        3
+ABC RESULTS:             ORNOT cells:        2
+ABC RESULTS:        internal signals:        7
+ABC RESULTS:           input signals:       12
+ABC RESULTS:          output signals:       10
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 95 gates and 169 wires to a netlist network with 73 inputs and 57 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        9
+ABC RESULTS:            ANDNOT cells:       41
+ABC RESULTS:               MUX cells:       26
+ABC RESULTS:              NAND cells:        4
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:        3
+ABC RESULTS:             ORNOT cells:        1
+ABC RESULTS:        internal signals:       39
+ABC RESULTS:           input signals:       73
+ABC RESULTS:          output signals:       57
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 46 gates and 86 wires to a netlist network with 40 inputs and 46 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:            ANDNOT cells:       44
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:        internal signals:        0
+ABC RESULTS:           input signals:       40
+ABC RESULTS:          output signals:       46
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 92 gates and 173 wires to a netlist network with 81 inputs and 54 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       22
+ABC RESULTS:            ANDNOT cells:       40
+ABC RESULTS:               MUX cells:        3
+ABC RESULTS:              NAND cells:       20
+ABC RESULTS:               NOR cells:        5
+ABC RESULTS:               NOT cells:        3
+ABC RESULTS:                OR cells:        7
+ABC RESULTS:             ORNOT cells:        2
+ABC RESULTS:              XNOR cells:        2
+ABC RESULTS:               XOR cells:        1
+ABC RESULTS:        internal signals:       38
+ABC RESULTS:           input signals:       81
+ABC RESULTS:          output signals:       54
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 7 gates and 9 wires to a netlist network with 2 inputs and 7 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:        2
+ABC RESULTS:             ORNOT cells:        2
+ABC RESULTS:               XOR cells:        1
+ABC RESULTS:        internal signals:        0
+ABC RESULTS:           input signals:        2
+ABC RESULTS:          output signals:        7
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 28 gates and 63 wires to a netlist network with 35 inputs and 12 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               MUX cells:        7
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:       17
+ABC RESULTS:             ORNOT cells:        1
+ABC RESULTS:        internal signals:       16
+ABC RESULTS:           input signals:       35
+ABC RESULTS:          output signals:       12
+Removing temp directory.
+
+3.24.23.1. Executed ABC.
+Extracted 388 gates and 568 wires to a netlist network with 179 inputs and 56 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+3.24.23.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       23
+ABC RESULTS:            ANDNOT cells:       12
+ABC RESULTS:               MUX cells:       71
+ABC RESULTS:              NAND cells:       77
+ABC RESULTS:               NOR cells:       10
+ABC RESULTS:               NOT cells:        8
+ABC RESULTS:                OR cells:      104
+ABC RESULTS:             ORNOT cells:       14
+ABC RESULTS:              XNOR cells:       21
+ABC RESULTS:               XOR cells:        6
+ABC RESULTS:        internal signals:      333
+ABC RESULTS:           input signals:      179
+ABC RESULTS:          output signals:       56
+Removing temp directory.
+Removing global temp directory.
+
+3.25. Executing OPT pass (performing simple optimizations).
+
+3.25.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module deadline_sequencer.
+<suppressed ~2 debug messages>
+
+3.25.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\deadline_sequencer'.
+Computing hashes of 897 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Computing hashes of 894 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+Computing hashes of 893 cells of `\deadline_sequencer'.
+Finding duplicate cells in `\deadline_sequencer'.
+<suppressed ~12 debug messages>
+Removed a total of 4 cells.
+
+3.25.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.25.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+Removed 1 unused cells and 1072 unused wires.
+<suppressed ~39 debug messages>
+
+3.25.5. Finished fast OPT passes.
+
+3.26. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `deadline_sequencer'. Setting top module to deadline_sequencer.
+
+3.26.1. Analyzing design hierarchy..
+Top module:  \deadline_sequencer
+
+3.26.2. Analyzing design hierarchy..
+Top module:  \deadline_sequencer
+Removed 0 unused modules.
+
+3.27. Printing statistics.
+
+=== deadline_sequencer ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      831 wires
+     1523 wire bits
+      219 public wires
+      884 public wire bits
+       13 ports
+       93 port bits
+      892 cells
+      140   $_ANDNOT_
+       69   $_AND_
+      132   $_MUX_
+      123   $_NAND_
+       23   $_NOR_
+       26   $_NOT_
+       22   $_ORNOT_
+      147   $_OR_
+      176   $_SDFFE_PP0P_
+        3   $_SDFF_PP0_
+       23   $_XNOR_
+        8   $_XOR_
+
+3.28. Executing CHECK pass (checking for obvious problems).
+Checking module deadline_sequencer...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF/DLATCH cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  cell sg13g2_dlhq_1 (noninv, pins=3, area=30.84) is a direct match for cell type $_DLATCH_P_.
+  cell sg13g2_dllrq_1 (noninv, pins=4, area=29.03) is a direct match for cell type $_DLATCH_NN0_.
+  cell sg13g2_dlhrq_1 (noninv, pins=4, area=27.22) is a direct match for cell type $_DLATCH_PN0_.
+  final dff/dlatch cell mappings:
+    unmapped dff/dlatch cell: $_DFF_N_
+    unmapped dff/dlatch cell: $_DFF_P_
+    unmapped dff/dlatch cell: $_DFF_NN0_
+    unmapped dff/dlatch cell: $_DFF_NN1_
+    unmapped dff/dlatch cell: $_DFF_NP0_
+    unmapped dff/dlatch cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DFF_PN1_
+    unmapped dff/dlatch cell: $_DFF_PP0_
+    unmapped dff/dlatch cell: $_DFF_PP1_
+    unmapped dff/dlatch cell: $_DFFE_NN_
+    unmapped dff/dlatch cell: $_DFFE_NP_
+    unmapped dff/dlatch cell: $_DFFE_PN_
+    unmapped dff/dlatch cell: $_DFFE_PP_
+    unmapped dff/dlatch cell: $_DFFSR_NNN_
+    unmapped dff/dlatch cell: $_DFFSR_NNP_
+    unmapped dff/dlatch cell: $_DFFSR_NPN_
+    unmapped dff/dlatch cell: $_DFFSR_NPP_
+    unmapped dff/dlatch cell: $_DFFSR_PNN_
+    unmapped dff/dlatch cell: $_DFFSR_PNP_
+    unmapped dff/dlatch cell: $_DFFSR_PPN_
+    unmapped dff/dlatch cell: $_DFFSR_PPP_
+    unmapped dff/dlatch cell: $_DLATCH_N_
+    \sg13g2_dlhq_1 _DLATCH_P_ (.D( D), .GATE( E), .Q( Q));
+    \sg13g2_dllrq_1 _DLATCH_NN0_ (.D( D), .GATE_N( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_NN1_
+    unmapped dff/dlatch cell: $_DLATCH_NP0_
+    unmapped dff/dlatch cell: $_DLATCH_NP1_
+    \sg13g2_dlhrq_1 _DLATCH_PN0_ (.D( D), .GATE( E), .Q( Q), .RESET_B( R));
+    unmapped dff/dlatch cell: $_DLATCH_PN1_
+    unmapped dff/dlatch cell: $_DLATCH_PP0_
+    unmapped dff/dlatch cell: $_DLATCH_PP1_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_NPP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PNP_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPN_
+    unmapped dff/dlatch cell: $_DLATCHSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs and LATCHes to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF/DLATCH cells in module `\deadline_sequencer':
+  mapped 179 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Summary of detected clock domains:
+  1247 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+5.2. Extracting gate netlist of module `\deadline_sequencer' to `<abc-temp-dir>/input.blif'..
+ABC: using cached merged SCL: /tmp/yosys-liberty-scl-cache-1000/yosys_merged_a6013080.scl (1 files)
+No matching clock domain found. Not extracting any FF cells.
+
+5.2.1. Executed ABC.
+Extracted 1068 gates and 1281 wires to a netlist network with 212 inputs and 188 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: UC Berkeley, ABC 1.01 (compiled Sep 21 2026 05:23:42)
+ABC: abc 01> empty
+ABC: abc 01> source <abc-temp-dir>/abc.script
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_scl /tmp/yosys-liberty-scl-cache-1000/yosys_merged_a6013080.scl 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+ABC: 
+ABC: YOSYS_ABC_DONE 
+
+5.2.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:        5
+ABC RESULTS:    sg13g2_a21oi_1 cells:      211
+ABC RESULTS:   sg13g2_a221oi_1 cells:        6
+ABC RESULTS:    sg13g2_a22oi_1 cells:       81
+ABC RESULTS:     sg13g2_and2_1 cells:       11
+ABC RESULTS:     sg13g2_and3_1 cells:        2
+ABC RESULTS:     sg13g2_and4_1 cells:        1
+ABC RESULTS:      sg13g2_inv_1 cells:       83
+ABC RESULTS:     sg13g2_mux2_1 cells:       12
+ABC RESULTS:     sg13g2_mux4_1 cells:       15
+ABC RESULTS:    sg13g2_nand2_1 cells:       73
+ABC RESULTS:   sg13g2_nand2b_1 cells:       19
+ABC RESULTS:    sg13g2_nand3_1 cells:       14
+ABC RESULTS:   sg13g2_nand3b_1 cells:        3
+ABC RESULTS:    sg13g2_nand4_1 cells:        7
+ABC RESULTS:     sg13g2_nor2_1 cells:       59
+ABC RESULTS:    sg13g2_nor2b_1 cells:       16
+ABC RESULTS:     sg13g2_nor3_1 cells:       18
+ABC RESULTS:     sg13g2_nor4_1 cells:        6
+ABC RESULTS:    sg13g2_o21ai_1 cells:      209
+ABC RESULTS:      sg13g2_or2_1 cells:       13
+ABC RESULTS:      sg13g2_or3_1 cells:        4
+ABC RESULTS:      sg13g2_or4_1 cells:        3
+ABC RESULTS:    sg13g2_xnor2_1 cells:       17
+ABC RESULTS:     sg13g2_xor2_1 cells:        5
+ABC RESULTS:        internal signals:      881
+ABC RESULTS:           input signals:      212
+ABC RESULTS:          output signals:      188
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \deadline_sequencer..
+Removed 0 unused cells and 1270 unused wires.
+<suppressed ~83 debug messages>
+
+7. Printing statistics.
+
+=== deadline_sequencer ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1021        - wires
+     1487        - wire bits
+      137        - public wires
+      603        - public wire bits
+       13        - ports
+       93        - port bits
+     1072 1.73E+04 cells
+        5   63.504   sg13g2_a21o_1
+      211 1.91E+03   sg13g2_a21oi_1
+        6   87.091   sg13g2_a221oi_1
+       81  878.737   sg13g2_a22oi_1
+       11   99.792   sg13g2_and2_1
+        2   25.402   sg13g2_and3_1
+        1   14.515   sg13g2_and4_1
+      179 8.77E+03   sg13g2_dfrbpq_1
+       83  451.786   sg13g2_inv_1
+       12  217.728   sg13g2_mux2_1
+       15  571.536   sg13g2_mux4_1
+       73  529.805   sg13g2_nand2_1
+       19  172.368   sg13g2_nand2b_1
+       14  127.008   sg13g2_nand3_1
+        3   38.102   sg13g2_nand3b_1
+        7   76.205   sg13g2_nand4_1
+       59  428.198   sg13g2_nor2_1
+       16  145.152   sg13g2_nor2b_1
+       18  163.296   sg13g2_nor3_1
+        6   65.318   sg13g2_nor4_1
+      209  1.9E+03   sg13g2_o21ai_1
+       13  117.936   sg13g2_or2_1
+        4   50.803   sg13g2_or3_1
+        3   43.546   sg13g2_or4_1
+       17  246.758   sg13g2_xnor2_1
+        5   72.576   sg13g2_xor2_1
+
+   Chip area for module '\deadline_sequencer': 17266.397400
+     of which used for sequential elements: 8768.995200 (50.79%)
+
+End of script. Logfile hash: 51a57610a4, time: 1.38s, user: 0.21s, system: 0.03s, MEM: 26.95 MB peak
+Yosys 0.69+77 (git sha1 9ff27d29c-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+Time spent: 85% 2x abc (1 sec), 4% 21x opt_clean (0 sec), ...

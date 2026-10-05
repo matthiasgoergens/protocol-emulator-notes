@@ -1,0 +1,12 @@
+[
+ {
+  "test": "subslot_train [control: fault]",
+  "result": "ok",
+  "checker_pass": false
+ },
+ {
+  "test": "quad_rx [control: fault]",
+  "result": "ok",
+  "checker_pass": false
+ }
+]

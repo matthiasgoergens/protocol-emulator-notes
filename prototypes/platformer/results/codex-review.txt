@@ -1,0 +1,33 @@
+Adversarial review by codex (codex-luna exec, gpt-6-luna, read-only), 2026-09-25; raw output in
+codex-review-raw.txt. Prompt: break the chip against the reference renderer, question the
+"configurations of one generic PE" claim, the streaming-versus-cache decision and the area
+comparison. Verdicts:
+
+1. "Left-clipped flipped sprites are encoded incorrectly (x = -1, flip, only pixel 15 set: the
+   reference shows it at screen x 0, the chip does not)." WRONG. At x = -1 screen x 0 is
+   d = px - x = 1, which shows pixel 15 - 1 = 14 of a flipped sprite; pixel 15 is at screen x -1,
+   off screen, and the encoder's right shift drops exactly it. Measured: chipmodel.ml's directed
+   case (pixel 14 = 2, pixel 15 = 1) shows index 18 at x 0 on both the model chip and the
+   reference (results/modelcheck.txt); 20,000 random lines and 240 directed edge lines (x -15..0
+   and 240..255, flipped and not, every fine scroll) differ in 0 pixels. The RTL directed run is in
+   check.ml (results/check.txt).
+2. "The feeder (WAIT/PIXELS/END) and the output port (colour table, hold, burst select, NCO) are
+   video-specific." PARTLY RIGHT. The feeder's step generator and WAIT are generic (a timed
+   memory-to-array streamer); PIXELS is its step-word initial value. The output port's burst pin
+   forcing table address 63, the V-switch reflection and the sequencer's luma pins overriding it are
+   video-specific; README now lists them.
+3. "The conditional write is a pixel-compositing rule in disguise; a masked merge (select a field,
+   replace the bits under a mask) would be more general." RIGHT in part: the value-lane write is a
+   masked merge with a fixed mask (the low byte), and the flag lane is an OR. The rule that is
+   really video-flavoured is 'only when the field is non-zero' (transparency). A configurable mask
+   costs 16 more configuration flops (about 780 um2). Recorded in README as the alternative; not
+   changed.
+4. "Streaming versus cache is not established: the cache's refresh load is small too, and the
+   comparison omits the tile map." PARTLY RIGHT on completeness, but it misses the deciding fact:
+   a cache does not remove the line buffer, because sprites, tile indices, scroll and colour updates
+   still arrive per line. The cache is added area (135,000 um2 for 64 tiles) to save link bandwidth
+   the link already has (46 % peak). README now says so.
+5. "The lean PE-X must not be presented as the generic PE-X area." AGREED; README reports both and
+   calls the lean one video-specialised.
+6. Area totals: codex's sums (356,274 um2 of logic; 288,828 lean) agree with results/area.txt,
+   which adds 63,486 um2 of memories.

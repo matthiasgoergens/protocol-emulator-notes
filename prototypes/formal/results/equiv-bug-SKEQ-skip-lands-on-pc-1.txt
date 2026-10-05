@@ -1,0 +1,18 @@
+# command: run_equiv.sh bug 12 SKEQ skip lands on pc+1
+# commit: 75d32c3d4e2c3beae2ee4fc1ba39ee083d46bac8
+# yosys: Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+# date: 2026-10-05T12:38:05+08:00
+bug-SKEQ-skip-lands-on-pc-1-12 depth 12 (11 clocks after the clear): COUNTEREXAMPLE, 44 s (696685 variables and 1857850 clauses)
+counterexample (step 1 clears; then one thread per step):
+  step  1  clear
+  step  2  thread 0  d330  send ch3 fail=48              
+  step  3  thread 1  f413  ldb                           
+  step  4  thread 2  f400  ldb                           
+  step  5  thread 3  d101  send ch1 fail=1               
+  step  6  thread 0  dd92  recv ch5 fail=146             
+  step  7  thread 1  f128  skeq 0x28                     
+  step  8  thread 2  d1e4  send ch1 fail=228               <- differs: dbg_pc1
+  step  9  thread 3  195b  setp mask=95 val=1 oe=0 q=3     <- differs: dbg_pc1
+  step 10  thread 0  7163  sho pin0 msb pair psel q=3      <- differs: dbg_pc1
+  step 11  thread 1  7f02  sho pin7 msb q=2              
+  step 12  thread 2  ca21  in                            

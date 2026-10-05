@@ -1,0 +1,221 @@
+# command: main.exe (every scenario)
+# commit: 75d32c3d4e2c3beae2ee4fc1ba39ee083d46bac8
+# Z3 version 5.1.0 - 64 bit
+# date: 2026-10-05T11:18:12+08:00
+a-deadline-main.ml-programme: no violation; 160 clocks unrolled, 38 goals sent to the solver, 122 folded to false, 1169 definitions; solver 0.02 s, total 0.05 s
+  cover wait at 1.2 left on its event                      reachable
+  cover wait at 1.2 left at its deadline                   reachable
+
+a-deadline-planted-ldd21: VIOLATED at clock 89; 90 clocks unrolled, 21 goals sent to the solver, 69 folded to false, 644 definitions; solver 0.01 s, total 0.05 s
+  counterexample, the watched thread's slots (clock: address instruction | dl after | pin_in | slots since anchor):
+       1: 1.0   setp mask=80 val=0 oe=1 q=0  | dl    0 | pin_in 00000000 | -
+       5: 1.1   ldd 21                       | dl   21 | pin_in 00000000 | -
+       9: 1.2   waitp pin1==1 fail=5         | dl   20 | pin_in 00000000 | 1
+      13: 1.2   waitp pin1==1 fail=5         | dl   19 | pin_in 00000000 | 2
+      17: 1.2   waitp pin1==1 fail=5         | dl   18 | pin_in 00000000 | 3
+      21: 1.2   waitp pin1==1 fail=5         | dl   17 | pin_in 00000000 | 4
+      25: 1.2   waitp pin1==1 fail=5         | dl   16 | pin_in 00000000 | 5
+      29: 1.2   waitp pin1==1 fail=5         | dl   15 | pin_in 00000000 | 6
+      33: 1.2   waitp pin1==1 fail=5         | dl   14 | pin_in 00000000 | 7
+      37: 1.2   waitp pin1==1 fail=5         | dl   13 | pin_in 00000000 | 8
+      41: 1.2   waitp pin1==1 fail=5         | dl   12 | pin_in 00000000 | 9
+      45: 1.2   waitp pin1==1 fail=5         | dl   11 | pin_in 00000000 | 10
+      49: 1.2   waitp pin1==1 fail=5         | dl   10 | pin_in 00000000 | 11
+      53: 1.2   waitp pin1==1 fail=5         | dl    9 | pin_in 00000000 | 12
+      57: 1.2   waitp pin1==1 fail=5         | dl    8 | pin_in 00000000 | 13
+      61: 1.2   waitp pin1==1 fail=5         | dl    7 | pin_in 00000000 | 14
+      65: 1.2   waitp pin1==1 fail=5         | dl    6 | pin_in 00000000 | 15
+      69: 1.2   waitp pin1==1 fail=5         | dl    5 | pin_in 00000000 | 16
+      73: 1.2   waitp pin1==1 fail=5         | dl    4 | pin_in 00000000 | 17
+      77: 1.2   waitp pin1==1 fail=5         | dl    3 | pin_in 00000000 | 18
+      81: 1.2   waitp pin1==1 fail=5         | dl    2 | pin_in 00000000 | 19
+      85: 1.2   waitp pin1==1 fail=5         | dl    1 | pin_in 00000000 | 20
+      89: 1.2   waitp pin1==1 fail=5         | dl    0 | pin_in 00000000 | 21
+  replay on Isa2.Spec: the monitor fires first at clock 89 (solver: clock 89) -> counterexample CONFIRMED
+
+(a) 15 WAITD contracts across the three programmes (SPI period 10 slots)
+a-waitd-uart-spi-i2c: no violation; 720 clocks unrolled, 0 goals sent to the solver, 720 folded to false, 0 definitions; solver 0.00 s, total 0.03 s
+  cover wait at 0.4 left at its deadline                   reachable
+  cover wait at 0.8 left at its deadline                   reachable
+  cover wait at 0.12 left at its deadline                  reachable
+  cover wait at 1.7 left at its deadline                   reachable
+  cover wait at 1.10 left at its deadline                  reachable
+  cover wait at 2.3 left at its deadline                   reachable
+  cover wait at 2.9 left at its deadline                   reachable
+  cover wait at 2.12 left at its deadline                  reachable
+  cover wait at 2.15 left at its deadline                  reachable
+  cover wait at 2.19 left at its deadline                  reachable
+  cover wait at 2.22 left at its deadline                  reachable
+  cover wait at 2.25 left at its deadline                  reachable
+  cover wait at 2.28 left at its deadline                  reachable
+  cover wait at 2.32 left at its deadline                  reachable
+  cover wait at 2.35 left at its deadline                  reachable
+
+(a) 15 WAITD contracts across the three programmes (SPI period 8 slots)
+a-waitd-uart-spi8-i2c: no violation; 720 clocks unrolled, 0 goals sent to the solver, 720 folded to false, 0 definitions; solver 0.00 s, total 0.03 s
+  cover wait at 0.4 left at its deadline                   reachable
+  cover wait at 0.8 left at its deadline                   reachable
+  cover wait at 0.12 left at its deadline                  reachable
+  cover wait at 1.7 left at its deadline                   NOT REACHABLE (vacuous?)
+  cover wait at 1.10 left at its deadline                  NOT REACHABLE (vacuous?)
+  cover wait at 2.3 left at its deadline                   reachable
+  cover wait at 2.9 left at its deadline                   reachable
+  cover wait at 2.12 left at its deadline                  reachable
+  cover wait at 2.15 left at its deadline                  reachable
+  cover wait at 2.19 left at its deadline                  reachable
+  cover wait at 2.22 left at its deadline                  reachable
+  cover wait at 2.25 left at its deadline                  reachable
+  cover wait at 2.28 left at its deadline                  reachable
+  cover wait at 2.32 left at its deadline                  reachable
+  cover wait at 2.35 left at its deadline                  reachable
+
+b-ownership: no violation; 720 clocks unrolled, 625 goals sent to the solver, 95 folded to false, 117 definitions; solver 0.06 s, total 0.12 s
+  cover thread 0 writes pins                               reachable
+  cover thread 1 writes pins                               reachable
+  cover thread 2 writes pins                               reachable
+  cover thread 3 writes pins                               reachable
+
+b-ownership-planted-mask01: VIOLATED at clock 95; 96 clocks unrolled, 1 goals sent to the solver, 95 folded to false, 117 definitions; solver 0.01 s, total 0.02 s
+  counterexample: pin writes and thread 3's slots (clock: thread address instruction -> pins written)
+       3: t3 3.0   setp mask=80 val=0 oe=1 q=0  -> 80   (pin 6 in: 0)
+       7: t3 3.1   ldd 20                       -> 00   (pin 6 in: 0)
+      11: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      15: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      19: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      23: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      27: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      31: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      35: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      39: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      43: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      47: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      51: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      55: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      59: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      61: t1 1.5   sho pin2 msb q=0             -> 04
+      63: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      67: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      68: t0 0.6   sho pin0 lsb q=0             -> 01
+      71: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      73: t1 1.8   setp mask=02 val=1 oe=1 q=0  -> 02
+      75: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      79: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      82: t2 2.13  setp mask=20 val=0 oe=1 q=0  -> 20
+      83: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      87: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      88: t0 0.6   sho pin0 lsb q=0             -> 01
+      91: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
+      93: t1 1.11  setp mask=02 val=0 oe=1 q=0  -> 02
+      95: t3 3.4   setp mask=01 val=1 oe=1 q=0  -> 01   (pin 6 in: 0)
+  pins written so far by thread: t0=01 t1=0e t2=30 t3=81
+  replay on Isa2.Spec: the monitor fires first at clock 95 (solver: clock 95) -> counterexample CONFIRMED
+
+  c-isolation-planted-ldb depth    4:     704 definitions,    3 goals checked, solver    0.03 s, total    0.03 s
+  c-isolation-planted-ldb depth    8:    2189 definitions,    7 goals checked, solver    0.12 s, total    0.12 s
+  c-isolation-planted-ldb depth   12:    4013 definitions,   11 goals checked, solver    0.38 s, total    0.38 s
+  c-isolation-planted-ldb depth   16:    5875 definitions,   15 goals checked, solver    1.28 s, total    1.29 s
+  c-isolation-planted-ldb depth   20:    7737 definitions,   19 goals checked, solver    5.39 s, total    5.40 s
+  c-isolation-planted-ldb depth   24:    9599 definitions,   23 goals checked, solver   22.73 s, total   22.74 s
+  c-isolation-planted-ldb depth   28:   11461 definitions,   27 goals checked, solver   66.92 s, total   66.94 s
+c-isolation-planted-ldb: VIOLATED at clock 28; 29 clocks unrolled, 28 goals sent to the solver, 1 folded to false, 11515 definitions; solver 71.64 s, total 71.73 s
+  counterexample: the two copies side by side (clock: thread, copy a | copy b; pin 0 after the clock)
+       2: t2 stb                      [bank 0 <- 00] | sho pin6 lsb od cap q=0  | pin0 1 1
+       4: t0 ldb                      | ldb                      | pin0 1 1
+       5: t1 send ch0 fail=144        | stb                      [bank 0 <- 46] | pin0 1 1
+       8: t0 setp mask=01 val=0 oe=1 q=0 | setp mask=01 val=0 oe=1 q=0 | pin0 0 0
+      12: t0 ldd 1                    | ldd 1                    | pin0 0 0
+      13: t1 stb                      [bank 0 <- 00] | in                       | pin0 0 0
+      14: t2 stb                      [bank 1 <- 00] | stb                      [bank 0 <- 84] | pin0 0 0
+      15: t3 recv ch7 fail=96         | stb                      [bank 0 <- 00] | pin0 0 0
+      16: t0 waitd                    | waitd                    | pin0 0 0
+      20: t0 waitd                    | waitd                    | pin0 0 0
+      24: t0 ldc 8                    | ldc 8                    | pin0 0 0
+      28: t0 sho pin0 lsb q=0         | sho pin0 lsb q=0         | pin0 0 1
+  replay on Isa2.Spec: the monitor fires first at clock 28 (solver: clock 28) -> counterexample CONFIRMED
+
+c-isolation-uart-induction: the relation is inductive: pin 0 cannot depend on the other threads, at any depth; assumptions satisfiable; thread 0 can be at 26 addresses; 1161 definitions, 0.08 s
+
+c-isolation-planted-ldb-induction: NOT inductive (a counterexample to induction with thread 0 at pc 13); assumptions satisfiable; thread 0 can be at 26 addresses; 1200 definitions, 0.03 s
+
+c-isolation-uart-induction-without-ownership-assumption: NOT inductive (a counterexample to induction with thread 0 at pc 14); assumptions satisfiable; thread 0 can be at 26 addresses; 1125 definitions, 0.03 s
+
+  d-uart-every-byte depth  100:      36 definitions,    4 goals checked, solver    0.00 s, total    0.01 s
+  d-uart-every-byte depth  200:      81 definitions,    9 goals checked, solver    0.00 s, total    0.03 s
+  d-uart-every-byte depth  300:    4798 definitions,  108 goals checked, solver    0.06 s, total    0.11 s
+  d-uart-every-byte depth  400:    9529 definitions,  208 goals checked, solver    0.09 s, total    0.15 s
+d-uart-every-byte: no violation; 440 clocks unrolled, 248 goals sent to the solver, 192 folded to false, 11847 definitions; solver 0.11 s, total 0.18 s
+  cover 2 frames received                                  reachable
+
+d-uart-planted-stretch: VIOLATED at clock 98; 99 clocks unrolled, 4 goals sent to the solver, 95 folded to false, 29 definitions; solver 0.00 s, total 0.01 s
+  the host's byte, taken at clock 4: 0x04 = 00000100 (lsb first on the line: 00100000)
+  the line from the start edge (clock 8), one character per clock, '|' every bit period (20 clocks):
+    |00000000000000000000|00000000000000000000|00000000000000000000|11111111111111111111|11111111111
+  the receiver samples 10 clocks after each '|'
+  replay on Isa2.Spec: the monitor fires first at clock 98 (solver: clock 98) -> counterexample CONFIRMED
+
+  d-uart-every-byte-any-arrival depth    4:       0 definitions,    0 goals checked, solver    0.00 s, total    0.00 s
+  d-uart-every-byte-any-arrival depth    8:       0 definitions,    0 goals checked, solver    0.00 s, total    0.00 s
+  d-uart-every-byte-any-arrival depth   12:     114 definitions,    2 goals checked, solver    0.01 s, total    0.01 s
+  d-uart-every-byte-any-arrival depth   16:     335 definitions,    6 goals checked, solver    0.01 s, total    0.01 s
+  d-uart-every-byte-any-arrival depth   20:     555 definitions,   10 goals checked, solver    0.03 s, total    0.03 s
+  d-uart-every-byte-any-arrival depth   24:     775 definitions,   14 goals checked, solver    0.04 s, total    0.04 s
+  d-uart-every-byte-any-arrival depth   28:    1042 definitions,   18 goals checked, solver    0.05 s, total    0.05 s
+  d-uart-every-byte-any-arrival depth   32:    1304 definitions,   22 goals checked, solver    0.06 s, total    0.06 s
+  d-uart-every-byte-any-arrival depth   36:    1567 definitions,   26 goals checked, solver    0.07 s, total    0.08 s
+  d-uart-every-byte-any-arrival depth   40:    1833 definitions,   30 goals checked, solver    0.10 s, total    0.11 s
+  d-uart-every-byte-any-arrival depth   44:    2197 definitions,   34 goals checked, solver    0.14 s, total    0.14 s
+  d-uart-every-byte-any-arrival depth   48:    2526 definitions,   38 goals checked, solver    0.18 s, total    0.19 s
+  d-uart-every-byte-any-arrival depth   52:    2855 definitions,   42 goals checked, solver    0.25 s, total    0.26 s
+  d-uart-every-byte-any-arrival depth   56:    3187 definitions,   46 goals checked, solver    0.34 s, total    0.35 s
+  d-uart-every-byte-any-arrival depth   60:    3534 definitions,   50 goals checked, solver    0.45 s, total    0.47 s
+  d-uart-every-byte-any-arrival depth   64:    3882 definitions,   54 goals checked, solver    0.64 s, total    0.65 s
+  d-uart-every-byte-any-arrival depth   68:    4230 definitions,   58 goals checked, solver    0.85 s, total    0.87 s
+  d-uart-every-byte-any-arrival depth   72:    4578 definitions,   62 goals checked, solver    1.17 s, total    1.19 s
+  d-uart-every-byte-any-arrival depth   76:    4926 definitions,   66 goals checked, solver    1.56 s, total    1.58 s
+  d-uart-every-byte-any-arrival depth   80:    5274 definitions,   70 goals checked, solver    2.01 s, total    2.03 s
+  d-uart-every-byte-any-arrival depth   84:    5622 definitions,   74 goals checked, solver    2.67 s, total    2.69 s
+  d-uart-every-byte-any-arrival depth   88:    5970 definitions,   78 goals checked, solver    3.36 s, total    3.39 s
+  d-uart-every-byte-any-arrival depth   92:    6318 definitions,   82 goals checked, solver    4.22 s, total    4.24 s
+  d-uart-every-byte-any-arrival depth   96:    6666 definitions,   86 goals checked, solver    5.46 s, total    5.48 s
+  d-uart-every-byte-any-arrival depth  100:    7014 definitions,   90 goals checked, solver    6.56 s, total    6.58 s
+  d-uart-every-byte-any-arrival depth  104:    7362 definitions,   94 goals checked, solver    8.23 s, total    8.25 s
+  d-uart-every-byte-any-arrival depth  108:    7710 definitions,   98 goals checked, solver   10.41 s, total   10.44 s
+  d-uart-every-byte-any-arrival depth  112:    8058 definitions,  102 goals checked, solver   12.39 s, total   12.42 s
+  d-uart-every-byte-any-arrival depth  116:    8406 definitions,  106 goals checked, solver   14.95 s, total   14.98 s
+  d-uart-every-byte-any-arrival depth  120:    8754 definitions,  110 goals checked, solver   18.44 s, total   18.48 s
+  d-uart-every-byte-any-arrival depth  124:    9102 definitions,  114 goals checked, solver   23.53 s, total   23.56 s
+  d-uart-every-byte-any-arrival depth  128:    9450 definitions,  118 goals checked, solver   28.72 s, total   28.76 s
+  d-uart-every-byte-any-arrival depth  132:    9798 definitions,  122 goals checked, solver   34.49 s, total   34.53 s
+  d-uart-every-byte-any-arrival depth  136:   10146 definitions,  126 goals checked, solver   42.61 s, total   42.65 s
+  d-uart-every-byte-any-arrival depth  140:   10494 definitions,  130 goals checked, solver   52.43 s, total   52.47 s
+  d-uart-every-byte-any-arrival depth  144:   10842 definitions,  134 goals checked, solver   66.09 s, total   66.13 s
+  d-uart-every-byte-any-arrival depth  148:   11190 definitions,  138 goals checked, solver   78.62 s, total   78.66 s
+  d-uart-every-byte-any-arrival depth  152:   11538 definitions,  142 goals checked, solver   94.23 s, total   94.28 s
+  d-uart-every-byte-any-arrival depth  156:   11886 definitions,  146 goals checked, solver  116.00 s, total  116.04 s
+  d-uart-every-byte-any-arrival depth  160:   12234 definitions,  150 goals checked, solver  138.41 s, total  138.45 s
+  d-uart-every-byte-any-arrival depth  164:   12582 definitions,  154 goals checked, solver  163.10 s, total  163.15 s
+  d-uart-every-byte-any-arrival depth  168:   12930 definitions,  158 goals checked, solver  193.40 s, total  193.45 s
+  d-uart-every-byte-any-arrival depth  172:   13278 definitions,  162 goals checked, solver  223.24 s, total  223.30 s
+  d-uart-every-byte-any-arrival depth  176:   13626 definitions,  166 goals checked, solver  273.75 s, total  273.80 s
+  d-uart-every-byte-any-arrival depth  180:   13974 definitions,  170 goals checked, solver  327.24 s, total  327.29 s
+  d-uart-every-byte-any-arrival depth  184:   14322 definitions,  174 goals checked, solver  413.99 s, total  414.04 s
+  d-uart-every-byte-any-arrival depth  188:   14670 definitions,  178 goals checked, solver  476.20 s, total  476.26 s
+  d-uart-every-byte-any-arrival depth  192:   15018 definitions,  182 goals checked, solver  565.93 s, total  565.99 s
+  d-uart-every-byte-any-arrival depth  196:   15366 definitions,  186 goals checked, solver  712.64 s, total  712.70 s
+  d-uart-every-byte-any-arrival depth  200:   15714 definitions,  190 goals checked, solver  826.35 s, total  826.41 s
+  d-uart-every-byte-any-arrival depth  204:   16062 definitions,  194 goals checked, solver 1049.70 s, total 1049.76 s
+  d-uart-every-byte-any-arrival depth  208:   16410 definitions,  198 goals checked, solver 1251.48 s, total 1251.55 s
+d-uart-every-byte-any-arrival: no violation; 208 clocks unrolled, 198 goals sent to the solver, 10 folded to false, 16806 definitions; solver 1289.13 s, total 1290.69 s
+  cover 1 frames received                                  reachable
+
+  c-isolation-uart depth    4:     704 definitions,    3 goals checked, solver    0.02 s, total    0.03 s
+  c-isolation-uart depth    8:    2189 definitions,    7 goals checked, solver    0.12 s, total    0.12 s
+  c-isolation-uart depth   12:    4013 definitions,   11 goals checked, solver    0.37 s, total    0.38 s
+  c-isolation-uart depth   16:    5875 definitions,   15 goals checked, solver    1.27 s, total    1.28 s
+  c-isolation-uart depth   20:    7737 definitions,   19 goals checked, solver    5.23 s, total    5.24 s
+  c-isolation-uart depth   24:    9599 definitions,   23 goals checked, solver   21.78 s, total   21.79 s
+  c-isolation-uart depth   28:   11461 definitions,   27 goals checked, solver   61.90 s, total   61.91 s
+  c-isolation-uart depth   32:   13331 definitions,   31 goals checked, solver  328.63 s, total  328.65 s
+  c-isolation-uart depth   36:   15193 definitions,   35 goals checked, solver  918.68 s, total  918.71 s
+Terminated                 SMT_SOLVER=$Z3 nice ionice ./_build/default/main.exe "$s"
+# note (added by hand): c-isolation-uart was stopped after its 36 clocks had passed with no violation; its two cover queries had run for 22 min without an answer.

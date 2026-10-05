@@ -1,0 +1,32 @@
+Delegated adversarial review, 2026-09-30
+
+The cheap subagent independently reconstructed the retained PAL RTL trace:
+all 10,000 phase bytes and 40,000 quarter bits matched the 24-bit recurrence.
+It identified two defects in the initial judge: PAL sign selection depended
+on absolute carrier phase, and the sync gate demanded integer detected
+crossings despite filtering. Both corrections are described in README.md;
+the original run is retained at results-initial/ and commit 34a39ef.
+
+Remaining concerns preserved from the incremental review:
+
+- PAL quarter-grid still misses the predeclared 2-degree hue target.
+- Ideal-carrier phase calibration shows that the TV itself has picture
+  dependence on starting phase; the experiment pairs each NCO with its
+  ideal waveform at the same phase.
+- The 512 synthetic PAL sign checks cover a common phase rotation, not
+  independent adjacent-line drift or noisy bursts.
+- Paired sync error supports a relative comparison, not absolute TV lock
+  robustness or a standards-compliance claim.
+- Carrier-only RTL verification does not verify hue/amplitude controls,
+  the resistor DAC, filter, four-phase stage connection or pads.
+- Square-wave versus sinusoidal-reference error includes harmonics and
+  gating as well as temporal quantisation.
+
+This was a delegated same-family review, not a cross-model headless review.
+The quantitative results were checked locally through analyse.py, including
+fresh-process agreement and nominal phase-zero image parity.
+
+A second cheap subagent checked the final README and architecture claims
+against every observation group. It confirmed the ranges, pass counts and
+paired sync maxima, and checked all three recorded source hashes against
+the current files. It reported no additional overclaim in the final text.

@@ -40,10 +40,25 @@ GC_THICK = 2.89   # 3T, thick-oxide write, W 0.15 / L 0.45
 GC_THIN = 2.20    # 3T, thin-oxide write, W 0.15 / L 0.13
 SRAM_CELL = 3.01  # PDK SRAM bit cell (2.81 x 1.07, prototypes/sram-cut/pdk-cell/refs.txt); unused
 
-# lifetimes of a stored 1, 10 ns sense (prototypes/gain-cell/retention/results/)
-LIFE = {  # seconds
+# Directional retention deadlines at the 10 ns sense threshold where that threshold is known.
+# The allocator uses the minimum of the two directions. Thick-cell zeroes stayed below 0.017 V
+# for the 10 ms simulation in retention/results/v5-3T-w0.15-l0.45.txt, so 10 ms is a conservative
+# refresh deadline, not a measured failure time. Thin-cell zero deadlines are from
+# tricks-thin/results/hold-lv-vlo0.txt: 106.9 us to the 0.20 V tt85 read threshold, and a
+# conservative 5.27 ms to 0.20 V at tt27 (the 0.25 V tt27 threshold is not crossed in the 50 ms
+# sweep). The 505.2 us point at tt85 is a 0.25 V crossing, not the read threshold. At ff85 the
+# published read-inclusive bound is 3.2 us (prototypes/gain-cell/README.md).
+LIFE_ONE = {  # seconds, stored 1 falls
     "thick": {"tt27": 12.06e-3, "tt85": 12.21e-3, "ff85": 3.10e-3},
     "thin": {"tt27": 118.8e-6, "tt85": 8.0e-6, "ff85": 1.2e-6},
+}
+LIFE_ZERO = {  # seconds, stored 0 rises
+    "thick": {"tt27": 10.0e-3, "tt85": 10.0e-3, "ff85": 10.0e-3},
+    "thin": {"tt27": 5.27e-3, "tt85": 106.9e-6, "ff85": 3.2e-6},
+}
+LIFE = {
+    kind: {cond: min(LIFE_ONE[kind][cond], LIFE_ZERO[kind][cond]) for cond in LIFE_ONE[kind]}
+    for kind in LIFE_ONE
 }
 
 
@@ -128,10 +143,15 @@ def main():
     for name, a, bits in sram_macros()[:6]:
         print(f"{'SRAM ' + name:44s} {bits:6d} {a:9.0f} {a/bits:8.2f}  LEF (smallest 1P macros)")
     print()
-    print("# lifetimes of a stored 1 (10 ns sense), in us and in 50 MHz cycles")
-    for kind, d in LIFE.items():
-        for cond, s in d.items():
-            print(f"gain-cell {kind:5s} {cond}: {s*1e6:10.1f} us = {s*50e6:10.0f} cycles")
+    print("# directional retention bounds (10 ns sense), in us and in 50 MHz cycles")
+    for kind in LIFE:
+        for cond in LIFE[kind]:
+            one = LIFE_ONE[kind][cond]
+            zero = LIFE_ZERO[kind][cond]
+            bound = LIFE[kind][cond]
+            print(f"gain-cell {kind:5s} {cond}: 1->0 {one*1e6:10.1f} us,"
+                  f" 0->1 {zero*1e6:10.1f} us, min {bound*1e6:10.1f} us"
+                  f" = {bound*50e6:10.0f} cycles")
 
 
 if __name__ == "__main__":

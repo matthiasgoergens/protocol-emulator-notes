@@ -1,0 +1,13 @@
+direct: 192000 samples; fitted gains per voice (ideal 30000 each): 30017 29791 29720 29975
+direct: tonal signal / residual (noise voice + artefacts) = 25.0 dB
+direct: control, melody reference a semitone sharp: gains 29929 29616 29675 131
+chain: 192000 samples; fitted gains per voice (ideal 30000 each): 29940 29685 29641 29833
+chain: tonal signal / residual (noise voice + artefacts) = 8.8 dB
+chain, reference ignoring the pauses: gains 6923 2046 -1026 1156; signal/residual -18.8 dB
+chain: control, melody reference a semitone sharp: gains 29819 29597 29518 246
+chain-hold: 192000 samples; fitted gains per voice (ideal 30000 each): 29960 29904 29809 29935
+chain-hold: tonal signal / residual (noise voice + artefacts) = 7.3 dB
+chain-hold: control, melody reference a semitone sharp: gains 29839 29816 29686 149
+chain-toggle: 192000 samples; fitted gains per voice (ideal 30000 each): 29873 29705 29594 29839
+chain-toggle: tonal signal / residual (noise voice + artefacts) = 22.5 dB
+chain-toggle: control, melody reference a semitone sharp: gains 29752 29617 29471 212

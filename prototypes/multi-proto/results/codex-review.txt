@@ -1,0 +1,1721 @@
+Reading additional input from stdin...
+OpenAI Codex v0.157.0
+--------
+workdir: /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+model: gpt-6-luna
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a0d72e-11fa-70a0-854a-5ec47743af75
+--------
+user
+You are reviewing a proposed ISA extension for a 4-thread barrel sequencer (one instruction per cycle, thread t runs on cycles t mod 4). Read isa_mb.ml (interpreter/spec), sequencer_mb.ml (RTL in Hardcaml), lockstep.ml (tests) and README.md sections 2, 4, 5 in the current directory, and ../deadline-sequencer/isa.ml (base ISA). Try to REFUTE these claims, citing file and line: (1) the variant is a strict extension of the base ISA (programmes without opcodes E/F and with SHO bit 6 clear behave identically); (2) no mailbox state can change another thread's timing or deadlock the round-robin schedule; (3) isolation: a thread that names no shared inbox/port has a pin trace independent of neighbours; (4) the RTL matches the interpreter's semantics for SEND/RECV/WAITC/SHO-capture including edge cases (full inbox with depth 1, pop and push ordering, fail address with pc_bits 6 vs 7, dl=0 vs dl>0). Also check whether the lockstep test could miss a class of RTL bugs (what state is not compared). Be concrete and brief; list real problems first, then weaknesses in the tests. Do not modify files.
+2026-09-25T06:08:36.663013Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when UnexpectedServerResponse("HTTP 401: {\"errors\":[\"Unauthorized\"]}")
+2026-09-25T06:08:37.864124Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/\"" })
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+I’ll read the specified implementation, tests, and README sections, then trace the disputed edge cases across interpreter and RTL. I’ll keep this read-only and report concrete counterexamples with file and line references.
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc "nice -n 10 ionice -c 3 rg --files -g 'isa_mb.ml' -g 'sequencer_mb.ml' -g 'lockstep.ml' -g 'README.md' -g 'isa.ml'" in /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+ succeeded in 0ms:
+README.md
+sequencer_mb.ml
+isa_mb.ml
+lockstep.ml
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba sequencer_mb.ml' in /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba lockstep.ml' in /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba README.md' in /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba isa_mb.ml' in /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+ succeeded in 281ms:
+     1	(* Mailbox variant of the deadline sequencer RTL. See isa_mb.ml for the semantics this must match
+     2	   cycle for cycle; ../deadline-sequencer/sequencer.ml is the base it extends (unmodified).
+     3	
+     4	   Parameters: pc_bits (6 or 7), depth (inbox entries: 1, 2 or 4). [mutant] plants a bug for the
+     5	   lockstep test's control: `Full_never makes an inbox never report full, so a SEND to a full
+     6	   inbox overwrites the oldest entry. *)
+     7	open Hardcaml
+     8	open Signal
+     9	
+    10	let n_threads = Isa_mb.n_threads
+    11	
+    12	let log2 d = match d with 1 -> 0 | 2 -> 1 | 4 -> 2 | 8 -> 3 | _ -> failwith "depth must be 1, 2, 4 or 8"
+    13	
+    14	let create ?(mutant = `None) ~(c : Isa_mb.cfg) ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid
+    15	    ~port_in ~port_in_valid ~port_out_ready ~flags () =
+    16	  let pb = c.pc_bits and d = c.depth in
+    17	  let spec = Reg_spec.create ~clock ~clear () in
+    18	  let open Always in
+    19	  let thread = Variable.reg spec ~width:2 in
+    20	  let regs width = Array.init n_threads (fun _ -> Variable.reg spec ~width) in
+    21	  let pcs = regs pb and accs = regs 8 and cnts = regs 12 and dls = regs 12 in
+    22	  let pin_out = Variable.reg spec ~width:8 in
+    23	  let pin_oe = Variable.reg spec ~width:8 in
+    24	  let host_out = Variable.reg spec ~width:8 in
+    25	  let host_out_valid = Variable.reg spec ~width:1 in
+    26	  let host_in_ready = Variable.wire ~default:gnd in
+    27	  let port_out_data = Variable.reg spec ~width:8 in
+    28	  let port_out_valid = Variable.reg spec ~width:4 in
+    29	  let port_in_ready = Variable.wire ~default:(zero 4) in
+    30	  (* inboxes: [d] byte slots, a read pointer and an occupancy count each *)
+    31	  let lw = log2 d in
+    32	  let slots = Array.init n_threads (fun _ -> Array.init d (fun _ -> Variable.reg spec ~width:8)) in
+    33	  let heads = Array.init n_threads (fun _ -> Variable.reg spec ~width:(max 1 lw)) in
+    34	  let counts = Array.init n_threads (fun _ -> Variable.reg spec ~width:(lw + 1)) in
+    35	  let full i = match mutant with `Full_never -> gnd | `None -> counts.(i).value ==:. d in
+    36	  let nonempty i = counts.(i).value <>:. 0 in
+    37	  let head_data i = if d = 1 then slots.(i).(0).value else mux (select heads.(i).value (lw - 1) 0) (Array.to_list (Array.map (fun (v : Variable.t) -> v.value) slots.(i))) in
+    38	  let values arr = Array.to_list (Array.map (fun (v : Variable.t) -> v.value) arr) in
+    39	  let sel arr = mux thread.value (values arr) in
+    40	  let pc = sel pcs and acc = sel accs and cnt = sel cnts and dl = sel dls in
+    41	  let instr = imem_data in
+    42	  let op = select instr 15 12 in
+    43	  let imm12 = select instr 11 0 and imm8 = select instr 7 0 in
+    44	  let pin_idx = select instr 11 9 and pin_val = bit instr 8 in
+    45	  let addr = select instr (pb - 1) 0 in
+    46	  let od = bit instr 7 in
+    47	  let mask8 = select instr 11 4 and setv = bit instr 3 and seto = bit instr 2 in
+    48	  let is_recv = bit instr 11 and ch_port = bit instr 10 and ch_lo = select instr 9 8 in
+    49	  let cval = bit instr 11 and cond = select instr 10 7 in
+    50	  let pin_bit = mux pin_idx (List.init 8 (fun i -> bit pin_in i)) in
+    51	  let cap_bit = bit instr 6 &: mux (select instr 5 3) (List.init 8 (fun i -> bit pin_in i)) in
+    52	  let pc_next = Variable.wire ~default:(pc +:. 1) in
+    53	  let acc_next = Variable.wire ~default:acc in
+    54	  let cnt_next = Variable.wire ~default:cnt in
+    55	  let dl_next = Variable.wire ~default:(mux2 (dl ==:. 0) dl (dl -:. 1)) in
+    56	  let stay = [ pc_next <-- pc ] in
+    57	  let fail_or_stay = [ if_ (dl ==:. 0) [ pc_next <-- addr ] stay ] in
+    58	  let with_pin_bit v = concat_lsb (List.init 8 (fun i -> mux2 (pin_idx ==:. i) v (bit pin_out.value i))) in
+    59	  let with_oe_bit v = concat_lsb (List.init 8 (fun i -> mux2 (pin_idx ==:. i) v (bit pin_oe.value i))) in
+    60	  let sho_bit = mux2 pin_val (bit acc 7) (bit acc 0) in
+    61	  let full_v = concat_lsb (List.init n_threads full) in
+    62	  let nonempty_v = concat_lsb (List.init n_threads nonempty) in
+    63	  let cond_bit = mux cond (List.init 8 (fun i -> bit acc i) @ List.init 4 (fun i -> bit full_v i) @ List.init 4 (fun i -> bit flags i)) in
+    64	  let onehot2 s = concat_lsb (List.init 4 (fun i -> s ==:. i)) in
+    65	  (* inbox push/pop requests, decoded once; at most one is active per cycle *)
+    66	  let push = Variable.wire ~default:gnd and pop = Variable.wire ~default:gnd in
+    67	  let opc o = of_int ~width:4 o in
+    68	  compile
+    69	    [ thread <-- thread.value +:. 1
+    70	    ; host_out_valid <-- gnd
+    71	    ; port_out_valid <--. 0
+    72	    ; switch op
+    73	        [ opc 1, [ pin_out <-- ((pin_out.value &: ~:mask8) |: (mask8 &: repeat setv 8))
+    74	                 ; pin_oe <-- ((pin_oe.value &: ~:mask8) |: (mask8 &: repeat seto 8)) ]
+    75	        ; opc 2, [ cnt_next <-- imm12 ]
+    76	        ; opc 3, [ dl_next <-- imm12 ]
+    77	        ; opc 4, [ acc_next <-- imm8 ]
+    78	        ; opc 5, [ if_ (pin_bit ==: pin_val) [] fail_or_stay ]
+    79	        ; opc 6, [ if_ (dl ==:. 0) [] stay ]
+    80	        ; opc 7, [ if_ od [ pin_out <-- with_pin_bit gnd; pin_oe <-- with_oe_bit (~:sho_bit) ]
+    81	                     [ pin_out <-- with_pin_bit sho_bit ]
+    82	                 ; acc_next <-- mux2 pin_val (sll acc 1 |: uresize cap_bit 8) (srl acc 1 |: concat_msb [ cap_bit; zero 7 ])
+    83	                 ; cnt_next <-- cnt -:. 1 ]
+    84	        ; opc 8, [ acc_next <-- mux2 pin_val (concat_msb [ select acc 6 0; pin_bit ])
+    85	                                            (concat_msb [ pin_bit; select acc 7 1 ])
+    86	                 ; cnt_next <-- cnt -:. 1 ]
+    87	        ; opc 9, [ pc_next <-- addr ]
+    88	        ; opc 10, [ if_ (cnt <>:. 0) [ pc_next <-- addr ] [] ]
+    89	        ; opc 11, [ host_out <-- acc; host_out_valid <-- vdd ]
+    90	        ; opc 12, [ if_ host_in_valid [ acc_next <-- host_in; host_in_ready <-- vdd ] stay ]
+    91	        ; opc 13, stay
+    92	        ; opc 14,
+    93	          [ if_ is_recv
+    94	              [ if_ ch_port
+    95	                  [ if_ (mux ch_lo (List.init 4 (fun i -> bit port_in_valid i)))
+    96	                      [ acc_next <-- mux ch_lo (Array.to_list port_in); port_in_ready <-- onehot2 ch_lo ]
+    97	                      fail_or_stay ]
+    98	                  [ if_ (mux ch_lo (List.init 4 (fun i -> bit nonempty_v i)))
+    99	                      [ acc_next <-- mux ch_lo (List.init 4 head_data); pop <-- vdd ]
+   100	                      fail_or_stay ] ]
+   101	              [ if_ ch_port
+   102	                  [ if_ (mux ch_lo (List.init 4 (fun i -> bit port_out_ready i)))
+   103	                      [ port_out_data <-- acc; port_out_valid <-- onehot2 ch_lo ]
+   104	                      fail_or_stay ]
+   105	                  [ if_ (~:(mux ch_lo (List.init 4 (fun i -> bit full_v i)))) [ push <-- vdd ] fail_or_stay ] ] ]
+   106	        ; opc 15, [ if_ (cond_bit ==: cval) [] fail_or_stay ] ]
+   107	    ; proc (List.init n_threads (fun t ->
+   108	        when_ (thread.value ==:. t)
+   109	          [ pcs.(t) <-- pc_next.value; accs.(t) <-- acc_next.value
+   110	          ; cnts.(t) <-- cnt_next.value; dls.(t) <-- dl_next.value ]))
+   111	    ; proc (List.init n_threads (fun i ->
+   112	        let mine = ch_lo ==:. i in
+   113	        let widx = if d = 1 then gnd else select (heads.(i).value +: uresize counts.(i).value (max 1 lw)) (lw - 1) 0 in
+   114	        proc
+   115	          [ when_ (push.value &: mine)
+   116	              [ proc (List.init d (fun j -> when_ (if d = 1 then vdd else widx ==:. j) [ slots.(i).(j) <-- acc ]))
+   117	              ; (match mutant with
+   118	                 | `Full_never -> counts.(i) <-- mux2 (counts.(i).value ==:. d) counts.(i).value (counts.(i).value +:. 1)
+   119	                 | `None -> counts.(i) <-- counts.(i).value +:. 1) ]
+   120	          ; when_ (pop.value &: mine)
+   121	              [ (if d = 1 then proc [] else heads.(i) <-- heads.(i).value +:. 1)
+   122	              ; counts.(i) <-- counts.(i).value -:. 1 ] ]))
+   123	    ];
+   124	  let tnext = thread.value +:. 1 in
+   125	  let imem_addr = concat_msb [ tnext; mux tnext (values pcs) ] in
+   126	  let pcs_out = concat_msb (List.rev (values pcs)) in
+   127	  let counts_out = concat_msb (List.rev (List.map (fun (v : Variable.t) -> uresize v.value 3) (Array.to_list counts))) in
+   128	  ( imem_addr, pin_out.value, pin_oe.value, host_out.value, host_out_valid.value, host_in_ready.value, pcs_out
+   129	  , port_out_data.value, port_out_valid.value, port_in_ready.value, counts_out )
+   130	
+   131	let circuit ?mutant (c : Isa_mb.cfg) =
+   132	  let clock = input "clock" 1 and clear = input "clear" 1 in
+   133	  let imem_data = input "imem_data" 16 and pin_in = input "pin_in" 8 in
+   134	  let host_in = input "host_in" 8 and host_in_valid = input "host_in_valid" 1 in
+   135	  let port_in = Array.init 4 (fun i -> input (Printf.sprintf "port_in%d" i) 8) in
+   136	  let port_in_valid = input "port_in_valid" 4 and port_out_ready = input "port_out_ready" 4 in
+   137	  let flags = input "flags" 4 in
+   138	  let imem_addr, pin_out, pin_oe, host_out, host_out_valid, host_in_ready, pcs, pod, pov, pir, cnts =
+   139	    create ?mutant ~c ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid ~port_in ~port_in_valid
+   140	      ~port_out_ready ~flags () in
+   141	  Circuit.create_exn ~name:(Printf.sprintf "deadline_sequencer_mb_p%d_d%d" c.pc_bits c.depth)
+   142	    [ output "imem_addr" imem_addr; output "pin_out" pin_out; output "pin_oe" pin_oe
+   143	    ; output "host_out" host_out; output "host_out_valid" host_out_valid
+   144	    ; output "host_in_ready" host_in_ready; output "pcs" pcs
+   145	    ; output "port_out_data" pod; output "port_out_valid" pov; output "port_in_ready" pir
+   146	    ; output "mb_counts" cnts ]
+
+ succeeded in 265ms:
+     1	(* Lockstep differential test of the mailbox variant's RTL against its interpreter, the check that
+     2	   the variant is a strict extension of the base ISA, a planted-bug control, and Verilog emission
+     3	   for the area measurement.
+     4	
+     5	   Usage: lockstep.exe [runs] [cycles]   (defaults 300 x 2000, as the base core's test) *)
+     6	open Hardcaml
+     7	
+     8	let rand_word ~mb_heavy =
+     9	  if mb_heavy && Random.int 2 = 0 then begin
+    10	    (* mailbox-heavy: SEND/RECV to inboxes and ports, WAITC on all conditions, short fail targets *)
+    11	    let fail = Random.int 16 in
+    12	    match Random.int 4 with
+    13	    | 0 -> Isa_mb.send ~ch:(Random.int 8) ~fail
+    14	    | 1 -> Isa_mb.recv ~ch:(Random.int 8) ~fail
+    15	    | 2 -> Isa_mb.waitc ~cond:(Random.int 16) ~value:(Random.int 2) ~fail
+    16	    | _ -> (3 lsl 12) lor Random.int 4   (* LDD 0..3: keep deadlines short so waits resolve *)
+    17	  end else Random.int 0x10000
+    18	
+    19	let random_io () : Isa_mb.io =
+    20	  { pin_in = Random.int 256; host_in = Random.int 256; host_in_valid = Random.bool ();
+    21	    port_in = Array.init 4 (fun _ -> Random.int 256); port_in_valid = Array.init 4 (fun _ -> Random.bool ());
+    22	    port_out_ready = Array.init 4 (fun _ -> Random.bool ()); flags = Random.int 16 }
+    23	
+    24	type cov = { mutable push : int; mutable pop : int; mutable full_cycles : int; mutable pport : int; mutable qport : int }
+    25	
+    26	let lockstep ?mutant ~(c : Isa_mb.cfg) ~seed ~cycles cov =
+    27	  Random.init seed;
+    28	  let mb_heavy = seed mod 2 = 0 in
+    29	  let plen = Isa_mb.prog_len c in
+    30	  let mem = Array.init 4 (fun _ -> Array.init plen (fun _ -> rand_word ~mb_heavy)) in
+    31	  let s = Harness_mb.make ?mutant c mem in
+    32	  let st = Isa_mb.init c in
+    33	  let bad = ref 0 in
+    34	  for cyc = 0 to cycles - 1 do
+    35	    let io = random_io () in
+    36	    let e = Isa_mb.step st ~mem io in
+    37	    let o = Harness_mb.cycle s io in
+    38	    (match e.mb with `Push _ -> cov.push <- cov.push + 1 | `Pop _ -> cov.pop <- cov.pop + 1 | `None -> ());
+    39	    if e.port_push <> None then cov.pport <- cov.pport + 1;
+    40	    if e.port_pop <> None then cov.qport <- cov.qport + 1;
+    41	    if Array.exists (fun n -> n >= c.depth) (Isa_mb.counts st) then cov.full_cycles <- cov.full_cycles + 1;
+    42	    if not (Harness_mb.agrees o st e) then begin
+    43	      incr bad;
+    44	      if !bad <= 2 && mutant = None then
+    45	        Printf.printf "  mismatch seed %d cycle %d: rtl pcs=%s counts=%s | model pcs=%s counts=%s\n" seed cyc
+    46	          (String.concat "," (List.map string_of_int o.pcs)) (String.concat "," (List.map string_of_int o.counts))
+    47	          (String.concat "," (Array.to_list (Array.map string_of_int st.pcs)))
+    48	          (String.concat "," (Array.to_list (Array.map string_of_int (Isa_mb.counts st))))
+    49	    end
+    50	  done;
+    51	  !bad
+    52	
+    53	(* Strict extension: with pc_bits = 6, on programmes that use no new opcode, the variant RTL must
+    54	   match the BASE interpreter (../deadline-sequencer/isa.ml) on pins, enables, host handshake and
+    55	   all four pcs, whatever the new inputs do. *)
+    56	let extension ~seed ~cycles =
+    57	  Random.init seed;
+    58	  let c = Isa_mb.cfg ~pc_bits:6 ~depth:2 () in
+    59	  (* reserved fields zero: no E/F opcodes, no SHO capture bit *)
+    60	  let strip w = if (w lsr 12) >= 14 then w land 0x0FFF else if (w lsr 12) = 7 then w land lnot 0x40 else w in
+    61	  let mem = Array.init 4 (fun _ -> Array.init 64 (fun _ -> strip (Random.int 0x10000))) in
+    62	  let s = Harness_mb.make c mem in
+    63	  let st = Isa.init () in
+    64	  let bad = ref 0 in
+    65	  for _ = 0 to cycles - 1 do
+    66	    let io = random_io () in
+    67	    let e = Isa.step st ~mem ~pin_in:io.pin_in ~host_in:io.host_in ~host_in_valid:io.host_in_valid in
+    68	    let o = Harness_mb.cycle s io in
+    69	    if not (o.pin_out = st.pin_out && o.pin_oe = st.pin_oe && o.host_out = e.host_out
+    70	            && o.host_in_ready = e.host_in_ready && o.pcs = Array.to_list st.pcs && o.port_push = None && o.port_pop = None)
+    71	    then incr bad
+    72	  done;
+    73	  !bad
+    74	
+    75	let emit (c : Isa_mb.cfg) =
+    76	  let name = Printf.sprintf "rtl/seq_mb_p%d_d%d.v" c.pc_bits c.depth in
+    77	  let oc = open_out name in
+    78	  Rtl.output ~output_mode:(To_channel oc) Verilog (Sequencer_mb.circuit c);
+    79	  close_out oc
+    80	
+    81	let () =
+    82	  let runs = try int_of_string Sys.argv.(1) with _ -> 300 in
+    83	  let cycles = try int_of_string Sys.argv.(2) with _ -> 2000 in
+    84	  (try Unix.mkdir "rtl" 0o755 with _ -> ());
+    85	  List.iter emit [ Isa_mb.cfg ~pc_bits:6 ~depth:1 (); Isa_mb.cfg ~pc_bits:6 ~depth:2 (); Isa_mb.cfg ~pc_bits:6 ~depth:4 ();
+    86	                   Isa_mb.cfg ~pc_bits:7 ~depth:2 () ];
+    87	  let ok = ref true in
+    88	  List.iter (fun (pb, d) ->
+    89	    let c = Isa_mb.cfg ~pc_bits:pb ~depth:d () in
+    90	    let cov = { push = 0; pop = 0; full_cycles = 0; pport = 0; qport = 0 } in
+    91	    let total = ref 0 in
+    92	    for seed = 1 to runs do total := !total + lockstep ~c ~seed ~cycles cov done;
+    93	    Printf.printf "lockstep pc_bits=%d depth=%d: %d programmes x %d cycles, %d mismatching cycles \
+    94	                   (coverage: %d inbox pushes, %d pops, %d cycles with a full inbox, %d port pushes, %d port pops)\n%!"
+    95	      pb d runs cycles !total cov.push cov.pop cov.full_cycles cov.pport cov.qport;
+    96	    if !total <> 0 || cov.full_cycles = 0 then ok := false) [ (6, 1); (6, 2); (6, 4); (7, 2) ];
+    97	  let ext = ref 0 in
+    98	  for seed = 1 to runs do ext := !ext + extension ~seed ~cycles done;
+    99	  Printf.printf "strict extension (variant RTL, pc_bits=6, vs the BASE interpreter on programmes without E/F): %d mismatching cycles\n" !ext;
+   100	  if !ext <> 0 then ok := false;
+   101	  (* control: the planted bug must be caught *)
+   102	  let c = Isa_mb.cfg ~pc_bits:7 ~depth:2 () in
+   103	  let cov = { push = 0; pop = 0; full_cycles = 0; pport = 0; qport = 0 } in
+   104	  let caught = ref 0 and m = ref 0 in
+   105	  for seed = 1 to 50 do let b = lockstep ~mutant:`Full_never ~c ~seed ~cycles cov in if b > 0 then incr caught; m := !m + b done;
+   106	  Printf.printf "control (inbox never reports full, RTL only): caught in %d of 50 programmes, %d mismatching cycles\n" !caught !m;
+   107	  if !caught = 0 then ok := false;
+   108	  print_endline (if !ok then "LOCKSTEP PASS" else "LOCKSTEP FAIL");
+   109	  exit (if !ok then 0 else 1)
+
+ succeeded in 258ms:
+     1	# Several protocols at once, and bridges between them
+     2	
+     3	The deadline sequencer runs four hardware threads round-robin, one instruction per slot, with
+     4	nothing shared except the pins. This prototype asks two questions. How many protocols fit on one
+     5	sequencer at the same time? And how do threads pass data to each other, so that the chip can
+     6	bridge protocols without the host? The answers are:
+     7	
+     8	- a capacity model;
+     9	- a small mailbox between threads, with deadline-bounded send and receive, as a variant of the
+    10	  ISA and RTL;
+    11	- five demonstrations, each checked cycle by cycle in the interpreter and the RTL against
+    12	  independent models of both sides:
+    13	  - Ethernet to TV;
+    14	  - a CAN bus analyser with TV output;
+    15	  - UART ↔ I2C;
+    16	  - UART ↔ SPI;
+    17	  - I2C ↔ CAN.
+    18	
+    19	The base ISA and RTL (`../deadline-sequencer/isa.ml`, `sequencer.ml`) are not modified. They are
+    20	symlinked here, as are the 10BASE-T receiver and model from `../ethernet-10base-t`. Every ISA
+    21	change lives in `isa_mb.ml` and `sequencer_mb.ml`.
+    22	
+    23	Run with `opam exec --switch=5.3.0 -- dune build`, then:
+    24	
+    25	| executable | what it checks | output |
+    26	|---|---|---|
+    27	| `lockstep.exe` | the variant's RTL against its interpreter; that it is a strict extension of the base; a planted bug | `results/lockstep.txt` |
+    28	| `ethtv.exe all` | Ethernet to TV, isolation, controls | `results/ethtv.txt` |
+    29	| `judge_tv.py` | the waveforms through the software TV (`uv run judge_tv.py WAVE EXPECT PNG`) | `results/ethtv_judge.txt` |
+    30	| `cantv.exe` | the CAN analyser | `results/cantv.txt` |
+    31	| `judge_screen.py` | the CAN analyser pixel by pixel | `results/cantv_judge.txt` |
+    32	| `bridges.exe all` | UART ↔ I2C and UART ↔ SPI, the full campaign | `results/bridges.txt` |
+    33	| `can_bridge.exe` | I2C ↔ CAN | `results/can_bridge.txt` |
+    34	| `loopback.exe` | option (b) against option (c) | `results/loopback.txt` |
+    35	| `synth.sh` | area, with Yosys 0.62 in the LibreLane container | `results/synth-summary.txt` |
+    36	
+    37	The waveforms go to `/var/tmp/multi-proto/`.
+    38	
+    39	## 1. Capacity: what fits on one sequencer
+    40	
+    41	A thread owns exactly a quarter of the slots whether it uses them or not. At 60 MHz that is 15
+    42	million slots a second per thread. So the budget is **threads (4) and pins**, not a fraction of
+    43	slots. A protocol either fits in a thread at its rate or it does not. Then the question is
+    44	whether the thread keeps its deadlines, which the budget analysis in §4 checks to the slot.
+    45	
+    46	Merging several slow protocols into one thread would make fractions matter. The compiler could do
+    47	that by interleaving their schedules (PLAN.md, "thread interleaving as disjunctions"), but it is
+    48	not done here.
+    49	
+    50	**Sources:** "measured" means a programme in this directory or in `../deadline-sequencer` run
+    51	against an independent model; "branch" means another agent's branch that is not on master yet;
+    52	"estimate" means an instruction count by hand.
+    53	
+    54	| protocol | threads | pins | slots per bit, fastest loop | fastest at 60 MHz, one thread | busy slots per bit at a typical rate | source |
+    55	|---|---|---|---|---|---|---|
+    56	| UART transmit | 1 | 1 | 4 (SHO LDD WAITD JNZ); bit ≥ 5 slots | 3 Mbaud | 4 of 130 at 115,200 baud (3 %) | measured |
+    57	| UART receive | 1 | 1 (+1 RTS) | 4; plus 5 slots of work between the stop-bit sample and the next start (§4) | 1.5 Mbaud (bit ≥ 10 slots) | about 5 of 130; it polls the rest | measured |
+    58	| SPI master, full duplex | 1 | 4 | 5 (with the capture option); 8 for the compiler's write-only master | 3 MHz; 1.9 MHz | ≈ 5 of 15 at 1 MHz | measured |
+    59	| SPI slave | 1 | 4 | ≈ 6 (two edge polls, SHI, SHO) | ≈ 2 MHz | – | estimate |
+    60	| I2C master, with clock stretching | 1 | 2 | 4q + 6, q ≥ 2 | 1 MHz (Fast-mode Plus) | ≈ 12 of 37 at 400 kHz | measured (q = 6) |
+    61	| I2C slave | 1 | 2 | ≈ 6 per edge pair; it may stretch the clock | 400 kHz easily | – | estimate |
+    62	| PS/2 device or host | 1 | 2 | – | 16.7 kHz clock | under 1 % | branch proto-ps2-can |
+    63	| CAN node (RX and TX threads) | 2 | 3–4 | 30 slots per bit at 500 kbit/s | 1 Mbit/s with the CRC and stuffing assists | – | branch proto-ps2-can |
+    64	| CAN analyser (receive only) | 1 | 1–3 | as the RX thread | – | – | branch, plus the stand-in here |
+    65	| JTAG or SWD master | 1 | 4 or 2 | ≈ 6 (with the capture option) | ≈ 2.5 MHz | – | estimate; branch proto-jtag-swd pending |
+    66	| USB low speed | 1–2 | 2 | 10 slots per bit at 1.5 Mbit/s; NRZI, stuffing, CRC-5/16 | – | – | estimate; branch proto-usb-ls pending |
+    67	| 10BASE-T transmit, firmware only | **4** | 1–2 | 3 clocks per half-bit, spread over all four threads | – | 100 % of all four | measured (`../sequencer-ethernet`) |
+    68	| 10BASE-T receive | 0 + ¼ | 2 | hardware receiver (Manchester and CRC-32) + header matcher; the parser needs 3 instructions per byte, one byte every 12 slots | – | 25 % of one thread during a frame | measured here |
+    69	| NTSC video, chasing the beam | 1 | 4 luma + 2 chroma | 12 active slots per 967-slot line | – | 1.2 % (the pin stage does the per-clock work) | measured here |
+    70	
+    71	Only 10BASE-T transmit in pure firmware needs all four threads. Firmware 10BASE-T receive on
+    72	proto-eth10 probably does too, unless the sampler and the systolic array take the bits.
+    73	
+    74	**Combinations measured to fit on one sequencer, with all four threads accounted for:**
+    75	
+    76	| combination | threads | pins | status |
+    77	|---|---|---|---|
+    78	| UART ↔ I2C bridge (3) + SPI master (1) | 4 | 8 | measured, isolation proven (§5) |
+    79	| UART ↔ SPI bridge (3) + I2C master (1) | 4 | 8 | measured, isolation proven |
+    80	| 10BASE-T receive (¼ of T0) + NTSC (T1) + SPI master (T2) + UART transmit (T3) | 4 | 4 + 4 on the sequencer; video and Ethernet on the stage and receiver pins | measured |
+    81	| CAN analyser: CAN RX (T3) + bit renderer (T0) + frame renderer (T2) + NTSC (T1) | 4 | 1–3 CAN + video | measured with the CAN stand-in; CAN RX pending the ISA merge (§6) |
+    82	| I2C ↔ CAN: CAN RX + CAN TX + bridge + I2C master | 4 | 4 + 2 | measured with a stand-in for the CAN node. It fits in four threads only if the translator and the assembler are merged, which works because they run one after the other (§6). As built here they take two threads |
+    83	| JTAG + SWD + UART console (3) | 3–4 | 8–9 | estimate |
+    84	| 10BASE-T transmit in firmware + anything | 5+ | – | does not fit |
+    85	
+    86	**Where generic assists free threads** (the column the coordinator asked for; ✓ = used or
+    87	measured here, others are proposals):
+    88	
+    89	| generic assist | frees or enables | protocols that benefit |
+    90	|---|---|---|
+    91	| mailbox between threads (this work) ✓ | bridges and analysers without the host; one thread per protocol side, one per translation | every bridge; analysers; Ethernet to TV (parser to memory) |
+    92	| pin streamer / pin sampler (FIFOs per pin group) ✓ in `../pin-streamer`, `../pin-sampler` | 10BASE-T transmit goes from 4 threads to 0–1; UART and SPI shifting drops to about one instruction per byte | UART, SPI, 10BASE-T TX, LS USB TX, video playback |
+    93	| bit-stuffing unit (programmable run length, equal/ones mode) | CAN and USB stuffing inline in the RX/TX thread instead of a second thread or the host | CAN, USB, HDLC |
+    94	| CRC unit (programmable polynomial ≤ 16 bits; CRC-32 in the Ethernet receiver) ✓ | CRC without a host round trip | CAN, USB, SD, 1-Wire, Ethernet |
+    95	| line-code unit (Manchester, NRZI) ✓ inside the 10BASE-T receiver | half-bit timing out of the threads | 10BASE-T, USB, DALI, IR remote |
+    96	| oversampling front end with resync | edge tracking out of the RX threads: UART above 1.5 Mbaud, CAN resync, USB DPLL | UART RX, CAN, USB, PS/2 |
+    97	| open-drain / wired-AND pin mode ✓ (SHO od) | – | I2C, SMBus, 1-Wire, CAN transceiver emulation |
+    98	| systolic matcher ✓ in `../systolic-matcher` | pattern and filter matching per byte, without thread branches | Ethernet header and SFD, USB SYNC/PID, CAN ID filters, I2C slave address |
+    99	| NCO chroma pins + memory streamer + lookup table ✓ (`video.ml`) | composite colour video with 1 thread | NTSC/PAL; with other lookup tables, 4b5b/8b10b-style line codes |
+   100	| saturating counters (one generic PE each) ✓ | statistics and rates for analysers | CAN analyser bars; packet counters |
+   101	
+   102	On this evidence the few units that buy the most concurrency are:
+   103	
+   104	1. **The mailbox.** Every bridge and analyser needs it, and it is the only one that changes the
+   105	   ISA.
+   106	2. **The streamer/sampler.** It turns the one protocol that takes all four threads into one that
+   107	   takes none.
+   108	3. **Stuffing and CRC.** Without them a CAN or USB node needs the host or an extra thread.
+   109	
+   110	The oversampling front end matters for rates above about 1.5 Mbit/s per thread.
+   111	
+   112	## 2. How threads talk: three options
+   113	
+   114	**(a) Through the host.** Every byte costs an OUT on one thread, a host read, a host write and
+   115	an IN on the other. Latency is the host's round trip: microseconds over SPI or USB from the
+   116	RP2040, and not deterministic. The host link's bandwidth is shared by every bridge. The chip also
+   117	stops being standalone, which rules out the CAN analyser. Not built: it is the status quo.
+   118	
+   119	**(b) Spare pins looped back, with no ISA change** (`loopback.exe`, base ISA and RTL unmodified).
+   120	Three pins: *valid*, *ready* and *data*. Because the barrel fixes the phase between two threads,
+   121	one rendezvous suffices. The sender's SHO in slot k is seen by the receiver's SHI in slot k,
+   122	eight bits in a row.
+   123	
+   124	- **Measured:** 256 random bytes in order. **56 cycles per byte** (1.07 MB/s at 60 MHz), 15 + 13
+   125	  words. The RTL matches the interpreter on every cycle.
+   126	- **Costs:** both threads are fully occupied for the whole transfer, nothing is buffered, and the
+   127	  sender waits until the receiver is at its poll.
+   128	- **Control:** with the sender one slot early, 0 of 256 bytes arrive correctly. The link exists
+   129	  only because the timing is exact. That is a fun property, but the link costs three pins and two
+   130	  threads' attention.
+   131	
+   132	**(c) A mailbox, the choice made here** (`isa_mb.ml`, `sequencer_mb.ml`). Measured on the same
+   133	test: **12 cycles per byte** (5 MB/s), 3 + 3 words, no pins. Each side spends 2 of every 3 of its
+   134	slots, and the inbox buffers.
+   135	
+   136	### The ISA proposal
+   137	
+   138	It is a strict extension of the base ISA. Opcodes 0xE and 0xF were NOP; SHO bits 6..3 were
+   139	unused.
+   140	
+   141	- **Parameters.**
+   142	  - `pc_bits`: 6 is the base; 7 gives 128 words per thread.
+   143	  - `depth`: 1, 2 or 4 bytes per inbox.
+   144	  - Every address field is the low `pc_bits` of the word.
+   145	- **State.** One inbox per thread, a FIFO of `depth` bytes. At most one instruction executes per
+   146	  cycle, so there is at most one inbox operation per cycle in the whole core. The barrel schedule
+   147	  is the arbiter, and no second port is needed.
+   148	
+   149	```
+   150	E  MBX    dir[11] ch[10:8] 0[7] fail[pc_bits-1:0]
+   151	          ch 0..3: inbox ch;  ch 4..7: generic port ch-4 (outside the core)
+   152	          SEND (dir 0): target can accept -> push acc, proceed; else dl = 0 -> jump fail; else stay
+   153	          RECV (dir 1): source has a byte -> acc <- pop, proceed; else dl = 0 -> jump fail; else stay
+   154	F  WAITC  val[11] cond[10:7] fail[pc_bits-1:0]
+   155	          cond 0..7: acc bit; 8..11: inbox cond-8 full; 12..15: flag input cond-12
+   156	          condition = val -> proceed; else dl = 0 -> jump fail; else stay
+   157	7  SHO    pin[11:9] msb[8] od[7] cap[6] cpin[5:3]   (capture option, for full duplex)
+   158	          with cap set, pin cpin is sampled in the same slot and enters the vacated bit
+   159	```
+   160	
+   161	**Semantics that keep timing exact.**
+   162	
+   163	- A blocked SEND, RECV or WAITC stays in its own slot exactly as WAITP does. The round-robin never
+   164	  changes, so a full or empty mailbox cannot move another thread's edges.
+   165	- Every wait is bounded by the thread's own deadline and then jumps to `fail`. An unbounded wait
+   166	  has to be written explicitly as `fail` = its own address. The bridges use that only where
+   167	  waiting for ever is the right behaviour: an idle thread waiting for work.
+   168	- Deadlock between threads is therefore a property of the programme, visible in its text, never of
+   169	  the schedule. With `dl = 0`, `WAITC` on an acc bit is a conditional branch in one slot. This was
+   170	  the missing piece for parsing bytes: the base ISA could only branch on pins, the counter and
+   171	  deadlines.
+   172	- Ports make generic blocks first-class: the Ethernet receiver, memory write ports, the video pin
+   173	  stage and the CAN frame interface. In-port handshakes match IN and out-port handshakes match
+   174	  OUT.
+   175	
+   176	**Verification of the variant** (`results/lockstep.txt`):
+   177	
+   178	- **Lockstep of the RTL against the interpreter:** 300 random programmes × 2,000 cycles for each
+   179	  of four configurations, 0 mismatching cycles. Half the programmes are mailbox-heavy. Coverage
+   180	  per configuration: 1,286–1,987 inbox pushes, 980–1,257 pops, 138,555–375,689 cycles with a
+   181	  full inbox, and 1,997–3,062 port transfers in each direction.
+   182	- **Strict extension:** with `pc_bits = 6`, the variant's RTL matches the base interpreter on
+   183	  programmes without the new fields. 0 mismatches.
+   184	- **Planted bug:** an inbox that never reports full is caught in 14 of 50 programmes (22,534
+   185	  cycles). Only programmes that fill an inbox can show it.
+   186	
+   187	**Area** (Yosys 0.62, sg13g2 typical, flattened, instruction memory external; the base
+   188	re-synthesised with the same Yosys):
+   189	
+   190	| configuration | µm² | flops | vs base |
+   191	|---|---|---|---|
+   192	| base sequencer | 17,263 | 179 | – |
+   193	| mailbox, depth 1, 64 words | 22,568 | 227 | +31 % |
+   194	| mailbox, depth 2, 64 words | 26,362 | 267 | +53 % |
+   195	| mailbox, depth 4, 64 words | 32,058 | 339 | +86 % |
+   196	| mailbox, depth 2, 128 words | 26,996 | 271 | +56 % |
+   197	
+   198	The inboxes are cheap in logic and dear in flops at 49 µm² each. Depth 2 is 64 data flops, 12
+   199	pointer flops and 12 port-register flops, and the rest is the port and condition multiplexers.
+   200	Two cheaper stores are worth measuring:
+   201	
+   202	- **latches:** about 31 µm² a bit, per the PLAN's latch table;
+   203	- **a shared pool:** one small FIFO or latch array addressed by inbox. That is enough because
+   204	  only one operation happens per cycle.
+   205	
+   206	The demos show depth 1 is enough when there is flow control: the UART ↔ I2C backpressure run
+   207	passes at depth 1. Depth 4 was needed only where a thread holds three bytes while waiting for a
+   208	CAN frame's status.
+   209	
+   210	## 3. The demonstrations
+   211	
+   212	### Ethernet to TV (`ethtv.ml`, `video.ml`, `video_fw.ml`; the flagship)
+   213	
+   214	Raw 10BASE-T frames (EtherType 0x88B5), each carrying one source scanline, are received while
+   215	NTSC colour video is generated by chasing the beam. Both run from one 60.852 MHz clock (17 × fsc),
+   216	concurrently.
+   217	
+   218	**Capacity split:**
+   219	
+   220	- **Receive:** the 10BASE-T receiver RTL, then a header matcher (broadcast, 0x88B5), then two
+   221	  in-ports.
+   222	- **T0 (parser):** takes the line number, writes 32 pixel bytes into a line buffer of four
+   223	  gain-cell rows, drains the padding, and commits the row only if the CRC was good. It uses 21
+   224	  words and about 25 % of its slots during a frame.
+   225	- **T1 (video timing):** sync and blanking by SETP on four luma pins, and burst and playback by
+   226	  commands to the pin stage, every edge on an exact slot. 84 words. Every line is 967 slots, which
+   227	  is 3,868 clocks, 227.5 subcarrier cycles plus 1/17.
+   228	- **The stage, all generic:**
+   229	  - the NCO's two chroma pins: pin A is high 9 phases of 17 and pin B 8, so their sum is flat;
+   230	    the mean phase is the hue and the phase difference the saturation;
+   231	  - a memory streamer (64 pixels × 48 clocks);
+   232	  - a 16-entry lookup table, chosen by the host from a prediction of what a TV decodes.
+   233	- **T2, T3:** an SPI master and a UART transmitter, unrelated to the video, to show isolation.
+   234	
+   235	**Why one scanline per frame means line doubling:** a minimum Ethernet frame with preamble and
+   236	gap takes 67.2 µs, longer than an NTSC line (63.6 µs). One frame per line cannot keep up. Each
+   237	source line is shown on two TV lines, 120 source lines per field.
+   238	
+   239	**The line buffer's lifetime contract.** A row is written when its frame arrives and read on two
+   240	TV lines. The first read writes each byte back, which is how gain cells are refreshed: a read
+   241	followed by a write. The longest write-to-read interval measured is **102.9 µs**, under the
+   242	120 µs of thin-oxide rows at tt/27 °C. Three runs show the contract matters:
+   243	
+   244	- **Thin-oxide rows at 85 °C (8 µs):** every read violates it. The cells' one-sided decay turns
+   245	  the picture black: 172 of 1,920 blocks correct.
+   246	- **No refresh on the first read:** the second reads reach 166.5 µs, with 3,578 violations and
+   247	  1,088 of 1,920 blocks correct.
+   248	- **A reordered pair of frames** (line 91 arrives before line 90): line 91 lives 264 µs. That
+   249	  breaks thin-oxide rows (source line 91 decays, 1,904 of 1,920 correct) and is fine in
+   250	  thick-oxide rows (≥ 3 ms: 1,920 of 1,920). Reordering by one frame costs one frame time of
+   251	  lifetime. The row type should be chosen by the reorder window, not only by the line time.
+   252	
+   253	**Results** (the unmodified `../composite-video/tv.py` finds syncs, locks to each line's burst and
+   254	decodes the field; the judge samples each 8-pixel block's centre):
+   255	
+   256	- **Main run:** RTL and interpreter agree on every one of 1,015,416 cycles, and the software TV
+   257	  decodes **1,920 of 1,920 blocks** to the colour that was sent. The corrupted frame and the
+   258	  filtered frame (wrong EtherType) come out as black lines, as they must.
+   259	- **Line periods:** all 258 are exactly 3,868 clocks. The control with one extra slot in the
+   260	  active line decodes fine, because a TV tolerates it, but its periods read 3,872. The timing
+   261	  contract is checked on the waveform, not only on the picture.
+   262	- **Isolation:**
+   263	  - the composite is identical cycle for cycle with the neighbours, without them, and under 4
+   264	    pairs of random neighbour programmes;
+   265	  - the neighbours' pins are identical with and without Ethernet and video.
+   266	- **Picture:** `out/ethtv_main.png`.
+   267	
+   268	**A bug in the shared receiver, found here.** `../ethernet-10base-t/eth_rx.ml` does not clear its
+   269	byte shift register at frame start. On back-to-back frames the previous frame's last bits plus
+   270	the new preamble matched 0xD5 one bit early. Frame 113 (after 112, gap ≥ 9.6 µs) was read with
+   271	its header shifted by a bit (0x55 as 0xAA) and dropped. This happened deterministically, with 0
+   272	to 3 ns of jitter. Clearing the register fixes it. The fix is in a local copy,
+   273	`eth_rx_fixed.ml`, which the demo uses; `rx_shared` in `results/ethtv.txt` reproduces the bug.
+   274	The shared file is left for its owner (the proto-eth10 branch).
+   275	
+   276	### CAN bus to TV: a standalone analyser (`cantv.ml`, `can_standin.ml`)
+   277	
+   278	- **Header:** flashes red for 30 fields after an error frame.
+   279	- **Waveform:** the last 64 bus bits scrolling, as three two-level traces (bus, node A's TXD,
+   280	  node B's TXD). Stuff bits are yellow; the bit where a node lost arbitration is red on its trace.
+   281	- **ID table:** eight rows. Each shows the last identifier seen in its slot (ID10..ID8), with its
+   282	  control bits, and an activity bar. The bars are eight saturating counters: +32 per frame, −4 per
+   283	  field.
+   284	
+   285	![analyser](out/cantv_noerr.png)
+   286	
+   287	**Threads:**
+   288	
+   289	- **T0:** writes each bit's code into a ring row. 3 words, 2 instructions per bit.
+   290	- **T2:** renders frame events. It uses a branch tree on the ID and keeps two bytes in its own
+   291	  inbox while it branches, so the mailbox doubles as scratch memory. 74 words.
+   292	- **T1:** the video-timing thread, identical to Ethernet to TV.
+   293	- **T3:** the slot for the CAN RX thread. Here it runs an unrelated UART, and a stand-in supplies
+   294	  the events.
+   295	
+   296	**Stage:** memory rows plus a per-line descriptor list (row, palette bank, bar), which is a
+   297	display list as DMA engines have.
+   298	
+   299	**Results:** 79 transmissions, 12 of them arbitration contests, one error frame.
+   300	
+   301	- **Stage against the reference analyser:** the stage's output matches an independent reference
+   302	  analyser, which sees only the event history, on **15,360 of 15,360 pixels**. The counters and
+   303	  the flash state are also equal.
+   304	- **Through the software TV:** it decodes **15,360 of 15,360 pixels** to the expected palette
+   305	  colour, both with the error frame and without it (then no flash).
+   306	- **RTL against the interpreter:** 0 mismatches.
+   307	- **Isolation:** holds.
+   308	- **Lifetime:** display rows are re-read once per field, so the longest interval is **15.95 ms**.
+   309	  That fits thick-oxide rows at tt (12–20 ms) only at the upper end, and fails at the worst case
+   310	  (≥ 3 ms). A standalone display needs a refresh sweep at least twice per field, or SRAM. This
+   311	  is a real cost the Ethernet buffer does not have.
+   312	
+   313	### UART ↔ I2C, UART ↔ SPI (`bridges.ml`, `bridge_lib.ml`)
+   314	
+   315	**Bridge A (UART ↔ I2C)** is four threads:
+   316	
+   317	- **T0, UART receive:** raises RTS when the I2C thread's inbox is full.
+   318	- **T1, I2C master:** runs a byte code (START, STOP, WRITE b, READ, ACK, NACK) and honours clock
+   319	  stretching on every SCL rise, bounded by its deadline. 99 words.
+   320	- **T2, UART transmit.**
+   321	- **T3:** an unrelated SPI master.
+   322	
+   323	**Bridge B (UART ↔ SPI):** a full-duplex SPI master built on SHO with capture, with an I2C master
+   324	as T3.
+   325	
+   326	**The other side of each bridge:**
+   327	
+   328	- **Host:** a UART model that honours CTS, with random gaps and a baud error.
+   329	- **Devices:** a bit-level I2C slave with random clock stretching (up to 1,500 cycles) and
+   330	  a bit-level SPI memory.
+   331	- **Expected results:** transaction-level reference models, written separately.
+   332	
+   333	**Results** (`results/bridges.txt`):
+   334	
+   335	- **Main runs**, RTL in lockstep: 71/71 and 56/56 answers exact. The device registers and the
+   336	  decoded I2C bus bytes are exact too.
+   337	- **Constrained random:** 24 of 24 runs pass (12 seeds × 2 bridges). Traffic mixes register
+   338	  writes and reads, 10 % to an absent device, host gaps of 0–2 bits, baud errors of −1.6 % to
+   339	  +1.6 %, and slave stretching of 0–900 cycles.
+   340	- **Backpressure** (no host gaps, the slave stretching up to 1,500 cycles): passes at inbox depth
+   341	  1, 2 and 4. RTS is high for 47,081, 22,261 and 9,137 cycles, and the host waits on CTS for
+   342	  45,005, 20,649 and 8,729 cycles.
+   343	
+   344	**Controls, each of which must fail:**
+   345	
+   346	- **A dropped push:** fails on both bridges.
+   347	- **Newest-first pop:** fails on A. On B it is **vacuous**, because B's inbox never holds two
+   348	  bytes. This is recorded, not hidden: an ordering fault needs occupancy ≥ 2 to show.
+   349	- **Two pushes swapped, swept over positions 20–69:** 82 of 82 swaps of different bytes caught.
+   350	  The 18 swaps of equal bytes are invisible to any checker.
+   351	- **A host ignoring CTS against the slow slave:** 21 overflows reported on the host channel, and
+   352	  the answers go wrong.
+   353	- **The receiver over budget:** see §4.
+   354	
+   355	**A deadlock the controls found.** In the first version, a byte that arrived while RTS was high
+   356	(the path that keeps listening when stopped) returned to idle with RTS still high. A host that
+   357	honours CTS then waited for ever: the over-budget run hung for 6 million cycles with RTS high.
+   358	The fix lowers RTS on the normal path whenever there is room.
+   359	
+   360	### I2C ↔ CAN (`can_bridge.ml`): a CAN node fronting an I2C sensor
+   361	
+   362	- **T0, translator:** buffers each request's three data bytes in its own inbox until the frame's
+   363	  status arrives, because a CAN node may act only after the end of frame. Frames with an error
+   364	  are dropped before anything reaches the I2C bus.
+   365	- **T1:** the unchanged I2C master.
+   366	- **T2, assembler:** returns response frames.
+   367	
+   368	**Results:**
+   369	
+   370	- **Six seeds pass:** 25–28 responses each. The responses, I2C bus bytes and device registers
+   371	  equal the reference, with the RTL in lockstep.
+   372	- **Corrupted requests** (1 in 10) never reach the bus.
+   373	- **Isolation:** holds.
+   374	- **Mailbox faults:** a dropped push and a swapped pair are both caught.
+   375	
+   376	## 4. Budgets are exact: the receive-slack edge
+   377	
+   378	The UART receiver samples the stop bit at slot 9.5 B, measured from the poll that saw the start
+   379	bit. It must be polling again by slot 10 B, because the next start bit can arrive then. The
+   380	static count of instructions on that path gives the slack:
+   381	
+   382	- B/2 − 5 on bridge A (with the RTS check);
+   383	- B/2 − 3 on bridge B.
+   384	
+   385	Adding NOPs to the path at exact baud with back-to-back bytes (`results/bridges.txt`):
+   386	
+   387	| bridge | extra slots | slack | result |
+   388	|---|---|---|---|
+   389	| A | +3 | 0 | 97/97 |
+   390	| A | +4 | −1 | fails, 59 framing errors reported |
+   391	| B | +5 | 0 | 67/67 |
+   392	| B | +6 | −1 | fails, 50 framing errors reported |
+   393	
+   394	The prediction holds to the slot. At exact baud the next edge keeps its phase against the
+   395	4-clock poll. A drifting host costs one more slot, and a 1 %-slow host adds about 1.6 slots of
+   396	margin per byte; the first version of this test missed that.
+   397	
+   398	## 5. Isolation: the proof
+   399	
+   400	A thread's next state depends only on its own registers, its instruction, the pins it reads, and
+   401	the inboxes or ports it names. The schedule never depends on data. So a protocol whose thread
+   402	names no shared channel has the same pin trace whatever its neighbours do. Each demo checks this
+   403	directly:
+   404	
+   405	- the protocol's pins are identical cycle for cycle with and without the neighbour;
+   406	- they are identical under 3–6 random neighbour programmes (random instructions confined to the
+   407	  neighbour's pins and own inbox, including branches, waits and mailbox traffic);
+   408	- the neighbour's pins are identical with the protocol idle and under different traffic.
+   409	
+   410	| demo | protocol unaffected by neighbour absent / random | neighbour unaffected by the protocol |
+   411	|---|---|---|
+   412	| Ethernet to TV | yes / 4 of 4 | yes |
+   413	| CAN analyser | yes / 3 of 3 | yes |
+   414	| UART ↔ I2C | yes / 6 of 6 | yes (idle and other traffic) |
+   415	| UART ↔ SPI | yes / 6 of 6 | yes |
+   416	| I2C ↔ CAN | yes / 1 of 1 | – |
+   417	
+   418	## 6. The CAN bridges when proto-ps2-can lands: plan and interfaces
+   419	
+   420	**The clash.** That branch's ISA variant (`isa_v.ml`) also takes the two free opcodes:
+   421	
+   422	- **E = JC:** jump if a condition holds (acc bit, CRC = 0, stuff, byte boundary, last bit).
+   423	- **F = CFG:** CRC and stuffing configuration, and `cnt <- acc`.
+   424	- **SHO bits 6..5:** feed the CRC and stuffing trackers, where this variant puts the capture
+   425	  option.
+   426	- **The programme counter:** 8 bits.
+   427	
+   428	The two variants cannot both be merged as they are. A unification that keeps both sets of
+   429	programmes expressible:
+   430	
+   431	- **One conditional instruction** with this variant's wait semantics (dl = 0 is JC's jump).
+   432	  - **Conditions:** JC's (acc bits, crc0, stuff, byte, last1) plus "own inbox non-empty",
+   433	    "target inbox full" and two flags.
+   434	  - **Encoding:** four bits of condition plus a polarity bit leaves 7 address bits, so the pc is
+   435	    7 bits or the polarity goes.
+   436	- **MBX takes the opcode that HALT frees**, since HALT ≡ `JMP self`. The assembler keeps HALT as
+   437	  a pseudo-op. Old binaries with 0xD000 need recompiling, which the protocol compiler does
+   438	  anyway.
+   439	- **SHO:** capture moves to a fixed partner pin (`cpin = pin xor 1`) in one bit, next to crc and
+   440	  stf.
+   441	- **`cnt <- acc` (CFG 3)** is wanted here too. It would have removed the branch tree on DLC and
+   442	  the fixed three-byte request format.
+   443	
+   444	**Interfaces for the bridges:**
+   445	
+   446	- **CAN RX thread → mailbox:** its tagged OUTs become SENDs to an inbox. The tag needs either a
+   447	  channel per tag class or tag bits in the message. The minimal version is two channels: bit
+   448	  events for an analyser, and frame events.
+   449	- **Data packing:** after the three header chunks, data bytes should be byte-aligned. The branch
+   450	  currently packs "7 bits followed by 8-bit chunks", which a bridge thread could only realign with
+   451	  shifts. `can_bridge.ml` uses the aligned form: `0xA1 c1 c2 c3 d0 .. 0xA2 status`.
+   452	- **CAN TX thread ← mailbox:** it takes `c1 c2 c3 d0 ..` and stuffs and adds the CRC on chip,
+   453	  with the branch's trackers. Today it takes a stream the host has already stuffed.
+   454	- **Thread budget for I2C ↔ CAN:** CAN RX, CAN TX, bridge and I2C master make four threads, which
+   455	  fits only if the translator and the assembler become one thread. They already run strictly one
+   456	  after the other: the translator waits for the assembler's done token.
+   457	- **The analyser:** the CAN RX thread's raw bit and stuff reports feed the bit renderer, and its
+   458	  SOF, header and END reports the frame renderer. Exactly the stand-in's events.
+   459	
+   460	## Open questions
+   461	
+   462	- **Merging the ISAs** (§6). Also the four-phase sub-slot fields now on master (SETP/SHO q[1:0],
+   463	  SHI quad[7]): there is no clash with this variant (WAITP 7:6, SHO 6:3, opcodes E and F), but
+   464	  there is one with proto-ps2-can's SHO bits.
+   465	- **Inbox storage:** latches or a shared pool instead of flops (§2), to be measured.
+   466	- **A refresh sweep for persistent display memory** (the analyser), or SRAM for it; the row type
+   467	  for the Ethernet buffer should follow the reorder window.
+   468	- **The shared 10BASE-T receiver's shift-register bug** (§3): it should be fixed on its branch.
+   469	- **What is only a model here:** the pin stage, memory, descriptor list and counters are
+   470	  behavioural OCaml models of generic blocks, not RTL, and their area is not measured. Only the
+   471	  sequencer variant, the Ethernet receiver and the TV decoder are the real thing.
+   472	- **Clock:** the demos run the sequencer at 60.852 MHz (Ethernet, TV) and treat 60 MHz and
+   473	  60.852 MHz as the same for the capacity numbers.
+
+ succeeded in 239ms:
+     1	(* Mailbox variant of the deadline-sequencer ISA: executable specification.
+     2	
+     3	   A strict extension of ../deadline-sequencer/isa.ml (which is not modified). Everything there
+     4	   still holds: four hardware threads issue round-robin, one instruction per cycle, every
+     5	   instruction takes exactly one slot, nothing stalls. What is added is a way for threads to talk
+     6	   to each other and to generic hardware blocks without going through the host or the pins, and a
+     7	   data-dependent branch.
+     8	
+     9	   Parameters (fixed at generation time):
+    10	     pc_bits  6 reproduces the base ISA's 64-word programmes; 7 gives 128 words per thread (the
+    11	              intended 1024x16 SRAM macro would give 256). Every address field below is the low
+    12	              pc_bits of the word, so with pc_bits = 6 bits 6..11 of JMP/JNZ/WAITP words are
+    13	              ignored exactly as in the base ISA.
+    14	     depth    entries per inbox, 1, 2 or 4.
+    15	
+    16	   New state: one inbox per thread, a FIFO of [depth] bytes. Since only one instruction executes
+    17	   per cycle, at most one inbox operation happens per cycle in the whole core, so the inboxes need
+    18	   no arbitration and no second port: the barrel schedule is the arbiter.
+    19	
+    20	   New instructions (opcodes 0xE and 0xF were NOP, and still are on master as of 2026-09-25):
+    21	
+    22	     E MBX   dir[11] ch[10:8] 0[7] fail[pc_bits-1:0]
+    23	             ch 0..3 names inbox ch; ch 4..7 names generic port ch-4 (outside the core).
+    24	             dir = 0, SEND: if the target can accept (inbox not full / out-port ready), push acc
+    25	               and proceed; else if dl = 0 jump to fail; else stay (retry next slot).
+    26	             dir = 1, RECV: if the source has a byte (inbox not empty / in-port valid), pop it
+    27	               into acc and proceed; else if dl = 0 jump to fail; else stay.
+    28	     F WAITC val[11] cond[10:7] fail[pc_bits-1:0]
+    29	             proceed when condition bit = val; else if dl = 0 jump to fail; else stay.
+    30	             cond 0..7: acc bit cond; 8..11: inbox (cond-8) is full; 12..15: flag input (cond-12).
+    31	             With dl = 0 and an acc bit this is a conditional branch in one slot:
+    32	               WAITC val=0 cond=k fail=L  branches to L when acc bit k is 1.
+    33	             With dl > 0 on an acc bit it is a branch taken when the deadline expires (acc cannot
+    34	             change while waiting), which is a timed branch, not an accident.
+    35	
+    36	   Timing rules, the point of the design:
+    37	     - A blocked SEND/RECV/WAITC occupies only its own thread's slot, exactly like WAITP. The
+    38	       round-robin schedule never changes, so no mailbox state can move another thread's edges.
+    39	     - Every wait has the thread's deadline as its bound, so a full or empty mailbox cannot hang
+    40	       a thread unless the programme asks for that explicitly with fail = own address (an
+    41	       unbounded wait, which the assembler can flag).
+    42	     - Coupling between threads is only through the inboxes and ports a programme names, and
+    43	       through pins it reads. A thread that names no shared channel is timing-identical whatever
+    44	       its neighbours do; the isolation tests check this.
+    45	
+    46	   One more addition, for full-duplex shifting (SPI, JTAG): SHO gains a capture option in bits
+    47	   that are unused in the base ISA and on master:
+    48	     7 SHO   pin[11:9] msb[8] od[7] cap[6] cpin[5:3]
+    49	             as before, and with cap set the pin cpin is sampled in the same slot and enters the
+    50	             bit the shift vacates (msb: bit 0; lsb: bit 7). One shift per bit, out and in, so a
+    51	             byte exchange is SHO then seven SHO-with-capture then SHI. Without it the two shifts
+    52	             lose a bit, and full duplex needs the pin sampler.
+    53	
+    54	   Ports: in-port k presents (valid, data); a RECV pops it with a one-cycle ready pulse, like IN.
+    55	   Out-port k presents ready; a SEND pushes acc, visible as (valid one-hot, data) registered, like
+    56	   OUT. Flags are four level inputs from generic blocks.
+    57	
+    58	   Faults for testing the checkers (interpreter only): Drop_push n silently loses the n-th
+    59	   successful push into any inbox (the SEND still proceeds); Lifo pops the newest entry;
+    60	   Swap_pair n holds the n-th push back and delivers it after the next push to the same inbox. *)
+    61	
+    62	let n_threads = 4
+    63	
+    64	type fault = No_fault | Drop_push of int | Lifo | Swap_pair of int
+    65	type cfg = { pc_bits : int; depth : int; fault : fault }
+    66	
+    67	let cfg ?(pc_bits = 7) ?(depth = 2) ?(fault = No_fault) () = { pc_bits; depth; fault }
+    68	let prog_len c = 1 lsl c.pc_bits
+    69	
+    70	(* Assembler helpers for the new instructions (addresses up to 7 bits). *)
+    71	let a7 a = a land 0x7F
+    72	let send ~ch ~fail = (0xE lsl 12) lor ((ch land 7) lsl 8) lor a7 fail
+    73	let recv ~ch ~fail = (0xE lsl 12) lor (1 lsl 11) lor ((ch land 7) lsl 8) lor a7 fail
+    74	let waitc ~cond ~value ~fail = (0xF lsl 12) lor ((value land 1) lsl 11) lor ((cond land 15) lsl 7) lor a7 fail
+    75	(* branch to [l] if acc bit k is 1 / 0 (requires dl = 0 to be immediate) *)
+    76	let br_set ~bit ~target = waitc ~cond:bit ~value:0 ~fail:target
+    77	let br_clr ~bit ~target = waitc ~cond:bit ~value:1 ~fail:target
+    78	let cond_full i = 8 + i
+    79	let cond_flag i = 12 + i
+    80	(* 7-bit address versions of the base ISA's control words *)
+    81	let jmp a = (9 lsl 12) lor a7 a
+    82	let jnz a = (10 lsl 12) lor a7 a
+    83	let waitp ~pin ~value ~fail = (5 lsl 12) lor ((pin land 7) lsl 9) lor ((value land 1) lsl 8) lor a7 fail
+    84	(* SHO with capture: out on [pin], in from [cpin], msb first by default *)
+    85	let shx ?(msb = 1) ~pin ~cpin () = (7 lsl 12) lor ((pin land 7) lsl 9) lor (msb lsl 8) lor (1 lsl 6) lor ((cpin land 7) lsl 3)
+    86	
+    87	type state = {
+    88	  c : cfg;
+    89	  pcs : int array; accs : int array; cnts : int array; dls : int array;
+    90	  mutable pin_out : int; mutable pin_oe : int; mutable thread : int;
+    91	  inbox : int list array;          (* oldest first *)
+    92	  mutable pushes : int;            (* successful inbox pushes so far, for Drop_push *)
+    93	  mutable held : (int * int) option;   (* Swap_pair: the push held back *)
+    94	  mutable swapped : (int * int) option;   (* Swap_pair: the two bytes that were exchanged *)
+    95	}
+    96	
+    97	let init c = {
+    98	  c; pcs = Array.make n_threads 0; accs = Array.make n_threads 0; cnts = Array.make n_threads 0;
+    99	  dls = Array.make n_threads 0; pin_out = 0; pin_oe = 0; thread = 0;
+   100	  inbox = Array.make n_threads []; pushes = 0; held = None; swapped = None;
+   101	}
+   102	
+   103	type io = {
+   104	  pin_in : int; host_in : int; host_in_valid : bool;
+   105	  port_in : int array; port_in_valid : bool array;   (* 4 in-ports *)
+   106	  port_out_ready : bool array;                        (* 4 out-ports *)
+   107	  flags : int;                                        (* 4 flag bits *)
+   108	}
+   109	
+   110	let idle_io = { pin_in = 0; host_in = 0; host_in_valid = false; port_in = Array.make 4 0;
+   111	                port_in_valid = Array.make 4 false; port_out_ready = Array.make 4 false; flags = 0 }
+   112	
+   113	type effects = {
+   114	  host_out : int option; host_in_ready : bool;
+   115	  port_pop : int option;              (* in-port popped this cycle *)
+   116	  port_push : (int * int) option;     (* (out-port, byte) pushed this cycle *)
+   117	  mb : [ `Push of int * int | `Pop of int * int | `None ];   (* inbox traffic, for tracing *)
+   118	}
+   119	
+   120	let counts st = Array.map List.length st.inbox
+   121	
+   122	let step st ~(mem : int array array) (io : io) =
+   123	  let c = st.c in
+   124	  let t = st.thread in
+   125	  let plen = prog_len c in
+   126	  let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
+   127	  let instr = mem.(t).(pc) in
+   128	  let opc = (instr lsr 12) land 0xF in
+   129	  let imm12 = instr land 0xFFF and imm8 = instr land 0xFF in
+   130	  let pin = (instr lsr 9) land 7 and pin_val = (instr lsr 8) land 1 in
+   131	  let addr = instr land (plen - 1) in
+   132	  let od = (instr lsr 7) land 1 in
+   133	  let mask8 = (instr lsr 4) land 0xFF and setv = (instr lsr 3) land 1 and seto = (instr lsr 2) land 1 in
+   134	  let pin_bit = (io.pin_in lsr pin) land 1 in
+   135	  let pc_next = ref ((pc + 1) land (plen - 1)) in
+   136	  let acc_next = ref acc and cnt_next = ref cnt in
+   137	  let dl_next = ref (if dl = 0 then 0 else dl - 1) in
+   138	  let host_out = ref None and host_in_ready = ref false in
+   139	  let port_pop = ref None and port_push = ref None and mb = ref `None in
+   140	  let stay () = pc_next := pc in
+   141	  let fail_or_stay () = if dl = 0 then pc_next := addr else stay () in
+   142	  let set_pin_bit v = st.pin_out <- (st.pin_out land lnot (1 lsl pin)) lor (v lsl pin) in
+   143	  let full i = List.length st.inbox.(i) >= c.depth in
+   144	  (match opc with
+   145	   | 1 ->
+   146	     st.pin_out <- (st.pin_out land lnot mask8) lor (if setv = 1 then mask8 else 0);
+   147	     st.pin_oe <- (st.pin_oe land lnot mask8) lor (if seto = 1 then mask8 else 0)
+   148	   | 2 -> cnt_next := imm12
+   149	   | 3 -> dl_next := imm12
+   150	   | 4 -> acc_next := imm8
+   151	   | 5 -> if pin_bit <> pin_val then fail_or_stay ()
+   152	   | 6 -> if dl <> 0 then stay ()
+   153	   | 7 ->
+   154	     let b = if pin_val = 1 then (acc lsr 7) land 1 else acc land 1 in
+   155	     if od = 1 then begin
+   156	       set_pin_bit 0;
+   157	       st.pin_oe <- (st.pin_oe land lnot (1 lsl pin)) lor ((1 - b) lsl pin)
+   158	     end else set_pin_bit b;
+   159	     let cap = (instr lsr 6) land 1 and cbit = (io.pin_in lsr ((instr lsr 3) land 7)) land 1 in
+   160	     acc_next := (if pin_val = 1 then ((acc lsl 1) land 0xFF) lor (cap land cbit) else (acc lsr 1) lor ((cap land cbit) lsl 7));
+   161	     cnt_next := (cnt - 1) land 0xFFF
+   162	   | 8 ->
+   163	     acc_next := (if pin_val = 1 then ((acc lsl 1) land 0xFF) lor pin_bit else (acc lsr 1) lor (pin_bit lsl 7));
+   164	     cnt_next := (cnt - 1) land 0xFFF
+   165	   | 9 -> pc_next := addr
+   166	   | 10 -> if cnt <> 0 then pc_next := addr
+   167	   | 11 -> host_out := Some acc
+   168	   | 12 -> if io.host_in_valid then (acc_next := io.host_in; host_in_ready := true) else stay ()
+   169	   | 13 -> stay ()
+   170	   | 14 ->
+   171	     let is_recv = (instr lsr 11) land 1 = 1 and ch = (instr lsr 8) land 7 in
+   172	     if not is_recv then begin
+   173	       if ch >= 4 then begin
+   174	         if io.port_out_ready.(ch - 4) then port_push := Some (ch - 4, acc) else fail_or_stay ()
+   175	       end else if not (full ch) then begin
+   176	         st.pushes <- st.pushes + 1;
+   177	         let dropped = (match c.fault with Drop_push n -> st.pushes = n | _ -> false) in
+   178	         (match c.fault, st.held with
+   179	          | Swap_pair n, _ when st.pushes = n -> st.held <- Some (ch, acc)
+   180	          | Swap_pair _, Some (hc, hv) when hc = ch -> st.inbox.(ch) <- st.inbox.(ch) @ [ acc; hv ]; st.held <- None; st.swapped <- Some (hv, acc)
+   181	          | _ -> if not dropped then st.inbox.(ch) <- st.inbox.(ch) @ [ acc ]);
+   182	         mb := `Push (ch, acc)
+   183	       end else fail_or_stay ()
+   184	     end else begin
+   185	       if ch >= 4 then begin
+   186	         if io.port_in_valid.(ch - 4) then (acc_next := io.port_in.(ch - 4); port_pop := Some (ch - 4)) else fail_or_stay ()
+   187	       end else (match st.inbox.(ch) with
+   188	         | [] -> fail_or_stay ()
+   189	         | q ->
+   190	           let v, rest = (match c.fault with
+   191	             | Lifo -> let r = List.rev q in List.hd r, List.rev (List.tl r)
+   192	             | _ -> List.hd q, List.tl q) in
+   193	           acc_next := v; st.inbox.(ch) <- rest; mb := `Pop (ch, v))
+   194	     end
+   195	   | 15 ->
+   196	     let v = (instr lsr 11) land 1 and cond = (instr lsr 7) land 15 in
+   197	     let bit =
+   198	       if cond < 8 then (acc lsr cond) land 1
+   199	       else if cond < 12 then (if full (cond - 8) then 1 else 0)
+   200	       else (io.flags lsr (cond - 12)) land 1 in
+   201	     if bit <> v then fail_or_stay ()
+   202	   | _ -> ());
+   203	  st.pcs.(t) <- !pc_next; st.accs.(t) <- !acc_next; st.cnts.(t) <- !cnt_next; st.dls.(t) <- !dl_next;
+   204	  st.thread <- (t + 1) mod n_threads;
+   205	  { host_out = !host_out; host_in_ready = !host_in_ready; port_pop = !port_pop; port_push = !port_push; mb = !mb }
+
+codex
+The comments make strong claims about timing and equivalence, so I’m checking the actual state-update ordering and test observables rather than relying on those summaries. I’ve already found that the README’s claim of zero stalls needs to be reconciled with the implemented retry loops.
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba lockstep.ml' in /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+ succeeded in 0ms:
+     1	(* Lockstep differential test of the mailbox variant's RTL against its interpreter, the check that
+     2	   the variant is a strict extension of the base ISA, a planted-bug control, and Verilog emission
+     3	   for the area measurement.
+     4	
+     5	   Usage: lockstep.exe [runs] [cycles]   (defaults 300 x 2000, as the base core's test) *)
+     6	open Hardcaml
+     7	
+     8	let rand_word ~mb_heavy =
+     9	  if mb_heavy && Random.int 2 = 0 then begin
+    10	    (* mailbox-heavy: SEND/RECV to inboxes and ports, WAITC on all conditions, short fail targets *)
+    11	    let fail = Random.int 16 in
+    12	    match Random.int 4 with
+    13	    | 0 -> Isa_mb.send ~ch:(Random.int 8) ~fail
+    14	    | 1 -> Isa_mb.recv ~ch:(Random.int 8) ~fail
+    15	    | 2 -> Isa_mb.waitc ~cond:(Random.int 16) ~value:(Random.int 2) ~fail
+    16	    | _ -> (3 lsl 12) lor Random.int 4   (* LDD 0..3: keep deadlines short so waits resolve *)
+    17	  end else Random.int 0x10000
+    18	
+    19	let random_io () : Isa_mb.io =
+    20	  { pin_in = Random.int 256; host_in = Random.int 256; host_in_valid = Random.bool ();
+    21	    port_in = Array.init 4 (fun _ -> Random.int 256); port_in_valid = Array.init 4 (fun _ -> Random.bool ());
+    22	    port_out_ready = Array.init 4 (fun _ -> Random.bool ()); flags = Random.int 16 }
+    23	
+    24	type cov = { mutable push : int; mutable pop : int; mutable full_cycles : int; mutable pport : int; mutable qport : int }
+    25	
+    26	let lockstep ?mutant ~(c : Isa_mb.cfg) ~seed ~cycles cov =
+    27	  Random.init seed;
+    28	  let mb_heavy = seed mod 2 = 0 in
+    29	  let plen = Isa_mb.prog_len c in
+    30	  let mem = Array.init 4 (fun _ -> Array.init plen (fun _ -> rand_word ~mb_heavy)) in
+    31	  let s = Harness_mb.make ?mutant c mem in
+    32	  let st = Isa_mb.init c in
+    33	  let bad = ref 0 in
+    34	  for cyc = 0 to cycles - 1 do
+    35	    let io = random_io () in
+    36	    let e = Isa_mb.step st ~mem io in
+    37	    let o = Harness_mb.cycle s io in
+    38	    (match e.mb with `Push _ -> cov.push <- cov.push + 1 | `Pop _ -> cov.pop <- cov.pop + 1 | `None -> ());
+    39	    if e.port_push <> None then cov.pport <- cov.pport + 1;
+    40	    if e.port_pop <> None then cov.qport <- cov.qport + 1;
+    41	    if Array.exists (fun n -> n >= c.depth) (Isa_mb.counts st) then cov.full_cycles <- cov.full_cycles + 1;
+    42	    if not (Harness_mb.agrees o st e) then begin
+    43	      incr bad;
+    44	      if !bad <= 2 && mutant = None then
+    45	        Printf.printf "  mismatch seed %d cycle %d: rtl pcs=%s counts=%s | model pcs=%s counts=%s\n" seed cyc
+    46	          (String.concat "," (List.map string_of_int o.pcs)) (String.concat "," (List.map string_of_int o.counts))
+    47	          (String.concat "," (Array.to_list (Array.map string_of_int st.pcs)))
+    48	          (String.concat "," (Array.to_list (Array.map string_of_int (Isa_mb.counts st))))
+    49	    end
+    50	  done;
+    51	  !bad
+    52	
+    53	(* Strict extension: with pc_bits = 6, on programmes that use no new opcode, the variant RTL must
+    54	   match the BASE interpreter (../deadline-sequencer/isa.ml) on pins, enables, host handshake and
+    55	   all four pcs, whatever the new inputs do. *)
+    56	let extension ~seed ~cycles =
+    57	  Random.init seed;
+    58	  let c = Isa_mb.cfg ~pc_bits:6 ~depth:2 () in
+    59	  (* reserved fields zero: no E/F opcodes, no SHO capture bit *)
+    60	  let strip w = if (w lsr 12) >= 14 then w land 0x0FFF else if (w lsr 12) = 7 then w land lnot 0x40 else w in
+    61	  let mem = Array.init 4 (fun _ -> Array.init 64 (fun _ -> strip (Random.int 0x10000))) in
+    62	  let s = Harness_mb.make c mem in
+    63	  let st = Isa.init () in
+    64	  let bad = ref 0 in
+    65	  for _ = 0 to cycles - 1 do
+    66	    let io = random_io () in
+    67	    let e = Isa.step st ~mem ~pin_in:io.pin_in ~host_in:io.host_in ~host_in_valid:io.host_in_valid in
+    68	    let o = Harness_mb.cycle s io in
+    69	    if not (o.pin_out = st.pin_out && o.pin_oe = st.pin_oe && o.host_out = e.host_out
+    70	            && o.host_in_ready = e.host_in_ready && o.pcs = Array.to_list st.pcs && o.port_push = None && o.port_pop = None)
+    71	    then incr bad
+    72	  done;
+    73	  !bad
+    74	
+    75	let emit (c : Isa_mb.cfg) =
+    76	  let name = Printf.sprintf "rtl/seq_mb_p%d_d%d.v" c.pc_bits c.depth in
+    77	  let oc = open_out name in
+    78	  Rtl.output ~output_mode:(To_channel oc) Verilog (Sequencer_mb.circuit c);
+    79	  close_out oc
+    80	
+    81	let () =
+    82	  let runs = try int_of_string Sys.argv.(1) with _ -> 300 in
+    83	  let cycles = try int_of_string Sys.argv.(2) with _ -> 2000 in
+    84	  (try Unix.mkdir "rtl" 0o755 with _ -> ());
+    85	  List.iter emit [ Isa_mb.cfg ~pc_bits:6 ~depth:1 (); Isa_mb.cfg ~pc_bits:6 ~depth:2 (); Isa_mb.cfg ~pc_bits:6 ~depth:4 ();
+    86	                   Isa_mb.cfg ~pc_bits:7 ~depth:2 () ];
+    87	  let ok = ref true in
+    88	  List.iter (fun (pb, d) ->
+    89	    let c = Isa_mb.cfg ~pc_bits:pb ~depth:d () in
+    90	    let cov = { push = 0; pop = 0; full_cycles = 0; pport = 0; qport = 0 } in
+    91	    let total = ref 0 in
+    92	    for seed = 1 to runs do total := !total + lockstep ~c ~seed ~cycles cov done;
+    93	    Printf.printf "lockstep pc_bits=%d depth=%d: %d programmes x %d cycles, %d mismatching cycles \
+    94	                   (coverage: %d inbox pushes, %d pops, %d cycles with a full inbox, %d port pushes, %d port pops)\n%!"
+    95	      pb d runs cycles !total cov.push cov.pop cov.full_cycles cov.pport cov.qport;
+    96	    if !total <> 0 || cov.full_cycles = 0 then ok := false) [ (6, 1); (6, 2); (6, 4); (7, 2) ];
+    97	  let ext = ref 0 in
+    98	  for seed = 1 to runs do ext := !ext + extension ~seed ~cycles done;
+    99	  Printf.printf "strict extension (variant RTL, pc_bits=6, vs the BASE interpreter on programmes without E/F): %d mismatching cycles\n" !ext;
+   100	  if !ext <> 0 then ok := false;
+   101	  (* control: the planted bug must be caught *)
+   102	  let c = Isa_mb.cfg ~pc_bits:7 ~depth:2 () in
+   103	  let cov = { push = 0; pop = 0; full_cycles = 0; pport = 0; qport = 0 } in
+   104	  let caught = ref 0 and m = ref 0 in
+   105	  for seed = 1 to 50 do let b = lockstep ~mutant:`Full_never ~c ~seed ~cycles cov in if b > 0 then incr caught; m := !m + b done;
+   106	  Printf.printf "control (inbox never reports full, RTL only): caught in %d of 50 programmes, %d mismatching cycles\n" !caught !m;
+   107	  if !caught = 0 then ok := false;
+   108	  print_endline (if !ok then "LOCKSTEP PASS" else "LOCKSTEP FAIL");
+   109	  exit (if !ok then 0 else 1)
+
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba sequencer_mb.ml' in /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+ succeeded in 0ms:
+     1	(* Mailbox variant of the deadline sequencer RTL. See isa_mb.ml for the semantics this must match
+     2	   cycle for cycle; ../deadline-sequencer/sequencer.ml is the base it extends (unmodified).
+     3	
+     4	   Parameters: pc_bits (6 or 7), depth (inbox entries: 1, 2 or 4). [mutant] plants a bug for the
+     5	   lockstep test's control: `Full_never makes an inbox never report full, so a SEND to a full
+     6	   inbox overwrites the oldest entry. *)
+     7	open Hardcaml
+     8	open Signal
+     9	
+    10	let n_threads = Isa_mb.n_threads
+    11	
+    12	let log2 d = match d with 1 -> 0 | 2 -> 1 | 4 -> 2 | 8 -> 3 | _ -> failwith "depth must be 1, 2, 4 or 8"
+    13	
+    14	let create ?(mutant = `None) ~(c : Isa_mb.cfg) ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid
+    15	    ~port_in ~port_in_valid ~port_out_ready ~flags () =
+    16	  let pb = c.pc_bits and d = c.depth in
+    17	  let spec = Reg_spec.create ~clock ~clear () in
+    18	  let open Always in
+    19	  let thread = Variable.reg spec ~width:2 in
+    20	  let regs width = Array.init n_threads (fun _ -> Variable.reg spec ~width) in
+    21	  let pcs = regs pb and accs = regs 8 and cnts = regs 12 and dls = regs 12 in
+    22	  let pin_out = Variable.reg spec ~width:8 in
+    23	  let pin_oe = Variable.reg spec ~width:8 in
+    24	  let host_out = Variable.reg spec ~width:8 in
+    25	  let host_out_valid = Variable.reg spec ~width:1 in
+    26	  let host_in_ready = Variable.wire ~default:gnd in
+    27	  let port_out_data = Variable.reg spec ~width:8 in
+    28	  let port_out_valid = Variable.reg spec ~width:4 in
+    29	  let port_in_ready = Variable.wire ~default:(zero 4) in
+    30	  (* inboxes: [d] byte slots, a read pointer and an occupancy count each *)
+    31	  let lw = log2 d in
+    32	  let slots = Array.init n_threads (fun _ -> Array.init d (fun _ -> Variable.reg spec ~width:8)) in
+    33	  let heads = Array.init n_threads (fun _ -> Variable.reg spec ~width:(max 1 lw)) in
+    34	  let counts = Array.init n_threads (fun _ -> Variable.reg spec ~width:(lw + 1)) in
+    35	  let full i = match mutant with `Full_never -> gnd | `None -> counts.(i).value ==:. d in
+    36	  let nonempty i = counts.(i).value <>:. 0 in
+    37	  let head_data i = if d = 1 then slots.(i).(0).value else mux (select heads.(i).value (lw - 1) 0) (Array.to_list (Array.map (fun (v : Variable.t) -> v.value) slots.(i))) in
+    38	  let values arr = Array.to_list (Array.map (fun (v : Variable.t) -> v.value) arr) in
+    39	  let sel arr = mux thread.value (values arr) in
+    40	  let pc = sel pcs and acc = sel accs and cnt = sel cnts and dl = sel dls in
+    41	  let instr = imem_data in
+    42	  let op = select instr 15 12 in
+    43	  let imm12 = select instr 11 0 and imm8 = select instr 7 0 in
+    44	  let pin_idx = select instr 11 9 and pin_val = bit instr 8 in
+    45	  let addr = select instr (pb - 1) 0 in
+    46	  let od = bit instr 7 in
+    47	  let mask8 = select instr 11 4 and setv = bit instr 3 and seto = bit instr 2 in
+    48	  let is_recv = bit instr 11 and ch_port = bit instr 10 and ch_lo = select instr 9 8 in
+    49	  let cval = bit instr 11 and cond = select instr 10 7 in
+    50	  let pin_bit = mux pin_idx (List.init 8 (fun i -> bit pin_in i)) in
+    51	  let cap_bit = bit instr 6 &: mux (select instr 5 3) (List.init 8 (fun i -> bit pin_in i)) in
+    52	  let pc_next = Variable.wire ~default:(pc +:. 1) in
+    53	  let acc_next = Variable.wire ~default:acc in
+    54	  let cnt_next = Variable.wire ~default:cnt in
+    55	  let dl_next = Variable.wire ~default:(mux2 (dl ==:. 0) dl (dl -:. 1)) in
+    56	  let stay = [ pc_next <-- pc ] in
+    57	  let fail_or_stay = [ if_ (dl ==:. 0) [ pc_next <-- addr ] stay ] in
+    58	  let with_pin_bit v = concat_lsb (List.init 8 (fun i -> mux2 (pin_idx ==:. i) v (bit pin_out.value i))) in
+    59	  let with_oe_bit v = concat_lsb (List.init 8 (fun i -> mux2 (pin_idx ==:. i) v (bit pin_oe.value i))) in
+    60	  let sho_bit = mux2 pin_val (bit acc 7) (bit acc 0) in
+    61	  let full_v = concat_lsb (List.init n_threads full) in
+    62	  let nonempty_v = concat_lsb (List.init n_threads nonempty) in
+    63	  let cond_bit = mux cond (List.init 8 (fun i -> bit acc i) @ List.init 4 (fun i -> bit full_v i) @ List.init 4 (fun i -> bit flags i)) in
+    64	  let onehot2 s = concat_lsb (List.init 4 (fun i -> s ==:. i)) in
+    65	  (* inbox push/pop requests, decoded once; at most one is active per cycle *)
+    66	  let push = Variable.wire ~default:gnd and pop = Variable.wire ~default:gnd in
+    67	  let opc o = of_int ~width:4 o in
+    68	  compile
+    69	    [ thread <-- thread.value +:. 1
+    70	    ; host_out_valid <-- gnd
+    71	    ; port_out_valid <--. 0
+    72	    ; switch op
+    73	        [ opc 1, [ pin_out <-- ((pin_out.value &: ~:mask8) |: (mask8 &: repeat setv 8))
+    74	                 ; pin_oe <-- ((pin_oe.value &: ~:mask8) |: (mask8 &: repeat seto 8)) ]
+    75	        ; opc 2, [ cnt_next <-- imm12 ]
+    76	        ; opc 3, [ dl_next <-- imm12 ]
+    77	        ; opc 4, [ acc_next <-- imm8 ]
+    78	        ; opc 5, [ if_ (pin_bit ==: pin_val) [] fail_or_stay ]
+    79	        ; opc 6, [ if_ (dl ==:. 0) [] stay ]
+    80	        ; opc 7, [ if_ od [ pin_out <-- with_pin_bit gnd; pin_oe <-- with_oe_bit (~:sho_bit) ]
+    81	                     [ pin_out <-- with_pin_bit sho_bit ]
+    82	                 ; acc_next <-- mux2 pin_val (sll acc 1 |: uresize cap_bit 8) (srl acc 1 |: concat_msb [ cap_bit; zero 7 ])
+    83	                 ; cnt_next <-- cnt -:. 1 ]
+    84	        ; opc 8, [ acc_next <-- mux2 pin_val (concat_msb [ select acc 6 0; pin_bit ])
+    85	                                            (concat_msb [ pin_bit; select acc 7 1 ])
+    86	                 ; cnt_next <-- cnt -:. 1 ]
+    87	        ; opc 9, [ pc_next <-- addr ]
+    88	        ; opc 10, [ if_ (cnt <>:. 0) [ pc_next <-- addr ] [] ]
+    89	        ; opc 11, [ host_out <-- acc; host_out_valid <-- vdd ]
+    90	        ; opc 12, [ if_ host_in_valid [ acc_next <-- host_in; host_in_ready <-- vdd ] stay ]
+    91	        ; opc 13, stay
+    92	        ; opc 14,
+    93	          [ if_ is_recv
+    94	              [ if_ ch_port
+    95	                  [ if_ (mux ch_lo (List.init 4 (fun i -> bit port_in_valid i)))
+    96	                      [ acc_next <-- mux ch_lo (Array.to_list port_in); port_in_ready <-- onehot2 ch_lo ]
+    97	                      fail_or_stay ]
+    98	                  [ if_ (mux ch_lo (List.init 4 (fun i -> bit nonempty_v i)))
+    99	                      [ acc_next <-- mux ch_lo (List.init 4 head_data); pop <-- vdd ]
+   100	                      fail_or_stay ] ]
+   101	              [ if_ ch_port
+   102	                  [ if_ (mux ch_lo (List.init 4 (fun i -> bit port_out_ready i)))
+   103	                      [ port_out_data <-- acc; port_out_valid <-- onehot2 ch_lo ]
+   104	                      fail_or_stay ]
+   105	                  [ if_ (~:(mux ch_lo (List.init 4 (fun i -> bit full_v i)))) [ push <-- vdd ] fail_or_stay ] ] ]
+   106	        ; opc 15, [ if_ (cond_bit ==: cval) [] fail_or_stay ] ]
+   107	    ; proc (List.init n_threads (fun t ->
+   108	        when_ (thread.value ==:. t)
+   109	          [ pcs.(t) <-- pc_next.value; accs.(t) <-- acc_next.value
+   110	          ; cnts.(t) <-- cnt_next.value; dls.(t) <-- dl_next.value ]))
+   111	    ; proc (List.init n_threads (fun i ->
+   112	        let mine = ch_lo ==:. i in
+   113	        let widx = if d = 1 then gnd else select (heads.(i).value +: uresize counts.(i).value (max 1 lw)) (lw - 1) 0 in
+   114	        proc
+   115	          [ when_ (push.value &: mine)
+   116	              [ proc (List.init d (fun j -> when_ (if d = 1 then vdd else widx ==:. j) [ slots.(i).(j) <-- acc ]))
+   117	              ; (match mutant with
+   118	                 | `Full_never -> counts.(i) <-- mux2 (counts.(i).value ==:. d) counts.(i).value (counts.(i).value +:. 1)
+   119	                 | `None -> counts.(i) <-- counts.(i).value +:. 1) ]
+   120	          ; when_ (pop.value &: mine)
+   121	              [ (if d = 1 then proc [] else heads.(i) <-- heads.(i).value +:. 1)
+   122	              ; counts.(i) <-- counts.(i).value -:. 1 ] ]))
+   123	    ];
+   124	  let tnext = thread.value +:. 1 in
+   125	  let imem_addr = concat_msb [ tnext; mux tnext (values pcs) ] in
+   126	  let pcs_out = concat_msb (List.rev (values pcs)) in
+   127	  let counts_out = concat_msb (List.rev (List.map (fun (v : Variable.t) -> uresize v.value 3) (Array.to_list counts))) in
+   128	  ( imem_addr, pin_out.value, pin_oe.value, host_out.value, host_out_valid.value, host_in_ready.value, pcs_out
+   129	  , port_out_data.value, port_out_valid.value, port_in_ready.value, counts_out )
+   130	
+   131	let circuit ?mutant (c : Isa_mb.cfg) =
+   132	  let clock = input "clock" 1 and clear = input "clear" 1 in
+   133	  let imem_data = input "imem_data" 16 and pin_in = input "pin_in" 8 in
+   134	  let host_in = input "host_in" 8 and host_in_valid = input "host_in_valid" 1 in
+   135	  let port_in = Array.init 4 (fun i -> input (Printf.sprintf "port_in%d" i) 8) in
+   136	  let port_in_valid = input "port_in_valid" 4 and port_out_ready = input "port_out_ready" 4 in
+   137	  let flags = input "flags" 4 in
+   138	  let imem_addr, pin_out, pin_oe, host_out, host_out_valid, host_in_ready, pcs, pod, pov, pir, cnts =
+   139	    create ?mutant ~c ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid ~port_in ~port_in_valid
+   140	      ~port_out_ready ~flags () in
+   141	  Circuit.create_exn ~name:(Printf.sprintf "deadline_sequencer_mb_p%d_d%d" c.pc_bits c.depth)
+   142	    [ output "imem_addr" imem_addr; output "pin_out" pin_out; output "pin_oe" pin_oe
+   143	    ; output "host_out" host_out; output "host_out_valid" host_out_valid
+   144	    ; output "host_in_ready" host_in_ready; output "pcs" pcs
+   145	    ; output "port_out_data" pod; output "port_out_valid" pov; output "port_in_ready" pir
+   146	    ; output "mb_counts" cnts ]
+
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba ../deadline-sequencer/isa.ml' in /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+ succeeded in 0ms:
+     1	(* The deadline sequencer ISA: executable specification.
+     2	
+     3	   Four hardware threads issue round-robin, one instruction per cycle, so thread t executes on
+     4	   every cycle congruent to t mod 4 and every instruction takes exactly one slot. Timing is exact
+     5	   by construction: nothing stalls, nothing is shared except the pins.
+     6	
+     7	   Per-thread state: pc (6 bits), acc (8-bit shift register), cnt (12-bit loop counter),
+     8	   dl (12-bit deadline, decrements once per slot while non-zero).
+     9	   Shared state: pin_out and pin_oe (8 bits each).
+    10	
+    11	   16-bit instruction, opcode in bits 15..12:
+    12	     0 NOP
+    13	     1 SETP  mask[11:4] val[3] oe[2]   masked pins <- val, their output enables <- oe
+    14	     2 LDC   imm[11:0]                 cnt <- imm
+    15	     3 LDD   imm[11:0]                 dl  <- imm (no decrement this slot)
+    16	     4 LDA   imm[7:0]                  acc <- imm
+    17	     5 WAITP pin[11:9] val[8] fail[5:0]
+    18	              proceed when pin_in[pin] = val; else if dl = 0 jump to fail; else stay
+    19	     6 WAITD                           proceed when dl = 0, else stay
+    20	     7 SHO   pin[11:9] msb[8] od[7]    pin_out[pin] <- acc bit (msb ? bit 7 : bit 0); acc shifts;
+    21	                                       cnt <- cnt - 1. With od set (open drain): pin_out[pin] <- 0
+    22	                                       and pin_oe[pin] <- not bit, i.e. drive low for 0, release for 1
+    23	     8 SHI   pin[11:9] msb[8]          pin_in[pin] shifts into acc (msb ? at bit 0 : at bit 7);
+    24	                                       cnt <- cnt - 1
+    25	     9 JMP   addr[5:0]
+    26	     A JNZ   addr[5:0]                 jump if cnt <> 0
+    27	     B OUT                             host_out <- acc, host_out_valid for one cycle
+    28	     C IN                              if host_in_valid: acc <- host_in, host_in_ready for one
+    29	                                       cycle, proceed; else stay
+    30	     D HALT                            stay forever
+    31	     E, F NOP *)
+    32	
+    33	let n_threads = 4
+    34	let pc_bits = 6
+    35	let prog_len = 1 lsl pc_bits
+    36	
+    37	type op = NOP | SETP | LDC | LDD | LDA | WAITP | WAITD | SHO | SHI | JMP | JNZ | OUT | IN | HALT
+    38	
+    39	let op_of_code = function
+    40	  | 1 -> SETP | 2 -> LDC | 3 -> LDD | 4 -> LDA | 5 -> WAITP | 6 -> WAITD | 7 -> SHO | 8 -> SHI
+    41	  | 9 -> JMP | 10 -> JNZ | 11 -> OUT | 12 -> IN | 13 -> HALT | _ -> NOP
+    42	
+    43	let code_of_op = function
+    44	  | NOP -> 0 | SETP -> 1 | LDC -> 2 | LDD -> 3 | LDA -> 4 | WAITP -> 5 | WAITD -> 6 | SHO -> 7
+    45	  | SHI -> 8 | JMP -> 9 | JNZ -> 10 | OUT -> 11 | IN -> 12 | HALT -> 13
+    46	
+    47	(* Assembler helpers: each returns the 16-bit word. *)
+    48	let enc op f = (code_of_op op lsl 12) lor (f land 0xFFF)
+    49	let nop = enc NOP 0
+    50	let setp ~mask ~value ~oe = enc SETP ((mask land 0xFF) lsl 4 lor (value lsl 3) lor (oe lsl 2))
+    51	let ldc n = enc LDC n
+    52	let ldd n = enc LDD n
+    53	let lda n = enc LDA (n land 0xFF)
+    54	let waitp ~pin ~value ~fail = enc WAITP ((pin lsl 9) lor (value lsl 8) lor (fail land 0x3F))
+    55	let waitd = enc WAITD 0
+    56	let sho ?(od = 0) ~pin ~msb () = enc SHO ((pin lsl 9) lor (msb lsl 8) lor (od lsl 7))
+    57	let shi ~pin ~msb = enc SHI ((pin lsl 9) lor (msb lsl 8))
+    58	let jmp a = enc JMP (a land 0x3F)
+    59	let jnz a = enc JNZ (a land 0x3F)
+    60	let out = enc OUT 0
+    61	let in_ = enc IN 0
+    62	let halt = enc HALT 0
+    63	
+    64	(* Interpreter. *)
+    65	type state = {
+    66	  pcs : int array; accs : int array; cnts : int array; dls : int array;
+    67	  mutable pin_out : int; mutable pin_oe : int; mutable thread : int;
+    68	}
+    69	
+    70	let init () = {
+    71	  pcs = Array.make n_threads 0; accs = Array.make n_threads 0; cnts = Array.make n_threads 0;
+    72	  dls = Array.make n_threads 0; pin_out = 0; pin_oe = 0; thread = 0;
+    73	}
+    74	
+    75	type effects = { host_out : int option; host_in_ready : bool }
+    76	
+    77	(* One cycle: the current thread executes one instruction from [mem.(thread).(pc)]. *)
+    78	let step st ~(mem : int array array) ~pin_in ~host_in ~host_in_valid =
+    79	  let t = st.thread in
+    80	  let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
+    81	  let instr = mem.(t).(pc) in
+    82	  let op = op_of_code ((instr lsr 12) land 0xF) in
+    83	  let imm12 = instr land 0xFFF and imm8 = instr land 0xFF in
+    84	  let pin = (instr lsr 9) land 7 and pin_val = (instr lsr 8) land 1 in
+    85	  let addr6 = instr land 0x3F in
+    86	  let od = (instr lsr 7) land 1 in
+    87	  let mask8 = (instr lsr 4) land 0xFF and setv = (instr lsr 3) land 1 and seto = (instr lsr 2) land 1 in
+    88	  let pin_bit = (pin_in lsr pin) land 1 in
+    89	  let pc_next = ref ((pc + 1) land (prog_len - 1)) in
+    90	  let acc_next = ref acc and cnt_next = ref cnt in
+    91	  let dl_next = ref (if dl = 0 then 0 else dl - 1) in
+    92	  let host_out = ref None and host_in_ready = ref false in
+    93	  let stay () = pc_next := pc in
+    94	  let set_pin_bit v = st.pin_out <- (st.pin_out land lnot (1 lsl pin)) lor (v lsl pin) in
+    95	  (match op with
+    96	   | NOP -> ()
+    97	   | SETP ->
+    98	     st.pin_out <- (st.pin_out land lnot mask8) lor (if setv = 1 then mask8 else 0);
+    99	     st.pin_oe <- (st.pin_oe land lnot mask8) lor (if seto = 1 then mask8 else 0)
+   100	   | LDC -> cnt_next := imm12
+   101	   | LDD -> dl_next := imm12
+   102	   | LDA -> acc_next := imm8
+   103	   | WAITP -> if pin_bit <> pin_val then (if dl = 0 then pc_next := addr6 else stay ())
+   104	   | WAITD -> if dl <> 0 then stay ()
+   105	   | SHO ->
+   106	     let b = if pin_val = 1 then (acc lsr 7) land 1 else acc land 1 in
+   107	     if od = 1 then begin
+   108	       set_pin_bit 0;
+   109	       st.pin_oe <- (st.pin_oe land lnot (1 lsl pin)) lor ((1 - b) lsl pin)
+   110	     end else set_pin_bit b;
+   111	     acc_next := (if pin_val = 1 then (acc lsl 1) land 0xFF else acc lsr 1);
+   112	     cnt_next := (cnt - 1) land 0xFFF
+   113	   | SHI ->
+   114	     acc_next := (if pin_val = 1 then ((acc lsl 1) land 0xFF) lor pin_bit else (acc lsr 1) lor (pin_bit lsl 7));
+   115	     cnt_next := (cnt - 1) land 0xFFF
+   116	   | JMP -> pc_next := addr6
+   117	   | JNZ -> if cnt <> 0 then pc_next := addr6
+   118	   | OUT -> host_out := Some acc
+   119	   | IN -> if host_in_valid then (acc_next := host_in; host_in_ready := true) else stay ()
+   120	   | HALT -> stay ());
+   121	  st.pcs.(t) <- !pc_next; st.accs.(t) <- !acc_next; st.cnts.(t) <- !cnt_next; st.dls.(t) <- !dl_next;
+   122	  st.thread <- (t + 1) mod n_threads;
+   123	  { host_out = !host_out; host_in_ready = !host_in_ready }
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 rg -n "let agrees|type observation|pc_bits|pin_out|accs|cnts|dls|thread|imem_addr|counts" harness_mb.ml *.ml' in /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+ succeeded in 22ms:
+compiler.ml:1:(* Protocol compiler for the deadline sequencer: protocol descriptions become thread programmes
+compiler.ml:22:let slot = 4   (* cycles per slot: one instruction per thread every n_threads cycles *)
+dual.ml:21:let pin_out d = d.st.pin_out
+harness_mb.ml:13:  let key = (c.pc_bits, c.depth, mutant) in
+harness_mb.ml:24:  s.pending_addr <- Bits.to_int !(o "imem_addr");
+harness_mb.ml:27:let fetch s addr = s.mem.(addr lsr s.c.pc_bits).(addr land (Isa_mb.prog_len s.c - 1))
+harness_mb.ml:30:  pin_out : int; pin_oe : int; host_out : int option; host_in_ready : bool; pcs : int list;
+harness_mb.ml:31:  port_push : (int * int) option; port_pop : int option; counts : int list;
+harness_mb.ml:48:  s.pending_addr <- Bits.to_int !(s.o "imem_addr");
+harness_mb.ml:51:  let pb = s.c.pc_bits in
+harness_mb.ml:52:  { pin_out = g "pin_out"; pin_oe = g "pin_oe";
+harness_mb.ml:55:    pcs = List.init Isa_mb.n_threads (fun t -> (g "pcs" lsr (t * pb)) land ((1 lsl pb) - 1));
+harness_mb.ml:58:    counts = List.init 4 (fun k -> (g "mb_counts" lsr (3 * k)) land 7) }
+harness_mb.ml:61:let agrees (o : observed) (st : Isa_mb.state) (e : Isa_mb.effects) =
+harness_mb.ml:62:  o.pin_out = st.pin_out && o.pin_oe = st.pin_oe && o.host_out = e.host_out && o.host_in_ready = e.host_in_ready
+harness_mb.ml:64:  && o.counts = Array.to_list (Isa_mb.counts st)
+loopback.ml:1:(* Option (b): two threads exchanging bytes over looped-back pins, on the UNMODIFIED base ISA and
+loopback.ml:5:   ready), D (data). The barrel schedule fixes the phase between thread 0 and thread 1, so after
+loopback.ml:7:   the receiver's SHI on slot k, eight in a row. Both threads are fully occupied during a
+loopback.ml:10:   Both directions are checked the same way: 256 random bytes from the host into thread 0, through
+loopback.ml:11:   the link, out of thread 1 to the host, compared in order; RTL and interpreter in lockstep. *)
+loopback.ml:18:  (* sender, thread 0 *)
+loopback.ml:27:  (* receiver, thread 1 *)
+loopback.ml:45:    let pin_in = st.pin_out land loop_mask in
+loopback.ml:49:    if o.pin_out <> st.pin_out || o.host_out <> e.host_out || o.host_in_ready <> e.host_in_ready then incr mism;
+loopback.ml:57:  let c = Isa_mb.cfg ~pc_bits:7 ~depth:2 () in
+loopback.ml:83:                 RTL mismatches %d; both threads busy for the whole transfer, no buffering\n"
+can_bridge.ml:4:     in-port 2   received frames as the CAN RX thread would report them, with the data made
+can_bridge.ml:7:     out-port 0  frames for the CAN TX thread to send: c1 c2 c3 d0 .. (it stuffs and adds the CRC
+can_bridge.ml:70:  let c = Isa_mb.cfg ~pc_bits:7 ~depth:4 ~fault () in
+can_bridge.ml:108:    let po = Dual.pin_out d and oe = Dual.pin_oe d in
+harness_mb.ml:13:  let key = (c.pc_bits, c.depth, mutant) in
+harness_mb.ml:24:  s.pending_addr <- Bits.to_int !(o "imem_addr");
+harness_mb.ml:27:let fetch s addr = s.mem.(addr lsr s.c.pc_bits).(addr land (Isa_mb.prog_len s.c - 1))
+harness_mb.ml:30:  pin_out : int; pin_oe : int; host_out : int option; host_in_ready : bool; pcs : int list;
+harness_mb.ml:31:  port_push : (int * int) option; port_pop : int option; counts : int list;
+harness_mb.ml:48:  s.pending_addr <- Bits.to_int !(s.o "imem_addr");
+harness_mb.ml:51:  let pb = s.c.pc_bits in
+harness_mb.ml:52:  { pin_out = g "pin_out"; pin_oe = g "pin_oe";
+harness_mb.ml:55:    pcs = List.init Isa_mb.n_threads (fun t -> (g "pcs" lsr (t * pb)) land ((1 lsl pb) - 1));
+harness_mb.ml:58:    counts = List.init 4 (fun k -> (g "mb_counts" lsr (3 * k)) land 7) }
+harness_mb.ml:61:let agrees (o : observed) (st : Isa_mb.state) (e : Isa_mb.effects) =
+harness_mb.ml:62:  o.pin_out = st.pin_out && o.pin_oe = st.pin_oe && o.host_out = e.host_out && o.host_in_ready = e.host_in_ready
+harness_mb.ml:64:  && o.counts = Array.to_list (Isa_mb.counts st)
+harness.ml:9:  imem_addr : Bits.t ref; pin_out : Bits.t ref; pin_oe : Bits.t ref; host_out : Bits.t ref;
+harness.ml:19:            host_in_valid = i "host_in_valid"; clear = i "clear"; imem_addr = o "imem_addr";
+harness.ml:20:            pin_out = o "pin_out"; pin_oe = o "pin_oe"; host_out = o "host_out";
+harness.ml:25:  s.pending_addr <- Bits.to_int !(s.imem_addr);
+harness.ml:28:let fetch mem addr = mem.(addr lsr Isa.pc_bits).(addr land (Isa.prog_len - 1))
+harness.ml:30:type observed = { pin_out : int; pin_oe : int; host_out : int option; host_in_ready : bool; pcs : int list }
+harness.ml:39:  s.pending_addr <- Bits.to_int !(s.imem_addr);
+harness.ml:40:  { pin_out = Bits.to_int !(s.pin_out); pin_oe = Bits.to_int !(s.pin_oe);
+harness.ml:43:    pcs = List.init Isa.n_threads (fun t -> (Bits.to_int !(s.pcs) lsr (t * Isa.pc_bits)) land (Isa.prog_len - 1)) }
+isa_mb.ml:4:   still holds: four hardware threads issue round-robin, one instruction per cycle, every
+isa_mb.ml:5:   instruction takes exactly one slot, nothing stalls. What is added is a way for threads to talk
+isa_mb.ml:10:     pc_bits  6 reproduces the base ISA's 64-word programmes; 7 gives 128 words per thread (the
+isa_mb.ml:12:              pc_bits of the word, so with pc_bits = 6 bits 6..11 of JMP/JNZ/WAITP words are
+isa_mb.ml:16:   New state: one inbox per thread, a FIFO of [depth] bytes. Since only one instruction executes
+isa_mb.ml:22:     E MBX   dir[11] ch[10:8] 0[7] fail[pc_bits-1:0]
+isa_mb.ml:28:     F WAITC val[11] cond[10:7] fail[pc_bits-1:0]
+isa_mb.ml:37:     - A blocked SEND/RECV/WAITC occupies only its own thread's slot, exactly like WAITP. The
+isa_mb.ml:38:       round-robin schedule never changes, so no mailbox state can move another thread's edges.
+isa_mb.ml:39:     - Every wait has the thread's deadline as its bound, so a full or empty mailbox cannot hang
+isa_mb.ml:40:       a thread unless the programme asks for that explicitly with fail = own address (an
+isa_mb.ml:42:     - Coupling between threads is only through the inboxes and ports a programme names, and
+isa_mb.ml:43:       through pins it reads. A thread that names no shared channel is timing-identical whatever
+isa_mb.ml:62:let n_threads = 4
+isa_mb.ml:65:type cfg = { pc_bits : int; depth : int; fault : fault }
+isa_mb.ml:67:let cfg ?(pc_bits = 7) ?(depth = 2) ?(fault = No_fault) () = { pc_bits; depth; fault }
+isa_mb.ml:68:let prog_len c = 1 lsl c.pc_bits
+isa_mb.ml:89:  pcs : int array; accs : int array; cnts : int array; dls : int array;
+isa_mb.ml:90:  mutable pin_out : int; mutable pin_oe : int; mutable thread : int;
+isa_mb.ml:98:  c; pcs = Array.make n_threads 0; accs = Array.make n_threads 0; cnts = Array.make n_threads 0;
+isa_mb.ml:99:  dls = Array.make n_threads 0; pin_out = 0; pin_oe = 0; thread = 0;
+isa_mb.ml:100:  inbox = Array.make n_threads []; pushes = 0; held = None; swapped = None;
+isa_mb.ml:120:let counts st = Array.map List.length st.inbox
+isa_mb.ml:124:  let t = st.thread in
+isa_mb.ml:126:  let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
+isa_mb.ml:142:  let set_pin_bit v = st.pin_out <- (st.pin_out land lnot (1 lsl pin)) lor (v lsl pin) in
+isa_mb.ml:146:     st.pin_out <- (st.pin_out land lnot mask8) lor (if setv = 1 then mask8 else 0);
+isa_mb.ml:203:  st.pcs.(t) <- !pc_next; st.accs.(t) <- !acc_next; st.cnts.(t) <- !cnt_next; st.dls.(t) <- !dl_next;
+isa_mb.ml:204:  st.thread <- (t + 1) mod n_threads;
+sequencer.ml:2:   Instruction memory is external (one-cycle synchronous read): the core presents imem_addr for
+sequencer.ml:3:   the thread that executes on the next cycle and consumes imem_data on that cycle. *)
+sequencer.ml:7:let n_threads = Isa.n_threads
+sequencer.ml:8:let pc_bits = Isa.pc_bits
+sequencer.ml:13:  let thread = Variable.reg spec ~width:2 in
+sequencer.ml:14:  let regs width = Array.init n_threads (fun _ -> Variable.reg spec ~width) in
+sequencer.ml:15:  let pcs = regs pc_bits and accs = regs 8 and cnts = regs 12 and dls = regs 12 in
+sequencer.ml:16:  let pin_out = Variable.reg spec ~width:8 in
+sequencer.ml:22:  let sel arr = mux thread.value (values arr) in
+sequencer.ml:23:  let pc = sel pcs and acc = sel accs and cnt = sel cnts and dl = sel dls in
+sequencer.ml:37:  let with_pin_bit v = concat_lsb (List.init 8 (fun i -> mux2 (pin_idx ==:. i) v (bit pin_out.value i))) in
+sequencer.ml:42:    [ thread <-- thread.value +:. 1
+sequencer.ml:45:        [ opc SETP, [ pin_out <-- ((pin_out.value &: ~:mask8) |: (mask8 &: repeat setv 8))
+sequencer.ml:52:        ; opc SHO, [ if_ od [ pin_out <-- with_pin_bit gnd; pin_oe <-- with_oe_bit (~:sho_bit) ]
+sequencer.ml:53:                       [ pin_out <-- with_pin_bit sho_bit ]
+sequencer.ml:64:    ; proc (List.init n_threads (fun t ->
+sequencer.ml:65:        when_ (thread.value ==:. t)
+sequencer.ml:66:          [ pcs.(t) <-- pc_next.value; accs.(t) <-- acc_next.value
+sequencer.ml:67:          ; cnts.(t) <-- cnt_next.value; dls.(t) <-- dl_next.value ]))
+sequencer.ml:69:  let tnext = thread.value +:. 1 in
+sequencer.ml:70:  let imem_addr = concat_msb [ tnext; mux tnext (values pcs) ] in
+sequencer.ml:72:  imem_addr, pin_out.value, pin_oe.value, host_out.value, host_out_valid.value, host_in_ready.value, pcs_out
+sequencer.ml:78:  let imem_addr, pin_out, pin_oe, host_out, host_out_valid, host_in_ready, pcs =
+sequencer.ml:81:    [ output "imem_addr" imem_addr; output "pin_out" pin_out; output "pin_oe" pin_oe
+isa.ml:3:   Four hardware threads issue round-robin, one instruction per cycle, so thread t executes on
+isa.ml:7:   Per-thread state: pc (6 bits), acc (8-bit shift register), cnt (12-bit loop counter),
+isa.ml:9:   Shared state: pin_out and pin_oe (8 bits each).
+isa.ml:20:     7 SHO   pin[11:9] msb[8] od[7]    pin_out[pin] <- acc bit (msb ? bit 7 : bit 0); acc shifts;
+isa.ml:21:                                       cnt <- cnt - 1. With od set (open drain): pin_out[pin] <- 0
+isa.ml:33:let n_threads = 4
+isa.ml:34:let pc_bits = 6
+isa.ml:35:let prog_len = 1 lsl pc_bits
+isa.ml:66:  pcs : int array; accs : int array; cnts : int array; dls : int array;
+isa.ml:67:  mutable pin_out : int; mutable pin_oe : int; mutable thread : int;
+isa.ml:71:  pcs = Array.make n_threads 0; accs = Array.make n_threads 0; cnts = Array.make n_threads 0;
+isa.ml:72:  dls = Array.make n_threads 0; pin_out = 0; pin_oe = 0; thread = 0;
+isa.ml:77:(* One cycle: the current thread executes one instruction from [mem.(thread).(pc)]. *)
+isa.ml:79:  let t = st.thread in
+isa.ml:80:  let pc = st.pcs.(t) and acc = st.accs.(t) and cnt = st.cnts.(t) and dl = st.dls.(t) in
+isa.ml:94:  let set_pin_bit v = st.pin_out <- (st.pin_out land lnot (1 lsl pin)) lor (v lsl pin) in
+isa.ml:98:     st.pin_out <- (st.pin_out land lnot mask8) lor (if setv = 1 then mask8 else 0);
+isa.ml:121:  st.pcs.(t) <- !pc_next; st.accs.(t) <- !acc_next; st.cnts.(t) <- !cnt_next; st.dls.(t) <- !dl_next;
+isa.ml:122:  st.thread <- (t + 1) mod n_threads;
+lockstep.ml:41:    if Array.exists (fun n -> n >= c.depth) (Isa_mb.counts st) then cov.full_cycles <- cov.full_cycles + 1;
+lockstep.ml:45:        Printf.printf "  mismatch seed %d cycle %d: rtl pcs=%s counts=%s | model pcs=%s counts=%s\n" seed cyc
+lockstep.ml:46:          (String.concat "," (List.map string_of_int o.pcs)) (String.concat "," (List.map string_of_int o.counts))
+lockstep.ml:48:          (String.concat "," (Array.to_list (Array.map string_of_int (Isa_mb.counts st))))
+lockstep.ml:53:(* Strict extension: with pc_bits = 6, on programmes that use no new opcode, the variant RTL must
+lockstep.ml:58:  let c = Isa_mb.cfg ~pc_bits:6 ~depth:2 () in
+lockstep.ml:69:    if not (o.pin_out = st.pin_out && o.pin_oe = st.pin_oe && o.host_out = e.host_out
+lockstep.ml:76:  let name = Printf.sprintf "rtl/seq_mb_p%d_d%d.v" c.pc_bits c.depth in
+lockstep.ml:85:  List.iter emit [ Isa_mb.cfg ~pc_bits:6 ~depth:1 (); Isa_mb.cfg ~pc_bits:6 ~depth:2 (); Isa_mb.cfg ~pc_bits:6 ~depth:4 ();
+lockstep.ml:86:                   Isa_mb.cfg ~pc_bits:7 ~depth:2 () ];
+lockstep.ml:89:    let c = Isa_mb.cfg ~pc_bits:pb ~depth:d () in
+lockstep.ml:93:    Printf.printf "lockstep pc_bits=%d depth=%d: %d programmes x %d cycles, %d mismatching cycles \
+lockstep.ml:99:  Printf.printf "strict extension (variant RTL, pc_bits=6, vs the BASE interpreter on programmes without E/F): %d mismatching cycles\n" !ext;
+lockstep.ml:102:  let c = Isa_mb.cfg ~pc_bits:7 ~depth:2 () in
+can_standin.ml:3:   opcodes E and F). It produces what that branch's RX thread reports, in the order it reports it,
+sequencer_mb.ml:4:   Parameters: pc_bits (6 or 7), depth (inbox entries: 1, 2 or 4). [mutant] plants a bug for the
+sequencer_mb.ml:10:let n_threads = Isa_mb.n_threads
+sequencer_mb.ml:16:  let pb = c.pc_bits and d = c.depth in
+sequencer_mb.ml:19:  let thread = Variable.reg spec ~width:2 in
+sequencer_mb.ml:20:  let regs width = Array.init n_threads (fun _ -> Variable.reg spec ~width) in
+sequencer_mb.ml:21:  let pcs = regs pb and accs = regs 8 and cnts = regs 12 and dls = regs 12 in
+sequencer_mb.ml:22:  let pin_out = Variable.reg spec ~width:8 in
+sequencer_mb.ml:32:  let slots = Array.init n_threads (fun _ -> Array.init d (fun _ -> Variable.reg spec ~width:8)) in
+sequencer_mb.ml:33:  let heads = Array.init n_threads (fun _ -> Variable.reg spec ~width:(max 1 lw)) in
+sequencer_mb.ml:34:  let counts = Array.init n_threads (fun _ -> Variable.reg spec ~width:(lw + 1)) in
+sequencer_mb.ml:35:  let full i = match mutant with `Full_never -> gnd | `None -> counts.(i).value ==:. d in
+sequencer_mb.ml:36:  let nonempty i = counts.(i).value <>:. 0 in
+sequencer_mb.ml:39:  let sel arr = mux thread.value (values arr) in
+sequencer_mb.ml:40:  let pc = sel pcs and acc = sel accs and cnt = sel cnts and dl = sel dls in
+sequencer_mb.ml:58:  let with_pin_bit v = concat_lsb (List.init 8 (fun i -> mux2 (pin_idx ==:. i) v (bit pin_out.value i))) in
+sequencer_mb.ml:61:  let full_v = concat_lsb (List.init n_threads full) in
+sequencer_mb.ml:62:  let nonempty_v = concat_lsb (List.init n_threads nonempty) in
+sequencer_mb.ml:69:    [ thread <-- thread.value +:. 1
+sequencer_mb.ml:73:        [ opc 1, [ pin_out <-- ((pin_out.value &: ~:mask8) |: (mask8 &: repeat setv 8))
+sequencer_mb.ml:80:        ; opc 7, [ if_ od [ pin_out <-- with_pin_bit gnd; pin_oe <-- with_oe_bit (~:sho_bit) ]
+sequencer_mb.ml:81:                     [ pin_out <-- with_pin_bit sho_bit ]
+sequencer_mb.ml:107:    ; proc (List.init n_threads (fun t ->
+sequencer_mb.ml:108:        when_ (thread.value ==:. t)
+sequencer_mb.ml:109:          [ pcs.(t) <-- pc_next.value; accs.(t) <-- acc_next.value
+sequencer_mb.ml:110:          ; cnts.(t) <-- cnt_next.value; dls.(t) <-- dl_next.value ]))
+sequencer_mb.ml:111:    ; proc (List.init n_threads (fun i ->
+sequencer_mb.ml:113:        let widx = if d = 1 then gnd else select (heads.(i).value +: uresize counts.(i).value (max 1 lw)) (lw - 1) 0 in
+sequencer_mb.ml:118:                 | `Full_never -> counts.(i) <-- mux2 (counts.(i).value ==:. d) counts.(i).value (counts.(i).value +:. 1)
+sequencer_mb.ml:119:                 | `None -> counts.(i) <-- counts.(i).value +:. 1) ]
+sequencer_mb.ml:122:              ; counts.(i) <-- counts.(i).value -:. 1 ] ]))
+sequencer_mb.ml:124:  let tnext = thread.value +:. 1 in
+sequencer_mb.ml:125:  let imem_addr = concat_msb [ tnext; mux tnext (values pcs) ] in
+sequencer_mb.ml:127:  let counts_out = concat_msb (List.rev (List.map (fun (v : Variable.t) -> uresize v.value 3) (Array.to_list counts))) in
+sequencer_mb.ml:128:  ( imem_addr, pin_out.value, pin_oe.value, host_out.value, host_out_valid.value, host_in_ready.value, pcs_out
+sequencer_mb.ml:129:  , port_out_data.value, port_out_valid.value, port_in_ready.value, counts_out )
+sequencer_mb.ml:138:  let imem_addr, pin_out, pin_oe, host_out, host_out_valid, host_in_ready, pcs, pod, pov, pir, cnts =
+sequencer_mb.ml:141:  Circuit.create_exn ~name:(Printf.sprintf "deadline_sequencer_mb_p%d_d%d" c.pc_bits c.depth)
+sequencer_mb.ml:142:    [ output "imem_addr" imem_addr; output "pin_out" pin_out; output "pin_oe" pin_oe
+sequencer_mb.ml:146:    ; output "mb_counts" cnts ]
+video.ml:4:   - A sequencer thread chases the beam: it drives four luma pins (a resistor DAC, code/14 of full
+video_fw.ml:1:(* The video-timing thread (T1) shared by the Ethernet-to-TV and CAN-to-TV demos: NTSC at
+ethtv.ml:158:  let c = Isa_mb.cfg ~pc_bits:7 ~depth:2 () in
+ethtv.ml:193:               pin_in = Dual.pin_out d;
+ethtv.ml:214:    let po = Dual.pin_out d and oe = Dual.pin_oe d in
+bridges.ml:84:  let ic = Isa_mb.cfg ~pc_bits:7 ~depth:c.depth ~fault:c.fault () in
+bridges.ml:124:    let po = Dual.pin_out d and oe = Dual.pin_oe d in
+bridges.ml:152:    let pc0 = d.st.pcs.(0) and th = d.st.thread in
+bridges.ml:177:    Printf.printf "end state: pcs %s, inbox fills %s, inbox1 %s, pin_out %02x oe %02x, t1 acc %02x dl %d\n"
+bridges.ml:180:      (String.concat " " (List.map (Printf.sprintf "%02x") d.st.inbox.(1))) d.st.pin_out d.st.pin_oe d.st.accs.(1) d.st.dls.(1);
+cantv.ml:12:     (T3)  CAN receive: the proto-ps2-can branch's RX thread, whose tagged reports become mailbox
+cantv.ml:32:(* the stage's field tick (counters decay, flash counts down) is the first playback of a field *)
+cantv.ml:96:      (* once per field: the counters decay, the flash counts down *)
+cantv.ml:266:  let c = Isa_mb.cfg ~pc_bits:7 ~depth:2 () in
+cantv.ml:289:               pin_in = Dual.pin_out d;
+cantv.ml:297:    let po = Dual.pin_out d and oe = Dual.pin_oe d in
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba harness_mb.ml' in /home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto
+ succeeded in 0ms:
+     1	(* Cyclesim harness for the mailbox variant, with a one-cycle-latency instruction memory, as
+     2	   ../deadline-sequencer/harness.ml does for the base core. *)
+     3	open Hardcaml
+     4	
+     5	type t = {
+     6	  c : Isa_mb.cfg; sim : Cyclesim.t_port_list; mem : int array array;
+     7	  i : string -> Bits.t ref; o : string -> Bits.t ref;
+     8	  mutable pending_addr : int; mutable current_addr : int;
+     9	}
+    10	
+    11	let circuits : (int * int * [ `Full_never | `None ] option, Circuit.t) Hashtbl.t = Hashtbl.create 4
+    12	let circuit ?mutant (c : Isa_mb.cfg) =
+    13	  let key = (c.pc_bits, c.depth, mutant) in
+    14	  match Hashtbl.find_opt circuits key with
+    15	  | Some x -> x
+    16	  | None -> let x = Sequencer_mb.circuit ?mutant c in Hashtbl.replace circuits key x; x
+    17	
+    18	let make ?mutant (c : Isa_mb.cfg) mem =
+    19	  let sim = Cyclesim.create (circuit ?mutant c) in
+    20	  let i n = Cyclesim.in_port sim n and o n = Cyclesim.out_port sim n in
+    21	  let s = { c; sim; mem; i; o; pending_addr = 0; current_addr = 0 } in
+    22	  i "clear" := Bits.vdd; Cyclesim.cycle sim; i "clear" := Bits.gnd;
+    23	  s.current_addr <- 0;
+    24	  s.pending_addr <- Bits.to_int !(o "imem_addr");
+    25	  s
+    26	
+    27	let fetch s addr = s.mem.(addr lsr s.c.pc_bits).(addr land (Isa_mb.prog_len s.c - 1))
+    28	
+    29	type observed = {
+    30	  pin_out : int; pin_oe : int; host_out : int option; host_in_ready : bool; pcs : int list;
+    31	  port_push : (int * int) option; port_pop : int option; counts : int list;
+    32	}
+    33	
+    34	let bits_of_bools a = Array.fold_left (fun (acc, k) b -> ((if b then acc lor (1 lsl k) else acc), k + 1)) (0, 0) a |> fst
+    35	
+    36	let cycle s (io : Isa_mb.io) =
+    37	  let bi w v = Bits.of_int ~width:w v in
+    38	  s.i "imem_data" := bi 16 (fetch s s.current_addr);
+    39	  s.i "pin_in" := bi 8 io.pin_in;
+    40	  s.i "host_in" := bi 8 io.host_in;
+    41	  s.i "host_in_valid" := bi 1 (if io.host_in_valid then 1 else 0);
+    42	  Array.iteri (fun k v -> s.i (Printf.sprintf "port_in%d" k) := bi 8 v) io.port_in;
+    43	  s.i "port_in_valid" := bi 4 (bits_of_bools io.port_in_valid);
+    44	  s.i "port_out_ready" := bi 4 (bits_of_bools io.port_out_ready);
+    45	  s.i "flags" := bi 4 io.flags;
+    46	  Cyclesim.cycle s.sim;
+    47	  s.current_addr <- s.pending_addr;
+    48	  s.pending_addr <- Bits.to_int !(s.o "imem_addr");
+    49	  let g n = Bits.to_int !(s.o n) in
+    50	  let pov = g "port_out_valid" in
+    51	  let pb = s.c.pc_bits in
+    52	  { pin_out = g "pin_out"; pin_oe = g "pin_oe";
+    53	    host_out = (if g "host_out_valid" = 1 then Some (g "host_out") else None);
+    54	    host_in_ready = g "host_in_ready" = 1;
+    55	    pcs = List.init Isa_mb.n_threads (fun t -> (g "pcs" lsr (t * pb)) land ((1 lsl pb) - 1));
+    56	    port_push = (if pov = 0 then None else Some ((match pov with 1 -> 0 | 2 -> 1 | 4 -> 2 | 8 -> 3 | _ -> -1), g "port_out_data"));
+    57	    port_pop = (match g "port_in_ready" with 0 -> None | 1 -> Some 0 | 2 -> Some 1 | 4 -> Some 2 | 8 -> Some 3 | _ -> Some (-1));
+    58	    counts = List.init 4 (fun k -> (g "mb_counts" lsr (3 * k)) land 7) }
+    59	
+    60	(* Compare one cycle of RTL against the interpreter's step on the same inputs. *)
+    61	let agrees (o : observed) (st : Isa_mb.state) (e : Isa_mb.effects) =
+    62	  o.pin_out = st.pin_out && o.pin_oe = st.pin_oe && o.host_out = e.host_out && o.host_in_ready = e.host_in_ready
+    63	  && o.pcs = Array.to_list st.pcs && o.port_push = e.port_push && o.port_pop = e.port_pop
+    64	  && o.counts = Array.to_list (Isa_mb.counts st)
+
+codex
+## Real problems
+
+- **The strict extension claim fails at `pc_bits = 7`.** The base ISA uses only the low six address bits for `JMP`, `JNZ` and `WAITP` ([base `isa.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/deadline-sequencer/isa.ml:17), [lines 25–26]). The variant uses the low `pc_bits` bits for those instructions ([`isa_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/isa_mb.ml:10), [line 131]; [`sequencer_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/sequencer_mb.ml:45)). Thus a legacy-format control word with bit 6 set in its otherwise-unused address field branches to a different address under the 7-bit variant. The lockstep extension check uses **only** `pc_bits = 6` ([`lockstep.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/lockstep.ml:58)), so it does not test this case.
+
+- **Pin-trace independence needs a pin-ownership condition.** A thread that names no shared inbox or port can still write a pin another thread writes. The interpreter stores pin outputs as shared state ([`isa_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/isa_mb.ml:90)); `SETP` and `SHO` update it ([lines 145–147, 153–160]). So its global pin trace can depend on a neighbour even when it names no mailbox or port. The README’s isolation claim is supported only for demos whose neighbour programmes are confined to their own pins ([`README.md`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/README.md:398), [lines 405–408)).
+
+## Edge-case comparison
+
+Static inspection found no definite interpreter/RTL mismatch in the requested SEND/RECV/WAITC/SHO cases:
+
+- At depth 1, full detection is `count == depth` in the RTL ([`sequencer_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/sequencer_mb.ml:35)); push is suppressed when full ([line 105]). Pop and push cannot target the same inbox in one cycle because only one thread executes per cycle.
+- Both implementations use the configured low address bits for failure targets ([`isa_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/isa_mb.ml:131), [`sequencer_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/sequencer_mb.ml:45, 57)).
+- Both compare WAITC’s selected bit to its value, and otherwise use the same deadline-based fail-or-stay rule ([`isa_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/isa_mb.ml:195), [`sequencer_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/sequencer_mb.ml:63, 106)).
+- With SHO capture clear, the RTL capture bit is zero; with capture set, both shift the sampled pin into the vacated accumulator bit ([`isa_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/isa_mb.ml:159–161), [`sequencer_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/sequencer_mb.ml:51, 82)).
+
+## Test weaknesses
+
+- **Lockstep does not compare much of the state it claims to validate.** `agrees` checks pins, host and port handshakes, PCs and inbox counts ([`harness_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/harness_mb.ml:61–64)). It does not compare per-thread accumulators, counters or deadlines; inbox contents or head pointers; or the current thread. A bug in those states can escape until it changes a checked output—and may remain invisible if it does not do so during the run.
+- The extension test checks pins, host handshakes, PCs and that no port transfer occurred ([`lockstep.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/lockstep.ml:65–71)), not internal state or instruction-by-instruction equivalence. Random testing also does not establish equivalence for all programs.
+tokens used
+39,425
+## Real problems
+
+- **The strict extension claim fails at `pc_bits = 7`.** The base ISA uses only the low six address bits for `JMP`, `JNZ` and `WAITP` ([base `isa.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/deadline-sequencer/isa.ml:17), [lines 25–26]). The variant uses the low `pc_bits` bits for those instructions ([`isa_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/isa_mb.ml:10), [line 131]; [`sequencer_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/sequencer_mb.ml:45)). Thus a legacy-format control word with bit 6 set in its otherwise-unused address field branches to a different address under the 7-bit variant. The lockstep extension check uses **only** `pc_bits = 6` ([`lockstep.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/lockstep.ml:58)), so it does not test this case.
+
+- **Pin-trace independence needs a pin-ownership condition.** A thread that names no shared inbox or port can still write a pin another thread writes. The interpreter stores pin outputs as shared state ([`isa_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/isa_mb.ml:90)); `SETP` and `SHO` update it ([lines 145–147, 153–160]). So its global pin trace can depend on a neighbour even when it names no mailbox or port. The README’s isolation claim is supported only for demos whose neighbour programmes are confined to their own pins ([`README.md`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/README.md:398), [lines 405–408)).
+
+## Edge-case comparison
+
+Static inspection found no definite interpreter/RTL mismatch in the requested SEND/RECV/WAITC/SHO cases:
+
+- At depth 1, full detection is `count == depth` in the RTL ([`sequencer_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/sequencer_mb.ml:35)); push is suppressed when full ([line 105]). Pop and push cannot target the same inbox in one cycle because only one thread executes per cycle.
+- Both implementations use the configured low address bits for failure targets ([`isa_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/isa_mb.ml:131), [`sequencer_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/sequencer_mb.ml:45, 57)).
+- Both compare WAITC’s selected bit to its value, and otherwise use the same deadline-based fail-or-stay rule ([`isa_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/isa_mb.ml:195), [`sequencer_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/sequencer_mb.ml:63, 106)).
+- With SHO capture clear, the RTL capture bit is zero; with capture set, both shift the sampled pin into the vacated accumulator bit ([`isa_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/isa_mb.ml:159–161), [`sequencer_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/sequencer_mb.ml:51, 82)).
+
+## Test weaknesses
+
+- **Lockstep does not compare much of the state it claims to validate.** `agrees` checks pins, host and port handshakes, PCs and inbox counts ([`harness_mb.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/harness_mb.ml:61–64)). It does not compare per-thread accumulators, counters or deadlines; inbox contents or head pointers; or the current thread. A bug in those states can escape until it changes a checked output—and may remain invisible if it does not do so during the run.
+- The extension test checks pins, host handshakes, PCs and that no port transfer occurred ([`lockstep.ml`](/home/matthias/prog/janestreet/emulator-wt-multi-proto/prototypes/multi-proto/lockstep.ml:65–71)), not internal state or instruction-by-instruction equivalence. Random testing also does not establish equivalence for all programs.

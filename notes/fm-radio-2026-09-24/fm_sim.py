@@ -65,7 +65,8 @@ def sinad(audio, fsd):
     resid = a - fit
     return 10 * np.log10(np.mean(tone ** 2) / np.mean(resid ** 2)), np.sqrt(np.mean(tone ** 2))
 
-for name, grid in [("ideal", None), ("grid", clk)] + [(f"clk/{k}", clk * k) for k in (2, 4, 8, 16, 32)]:
+if __name__ == "__main__":   # guard added so prototypes/multiphase/fm_eval.py can reuse the functions
+  for name, grid in [("ideal", None), ("grid", clk)] + [(f"clk/{k}", clk * k) for k in (2, 4, 8, 16, 32)]:
     x = square_from_edges(phase, grid)
     # carrier level at 99.75 MHz relative to the fundamental, before demodulation
     audio, fsd = demodulate(x)

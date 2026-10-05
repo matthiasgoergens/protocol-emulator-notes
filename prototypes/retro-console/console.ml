@@ -37,7 +37,10 @@ let nspr = 16
 let plen = 10 + 3 * nspr
 let burst_phase = 4                     (* 15 + 30 * 4 = 135 degrees *)
 
-let create ~clock ~clear ~din ~strobe =
+(* [plant_valid_short] removes one register from the pixel-valid lane of the sprite pipeline (at
+   cell 8), the lane that blanks the picture outside the 256 pixels: a negative control for the
+   latency lint (latency_check.ml) only. *)
+let create_planted ~plant_valid_short ~clock ~clear ~din ~strobe =
   let spec = Reg_spec.create ~clock ~clear () in
   let hcount = reg_fb spec ~width:12 ~f:(fun h -> mux2 (h ==:. (cpl - 1)) (zero 12) (h +:. 1)) in
   let line_end = hcount ==:. (cpl - 1) in
@@ -75,7 +78,8 @@ let create ~clock ~clear ~din ~strobe =
     let d = uresize x 9 -: uresize sx 9 in
     let cover = v &: (d <:. 16) in
     let b = mux (select d 3 1) (List.init 8 (fun k -> bit bmp (7 - k))) in
-    stage := (reg spec x, reg spec (mux2 (cover &: b) scol col), reg spec v)
+    let v_next = if plant_valid_short && i = 8 then v else reg spec v in
+    stage := (reg spec x, reg spec (mux2 (cover &: b) scol col), v_next)
   done;
   let _, pcol, pvalid = !stage in
   let hue = select pcol 7 4 and luma = select pcol 3 0 in
@@ -100,11 +104,16 @@ let create ~clock ~clear ~din ~strobe =
   let r = reg spec in
   r code, r chroma_val, r chroma_on, r colour_px, line_start, pcol, pvalid, hcount, vcount
 
-let circuit () =
+let create = create_planted ~plant_valid_short:false
+
+let circuit_planted ~plant_valid_short () =
   let clock = input "clock" 1 and clear = input "clear" 1 in
   let din = input "din" 8 and strobe = input "strobe" 1 in
-  let code, cv, con, c2on, ls, pcol, pvalid, h, v = create ~clock ~clear ~din ~strobe in
+  let code, cv, con, c2on, ls, pcol, pvalid, h, v =
+    create_planted ~plant_valid_short ~clock ~clear ~din ~strobe in
   Circuit.create_exn ~name:"retro_console"
     [ output "luma" code; output "chroma" cv; output "chroma_oe" con; output "chroma2_oe" c2on
     ; output "line_start" ls; output "pix_col" pcol; output "pix_valid" pvalid
     ; output "hcount" h; output "vcount" v ]
+
+let circuit () = circuit_planted ~plant_valid_short:false ()

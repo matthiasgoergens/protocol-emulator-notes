@@ -1,0 +1,9 @@
+# demo_i2c.py (seed 5)
+bus: pull-up 4.7 kohm, 200 pF (tau 940 ns), V_OL 0.15 V, released at 50 ns, pulled low at 3.05 us with a 10 ns driver fall
+pad decision delay on a ramp through the threshold (fitted model): 0.1 mV/ns: 43.78 ns, 1 mV/ns: 21.71 ns, 10 mV/ns: 7.45 ns, 100 mV/ns: 2.00 ns
+acquisition: 869 instants x 256 ladder levels x 8 = 1779712 one-bit samples; 16.3 mV at the target per ladder step
+walk correction moved instants by 13.0 ns (median), up to 43.8 ns; rms error without it 675.5 mV
+reconstruction: 869/869 instants; rms error on the RC rise 9.7 mV; on the flat high part 7.0 mV; on the low part 9.9 mV
+answers: V_OL 144 mV (true 150, limit 400); RC fit tau 937.4 ns +- 2.0 (true 940.0) -> bus capacitance 199.4 pF for the known 4.7 kohm; 30-70 % rise 783 ns (true 796 ns; fast-mode limit 300 ns: FAIL, standard-mode 1000 ns: pass)
+fall (70-30 %) 29.5 ns after walk correction, 23.3 ns before (true 9.4 ns) from 130 ps steps around it
+chip time: the bus repeats every 3.5 us; every repetition gives one sample to each of 4 lanes, so 446464 repetitions = 1.6 s. With the sampler's timed mode (one sample per clock for the whole repetition, pin-sampler) it is 256 x 8 repetitions + the fine window: 7.2 ms + 1.24 s

@@ -7,7 +7,7 @@ open Signal
 let n_threads = Isa.n_threads
 let pc_bits = Isa.pc_bits
 
-let create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
+let create ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_in ~host_in_valid =
   let spec = Reg_spec.create ~clock ~clear () in
   let open Always in
   let thread = Variable.reg spec ~width:2 in
@@ -29,6 +29,13 @@ let create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
   let od = bit instr 7 in
   let mask8 = select instr 11 4 and setv = bit instr 3 and seto = bit instr 2 in
   let pin_bit = mux pin_idx (List.init 8 (fun i -> bit pin_in i)) in
+  (* quarter-clock extensions: sub-slot q of a pin write, and SHI's quad mode (see isa.ml) *)
+  let q = select instr 1 0 and quad = bit instr 7 in
+  let nib = mux pin_idx (List.init 8 (fun i -> select pin_in4 (4 * i + 3) (4 * i))) in
+  let rev4 n = concat_lsb [ bit n 3; bit n 2; bit n 1; bit n 0 ] in
+  let sub_q = Variable.wire ~default:(zero 2) in
+  let prev_pins = Variable.reg spec ~width:8 and q_reg = Variable.reg spec ~width:2 in
+  let pin_out_n = Variable.wire ~default:pin_out.value in   (* this clock's new pin levels *)
   let pc_next = Variable.wire ~default:(pc +:. 1) in
   let acc_next = Variable.wire ~default:acc in
   let cnt_next = Variable.wire ~default:cnt in
@@ -42,42 +49,54 @@ let create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid =
     [ thread <-- thread.value +:. 1
     ; host_out_valid <-- gnd
     ; switch op
-        [ opc SETP, [ pin_out <-- ((pin_out.value &: ~:mask8) |: (mask8 &: repeat setv 8))
+        [ opc SETP, [ sub_q <-- q; pin_out_n <-- ((pin_out.value &: ~:mask8) |: (mask8 &: repeat setv 8))
                     ; pin_oe <-- ((pin_oe.value &: ~:mask8) |: (mask8 &: repeat seto 8)) ]
         ; opc LDC, [ cnt_next <-- imm12 ]
         ; opc LDD, [ dl_next <-- imm12 ]
         ; opc LDA, [ acc_next <-- imm8 ]
         ; opc WAITP, [ if_ (pin_bit ==: pin_val) [] [ if_ (dl ==:. 0) [ pc_next <-- addr6 ] stay ] ]
         ; opc WAITD, [ if_ (dl ==:. 0) [] stay ]
-        ; opc SHO, [ if_ od [ pin_out <-- with_pin_bit gnd; pin_oe <-- with_oe_bit (~:sho_bit) ]
-                       [ pin_out <-- with_pin_bit sho_bit ]
+        ; opc SHO, [ if_ od [ pin_out_n <-- with_pin_bit gnd; pin_oe <-- with_oe_bit (~:sho_bit) ]
+                       [ pin_out_n <-- with_pin_bit sho_bit; sub_q <-- q ]
                    ; acc_next <-- mux2 pin_val (sll acc 1) (srl acc 1)
                    ; cnt_next <-- cnt -:. 1 ]
-        ; opc SHI, [ acc_next <-- mux2 pin_val (concat_msb [ select acc 6 0; pin_bit ])
-                                              (concat_msb [ pin_bit; select acc 7 1 ])
+        ; opc SHI, [ acc_next <-- mux2 quad
+                                     (mux2 pin_val (concat_msb [ select acc 3 0; rev4 nib ])
+                                                   (concat_msb [ nib; select acc 7 4 ]))
+                                     (mux2 pin_val (concat_msb [ select acc 6 0; pin_bit ])
+                                                   (concat_msb [ pin_bit; select acc 7 1 ]))
                    ; cnt_next <-- cnt -:. 1 ]
         ; opc JMP, [ pc_next <-- addr6 ]
         ; opc JNZ, [ if_ (cnt <>:. 0) [ pc_next <-- addr6 ] [] ]
         ; opc OUT, [ host_out <-- acc; host_out_valid <-- vdd ]
         ; opc IN, [ if_ host_in_valid [ acc_next <-- host_in; host_in_ready <-- vdd ] stay ]
         ; opc HALT, stay ]
+    ; (* for pin_sub: the levels before this clock's write and its sub-slot, 10 flip-flops rather
+         than a 32-bit register *)
+      prev_pins <-- pin_out.value
+    ; q_reg <-- sub_q.value
+    ; pin_out <-- pin_out_n.value
     ; proc (List.init n_threads (fun t ->
         when_ (thread.value ==:. t)
           [ pcs.(t) <-- pc_next.value; accs.(t) <-- acc_next.value
           ; cnts.(t) <-- cnt_next.value; dls.(t) <-- dl_next.value ]))
     ];
+  (* pin_sub: per pin, the old level for quarters before q, the new level from q on *)
+  let pin_sub = concat_lsb (List.concat (List.init 8 (fun i ->
+      List.init 4 (fun p -> mux2 (of_int ~width:2 p <: q_reg.value) (bit prev_pins.value i) (bit pin_out.value i))))) in
   let tnext = thread.value +:. 1 in
   let imem_addr = concat_msb [ tnext; mux tnext (values pcs) ] in
   let pcs_out = concat_msb (List.rev (values pcs)) in
-  imem_addr, pin_out.value, pin_oe.value, host_out.value, host_out_valid.value, host_in_ready.value, pcs_out
+  imem_addr, pin_out.value, pin_oe.value, host_out.value, host_out_valid.value, host_in_ready.value, pcs_out,
+  pin_sub
 
 let circuit () =
   let clock = input "clock" 1 and clear = input "clear" 1 in
-  let imem_data = input "imem_data" 16 and pin_in = input "pin_in" 8 in
+  let imem_data = input "imem_data" 16 and pin_in = input "pin_in" 8 and pin_in4 = input "pin_in4" 32 in
   let host_in = input "host_in" 8 and host_in_valid = input "host_in_valid" 1 in
-  let imem_addr, pin_out, pin_oe, host_out, host_out_valid, host_in_ready, pcs =
-    create ~clock ~clear ~imem_data ~pin_in ~host_in ~host_in_valid in
+  let imem_addr, pin_out, pin_oe, host_out, host_out_valid, host_in_ready, pcs, pin_sub =
+    create ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_in ~host_in_valid in
   Circuit.create_exn ~name:"deadline_sequencer"
     [ output "imem_addr" imem_addr; output "pin_out" pin_out; output "pin_oe" pin_oe
     ; output "host_out" host_out; output "host_out_valid" host_out_valid
-    ; output "host_in_ready" host_in_ready; output "pcs" pcs ]
+    ; output "host_in_ready" host_in_ready; output "pcs" pcs; output "pin_sub" pin_sub ]

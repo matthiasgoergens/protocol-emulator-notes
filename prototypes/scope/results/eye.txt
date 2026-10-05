@@ -1,0 +1,11 @@
+# demo_eye.py (seed 11)
+line: MLT-3, 124.9938 Mbaud (50 ppm off the chip), one leg 1.2 V +- 0.5 V, 10-90 % rise 3.5 ns, random jitter 30 ps rms per edge; 200000 symbols
+chip: 128 bins per clock, INL after code density 9.1 ps, Vernier 15 ps
+trigger: 25112 rises to +1, 12649 match the pattern -1, 0, +1 (7.91 M/s); slope at the threshold 0.15 V/ns, so 2.3 mV of threshold noise is 15.5 ps
+symbol period from 12649 trigger timestamps: 8000.4000 ps (true 8000.4000 ps, error +0.00 ppm)
+kicks: 4 tiles, 8 per trigger from clock 4 on, random lane; 32257 valid of 101192 (3 s of simulation)
+per-sample voltage error against the line at the sampled instant: rms 14.9 mV, mean +0.4 mV
+truth (the line itself, 60000 samples): upper eye height 497 mV at phase 4.10 ns; width at the mid level 7.20 ns (of one symbol, 8.00 ns)
+measured (32257 kicked samples): upper eye height 425 mV at phase 3.90 ns; width at the mid level 7.20 ns (of one symbol, 8.00 ns)
+chip time: 12649 triggers at 7.91 M/s pattern rate, busy 333 ns each -> 5.82 ms for 101192 kicks (17.4 M kicks/s)
+to the host: raw 4 bytes per kick (trigger fraction, lane, reading) = 0.40 MB, i.e. 70 MB/s against the host link's 7.5 MB/s (architecture v0 2.7); a PE histogram (64 phases x 64 levels, 16-bit counts, 8 kB in a gain-cell bank) needs only the final 8 kB

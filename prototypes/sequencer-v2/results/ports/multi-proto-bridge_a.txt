@@ -1,0 +1,24 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/sequencer-v2/_build/default/ports/multi-proto/bridge_a.exe all
+# commit: 16a9041343aafeaa1e644646adbc879235bdd53b (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T09:04:57+08:00
+programme T0 UART receive (RTS)   29 words of 128
+programme T1 I2C master          116 words of 128
+programme T2 UART transmit        14 words of 128
+A: UART<->I2C, SPI neighbour, RTL+interp           PASS: 150 bytes in, answers 71/71 in agreement before the first difference (none); device ok, bus ok; RTL mismatches 0; T0/T1 reports 0; 145642 cycles; RTS high 23301 cycles; host waited on CTS 18041 cycles; max inbox fill 1; slave stretched 13463 cycles; receive slack 3 slots
+constrained random: 12 of 12 runs pass (12 seeds x bridge A; RTL in lockstep for seeds 2..4)
+isolation A: bridge pins identical without the neighbour true, under 6 random neighbours 6/6; neighbour pins identical with the bridge idle true and under other traffic true
+control A: mailbox drops push 40 (interp)          FAIL: 150 bytes in, answers 15/71 in agreement before the first difference (answer 15: got 64 expected 0); device ok, bus ok; RTL mismatches 0; T0/T1 reports 0; 525642 cycles; RTS high 23301 cycles; host waited on CTS 18041 cycles; max inbox fill 1; slave stretched 13463 cycles; receive slack 3 slots
+  (ordering controls, newest first and swapped pairs, need an inbox of depth >= 2: not expressible on v2)
+budget edge A: +3 slots in the receiver (slack 0), exact baud PASS: 199 bytes in, answers 97/97 in agreement before the first difference (none); device ok, bus ok; RTL mismatches 0; T0/T1 reports 0; 182966 cycles; RTS high 34781 cycles; host waited on CTS 34579 cycles; max inbox fill 1; slave stretched 17258 cycles; receive slack 0 slots
+budget edge A: +4 slots (slack -1), exact baud     FAIL: 199 bytes in, answers 49/97 in agreement before the first difference (answer 49: got 252 expected 0); device WRONG, bus WRONG; RTL mismatches 0; T0/T1 reports 1; 6000001 cycles; RTS high 5956661 cycles; host waited on CTS 5931855 cycles; max inbox fill 1; slave stretched 8680 cycles; receive slack -1 slots
+control A: receiver over budget by 6 slots (vacuous at depth 1) PASS: 150 bytes in, answers 71/71 in agreement before the first difference (none); device ok, bus ok; RTL mismatches 0; T0/T1 reports 0; 123216 cycles; RTS high 41541 cycles; host waited on CTS 4957 cycles; max inbox fill 1; slave stretched 13463 cycles; receive slack -3 slots
+control A: host ignores CTS, slow slave            FAIL: 199 bytes in, answers 2/97 in agreement before the first difference (answer 2: got 255 expected 0); device WRONG, bus WRONG; RTL mismatches 0; T0/T1 reports 33; 529946 cycles; RTS high 73089 cycles; host waited on CTS 0 cycles; max inbox fill 1; slave stretched 36416 cycles; receive slack 3 slots
+  (overflow reported by T0 on the host channel: 33 bytes)
+backpressure A: no host gaps, slave stretches <=1500 cycles PASS: 199 bytes in, answers 97/97 in agreement before the first difference (none); device ok, bus ok; RTL mismatches 0; T0/T1 reports 0; 195138 cycles; RTS high 47441 cycles; host waited on CTS 45365 cycles; max inbox fill 1; slave stretched 48720 cycles; receive slack 3 slots
+WAITC 11 executed with the last SEND elsewhere than the inbox the original waited on: 0 of 57398 executions
+answer deadline A: UART transmitter stopped (interp) FAIL: 150 bytes in, answers 0/71 in agreement before the first difference (71 answers missing); device ok, bus ok; RTL mismatches 0; T0/T1 reports 70; 1366687 cycles; RTS high 1165937 cycles; host waited on CTS 1143789 cycles; max inbox fill 1; slave stretched 13463 cycles; receive slack 3 slots
+  T1 reported 70 lost answers of 71 (inbox 2 keeps 1); I2C bus and register file as the reference: true -> as expected
+BRIDGES PASS
+elapsed 10 s
+exit 0

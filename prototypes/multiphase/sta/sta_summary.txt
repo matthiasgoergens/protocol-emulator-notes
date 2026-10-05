@@ -1,0 +1,125 @@
+====================================================================================================
+STA summary: worst setup/hold slack and critical-path endpoints per corner/period
+====================================================================================================
+corner period_ns  setup_slack  hold_slack  critical_setup_path (start -> end)                 critical_hold_path (start -> end)
+fast       15.00       2.4349      0.1007  clear -> _315_                 _327_ -> samples[0]
+fast       16.67       2.8524      0.1007  clear -> _315_                 _327_ -> samples[0]
+fast       18.80       3.3849      0.1007  clear -> _315_                 _327_ -> samples[0]
+typ        15.00       2.2951      0.1478  clear -> _315_                 _327_ -> samples[0]
+typ        16.67       2.7126      0.1478  clear -> _315_                 _327_ -> samples[0]
+typ        18.80       3.2451      0.1478  clear -> _315_                 _327_ -> samples[0]
+slow       15.00       2.0516      0.2342  clear -> _315_                 _327_ -> samples[0]
+slow       16.67       2.4691      0.2342  clear -> _315_                 _327_ -> samples[0]
+slow       18.80       3.0016      0.2342  clear -> _315_                 _327_ -> samples[0]
+
+====================================================================================================
+Per-lane clock(phase)-to-pin delay (clock-to-Q + XOR tree), ns; spread = max(all 32 numbers) - min(all 32 numbers) per corner/period
+====================================================================================================
+
+-- corner=fast period=15.0ns --
+lane_net phase port     maxrise  maxfall  minrise  minfall
+_144     ph0   pin[0]    0.2631   0.2532   0.2168   0.2121
+_134     ph1   pin[0]    0.2694   0.2620   0.2248   0.2201
+_124     ph2   pin[0]    0.2511   0.2534   0.2161   0.2098
+_114     ph3   pin[0]    0.2555   0.2558   0.2233   0.2170
+_18      ph0   pin[1]    0.2631   0.2532   0.2168   0.2121
+_14      ph1   pin[1]    0.2694   0.2620   0.2248   0.2201
+_12      ph2   pin[1]    0.2511   0.2534   0.2161   0.2098
+_10      ph3   pin[1]    0.2555   0.2558   0.2233   0.2170
+  lane spread (max-path, rise&fall) pin[0]: 0.0183 ns   pin[1]: 0.0183 ns  both pins combined: 0.0183 ns
+
+-- corner=fast period=16.67ns --
+lane_net phase port     maxrise  maxfall  minrise  minfall
+_144     ph0   pin[0]    0.2631   0.2532   0.2168   0.2121
+_134     ph1   pin[0]    0.2694   0.2620   0.2248   0.2201
+_124     ph2   pin[0]    0.2511   0.2534   0.2161   0.2098
+_114     ph3   pin[0]    0.2555   0.2558   0.2233   0.2170
+_18      ph0   pin[1]    0.2631   0.2532   0.2168   0.2121
+_14      ph1   pin[1]    0.2694   0.2620   0.2248   0.2201
+_12      ph2   pin[1]    0.2511   0.2534   0.2161   0.2098
+_10      ph3   pin[1]    0.2555   0.2558   0.2233   0.2170
+  lane spread (max-path, rise&fall) pin[0]: 0.0183 ns   pin[1]: 0.0183 ns  both pins combined: 0.0183 ns
+
+-- corner=fast period=18.8ns --
+lane_net phase port     maxrise  maxfall  minrise  minfall
+_144     ph0   pin[0]    0.2631   0.2532   0.2168   0.2121
+_134     ph1   pin[0]    0.2694   0.2620   0.2248   0.2201
+_124     ph2   pin[0]    0.2511   0.2534   0.2161   0.2098
+_114     ph3   pin[0]    0.2555   0.2558   0.2233   0.2170
+_18      ph0   pin[1]    0.2631   0.2532   0.2168   0.2121
+_14      ph1   pin[1]    0.2694   0.2620   0.2248   0.2201
+_12      ph2   pin[1]    0.2511   0.2534   0.2161   0.2098
+_10      ph3   pin[1]    0.2555   0.2558   0.2233   0.2170
+  lane spread (max-path, rise&fall) pin[0]: 0.0183 ns   pin[1]: 0.0183 ns  both pins combined: 0.0183 ns
+
+-- corner=typ period=15.0ns --
+lane_net phase port     maxrise  maxfall  minrise  minfall
+_144     ph0   pin[0]    0.3989   0.3786   0.3192   0.3071
+_134     ph1   pin[0]    0.4079   0.3894   0.3308   0.3186
+_124     ph2   pin[0]    0.3794   0.3726   0.3200   0.3072
+_114     ph3   pin[0]    0.3862   0.3759   0.3294   0.3165
+_18      ph0   pin[1]    0.3989   0.3786   0.3192   0.3071
+_14      ph1   pin[1]    0.4079   0.3894   0.3308   0.3186
+_12      ph2   pin[1]    0.3794   0.3726   0.3200   0.3072
+_10      ph3   pin[1]    0.3862   0.3759   0.3294   0.3165
+  lane spread (max-path, rise&fall) pin[0]: 0.0353 ns   pin[1]: 0.0353 ns  both pins combined: 0.0353 ns
+
+-- corner=typ period=16.67ns --
+lane_net phase port     maxrise  maxfall  minrise  minfall
+_144     ph0   pin[0]    0.3989   0.3786   0.3192   0.3071
+_134     ph1   pin[0]    0.4079   0.3894   0.3308   0.3186
+_124     ph2   pin[0]    0.3794   0.3726   0.3200   0.3072
+_114     ph3   pin[0]    0.3862   0.3759   0.3294   0.3165
+_18      ph0   pin[1]    0.3989   0.3786   0.3192   0.3071
+_14      ph1   pin[1]    0.4079   0.3894   0.3308   0.3186
+_12      ph2   pin[1]    0.3794   0.3726   0.3200   0.3072
+_10      ph3   pin[1]    0.3862   0.3759   0.3294   0.3165
+  lane spread (max-path, rise&fall) pin[0]: 0.0353 ns   pin[1]: 0.0353 ns  both pins combined: 0.0353 ns
+
+-- corner=typ period=18.8ns --
+lane_net phase port     maxrise  maxfall  minrise  minfall
+_144     ph0   pin[0]    0.3989   0.3786   0.3192   0.3071
+_134     ph1   pin[0]    0.4079   0.3894   0.3308   0.3186
+_124     ph2   pin[0]    0.3794   0.3726   0.3200   0.3072
+_114     ph3   pin[0]    0.3862   0.3759   0.3294   0.3165
+_18      ph0   pin[1]    0.3989   0.3786   0.3192   0.3071
+_14      ph1   pin[1]    0.4079   0.3894   0.3308   0.3186
+_12      ph2   pin[1]    0.3794   0.3726   0.3200   0.3072
+_10      ph3   pin[1]    0.3862   0.3759   0.3294   0.3165
+  lane spread (max-path, rise&fall) pin[0]: 0.0353 ns   pin[1]: 0.0353 ns  both pins combined: 0.0353 ns
+
+-- corner=slow period=15.0ns --
+lane_net phase port     maxrise  maxfall  minrise  minfall
+_144     ph0   pin[0]    0.6280   0.5986   0.5067   0.4913
+_134     ph1   pin[0]    0.6417   0.6176   0.5245   0.5091
+_124     ph2   pin[0]    0.5991   0.5936   0.5103   0.4948
+_114     ph3   pin[0]    0.6099   0.5972   0.5243   0.5088
+_18      ph0   pin[1]    0.6280   0.5986   0.5067   0.4913
+_14      ph1   pin[1]    0.6417   0.6176   0.5245   0.5091
+_12      ph2   pin[1]    0.5991   0.5936   0.5103   0.4948
+_10      ph3   pin[1]    0.6099   0.5972   0.5243   0.5088
+  lane spread (max-path, rise&fall) pin[0]: 0.0481 ns   pin[1]: 0.0481 ns  both pins combined: 0.0481 ns
+
+-- corner=slow period=16.67ns --
+lane_net phase port     maxrise  maxfall  minrise  minfall
+_144     ph0   pin[0]    0.6280   0.5986   0.5067   0.4913
+_134     ph1   pin[0]    0.6417   0.6176   0.5245   0.5091
+_124     ph2   pin[0]    0.5991   0.5936   0.5103   0.4948
+_114     ph3   pin[0]    0.6099   0.5972   0.5243   0.5088
+_18      ph0   pin[1]    0.6280   0.5986   0.5067   0.4913
+_14      ph1   pin[1]    0.6417   0.6176   0.5245   0.5091
+_12      ph2   pin[1]    0.5991   0.5936   0.5103   0.4948
+_10      ph3   pin[1]    0.6099   0.5972   0.5243   0.5088
+  lane spread (max-path, rise&fall) pin[0]: 0.0481 ns   pin[1]: 0.0481 ns  both pins combined: 0.0481 ns
+
+-- corner=slow period=18.8ns --
+lane_net phase port     maxrise  maxfall  minrise  minfall
+_144     ph0   pin[0]    0.6280   0.5986   0.5067   0.4913
+_134     ph1   pin[0]    0.6417   0.6176   0.5245   0.5091
+_124     ph2   pin[0]    0.5991   0.5936   0.5103   0.4948
+_114     ph3   pin[0]    0.6099   0.5972   0.5243   0.5088
+_18      ph0   pin[1]    0.6280   0.5986   0.5067   0.4913
+_14      ph1   pin[1]    0.6417   0.6176   0.5245   0.5091
+_12      ph2   pin[1]    0.5991   0.5936   0.5103   0.4948
+_10      ph3   pin[1]    0.6099   0.5972   0.5243   0.5088
+  lane spread (max-path, rise&fall) pin[0]: 0.0481 ns   pin[1]: 0.0481 ns  both pins combined: 0.0481 ns

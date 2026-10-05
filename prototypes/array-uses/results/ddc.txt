@@ -1,0 +1,6 @@
+# normal: ./_build/default/main.exe ddc 1.2 out
+ddc: 3 of 72000000 ADC samples clipped
+ddc: 72000000 clocks (1.20 s) through 16 PEs, 300000 decimated I/Q frames at 250000 S/s; channels 5.950, 6.000, 6.055, 6.150 MHz -> out/ddc-ch*.txt
+# fault control: UPE_FAULT=negate ./_build/default/main.exe ddc 0.35 out/ddc-fault
+ddc: 0 of 21000000 ADC samples clipped
+ddc: 21000000 clocks (0.35 s) through 16 PEs, 87500 decimated I/Q frames at 250000 S/s; channels 5.950, 6.000, 6.055, 6.150 MHz -> out/ddc-fault/ddc-ch*.txt

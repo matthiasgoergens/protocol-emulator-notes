@@ -1,0 +1,16 @@
+; ../../../sequencer-ethernet's 10BASE-T transmitter firmware and checks, unchanged (symlinks), on v2
+(rule
+ (with-stdout-to
+  isa_enc.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
+
+; the firmware generator of main.ml up to its first test, for eth_fixed.ml: the transmitter with
+; the underrun check (found by ../../../verif-oracles/stall/eth_stall.ml), which main_fixed.exe tests
+(rule
+ (with-stdout-to
+  eth_fw.ml
+  (run sed "/^let () =/,$d" %{dep:main.ml})))
+
+(executables
+ (names main main_fixed)
+ (libraries hardcaml seqv2))

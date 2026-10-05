@@ -1,0 +1,147 @@
+Multiphase-stage cell-delay / STA measurement — exact commands
+================================================================
+
+Everything lives in /var/tmp/multiphase/sta. Inputs (read-only):
+  - Verilog:  /home/matthias/prog/janestreet/emulator-wt-multiphase/prototypes/multiphase/multiphase_stage.v
+  - Liberty:  /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_{fast_1p32V_m40C,typ_1p20V_25C,slow_1p08V_125C}.lib
+  - Docker:   ghcr.io/librelane/librelane:3.0.14 (yosys 0.62, OpenSTA 2.7.0, openroad found at
+              /nix/store/.../bin/{yosys,sta,openroad} inside the image)
+
+Docker invocation template used throughout:
+
+DOCKER_CONFIG=/var/tmp/claude-notes/dockercfg nice ionice docker run --rm --user "$(id -u):$(id -g)" \
+  --volume /home/matthias/.ciel:/home/matthias/.ciel:ro \
+  --volume /var/tmp/multiphase:/var/tmp/multiphase \
+  --volume /home/matthias/prog/janestreet/emulator-wt-multiphase:/home/matthias/prog/janestreet/emulator-wt-multiphase:ro \
+  --workdir /var/tmp/multiphase/sta \
+  ghcr.io/librelane/librelane:3.0.14 <command>
+
+1. Liberty delay tables (task 1)
+---------------------------------
+Script: liberty_delays.py (self-contained: tiny brace-matching + recursive-descent
+liberty parser, bilinear NLDM interpolation, self-consistent FO1 transition
+iteration; no external liberty-parsing package, no network access).
+
+  cd /var/tmp/multiphase/sta
+  nice ionice uv run --no-project python3 liberty_delays.py
+
+Output: liberty_delays.txt (human-readable), liberty_delays.json (machine-readable,
+consumed by dtc_area.py), run_liberty_delays.log (stdout capture, duplicate of
+liberty_delays.txt content plus interleaved prints).
+
+2. Synthesis (task 2)
+----------------------
+Script: synth.ys (yosys script). Note: "rename -enumerate" was deliberately
+NOT used, so the original register/net names in the Verilog (e.g. _144, _134,
+_124, _114 — the four pin[0] lane toggle flops) survive into the netlist and
+can be referenced directly from the STA scripts.
+
+  DOCKER_CONFIG=/var/tmp/claude-notes/dockercfg nice ionice docker run --rm --user "$(id -u):$(id -g)" \
+    --volume /home/matthias/.ciel:/home/matthias/.ciel:ro \
+    --volume /var/tmp/multiphase:/var/tmp/multiphase \
+    --volume /home/matthias/prog/janestreet/emulator-wt-multiphase:/home/matthias/prog/janestreet/emulator-wt-multiphase:ro \
+    --workdir /var/tmp/multiphase/sta \
+    ghcr.io/librelane/librelane:3.0.14 yosys -s /var/tmp/multiphase/sta/synth.ys
+
+Output: synth.log, multiphase_stage_synth.v (gate-level netlist), multiphase_stage_synth.json.
+
+IMPORTANT naming note discovered while building the STA scripts: yosys's
+"opt" pass merges some buffer-only aliases in the original RTL (e.g.
+"assign _10 = _154;") and can keep either side's name. For the pin[0] lane
+flops the flop's own name survived (_144, _134, _124, _114, clocked ph0/1/2/3
+respectively). For the pin[1] lane flops the ALIAS name survived instead of
+the flop's own name: the flops originally called _184/_174/_164/_154
+(clocked ph0/1/2/3) appear in the synthesised netlist as _18/_14/_12/_10.
+This was verified by grep'ing "Q(_18)" etc. and checking the driving
+instance's CLK net in multiphase_stage_synth.v. sta_run.tcl uses these
+post-synthesis names directly.
+
+3. Static timing analysis (task 3)
+------------------------------------
+SDC generator: gen_sdc.py <period_ns> <out.sdc>. Generates create_clock for
+ph0/ph1/ph2/ph3 as four RELATED clocks (same period, waveforms offset by
+P/4, P/2, 3P/4 — not asynchronous groups), 1 ns input delay on sub/oe/pads/clear
+relative to ph0, 0 ns output delay + 5 fF load on pin/pin_oe (2 fF on samples),
+50 ps input transition on the four phase clocks and 100 ps on the data inputs,
+zero clock uncertainty (ideal clocks, no CTS).
+
+  nice ionice uv run --no-project python3 gen_sdc.py 15.0  sta_15p0.sdc
+  nice ionice uv run --no-project python3 gen_sdc.py 16.67 sta_16p67.sdc
+  nice ionice uv run --no-project python3 gen_sdc.py 18.8  sta_18p8.sdc
+
+OpenSTA template: sta_run.tcl (placeholders {{LIBERTY_FILE}}, {{SDC_FILE}},
+{{CORNER_LABEL}}, {{PERIOD_LABEL}}; OpenSTA's CLI does not forward extra argv
+into the sourced script, so gen_sta_tcl.py instantiates one concrete .tcl
+file per corner x period combination):
+
+  nice ionice uv run --no-project python3 gen_sta_tcl.py
+  # -> sta_{fast,typ,slow}_{15p0,16p67,18p8}.tcl
+
+Run all nine (inside one docker invocation):
+
+  DOCKER_CONFIG=/var/tmp/claude-notes/dockercfg nice ionice docker run --rm --user "$(id -u):$(id -g)" \
+    --volume /home/matthias/.ciel:/home/matthias/.ciel:ro \
+    --volume /var/tmp/multiphase/sta:/var/tmp/multiphase/sta \
+    --workdir /var/tmp/multiphase/sta \
+    ghcr.io/librelane/librelane:3.0.14 bash -lc '
+  for corner in fast typ slow; do
+    for period in 15p0 16p67 18p8; do
+      sta -exit -no_init /var/tmp/multiphase/sta/sta_${corner}_${period}.tcl \
+        > /var/tmp/multiphase/sta/sta_${corner}_${period}.log 2>&1
+    done
+  done'
+
+Each sta_run.tcl instance does: read_liberty, read_verilog (the synthesised
+netlist), link_design, read_sdc, report_checks -path_delay max/min (top 3
+per path group), sta::worst_slack -max/-min, and then, for each of the 8
+lane flops, report_checks -from <flop>/CLK -rise_to|-fall_to <pin[i]>
+-path_delay max|min -format full_clock (OpenSTA quirk found while building
+this: -rise_to/-fall_to are alternatives to -to that take the port list
+directly, not modifier flags alongside -to — using them together produced
+"Error: positional arguments not supported").
+
+Parser: parse_sta.py reads all nine .log files and writes sta_summary.txt.
+Key correction made here: report_checks' printed "data arrival time" is an
+ABSOLUTE time referenced to the launching clock edge's own position in the
+period (e.g. a ph3-launched path's arrival time already includes ph3's
+0.75*P offset) — NOT a pure propagation delay. The parser subtracts the
+launch-clock-edge time (the first table row) from the arrival time to get
+the true clock(edge)-to-pin delay. It also corrects for the fact that
+"report_checks -group_count 3" prints the 3 worst paths PER PATH GROUP
+(one group per phase clock), not the 3 worst overall, so the true global
+critical path is found by matching a printed path's slack against
+sta::worst_slack across ALL four groups.
+
+  nice ionice uv run --no-project python3 parse_sta.py
+
+Output: sta_summary.txt, plus per-run sta_<corner>_<period>.log raw OpenSTA
+output and sta_<corner>_<period>.tcl the exact script run.
+
+4. Delay-line / TDC area arithmetic (task 4)
+-----------------------------------------------
+Script: dtc_area.py. Pure arithmetic on liberty_delays.json's FO1 chain
+delays and cell areas — no EDA tool invoked. N is sized from the FAST-corner
+per-tap delay (fewest ps/tap => most taps needed to cover a fixed interval),
+then that fixed N's resolution is reported at all three corners. Mux tree
+cell count uses ceil((N-1)/(radix-1)) for a full radix-ary tree. No wire
+parasitics, no select-line decoder logic, no layout effects are included —
+arithmetic only, as asked.
+
+  nice ionice uv run --no-project python3 dtc_area.py
+
+Output: dtc_area.txt.
+
+Approximations / stated assumptions (see also each script's own comments)
+---------------------------------------------------------------------------
+- 2 fF wire allowance added to every FO1 self-load (liberty_delays.py, WIRE_CAP_FF).
+- Representative slew/load for the FF clock-to-Q/setup/hold and the xor2_1
+  A-vs-B arcs: the self-consistent buf_1 rise transition for that corner, and
+  buf_1's own FO1 load, rather than a full timing closure across the design.
+- xor2_1 A/B arcs use the liberty timing() group with no "when" condition
+  (the general/non-unate arc), not the state-conditioned ("when: !B" etc.)
+  arcs, per corner.
+- SDC input/output delay and load values (1 ns, 5 fF, 2 fF, 50/100 ps
+  transitions) are stated assumptions, not measurements from a real
+  neighbouring stage.
+- dtc_area.py ignores decoder logic for the mux select lines and any wire
+  parasitics on the tap chain itself — arithmetic cell-count estimate only.

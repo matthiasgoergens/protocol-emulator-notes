@@ -1,0 +1,161 @@
+# recorded with the ORIGINAL prototypes/deadline-sequencer demo.exe (base ISA and RTL) at commit 5be80cf854522d8fe3907369d329079ba4a49aeb, for comparison (regenerated after the I2C clock-stretching fix)
+== uart_tx (38 words)
+   0: setp mask=01 val=1 oe=1
+   1: lda 0x4f
+   2: setp mask=01 val=0 oe=1
+   3: ldd 12
+   4: waitd
+   5: ldc 8
+   6: sho pin0 lsb
+   7: ldd 12
+   8: waitd
+   9: jnz 6
+  10: setp mask=01 val=1 oe=1
+  11: ldd 12
+  12: waitd
+  13: lda 0x4b
+  14: setp mask=01 val=0 oe=1
+  15: ldd 12
+  16: waitd
+  17: ldc 8
+  18: sho pin0 lsb
+  19: ldd 12
+  20: waitd
+  21: jnz 18
+  22: setp mask=01 val=1 oe=1
+  23: ldd 12
+  24: waitd
+  25: lda 0x21
+  26: setp mask=01 val=0 oe=1
+  27: ldd 12
+  28: waitd
+  29: ldc 8
+  30: sho pin0 lsb
+  31: ldd 12
+  32: waitd
+  33: jnz 30
+  34: setp mask=01 val=1 oe=1
+  35: ldd 12
+  36: waitd
+  37: halt
+== spi_master (27 words)
+   0: setp mask=06 val=0 oe=1
+   1: setp mask=08 val=1 oe=1
+   2: lda 0xa5
+   3: setp mask=08 val=0 oe=1
+   4: ldc 8
+   5: sho pin2 msb
+   6: ldd 3
+   7: waitd
+   8: setp mask=02 val=1 oe=1
+   9: ldd 5
+  10: waitd
+  11: setp mask=02 val=0 oe=1
+  12: jnz 5
+  13: setp mask=08 val=1 oe=1
+  14: lda 0x3c
+  15: setp mask=08 val=0 oe=1
+  16: ldc 8
+  17: sho pin2 msb
+  18: ldd 3
+  19: waitd
+  20: setp mask=02 val=1 oe=1
+  21: ldd 5
+  22: waitd
+  23: setp mask=02 val=0 oe=1
+  24: jnz 17
+  25: setp mask=08 val=1 oe=1
+  26: halt
+== i2c_write (64 words)
+   0: setp mask=10 val=0 oe=1
+   1: ldd 1
+   2: waitd
+   3: setp mask=20 val=0 oe=1
+   4: lda 0xa0
+   5: ldc 8
+   6: sho pin4 msb od
+   7: ldd 2
+   8: waitd
+   9: ldd 4095
+  10: setp mask=20 val=0 oe=0
+  11: waitp pin5==1 fail=62
+  12: ldd 4
+  13: waitd
+  14: setp mask=20 val=0 oe=1
+  15: jnz 6
+  16: setp mask=10 val=0 oe=0
+  17: ldd 2
+  18: waitd
+  19: ldd 4095
+  20: setp mask=20 val=0 oe=0
+  21: waitp pin5==1 fail=62
+  22: ldd 0
+  23: waitd
+  24: shi pin4 msb
+  25: ldd 1
+  26: waitd
+  27: setp mask=20 val=0 oe=1
+  28: out
+  29: lda 0x5a
+  30: ldc 8
+  31: sho pin4 msb od
+  32: ldd 2
+  33: waitd
+  34: ldd 4095
+  35: setp mask=20 val=0 oe=0
+  36: waitp pin5==1 fail=62
+  37: ldd 4
+  38: waitd
+  39: setp mask=20 val=0 oe=1
+  40: jnz 31
+  41: setp mask=10 val=0 oe=0
+  42: ldd 2
+  43: waitd
+  44: ldd 4095
+  45: setp mask=20 val=0 oe=0
+  46: waitp pin5==1 fail=62
+  47: ldd 0
+  48: waitd
+  49: shi pin4 msb
+  50: ldd 1
+  51: waitd
+  52: setp mask=20 val=0 oe=1
+  53: out
+  54: setp mask=10 val=0 oe=1
+  55: ldd 3
+  56: waitd
+  57: ldd 4095
+  58: setp mask=20 val=0 oe=0
+  59: waitp pin5==1 fail=62
+  60: ldd 0
+  61: waitd
+  62: setp mask=30 val=0 oe=0
+  63: halt
+RTL and interpreter agree on every cycle: true
+uart decoded: 0x4f@8 0x4b@648 0x21@1288
+spi decoded:  0xa5 0x3c
+i2c decoded:  0xa0+ack 0x5a+ack stop=true; host received ack bytes: 0x00 0x00
+  uart tx edge spacing: 20 edges, all spacings multiples of 64 cycles: true (worst deviation 0 cycles)
+  spi sclk period within bytes: 64,64,64,64,64,64,64,64,64,64,64,64 (expected 64): true
+  i2c scl high widths: 32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32 (expected 32): true
+main demo: PASS
+
+== fault injection: UART data bit 5 stretched by d slots, receiver fixed at 64 cycles/bit
+  d= 0 slots (+  0 cycles,  +0.0% of a bit): decoded 0x4f -> still decodes
+  d= 2 slots (+  8 cycles, +12.5% of a bit): decoded 0x4f -> still decodes
+  d= 4 slots (+ 16 cycles, +25.0% of a bit): decoded 0x4f -> still decodes
+  d= 7 slots (+ 28 cycles, +43.8% of a bit): decoded 0x4f -> still decodes
+  d= 8 slots (+ 32 cycles, +50.0% of a bit): decoded 0x4f -> still decodes
+  d= 9 slots (+ 36 cycles, +56.2% of a bit): decoded 0x8f framing error -> receiver breaks
+  d=10 slots (+ 40 cycles, +62.5% of a bit): decoded 0x8f framing error -> receiver breaks
+
+== timing microscope: transmitter bit period swept, receiver fixed at 128 cycles/bit
+  tx 29 slots/bit ( -9.4%): decoded ERR ERR 0xfe -> wrong
+  tx 30 slots/bit ( -6.2%): decoded ERR ERR 0xfe -> wrong
+  tx 31 slots/bit ( -3.1%): decoded 0x4f 0x4b 0x21 -> ok
+  tx 32 slots/bit ( +0.0%): decoded 0x4f 0x4b 0x21 -> ok
+  tx 33 slots/bit ( +3.1%): decoded 0x4f 0x4b 0x21 -> ok
+  tx 34 slots/bit ( +6.2%): decoded ERR ERR ERR -> wrong
+  tx 35 slots/bit ( +9.4%): decoded ERR ERR ERR -> wrong
+
+DEMO PASS

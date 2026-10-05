@@ -1,0 +1,5 @@
+# padmodel.py fit: C_a, C_m, tau_in fitted to SPICE Va(t) of 10 step responses (results/pad2-step.txt), tt 25 C
+# rms Va error 25.2 mV over 10 waveforms, 40 iterations
+param C_a 2.0905e-14
+param C_m 4.6979e-16
+param tau_in 1.4522e-11

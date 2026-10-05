@@ -1,0 +1,29 @@
+(tests
+ (names test_tmds test_blink)
+ (modules test_tmds test_blink)
+ (libraries base stdio hardcaml hdmi_hw tmds_indep))
+
+; The latency checks: stdout must match latency.expected (accept a reviewed change with
+; [dune promote]); the executable also exits 1 on its own failures, which fails the rule.
+(executable
+ (name test_latency)
+ (modules test_latency)
+ (libraries
+  base
+  stdio
+  hardcaml
+  hardcaml_latency
+  latency_ci
+  hdmi_hw
+  hdmi_demo
+  hdmi_reference))
+
+(rule
+ (with-stdout-to
+  latency.out
+  (run %{exe:test_latency.exe})))
+
+(rule
+ (alias runtest)
+ (action
+  (diff latency.expected latency.out)))

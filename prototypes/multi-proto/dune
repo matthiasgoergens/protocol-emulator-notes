@@ -1,0 +1,52 @@
+(library
+ (name mpcore)
+ (wrapped false)
+ (modules isa compiler decoders sequencer harness isa_mb sequencer_mb harness_mb eth_tx eth_rx eth_rx_fixed eth_model asm dual video video_fw can_standin bridge_lib)
+ (libraries hardcaml))
+
+(executable
+ (name lockstep)
+ (modules lockstep)
+ (libraries hardcaml unix mpcore))
+
+(executable
+ (name ethtv)
+ (modules ethtv)
+ (libraries hardcaml unix mpcore))
+
+(executable
+ (name bridges)
+ (modules bridges)
+ (libraries hardcaml unix mpcore))
+
+(executable
+ (name cantv)
+ (modules cantv)
+ (libraries hardcaml unix mpcore))
+
+(executable
+ (name can_bridge)
+ (modules can_bridge)
+ (libraries hardcaml unix mpcore))
+
+(executable
+ (name loopback)
+ (modules loopback)
+ (libraries hardcaml unix mpcore))
+
+; The latency lint (latency_lint.ml): stdout must match latency.expected; accept a reviewed
+; change with [dune promote].
+(executable
+ (name latency_lint)
+ (modules latency_lint)
+ (libraries hardcaml mpcore hardcaml_latency latency_ci))
+
+(rule
+ (with-stdout-to
+  latency.out
+  (run %{exe:latency_lint.exe})))
+
+(rule
+ (alias runtest)
+ (action
+  (diff latency.expected latency.out)))

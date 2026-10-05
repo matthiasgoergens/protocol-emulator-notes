@@ -1,0 +1,7 @@
+== subslot_train (simulation, plain build)
+  replay through interpreter   PASS  700 cycles, every output equal, pin_sub on all 2800 quarters
+  prediction (whole trace)     PASS  700 cycles identical to the OCaml board model
+  pin_sub edges pin 1          PASS  165 edges on the quarter grid, spacings all 17 quarters: true
+  quad loopback: plain build, pads on the clock grid; not applicable
+RESULT subslot_train PASS
+  (452 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 1.12 s)

@@ -1,0 +1,11 @@
+10BASE-T receive at 53.203425 MHz; 10 random frames (46-245 bytes) per ppm in {-100,+100} per cell; frames intact with good CRC
+receiver \ jitter +-ns           0     2     3     4     5     6     8     9    10    11    12    13
+eth_rx h=3 (existing)        20/20 20/20 20/20  8/20  1/20  0/20  0/20  0/20  0/20  0/20  0/20  0/20
+n=1 thr=5                    20/20 20/20 20/20  8/20  1/20  0/20  0/20  0/20  0/20  0/20  0/20  0/20
+n=1 thr=4                    20/20 20/20 20/20 13/20  2/20  0/20  0/20  0/20  0/20  0/20  0/20  0/20
+n=2 thr=8 (both edges)       20/20 20/20 20/20 20/20 20/20 20/20 19/20 12/20  4/20  1/20  0/20  0/20
+n=4 thr=16 (stage RTL)       20/20 20/20 20/20 20/20 20/20 20/20 20/20 20/20 20/20 19/20  4/20  0/20
+n=4 thr=16, phases skewed    20/20 20/20 20/20 20/20 20/20 20/20 20/20 20/20 20/20 13/20  0/20  0/20
+control: samples reversed     0/20  0/20  0/20  0/20  0/20  0/20  0/20  0/20  0/20  0/20  0/20  0/20
+differential check: eth_rxn n=1 thr=5 decoded differently from eth_rx h=3 on 0 of 240 lines (must be 0)
+stage input samplers vs direct sampling of the same line: 0 mismatching sample words (must be 0)

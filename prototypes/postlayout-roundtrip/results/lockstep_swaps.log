@@ -1,0 +1,147 @@
+deadline_sequencer.gds: extracted in 0.39 s
+deadline_sequencer.gds: structural check: 0 errors
+deadline_sequencer.gds: 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.5 s)
+swap u413@88.80,151.20.A1 (n635) with u351@27.84,158.76.A (n530): structural check: 0 errors
+  seed 3: first mismatch at cycle 16: pcs rtl=100105 gate=10010b
+swap u413@88.80,151.20.A1 (n635) with u351@27.84,158.76.A (n530): 20 programmes x 2000 cycles, 13926 mismatching cycles in 8 programmes, 197153 output-bit toggles (lockstep 3.5 s)
+swap u1298@28.32,83.16.A2 (n1461) with u404@139.68,151.20.B1 (n593): structural check: 0 errors
+  seed 1: first mismatch at cycle 17: pin_out rtl=0 gate=4; pin_sub rtl=0 gate=c00
+swap u1298@28.32,83.16.A2 (n1461) with u404@139.68,151.20.B1 (n593): 20 programmes x 2000 cycles, 29255 mismatching cycles in 18 programmes, 187408 output-bit toggles (lockstep 3.5 s)
+swap u1748@42.24,45.36.A2 (n1789) with u1406@139.68,68.04.CLK (n1601): structural check: 1 errors (first: u1406@139.68,68.04: clock pin CLK: clock passes through u1777@135.84,37.80 (sg13g2_dfrbpq_1), not a buffer)
+  seed 12: first mismatch at cycle 1113: pcs rtl=256086 gate=2560c6
+swap u1748@42.24,45.36.A2 (n1789) with u1406@139.68,68.04.CLK (n1601): 20 programmes x 2000 cycles, 560 mismatching cycles in 2 programmes, 192432 output-bit toggles (lockstep 3.5 s)
+swap u844@56.16,113.40.B2 (n994) with u194@170.40,173.88.CLK (n275): structural check: 1 errors (first: u194@170.40,173.88: clock pin CLK: clock passes through u776@55.20,120.96 (sg13g2_a22oi_1), not a buffer)
+  seed 1: first mismatch at cycle 8: pcs rtl=82083 gate=82082
+swap u844@56.16,113.40.B2 (n994) with u194@170.40,173.88.CLK (n275): 20 programmes x 2000 cycles, 35835 mismatching cycles in 18 programmes, 171622 output-bit toggles (lockstep 3.5 s)
+swap u347@45.12,158.76.A1 (n254) with u1805@20.64,37.80.CLK (n1796): structural check: 1 errors (first: u1805@20.64,37.80: clock pin CLK: clock passes through u854@19.20,120.96 (sg13g2_or2_1), not a buffer)
+swap u347@45.12,158.76.A1 (n254) with u1805@20.64,37.80.CLK (n1796): 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.5 s)
+swap u1162@105.60,90.72.A1 (n1384) with u230@8.16,173.88.D (n456): structural check: 0 errors
+  seed 3: first mismatch at cycle 16: pcs rtl=100105 gate=10010b
+swap u1162@105.60,90.72.A1 (n1384) with u230@8.16,173.88.D (n456): 20 programmes x 2000 cycles, 17860 mismatching cycles in 9 programmes, 190494 output-bit toggles (lockstep 3.5 s)
+swap u748@131.04,120.96.A (n183) with u1872@93.60,30.24.A (n1731): structural check: 0 errors
+  seed 1: first mismatch at cycle 0: pcs rtl=1 gate=0
+swap u748@131.04,120.96.A (n183) with u1872@93.60,30.24.A (n1731): 20 programmes x 2000 cycles, 39992 mismatching cycles in 20 programmes, 100007 output-bit toggles (lockstep 3.4 s)
+swap u570@104.64,143.64.A (n808) with u425@35.04,151.20.D (n646): structural check: 0 errors
+swap u570@104.64,143.64.A (n808) with u425@35.04,151.20.D (n646): cannot build the gate-level model: combinational loop: 465 of 3756 gates unordered
+swap u72@57.12,189.00.RESET_B (n237) with u1285@95.04,83.16.B1 (n1104): structural check: 0 errors
+  seed 1: first mismatch at cycle 0: pcs rtl=1 gate=5
+swap u72@57.12,189.00.RESET_B (n237) with u1285@95.04,83.16.B1 (n1104): 20 programmes x 2000 cycles, 39995 mismatching cycles in 20 programmes, 186344 output-bit toggles (lockstep 3.5 s)
+swap u608@17.76,136.08.A1 (n755) with u1929@24.00,22.68.A1 (n2026): structural check: 0 errors
+  seed 7: first mismatch at cycle 14: pcs rtl=5101 gate=3101
+swap u608@17.76,136.08.A1 (n755) with u1929@24.00,22.68.A1 (n2026): 20 programmes x 2000 cycles, 8716 mismatching cycles in 5 programmes, 187072 output-bit toggles (lockstep 3.5 s)
+swap u1653@75.84,45.36.A2 (n1850) with u1577@83.52,52.92.A2 (n1720): structural check: 0 errors
+swap u1653@75.84,45.36.A2 (n1850) with u1577@83.52,52.92.A2 (n1720): 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.5 s)
+swap u1215@176.16,83.16.C (n1341) with u1464@18.72,68.04.S1 (n1313): structural check: 0 errors
+  seed 1: first mismatch at cycle 8: pcs rtl=82083 gate=82082
+swap u1215@176.16,83.16.C (n1341) with u1464@18.72,68.04.S1 (n1313): 20 programmes x 2000 cycles, 9969 mismatching cycles in 9 programmes, 191791 output-bit toggles (lockstep 3.5 s)
+swap u1831@84.96,30.24.RESET_B (n1979) with u1823@119.52,30.24.A (n1689): structural check: 0 errors
+  seed 1: first mismatch at cycle 0: pcs rtl=1 gate=11
+swap u1831@84.96,30.24.RESET_B (n1979) with u1823@119.52,30.24.A (n1689): 20 programmes x 2000 cycles, 35425 mismatching cycles in 20 programmes, 190480 output-bit toggles (lockstep 3.5 s)
+swap u575@89.28,143.64.A1 (n638) with u1092@77.76,98.28.A (n1258): structural check: 0 errors
+  seed 2: first mismatch at cycle 41: pcs rtl=1eef49 gate=1eef09
+swap u575@89.28,143.64.A1 (n638) with u1092@77.76,98.28.A (n1258): 20 programmes x 2000 cycles, 5857 mismatching cycles in 3 programmes, 188916 output-bit toggles (lockstep 3.6 s)
+swap u1173@80.64,90.72.A2 (n1156) with u1863@116.64,30.24.B2 (n2009): structural check: 0 errors
+  seed 1: first mismatch at cycle 0: pcs rtl=1 gate=21
+swap u1173@80.64,90.72.A2 (n1156) with u1863@116.64,30.24.B2 (n2009): 20 programmes x 2000 cycles, 39997 mismatching cycles in 20 programmes, 209049 output-bit toggles (lockstep 3.5 s)
+swap u701@140.16,128.52.A2 (n786) with u1099@41.28,98.28.A2 (n1114): structural check: 0 errors
+  seed 2: first mismatch at cycle 23: host_out rtl=45 gate=4d
+swap u701@140.16,128.52.A2 (n786) with u1099@41.28,98.28.A2 (n1114): 20 programmes x 2000 cycles, 6153 mismatching cycles in 7 programmes, 193846 output-bit toggles (lockstep 3.5 s)
+swap u1613@120.00,52.92.A (n1765) with u324@125.76,158.76.A1 (n296): structural check: 0 errors
+  seed 2: first mismatch at cycle 43: pcs rtl=22ef49 gate=2ef49
+swap u1613@120.00,52.92.A (n1765) with u324@125.76,158.76.A1 (n296): 20 programmes x 2000 cycles, 23687 mismatching cycles in 13 programmes, 188864 output-bit toggles (lockstep 3.5 s)
+swap u1844@28.32,30.24.A1 (n1957) with u608@17.76,136.08.A1 (n755): structural check: 0 errors
+swap u1844@28.32,30.24.A1 (n1957) with u608@17.76,136.08.A1 (n755): 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.5 s)
+swap u1512@150.24,60.48.RESET_B (n1714) with u744@154.08,120.96.A (n973): structural check: 0 errors
+  seed 1: first mismatch at cycle 0: host_out rtl=0 gate=1
+swap u1512@150.24,60.48.RESET_B (n1714) with u744@154.08,120.96.A (n973): 20 programmes x 2000 cycles, 30289 mismatching cycles in 20 programmes, 192198 output-bit toggles (lockstep 3.5 s)
+swap u1727@72.00,45.36.A1 (n1636) with u482@41.76,151.20.A2 (n320): structural check: 0 errors
+  seed 1: first mismatch at cycle 4: pcs rtl=41042 gate=1042
+swap u1727@72.00,45.36.A1 (n1636) with u482@41.76,151.20.A2 (n320): 20 programmes x 2000 cycles, 29929 mismatching cycles in 19 programmes, 198288 output-bit toggles (lockstep 3.5 s)
+swap u2003@34.56,22.68.D (n2056) with u883@150.72,113.40.B1 (n1093): structural check: 0 errors
+  seed 6: first mismatch at cycle 58: pin_out rtl=10 gate=0; pin_sub rtl=80000 gate=0
+swap u2003@34.56,22.68.D (n2056) with u883@150.72,113.40.B1 (n1093): 20 programmes x 2000 cycles, 12604 mismatching cycles in 9 programmes, 191343 output-bit toggles (lockstep 3.5 s)
+swap u760@102.24,120.96.B (n209) with u1988@66.72,15.12.A1 (n1817): structural check: 0 errors
+  seed 1: first mismatch at cycle 4: imem_addr rtl=81 gate=80; pcs rtl=41042 gate=40042
+swap u760@102.24,120.96.B (n209) with u1988@66.72,15.12.A1 (n1817): 20 programmes x 2000 cycles, 39465 mismatching cycles in 20 programmes, 218179 output-bit toggles (lockstep 3.5 s)
+swap u756@102.24,120.96.B (n209) with u1274@137.76,83.16.B1 (n1444): structural check: 0 errors
+  seed 2: first mismatch at cycle 41: pcs rtl=1eef49 gate=1eef09
+swap u756@102.24,120.96.B (n209) with u1274@137.76,83.16.B1 (n1444): 20 programmes x 2000 cycles, 25797 mismatching cycles in 13 programmes, 187303 output-bit toggles (lockstep 3.5 s)
+swap u1838@57.60,30.24.A1 (n1980) with u89@116.64,181.44.A (n300): structural check: 0 errors
+  seed 1: first mismatch at cycle 0: imem_addr rtl=80 gate=0
+swap u1838@57.60,30.24.A1 (n1980) with u89@116.64,181.44.A (n300): 20 programmes x 2000 cycles, 39927 mismatching cycles in 20 programmes, 172582 output-bit toggles (lockstep 3.4 s)
+swap u604@21.60,143.64.B2 (n655) with u1020@181.44,98.28.A2 (n1189): structural check: 0 errors
+  seed 3: first mismatch at cycle 16: pcs rtl=100105 gate=10010b
+swap u604@21.60,143.64.B2 (n655) with u1020@181.44,98.28.A2 (n1189): 20 programmes x 2000 cycles, 20874 mismatching cycles in 12 programmes, 191480 output-bit toggles (lockstep 3.5 s)
+swap u8@160.32,189.00.B1 (n176) with u241@169.44,166.32.A2 (n327): structural check: 0 errors
+  seed 2: first mismatch at cycle 23: host_out rtl=45 gate=c5
+swap u8@160.32,189.00.B1 (n176) with u241@169.44,166.32.A2 (n327): 20 programmes x 2000 cycles, 8411 mismatching cycles in 9 programmes, 192240 output-bit toggles (lockstep 3.6 s)
+swap u1526@96.96,60.48.A (n1728) with u71@70.08,189.00.D (n240): structural check: 0 errors
+  seed 1: first mismatch at cycle 24: pcs rtl=831ae gate=831ad
+swap u1526@96.96,60.48.A (n1728) with u71@70.08,189.00.D (n240): 20 programmes x 2000 cycles, 8328 mismatching cycles in 6 programmes, 192462 output-bit toggles (lockstep 3.5 s)
+swap u344@40.32,158.76.B1 (n258) with u1228@134.88,83.16.A (n75): structural check: 0 errors
+swap u344@40.32,158.76.B1 (n258) with u1228@134.88,83.16.A (n75): 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.5 s)
+swap u704@133.44,128.52.B (n896) with u1746@38.88,45.36.A2 (n1704): structural check: 0 errors
+  seed 2: first mismatch at cycle 15: host_out rtl=8b gate=9b
+swap u704@133.44,128.52.B (n896) with u1746@38.88,45.36.A2 (n1704): 20 programmes x 2000 cycles, 9193 mismatching cycles in 8 programmes, 192478 output-bit toggles (lockstep 3.5 s)
+swap u335@89.28,158.76.A2 (n567) with u960@183.84,105.84.A1 (n1181): structural check: 0 errors
+  seed 5: first mismatch at cycle 20: pcs rtl=162146 gate=162161
+swap u335@89.28,158.76.A2 (n567) with u960@183.84,105.84.A1 (n1181): 20 programmes x 2000 cycles, 3976 mismatching cycles in 2 programmes, 193292 output-bit toggles (lockstep 3.5 s)
+swap u1051@37.44,98.28.CLK (n1164) with u512@49.92,143.64.CLK (n740): structural check: 0 errors
+swap u1051@37.44,98.28.CLK (n1164) with u512@49.92,143.64.CLK (n740): 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.5 s)
+swap u1253@23.04,83.16.A1 (n1327) with u466@84.00,151.20.C (n639): structural check: 0 errors
+  seed 3: first mismatch at cycle 27: pcs rtl=1c0f19 gate=180f19
+swap u1253@23.04,83.16.A1 (n1327) with u466@84.00,151.20.C (n639): 20 programmes x 2000 cycles, 17764 mismatching cycles in 10 programmes, 185375 output-bit toggles (lockstep 3.5 s)
+swap u1480@88.32,60.48.RESET_B (n1629) with u835@67.20,120.96.B1 (n706): structural check: 0 errors
+swap u1480@88.32,60.48.RESET_B (n1629) with u835@67.20,120.96.B1 (n706): 20 programmes x 2000 cycles, 0 mismatching cycles in 0 programmes, 192386 output-bit toggles (lockstep 3.5 s)
+swap u487@25.92,151.20.A (n621) with u1475@140.16,60.48.A2 (n1609): structural check: 0 errors
+  seed 1: first mismatch at cycle 0: pin_oe rtl=0 gate=4
+swap u487@25.92,151.20.A (n621) with u1475@140.16,60.48.A2 (n1609): 20 programmes x 2000 cycles, 32033 mismatching cycles in 20 programmes, 192482 output-bit toggles (lockstep 3.5 s)
+swap u183@84.00,173.88.CLK (n409) with u1169@93.60,90.72.B1 (n1153): structural check: 1 errors (first: u183@84.00,173.88: clock pin CLK: clock passes through u939@112.32,105.84 (sg13g2_nand3_1), not a buffer)
+  seed 2: first mismatch at cycle 21: pcs rtl=144e0d gate=144a0d
+swap u183@84.00,173.88.CLK (n409) with u1169@93.60,90.72.B1 (n1153): 20 programmes x 2000 cycles, 28926 mismatching cycles in 15 programmes, 182618 output-bit toggles (lockstep 3.5 s)
+swap u829@96.00,113.40.A (n208) with u1249@56.64,83.16.B (n1401): structural check: 0 errors
+  seed 1: first mismatch at cycle 8: pcs rtl=82083 gate=82082
+swap u829@96.00,113.40.A (n208) with u1249@56.64,83.16.B (n1401): 20 programmes x 2000 cycles, 39858 mismatching cycles in 20 programmes, 167594 output-bit toggles (lockstep 3.5 s)
+swap u892@123.36,113.40.A1 (n392) with u682@59.04,128.52.A2 (n843): structural check: 0 errors
+  seed 4: first mismatch at cycle 6: pcs rtl=6a002 gate=62002
+swap u892@123.36,113.40.A1 (n392) with u682@59.04,128.52.A2 (n843): 20 programmes x 2000 cycles, 12457 mismatching cycles in 8 programmes, 193283 output-bit toggles (lockstep 3.5 s)
+swap u1711@110.40,45.36.A1 (n1691) with u352@24.00,158.76.B1 (n261): structural check: 0 errors
+  seed 2: first mismatch at cycle 25: pcs rtl=185e4e gate=185a4e
+swap u1711@110.40,45.36.A1 (n1691) with u352@24.00,158.76.B1 (n261): 20 programmes x 2000 cycles, 15468 mismatching cycles in 8 programmes, 194495 output-bit toggles (lockstep 3.5 s)
+swap u1242@74.40,83.16.A (n1451) with u762@89.76,120.96.A (n506): structural check: 0 errors
+  seed 1: first mismatch at cycle 4: pcs rtl=41042 gate=41040
+swap u1242@74.40,83.16.A (n1451) with u762@89.76,120.96.A (n506): 20 programmes x 2000 cycles, 26893 mismatching cycles in 18 programmes, 187883 output-bit toggles (lockstep 3.6 s)
+swap u1614@117.12,52.92.A (n472) with u2011@24.00,15.12.A1 (n1921): structural check: 0 errors
+  seed 2: first mismatch at cycle 27: pcs rtl=1eee4e gate=1e6e4e
+swap u1614@117.12,52.92.A (n472) with u2011@24.00,15.12.A1 (n1921): 20 programmes x 2000 cycles, 27692 mismatching cycles in 14 programmes, 184658 output-bit toggles (lockstep 3.5 s)
+swap u1757@7.20,45.36.D (n1931) with u442@156.00,151.20.B1 (n670): structural check: 0 errors
+  seed 1: first mismatch at cycle 8: pcs rtl=82083 gate=82082
+swap u1757@7.20,45.36.D (n1931) with u442@156.00,151.20.B1 (n670): 20 programmes x 2000 cycles, 10041 mismatching cycles in 8 programmes, 190265 output-bit toggles (lockstep 3.5 s)
+swap u1963@132.48,15.12.A (n1719) with u1629@33.12,52.92.CLK (n1547): structural check: 1 errors (first: u1629@33.12,52.92: clock pin CLK: n156 is not driven)
+  seed 1: first mismatch at cycle 12: pcs rtl=c30c4 gate=c30c0
+swap u1963@132.48,15.12.A (n1719) with u1629@33.12,52.92.CLK (n1547): 20 programmes x 2000 cycles, 39838 mismatching cycles in 20 programmes, 177929 output-bit toggles (lockstep 3.5 s)
+swap u1903@115.68,22.68.A2 (n1974) with u1479@101.28,60.48.CLK (n1561): structural check: 1 errors (first: u1479@101.28,60.48: clock pin CLK: clock passes through u1827@104.64,30.24 (sg13g2_dfrbpq_1), not a buffer)
+  seed 2: first mismatch at cycle 73: imem_addr rtl=fb gate=db
+swap u1903@115.68,22.68.A2 (n1974) with u1479@101.28,60.48.CLK (n1561): 20 programmes x 2000 cycles, 15410 mismatching cycles in 8 programmes, 191050 output-bit toggles (lockstep 3.4 s)
+swap u358@171.36,158.76.A1 (n585) with u1119@164.16,90.72.B (n1348): structural check: 0 errors
+  seed 2: first mismatch at cycle 17: pcs rtl=103b4c gate=10348c
+swap u358@171.36,158.76.A1 (n585) with u1119@164.16,90.72.B (n1348): 20 programmes x 2000 cycles, 10508 mismatching cycles in 7 programmes, 190531 output-bit toggles (lockstep 3.4 s)
+swap u691@17.28,128.52.A2 (n749) with u897@84.00,113.40.A (n398): structural check: 0 errors
+  seed 2: first mismatch at cycle 3: pcs rtl=41041 gate=201041
+swap u691@17.28,128.52.A2 (n749) with u897@84.00,113.40.A (n398): 20 programmes x 2000 cycles, 23227 mismatching cycles in 13 programmes, 188327 output-bit toggles (lockstep 3.5 s)
+swap u1579@58.08,52.92.CLK (n1507) with u535@175.68,143.64.A1 (n665): structural check: 1 errors (first: u1579@58.08,52.92: clock pin CLK: clock passes through u490@171.36,143.64 (sg13g2_dfrbpq_1), not a buffer)
+  seed 2: first mismatch at cycle 16: host_out rtl=8b gate=89
+swap u1579@58.08,52.92.CLK (n1507) with u535@175.68,143.64.A1 (n665): 20 programmes x 2000 cycles, 5415 mismatching cycles in 8 programmes, 192685 output-bit toggles (lockstep 3.4 s)
+swap u325@117.12,158.76.B2 (n403) with u1323@112.32,75.60.B1 (n1209): structural check: 0 errors
+  seed 1: first mismatch at cycle 32: pcs rtl=1031d2 gate=1031f2
+swap u325@117.12,158.76.B2 (n403) with u1323@112.32,75.60.B1 (n1209): 20 programmes x 2000 cycles, 13961 mismatching cycles in 9 programmes, 191106 output-bit toggles (lockstep 3.4 s)
+swap u1757@7.20,45.36.RESET_B (n1932) with u237@173.76,166.32.B2 (n171): structural check: 0 errors
+  seed 1: first mismatch at cycle 56: pin_out rtl=0 gate=2; pin_sub rtl=0 gate=80
+swap u1757@7.20,45.36.RESET_B (n1932) with u237@173.76,166.32.B2 (n171): 20 programmes x 2000 cycles, 5958 mismatching cycles in 5 programmes, 192381 output-bit toggles (lockstep 3.4 s)
+swap u1978@89.76,22.68.A1 (n1817) with u1918@63.84,22.68.A (n1309): structural check: 0 errors
+  seed 1: first mismatch at cycle 0: pcs rtl=1 gate=0
+swap u1978@89.76,22.68.A1 (n1817) with u1918@63.84,22.68.A (n1309): 20 programmes x 2000 cycles, 39840 mismatching cycles in 20 programmes, 206574 output-bit toggles (lockstep 3.4 s)
+swap u1673@177.60,45.36.A0 (n1836) with u775@49.92,120.96.A1 (n991): structural check: 0 errors
+  seed 1: first mismatch at cycle 1: pin_sub rtl=0 gate=1
+swap u1673@177.60,45.36.A0 (n1836) with u775@49.92,120.96.A1 (n991): 20 programmes x 2000 cycles, 1559 mismatching cycles in 16 programmes, 193638 output-bit toggles (lockstep 3.4 s)
+planted faults: 50; behaviour differs or cannot be simulated: 44; caught only by the structural check: 1; caught by neither: 5

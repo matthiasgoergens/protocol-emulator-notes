@@ -97,6 +97,7 @@ let () =
   (try Unix.mkdir "out" 0o755 with _ -> ());
   match Array.to_list Sys.argv with
   | [ _; "check" ] -> exit (if check () then 0 else 1)
+  | [ _; "latency" ] -> Latency_check.main ()
   | [ _; "verilog" ] -> let oc = open_out "retro_console.v" in Rtl.output ~output_mode:(To_channel oc) Verilog circuit; close_out oc
   | [ _; "palette" ] -> dump (make ()) ~fields:1 ~packet:palette_packet ~name:"palette"
   | [ _; "game"; n ] -> dump (make ()) ~fields:(int_of_string n) ~packet:Game.packet ~name:"frame"

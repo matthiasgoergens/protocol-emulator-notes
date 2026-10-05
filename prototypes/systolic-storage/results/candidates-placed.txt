@@ -4,13 +4,13 @@
 D0 uniform, no storage: 20 PEs (197035 um2) + storage 0 um2 = 197035 um2; 0 storage bits in 0 blocks; pipeline registers only: 32 flop bits per PE
 D1 uniform, 8x16 latch RF per PE: 11 PEs (108369 um2) + storage 88275 um2 = 196644 um2; 1408 storage bits in 11 blocks; every PE can hold 8 words
     11 x local RF: 8025 um2 each, 128 bits, 62.70 um2/bit
-D2 edge column, 2 thick banks 128x32: 14 PEs (137924 um2) + storage 53236 um2 = 191160 um2; 8192 storage bits in 2 blocks; storage at the array's edge
-    2 x thick bank: 26618 um2 each, 4096 bits, 6.50 um2/bit
+D2 edge column, 2 thick banks 128x32: 14 PEs (137924 um2) + storage 54138 um2 = 192062 um2; 8192 storage bits in 2 blocks; storage at the array's edge
+    2 x thick bank: 27069 um2 each, 4096 bits, 6.61 um2/bit
 D2s edge column, 2 SRAM 256x16 macros: 14 PEs (137924 um2) + storage 56254 um2 = 194178 um2; 8192 storage bits in 2 blocks; same idea with PDK macros
     2 x SRAM 256x16: 28127 um2 each, 4096 bits, 6.87 um2/bit
-D3 graded: thin 32x16 per 4 PEs + 2 thick 128x32 at the edge: 12 PEs (118221 um2) + storage 71315 um2 = 189536 um2; 9728 storage bits in 5 blocks; dense short-lived storage near producers, long-lived at the edge
-    3 x local thin bank: 6026 um2 each, 512 bits, 11.77 um2/bit
-    2 x thick bank: 26618 um2 each, 4096 bits, 6.50 um2/bit
+D3 graded: thin 32x16 per 4 PEs + 2 thick 128x32 at the edge: 12 PEs (118221 um2) + storage 72674 um2 = 190895 um2; 9728 storage bits in 5 blocks; dense short-lived storage near producers, long-lived at the edge
+    3 x local thin bank: 6179 um2 each, 512 bits, 12.07 um2/bit
+    2 x thick bank: 27069 um2 each, 4096 bits, 6.61 um2/bit
 D4 array as delay line: 20 PEs (197035 um2) + storage 0 um2 = 197035 um2; 0 storage bits in 0 blocks; any PE can be switched to pass-through: 32 bits of delay per PE
 
 workload                                                     D0                    D1                    D2                    D2s                   D3                    D4 

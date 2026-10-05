@@ -1,0 +1,6 @@
+== flash_interlock (simulation)
+  replay through interpreter   PASS  1168 cycles, every output equal
+  prediction (whole trace)     PASS  1168 cycles identical to the OCaml board model
+RESULT flash_interlock PASS
+  (44 trace entries, 0 capture words, status {'board_status': 0, 'sampler_overflows': 0, 'trace_overflow': 0}, 0.06 s)
+  interlock (sim flash log)    PASS  flash saw: no complete command byte

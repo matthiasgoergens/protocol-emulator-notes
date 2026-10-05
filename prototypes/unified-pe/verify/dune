@@ -1,0 +1,15 @@
+(executable
+ (name main)
+ (libraries hardcaml hardcaml_latency latency_ci))
+
+; The latency lint (latency_check.ml): stdout must match latency.expected; accept a reviewed
+; change with [dune promote].
+(rule
+ (with-stdout-to
+  latency.out
+  (run %{exe:main.exe} latency)))
+
+(rule
+ (alias runtest)
+ (action
+  (diff latency.expected latency.out)))

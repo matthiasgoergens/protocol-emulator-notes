@@ -1,0 +1,16 @@
+; ../../../usb-ls: the low-speed USB firmware device, its bench and main_fw.exe, unchanged
+; (symlinks), on v2: isa_ls.ml and sequencer_ls.ml are v2-backed replacements, isa.ml and
+; harness.ml the base shims (part 3 of main_fw runs T0 on the base ISA).
+(rule
+ (with-stdout-to
+  isa_enc.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
+
+(rule
+ (with-stdout-to
+  isa_ls_enc.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa_ls.ml})))
+
+(executable
+ (name main_fw)
+ (libraries hardcaml seqv2))

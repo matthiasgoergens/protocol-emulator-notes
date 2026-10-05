@@ -1,0 +1,17 @@
+bit times captured: 9000000
+lane 0 word alignment: 1
+lane 1 word alignment: 1
+lane 2 word alignment: 1
+clock lane: first full word at 16, 0 wrong words after it
+lane 0: max |running disparity| 8
+lane 1: max |running disparity| 8
+lane 2: max |running disparity| 8
+timing: H 640/16/96/48 (total 800), V 480/10/2/33 (total 525), hsync -, vsync -
+complete frames: 1
+  pixel (0,0): got 127,127,127 want 255,255,255
+  pixel (80,1): got 255,255,255 want 255,255,0
+  pixel (160,1): got 255,255,0 want 0,255,255
+  pixel (240,1): got 0,255,255 want 0,255,0
+  pixel (320,1): got 0,255,0 want 255,0,255
+frame 640x480: 195257 pixels differ from the reference
+FAIL: frame mismatch

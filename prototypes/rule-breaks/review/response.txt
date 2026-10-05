@@ -1,0 +1,16 @@
+Response to review/codex-verdict.txt (codex exec -m gpt-6-luna, medium effort; prompt in codex-prompt.txt)
+
+3 (204 vs 56): the reviewer read drc/6t-pdk-mark-stocktt-tt.summary.txt (our 6T, 56 items in
+  hierarchical mode). The README cites drc/pdkcell-mark-stocktt-tt.summary.txt, IHP's cell, which
+  reports 204 x Cnt.c.digibnd at 0.020 um. Claim stands.
+4 (generator equivalence unsupported): fair; the comparison was run but not saved. Now saved:
+  layout/standard-identity.txt (all six gain arrays and the 6T identical), layout/polycmp.py.
+5 (mkdeck.py could silently skip a rule): fair. mkdeck.py now asserts that every requested rule
+  changed in the maximal deck or the JSON; the substitutions of every deck used are in
+  deck/relaxed-decks/. The positive (IHP's cell) and negative (0.12 end cap) controls stand.
+6 (SPICE scope): agreed, these are nominal PSP runs; README now says "in these nominal
+  simulations". The ss/27 baseline used the VLO 0 read sweep (as ../gain-cell/ did) and the W 0.20
+  run a matched VLO 0.3 sweep; now stated in the table. Other pairs are like for like (bar0 reads
+  both without LUMP; vlo0.3 reads both LUMP=1).
+7, 8, 9: agreed; these were already labelled estimate/assumption/not checked in the README.
+1, 2: confirmed OK.

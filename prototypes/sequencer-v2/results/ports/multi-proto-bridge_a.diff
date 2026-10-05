@@ -1,0 +1,120 @@
+--- ports/multi-proto/orig/bridges.ml	2026-09-25 16:00:16.650091259 +0800
++++ ports/multi-proto/bridge_a.ml	2026-09-25 16:29:28.074157700 +0800
+@@ -1,4 +1,18 @@
+-(* Protocol bridges on the mailbox variant, run cycle by cycle on the interpreter and the RTL in
++(* PORTED TO ISA v2 (prototypes/sequencer-v2/ports/multi-proto): a copy of
++   ../../../multi-proto/bridges.ml cut down to bridge A; `diff` against the original is in
++   ../../results/ports/multi-proto-bridge_a.diff. What was removed and why:
++   - bridge B: its SPI master captures MISO on pin 4 while driving MOSI on pin 3, and v2's SHO
++     capture reads only the partner pin (pin XOR 1), so B needs re-pinning, not a port;
++   - inbox depths 2 and 4: v2's inboxes hold one byte, so every run is at depth 1 (base.depth);
++   - the ordering controls (newest first, swapped pair): at depth 1 an inbox never holds two
++     bytes, so neither fault can be expressed (the original already reports newest-first as
++     vacuous for B for the same reason);
++   - "receiver over budget by 6 slots" is reported, not required to fail: at depth 1 flow control
++     hides the overrun, in the original code as well (see the comment at that control).
++   Added: the count of WAITC-11 executions whose last SEND target was not the inbox the original
++   condition named (must be 0; see asm.ml).
++
++   Protocol bridges on the mailbox variant, run cycle by cycle on the interpreter and the RTL in
+    lockstep, against independent models of both sides.
+ 
+    Bridge A, UART <-> I2C master (a UART command interface to an I2C sensor):
+@@ -57,7 +71,7 @@
+ }
+ 
+ let base = { which = A; seed = 1; ntx = 12; rtl = true; neigh = Compiled; fault = Isa_mb.No_fault; late = 0;
+-             respect_cts = true; err = 0.01; gap_bits = 2; max_stretch = 400; bridge = true; depth = 2 }
++             respect_cts = true; err = 0.01; gap_bits = 2; max_stretch = 400; bridge = true; depth = 1 }
+ 
+ type outcome = {
+   answers : int list; expected : int list; regs_ok : bool; bus_ok : bool; mism : int; reports : (int * int) list;
+@@ -214,7 +228,7 @@
+   let mode = try Sys.argv.(1) with _ -> "all" in
+   List.iter (fun (name, (_, len, _)) -> Printf.printf "programme %-22s %3d words of 128\n" name len)
+     [ ("T0 UART receive (RTS)", uart_rx ~rx:0 ~rts:(Some 2) ~dst:1 ()); ("T1 I2C master", i2c_master ~sda:3 ~scl:4 ~own:1 ~reply:2 ());
+-      ("T1 SPI master", spi_master ~sclk:2 ~mosi:3 ~miso:4 ~cs:5 ~own:1 ~reply:2 ()); ("T2 UART transmit", uart_tx ~tx:1 ~own:2 ()) ];
++      ("T2 UART transmit", uart_tx ~tx:1 ~own:2 ()) ];
+   if mode = "iso" then begin
+     let full = run { base with rtl = false } and nalone = run { base with rtl = false; bridge = false } in
+     let n = min (Array.length full.ntr) (Array.length nalone.ntr) in
+@@ -225,8 +239,7 @@
+   end;
+   if mode = "late" then describe "late" (run { base with rtl = false; late = 6; gap_bits = 0 });
+   if mode = "smoke" then begin
+-    describe "A smoke" (run { base with ntx = 3 });
+-    describe "B smoke" (run { base with which = B; ntx = 3 })
++    describe "A smoke" (run { base with ntx = 3 })
+   end;
+   if mode = "all" then begin
+     let all_ok = ref true in
+@@ -234,16 +247,15 @@
+     let expect_fail name o = describe name o; if pass o then (all_ok := false; print_endline "  ^ CONTROL DID NOT FAIL") in
+     (* main runs, RTL in lockstep *)
+     let a = run base in expect_pass "A: UART<->I2C, SPI neighbour, RTL+interp" a;
+-    let b = run { base with which = B } in expect_pass "B: UART<->SPI, I2C neighbour, RTL+interp" b;
+     (* constrained random: seeds, both bridges, fast host (no gaps), baud error, slow slave *)
+     let ok = ref 0 and tot = ref 0 in
+     for seed = 2 to 13 do
+       List.iter (fun which ->
+         let c = { base with which; seed; rtl = seed <= 4; gap_bits = seed mod 3; err = (float (seed mod 5) -. 2.0) *. 0.008;
+                   max_stretch = (seed mod 4) * 300 } in
+-        let o = run c in incr tot; if pass o then incr ok else describe (Printf.sprintf "  random seed %d %s" seed (if which = A then "A" else "B")) o) [ A; B ]
++        let o = run c in incr tot; if pass o then incr ok else describe (Printf.sprintf "  random seed %d %s" seed (if which = A then "A" else "B")) o) [ A ]
+     done;
+-    Printf.printf "constrained random: %d of %d runs pass (12 seeds x 2 bridges; RTL in lockstep for seeds 2..4)\n%!" !ok !tot;
++    Printf.printf "constrained random: %d of %d runs pass (12 seeds x bridge A; RTL in lockstep for seeds 2..4)\n%!" !ok !tot;
+     if !ok <> !tot then all_ok := false;
+     (* isolation *)
+     List.iter (fun which ->
+@@ -258,40 +270,26 @@
+                      neighbour pins identical with the bridge idle %b and under other traffic %b\n%!"
+         nm (alone.bridge_hash = full.bridge_hash) !same (same_prefix nalone.ntr full.ntr) (same_prefix traffic.ntr full.ntr);
+       if not (alone.bridge_hash = full.bridge_hash && !same = 6 && same_prefix nalone.ntr full.ntr && same_prefix traffic.ntr full.ntr)
+-      then all_ok := false) [ A; B ];
++      then all_ok := false) [ A ];
+     (* controls, each must fail *)
+     expect_fail "control A: mailbox drops push 40 (interp)" (run { base with rtl = false; fault = Isa_mb.Drop_push 40 });
+-    expect_fail "control A: mailbox pops newest first (interp)" (run { base with rtl = false; fault = Isa_mb.Lifo });
+-    expect_fail "control B: mailbox drops push 40 (interp)" (run { base with which = B; rtl = false; fault = Isa_mb.Drop_push 40 });
+-    describe "control B: mailbox pops newest first (interp; vacuous)" (run { base with which = B; rtl = false; fault = Isa_mb.Lifo });
+-    print_endline "  (B's inbox never holds two bytes, so newest-first equals oldest-first: an ordering fault needs occupancy >= 2 to show)";
+-    List.iter (fun which ->
+-      let obs = ref 0 and caught = ref 0 and same = ref 0 in
+-      for k = 20 to 69 do
+-        let o = run { base with which; rtl = false; fault = Isa_mb.Swap_pair k } in
+-        match o.swapped with
+-        | Some (x, y) when x <> y -> incr obs; if not (pass o) then incr caught
+-        | Some _ -> incr same
+-        | None -> ()
+-      done;
+-      Printf.printf "control %s: two pushes delivered swapped, at pushes 20..69: %d swaps of different bytes, caught %d; %d swaps of equal bytes (unobservable by any checker)\n%!"
+-        (if which = A then "A" else "B") !obs !caught !same;
+-      if !caught <> !obs || !obs = 0 then all_ok := false) [ A; B ];
++    print_endline "  (ordering controls, newest first and swapped pairs, need an inbox of depth >= 2: not expressible on v2)";
+  expect_pass "budget edge A: +3 slots in the receiver (slack 0), exact baud" (run { base with rtl = false; late = 3; gap_bits = 0; ntx = 16; err = 0.0 });
+     expect_fail "budget edge A: +4 slots (slack -1), exact baud" (run { base with rtl = false; late = 4; gap_bits = 0; ntx = 16; err = 0.0 });
+-    expect_pass "budget edge B: +5 slots (slack 0), exact baud" (run { base with which = B; rtl = false; late = 5; gap_bits = 0; ntx = 16; err = 0.0 });
+-    expect_fail "budget edge B: +6 slots (slack -1), exact baud" (run { base with which = B; rtl = false; late = 6; gap_bits = 0; ntx = 16; err = 0.0 });
+-    expect_fail "control A: receiver over budget by 6 slots" (run { base with rtl = false; late = 6; gap_bits = 0 });
++    (* at depth 1 this control is vacuous: RTS holds the host off while the inbox is full, which
++       hides the receiver's overrun; the original multi-proto code at depth 1 passes it too
++       (../../results/ports/multi-proto-depth1-control.txt). The budget edges above are the
++       receive-budget control that still bites. *)
++    describe "control A: receiver over budget by 6 slots (vacuous at depth 1)" (run { base with rtl = false; late = 6; gap_bits = 0 });
+     let ig = run { base with rtl = false; respect_cts = false; gap_bits = 0; max_stretch = 1500; ntx = 16 } in
+     expect_fail "control A: host ignores CTS, slow slave" ig;
+     Printf.printf "  (overflow reported by T0 on the host channel: %d bytes)\n" (List.length ig.reports);
+     (* backpressure: the fast host against a slow device, with and without flow control *)
+     let slow = run { base with rtl = true; gap_bits = 0; max_stretch = 1500; ntx = 16 } in
+     expect_pass "backpressure A: no host gaps, slave stretches <=1500 cycles" slow;
+-    let d1 = run { base with rtl = false; gap_bits = 0; max_stretch = 1500; ntx = 16; depth = 1 } in
+-    expect_pass "backpressure A: same, inbox depth 1" d1;
+-    let d4 = run { base with rtl = false; gap_bits = 0; max_stretch = 1500; ntx = 16; depth = 4 } in
+-    expect_pass "backpressure A: same, inbox depth 4" d4;
++    Printf.printf "WAITC 11 executed with the last SEND elsewhere than the inbox the original waited on: %d of %d executions\n"
++      !Isa_mb.lsend_violations !Isa_mb.lsend_checked;
++    if !Isa_mb.lsend_violations <> 0 || !Isa_mb.lsend_checked = 0 then all_ok := false;
+     print_endline (if !all_ok then "BRIDGES PASS" else "BRIDGES FAIL")
+   end;
+   Printf.printf "elapsed %.0f s\n" (Unix.gettimeofday () -. t0)

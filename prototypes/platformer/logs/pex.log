@@ -1,0 +1,1153 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+
+-- Running command `read_verilog -sv rtl/pex.v; hierarchy -check -top pex; synth -top pex -flatten ; dfflibmap -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; abc -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; opt_clean; tee -o reports/pex.stat.txt stat -liberty /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib; write_verilog -noattr /var/tmp/platformer/netlists/pex.v' --
+
+1. Executing Verilog-2005 frontend: rtl/pex.v
+Parsing SystemVerilog input from `rtl/pex.v' to AST representation.
+Generating RTLIL representation for module `\pex'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \pex
+
+2.2. Analyzing design hierarchy..
+Top module:  \pex
+Removed 0 unused modules.
+
+3. Executing SYNTH pass.
+
+3.1. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1.1. Analyzing design hierarchy..
+Top module:  \pex
+
+3.1.2. Analyzing design hierarchy..
+Top module:  \pex
+Removed 0 unused modules.
+
+3.2. Executing PROC pass (convert processes to netlists).
+
+3.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:725$112 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:687$100 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:667$90 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:647$81 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:630$77 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:583$58 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:523$50 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:498$47 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:480$37 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:461$33 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:450$32 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:432$26 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:387$21 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:317$11 in module pex.
+Marked 1 switch rules as full_case in process $proc$rtl/pex.v:296$5 in module pex.
+Removed a total of 0 dead cases.
+
+3.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 15 redundant assignments.
+Promoted 0 assignments to connections.
+
+3.2.4. Executing PROC_INIT pass (extract init attributes).
+
+3.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 1 switch.
+<suppressed ~19 debug messages>
+
+3.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\pex.$proc$rtl/pex.v:725$112'.
+     1/1: $0\_319[2:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:711$106'.
+     1/1: $0\_34[7:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:707$105'.
+     1/1: $0\_31[7:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:703$104'.
+     1/1: $0\_28[7:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:699$103'.
+     1/1: $0\_25[7:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:695$102'.
+     1/1: $0\_22[7:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:687$100'.
+     1/1: $0\_49[0:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:667$90'.
+     1/1: $0\_298[0:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:647$81'.
+     1/1: $0\_38[15:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:630$77'.
+     1/1: $0\_289[15:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:583$58'.
+     1/1: $0\_57[2:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:523$50'.
+     1/1: $0\_105[15:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:498$47'.
+     1/1: $0\_236[15:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:480$37'.
+     1/1: $0\_112[8:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:461$33'.
+     1/1: $0\_207[7:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:450$32'.
+     1/1: $0\_66[31:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:432$26'.
+     1/1: $0\_144[31:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:387$21'.
+     1/1: $0\_173[31:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:317$11'.
+     1/1: $0\_213[7:0]
+Creating decoders for process `\pex.$proc$rtl/pex.v:296$5'.
+     1/1: $0\_54[15:0]
+
+3.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\pex.\_289' from process `\pex.$proc$rtl/pex.v:630$77'.
+No latch inferred for signal `\pex.\_105' from process `\pex.$proc$rtl/pex.v:523$50'.
+No latch inferred for signal `\pex.\_207' from process `\pex.$proc$rtl/pex.v:461$33'.
+No latch inferred for signal `\pex.\_144' from process `\pex.$proc$rtl/pex.v:432$26'.
+No latch inferred for signal `\pex.\_173' from process `\pex.$proc$rtl/pex.v:387$21'.
+No latch inferred for signal `\pex.\_213' from process `\pex.$proc$rtl/pex.v:317$11'.
+
+3.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\pex.\_319' using process `\pex.$proc$rtl/pex.v:725$112'.
+  created $dff cell `$procdff$180' with positive edge clock.
+Creating register for signal `\pex.\_34' using process `\pex.$proc$rtl/pex.v:711$106'.
+  created $dff cell `$procdff$181' with positive edge clock.
+Creating register for signal `\pex.\_31' using process `\pex.$proc$rtl/pex.v:707$105'.
+  created $dff cell `$procdff$182' with positive edge clock.
+Creating register for signal `\pex.\_28' using process `\pex.$proc$rtl/pex.v:703$104'.
+  created $dff cell `$procdff$183' with positive edge clock.
+Creating register for signal `\pex.\_25' using process `\pex.$proc$rtl/pex.v:699$103'.
+  created $dff cell `$procdff$184' with positive edge clock.
+Creating register for signal `\pex.\_22' using process `\pex.$proc$rtl/pex.v:695$102'.
+  created $dff cell `$procdff$185' with positive edge clock.
+Creating register for signal `\pex.\_49' using process `\pex.$proc$rtl/pex.v:687$100'.
+  created $dff cell `$procdff$186' with positive edge clock.
+Creating register for signal `\pex.\_298' using process `\pex.$proc$rtl/pex.v:667$90'.
+  created $dff cell `$procdff$187' with positive edge clock.
+Creating register for signal `\pex.\_38' using process `\pex.$proc$rtl/pex.v:647$81'.
+  created $dff cell `$procdff$188' with positive edge clock.
+Creating register for signal `\pex.\_57' using process `\pex.$proc$rtl/pex.v:583$58'.
+  created $dff cell `$procdff$189' with positive edge clock.
+Creating register for signal `\pex.\_236' using process `\pex.$proc$rtl/pex.v:498$47'.
+  created $dff cell `$procdff$190' with positive edge clock.
+Creating register for signal `\pex.\_112' using process `\pex.$proc$rtl/pex.v:480$37'.
+  created $dff cell `$procdff$191' with positive edge clock.
+Creating register for signal `\pex.\_66' using process `\pex.$proc$rtl/pex.v:450$32'.
+  created $dff cell `$procdff$192' with positive edge clock.
+Creating register for signal `\pex.\_54' using process `\pex.$proc$rtl/pex.v:296$5'.
+  created $dff cell `$procdff$193' with positive edge clock.
+
+3.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:725$112'.
+Removing empty process `pex.$proc$rtl/pex.v:725$112'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:711$106'.
+Removing empty process `pex.$proc$rtl/pex.v:711$106'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:707$105'.
+Removing empty process `pex.$proc$rtl/pex.v:707$105'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:703$104'.
+Removing empty process `pex.$proc$rtl/pex.v:703$104'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:699$103'.
+Removing empty process `pex.$proc$rtl/pex.v:699$103'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:695$102'.
+Removing empty process `pex.$proc$rtl/pex.v:695$102'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:687$100'.
+Removing empty process `pex.$proc$rtl/pex.v:687$100'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:667$90'.
+Removing empty process `pex.$proc$rtl/pex.v:667$90'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:647$81'.
+Removing empty process `pex.$proc$rtl/pex.v:647$81'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:630$77'.
+Removing empty process `pex.$proc$rtl/pex.v:630$77'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:583$58'.
+Removing empty process `pex.$proc$rtl/pex.v:583$58'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:523$50'.
+Removing empty process `pex.$proc$rtl/pex.v:523$50'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:498$47'.
+Removing empty process `pex.$proc$rtl/pex.v:498$47'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:480$37'.
+Removing empty process `pex.$proc$rtl/pex.v:480$37'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:461$33'.
+Removing empty process `pex.$proc$rtl/pex.v:461$33'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:450$32'.
+Removing empty process `pex.$proc$rtl/pex.v:450$32'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:432$26'.
+Removing empty process `pex.$proc$rtl/pex.v:432$26'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:387$21'.
+Removing empty process `pex.$proc$rtl/pex.v:387$21'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:317$11'.
+Removing empty process `pex.$proc$rtl/pex.v:317$11'.
+Found and cleaned up 1 empty switch in `\pex.$proc$rtl/pex.v:296$5'.
+Removing empty process `pex.$proc$rtl/pex.v:296$5'.
+Cleaned up 20 empty switches.
+
+3.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+<suppressed ~12 debug messages>
+
+3.3. Executing FLATTEN pass (flatten design).
+
+3.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+Removed 2 unused cells and 134 unused wires.
+<suppressed ~5 debug messages>
+
+3.6. Executing CHECK pass (checking for obvious problems).
+Checking module pex...
+Found and reported 0 problems.
+
+3.7. Executing OPT pass (performing simple optimizations).
+
+3.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 139 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Computing hashes of 128 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+<suppressed ~33 debug messages>
+Removed a total of 11 cells.
+
+3.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pex..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~148 debug messages>
+
+3.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pex.
+Performed a total of 0 changes.
+
+3.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 128 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Computing hashes of 127 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Computing hashes of 126 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+<suppressed ~6 debug messages>
+Removed a total of 2 cells.
+
+3.7.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+Removed 0 unused cells and 10 unused wires.
+<suppressed ~1 debug messages>
+
+3.7.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.7.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.7.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pex..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~148 debug messages>
+
+3.7.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pex.
+    New ctrl vector for $pmux cell $procmux$140: { $auto$opt_reduce.cc:137:opt_pmux$195 $procmux$141_CMP }
+  Optimizing cells in module \pex.
+Performed a total of 1 changes.
+
+3.7.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 127 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.7.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+
+3.7.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.7.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.7.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pex..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~142 debug messages>
+
+3.7.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pex.
+Performed a total of 0 changes.
+
+3.7.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 127 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.7.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.7.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+
+3.7.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.7.23. Finished fast OPT passes. (There is nothing left to do.)
+
+3.8. Executing FSM pass (extract and optimize FSM).
+
+3.8.1. Executing FSM_DETECT pass (finding FSMs in design).
+
+3.8.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+3.8.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+
+3.8.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+3.8.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+3.8.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+3.8.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+3.9. Executing OPT pass (performing simple optimizations).
+
+3.9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 127 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pex..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~142 debug messages>
+
+3.9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pex.
+Performed a total of 0 changes.
+
+3.9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 127 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.9.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$193 ($dff) from module pex (D = \_3, Q = \_54, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$196 ($sdff) from module pex (D = \data_in, Q = \_54).
+Adding SRST signal on $procdff$192 ($dff) from module pex (D = \_187, Q = \_66, rval = 0).
+Adding EN signal on $auto$ff.cc:337:slice$200 ($sdff) from module pex (D = \_187 [31:16], Q = \_66 [31:16]).
+Adding EN signal on $auto$ff.cc:337:slice$200 ($sdff) from module pex (D = \_187 [15:0], Q = \_66 [15:0]).
+Adding SRST signal on $procdff$191 ($dff) from module pex (D = \_192, Q = \_112, rval = 9'000000000).
+Adding EN signal on $auto$ff.cc:337:slice$207 ($sdff) from module pex (D = \data_in [8:0], Q = \_112).
+Adding SRST signal on $procdff$190 ($dff) from module pex (D = \_233, Q = \_236, rval = 16'0000000000000000).
+Adding SRST signal on $procdff$189 ($dff) from module pex (D = \_247, Q = \_57, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$212 ($sdff) from module pex (D = \_246, Q = \_57).
+Adding SRST signal on $procdff$188 ($dff) from module pex (D = \_10, Q = \_38, rval = 16'0000000000000000).
+Adding SRST signal on $procdff$187 ($dff) from module pex (D = \_11, Q = \_298, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$219 ($sdff) from module pex (D = \_301, Q = \_298).
+Adding SRST signal on $procdff$186 ($dff) from module pex (D = \_13, Q = \_49, rval = 1'0).
+Adding EN signal on $procdff$185 ($dff) from module pex (D = \cfg_in, Q = \_22).
+Adding EN signal on $procdff$184 ($dff) from module pex (D = \_22, Q = \_25).
+Adding EN signal on $procdff$183 ($dff) from module pex (D = \_25, Q = \_28).
+Adding EN signal on $procdff$182 ($dff) from module pex (D = \_28, Q = \_31).
+Adding EN signal on $procdff$181 ($dff) from module pex (D = \_31, Q = \_34).
+Adding SRST signal on $procdff$180 ($dff) from module pex (D = \tag_in, Q = \_319, rval = 3'000).
+
+3.9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+Removed 21 unused cells and 26 unused wires.
+<suppressed ~34 debug messages>
+
+3.9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.9.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.9.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pex..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~113 debug messages>
+
+3.9.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pex.
+Performed a total of 0 changes.
+
+3.9.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 114 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.9.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.9.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+
+3.9.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.9.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.10. Executing WREDUCE pass (reducing word size of cells).
+Removed top 28 address bits (of 32) from memory init port pex.$auto$mem.cc:351:emit$116 ($auto$proc_rom.cc:155:do_switch$114).
+Removed top 1 bits (of 2) from port B of cell pex.$auto$opt_dff.cc:235:make_patterns_logic$215 ($ne).
+Removed top 1 bits (of 3) from port B of cell pex.$eq$rtl/pex.v:348$13 ($eq).
+Removed top 2 bits (of 3) from port B of cell pex.$eq$rtl/pex.v:351$15 ($eq).
+Removed top 24 bits (of 32) from mux cell pex.$ternary$rtl/pex.v:406$22 ($mux).
+Removed top 28 bits (of 32) from mux cell pex.$ternary$rtl/pex.v:414$23 ($mux).
+Removed top 30 bits (of 32) from mux cell pex.$ternary$rtl/pex.v:422$24 ($mux).
+Removed top 31 bits (of 32) from mux cell pex.$ternary$rtl/pex.v:431$25 ($mux).
+Removed top 2 bits (of 3) from port B of cell pex.$add$rtl/pex.v:573$51 ($add).
+Removed top 1 bits (of 3) from port B of cell pex.$eq$rtl/pex.v:589$59 ($eq).
+Removed top 16 bits (of 17) from port B of cell pex.$add$rtl/pex.v:625$74 ($add).
+Removed top 1 bits (of 2) from port B of cell pex.$eq$rtl/pex.v:683$97 ($eq).
+Removed top 1 bits (of 2) from port B of cell pex.$procmux$142_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell pex.$procmux$157_CMP0 ($eq).
+
+3.11. Executing PEEPOPT pass (run peephole optimizers).
+
+3.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+
+3.13. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module pex:
+  creating $macc model for $add$rtl/pex.v:573$51 ($add).
+  creating $macc model for $add$rtl/pex.v:624$73 ($add).
+  creating $macc model for $add$rtl/pex.v:625$74 ($add).
+  merging $macc model for $add$rtl/pex.v:624$73 into $add$rtl/pex.v:625$74.
+  creating $alu model for $macc $add$rtl/pex.v:625$74.
+  creating $alu model for $macc $add$rtl/pex.v:573$51.
+  creating $alu cell for $add$rtl/pex.v:573$51: $auto$alumacc.cc:512:replace_alu$230
+  creating $alu cell for $add$rtl/pex.v:625$74: $auto$alumacc.cc:512:replace_alu$233
+  created 2 $alu and 0 $macc cells.
+
+3.14. Executing SHARE pass (SAT-based resource sharing).
+
+3.15. Executing OPT pass (performing simple optimizations).
+
+3.15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 114 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pex..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~113 debug messages>
+
+3.15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pex.
+Performed a total of 0 changes.
+
+3.15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 114 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+Removed 1 unused cells and 1 unused wires.
+<suppressed ~2 debug messages>
+
+3.15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.15.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.15.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pex..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~113 debug messages>
+
+3.15.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pex.
+Performed a total of 0 changes.
+
+3.15.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 113 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.15.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.15.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+
+3.15.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.15.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.16. Executing MEMORY pass.
+
+3.16.1. Executing OPT_MEM pass (optimize memories).
+pex.$auto$proc_rom.cc:155:do_switch$114: removing const-0 lane 15
+Performed a total of 1 transformations.
+
+3.16.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.16.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+
+3.16.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.16.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+Checking read port `$auto$proc_rom.cc:155:do_switch$114'[0] in module `\pex': no output FF found.
+Checking read port address `$auto$proc_rom.cc:155:do_switch$114'[0] in module `\pex': merged address FF to cell.
+
+3.16.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+
+3.16.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+3.16.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.16.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+
+3.16.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+
+3.18. Executing OPT pass (performing simple optimizations).
+
+3.18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+<suppressed ~15 debug messages>
+
+3.18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 112 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.18.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.18.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+3.18.5. Finished fast OPT passes.
+
+3.19. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+Mapping memory $auto$proc_rom.cc:155:do_switch$114 in module \pex:
+  created 16 $dff cells and 0 static cells of width 15.
+Extracted data FF from read port 0 of pex.$auto$proc_rom.cc:155:do_switch$114: $$auto$proc_rom.cc:155:do_switch$114$rdreg[0]
+  read interface: 1 $dff and 15 $mux cells.
+  write interface: 0 write mux blocks.
+
+3.20. Executing OPT pass (performing simple optimizations).
+
+3.20.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.20.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 127 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.20.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pex..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~122 debug messages>
+
+3.20.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pex.
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][3][6]$285:
+      Old ports: A=15'000111111111111, B=15'001111111111111, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$a$265
+      New ports: A=1'0, B=1'1, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$a$265 [12]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$a$265 [14:13] $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$a$265 [11:0] } = 14'00111111111111
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][3][5]$282:
+      Old ports: A=15'000001111111111, B=15'000011111111111, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$b$263
+      New ports: A=1'0, B=1'1, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$b$263 [10]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$b$263 [14:11] $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$b$263 [9:0] } = 14'00001111111111
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][3][4]$279:
+      Old ports: A=15'000000011111111, B=15'000000111111111, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$a$262
+      New ports: A=1'0, B=1'1, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$a$262 [8]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$a$262 [14:9] $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$a$262 [7:0] } = 14'00000011111111
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][3][3]$276:
+      Old ports: A=15'000000000111111, B=15'000000001111111, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$b$260
+      New ports: A=1'0, B=1'1, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$b$260 [6]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$b$260 [14:7] $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$b$260 [5:0] } = 14'00000000111111
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][3][2]$273:
+      Old ports: A=15'000000000001111, B=15'000000000011111, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$a$259
+      New ports: A=1'0, B=1'1, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$a$259 [4]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$a$259 [14:5] $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$a$259 [3:0] } = 14'00000000001111
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][3][1]$270:
+      Old ports: A=15'000000000000011, B=15'000000000000111, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$b$257
+      New ports: A=1'0, B=1'1, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$b$257 [2]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$b$257 [14:3] $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$b$257 [1:0] } = 14'00000000000011
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][3][0]$267:
+      Old ports: A=15'000000000000000, B=15'000000000000001, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$a$256
+      New ports: A=1'0, B=1'1, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$a$256 [0]
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$a$256 [14:1] = 14'00000000000000
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][3][7]$288:
+      Old ports: A=15'011111111111111, B=15'111111111111111, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$b$266
+      New ports: A=1'0, B=1'1, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$b$266 [14]
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$b$266 [13:0] = 14'11111111111111
+    Consolidated identical input bits for $pmux cell $procmux$173:
+      Old ports: A=8'11111111, B=24'000000010000001100001111, Y=\_213
+      New ports: A=3'111, B=9'000001011, Y={ \_213 [4] \_213 [2:1] }
+      New connections: { \_213 [7:5] \_213 [3] \_213 [0] } = { \_213 [4] \_213 [4] \_213 [4] \_213 [2] 1'1 }
+    Consolidated identical input bits for $mux cell $ternary$rtl/pex.v:360$17:
+      Old ports: A={ 8'00000000 \_66 [31:8] }, B={ \_66 [7:0] \_66 [31:8] }, Y=\_172
+      New ports: A=8'00000000, B=\_66 [7:0], Y=\_172 [31:24]
+      New connections: \_172 [23:0] = \_66 [31:8]
+    Consolidated identical input bits for $mux cell $ternary$rtl/pex.v:368$18:
+      Old ports: A={ 4'0000 \_66 [31:4] }, B={ \_66 [3:0] \_66 [31:4] }, Y=\_165
+      New ports: A=4'0000, B=\_66 [3:0], Y=\_165 [31:28]
+      New connections: \_165 [27:0] = \_66 [31:4]
+    Consolidated identical input bits for $mux cell $ternary$rtl/pex.v:377$19:
+      Old ports: A={ 2'00 \_66 [31:2] }, B={ \_66 [1:0] \_66 [31:2] }, Y=\_158
+      New ports: A=2'00, B=\_66 [1:0], Y=\_158 [31:30]
+      New connections: \_158 [29:0] = \_66 [31:2]
+    Consolidated identical input bits for $mux cell $ternary$rtl/pex.v:386$20:
+      Old ports: A={ 1'0 \_66 [31:1] }, B={ \_66 [0] \_66 [31:1] }, Y=\_151
+      New ports: A=1'0, B=\_66 [0], Y=\_151 [31]
+      New connections: \_151 [30:0] = \_66 [31:1]
+    Consolidated identical input bits for $mux cell $ternary$rtl/pex.v:596$63:
+      Old ports: A=16'0111111111111111, B=16'1000000000000000, Y=\_284
+      New ports: A=2'01, B=2'10, Y={ \_284 [15] \_284 [0] }
+      New connections: \_284 [14:1] = { \_284 [0] \_284 [0] \_284 [0] \_284 [0] \_284 [0] \_284 [0] \_284 [0] \_284 [0] \_284 [0] \_284 [0] \_284 [0] \_284 [0] \_284 [0] \_284 [0] }
+    Consolidated identical input bits for $mux cell $ternary$rtl/pex.v:618$71:
+      Old ports: A={ \_261 [16] \_261 [16] \_261 [14:0] }, B={ \_258 [15] \_258 }, Y=\_262
+      New ports: A={ \_261 [16] \_261 [14:0] }, B=\_258, Y=\_262 [15:0]
+      New connections: \_262 [16] = \_262 [15]
+  Optimizing cells in module \pex.
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$264:
+      Old ports: A=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$a$265, B=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$b$266, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$b$254
+      New ports: A={ 2'00 $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$a$265 [12] }, B={ $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][3]$b$266 [14] 2'11 }, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$b$254 [14:12]
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$b$254 [11:0] = 12'111111111111
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$261:
+      Old ports: A=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$a$262, B=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$b$263, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$a$253
+      New ports: A={ 2'00 $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$a$262 [8] }, B={ $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][2]$b$263 [10] 2'11 }, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$a$253 [10:8]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$a$253 [14:11] $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$a$253 [7:0] } = 12'000011111111
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$258:
+      Old ports: A=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$a$259, B=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$b$260, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$b$251
+      New ports: A={ 2'00 $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$a$259 [4] }, B={ $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][1]$b$260 [6] 2'11 }, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$b$251 [6:4]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$b$251 [14:7] $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$b$251 [3:0] } = 12'000000001111
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$255:
+      Old ports: A=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$a$256, B=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$b$257, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$a$250
+      New ports: A={ 2'00 $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$a$256 [0] }, B={ $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][2][0]$b$257 [2] 2'11 }, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$a$250 [2:0]
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$a$250 [14:3] = 12'000000000000
+  Optimizing cells in module \pex.
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$252:
+      Old ports: A=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$a$253, B=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$b$254, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][0][0]$b$248
+      New ports: A={ 4'0000 $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$a$253 [10:8] }, B={ $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][1]$b$254 [14:12] 4'1111 }, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][0][0]$b$248 [14:8]
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][0][0]$b$248 [7:0] = 8'11111111
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$249:
+      Old ports: A=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$a$250, B=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$b$251, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][0][0]$a$247
+      New ports: A={ 4'0000 $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$a$250 [2:0] }, B={ $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][1][0]$b$251 [6:4] 4'1111 }, Y=$memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][0][0]$a$247 [6:0]
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][0][0]$a$247 [14:7] = 8'00000000
+  Optimizing cells in module \pex.
+Performed a total of 21 changes.
+
+3.20.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 127 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Computing hashes of 120 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Computing hashes of 117 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Computing hashes of 116 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+<suppressed ~33 debug messages>
+Removed a total of 11 cells.
+
+3.20.6. Executing OPT_SHARE pass.
+
+3.20.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+Removed 0 unused cells and 27 unused wires.
+<suppressed ~1 debug messages>
+
+3.20.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+<suppressed ~7 debug messages>
+
+3.20.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.20.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pex..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~111 debug messages>
+
+3.20.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pex.
+Performed a total of 0 changes.
+
+3.20.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 115 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.20.14. Executing OPT_SHARE pass.
+
+3.20.15. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $$auto$proc_rom.cc:155:do_switch$114$rdreg[0] ($dff) from module pex (D = $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][0][0]$a$247 [6:0], Q = \_105 [14:8], rval = 7'0000000).
+Adding SRST signal on $$auto$proc_rom.cc:155:do_switch$114$rdreg[0] ($dff) from module pex (D = $memory$auto$proc_rom.cc:155:do_switch$114$rdmux[0][0][0]$a$247 [6:0], Q = \_105 [6:0], rval = 7'1111111).
+
+3.20.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+3.20.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.20.18. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.20.19. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \pex..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~109 debug messages>
+
+3.20.20. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \pex.
+Performed a total of 0 changes.
+
+3.20.21. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 117 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.20.22. Executing OPT_SHARE pass.
+
+3.20.23. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.20.24. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+
+3.20.25. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+
+3.20.26. Finished fast OPT passes. (There is nothing left to do.)
+
+3.21. Executing TECHMAP pass (map to technology primitives).
+
+3.21.1. Executing Verilog-2005 frontend: /nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/nix/store/f1q0w7rd0a4ny4hqvfxlhs4cmariidcy-yosys-0.62/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.21.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $dff.
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $mux.
+Using template $paramod$3bb72ad0665cdca279bbc49ed6a39f403f16497f\_90_alu for cells of type $alu.
+Using template $paramod$3ef7d3dd227da7627a99c5e5a6a4deb817573e39\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $dffe.
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $ne.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod$0d149ffe75563ef6fcc1a3dddc59d00af28651a7\_90_pmux for cells of type $pmux.
+Using template $paramod$645fe0cc96ae5edb83bff90cc2c78f4a20ca3e3c\_90_pmux for cells of type $pmux.
+Using template $paramod$54d740639e1393b22262823179ff783ea9f17a35\_90_pmux for cells of type $pmux.
+Using template $paramod$85df5dc01c7df96a7d8e5f1fdf76ce9ac452af63\_90_pmux for cells of type $pmux.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000010001 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010001 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000011 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~752 debug messages>
+
+3.22. Executing OPT pass (performing simple optimizations).
+
+3.22.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+<suppressed ~330 debug messages>
+
+3.22.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 1450 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Computing hashes of 1330 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Computing hashes of 1326 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+<suppressed ~372 debug messages>
+Removed a total of 124 cells.
+
+3.22.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.22.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+Removed 38 unused cells and 475 unused wires.
+<suppressed ~43 debug messages>
+
+3.22.5. Finished fast OPT passes.
+
+3.23. Executing ABC pass (technology mapping using ABC).
+
+3.23.1. Extracting gate netlist of module `\pex' to `<abc-temp-dir>/input.blif'..
+Replacing 32 occurrences of constant undef bits with constant zero bits
+
+3.23.1.1. Executed ABC.
+Extracted 1136 gates and 1294 wires to a netlist network with 155 inputs and 84 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library /tmp/yosys-abc-rWlHZq/stdcells.genlib 
+ABC: + strash 
+ABC: + dretime 
+ABC: + map 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+3.23.1.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       63
+ABC RESULTS:            ANDNOT cells:      284
+ABC RESULTS:               MUX cells:      467
+ABC RESULTS:              NAND cells:        9
+ABC RESULTS:               NOR cells:       79
+ABC RESULTS:               NOT cells:      137
+ABC RESULTS:                OR cells:      114
+ABC RESULTS:             ORNOT cells:       17
+ABC RESULTS:              XNOR cells:        5
+ABC RESULTS:               XOR cells:       47
+ABC RESULTS:        internal signals:     1055
+ABC RESULTS:           input signals:      155
+ABC RESULTS:          output signals:       84
+Removing temp directory.
+Removing global temp directory.
+
+3.24. Executing OPT pass (performing simple optimizations).
+
+3.24.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module pex.
+<suppressed ~96 debug messages>
+
+3.24.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\pex'.
+Computing hashes of 1374 cells of `\pex'.
+Finding duplicate cells in `\pex'.
+Removed a total of 0 cells.
+
+3.24.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.24.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+Removed 6 unused cells and 488 unused wires.
+<suppressed ~86 debug messages>
+
+3.24.5. Finished fast OPT passes.
+
+3.25. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `pex'. Setting top module to pex.
+
+3.25.1. Analyzing design hierarchy..
+Top module:  \pex
+
+3.25.2. Analyzing design hierarchy..
+Top module:  \pex
+Removed 0 unused modules.
+
+3.26. Printing statistics.
+
+=== pex ===
+
+        +----------Local Count, excluding submodules.
+        | 
+     1322 wires
+     3593 wire bits
+      175 public wires
+     2432 public wire bits
+       10 ports
+       73 port bits
+     1368 cells
+      284   $_ANDNOT_
+       63   $_AND_
+       40   $_DFFE_PP_
+        1   $_DFF_P_
+      467   $_MUX_
+        9   $_NAND_
+       79   $_NOR_
+      131   $_NOT_
+       17   $_ORNOT_
+      114   $_OR_
+        1   $_SDFFE_PP0N_
+       60   $_SDFFE_PP0P_
+        7   $_SDFF_PN0_
+       36   $_SDFF_PP0_
+        7   $_SDFF_PP1_
+        5   $_XNOR_
+       47   $_XOR_
+
+3.27. Executing CHECK pass (checking for obvious problems).
+Checking module pex...
+Found and reported 0 problems.
+
+4. Executing DFFLIBMAP pass (mapping DFF cells to sequential cells from liberty file).
+  cell sg13g2_dfrbpq_1 (noninv, pins=4, area=48.99) is a direct match for cell type $_DFF_PN0_.
+  final dff cell mappings:
+    unmapped dff cell: $_DFF_N_
+    unmapped dff cell: $_DFF_P_
+    unmapped dff cell: $_DFF_NN0_
+    unmapped dff cell: $_DFF_NN1_
+    unmapped dff cell: $_DFF_NP0_
+    unmapped dff cell: $_DFF_NP1_
+    \sg13g2_dfrbpq_1 _DFF_PN0_ (.CLK( C), .D( D), .Q( Q), .RESET_B( R));
+    unmapped dff cell: $_DFF_PN1_
+    unmapped dff cell: $_DFF_PP0_
+    unmapped dff cell: $_DFF_PP1_
+    unmapped dff cell: $_DFFE_NN_
+    unmapped dff cell: $_DFFE_NP_
+    unmapped dff cell: $_DFFE_PN_
+    unmapped dff cell: $_DFFE_PP_
+    unmapped dff cell: $_DFFSR_NNN_
+    unmapped dff cell: $_DFFSR_NNP_
+    unmapped dff cell: $_DFFSR_NPN_
+    unmapped dff cell: $_DFFSR_NPP_
+    unmapped dff cell: $_DFFSR_PNN_
+    unmapped dff cell: $_DFFSR_PNP_
+    unmapped dff cell: $_DFFSR_PPN_
+    unmapped dff cell: $_DFFSR_PPP_
+
+4.1. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+<suppressed ~4 debug messages>
+Mapping DFF cells in module `\pex':
+  mapped 152 $_DFF_PN0_ cells to \sg13g2_dfrbpq_1 cells.
+
+5. Executing ABC pass (technology mapping using ABC).
+
+5.1. Extracting gate netlist of module `\pex' to `<abc-temp-dir>/input.blif'..
+
+5.1.1. Executed ABC.
+Extracted 1428 gates and 1592 wires to a netlist network with 162 inputs and 152 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_lib -w /home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib 
+ABC: Parsing finished successfully.  Parsing time =     0.01 sec
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_antennanp" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_decap_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dlhrq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllr_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_dllrq_1".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_ebufn_8".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_2".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_4".
+ABC: Scl_LibertyReadGenlib() skipped three-state cell "sg13g2_einvn_8".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_2" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_4" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_fill_8" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_lgcp_1" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfbbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbp_2".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_1".
+ABC: Scl_LibertyReadGenlib() skipped sequential cell "sg13g2_sdfrbpq_2".
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_sighold" due to dont_use attribute.
+ABC: Scl_LibertyReadGenlib() skipped cell "sg13g2_slgcp_1" due to dont_use attribute.
+ABC: Library "sg13g2_stdcell_typ_1p20V_25C" from "/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib" has 54 cells (30 skipped: 14 seq; 6 tri-state; 0 no func; 10 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.02 sec
+ABC: Memory =    2.85 MB. Time =     0.02 sec
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+5.1.2. Re-integrating ABC results.
+ABC RESULTS:     sg13g2_a21o_1 cells:       10
+ABC RESULTS:    sg13g2_a21oi_1 cells:      178
+ABC RESULTS:   sg13g2_a221oi_1 cells:       68
+ABC RESULTS:    sg13g2_a22oi_1 cells:       79
+ABC RESULTS:     sg13g2_and2_1 cells:       30
+ABC RESULTS:     sg13g2_and3_1 cells:        5
+ABC RESULTS:      sg13g2_inv_1 cells:       89
+ABC RESULTS:     sg13g2_mux2_1 cells:       70
+ABC RESULTS:    sg13g2_nand2_1 cells:       78
+ABC RESULTS:   sg13g2_nand2b_1 cells:       18
+ABC RESULTS:    sg13g2_nand3_1 cells:       18
+ABC RESULTS:    sg13g2_nand4_1 cells:        6
+ABC RESULTS:     sg13g2_nor2_1 cells:       95
+ABC RESULTS:    sg13g2_nor2b_1 cells:       17
+ABC RESULTS:     sg13g2_nor3_1 cells:       13
+ABC RESULTS:     sg13g2_nor4_1 cells:        3
+ABC RESULTS:    sg13g2_o21ai_1 cells:      260
+ABC RESULTS:      sg13g2_or2_1 cells:        8
+ABC RESULTS:      sg13g2_or3_1 cells:        3
+ABC RESULTS:    sg13g2_xnor2_1 cells:       29
+ABC RESULTS:     sg13g2_xor2_1 cells:       10
+ABC RESULTS:        internal signals:     1278
+ABC RESULTS:           input signals:      162
+ABC RESULTS:          output signals:      152
+Removing temp directory.
+Removing global temp directory.
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \pex..
+Removed 0 unused cells and 1531 unused wires.
+<suppressed ~11 debug messages>
+
+7. Printing statistics.
+
+=== pex ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1252        - wires
+     3399        - wire bits
+      165        - public wires
+     2298        - public wire bits
+       10        - ports
+       73        - port bits
+     1239 1.81E+04 cells
+       10  127.008   sg13g2_a21o_1
+      178 1.61E+03   sg13g2_a21oi_1
+       68  987.034   sg13g2_a221oi_1
+       79  857.039   sg13g2_a22oi_1
+       30   272.16   sg13g2_and2_1
+        5   63.504   sg13g2_and3_1
+      152 7.45E+03   sg13g2_dfrbpq_1
+       89  484.445   sg13g2_inv_1
+       70  1270.08   sg13g2_mux2_1
+       78  566.093   sg13g2_nand2_1
+       18  163.296   sg13g2_nand2b_1
+       18  163.296   sg13g2_nand3_1
+        6   65.318   sg13g2_nand4_1
+       95  689.472   sg13g2_nor2_1
+       17  154.224   sg13g2_nor2b_1
+       13  117.936   sg13g2_nor3_1
+        3   32.659   sg13g2_nor4_1
+      260  2358.72   sg13g2_o21ai_1
+        8   72.576   sg13g2_or2_1
+        3   38.102   sg13g2_or3_1
+       29  420.941   sg13g2_xnor2_1
+       10  145.152   sg13g2_xor2_1
+
+   Chip area for module '\pex': 18110.169000
+     of which used for sequential elements: 7446.297600 (41.12%)
+
+8. Executing Verilog backend.
+
+8.1. Executing BMUXMAP pass.
+
+8.2. Executing DEMUXMAP pass.
+Dumping module `\pex'.
+
+End of script. Logfile hash: d2b65628fc, CPU: user 0.35s system 0.06s, MEM: 32.25 MB peak
+Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+Time spent: 55% 2x abc (0 sec), 9% 22x opt_clean (0 sec), ...

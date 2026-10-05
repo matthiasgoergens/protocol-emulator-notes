@@ -1,0 +1,448 @@
+sequencer_mb p7 d2: 534 of 714 nodes checked; 37 loop registers; 0 memories/instances cut
+sequencer_mb p7 d2: 534 of 714 nodes checked; 37 loop registers; 0 memories/instances cut
+sequencer (base): 437 of 572 nodes checked; 20 loop registers; 0 memories/instances cut
+== sequencer_mb p7 d2 (defaults): 0 finding(s)
+== sequencer_mb p7 d2 (hold_registers): 0 finding(s)
+== sequencer (base) (defaults): 52 finding(s)
+reconvergence at & @ sequencer.ml:52:50
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      1 cycles: reg @ sequencer.ml:16:16
+      0 cycles: not @ sequencer.ml:52:68
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[0:0] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[0:0] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[1:1] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[1:1] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[2:2] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[2:2] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[3:3] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[3:3] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[4:4] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[4:4] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[5:5] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[5:5] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[6:6] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[6:6] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[7:7] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input pin_in4 @ sequencer.ml:95:83:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[7:7] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:48:2
+  measured from input pin_in4 @ sequencer.ml:95:83:
+      0 cycles: == @ sequencer.ml:48:2
+      1 cycles: reg @ sequencer.ml:16:16
+reconvergence at mux @ sequencer.ml:48:2
+  measured from input pin_in4 @ sequencer.ml:95:83:
+      0 cycles: == @ sequencer.ml:48:2
+      1 cycles: | @ sequencer.ml:52:49
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[0:0] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[0:0] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[0:0] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[0:0] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[1:1] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[1:1] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[1:1] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[1:1] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[2:2] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[2:2] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[2:2] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[2:2] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[3:3] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[3:3] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[3:3] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[3:3] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[4:4] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[4:4] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[4:4] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[4:4] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[5:5] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[5:5] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[5:5] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[5:5] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[6:6] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[6:6] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[6:6] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[6:6] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[7:7] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[7:7] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[7:7] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[7:7] @ sequencer.ml:85:40
+reconvergence at | @ sequencer.ml:52:49
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      1 cycles: & @ sequencer.ml:52:50
+      0 cycles: & @ sequencer.ml:52:80
+sequencer (base): 437 of 572 nodes checked; 20 loop registers; 0 memories/instances cut
+== sequencer (base) (hold_registers): 52 finding(s)
+reconvergence at & @ sequencer.ml:52:50
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      1 cycles: reg @ sequencer.ml:16:16
+      0 cycles: not @ sequencer.ml:52:68
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[0:0] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[0:0] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[1:1] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[1:1] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[2:2] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[2:2] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[3:3] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[3:3] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[4:4] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[4:4] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[5:5] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[5:5] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[6:6] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[6:6] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[7:7] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:44:34
+  measured from input pin_in4 @ sequencer.ml:95:83:
+      0 cycles: == @ sequencer.ml:44:34
+      1 cycles: select[7:7] @ sequencer.ml:44:34
+reconvergence at mux @ sequencer.ml:48:2
+  measured from input pin_in4 @ sequencer.ml:95:83:
+      0 cycles: == @ sequencer.ml:48:2
+      1 cycles: reg @ sequencer.ml:16:16
+reconvergence at mux @ sequencer.ml:48:2
+  measured from input pin_in4 @ sequencer.ml:95:83:
+      0 cycles: == @ sequencer.ml:48:2
+      1 cycles: | @ sequencer.ml:52:49
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[0:0] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[0:0] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[0:0] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[0:0] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[1:1] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[1:1] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[1:1] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[1:1] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[2:2] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[2:2] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[2:2] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[2:2] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[3:3] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[3:3] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[3:3] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[3:3] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[4:4] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[4:4] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[4:4] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[4:4] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[5:5] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[5:5] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[5:5] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[5:5] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[6:6] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[6:6] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[6:6] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[6:6] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[7:7] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[7:7] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[7:7] @ sequencer.ml:85:40
+reconvergence at mux @ sequencer.ml:85:40
+  measured from input imem_data @ sequencer.ml:95:18:
+      1 cycles: < @ sequencer.ml:86:33
+      2 cycles: select[7:7] @ sequencer.ml:85:40
+reconvergence at | @ sequencer.ml:52:49
+  measured from input host_in_valid @ sequencer.ml:96:54:
+      1 cycles: & @ sequencer.ml:52:50
+      0 cycles: & @ sequencer.ml:52:80
+eth_rx h3: 114 of 165 nodes checked; 8 loop registers; 0 memories/instances cut
+== eth_rx h3 (defaults): 1 finding(s)
+reconvergence at == @ eth_rx.ml:18:19
+  measured from input rx @ eth_rx.ml:46:67:
+      2 cycles: reg @ eth_rx.ml:12:13
+      3 cycles: reg @ eth_rx.ml:13:16
+eth_rx h3: 114 of 165 nodes checked; 8 loop registers; 0 memories/instances cut
+== eth_rx h3 (hold_registers): 1 finding(s)
+reconvergence at == @ eth_rx.ml:18:19
+  measured from input rx @ eth_rx.ml:46:67:
+      2 cycles: reg @ eth_rx.ml:12:13
+      3 cycles: reg @ eth_rx.ml:13:16
+eth_rx_fixed h3: 114 of 165 nodes checked; 8 loop registers; 0 memories/instances cut
+== eth_rx_fixed h3 (defaults): 1 finding(s)
+reconvergence at == @ eth_rx_fixed.ml:24:19
+  measured from input rx @ eth_rx_fixed.ml:52:67:
+      2 cycles: reg @ eth_rx_fixed.ml:18:13
+      3 cycles: reg @ eth_rx_fixed.ml:19:16
+eth_rx_fixed h3: 114 of 165 nodes checked; 8 loop registers; 0 memories/instances cut
+== eth_rx_fixed h3 (hold_registers): 1 finding(s)
+reconvergence at == @ eth_rx_fixed.ml:24:19
+  measured from input rx @ eth_rx_fixed.ml:52:67:
+      2 cycles: reg @ eth_rx_fixed.ml:18:13
+      3 cycles: reg @ eth_rx_fixed.ml:19:16
