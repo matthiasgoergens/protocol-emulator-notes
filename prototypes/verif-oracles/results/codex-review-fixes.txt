@@ -1,0 +1,34 @@
+# codex-luna (read-only) on git diff 2d96174..HEAD of branch fix-findings, 2026-10-05; prompt in the session. Its final answer, then the triage.
+
+codex
+## Findings
+
+- **[P2] A lost I²C reply can leave the bus held low.** In [bridge_lib.ml](/home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/multi-proto/bridge_lib.ml:119), the write path lowers SCL before calling `answer` at line 121. If that `SEND` times out, execution jumps to `replylost`, which reports `0xFB` and returns to `top` without releasing SCL or issuing STOP ([lines 133–134](/home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/multi-proto/bridge_lib.ml:133)). A lost reply after a ninth clock can therefore leave the bus stuck low while the master accepts another byte code. This breaks the claim that the failure path leaves the bus and protocol in a sane state.
+
+- **[P2] USB flush can make stale reply bytes part of a later “whole” reply.** `flush` clears the FIFO and staged bytes only when `popped = 0`; after any byte has been consumed, it merely sets `forget` ([controller.ml](/home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/usb-ls/controller.ml:105)). A subsequent `queue_reply` appends new bytes to the existing staged queue ([lines 112–122](/home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/usb-ls/controller.ml:112)). `rdy` rises once that combined staged queue empties ([lines 238–241](/home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/usb-ls/controller.ml:238)), so a reset or new SETUP after a partial reply can expose the stale remainder followed by the new reply. The stall oracle does not exercise this sequence, so its runs don’t establish the broader stale/flush claim.
+
+- **[P3] The CAN slot-count comment does not match the listed instructions.** From `more`, the success path is `WAITC`, `IN`, `pad (n-sp-6)`, `JMP`; using `delay`’s slot count at [can_fw.ml:52–55](/home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/sequencer-v2/ports/can/can_fw.ml:52), that totals `1 + 1 + (n-sp-6) + 1 = n-sp-3`, not the stated `n-sp-2` at [lines 87–93](/home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/sequencer-v2/ports/can/can_fw.ml:87). The no-byte path also totals `pad (n-sp-4)` plus `JMP`, or `n-sp-3`. The two paths appear equal to each other; the discrepancy is in the claimed count. I could not establish from this arithmetic alone that the bit timing is wrong.
+
+## Claims I could not break
+
+- **Deadline-sequencer I²C timing and stretching:** Counting each emitted instruction as one slot, the `LDD`/`WAITD` delays and the following release/`WAITP` align with the documented no-stretch positions. The failure target releases both lines and halts. I found no path in this compiler sequence where a nonzero deadline makes a later branch or wait misbehave, and the waits are bounded. I could not break these claims.
+
+- **CAN underrun handler:** The `under` path sets TXD recessive before reporting underrun. I could not find a path from that handler that reasserts dominant output before it returns to input acquisition.
+
+- **USB FIFO capacity:** The controller checks that a whole reply, including its terminator, fits the configured depth before queueing it. The oracle uses depth 32 and computes the longest tested eight-byte reply. I could not break the capacity claim for replies the tested controller can queue; the flush issue above is about which bytes are in that reply.
+
+- **Oracle non-vacuity:** The I²C oracle checks both old and new no-stretch transcripts against expected bytes and requires the old firmware to break under stretch; its timeout cases check released lines and a stopped thread. The CAN oracle validates an unstalled reference frame and checks a flipped-transcript control. The PS/2 oracle requires contract-compliant runs to pass and early-doorbell runs to fail. The USB oracle checks controller/RTL lockstep and judges packet behaviour through the bench. I found no clear case where these oracles pass solely because the intended stall or comparison never occurs. The USB oracle’s coverage does not include the partial-reply flush sequence identified above.
+
+# Triage (each point checked against the code)
+# - "lost reply leaves SCL low": refuted as a defect. After every ninth clock the normal path
+#   also returns to "top" with SCL driven low; that is the master's state between byte codes, and
+#   the host, which receives 0xFB, continues or ends the transaction with its next code (STOP
+#   releases the lines). Before the fix the same state was held for ever inside the SEND.
+# - "USB flush can expose a stale remainder": not reachable as described. flush leaves bytes only
+#   when popped > 0, i.e. the firmware is inside the data loop, which has no exit but the
+#   terminator; it consumes the remainder (host_in_valid is Controller.valid, not RDY) before the
+#   next token reads RDY. RDY may rise during that packet, but nothing reads it then.
+# - "CAN slot count is n-sp-3": miscounted. From "more": WAITC byte, WAITC host, IN, pad
+#   (n-sp-6), JMP = n-sp-2; the no-byte path: WAITC byte (taken, one slot), pad (n-sp-4), JMP =
+#   n-sp-2. Measured as well: the unstalled txd transcripts before and after are identical and
+#   the slack moved by exactly one slot (960 -> 956 clocks).
