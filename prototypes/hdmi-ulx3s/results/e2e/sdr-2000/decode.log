@@ -1,0 +1,12 @@
+bit times captured: 9000000
+lane 0 word alignment: 1
+lane 1 word alignment: 1
+lane 2 word alignment: 1
+clock lane: first full word at 16, 0 wrong words after it
+lane 0: max |running disparity| 8
+lane 1: max |running disparity| 8
+lane 2: max |running disparity| 8
+timing: H 640/16/96/48 (total 800), V 480/10/2/33 (total 525), hsync -, vsync -
+complete frames: 1
+frame 640x480: 0 pixels differ from the reference
+E2E PASS

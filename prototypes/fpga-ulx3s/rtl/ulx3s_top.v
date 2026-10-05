@@ -21,6 +21,12 @@
 // degree phases, XORed onto the pin; one sampler per phase): a second EHXPLLL makes the four
 // phases of 60 MHz and the core runs on phase 0. Needs the sequencer with the sub-slot ISA
 // extension (pin_sub, pin_in4), i.e. master after the multiphase merge.
+//
+// With EMU_HDMI defined (build_hdmi.sh), ../hdmi-ulx3s/rtl/hdmi_out.v adds a 640x480@60 DVI
+// output on the GPDI connector (test pattern, or the retro console's game with HDMI_DEMO) from
+// its own EHXPLLL; it shares nothing with the core but the 25 MHz oscillator.  wifi_gpio0 is then
+// tied high, as in the stand-alone HDMI build.  The LEDs keep their meaning; the HDMI status
+// signals are not shown (bring HDMI up with the stand-alone bitstream first, BRINGUP.md step 11).
 `default_nettype none
 
 module ulx3s_top (
@@ -43,6 +49,11 @@ module ulx3s_top (
   output wire usb_fpga_pu_dp,
   output wire usb_fpga_pu_dn,
   output wire wifi_en
+`ifdef EMU_HDMI
+  ,
+  output wire [3:0] gpdi_dp,
+  output wire wifi_gpio0
+`endif
 );
   // ------------------------------------------------------------------ clocks and resets
   wire clk60, clk48, locked;
@@ -65,6 +76,13 @@ module ulx3s_top (
 
   // the ESP32 is not used; hold it in reset so it cannot drive shared pins
   assign wifi_en = 1'b0;
+
+`ifdef EMU_HDMI
+  // ------------------------------------------------------------------ HDMI output
+  wire [4:0] hdmi_status_unused;
+  hdmi_out hdmi (.clk_25mhz(clk_25mhz), .gpdi_dp(gpdi_dp), .status(hdmi_status_unused));
+  assign wifi_gpio0 = 1'b1;
+`endif
 
   // ------------------------------------------------------------------ the core
   wire [7:0] seq_out, seq_oe;

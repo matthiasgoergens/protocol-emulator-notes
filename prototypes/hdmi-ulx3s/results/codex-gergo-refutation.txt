@@ -1,0 +1,12 @@
+**(1) CONFIRMED.** The choice differs for inputs with exactly four 1s when `D[1]` and `D[0]` differ. For byte **0x1B** (`00011011`), `pop = 4`, `D[1] = 1`, and `D[0] = 1`: the code selects XNOR, while Figure 3-5 selects XOR because its condition tests `D[0] == 0`. At accumulator `0`, that changes `tag1` (`q_m[8]`) and the stage-one bits.
+
+**(2) CONFIRMED.** `tag1` is `q_m[8]`: the tuple’s `tag1` becomes output bit 8. In the inverting branch, the code uses `(if tag1 then 0 else 2) - popDiff`, but the flowchart’s term is `2*q_m[8] + N0 - N1`; the code has the `2` term reversed. In the non-inverting branch, it uses `(if tag1 then -2 else 0) + popDiff`, but the flowchart uses `-2*(~q_m[8]) + N1 - N0`; that `2` term is reversed too.
+
+For a worked inverting-branch example, take byte **0xFF** at accumulator **+1**. Its stage-one word is all ones and `pop1 = 8`, so `popDiff = 8`. The code takes the inverting branch and gives `accN = -8`; the flowchart gives `2*1 + 0 - 8 = -6`. The next accumulator therefore differs by 2. For a non-inverting example, byte **0x00** at accumulator **−1** has `tag1 = 1`, `pop1 = 0`, and `popDiff = −8`. The code gives `accN = −10`; the flowchart gives `−8`, again a difference of 2.
+
+**(3) CONFIRMED.** `Signed 4` wraps to −8…+7, so it cannot represent the flowchart’s reachable `cnt = +8`. The same byte **0xFF** from accumulator **+1** gives the flowchart update `+1 + 2*1 + 0 − 8 = −5`—not +8; a direct reachable +8 example needs a sequence. Separately, when `pop1 = 8`, `bitCoerce pop1` as `Signed 4` is −8; subtracting 4 and multiplying by 2 wraps, yielding −8 instead of the mathematical `+8`. Thus `popDiff` is wrong at that endpoint too.
+
+The transliteration’s `scanr1` direction is faithful: `bitCoerce` orders the vector MSB first, so `xs :< x` splits off bit 0; `scanr f x xs` then computes each next bit from the preceding lower bit. That matches the DVI recurrence from `q_m[0] = D[0]` upward. `bitCoerce` on the output tuple likewise places the tuple’s first field in the most significant bits, so `(tag2, tag1, stage2)` maps to bits 9, 8, and 7:0. `testBit d 1` really does inspect `D[1]`, and `popCountBV`’s result is coerced to `Signed 4` at `popDiff`.
+
+Source: [DVI 1.0, §3.2.2 and Figure 3-5](https://ez.analog.com/cfs-file/__key/communityserver-discussions-components-files/331/DVI_2D00_1.0_5F00_specs.pdf).
+exit 0

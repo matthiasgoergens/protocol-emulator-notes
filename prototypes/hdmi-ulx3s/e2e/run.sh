@@ -28,6 +28,6 @@ opam exec --switch=5.3.0 -- dune exec ./bin/emit.exe rtl/gen "$emit_mutant"
 git -C "$here" rev-parse HEAD > "$out/commit.txt"
 git -C "$here" status --porcelain -- . >> "$out/commit.txt"
 iverilog -g2012 $defs $extra -DPIX_PHASE_PS="$phase" -DBITS="$bits" -DCAPTURE="\"$out/capture.hex\"" \
-  -o "$out/tb.vvp" e2e/tb.v e2e/sim_models.v rtl/hdmi_top.v rtl/gen/hdmi_pixel.v rtl/gen/$serial.v
+  -o "$out/tb.vvp" e2e/tb.v e2e/sim_models.v rtl/hdmi_top.v rtl/hdmi_out.v rtl/gen/hdmi_pixel.v rtl/gen/$serial.v
 nice ionice vvp -n "$out/tb.vvp" | tee "$out/sim.log"
 nice ionice opam exec --switch=5.3.0 -- dune exec ./e2e/decode_capture.exe "$out/capture.hex" "$out" | tee "$out/decode.log"

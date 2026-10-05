@@ -1,7 +1,10 @@
 (* Decode a captured serial stream (tb.v: one hex digit per bit time, bit i = gpdi_dp[i]) with the
    independent decoder (../indep), compare the first complete frame with the test pattern's
    software reference, and write both as PNG.
-   Usage: decode_capture.exe CAPTURE OUT_DIR *)
+   Usage: decode_capture.exe CAPTURE OUT_DIR [PACKETS_HEX]
+   With PACKETS_HEX (one field of retro-console packets) the reference is the demo's expected
+   frame (demo/expected.ml), and the LAST complete frame is compared: the earlier ones are shown
+   while the frame buffer is still being filled. *)
 module I = Tmds_indep
 
 let () =
@@ -51,9 +54,20 @@ let () =
   Printf.printf "complete frames: %d\n" (List.length frames);
   match frames with
   | [] -> fail "no complete frame"
-  | f :: _ ->
+  | first_frame :: _ ->
+    let f, refpix =
+      if Array.length Sys.argv > 3 then begin
+        let bytes = In_channel.with_open_text Sys.argv.(3) In_channel.input_all
+                    |> String.split_on_char '\n' |> List.filter (fun l -> l <> "")
+                    |> List.map (fun l -> int_of_string ("0x" ^ l)) |> Array.of_list in
+        let plen = Hdmi_demo.Console.plen in
+        let packets = Array.init (Array.length bytes / plen) (fun i -> Array.sub bytes (i * plen) plen) in
+        if Array.length packets <> Hdmi_demo.Console.nvis then fail "expected one field of packets";
+        List.nth frames (List.length frames - 1), Hdmi_demo.Expected.frame packets
+      end else
+        first_frame, Hdmi_hw.Test_pattern.reference ~width:first_frame.width ~height:first_frame.height
+    in
     let mism = ref 0 in
-    let refpix x y = Hdmi_hw.Test_pattern.reference ~width:f.width ~height:f.height x y in
     for y = 0 to f.height - 1 do
       for x = 0 to f.width - 1 do
         if f.rgb.((y * f.width) + x) <> refpix x y then begin
@@ -68,5 +82,5 @@ let () =
     Png.write (Filename.concat out_dir "decoded.png") ~width:f.width ~height:f.height (fun x y -> f.rgb.((y * f.width) + x));
     Png.write (Filename.concat out_dir "expected.png") ~width:f.width ~height:f.height refpix;
     Printf.printf "frame %dx%d: %d pixels differ from the reference\n" f.width f.height !mism;
-    List.iteri (fun i (g : I.frame) -> if g.rgb <> f.rgb then Printf.printf "frame %d differs from frame 0\n" i) frames;
+    List.iteri (fun i (g : I.frame) -> if g.rgb <> f.rgb then Printf.printf "frame %d differs from the compared frame\n" i) frames;
     if !mism > 0 then fail "frame mismatch" else print_endline "E2E PASS"

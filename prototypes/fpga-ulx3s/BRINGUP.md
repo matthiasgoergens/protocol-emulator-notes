@@ -62,6 +62,13 @@ openFPGALoader --board ulx3s bitstream/ulx3s_85f.bit       # SRAM: lost at power
 - If LED 5 is off, the PLL did not lock. Rebuild with `ecppll`'s own 60/50 MHz dividers to tell
   the hand-edited 48 MHz dividers apart from a board problem.
 - **Checkpoint:** the heartbeat blinks at the right period, so the clock tree and the bitstream work.
+- **Standing first check, for every new clock (credit: Gergo Erdi).** Before trusting anything a
+  new clock drives, video above all, blink an LED at 1 Hz derived from that clock and time it
+  against a watch. Gergo's ULX3S VGA output showed nothing while his simulation looked right; an
+  LED blinking from the pixel clock showed the PLL was making 40 MHz instead of 25.175 MHz
+  (unsafePerformIO blog, 2018-09-02). A simulation runs whatever clock it is given, so only the
+  board can show what the PLL really makes. The heartbeat above is this check for the 60 MHz
+  domain; the HDMI build (step 11) has one LED per clock.
 
 ## 4. Host link
 
@@ -181,3 +188,29 @@ bitstream/ulx3s_85f.bit`, power-cycle, repeat step 5.
 (to `/var/tmp/fpga-ulx3s/build-mp/ulx3s_mp.bit`). Load it like the base bitstream. The quarter-clock
 edges (4.17 ns apart at 60 MHz) need an oscilloscope of at least 350 MHz; a 24 MS/s logic analyser
 cannot see them. See README, "Four-phase output stage on the ECP5".
+
+## 11. HDMI output (`../hdmi-ulx3s`)
+
+A separate bitstream: a 640x480@60 test pattern on the GPDI connector, plain DVI signalling
+(no HDMI data islands, so no sound), which every HDMI monitor accepts. Build and simulation details
+are in `../hdmi-ulx3s/README.md`.
+
+```
+cd ../hdmi-ulx3s && ./build.sh ddr     # or ./build.sh sdr; bitstreams in /var/tmp/hdmi-ulx3s/build/
+openFPGALoader --board ulx3s /var/tmp/hdmi-ulx3s/build/ddr/hdmi_ddr.bit
+```
+
+1. **Before plugging a monitor in, the standing first check** (step 3): LED 0 must blink at 1 Hz
+   (from the 25 MHz pixel clock) and LED 1 at 1 Hz (from the 125 or 250 MHz bit clock), in step
+   with each other, for as long as you watch. Time ten periods against a watch: 10 s. If either is
+   wrong the PLL is wrong, and nothing on the screen can be trusted.
+2. LED 2 (PLL locked) and LED 3 (serialiser armed) on; LED 4 (serialiser slip, sticky) off. LED 4
+   lit means the pixel and bit clocks drifted relative to each other, which two outputs of one PLL
+   cannot do: suspect the clocking.
+3. Plug a monitor into the GPDI connector. Expected (`../hdmi-ulx3s/results/e2e/sdr-2000/decoded.png`):
+   eight colour bars, a colour gradient, a one-pixel checkerboard and a grey ramp, with a one-pixel
+   white border on all four sides. The monitor's info menu should say 640x480 at 60 Hz (59.5).
+   A missing border edge means the monitor crops or the porches are off; a checkerboard that turns
+   grey or striped means bits are swapped in the serialiser (try the other variant).
+4. `-DHDMI_DEMO` builds (`./build.sh ddr demo`) show the retro console's game, eight fields looping
+   at 23.5 fields/s, scaled 2 x 2 with black side borders.

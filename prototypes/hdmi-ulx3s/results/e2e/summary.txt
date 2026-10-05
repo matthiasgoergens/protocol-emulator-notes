@@ -1,0 +1,9 @@
+ok  expect pass got pass  sdr 0  
+ok  expect pass got pass  sdr 2000  
+ok  expect pass got pass  ddr 0  
+ok  expect pass got pass  ddr 4000  
+ok  expect fail got fail  sdr 2000 latency  FAIL: frame mismatch
+ok  expect fail got fail  sdr 2000 xnor  Fatal error: exception Failure("invalid word 0x0cb on blue lane at cycle 128004")
+ok  expect fail got fail  sdr 2000 qm8  FAIL: lane 0 running disparity exceeds 8
+ok  expect fail got fail  sdr 2000 control  Fatal error: exception Failure("hsync period inconsistent (800 vs 144)")
+ok  expect fail got fail  ddr 4000 oddr_swap  FAIL: lane 1 aligned differently from blue

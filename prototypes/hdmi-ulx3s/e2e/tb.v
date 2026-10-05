@@ -7,7 +7,7 @@ module tb;
   wire [3:0] gpdi_dp;
   wire wifi_gpio0;
   hdmi_top dut (.clk_25mhz(clk_25mhz), .led(led), .gpdi_dp(gpdi_dp), .wifi_gpio0(wifi_gpio0));
-  defparam dut.pll.PIX_PHASE_PS = `PIX_PHASE_PS;
+  defparam dut.hdmi.pll.PIX_PHASE_PS = `PIX_PHASE_PS;
   integer f, n;
   // One bit time is 4 ns in both variants.  Sample in the middle of each: the SDR outputs change
   // on bit-clock rising edges (2 ns mod 4 ns), the DDR outputs on both edges (0 mod 4 ns).
@@ -17,9 +17,12 @@ module tb;
 `else
   localparam START_PS = 200000;
 `endif
+`ifndef SKIP_PS
+  `define SKIP_PS 0
+`endif
   initial begin
     f = $fopen(`CAPTURE, "w");
-    #(START_PS);
+    #(START_PS + `SKIP_PS);   // SKIP_PS: a multiple of 4000, to skip the start of a long run
     for (n = 0; n < `BITS; n = n + 1) begin
       $fwrite(f, "%h", gpdi_dp);
       #(BIT_PS);
