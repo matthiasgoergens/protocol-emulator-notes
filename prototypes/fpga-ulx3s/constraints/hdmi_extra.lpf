@@ -1,0 +1,12 @@
+# Added to ulx3s.lpf for the EMU_HDMI build (build_hdmi.sh): the GPDI video pairs and wifi_gpio0.
+# Same sites as ../../hdmi-ulx3s/constraints/hdmi.lpf (emard/ulx3s ulx3s_v20.lpf).
+LOCATE COMP "wifi_gpio0" SITE "L2";
+IOBUF  PORT "wifi_gpio0" PULLMODE=UP IO_TYPE=LVCMOS33 DRIVE=4;
+LOCATE COMP "gpdi_dp[0]" SITE "A16"; # Blue +   (gpdi_dn[0] is B16)
+LOCATE COMP "gpdi_dp[1]" SITE "A14"; # Green +  (gpdi_dn[1] is C14)
+LOCATE COMP "gpdi_dp[2]" SITE "A12"; # Red +    (gpdi_dn[2] is A13)
+LOCATE COMP "gpdi_dp[3]" SITE "A17"; # Clock +  (gpdi_dn[3] is B18)
+IOBUF PORT "gpdi_dp[0]" IO_TYPE=LVCMOS33D DRIVE=4;
+IOBUF PORT "gpdi_dp[1]" IO_TYPE=LVCMOS33D DRIVE=4;
+IOBUF PORT "gpdi_dp[2]" IO_TYPE=LVCMOS33D DRIVE=4;
+IOBUF PORT "gpdi_dp[3]" IO_TYPE=LVCMOS33D DRIVE=4;

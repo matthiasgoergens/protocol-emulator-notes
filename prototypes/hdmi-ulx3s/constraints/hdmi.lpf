@@ -1,0 +1,36 @@
+# ULX3S constraints for hdmi_top.v.  Pin sites from emard/ulx3s doc/constraints/ulx3s_v20.lpf (as
+# copied in ../../fpga-ulx3s/constraints/ulx3s.lpf), and for gpdi and wifi_gpio0 the same sites as
+# Gergo Erdi's ulx3s_v20_segpdi.lpf (clash-flappysquare, ulx3s-hdmi branch).  gpdi_dp is LVCMOS33D:
+# the I/O buffer drives gpdi_dn as the complement, so gpdi_dn is not a port of the design.
+BLOCK RESETPATHS;
+BLOCK ASYNCPATHS;
+SYSCONFIG CONFIG_IOVOLTAGE=3.3 COMPRESS_CONFIG=ON MCCLK_FREQ=62 SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=DISABLE SLAVE_PARALLEL_PORT=DISABLE;
+LOCATE COMP "clk_25mhz" SITE "G2";
+IOBUF  PORT "clk_25mhz" PULLMODE=NONE IO_TYPE=LVCMOS33;
+FREQUENCY PORT "clk_25mhz" 25 MHZ;
+LOCATE COMP "led[7]" SITE "H3";
+LOCATE COMP "led[6]" SITE "E1";
+LOCATE COMP "led[5]" SITE "E2";
+LOCATE COMP "led[4]" SITE "D1";
+LOCATE COMP "led[3]" SITE "D2";
+LOCATE COMP "led[2]" SITE "C1";
+LOCATE COMP "led[1]" SITE "C2";
+LOCATE COMP "led[0]" SITE "B2";
+IOBUF  PORT "led[0]" PULLMODE=NONE IO_TYPE=LVCMOS33 DRIVE=4;
+IOBUF  PORT "led[1]" PULLMODE=NONE IO_TYPE=LVCMOS33 DRIVE=4;
+IOBUF  PORT "led[2]" PULLMODE=NONE IO_TYPE=LVCMOS33 DRIVE=4;
+IOBUF  PORT "led[3]" PULLMODE=NONE IO_TYPE=LVCMOS33 DRIVE=4;
+IOBUF  PORT "led[4]" PULLMODE=NONE IO_TYPE=LVCMOS33 DRIVE=4;
+IOBUF  PORT "led[5]" PULLMODE=NONE IO_TYPE=LVCMOS33 DRIVE=4;
+IOBUF  PORT "led[6]" PULLMODE=NONE IO_TYPE=LVCMOS33 DRIVE=4;
+IOBUF  PORT "led[7]" PULLMODE=NONE IO_TYPE=LVCMOS33 DRIVE=4;
+LOCATE COMP "wifi_gpio0" SITE "L2";
+IOBUF  PORT "wifi_gpio0" PULLMODE=UP IO_TYPE=LVCMOS33 DRIVE=4;
+LOCATE COMP "gpdi_dp[0]" SITE "A16"; # Blue +   (gpdi_dn[0] is B16)
+LOCATE COMP "gpdi_dp[1]" SITE "A14"; # Green +  (gpdi_dn[1] is C14)
+LOCATE COMP "gpdi_dp[2]" SITE "A12"; # Red +    (gpdi_dn[2] is A13)
+LOCATE COMP "gpdi_dp[3]" SITE "A17"; # Clock +  (gpdi_dn[3] is B18)
+IOBUF PORT "gpdi_dp[0]" IO_TYPE=LVCMOS33D DRIVE=4;
+IOBUF PORT "gpdi_dp[1]" IO_TYPE=LVCMOS33D DRIVE=4;
+IOBUF PORT "gpdi_dp[2]" IO_TYPE=LVCMOS33D DRIVE=4;
+IOBUF PORT "gpdi_dp[3]" IO_TYPE=LVCMOS33D DRIVE=4;

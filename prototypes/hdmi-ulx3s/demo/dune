@@ -1,0 +1,11 @@
+; console.ml and game.ml are symlinks into ../../retro-console: the console RTL and its game,
+; unchanged.
+(library
+ (name hdmi_demo)
+ (modules console game console_hdmi expected)
+ (libraries base hardcaml hdmi_hw))
+
+(executable
+ (name gen_packets)
+ (modules gen_packets)
+ (libraries hdmi_demo))

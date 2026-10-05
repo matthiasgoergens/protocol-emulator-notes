@@ -182,6 +182,14 @@ sampler per phase. The ECP5 can prototype this directly:
   quarters, and independently reconstructs the stage's loopback samples. `fpga_tests.exe vcd`
   renders the result on a 4,167 ps quarter grid for Surfer or GTKWave.
 
+## HDMI output (`build_hdmi.sh`, `-DEMU_HDMI`)
+
+`../hdmi-ulx3s/rtl/hdmi_out.v`, a 640x480@60 DVI output on the GPDI connector from its own
+EHXPLLL (125 MHz DDR serialiser), added beside the core; `build_hdmi.sh demo` shows the retro
+console's game instead of the test pattern. The core and USB clocks still pass (67.0 and 85.6 MHz;
+61.5 MHz for the core with the demo), see `../hdmi-ulx3s/README.md`. Bring HDMI up with the
+stand-alone bitstream first (`BRINGUP.md`, step 11).
+
 ## Limits of the trace
 
 The recorder sees what the core saw and drove. For header pins, "saw" is the pad read back
@@ -235,6 +243,7 @@ commits, so the `rtl/gen` symlinks need nothing more.
 | `sim/sim_main.cpp`, `sim/build.sh` | Verilator board model (C++ port of `ocaml/env.ml`) |
 | `ocaml/` | tests, board model, checker (`isa.ml`, `compiler.ml`, `decoders.ml` symlinked) |
 | `host/emu_runner.py`, `host/test_emu_runner.py`, `host/usb_check.py` | runner for board and simulator, focused-control regressions, USB enumeration and loopback check |
+| `build_hdmi.sh`, `constraints/hdmi_extra.lpf`, `reports/hdmi*/` | the variant with HDMI output |
 | `BRINGUP.md` | the checklist |
 | `evidence/2026-09-25-sim/` | the simulated runs before the merge: 60 and 8 clocks per UART bit, the board-mode rehearsal, the interlock mutation |
 | `evidence/2026-09-25-sim-after-master/` | the same suite after merging master, and the regeneration logs |

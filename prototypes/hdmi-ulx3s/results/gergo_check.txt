@@ -1,0 +1,3 @@
+reachable accumulator values: -8 -6 -4 -2 0 2 4 6
+pairs 2048: decode(encode x) <> x: 0; words outside the 460 valid data words: 240; accumulator step <> word disparity: 1430
+1,000,000-word random stream: max |running disparity| = 466 (spec encoder: 8)

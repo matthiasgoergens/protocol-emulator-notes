@@ -1,0 +1,7 @@
+bit times captured: 9000000
+lane 0 word alignment: 1
+lane 1 word alignment: 1
+lane 2 word alignment: 1
+clock lane: first full word at 16, 0 wrong words after it
+lane 0: max |running disparity| 646
+FAIL: lane 0 running disparity exceeds 8
