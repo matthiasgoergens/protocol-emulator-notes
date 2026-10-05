@@ -6,6 +6,8 @@ Sources (fetched 2026-10-04; raw copies in `src/` and `src/w/` beside this file)
 - Competition post: <https://blog.janestreet.com/protocol-emulator-asic-competition/> (cited as COMP)
 - Writeups read (skimmed, not studied end to end): Soto Franco <https://www.sotofranco.dev/pdfs/asic-reverse-engineering.pdf>; Aaron Shi <https://pakkachan.github.io/asic/>; van Driel and Post <https://kjartanvandriel.github.io/asic/>; Garner (SPICE) <https://github.com/davidg351/Jane-Street-Puzzle-August-2026/blob/main/JaneStreetPuzzleWriteup_DavidGarner_FINAL.pdf>. Fetched but only sampled: Shapovalov, Ravishankar, Aravapalli, Taboada, Vargas, Wójcik, Smallwood.
 
+Corrections (2026-10-05): `learned-from-puzzle-solvers.md` section 5 corrects six points here. Notably, our post-layout round trip covers sg13g2, not the shuttle's sg13cmos5l. The puzzle post also asked solvers not to use AI to generate their write-ups. And the sentence about Soto Franco's section 7 is his own, not Jane Street's.
+
 Confidence note: everything under "Quotes" is verbatim from the pages above. Section 5 is my interpretation and is not Jane Street's.
 
 ## 1. What the puzzle chip was, and its style
