@@ -65,12 +65,15 @@ let fast_step f w =
   out
 
 (* ---- the pump thread (ISA v2), thread 0 ----
-   Every 340 slots (1360 clocks; 85 slots for mode B's 340 clocks): for each of the 4 bytes of a frame (L lo, L hi, R lo, R hi):
-   at dl = 0, WAITC host_in_valid is a one-slot branch; IN; SEND to port 4 (left) or 5
-   (right). The port glue sends a port's first byte as the feed's low byte and its second as
+   Every 340 slots (1360 clocks; 85 slots for mode B's 340 clocks): for each of the 4 bytes of a
+   frame (L lo, L hi, R lo, R hi): at dl = 0, WAITC host_in_valid is a one-slot branch; IN; STB
+   into the bank (bytes 0-3). Only when all four are in: LDB and SEND each to port 4 (left) or 5
+   (right), so both channels commit in the same period and a stereo frame is never torn (a
+   review found the first version, which sent each byte as it arrived, could commit L without R). The port glue sends a port's first byte as the feed's low byte and its second as
    the high byte, which commits the word (E2). If a byte is missing (underrun), U_k reports it
    (OUT tag 1, imm k), waits for the next sample instant, and retries byte k at exactly the
-   slot it would have had: a frame is delayed, never torn or dropped. *)
+   slot it would have had (the bank pointer still points at byte k): a frame is delayed, never
+   torn or dropped. *)
 module A = Isa2
 
 (* threads 1-3 are parked here (HALT = JMP self); the DAC needs only thread 0 *)
@@ -78,19 +81,19 @@ let idle_pc = 200
 
 let pump_programme ?(sample_clocks = sample_clocks) () =
   let slots = sample_clocks / 4 in
-  (* addresses: B_k = 1 + 3k; LDD at 13; JMP at 14; U_k at 15 + 4k *)
-  let b k = 1 + (3 * k) and u k = 15 + (4 * k) in
+  (* addresses: B_k (WAITC of byte k) = 3 + 3k; commit block 15-24; LDD 25; JMP 26; U_k = 27 + 4k *)
+  let b k = 3 + (3 * k) and u k = 27 + (4 * k) in
   let body =
-    [ A.waitd ]
+    [ A.waitd; A.lda 0; A.bank 0 ]
+    @ List.concat (List.init 4 (fun k -> [ A.waitc ~cond:A.c_host ~fail:(u k); A.in_; A.stb ]))
+    @ [ A.lda 0; A.bank 0 ]
     @ List.concat
-        (List.init 4 (fun k ->
-             let ch = if k < 2 then 4 else 5 in
-             [ A.waitc ~cond:A.c_host ~fail:(u k); A.in_; A.send ~ch ~fail:(b k + 3) ]))
-    @ [ A.ldd (slots - 14); A.jmp 0 ]
+        (List.init 4 (fun k -> let ch = if k < 2 then 4 else 5 in [ A.ldb; A.send ~ch ~fail:(17 + (2 * k) + 1) ]))
+    @ [ A.ldd (slots - 26); A.jmp 0 ]
   in
   let under = List.concat (List.init 4 (fun k -> [ A.outi ~tag:1 k; A.ldd (slots - 5); A.waitd; A.jmp (b k) ])) in
   let prog = body @ under in
-  assert (List.length body = 15);
+  assert (List.length body = 27);
   let mem = Array.make A.store_len (A.jmp 0) in
   List.iteri (fun i w -> mem.(i) <- w) prog;
   mem.(idle_pc) <- A.jmp idle_pc;
@@ -103,7 +106,7 @@ type host = {
   mutable next : int;            (* index of the next byte the host would send *)
   bytes : int array;             (* the whole stream, frame after frame *)
   mutable link_busy : int;       (* clocks until the link can carry the next byte *)
-  pause : int -> bool;           (* host stalls at this clock (underrun experiments) *)
+  pause : int -> int -> bool;    (* host stalls at this clock, given the next byte index *)
 }
 
 (* 4-bit link at 15 MHz: one byte per 8 clocks at 60 MHz *)
@@ -111,7 +114,7 @@ let link_clocks_per_byte = 8
 
 let host_tick h clk =
   if h.link_busy > 0 then h.link_busy <- h.link_busy - 1
-  else if (not (h.pause clk)) && h.next < Array.length h.bytes && Queue.length h.fifo < h.depth then begin
+  else if (not (h.pause clk h.next)) && h.next < Array.length h.bytes && Queue.length h.fifo < h.depth then begin
     Queue.push h.bytes.(h.next) h.fifo;
     h.next <- h.next + 1;
     h.link_busy <- link_clocks_per_byte - 1
@@ -158,7 +161,7 @@ module System (S : SIM) = struct
     push { idle with mbx_wr = true; mbx_seg = 3; mbx_sel = 3; mbx_byte = period };
     List.rev !l
 
-  let create ?(log_inputs = false) ?(depth = 16) ?(pause = fun _ -> false) ?(sample_clocks = sample_clocks) ~ops_l ~ops_r ~bytes () =
+  let create ?(log_inputs = false) ?(depth = 16) ?(pause = fun _ _ -> false) ?(sample_clocks = sample_clocks) ~ops_l ~ops_r ~bytes () =
     let arr = S.create () in
     let t =
       { arr; seq = A.init ~boot:[| (0, 0); (0, idle_pc); (0, idle_pc); (0, idle_pc) |] (); mem = pump_programme ~sample_clocks ();

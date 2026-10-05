@@ -135,7 +135,9 @@ let rtl_lockstep order clocks amp =
 
 (* pump timing and underruns: commit clocks modulo the sample period, steps per sample *)
 let pump_check sample_clocks clocks =
-  let pause c = c >= 400_000 && c < 520_000 in
+  (* the host stalls between the left and the right half of a frame: from clock 400,000 it
+     sends nothing once the next byte is a frame's third (R lo), until clock 520,000 *)
+  let pause c next = c >= 400_000 && c < 520_000 && (c >= 401_000 || next land 3 = 2) in
   pr "sample period %d clocks (%d steps)\n" sample_clocks (sample_clocks / Dac.period);
   let sys, _, steps = system_run ~pause ~sample_clocks ~order:"o3" ~clocks ~amp:8000. () in
   let commits = List.rev sys.SysM.commits in
@@ -143,8 +145,13 @@ let pump_check sample_clocks clocks =
   List.iter (fun (c, sg, _) -> Hashtbl.replace phases (sg, c mod sample_clocks) (1 + Option.value ~default:0 (Hashtbl.find_opt phases (sg, c mod sample_clocks)))) commits;
   pr "commits: %d; (segment, clock mod %d) -> count:\n" (List.length commits) sample_clocks;
   Hashtbl.iter (fun (sg, ph) n -> pr "  seg %d phase %4d: %d\n" sg ph n) phases;
+  (* a torn frame would show as a sample period with a commit on one side only *)
+  let per = Hashtbl.create 1024 in
+  List.iter (fun (c, sg, _) -> let k = c / sample_clocks in Hashtbl.replace per k (sg :: Option.value ~default:[] (Hashtbl.find_opt per k))) commits;
+  let torn = Hashtbl.fold (fun _ l n -> if List.length l <> 2 || List.sort compare l <> [ 0; 3 ] then n + 1 else n) per 0 in
+  pr "sample periods with commits: %d; with other than one left and one right commit (torn): %d\n" (Hashtbl.length per) torn;
   let ur = List.rev sys.SysM.underruns in
-  pr "underrun reports: %d (host paused clocks 400000-519999)\n" (List.length ur);
+  pr "underrun reports: %d (host stalled mid-frame from clock 400000 to 519999)\n" (List.length ur);
   List.iteri (fun i (c, k) -> if i < 3 || i >= List.length ur - 2 then pr "  clock %d byte %d\n" c k) ur;
   (* steps per distinct word on the left, the ZOH length *)
   let st = steps.(0) in
@@ -164,8 +171,83 @@ let render order inpath outprefix steps shift0 =
   Dac.write_bits (outprefix ^ ".R.bits") br;
   pr "%s: %d samples x %d steps per channel, %.1f s\n" order (Array.length l) steps (Unix.gettimeofday () -. t0)
 
+(* ---- compressed audio ---- *)
+module CrcM = Codec.Pe_crc (struct include Model type t = Model.t end)
+
+let adpcm inp outp =
+  let ch, pcm, nb, per = Codec.adpcm_decode inp in
+  Codec.write_s16 outp pcm;
+  pr "adpcm: %d channels, %d blocks of %d samples, %d samples per channel; predictor PE steps %d (%.2f per sample)\n" ch nb per
+    (Array.length pcm / ch) !Codec.pe_steps (float !Codec.pe_steps /. float (Array.length pcm))
+
+let sbc_run ?(crc = Codec.crc8_ref) s =
+  Codec.n_frames := 0; Codec.n_alloc_ops := 0; Codec.n_mac := 0; Codec.n_div := 0; Codec.n_crc_bits := 0;
+  Codec.sbc_decode ~crc s
+
+let sbc inp outp how =
+  let s = Codec.read_file inp in
+  let crc =
+    match how with
+    | "pe" -> CrcM.crc
+    | "pe-rtl" ->
+      let r = Rtlsim.create () in
+      CrcM.other := Some (Rtlsim.cycle r, fun () -> Rtlsim.state r);
+      CrcM.crc
+    | _ -> Codec.crc8_ref
+  in
+  let ch, pcm, good, bad = sbc_run ~crc s in
+  Codec.write_s16 outp pcm;
+  let fr = float !Codec.n_frames in
+  pr "sbc (%s CRC): %d channels, %d frames decoded, %d rejected, %d samples per channel\n" how ch good bad (Array.length pcm / max 1 ch);
+  pr "  per frame: %.0f CRC bits, %.0f allocation operations, %.0f dequantisations (divisions), %.0f MACs\n"
+    (float !Codec.n_crc_bits /. fr) (float !Codec.n_alloc_ops /. fr) (float !Codec.n_div /. fr) (float !Codec.n_mac /. fr);
+  if how <> "ref" then
+    pr "  PE array clocks for the CRCs: %d (%.0f per frame)%s\n" !CrcM.clocks (float !CrcM.clocks /. fr)
+      (match how, !CrcM.mismatch with
+       | "pe-rtl", None -> "; Hardcaml RTL in lockstep: 0 mismatches"
+       | "pe-rtl", Some c -> Printf.sprintf "; RTL MISMATCH at clock %d" c
+       | _ -> "")
+
+(* planted controls: each must be caught *)
+let sbc_controls inp =
+  let s = Codec.read_file inp in
+  let _, clean, g0, b0 = sbc_run s in
+  pr "clean: %d frames, %d rejected\n" g0 b0;
+  (* 1: corrupt the CRC byte of frame 10 (the frame length from the clean parse) *)
+  let flen = let _, l = Codec.unpack s 0 ~crc:Codec.crc8_ref in l in
+  let b = Bytes.of_string s in
+  let at = (10 * flen) + 3 in
+  Bytes.set b at (Char.chr (Char.code s.[at] lxor 0x01));
+  let _, pcm1, g1, b1 = sbc_run ~crc:CrcM.crc (Bytes.to_string b) in
+  pr "control 1, CRC byte of frame 10 flipped, CRC on the PE: %d decoded, %d rejected -> %s\n" g1 b1
+    (if b1 = 1 && g1 = g0 - 1 then "CAUGHT" else "MISSED");
+  ignore pcm1;
+  (* 2: one scale-factor bit flipped in frame 20 (the CRC covers it) *)
+  let b = Bytes.of_string s in
+  let at = (20 * flen) + 5 in
+  Bytes.set b at (Char.chr (Char.code s.[at] lxor 0x10));
+  let _, _, g2, b2 = sbc_run ~crc:CrcM.crc (Bytes.to_string b) in
+  pr "control 2, a scale-factor bit of frame 20 flipped: %d decoded, %d rejected -> %s\n" g2 b2 (if b2 = 1 then "CAUGHT" else "MISSED");
+  (* 3: a wrong bit allocation (loudness offset of subband 0 off by one) *)
+  Codec.fault := "alloc_offset";
+  let _, pcm3, _, _ = sbc_run s in
+  Codec.fault := "";
+  let diffs = ref 0 in
+  Array.iteri (fun i v -> if i < Array.length clean && v <> clean.(i) then incr diffs) pcm3;
+  pr "control 3, loudness offset of subband 0 off by one: %d of %d samples differ from the clean decode%s -> %s\n" !diffs
+    (Array.length clean) (if Array.length pcm3 <> Array.length clean then " (length differs)" else "")
+    (if !diffs > 0 || Array.length pcm3 <> Array.length clean then "CAUGHT (the reference comparison fails)" else "MISSED");
+  (* 4: the PE CRC with a wrong polynomial bit must reject every frame *)
+  Codec.fault := "crc_poly";
+  let _, _, g4, b4 = sbc_run ~crc:CrcM.crc s in
+  Codec.fault := "";
+  pr "control 4, the PE CRC's result with one bit wrong: %d decoded, %d rejected -> %s\n" g4 b4 (if g4 = 0 then "CAUGHT" else "MISSED")
+
 let () =
   match Array.to_list Sys.argv with
+  | [ _; "adpcm"; i; o ] -> adpcm i o
+  | [ _; "sbc"; i; o; how ] -> sbc i o how
+  | [ _; "sbc-controls"; i ] -> sbc_controls i
   | [ _; "check-fast"; o; c; a ] -> check_fast o (int_of_string c) (float_of_string a)
   | [ _; "rtl-lockstep"; o; c; a ] -> rtl_lockstep o (int_of_string c) (float_of_string a)
   | [ _; "pump-check"; p; c ] -> pump_check (int_of_string p) (int_of_string c)

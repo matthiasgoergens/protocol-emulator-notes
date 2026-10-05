@@ -1,10 +1,10 @@
 == rtl-lockstep o2 clocks 3000000 amplitude 8000
-o2: 3000134 clocks (setup and 300000 modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled 194118 times; model events: saturated 72, lane_loop 6000007, repeat_tick 600000
+o2: 3000134 clocks (setup and 300000 modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled 194222 times; model events: saturated 59, lane_loop 6000007, repeat_tick 600000
 == rtl-lockstep o3 clocks 3000000 amplitude 6000
-o3: 3000134 clocks (setup and 300000 modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled 201483 times; model events: saturated 337, lane_loop 6000007, repeat_tick 600000
+o3: 3000134 clocks (setup and 300000 modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled 201928 times; model events: saturated 342, lane_loop 6000007, repeat_tick 600000
 == rtl-lockstep o3 clocks 1000000 amplitude 11000
-o3: 1000134 clocks (setup and 100000 modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled 55205 times; model events: saturated 6533, lane_loop 2000007, repeat_tick 200000
+o3: 1000134 clocks (setup and 100000 modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled 55079 times; model events: saturated 6655, lane_loop 2000007, repeat_tick 200000
 == rtl-lockstep o4 clocks 3000000 amplitude 3500
-o4: 3000134 clocks (setup and 300000 modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled 219418 times; model events: saturated 4257, lane_loop 6000007, repeat_tick 600000
+o4: 3000134 clocks (setup and 300000 modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled 219361 times; model events: saturated 4250, lane_loop 6000007, repeat_tick 600000
 == rtl-lockstep o4 clocks 1000000 amplitude 6000
-o4: 1000134 clocks (setup and 100000 modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled 65063 times; model events: saturated 15587, lane_loop 2000007, repeat_tick 200000
+o4: 1000134 clocks (setup and 100000 modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled 65094 times; model events: saturated 15602, lane_loop 2000007, repeat_tick 200000
