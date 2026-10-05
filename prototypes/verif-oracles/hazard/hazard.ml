@@ -24,11 +24,16 @@
      in their declared clocks), and whether the resource is declared shared between them;
    - COUNTERPART: a SEND needs a reachable RECV on that inbox in another thread, and vice versa.
 
-   Not checked (stated, not hidden): runtime pc changes by the host (D1 of sequencer-v2); the bank
-   pointer crossing from bank 0 into bank 1 by post-increment (the bank of LDB/STB comes from a
-   data-flow pass over BANK's imm[1], see [flow]); programmes that patch their
-   own words (usb-ls's controller); timing (deadlines met), which is the lockstep's and the
-   protocol models' job; whether two bank users touch disjoint addresses (the allocator's job). *)
+   - OWNERSHIP of the bank, the inboxes and the ports (../../sequencer-v2/ownership.ml, declared
+     per thread in [decl.owns]): a use outside the thread's declaration is "undeclared", for which
+     the SOLO table has no entry, so it is REJECTED. Bank addresses come from a data-flow analysis
+     of the bank pointer (see [flow]): every address an LDB or STB can reach must be in the
+     thread's declared ranges. Since the ranges are declared per thread, two threads' bank uses
+     are disjoint exactly when their declarations are, which is checked too ([overlaps]).
+
+   Not checked (stated, not hidden): runtime pc changes by the host (D1 of sequencer-v2);
+   programmes that patch their own words (usb-ls's controller); timing (deadlines met), which is
+   the lockstep's and the protocol models' job. *)
 
 exception Unhandled of string
 exception Bad_table of string
@@ -103,7 +108,8 @@ let actor_name = function
 
 (* ---- declarations ---- *)
 type decl = {
-  grants : (resource * actor * kind list) list;   (* actor may use resource with these kinds *)
+  grants : (resource * actor * kind list) list;   (* pins only: actor may use the pin with these kinds *)
+  owns : Ownership.t;                             (* bank addresses, inboxes and ports, per thread *)
   shared : (resource * actor list) list;          (* declared sharing groups (e.g. a TDM pin) *)
   refresh : (int * int * int) list;               (* bank, period, offset: clocks the refresh owns *)
   streams : (int * int) list;                     (* bank, segment: the array uses the bank port every clock *)
@@ -113,7 +119,7 @@ type decl = {
      WAIVED with its reason, never silent. The table itself is not changed by a waiver. *)
 }
 
-let no_decl = { grants = []; shared = []; refresh = []; streams = []; boot = Array.init 4 (fun t -> (t, 0)); waivers = [] }
+let no_decl = { grants = []; owns = Ownership.none (); shared = []; refresh = []; streams = []; boot = Array.init 4 (fun t -> (t, 0)); waivers = [] }
 
 (* ---- the tables ---- *)
 type decl_rel = Declared | Undeclared
@@ -191,7 +197,8 @@ type tables = { solo : ((kind * wait * decl_rel) * string) list; pairs : ((kind 
 let default_tables = { solo = solo_table; pairs = pair_table }
 
 (* ---- uses of one instruction ---- *)
-type use = { res : resource; kind : kind; actor : actor; addr : int; wait : wait; text : string }
+type use = { res : resource; kind : kind; actor : actor; addr : int; wait : wait; text : string;
+             cells : int list (* LDB, STB: the bank addresses it can touch; [] otherwise *) }
 
 let n_threads = 4
 
@@ -214,15 +221,35 @@ let wait_class ~fetch ~page ~self ~fail =
     end in
   go fail
 
-(* the bank bit a BANK sets (bp <- {imm[1:0], acc}, bank = bp[9] = imm[1]), and a SEND's channel *)
-let bank_hi = function
-  | Bank { hi } -> Some ((hi lsr 1) land 1)
+(* the bank pointer a BANK sets: bp <- {imm[1:0], acc} *)
+let bank_sel = function
+  | Bank { hi } -> Some (hi land 3)
   | Nop | Setp _ | Ldc | Ldd | Lda | Waitp _ | Waitd | Sho _ | Shi _ | Jmp _ | Jnz _ | Out | In | Send _ | Recv _
   | Waitc _ | Skne | Skeq | Fine | Cnta | Ldb | Stb | Cfg | Ext_reserved _ -> None
 let send_ch = function
   | Send { ch; _ } -> Some ch
   | Nop | Setp _ | Ldc | Ldd | Lda | Waitp _ | Waitd | Sho _ | Shi _ | Jmp _ | Jnz _ | Out | In | Bank _ | Recv _
   | Waitc _ | Skne | Skeq | Fine | Cnta | Ldb | Stb | Cfg | Ext_reserved _ -> None
+
+(* the accumulator, as far as BANK needs it: a known constant, or anything *)
+type acc = Known of int | Any
+(* what an instruction leaves in the accumulator, given what was there; [imm] is the word's low
+   byte (LDA's immediate) *)
+let acc_after i ~imm a = match i with
+  | Lda -> Known imm
+  | In | Recv _ | Shi _ | Sho _ | Ldb -> Any
+  | Nop | Setp _ | Ldc | Ldd | Waitp _ | Waitd | Jmp _ | Jnz _ | Out | Send _ | Waitc _ | Skne | Skeq | Fine
+  | Cnta | Stb | Bank _ | Cfg | Ext_reserved _ -> a
+
+(* does the instruction step the bank pointer (post-increment)? *)
+let steps_bp = function
+  | Ldb | Stb -> true
+  | Nop | Setp _ | Ldc | Ldd | Lda | Waitp _ | Waitd | Sho _ | Shi _ | Jmp _ | Jnz _ | Out | In | Send _ | Recv _
+  | Waitc _ | Skne | Skeq | Fine | Cnta | Bank _ | Cfg | Ext_reserved _ -> false
+
+let join_acc x y = match x, y with
+  | Known a, Known b -> if a = b then Known a else Any
+  | Known _, Any | Any, Known _ | Any, Any -> Any
 
 (* successors of the instruction at [pc] *)
 let successors ~fetch ~page pc =
@@ -235,36 +262,62 @@ let successors ~fetch ~page pc =
   | Nop | Setp _ | Ldc | Ldd | Lda | Sho _ | Shi _ | Out | Fine | Cnta | Ldb | Stb | Bank _ | Cfg -> [ nx ]
   | Ext_reserved s -> raise (Unhandled (Printf.sprintf "page %d pc %d: reserved EXT operation %d" page pc s))
 
-(* Reachable addresses with, at each, the banks the thread's pointer can be in and the channels
-   its last SEND can name (bit sets), by a forward data-flow fixpoint from reset (bank 0, lsend
-   0, as the RTL resets them). BANK sets the bank bit; SEND sets lsend on every path, taken or
-   not (D3); everything else keeps both. The bank pointer's post-increment can carry from bank 0
-   into bank 1 at address 511; that is not modelled. *)
+(* Reachable addresses with, at each, the values the bank pointer can hold and the channels the
+   thread's last SEND can name, by a forward data-flow fixpoint from reset (bp 0, acc 0, lsend 0,
+   as the RTL resets them). The pointer is a set of the 1024 bank addresses: BANK sets it from
+   its immediate and the accumulator (all 256 low bytes when the accumulator is not a known
+   constant), LDB and STB add one (mod 1024, so a carry into bank 1 is followed), everything else
+   keeps it. The accumulator is tracked only as far as LDA's immediate. SEND sets lsend on every
+   path, taken or not (D3). The sets only grow and are finite, so the fixpoint is reached; a
+   pointer stepped in a loop grows to every address the loop could reach without a bound on the
+   loop count, which over-approximates. *)
 let flow ~fetch ~page ~start =
-  let banks = Array.make 256 0 and lsend = Array.make 256 0 and seen = Array.make 256 false in
+  let bps = Array.init 256 (fun _ -> Array.make 1024 false) and acc = Array.make 256 Any
+  and lsend = Array.make 256 0 and seen = Array.make 256 false in
   let work = Queue.create () in
-  let join pc b l =
-    let nb = banks.(pc) lor b and nl = lsend.(pc) lor l in
-    if not seen.(pc) || nb <> banks.(pc) || nl <> lsend.(pc) then begin
-      seen.(pc) <- true; banks.(pc) <- nb; lsend.(pc) <- nl; Queue.push pc work
-    end in
-  join start 1 1;
+  let join pc (bp : bool array) a l =
+    let changed = ref (not seen.(pc)) in
+    Array.iteri (fun i v -> if v && not bps.(pc).(i) then (bps.(pc).(i) <- true; changed := true)) bp;
+    let a' = if not seen.(pc) then a else join_acc acc.(pc) a in
+    if a' <> acc.(pc) then changed := true;
+    acc.(pc) <- a';
+    let nl = lsend.(pc) lor l in
+    if nl <> lsend.(pc) then changed := true;
+    lsend.(pc) <- nl;
+    if !changed then (seen.(pc) <- true; Queue.push pc work) in
+  join start (Array.init 1024 (fun i -> i = 0)) (Known 0) 1;
   while not (Queue.is_empty work) do
     let pc = Queue.pop work in
-    let b = (match bank_hi (decode (fetch ((page lsl 8) lor pc))) with Some h -> 1 lsl h | None -> banks.(pc))
-    and l = (match send_ch (decode (fetch ((page lsl 8) lor pc))) with Some c -> 1 lsl c | None -> lsend.(pc)) in
-    List.iter (fun s -> join s b l) (successors ~fetch ~page pc)
+    let w = fetch ((page lsl 8) lor pc) in
+    let i = decode w in
+    let bp = bps.(pc) in
+    let bp' = match bank_sel i with
+      | Some sel ->
+        let lows = match acc.(pc) with Known a -> [ a land 0xFF ] | Any -> List.init 256 Fun.id in
+        let n = Array.make 1024 false in List.iter (fun lo -> n.((sel lsl 8) lor lo) <- true) lows; n
+      | None -> if steps_bp i then Array.init 1024 (fun k -> bp.((k + 1023) land 1023)) else Array.copy bp in
+    let a' = acc_after i ~imm:(w land 0xFF) acc.(pc)
+    and l = (match send_ch i with Some c -> 1 lsl c | None -> lsend.(pc)) in
+    List.iter (fun s -> join s bp' a' l) (successors ~fetch ~page pc)
   done;
   let bits m n = List.filter (fun i -> (m lsr i) land 1 = 1) (List.init n Fun.id) in
-  List.filter_map (fun pc -> if seen.(pc) then Some (pc, bits banks.(pc) 2, bits lsend.(pc) 8) else None) (List.init 256 Fun.id)
+  List.filter_map (fun pc ->
+      if seen.(pc) then Some (pc, List.filter (fun a -> bps.(pc).(a)) (List.init 1024 Fun.id), bits lsend.(pc) 8) else None)
+    (List.init 256 Fun.id)
 
 let uses_of_thread ~fetch ~(decl : decl) t =
   let page, start = decl.boot.(t) in
   let actor = Thread t in
   let at pc = (page lsl 8) lor pc in
-  List.concat_map (fun (pc, banks, lsends) ->
+  List.concat_map (fun (pc, cells, lsends) ->
       let i = decode (fetch (at pc)) in
-      let mk ?(wait = No_wait) res kind text = { res; kind; actor; addr = at pc; wait; text } in
+      let mk ?(wait = No_wait) ?(cells = []) res kind text = { res; kind; actor; addr = at pc; wait; text; cells } in
+      (* one use per bank the pointer can be in, with the addresses in that bank *)
+      let per_bank kind text =
+        List.filter_map (fun b ->
+            match List.filter (fun a -> a lsr 9 = b) cells with
+            | [] -> None
+            | cs -> Some (mk ~cells:cs (Bankr b) kind text)) [ 0; 1 ] in
       let wc fail = wait_class ~fetch ~page ~self:pc ~fail in
       match i with
       | Setp { mask } -> List.filter_map (fun p -> if (mask lsr p) land 1 = 1 then Some (mk (Pin p) Pin_drive "SETP") else None) [ 0; 1; 2; 3; 4; 5; 6; 7 ]
@@ -274,8 +327,8 @@ let uses_of_thread ~fetch ~(decl : decl) t =
         @ (if cap then [ mk (Pin (pin lxor 1)) Pin_sample "SHO capture" ] else [])
       | Waitp { pin; _ } -> [ mk (Pin pin) Pin_sample "WAITP" ]
       | Shi { pin } -> [ mk (Pin pin) Pin_sample "SHI" ]
-      | Ldb -> List.map (fun b -> mk (Bankr b) Bank_read "LDB") banks
-      | Stb -> List.map (fun b -> mk (Bankr b) Bank_write "STB") banks
+      | Ldb -> per_bank Bank_read "LDB"
+      | Stb -> per_bank Bank_write "STB"
       | Send { ch; fail } ->
         if ch < 4 then [ mk ~wait:(wc fail) (Inbox ch) Send_k "SEND" ] else [ mk ~wait:(wc fail) (Feed (ch - 4)) Feed_push "SEND port" ]
       | Recv { ch; fail } ->
@@ -293,9 +346,10 @@ let uses_of_thread ~fetch ~(decl : decl) t =
 let declared_uses (d : decl) =
   List.map (fun (b, period, offset) ->
       { res = Bankr b; kind = Bank_refresh; actor = Refresher; addr = -1; wait = No_wait;
-        text = Printf.sprintf "refresh every %d clocks at %d" period offset }) d.refresh
+        text = Printf.sprintf "refresh every %d clocks at %d" period offset; cells = [] }) d.refresh
   @ List.map (fun (b, seg) ->
-      { res = Bankr b; kind = Bank_stream; actor = Array_seg seg; addr = -1; wait = No_wait; text = "array stream, every clock" }) d.streams
+      { res = Bankr b; kind = Bank_stream; actor = Array_seg seg; addr = -1; wait = No_wait; text = "array stream, every clock";
+        cells = [] }) d.streams
 
 (* clocks an actor can use a resource in: (period, offset) *)
 let clocks (d : decl) u =
@@ -310,10 +364,41 @@ let coincide d u v =
   let pa, oa = clocks d u and pb, ob = clocks d v in
   let g = gcd pa pb in ((oa - ob) mod g + g) mod g = 0
 
+(* Is the use within the thread's declaration? Pins: [grants]; everything else: [owns]. A kind
+   that does not belong to its resource's class cannot reach here ([check] raises first). *)
 let is_declared (d : decl) u =
   match u.actor with
   | Refresher | Array_seg _ -> true
-  | Thread _ -> List.exists (fun (r, a, ks) -> r = u.res && a = u.actor && List.mem u.kind ks) d.grants
+  | Thread t ->
+    let o = d.owns.(t) in
+    (match u.res, u.kind with
+     | Pin _, (Pin_drive | Pin_sample) -> List.exists (fun (r, a, ks) -> r = u.res && a = u.actor && List.mem u.kind ks) d.grants
+     | Bankr _, Bank_read -> u.cells <> [] && List.for_all (Ownership.in_ranges o.bank_read) u.cells
+     | Bankr _, Bank_write -> u.cells <> [] && List.for_all (Ownership.in_ranges o.bank_write) u.cells
+     | Inbox i, (Send_k | Space_wait) -> List.mem i o.inbox_send
+     | Inbox i, (Recv_k | Poll) -> List.mem i o.inbox_recv
+     | Feed j, Feed_push -> List.mem j o.port_out
+     | Tap j, Tap_pop -> List.mem j o.port_in
+     | Pin _, (Bank_read | Bank_write | Bank_refresh | Bank_stream | Send_k | Space_wait | Recv_k | Poll | Feed_push | Tap_pop)
+     | Bankr _, (Pin_drive | Pin_sample | Bank_refresh | Bank_stream | Send_k | Space_wait | Recv_k | Poll | Feed_push | Tap_pop)
+     | Inbox _, (Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream | Feed_push | Tap_pop)
+     | Feed _, (Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream | Send_k | Space_wait | Recv_k | Poll | Tap_pop)
+     | Tap _, (Pin_drive | Pin_sample | Bank_read | Bank_write | Bank_refresh | Bank_stream | Send_k | Space_wait | Recv_k | Poll | Feed_push) ->
+       false)
+
+(* the bank addresses of a use outside the declared ranges, as text *)
+let cells_outside (d : decl) u =
+  match u.actor, u.kind with
+  | Thread t, (Bank_read | Bank_write) ->
+    let r = if u.kind = Bank_read then d.owns.(t).bank_read else d.owns.(t).bank_write in
+    (match List.filter (fun a -> not (Ownership.in_ranges r a)) u.cells with
+     | [] -> ""
+     | out -> let n = List.length out in
+       Printf.sprintf ", addresses %s%s outside %s" (String.concat "," (List.map string_of_int (List.filteri (fun i _ -> i < 8) out)))
+         (if n > 8 then Printf.sprintf ",... (%d in all)" n else "") (Ownership.ranges_text r))
+  | (Thread _ | Refresher | Array_seg _),
+    (Pin_drive | Pin_sample | Bank_refresh | Bank_stream | Send_k | Space_wait | Recv_k | Poll | Feed_push | Tap_pop)
+  | (Refresher | Array_seg _), (Bank_read | Bank_write) -> ""
 
 let shared (d : decl) r a b = List.exists (fun (r', g) -> r' = r && List.mem a g && List.mem b g) d.shared
 
@@ -324,7 +409,40 @@ let where_of u = if u.addr < 0 then Printf.sprintf "%s (%s)" (actor_name u.actor
 
 let last_waived : string list ref = ref []
 
+(* Ownership declarations that overlap where they must not: two threads that may write one bank
+   address (like two drivers of one pin), or two threads on one port in the same direction (a
+   port is one external device's). A bank address one thread writes and another reads is a
+   declared channel, not a fault; it is listed by [channels]. Inboxes need no rule here: two
+   senders or two receivers of one inbox are PAIR rejections already, and a declared
+   multi-producer inbox is [shared]. *)
+let meet r1 r2 = List.exists (fun (a, b) -> List.exists (fun (c, e) -> a <= e && c <= b) r2) r1
+let overlaps (d : decl) =
+  let o = d.owns in
+  List.concat (List.init 4 (fun t -> List.concat (List.init 4 (fun u ->
+      if t >= u then [] else
+        (if meet o.(t).bank_write o.(u).bank_write then [ Printf.sprintf "T%d and T%d may both write one bank address" t u ] else [])
+        @ List.filter_map (fun j -> if List.mem j o.(u).port_out then Some (Printf.sprintf "T%d and T%d may both send to port %d" t u j) else None) o.(t).port_out
+        @ List.filter_map (fun j -> if List.mem j o.(u).port_in then Some (Printf.sprintf "T%d and T%d may both receive from port %d" t u j) else None) o.(t).port_in))))
+
+(* What the declaration lets one thread pass to another: bank addresses written by one and read
+   by the other, and inboxes. A thread with no incoming channel is isolated from the others'
+   bank and mailbox traffic; this is what an isolation argument may assume. *)
+let channels (d : decl) =
+  let o = d.owns in
+  List.concat (List.init 4 (fun t -> List.concat (List.init 4 (fun u ->
+      if t = u then [] else
+        (if meet o.(t).bank_write o.(u).bank_read then
+           [ Printf.sprintf "T%d -> T%d through the bank (T%d writes %s, T%d reads %s)" t u t (Ownership.ranges_text o.(t).bank_write)
+               u (Ownership.ranges_text o.(u).bank_read) ] else [])
+        @ List.filter_map (fun i -> if List.mem i o.(u).inbox_recv then Some (Printf.sprintf "T%d -> T%d through inbox %d" t u i) else None)
+          o.(t).inbox_send))))
+
 let check ?(tables = default_tables) ~fetch (d : decl) =
+  Ownership.check_well_formed d.owns;
+  List.iter (fun (r, _, _) -> match r with
+      | Pin _ -> ()
+      | Bankr _ | Inbox _ | Feed _ | Tap _ -> raise (Bad_table ("grants are for pins; declare " ^ res_name r ^ " in owns")))
+    d.grants;
   let uses = List.concat (List.init n_threads (uses_of_thread ~fetch ~decl:d)) @ declared_uses d in
   let rejected = ref [] in
   last_waived := [];
@@ -335,7 +453,8 @@ let check ?(tables = default_tables) ~fetch (d : decl) =
       let key = (u.kind, u.wait, (if is_declared d u then Declared else Undeclared)) in
       if not (List.mem_assoc key tables.solo) then
         let k, w, r = key in
-        let text = Printf.sprintf "(%s, %s, %s) on %s" (kind_name k) (wait_name w) (if r = Declared then "declared" else "UNDECLARED") (res_name u.res) in
+        let text = Printf.sprintf "(%s, %s, %s) on %s%s" (kind_name k) (wait_name w) (if r = Declared then "declared" else "UNDECLARED")
+            (res_name u.res) (cells_outside d u) in
         match List.find_opt (fun (res, a, kd, _) -> res = u.res && a = u.actor && kd = u.kind) d.waivers with
         | Some (_, _, _, why) -> last_waived := Printf.sprintf "%s at %s -- %s" text (where_of u) why :: !last_waived
         | None -> reject "solo" text (where_of u))
@@ -356,6 +475,8 @@ let check ?(tables = default_tables) ~fetch (d : decl) =
                                (res_name u.res)) (where_of u ^ " / " ^ where_of v)
             end
           end) reps) reps;
+  (* OWNERSHIP: overlapping declarations *)
+  List.iter (fun s -> reject "ownership" s "the declaration") (overlaps d);
   (* COUNTERPART *)
   List.iter (fun u ->
       match counterpart_kinds u.kind with
@@ -405,6 +526,7 @@ let report ?tables ~name ~fetch (d : decl) =
   match check ?tables ~fetch d with
   | uses, findings ->
     List.iter (Printf.printf "   uses: %s\n") (summarise uses);
+    List.iter (Printf.printf "   channel: %s\n") (channels d);
     List.iter (Printf.printf "   WAIVED %s\n") (List.rev !last_waived);
     if findings = [] then Printf.printf "   ACCEPTED: no rejected combination\n"
     else List.iter (fun f -> Printf.printf "   REJECTED [%s] %s\n      at %s\n" f.rule f.key f.where) findings;

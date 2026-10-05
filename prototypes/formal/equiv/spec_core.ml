@@ -29,7 +29,9 @@ let merge_effects g (x : H.effects) (y : H.effects) : H.effects =
   { host_out = three x.host_out y.host_out; host_in_ready = i x.host_in_ready y.host_in_ready;
     port_pop = two x.port_pop y.port_pop; port_push = three x.port_push y.port_push;
     bank_write = three x.bank_write y.bank_write; bank_read = two x.bank_read y.bank_read;
-    fine_out = two x.fine_out y.fine_out; pins_written = i x.pins_written y.pins_written }
+    fine_out = two x.fine_out y.fine_out; pins_written = i x.pins_written y.pins_written;
+    inbox_send = i x.inbox_send y.inbox_send; inbox_recv = i x.inbox_recv y.inbox_recv;
+    port_out = i x.port_out y.port_out; port_in = i x.port_in y.port_in }
 
 let create ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_in ~host_in_valid ~port_in ~port_in_valid
     ~port_out_ready ~flags ~ctl_valid ~ctl_thread ~ctl_page ~ctl_pc ~boot_page ~boot_pc ~bank_rd =

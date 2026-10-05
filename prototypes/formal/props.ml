@@ -83,6 +83,27 @@ module Make (V : Isa2.VALUE) = struct
   (* the assumption a thread outside the protocol obeys: it never writes [pins] *)
   let keeps_off ~pins (e : S.effects) = eq (logand e.pins_written (c 8 pins)) (c 8 0)
 
+  (* (e) Ownership of the bank, the inboxes and the ports (ownership.ml). Bad when the clock's
+     instruction touches a bank address, an inbox or a port that the executing thread's
+     declaration does not give it. The touches are the interpreter's own effects. *)
+  let in_ranges a ranges =
+    List.fold_left (fun r (lo, hi) -> or_ r (and_ (not_ (ult a (c 10 lo))) (not_ (ult (c 10 hi) a)))) ff ranges
+
+  (* some bit of the 4-bit mask [m] outside [allowed] *)
+  let outside m allowed = not_ (eq (logand m (c 4 (lnot (Ownership.mask allowed) land 0xF))) (c 4 0))
+
+  let disobeys (o : Ownership.thread) (e : S.effects) =
+    let rd, ra = e.bank_read and wr, wa, _ = e.bank_write in
+    List.fold_left or_ ff
+      [ and_ rd (not_ (in_ranges ra o.bank_read)); and_ wr (not_ (in_ranges wa o.bank_write));
+        outside e.inbox_send o.inbox_send; outside e.inbox_recv o.inbox_recv;
+        outside e.port_out o.port_out; outside e.port_in o.port_in ]
+
+  let resources_step (o : Ownership.t) ~thread ~(e : S.effects) = disobeys o.(thread) e
+
+  (* the assumption a thread outside the protocol obeys: it keeps to its declaration *)
+  let obeys (o : Ownership.thread) (e : S.effects) = not_ (disobeys o e)
+
   (* (d) A UART receiver, 8N1, lsb first, independent of the compiler: it watches the line (the
      pin's level when driven, 1 when released), starts at a falling edge while idle, and samples
      the middle of each bit, [bit_clocks] / 2 + k * [bit_clocks] clocks after the edge, k = 0..9.

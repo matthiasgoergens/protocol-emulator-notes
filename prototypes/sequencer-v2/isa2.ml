@@ -196,6 +196,12 @@ type ('t, 'b) effects_of = {
   bank_read : 'b * 't;            (* address *)
   fine_out : 'b * 't;
   pins_written : 't;              (* the pins this clock's SETP or SHO writes, for checks *)
+  (* The inboxes and ports this clock's instruction names, as 4-bit masks (bit i: inbox i, or
+     port i, which is MBX channel 4 + i), whether or not it succeeds; for ownership checks. *)
+  inbox_send : 't;                (* SEND to an inbox, or WAITC 11 waiting for space in it *)
+  inbox_recv : 't;                (* RECV from an inbox, or WAITC 10 polling the thread's own *)
+  port_out : 't;                  (* SEND to an out-port, or WAITC 11 waiting until it is ready *)
+  port_in : 't;                   (* RECV from an in-port *)
 }
 
 module Make (V : VALUE) = struct
@@ -353,6 +359,17 @@ module Make (V : VALUE) = struct
                 (ite_b (is_cond c_inbox) (eq st.full.(t) (c 1 1))
                    (ite_b (is_cond c_space) space
                       (bit (lshr io.flags (zext ~w:16 (extract cond ~hi:1 ~lo:0))) (4 * t))))))) in
+    let inbox_send, inbox_recv, port_out, port_in =
+      let none4 = c 4 0 in
+      unless_false (or_ is_mbx is_waitc) (none4, none4, none4, none4) (fun () ->
+          let names s i = ite s (shl ~w:4 (c 4 1) (zext ~w:4 i)) none4 in
+          let space_wait = and_ is_waitc (eq (field instr 11 8) (c 4 c_space))
+          and poll = and_ is_waitc (eq (field instr 11 8) (c 4 c_inbox)) in
+          let ls_port = bit ls 2 and ls_slot = extract ls ~hi:1 ~lo:0 in
+          logor (names (and_ is_send (not_ to_port)) slot) (names (and_ space_wait (not_ ls_port)) ls_slot),
+          logor (names (and_ is_recv (not_ to_port)) slot) (names poll (c 2 t)),
+          logor (names (and_ is_send to_port) slot) (names (and_ space_wait ls_port) ls_slot),
+          names (and_ is_recv to_port) slot) in
     (* EXT *)
     let is_ext = is opc op_ext in
     let ext_sub = field instr 11 8 in
@@ -423,7 +440,8 @@ module Make (V : VALUE) = struct
           ite is_setp mask8 @@
           ite is_sho (unless_false is_sho (c 8 0) (fun () ->
               logor (onehot pin) (ite pair (onehot (add ~w:3 pin (c 3 1))) (c 8 0)))) @@
-          c 8 0 } in
+          c 8 0;
+        inbox_send; inbox_recv; port_out; port_in } in
     (* commit *)
     st.bankmem <- unless_false (x x_stb) st.bankmem (fun () -> mem_write st.bankmem (x x_stb) bp acc);
     st.pin_sub <- sub_of ~old_:st.pin_out ~new_:pin_out_next ~q:sub_q;
@@ -639,6 +657,17 @@ module Spec = struct
                 (ite_b (is_cond c_inbox) (eq st.full.(t) (c 1 1))
                    (ite_b (is_cond c_space) space
                       (bit (lshr io.flags (zext ~w:16 (extract cond ~hi:1 ~lo:0))) (4 * t))))))) in
+    let inbox_send, inbox_recv, port_out, port_in =
+      let none4 = c 4 0 in
+      unless_false (or_ is_mbx is_waitc) (none4, none4, none4, none4) (fun () ->
+          let names s i = ite s (shl ~w:4 (c 4 1) (zext ~w:4 i)) none4 in
+          let space_wait = and_ is_waitc (eq (field instr 11 8) (c 4 c_space))
+          and poll = and_ is_waitc (eq (field instr 11 8) (c 4 c_inbox)) in
+          let ls_port = bit ls 2 and ls_slot = extract ls ~hi:1 ~lo:0 in
+          logor (names (and_ is_send (not_ to_port)) slot) (names (and_ space_wait (not_ ls_port)) ls_slot),
+          logor (names (and_ is_recv (not_ to_port)) slot) (names poll (c 2 t)),
+          logor (names (and_ is_send to_port) slot) (names (and_ space_wait ls_port) ls_slot),
+          names (and_ is_recv to_port) slot) in
     (* EXT *)
     let is_ext = is opc op_ext in
     let ext_sub = field instr 11 8 in
@@ -709,7 +738,8 @@ module Spec = struct
           ite is_setp mask8 @@
           ite is_sho (unless_false is_sho (c 8 0) (fun () ->
               logor (onehot pin) (ite pair (onehot (add ~w:3 pin (c 3 1))) (c 8 0)))) @@
-          c 8 0 } in
+          c 8 0;
+        inbox_send; inbox_recv; port_out; port_in } in
     (* commit *)
     st.bankmem <- unless_false (x x_stb) st.bankmem (fun () -> mem_write st.bankmem (x x_stb) bp acc);
     st.pin_sub <- sub_of ~old_:st.pin_out ~new_:pin_out_next ~q:sub_q;

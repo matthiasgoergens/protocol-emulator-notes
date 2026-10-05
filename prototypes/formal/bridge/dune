@@ -1,0 +1,13 @@
+; Bridge A's firmware (../../multi-proto, as ported to v2 by ../../sequencer-v2/ports/multi-proto),
+; as words, for the resource-ownership checks in ../main.ml. Every .ml here but bridge_a_words.ml
+; is a link to the prototypes' own file; isa.ml is multi-proto's base-ISA encoder without its
+; interpreter, as the port builds it. The library has its own copy of Isa2 (only words leave it).
+(rule
+ (with-stdout-to
+  isa.ml
+  (run sed "/^type state/,$d" %{dep:orig/isa.ml})))
+
+(library
+ (name bridge_fw)
+ (flags (:standard -w -37))
+ (modules isa isa2 compat asm isa_mb compiler bridge_lib bridge_a_words))

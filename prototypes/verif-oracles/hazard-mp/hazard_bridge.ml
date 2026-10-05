@@ -3,11 +3,20 @@
    multi-proto/bridge_a.ml assembles it. Declarations from bridge_a.ml's header: T0 UART RX (pin
    0 in, RTS pin 2 out) -> inbox 1; T1 I2C master (SDA 3, SCL 4, both read back for clock
    stretching and acks) <- inbox 1, -> inbox 2; T2 UART TX (pin 1) <- inbox 2; T3 SPI master on
-   pins 5..7. *)
+   pins 5..7. The inboxes are declared as resource ownership (../../sequencer-v2/ownership.ml):
+   T0 sends to inbox 1, T1 receives from it and sends to inbox 2, T2 receives from inbox 2; no
+   thread owns any bank address or port. Bridge B (UART <-> SPI master) cannot be checked: its
+   SPI master's SHX captures MISO on pin 4 next to MOSI on 3, and v2's capture pin for pin 3 is 2
+   (the port's Asm refuses it), which is why only bridge A was ported to v2. *)
 open Hazard
 open Bridge_lib
 
 let g r t ks = (r, Thread t, ks)
+let nothing = Ownership.nothing
+let bridge_owns () =
+  [| { nothing with inbox_send = [ 1 ] }; { nothing with inbox_recv = [ 1 ]; inbox_send = [ 2 ] };
+     { nothing with inbox_recv = [ 2 ] }; nothing |]
+let fetch_of mem a = let t = a lsr 8 and pc = a land 0xFF in if pc < Array.length mem.(t) then mem.(t).(pc) else Isa2.nop
 
 let () =
   let (t0, _, _), (t1, _, _), (t2, _, _) =
@@ -16,11 +25,12 @@ let () =
   let mem = [| t0; t1; t2; t3 |] in
   let fetch a = let t = a lsr 8 and pc = a land 0xFF in if pc < Array.length mem.(t) then mem.(t).(pc) else Isa2.nop in
   let d = { no_decl with grants =
-                           [ g (Pin 0) 0 [ Pin_sample ]; g (Pin 2) 0 [ Pin_drive ]; g (Inbox 1) 0 [ Send_k; Space_wait ];
+                           [ g (Pin 0) 0 [ Pin_sample ]; g (Pin 2) 0 [ Pin_drive ];
                              g (Pin 3) 1 [ Pin_drive; Pin_sample ]; g (Pin 4) 1 [ Pin_drive; Pin_sample ];
-                             g (Inbox 1) 1 [ Recv_k; Poll ]; g (Inbox 2) 1 [ Send_k; Space_wait ];
-                             g (Pin 1) 2 [ Pin_drive ]; g (Inbox 2) 2 [ Recv_k; Poll ];
-                             g (Pin 5) 3 [ Pin_drive ]; g (Pin 6) 3 [ Pin_drive ]; g (Pin 7) 3 [ Pin_drive ] ] } in
+                             g (Pin 1) 2 [ Pin_drive ];
+                             g (Pin 5) 3 [ Pin_drive ]; g (Pin 6) 3 [ Pin_drive ]; g (Pin 7) 3 [ Pin_drive ] ];
+                         owns = bridge_owns () } in
+  print_endline (Ownership.describe d.owns);
   let f = report ~name:"bridge A on v2: T0 UART RX -> inbox 1 -> T1 I2C master -> inbox 2 -> T2 UART TX; T3 SPI neighbour" ~fetch d in
   Printf.printf "bridge A: %d rejected combination(s), no waiver (bridge_lib's i2c_master now answers into inbox 2 with \
                  LDD 4095; SEND ch2 -> replylost)\n\n" (List.length f);
@@ -33,8 +43,25 @@ let () =
   let fetch_old a = let t = a lsr 8 and pc = a land 0xFF in if pc < Array.length mem_old.(t) then mem_old.(t).(pc) else Isa2.nop in
   let f_old = report ~name:"control: the same with T1's SENDs to inbox 2 made fail = own address (the code before the fix)" ~fetch:fetch_old d in
   Printf.printf "control: %d SEND(s) to inbox 2 in T1; with fail = own address the checker rejects %d\n\n" n_send2 (List.length f_old);
-  Printf.printf "HAZARD BRIDGE %s (bridge A accepted without a waiver: %d rejections; control: %d of %d sends rejected)\n"
-    (if f = [] && n_send2 > 0 && List.length f_old = n_send2 then "PASS" else "FAIL") (List.length f) (List.length f_old) n_send2
+  (* planted ownership violations in the real firmware: each replaces one reachable word *)
+  let planted name t pc w =
+    let m = Array.map Array.copy mem in
+    m.(t).(pc) <- w;
+    let r = report ~name:(Printf.sprintf "control: %s (must be rejected)" name) ~fetch:(fetch_of m) d in
+    (name, r <> []) in
+  let t3_first = 0 in
+  let plants = [
+    planted "T3 (the SPI neighbour) also receives from inbox 2, stealing T2's bytes" 3 t3_first (Isa2.recv ~ch:2 ~fail:t3_first);
+    planted "T3 sends into inbox 1, T1's command stream" 3 t3_first (Isa2.send ~ch:1 ~fail:(t3_first + 1));
+    planted "T3 reads the bank (LDB), which nobody owns" 3 t3_first Isa2.ldb;
+    planted "T2 sends to out-port 0 (channel 4), which nobody owns" 2 0 (Isa2.send ~ch:4 ~fail:1);
+  ] in
+  List.iter (fun (n, caught) -> Printf.printf "planted: %-75s %s\n" n (if caught then "caught" else "MISSED")) plants;
+  let all_caught = List.for_all snd plants in
+  Printf.printf "\nHAZARD BRIDGE %s (bridge A accepted without a waiver: %d rejections; control: %d of %d sends rejected; \
+                 ownership plants caught: %d of %d)\n"
+    (if f = [] && n_send2 > 0 && List.length f_old = n_send2 && all_caught then "PASS" else "FAIL") (List.length f) (List.length f_old) n_send2
+    (List.length (List.filter snd plants)) (List.length plants)
 
 let () =
   let (_, _, _), (t1, _, _), (_, _, _) =
