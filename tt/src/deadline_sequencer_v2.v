@@ -16,10 +16,10 @@ module deadline_sequencer_v2 (
     imem_data,
     boot_page,
     ctl_page,
-    clear,
     clock,
     ctl_thread,
     ctl_valid,
+    clear,
     imem_addr,
     pin_out,
     pin_oe,
@@ -57,10 +57,10 @@ module deadline_sequencer_v2 (
     input [15:0] imem_data;
     input [7:0] boot_page;
     input [1:0] ctl_page;
-    input clear;
     input clock;
     input [1:0] ctl_thread;
     input ctl_valid;
+    input clear;
     output [9:0] imem_addr;
     output [7:0] pin_out;
     output [7:0] pin_oe;
@@ -475,6 +475,9 @@ module deadline_sequencer_v2 (
     wire [7:0] _47;
     wire [7:0] _48;
     reg [7:0] _355;
+    wire [7:0] _1131;
+    wire [1:0] _1130;
+    wire [9:0] _1132;
     wire [7:0] _1093;
     wire [7:0] _1085;
     wire _1084;
@@ -941,13 +944,14 @@ module deadline_sequencer_v2 (
     reg [1:0] _1125;
     wire vdd;
     wire [1:0] _1120;
-    wire [1:0] _117;
+    wire [1:0] _116;
     reg [1:0] _143;
     wire [1:0] _1122;
     wire _1123;
     wire _1124;
     wire [1:0] _1126;
     wire [9:0] _1129;
+    wire [9:0] _1133;
     assign _134 = { _124,
                     _127,
                     _130,
@@ -1570,6 +1574,10 @@ module deadline_sequencer_v2 (
         else
             _355 <= _48;
     end
+    assign _1131 = boot_pc[7:0];
+    assign _1130 = boot_page[1:0];
+    assign _1132 = { _1130,
+                     _1131 };
     assign _1093 = boot_pc[7:0];
     assign _1085 = _1055 ? _1056 : _995;
     assign _1084 = _882 == _582;
@@ -2503,12 +2511,12 @@ module deadline_sequencer_v2 (
     end
     assign vdd = 1'b1;
     assign _1120 = _143 + _290;
-    assign _117 = _1120;
+    assign _116 = _1120;
     always @(posedge clock) begin
         if (clear)
             _143 <= _292;
         else
-            _143 <= _117;
+            _143 <= _116;
     end
     assign _1122 = _143 + _290;
     assign _1123 = ctl_thread == _1122;
@@ -2516,7 +2524,8 @@ module deadline_sequencer_v2 (
     assign _1126 = _1124 ? ctl_page : _1125;
     assign _1129 = { _1126,
                      _1128 };
-    assign imem_addr = _1129;
+    assign _1133 = clear ? _1132 : _1129;
+    assign imem_addr = _1133;
     assign pin_out = _355;
     assign pin_oe = _535;
     assign pin_sub = _530;

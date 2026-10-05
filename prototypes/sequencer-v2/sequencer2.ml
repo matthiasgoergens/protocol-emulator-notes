@@ -271,7 +271,13 @@ let create ?bug ?(unreset = []) ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_
   let ctl_next = if is Ctl_no_bypass then gnd else ctl_valid &: (ctl_thread ==: tnext) in
   let f_pc = mux2 ctl_next ctl_pc (mux tnext (values pcs)) in
   let f_page = if is Page_ignored then zero 2 else mux2 ctl_next ctl_page (mux tnext (values pages)) in
-  let imem_addr = concat_msb [ f_page; f_pc ] in
+  (* During clear the registers still hold their power-up contents, and the store latches the
+     address presented now as the word thread 0 executes first. So present thread 0's boot
+     address while clear is high. Found by the power-up determinism proof (../formal/powerup):
+     before, a one-clock clear let thread 0 start from an arbitrary word, and a longer clear made
+     it execute thread 1's boot word (thread is 0 during clear, so the address was thread 1's). *)
+  let imem_addr =
+    mux2 clear (concat_msb [ select boot_page 1 0; select boot_pc 7 0 ]) (concat_msb [ f_page; f_pc ]) in
   let cat l = concat_msb (List.rev l) in
   let dbg =
     [ "dbg_pc", cat (values pcs); "dbg_page", cat (values pages); "dbg_acc", cat (values accs);

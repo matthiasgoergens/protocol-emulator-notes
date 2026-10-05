@@ -44,10 +44,14 @@ and make_f ?bug ?(boot = Array.make Isa2.n_threads (0, 0)) ?bank ~fetch () =
   set (inp "boot_page") ~width:8 bp;
   set (inp "boot_pc") ~width:32 bpc;
   inp "clear" := Bits.vdd;
-  Cyclesim.cycle sim;
+  (* the store latches whatever address the core presents during clear, as an SRAM would; the
+     harness used to assume thread 0's boot address here, which hid a fetch bug (sequencer2.ml) *)
+  Cyclesim.cycle_check sim;
+  Cyclesim.cycle_before_clock_edge sim;
+  s.fetch_addr <- Bits.to_int !(before "imem_addr");
+  Cyclesim.cycle_at_clock_edge sim;
+  Cyclesim.cycle_after_clock_edge sim;
   inp "clear" := Bits.gnd;
-  let pg0, pc0 = boot.(0) in
-  s.fetch_addr <- (pg0 lsl Isa2.pc_bits) lor pc0;
   s
 
 type observed = {

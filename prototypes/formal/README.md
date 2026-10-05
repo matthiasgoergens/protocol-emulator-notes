@@ -22,6 +22,7 @@ Everything was run on 2026-10-05.
 | 2d | UART frame, every byte | 2 frames (440 clocks); planted bug found at clock 98 (byte 0x04) |
 | 3 | Kind 2 (k-induction, IC3) | deadline property **proved for all depths** in 0.2 s; UART times out at 15 min |
 | 4 | RTL against specification (Yosys) | equal for 23 clocks after reset, for every instruction stream and input; **28 of 28** planted RTL bugs found |
+| 5 | power-up determinism (SymbiYosys) | two copies from arbitrary register contents agree on every output after a one-clock reset, **unbounded** (abc pdr); **found a fetch bug in the RTL** (Findings 5), now fixed; 2 of 2 planted un-reset registers that reach an output are caught, 3 that cannot are correctly passed |
 
 ## 1. One interpreter, several value domains
 
@@ -350,6 +351,63 @@ change, prints N only.
 Not tried: `sat -tempinduct`. RTL-internal registers that the comparison cannot see (pending LDB,
 the previous pins) would probably need strengthening invariants first.
 
+## 5. Power-up determinism (SymbiYosys)
+
+After MarcosAsh's `formal/powerup.sby` (credits). `powerup/powerup.sv` instantiates two copies
+of the v2 core as it is synthesised (`powerup/emit_core.ml`: the Verilog of `tt/src`, no debug
+ports). No register of the core has an initial value, so each copy starts from its own arbitrary
+contents. Both copies get the same inputs on every clock, including clear. Clear is forced high
+for the first `RESET_CLOCKS` clocks, and free (but shared) afterwards. From then on every output
+must agree, one assertion per group: pins (level, output enable, quarter-clock levels), the
+fetch address, host, ports, bank, FINE, cfg. Data buses are compared only while their strobe is
+set. The memories are outside the core, as on the chip. Each copy's programme word is the
+store's output for the address that copy presented on the previous clock. Both copies get the
+same word when they presented the same address, and independent words otherwise. The bank's
+read data is modelled the same way. This is exactly "every register that can reach an output
+is reset": a register left out of the clear may differ, and the proof fails only if the
+difference reaches a pin.
+
+`Sequencer2.create ?unreset` builds named register groups without the clear, as planted faults;
+without it the generated Verilog is byte-identical (`tt/scripts/regen.sh --check`).
+
+Results (`results/powerup.txt`; `powerup/run_powerup.sh`, SymbiYosys and Yosys 0.62 in the
+LibreLane container; abc pdr for the proofs, smtbmc with z3 for the bounded run and covers):
+
+| task | what | result |
+|---|---|---|
+| r1 | real core, one-clock reset | **PASS, unbounded** (abc pdr, 45 s) |
+| r2 | real core, two-clock reset | PASS, unbounded (abc pdr, 171 s) |
+| r1_bmc | as r1, bounded, 12 clocks | PASS |
+| u_cfg | `cfg` registers without the clear | **FAIL** at step 1 (`cfg_out` differs) |
+| u_dl | `dl` registers without the clear | **FAIL** at step 4: a wait in thread 0 ends at a different clock, so the fetch addresses part |
+| u_inbox | inbox data without the clear | PASS: read only while `full`, which is reset |
+| u_prev_pins | `prev_pins` without the clear | PASS: selected only after a SETP with q > 0, by which time it holds a reset value |
+| u_host_tag | `host_tag` without the clear | PASS: compared only with `host_out_valid`, and OUT writes it first |
+
+The three passing planted faults are the point of comparing outputs rather than demanding a
+reset on every register: those registers really cannot reach a pin before they are written.
+
+**What the first run found** (`results/powerup-before-fetch-fix.txt`, commit d0d3f3e). With a
+one-clock reset, r1 failed at step 1. During the clear clock the core presented a fetch address
+computed from the power-up contents of `thread`, `pc` and `page`. The store latched that word,
+and thread 0 executed it as its first instruction (copy a ran `f500`, copy b `c000`, an IN,
+whose ready strobe differed). With a longer reset the proof passed, but a simulation (iverilog,
+boot pcs 10, 20, 30, 40) showed thread 0 then executing the word at **thread 1's** boot address:
+`thread` is 0 during clear, so the core presented the address for thread 0 + 1. The lockstep test
+missed both because `harness2.ml` did not model this: after clear it set the store's address to
+thread 0's boot address itself. The TT harness boots every thread at 0, which hides it too.
+
+The fix (`../sequencer-v2/sequencer2.ml`): while clear is high the core presents thread 0's boot
+address. `harness2.ml` now latches whatever address the core presents during clear, as an SRAM
+does. With the honest harness and the old RTL, the lockstep test fails at clock 0 in every
+programme (`lockstep2.exe 20 200`: 1297 and 856 mismatching clocks); with the fix, `lockstep2.exe
+1000 5000` gives output identical to `../sequencer-v2/results/lockstep.txt`.
+
+Limits: the inputs `boot_pc` and `boot_page` are free on every clock (on the chip they are a
+configuration register); the stores are modelled per address, not as a whole memory, which only
+adds behaviours. The proof is of the core alone; the TT wrapper's own registers (its loader) are
+outside it.
+
 ## Findings
 
 1. **Latent bug in the SPI compiler** (`../deadline-sequencer/compiler.ml`, not fixed here).
@@ -375,6 +433,9 @@ the previous pins) would probably need strengthening invariants first.
    unmodified HEAD gives the same numbers, so this comes from the merge, not from the follow-ups. The UART and SPI contracts are unaffected in
    principle; splitting the I2C thread out, or giving it a stretching bound, is the obvious next
    step. Not done here.
+5. **Thread 0's first fetch after reset came from the wrong address** (section 5). Found by the
+   power-up determinism proof; fixed in `../sequencer-v2/sequencer2.ml`, and the harness that hid
+   it now models the store's latch during clear.
 
 ## Credits and prior art
 
@@ -390,6 +451,9 @@ the previous pins) would probably need strengthening invariants first.
   - MarcosAsh's abstract-interpretation programme verifier (intervals over phase, period and
     cycles since an edge) is the unbounded alternative to (a). **It has not been read yet**; the
     backlog's advice to read it before building ours still stands for the programme verifier.
+- **MarcosAsh**, github.com/MarcosAsh/protocol-emulator (Apache-2.0): power-up determinism as
+  a two-copy proof from arbitrary flop contents (`formal/powerup.sby`). Idea only; section 5 is
+  our own.
 - Tools: z3 (MIT, from the `z3-solver` wheel), Kind 2 (Apache-2.0), Yosys (ISC, in the
   LibreLane image), Hardcaml.
 
@@ -409,6 +473,10 @@ equiv/run_equiv.sh bugs 16
 equiv/run_equiv.sh bug 12 "SKEQ skip lands on pc+1"
 ./_build/default/equiv/miter.exe --sim 20000 ["BUG"]   # the miter in Cyclesim, a smoke test
 ```
+
+Power-up determinism (section 5): `powerup/run_powerup.sh [TASK...]`. It needs the LibreLane
+image and the z3 venv above (`Z3ENV`); the container has no `/lib64`, so the script runs the
+host's z3 through the host's dynamic loader, mounted read-only.
 
 Kind 2: the v3.0.0 release binary (github.com/kind2-mc/kind2/releases), on `PATH` or in
 `KIND2`. `BMC_SMT_LOG=DIR` saves the SMT-LIB of each BMC run, replayable with `z3 FILE`.

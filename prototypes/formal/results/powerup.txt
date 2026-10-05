@@ -1,0 +1,63 @@
+# command: powerup/run_powerup.sh 
+# commit: d0d3f3ee515c9b935fcb33b9a0537b88fccdf811 (with uncommitted changes)
+# yosys: Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+# z3: Z3 version 5.1.0 - 64 bit
+# date: 2026-10-05T20:11:46+08:00
+== r1
+engine_0: Property proved.  Time =    45.42 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== r2
+engine_0: Property proved.  Time =   170.52 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== r1_bmc
+summary: engine_0 (smtbmc z3) returned pass
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== cover
+summary: engine_0 (smtbmc z3) returned pass
+summary:   reached cover statement powerup.writes_bank at powerup.sv:112.5-112.35 step 1
+summary:   reached cover statement powerup.drives_pin at powerup.sv:110.5-110.42 step 2
+summary:   reached cover statement powerup.sends_host at powerup.sv:111.5-111.42 step 2
+DONE (PASS, rc=0)
+== u_cfg
+engine_0: Output 1 of miter "model/design_aiger" was asserted in frame 1.  Time =     0.03 sec
+summary: engine_0 (abc pdr) returned FAIL
+summary:   failed assertion powerup.cfg at powerup.sv:103.5-103.47 step 1
+DONE (FAIL, rc=2)
+counterexample, both copies (step 0 is the first clock; clear is high in the first RESET_CLOCKS steps):
+step          clear    imem_addr_a    imem_addr_b         imem_a         imem_b      pin_out_a      pin_out_b      cfg_out_a      cfg_out_b
+   0              1              0              0           4a80           8a00              0              0              0       80000000
+   1              0              0              0              0              0              0              0              0       80000000
+   2              0              0              0              0              0              0              0              0       80000000
+== u_dl
+engine_0: Output 2 of miter "model/design_aiger" was asserted in frame 4.  Time =     0.58 sec
+summary: engine_0 (abc pdr) returned FAIL
+summary:   failed assertion powerup.fetch at powerup.sv:94.5-94.51 step 4
+DONE (FAIL, rc=2)
+counterexample, both copies (step 0 is the first clock; clear is high in the first RESET_CLOCKS steps):
+step          clear    imem_addr_a    imem_addr_b         imem_a         imem_b      pin_out_a      pin_out_b      cfg_out_a      cfg_out_b
+   0              1              2              2           eb82           47ef              0              0              0              0
+   1              0              0              0           5a31           5a31              0              0              0              0
+   2              0             10             10           e0ba           e0ba              0              0              0              0
+   3              0              0              0           d7d5           d7d5              0              0              0              0
+   4              0              2             31              0              0              0              0              0              0
+   5              0              2             31              0              0              0              0              0              0
+== u_inbox
+engine_0: Property proved.  Time =    21.39 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== u_prev_pins
+engine_0: Property proved.  Time =   131.92 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== u_host_tag
+engine_0: Property proved.  Time =    36.85 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
