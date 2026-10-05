@@ -1,0 +1,205 @@
+=== cases uart,spi,i2c,ps2 at 500000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 500000 Hz (resampled)
+uart: PASS: decoded 4F 4B 21
+  tooth uart: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 47 4B 21, sent 4F 4B 21
+  tooth uart: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 8F 8B 41, sent 4F 4B 21
+      decoder warning: Frame error
+      decoder warning: Frame error
+spi: PASS: decoded A5 3C
+  tooth spi: MOSI inverted around the third clock rising edge: CAUGHT
+      decoded 85 3C, sent A5 3C
+  tooth spi: MOSI 40 samples late against SCLK (period 64): CAUGHT
+      decoded 52 9E, sent A5 3C
+i2c: PASS: decoded [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c: SDA inverted over the high phase of the third SCL pulse: CAUGHT
+      decoded [Start; Address write: 40; ACK; Data write: 5A; ACK; Stop], sent [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c: SDA 24 samples late against SCL: CAUGHT
+      decoded [Start; Address write: 40; NACK; Data write: 68], sent [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+ps2: PASS: decoded 1c f0 1c 32
+  tooth ps2: DATA inverted over the fifth falling clock edge: CAUGHT
+      decoded 14 f0 1c 32, sent 1c f0 1c 32
+      1 parity errors reported
+  tooth ps2: DATA 45 samples late against CLK (half period about 40): CAUGHT
+      decoded 1c f0 1c, sent 1c f0 1c 32
+ALL CHECKS PASS
+=== cases uart,spi,i2c,ps2 at 250000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 250000 Hz (resampled)
+uart: PASS: decoded 4F 4B 21
+  tooth uart: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 47 4B 21, sent 4F 4B 21
+  tooth uart: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 8F 8B 41, sent 4F 4B 21
+      decoder warning: Frame error
+      decoder warning: Frame error
+spi: PASS: decoded A5 3C
+  tooth spi: MOSI inverted around the third clock rising edge: CAUGHT
+      decoded 85 3C, sent A5 3C
+  tooth spi: MOSI 40 samples late against SCLK (period 64): CAUGHT
+      decoded 52 9E, sent A5 3C
+i2c: PASS: decoded [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c: SDA inverted over the high phase of the third SCL pulse: CAUGHT
+      decoded [Start; Address write: 40; ACK; Data write: 5A; ACK; Stop], sent [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c: SDA 24 samples late against SCL: CAUGHT
+      decoded [Start; Address write: 40; NACK; Data write: 68], sent [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+ps2: PASS: decoded 1c f0 1c 32
+  tooth ps2: DATA inverted over the fifth falling clock edge: CAUGHT
+      decoded 14 f0 1c 32, sent 1c f0 1c 32
+      1 parity errors reported
+  tooth ps2: DATA 45 samples late against CLK (half period about 40): CAUGHT
+      decoded 1c f0 1c, sent 1c f0 1c 32
+ALL CHECKS PASS
+=== cases uart,spi,i2c,ps2 at 125000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 125000 Hz (resampled)
+uart: PASS: decoded 4F 4B 21
+  tooth uart: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 47 4B 21, sent 4F 4B 21
+  tooth uart: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 8F 8B 61, sent 4F 4B 21
+      decoder warning: Frame error
+      decoder warning: Frame error
+spi: PASS: decoded A5 3C
+  tooth spi: MOSI inverted around the third clock rising edge: CAUGHT
+      decoded 85 3C, sent A5 3C
+  tooth spi: MOSI 40 samples late against SCLK (period 64): CAUGHT
+      decoded 52 9E, sent A5 3C
+i2c: PASS: decoded [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c: SDA inverted over the high phase of the third SCL pulse: CAUGHT
+      decoded [Start; Address write: 40; ACK; Data write: 5A; ACK; Stop], sent [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c: SDA 24 samples late against SCL: CAUGHT
+      decoded [Start; Address write: 40; NACK; Data write: 68], sent [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+ps2: PASS: decoded 1c f0 1c 32
+  tooth ps2: DATA inverted over the fifth falling clock edge: CAUGHT
+      decoded 14 f0 1c 32, sent 1c f0 1c 32
+      1 parity errors reported
+  tooth ps2: DATA 45 samples late against CLK (half period about 40): CAUGHT
+      decoded 1c f0 1c, sent 1c f0 1c 32
+ALL CHECKS PASS
+=== cases can at 10000000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 1e+07 Hz (resampled)
+can: PASS: decoded [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]; ACK slots ACK,ACK,NACK; allowed warnings seen: 1
+  tooth can: bit 30 of the first frame inverted: CAUGHT
+      decoded [id=0xf0 rtr=0 dlc=8 data=90,8d,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=], sent [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]
+  tooth can: bit time 25 % long (decoder fixed at 500 kbit/s): CAUGHT
+      decoded [id=0x78 rtr=0 dlc=4 data=64,0b,79,5e; id=0x7f3 rtr=0 dlc=15 data=ff,ff,ff,ff,ff,ff,80,01,e0,0f,00,03,fe,00,00,01,ff,ff,fe,1f,f0,f0,f0,00,3c,01,e0,00,78,7f,ff,ff,87,ff,ff,f8,00,1f,f0,07,80,3c,3f,ff,ff,ff,ff,ff,ff,0f,ff,ff,f0,ff,ff,ff,0f,f8,00,00,f0,00,3f,e1], sent [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]
+      decoder warning: CRC delimiter must be a recessive bit
+      decoder warning: End of frame (EOF) must be 7 recessive bits
+ALL CHECKS PASS
+=== cases can at 5000000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 5e+06 Hz (resampled)
+can: PASS: decoded [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]; ACK slots ACK,ACK,NACK; allowed warnings seen: 1
+  tooth can: bit 30 of the first frame inverted: CAUGHT
+      decoded [id=0xf0 rtr=0 dlc=8 data=90,8d,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=], sent [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]
+  tooth can: bit time 25 % long (decoder fixed at 500 kbit/s): CAUGHT
+      decoded [id=0x78 rtr=0 dlc=6 data=32,05,bc,d7,9e,06; id=0x6a7 rtr=1 dlc=9 data=], sent [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]
+      decoder warning: ACK delimiter must be a recessive bit
+      decoder warning: End of frame (EOF) must be 7 recessive bits
+ALL CHECKS PASS
+=== cases can at 2500000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 2.5e+06 Hz (resampled)
+can: PASS: decoded [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]; ACK slots ACK,ACK,NACK; allowed warnings seen: 1
+  tooth can: bit 30 of the first frame inverted: CAUGHT
+      decoded [id=0xf0 rtr=0 dlc=8 data=90,8d,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=], sent [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]
+  tooth can: bit time 25 % long (decoder fixed at 500 kbit/s): CAUGHT
+      decoded [id=0x78 rtr=0 dlc=6 data=32,05,de,6b,cf,03; id=0x753 rtr=1 dlc=4 data=; id=0x7ff rtr=1 dlc=0 data=], sent [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]
+      decoder warning: End of frame (EOF) must be 7 recessive bits
+      decoder warning: CRC delimiter must be a recessive bit
+ALL CHECKS PASS
+=== cases usb-ls at 12000000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 1.2e+07 Hz (resampled)
+usb-ls: PASS: 15 packets; setup [128, 6, 0, 1, 0, 0, 18, 0]; device data 12 01 10 01 00 00 00 08 09 12 01 00 00 01 00 00 00 01
+  tooth usb-ls: one bit of the first packet inverted (D+ and D-): CAUGHT
+      decoder error: CRC5 ERROR: 0x02
+      decoder error: token for address 48
+  tooth usb-ls: bit time 25 % long (decoder fixed at 1.5 Mbit/s): CAUGHT
+      SETUP data None, sent [128, 6, 0, 1, 0, 0, 18, 0]
+      device sent , expected 12 01 10 01 00 00 00 08 09 12 01 00 00 01 00 00 00 01
+      decoder error: SYNC ERROR: 00010000
+ALL CHECKS PASS
+=== cases usb-ls at 7500000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 7.5e+06 Hz (resampled)
+usb-ls: PASS: 15 packets; setup [128, 6, 0, 1, 0, 0, 18, 0]; device data 12 01 10 01 00 00 00 08 09 12 01 00 00 01 00 00 00 01
+  tooth usb-ls: one bit of the first packet inverted (D+ and D-): CAUGHT
+      decoder error: CRC5 ERROR: 0x02
+      decoder error: token for address 48
+  tooth usb-ls: bit time 25 % long (decoder fixed at 1.5 Mbit/s): CAUGHT
+      SETUP data None, sent [128, 6, 0, 1, 0, 0, 18, 0]
+      device sent , expected 12 01 10 01 00 00 00 08 09 12 01 00 00 01 00 00 00 01
+      decoder error: SYNC ERROR: 00100001
+ALL CHECKS PASS
+=== cases usb-ls at 6000000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 6e+06 Hz (resampled)
+usb-ls: PASS: 15 packets; setup [128, 6, 0, 1, 0, 0, 18, 0]; device data 12 01 10 01 00 00 00 08 09 12 01 00 00 01 00 00 00 01
+  tooth usb-ls: one bit of the first packet inverted (D+ and D-): CAUGHT
+      decoder error: CRC5 ERROR: 0x02
+      decoder error: token for address 48
+  tooth usb-ls: bit time 25 % long (decoder fixed at 1.5 Mbit/s): CAUGHT
+      SETUP data None, sent [128, 6, 0, 1, 0, 0, 18, 0]
+      device sent , expected 12 01 10 01 00 00 00 08 09 12 01 00 00 01 00 00 00 01
+      decoder error: SYNC ERROR: 00010000
+ALL CHECKS PASS
+=== cases spdif at 120000000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 1.2e+08 Hz (resampled)
+spdif: PASS: 899 subframes decoded, aligned at sent subframe 1, 897 of 897 equal (preamble, 24-bit audio, V, U, C, P)
+  tooth spdif: 30 samples (0.7 cell) inverted mid-stream: CAUGHT
+      1 of 897 decoded subframes differ from the sent
+  tooth spdif: 300 samples stretched 1.6 times mid-stream (cells of the wrong length): CAUGHT
+      only 449 of 898 sent subframes decoded
+ALL CHECKS PASS
+=== cases spdif at 48000000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 4.8e+07 Hz (resampled)
+spdif: PASS: 899 subframes decoded, aligned at sent subframe 1, 897 of 897 equal (preamble, 24-bit audio, V, U, C, P)
+  tooth spdif: 30 samples (0.7 cell) inverted mid-stream: CAUGHT
+      1 of 897 decoded subframes differ from the sent
+  tooth spdif: 300 samples stretched 1.6 times mid-stream (cells of the wrong length): CAUGHT
+      only 449 of 898 sent subframes decoded
+ALL CHECKS PASS
+=== cases spdif at 24000000 Hz
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# analyser rate: 2.4e+07 Hz (resampled)
+spdif: FAIL: 556 subframes decoded, aligned at sent subframe -1, 0 of 0 equal (preamble, 24-bit audio, V, U, C, P)
+    the first four decoded subframes appear nowhere in the sent stream (556 decoded)
+    343 unknown preambles
+  tooth spdif: 30 samples (0.7 cell) inverted mid-stream: CAUGHT
+      the first four decoded subframes appear nowhere in the sent stream (556 decoded)
+      343 unknown preambles
+  tooth spdif: 300 samples stretched 1.6 times mid-stream (cells of the wrong length): CAUGHT
+      the first four decoded subframes appear nowhere in the sent stream (275 decoded)
+      174 unknown preambles
+1 CHECK(S) FAILED

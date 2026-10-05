@@ -1,0 +1,58 @@
+# command: judge.py --traces sigrok-judge/traces
+# commit: f53e76801fa45e787d10db9b88c169682239652f
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# date: 2026-10-05T19:29:30+08:00
+# analyser rate: as simulated
+uart: PASS: decoded 4F 4B 21
+  tooth uart: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 47 4B 21, sent 4F 4B 21
+  tooth uart: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 8F 8B 41, sent 4F 4B 21
+      decoder warning: Frame error
+      decoder warning: Frame error
+spi: PASS: decoded A5 3C
+  tooth spi: MOSI inverted around the third clock rising edge: CAUGHT
+      decoded 85 3C, sent A5 3C
+  tooth spi: MOSI 40 samples late against SCLK (period 64): CAUGHT
+      decoded 52 9E, sent A5 3C
+i2c: PASS: decoded [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c: SDA inverted over the high phase of the third SCL pulse: CAUGHT
+      decoded [Start; Address write: 40; ACK; Data write: 5A; ACK; Stop], sent [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c: SDA 24 samples late against SCL: CAUGHT
+      decoded [Start; Address write: 40; NACK; Data write: 68], sent [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+ps2: PASS: decoded 1c f0 1c 32
+  tooth ps2: DATA inverted over the fifth falling clock edge: CAUGHT
+      decoded 14 f0 1c 32, sent 1c f0 1c 32
+      1 parity errors reported
+  tooth ps2: DATA 45 samples late against CLK (half period about 40): CAUGHT
+      decoded 1c f0 1c, sent 1c f0 1c 32
+can: PASS: decoded [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]; ACK slots ACK,ACK,NACK; allowed warnings seen: 1
+  tooth can: bit 30 of the first frame inverted: CAUGHT
+      decoded [id=0xf0 rtr=0 dlc=8 data=90,8d,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=], sent [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]
+  tooth can: bit time 25 % long (decoder fixed at 500 kbit/s): CAUGHT
+      decoded [id=0x78 rtr=0 dlc=4 data=64,0b,79,5e; id=0x7f3 rtr=0 dlc=15 data=ff,ff,ff,ff,ff,ff,80,01,e0,0f,00,03,fe,00,00,01,ff,ff,fe,1f,f0,f0,f0,00,3c,01,e0,00,78,7f,ff,ff,87,ff,ff,f8,00,1f,f0,07,80,3c,3f,ff,ff,ff,ff,ff,ff,0f,ff,ff,f0,ff,ff,ff,0f,f8,00,00,f0,00,3f,e1], sent [id=0xf0 rtr=0 dlc=8 data=90,ad,ca,e7,04,21,3e,5b; id=0x123 rtr=0 dlc=3 data=f5,12,2f; id=0x7ff rtr=1 dlc=2 data=]
+      decoder warning: CRC delimiter must be a recessive bit
+      decoder warning: End of frame (EOF) must be 7 recessive bits
+usb-ls: PASS: 15 packets; setup [128, 6, 0, 1, 0, 0, 18, 0]; device data 12 01 10 01 00 00 00 08 09 12 01 00 00 01 00 00 00 01
+  tooth usb-ls: one bit of the first packet inverted (D+ and D-): CAUGHT
+      decoder error: CRC5 ERROR: 0x02
+      decoder error: token for address 48
+  tooth usb-ls: bit time 25 % long (decoder fixed at 1.5 Mbit/s): CAUGHT
+      SETUP data None, sent [128, 6, 0, 1, 0, 0, 18, 0]
+      device sent , expected 12 01 10 01 00 00 00 08 09 12 01 00 00 01 00 00 00 01
+      decoder error: SYNC ERROR: 00010000
+spdif: PASS: 899 subframes decoded, aligned at sent subframe 1, 897 of 897 equal (preamble, 24-bit audio, V, U, C, P)
+  tooth spdif: 30 samples (0.7 cell) inverted mid-stream: CAUGHT
+      1 of 897 decoded subframes differ from the sent
+  tooth spdif: 300 samples stretched 1.6 times mid-stream (cells of the wrong length): CAUGHT
+      only 449 of 898 sent subframes decoded
+  probe spdif: 20 samples deleted mid-stream (a phase step of half a cell): NOT flagged (informational, not a fault for this decoder)
+spdif-chip-fault: FLAGGED (as planted in the chip): 899 subframes decoded, aligned at sent subframe 1, 886 of 897 equal (preamble, 24-bit audio, V, U, C, P)
+    11 of 897 decoded subframes differ from the sent
+
+protocols with no sigrok decoder:
+  10BASE-T (ethernet-10base-t, eth10-node, pin-sampler, sequencer-ethernet, multi-proto Ethernet): libsigrokdecode 0.5.3 has no decoder for Manchester-coded 10BASE-T or an Ethernet MAC frame (see results/sigrok-decoders.txt); the Ethernet prototypes keep their scapy-based oracles.
+
+ALL CHECKS PASS

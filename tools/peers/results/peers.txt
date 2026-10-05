@@ -1,0 +1,10 @@
+# command: peers.py
+# commit: f53e76801fa45e787d10db9b88c169682239652f
+# peer: commit:   1b867e53af738e4a8bc7c839ca2f1c07f40382dc  (2025-02-27, "Add deprecation notice")
+# Icarus Verilog version 13.0 (stable) (v13_0-dirty)
+# date: 2026-10-05T19:30:46+08:00
+verilog-uart uart_rx on the sequencer's UART pin (prescale 8): PASS: received 4f 4b 21, sent 4f 4b 21, errors none
+  tooth: bit 3 of byte 0 inverted for half a bit: CAUGHT: received 47 4b 21, errors none
+  tooth: bit time 10 % long (receiver fixed): CAUGHT: received nothing, errors ['FRAME_ERROR']
+  tooth: bit time 30 % long (receiver fixed): CAUGHT: received 3f 98, errors ['FRAME_ERROR']
+ALL CHECKS PASS

@@ -1,0 +1,4 @@
+# command: judge.py --ps2-quirk
+# ideal trace, 1 MHz, bytes sent: 1c f0 1c 32
+without the shim: Data: 1c; Parity OK; Data: f8; Parity error; Data: 87; Parity error
+with the shim: Data: 1c; Parity OK; Data: f0; Parity OK; Data: 1c; Parity OK; Data: 32; Parity OK
