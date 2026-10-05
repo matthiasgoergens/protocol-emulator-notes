@@ -247,9 +247,12 @@ module Make (V : VALUE) = struct
   (* the quarter-clock view of a clock whose instruction moved the pins from [old_] to [new_] at
      sub-slot [q]: bit 4i+p is old_ bit i for p < q, new_ bit i otherwise *)
   let sub_of ~old_ ~new_ ~q =
-    let level = Array.init 4 (fun p -> ite (ult (c 2 p) q) old_ new_) in
-    of_bits (List.concat_map (fun i -> List.map (fun p -> extract level.(p) ~hi:i ~lo:i) [ 3; 2; 1; 0 ])
-               [ 7; 6; 5; 4; 3; 2; 1; 0 ])
+    (* bit i of an 8-bit value to bit 4i of a 32-bit one, by the usual shift-and-mask steps *)
+    let spread x =
+      let step y s m = logand (logor y (shl ~w:32 y (c 32 s))) (c 32 m) in
+      step (step (step (zext ~w:32 x) 12 0x000F000F) 6 0x03030303) 3 0x11111111 in
+    let quarter p = shl ~w:32 (spread (ite (ult (c 2 p) q) old_ new_)) (c 32 p) in
+    logor (logor (quarter 0) (quarter 1)) (logor (quarter 2) (quarter 3))
 
   let fetch_addr st t = logor (shl ~w:10 (zext ~w:10 st.pages.(t)) (c 10 pc_bits)) (zext ~w:10 st.pcs.(t))
 
