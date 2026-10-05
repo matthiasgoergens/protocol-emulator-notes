@@ -45,6 +45,9 @@ let error b s =
   if List.length b.errors < 20 then b.errors <- Printf.sprintf "[%s clk %d] %s" b.dut.name b.now s :: b.errors
   else if List.length b.errors = 20 then b.errors <- "(more errors suppressed)" :: b.errors
 
+(* called with the resolved line on every clock; tools/sigrok-judge uses it to record the bus *)
+let tap : (dp:int -> dm:int -> unit) ref = ref (fun ~dp:_ ~dm:_ -> ())
+
 let t_bit b = Ls_host.bit_period b.ppm
 
 let device_state b =
@@ -61,6 +64,7 @@ let tick b host =
     | None, None -> Ls_host.phy Ls_host.J
     | Some s, Some _ -> error b "bus contention: host and device drive together"; Ls_host.phy s in
   b.dut.step ~dp ~dm;
+  !tap ~dp ~dm;
   b.now <- b.now + 1;
   dev
 

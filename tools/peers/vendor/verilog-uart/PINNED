@@ -1,0 +1,4 @@
+upstream: https://github.com/alexforencich/verilog-uart  (MIT, see COPYING)
+commit:   1b867e53af738e4a8bc7c839ca2f1c07f40382dc  (2025-02-27, "Add deprecation notice")
+files:    rtl/uart_rx.v, rtl/uart_tx.v, COPYING, AUTHORS, copied unmodified; SHA256SUMS checks them
+commit chosen: the pin TeslaCoilerOW/ttihp-protocol-emulator uses in docs/independent-peers.md

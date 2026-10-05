@@ -1,0 +1,8 @@
+# sigrok-cli, run only as an external program (libsigrokdecode is GPL-3.0; nothing of it is copied here).
+# The base image is pinned by digest and the packages by version, so a rebuild fails loudly rather than
+# silently pulling another decoder. Versions as recorded on 2026-10-05 (Debian 13.7, trixie).
+FROM docker.io/library/debian:trixie-slim@sha256:7792b1f7702a86946cd518db72b6a407302c3e9bc1635634368b878189e8221c
+RUN apt-get update \
+ && apt-get install --yes --no-install-recommends \
+      sigrok-cli=0.7.2-1+b2 libsigrokdecode4=0.5.3-4+b4 libsigrok4t64=0.5.2-5.1+b3 \
+ && rm -rf /var/lib/apt/lists/*

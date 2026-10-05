@@ -131,7 +131,22 @@ let sweep_demo () =
       (String.concat " " (List.map (fun b -> if b < 0 then "ERR" else Printf.sprintf "0x%02x" b) bytes))
       (if bytes = uart_bytes then "ok" else "wrong")) [ 29; 30; 31; 32; 33; 34; 35 ]
 
+(* [demo.exe dump DIR]: write the bus trace of the main demo for tools/sigrok-judge, one byte per
+   core cycle, bit p = pin p (UART 0, SCLK 1, MOSI 2, CS 3, SDA 4, SCL 5), plus the payloads sent. *)
+let dump dir =
+  let mem, _ = build () in
+  let trace, _, _ = run ~mem ~cycles:6000 in
+  let oc = open_out_bin (Filename.concat dir "deadline-sequencer.bin") in
+  List.iter (fun s -> output_char oc (Char.chr (s.Decoders.bus land 0xff))) trace;
+  close_out oc;
+  let bytes l = String.concat "," (List.map (Printf.sprintf "%d") l) in
+  let oc = open_out (Filename.concat dir "deadline-sequencer.expected") in
+  Printf.fprintf oc "# samplerate_hz_assumed 1000000 (one sample per core cycle)\nuart_pin %d\nuart_bit_cycles %d\nspi_sclk %d\nspi_mosi %d\nspi_cs %d\ni2c_sda %d\ni2c_scl %d\nuart_bytes %s\nspi_bytes %s\ni2c_bytes %s\n"
+    uart_pin (bit_slots * slot) sclk mosi cs sda scl (bytes uart_bytes) (bytes spi_bytes) (bytes i2c_bytes);
+  close_out oc
+
 let () =
+  if Array.length Sys.argv = 3 && Sys.argv.(1) = "dump" then (dump Sys.argv.(2); exit 0);
   let a = main_demo () in
   let b = fault_demo () in
   sweep_demo ();
