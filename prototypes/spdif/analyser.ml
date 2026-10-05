@@ -24,7 +24,9 @@ let describe_cs (b : int array) =
     ("emphasis", (match cs_str b 3 3 with "000" -> "none" | "100" -> "50/15 us" | s -> "reserved " ^ s));
     ("mode", cs_str b 6 2);
     ("category", category_name (cs_field b 8 7));
-    ("L bit", string_of_int b.(15));
+    ("L bit", (let reversed = cs_field b 8 3 = 1 (* laser optical "100", bit 8 first *) || cs_field b 8 3 = 4 (* broadcast "001" *) || cs_field b 8 4 = 14 (* broadcast "0111" *) in
+               let original = if reversed then b.(15) = 0 else b.(15) = 1 in
+               Printf.sprintf "%d (%s)" b.(15) (if original then "original" else "no indication")));
     ("source", string_of_int (cs_field b 16 4));
     ("channel", (match cs_field b 20 4 with 1 -> "1 (left)" | 2 -> "2 (right)" | 0 -> "unspecified" | n -> string_of_int n));
     ("fs", fs_of_code (cs_str b 24 4));

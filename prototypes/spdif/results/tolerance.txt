@@ -1,7 +1,7 @@
 # command: main.exe tolerance
-# commit: 91673214596eebe63da99382729b2face2ecc38b (with uncommitted changes)
+# commit: 13827404a96a13b8d92fb8a2eafbc6b9e7ba9b39 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T18:10:42+08:00
+# date: 2026-10-05T18:31:58+08:00
 receiver jitter tolerance (sinusoidal jitter, plus 0.5 ns rms random; AES3 figure 11 asks 0.25 UI p-p above 8 kHz): largest passing p-p in steps of 0.05 UI
   44.1 kHz, source +0 ppm, rx 60.000 MHz, jitter at   10000 Hz: passes 1.00 UI p-p (177.2 ns), first failure none up to 1 UI
   44.1 kHz, source +0 ppm, rx 60.000 MHz, jitter at  100000 Hz: passes 1.00 UI p-p (177.2 ns), first failure none up to 1 UI

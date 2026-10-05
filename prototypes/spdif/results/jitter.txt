@@ -1,7 +1,7 @@
 # command: main.exe jitter
-# commit: 91673214596eebe63da99382729b2face2ecc38b
+# commit: 13827404a96a13b8d92fb8a2eafbc6b9e7ba9b39 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T18:07:36+08:00
+# date: 2026-10-05T18:31:49+08:00
 transmit jitter: TIE of every UI boundary of the pin NCO, against a least-squares line; 'peak HP' after AES3's 700 Hz intrinsic-jitter filter
 limits: AES3-1992 6.2.5.1 intrinsic jitter < 0.025 UI peak (filtered); IEC 60958-3 consumer intrinsic jitter 0.05 UI (Cirrus/Wolfson white paper's summary, unverified against the standard)
 rate      clock      grid     skew           p-p ns     p-p UI   peak HP ns    peak UI     rms ns
@@ -25,6 +25,11 @@ rate      clock      grid     skew           p-p ns     p-p UI   peak HP ns    p
 48 kHz    60.852     quarter  +-1 ns          6.108     0.0375        3.182     0.0195      1.397
 48 kHz    60.852     half     none            8.216     0.0505        4.113     0.0253      2.371
 48 kHz    60.852     clock    none           16.434     0.1010        8.249     0.0507      4.742
+at the transmitted edges only (the pacer model driven by the TX firmware, random 16-bit audio, 20 ms; filter stepped per edge):
+44.1 kHz  60.000     quarter  edges           4.147     0.0234        2.116     0.0119      1.201   (71406 edges)
+48 kHz    60.000     quarter  edges           3.914     0.0240        2.061     0.0127      1.201   (77726 edges)
+44.1 kHz  60.852     quarter  edges           4.114     0.0232        2.077     0.0117      1.184   (71406 edges)
+48 kHz    60.852     quarter  edges           4.113     0.0253        2.101     0.0129      1.186   (77725 edges)
 check: the pacer model's 28189 boundaries lie on the analytic quarter-grid placement to within 0.000 ns (the model truncates inc/4)
 ALL CHECKS PASS
 exit 0

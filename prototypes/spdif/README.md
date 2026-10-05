@@ -21,7 +21,7 @@ Reused through symlinks, unchanged:
 |---|---|---|
 | Transmit, 44.1 and 48 kHz, 16-bit, at 60.000 and 60.852 MHz | The chip's pin output matches the reference encoder for all 57,472 UIs in each of the 4 cases, with 0 FIFO underruns. The pacer RTL equals its model on every clock. | `results/tx.txt` |
 | Same output, independent decoders | Our OCaml oracle matches 898/898 subframes with 2 channel-status blocks equal. sigrok's spdif decoder matches 897/897 subframes (preamble, 24-bit audio, V, U, C, P) in all 4 cases. | `results/tx.txt`, `results/sigrok.txt` |
-| Transmit jitter on the quarter grid | 4.1 ns p-p, which is 0.023 UI at 44.1 kHz and 0.024 UI at 48 kHz. After AES3's 700 Hz filter the peak is 0.012 UI. The limit is 0.025 UI (AES3), and the consumer figure is 0.05 UI. | `results/jitter.txt` |
+| Transmit jitter on the quarter grid | 4.1 ns p-p, which is 0.023–0.025 UI. After AES3's 700 Hz filter, at the transmitted edges, the peak is 0.012–0.013 UI. The limit is 0.025 UI (AES3), and the consumer figure is 0.05 UI. | `results/jitter.txt` |
 | Receive: 40 random runs | 40 of 40 clean. Each run had 420 frames of 24-bit random audio, source ±1000 ppm, random jitter up to the AES3 template, at 44.1/48 kHz and an RX clock of 60/60.852 MHz. | `results/rx-random.txt` |
 | Receiver jitter tolerance | ≥ 1 UI p-p at 10 and 100 kHz; 0.60–0.90 UI at 400 kHz; 0.35–0.40 UI at 1 MHz. AES3 asks for 0.25 UI p-p above 8 kHz. Each point is one run, not a statistic. | `results/tolerance.txt` |
 | Round trips: chip TX → chip RX | 7 of 7 pass, ±1000 ppm, including RX at 60.852 MHz. | `results/roundtrip.txt` |
@@ -78,7 +78,7 @@ The pacer needs inc < 2^30, at most one boundary per clock. That holds up to a U
 fclk/4: 15 MBd, or 117 kHz frames at 60 MHz.
 
 **Channel status sent** (`iec60958.ml`): consumer, linear PCM, Cp = 1 (copy permitted), no
-pre-emphasis, mode 0, category CD 0x01 with L = 1, source 0, channel 1 (left) and 2 (right),
+pre-emphasis, mode 0, category CD 0x01 with L = 0 (original), source 0, channel 1 (left) and 2 (right),
 fs 44.1 kHz (0000) or 48 kHz (0100), clock accuracy level II, word length 16 bits of 20.
 
 Sources:
@@ -87,9 +87,14 @@ Sources:
 - Copies are under `/var/tmp/spdif/refs` (iteh.ai sample PDF; cim.mcgill.ca AES3 PDF).
 - The CD category value 0x01 is the ALSA header's `IEC958_AES1_CON_IEC908_CD`.
 
-**From memory, not checked against the standard's text:** for the laser-optical group the L bit
-has the reversed sense, so L = 1 means "original/commercial". The preview stops before §5.3, and
-ALSA says only "depends on the category code".
+**The L bit** (generation status, bit 15) is from IS/IEC 60958-3:2003 §5.3, the Indian adoption,
+which is public at law.resource.org (`/var/tmp/spdif/refs/is-iec60958-3-2003.txt`, lines 589–614).
+Generally L = 1 means "commercially released pre-recorded software". "For historical reasons, the
+reverse situation is valid" for laser-optical products ("100 XXXXL") and broadcast reception, where
+L = 0 means commercially released. A CD player playing an original disc therefore sends L = 0.
+
+My first version sent L = 1, with this sense backwards from memory. The codex review flagged it
+and the text settled it. The analyser applies the reversal when it prints the L bit.
 
 ### Transmit jitter (`results/jitter.txt`)
 
@@ -107,6 +112,13 @@ Method:
 | clock grid | 0.094 UI | 0.0469 UI | 0.101 UI | 0.0504 UI |
 
 At 60.852 MHz the figures are within 0.001 UI of these.
+
+The table measures every UI boundary. Intrinsic jitter is defined at the transitions, which are an
+irregular subset of the boundaries; the codex review pointed this out. So the measurement was
+repeated at the transmitted edges only. It used the pacer model driven by the TX firmware: 20 ms of
+random audio, about 71,000–78,000 edges, with the filter stepped by each edge's own interval. The
+filtered peak is **0.0117–0.0129 UI** across the four rate and clock cases (last block of
+`results/jitter.txt`, with a check that it stays below 0.025 UI).
 
 Limits, with the UI defined as 1/128 of a frame (AES3 §2.1.13; 177.2 ns at 44.1 kHz):
 - AES3 intrinsic jitter: < 0.025 UI peak, filtered. The quarter grid passes with half the margin
@@ -192,10 +204,16 @@ table (256 bytes) plus 2 × 384 bytes: **1,024 of 1,024**. TX and RX can therefo
 chip's bank as built (960 + 1,024 bytes). Shrinking R1 to one buffer, or packing C bits eight to a
 byte, would be the fix. Neither was done.
 
-Error accounting in the tests:
-- Errors before the first complete subframe are "while locking".
-- One framing error after the last edge of a capture is the stream stopping mid-subframe.
-- Both are reported separately and are not counted as failures. Every other error is.
+Error accounting in the tests. A run is clean only if all of these hold:
+- At most one error comes before the first complete subframe (the receiver locking on
+  mid-subframe).
+- At most one framing error comes after the last edge of the capture (the stream stopping
+  mid-subframe).
+- No other error occurs.
+- At most two of the sent subframes are missing, the first and the last.
+
+The codex review found the first version of these criteria too loose: it allowed four missing
+subframes and any number of errors at the edges. They were tightened, and every suite was re-run.
 
 ## Verification
 
@@ -210,6 +228,10 @@ Error accounting in the tests:
   "Signal Bitrate" text, so it is compared on (preamble, audio, V, U, C, P).
 - A capture must start near the first edge. sigrok learns the pulse widths from the first
   intervals; a long idle lead-in made it decode nothing. That was found and fixed here.
+
+How independent the oracle is: it is a different algorithm, but it encodes the same reading of
+AES3 as the encoder (preamble interval patterns, slot order). A misreading shared by both would pass
+it. sigrok's decoder, written by others, is the check against that, though it does not check parity.
 
 **What is compared.** Decoded subframes are compared with sent ones in order. The comparison
 resynchronises after a mismatch, and reports resyncs and skipped subframes. Complete
@@ -333,6 +355,21 @@ marks the claims I re-read myself.
   - an unbuffered inverter biased as an amplifier (74HCU04 with 10 kΩ feedback: a hobby circuit,
     unverified).
 - Simpler for the demo board: use only TOSLINK for input.
+
+## Review
+
+There was one adversarial review, `codex-luna exec`; its findings are in
+`results/codex-review.txt`. Each finding, and what was done about it:
+1. The L bit had the wrong sense: correct. It was fixed against the standard's text (above).
+2. Jitter should be measured at the transitions only: correct. The measurement was added (above),
+   and the result barely moves.
+3. The pass criteria were too loose: correct. They were tightened (above), and all suites were
+   re-run.
+4. The oracle shares the encoder's reading of AES3: true, and noted above.
+
+The review found the following correct: the framing, the preamble bytes, the slot placement, the
+channel-status positions and rate codes, the receive signatures, C-bit positions and parities, and
+the ISA v2 usage.
 
 ## Open issues
 

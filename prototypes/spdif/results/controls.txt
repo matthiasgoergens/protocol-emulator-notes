@@ -1,7 +1,7 @@
 # command: main.exe controls
-# commit: 91673214596eebe63da99382729b2face2ecc38b (with uncommitted changes)
+# commit: 13827404a96a13b8d92fb8a2eafbc6b9e7ba9b39 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T18:10:28+08:00
+# date: 2026-10-05T18:31:18+08:00
 clean stream (must pass)                           chip clean, oracle clean   [chip: 839/839 equal (offset 0, 0 resync, 0 sent skipped), errors 0 [count 0 prefix 0 short 0 overflow 0 overrun 0; after the last edge 1] (+0 while locking), parity 0, cs blocks 1 ok 0 bad | oracle: 839/839 equal (0 resync, 0 skipped), errors 0, parity 0, cs 1 ok 0 bad]
 wrong preamble (an M sent as W)                    chip CAUGHT, oracle CAUGHT   [chip: 838/839 equal (offset 0, 0 resync, 0 sent skipped), errors 0 [count 0 prefix 0 short 0 overflow 0 overrun 0; after the last edge 1] (+0 while locking), parity 0, cs blocks 1 ok 0 bad | oracle: 838/839 equal (0 resync, 0 skipped), errors 2, parity 0, cs 0 ok 0 bad]
 wrong preamble (the block's B sent as M)           chip CAUGHT, oracle CAUGHT   [chip: 838/839 equal (offset 0, 0 resync, 0 sent skipped), errors 0 [count 0 prefix 0 short 0 overflow 0 overrun 0; after the last edge 1] (+0 while locking), parity 0, cs blocks 0 ok 0 bad | oracle: 838/839 equal (0 resync, 0 skipped), errors 0, parity 0, cs 0 ok 0 bad]

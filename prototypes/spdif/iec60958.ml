@@ -21,12 +21,13 @@
      bits 33..35 = 100 (16 bits when the maximum is 20); bits 36..39 original sampling frequency
      (0000 = not indicated).
    - Category code of a CD player (IEC 60908): "1000000L", i.e. byte value 0x01 with L in bit 15.
-     The value is the ALSA header's IEC958_AES1_CON_IEC908_CD (/usr/include/alsa/asoundef.h:80),
-     which agrees with the laser-optical group "100" as I remember it.
-     FROM MEMORY, NOT CHECKED AGAINST THE STANDARD'S TEXT (the preview pages stop before
-     section 5.3 and the annexes): that for the laser-optical group the L bit has the reversed
-     sense, L = 1 meaning "original / commercially released" and L = 0 "first generation or
-     higher copy". ALSA only says "this bit depends on the category code". *)
+     The value is the ALSA header's IEC958_AES1_CON_IEC908_CD (/usr/include/alsa/asoundef.h:80).
+   - L bit (bit 15), IS/IEC 60958-3:2003 section 5.3 (the Indian adoption, public at
+     law.resource.org): generally 0 = no indication, 1 = commercially released pre-recorded
+     software; "for historical reasons, the reverse situation is valid" for laser-optical products
+     (category "100 XXXXL") and broadcast reception: there 0 = commercially released, 1 = no
+     indication. A CD player's original disc therefore sends L = 0. (My first version had this
+     backwards from memory; a codex review caught it, and the text above settled it.) *)
 
 type preamble = B | M | W
 
@@ -51,7 +52,7 @@ type cs_params = {
   word16 : bool;             (* bits 32..35 = 0,1,0,0: 16-bit words in a 20-bit field *)
 }
 
-let cd_params rate = { copy_permitted = true; l_bit = 1; category = 0x01; rate; word16 = true }
+let cd_params rate = { copy_permitted = true; l_bit = 0; category = 0x01; rate; word16 = true }
 
 (* the 192 bits of one channel's channel-status block; channel 0 = left, 1 = right *)
 let channel_status (p : cs_params) ~channel =

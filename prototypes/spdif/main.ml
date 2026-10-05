@@ -68,7 +68,7 @@ let line_of_subframes (c : src_cfg) ?(mangle = fun (l : int array) -> l) sfs =
 
 let clocks_for ~fclk (l : Line.t) = int_of_float ((l.edges.(Array.length l.edges - 1) +. 3000.) *. fclk *. 1e-9)
 
-type verdict = { rx_cmp : cmp; rx_err : int; rx_startup : int; rx_detail : string; rx_par : int; rx_cs_ok : int; rx_cs_bad : int; or_cmp : cmp; or_err : int; or_par : int; or_cs_ok : int; or_cs_bad : int; rr : Rx.run_result }
+type verdict = { rx_cmp : cmp; rx_err : int; rx_startup : int; rx_trailing : int; rx_detail : string; rx_par : int; rx_cs_ok : int; rx_cs_bad : int; or_cmp : cmp; or_err : int; or_par : int; or_cs_ok : int; or_cs_bad : int; rr : Rx.run_result }
 
 let judge ?(impl = Rx.Rtl) ?scfg ~fclk ~phase ~rate (sfs : Iec60958.subframe array) (line : Line.t) =
   let samples = Line.sample ~fclk ~phase ~clocks:(clocks_for ~fclk line) line in
@@ -79,7 +79,7 @@ let judge ?(impl = Rx.Rtl) ?scfg ~fclk ~phase ~rate (sfs : Iec60958.subframe arr
   let rx_cs_ok = List.length (List.filter (fun (_, l, r) -> l = csl && r = csr) d.cs_blocks) in
   let o = Oracle.decode line.edges in
   let or_cs_ok = List.length (List.filter (fun (l, r) -> l = csl && r = csr) o.blocks) in
-  { rx_cmp = compare_stream sfs (rx_got d); rx_err = d.count_errors + d.prefix_errors + d.short_records + rr.overflows + rr.sampler_overruns; rx_startup = d.startup_errors;
+  { rx_cmp = compare_stream sfs (rx_got d); rx_err = d.count_errors + d.prefix_errors + d.short_records + rr.overflows + rr.sampler_overruns; rx_startup = d.startup_errors; rx_trailing = d.trailing_errors;
     rx_detail = sprintf "count %d prefix %d short %d overflow %d overrun %d; after the last edge %d" d.count_errors d.prefix_errors d.short_records rr.overflows rr.sampler_overruns d.trailing_errors;
     rx_par = List.length (List.filter (fun (s : Rx.rx_subframe) -> s.parity_bad) d.subframes);
     rx_cs_ok; rx_cs_bad = List.length d.cs_blocks - rx_cs_ok;
@@ -87,7 +87,10 @@ let judge ?(impl = Rx.Rtl) ?scfg ~fclk ~phase ~rate (sfs : Iec60958.subframe arr
     or_par = List.length (List.filter (fun (s : Oracle.sub) -> not s.parity_ok) o.subs);
     or_cs_ok; or_cs_bad = List.length o.blocks - or_cs_ok; rr }
 
+(* [expect]: the subframes sent minus the most the receiver may miss at the edges of a capture:
+   the first (it locks on mid-subframe) and the last (its tail is flushed only by a next preamble). *)
 let clean v ~expect =
+  v.rx_startup <= 1 && v.rx_trailing <= 1 &&
   v.rx_cmp.mismatched = 0 && v.rx_cmp.compared >= expect && v.rx_err = 0 && v.rx_par = 0 && v.rx_cs_ok >= 1 && v.rx_cs_bad = 0
   && v.or_cmp.mismatched = 0 && v.or_cmp.compared >= expect && v.or_err = 0 && v.or_par = 0 && v.or_cs_ok >= 1 && v.or_cs_bad = 0
 
@@ -196,7 +199,7 @@ let rx_random n seed =
     let c = { rate; ppm; t0 = Random.State.float st 1000.; jit; frames = 420; frame0 = Random.State.int st 192; seed = Random.State.bits st } in
     let sfs = random_stream ~seed:c.seed ~rate ~frames:c.frames ~frame0:c.frame0 in
     let v = judge ~fclk ~phase:(Random.State.float st 16.) ~rate sfs (line_of_subframes c sfs) in
-    let ok = clean v ~expect:(2 * c.frames - 4) in
+    let ok = clean v ~expect:(2 * c.frames - 2) in
     if ok then incr pass;
     pr "rx %2d %s rx %.3f MHz, source %+7.1f ppm, jitter %.2f ns rms + %.3f UI p-p at %.0f Hz: %s  %s" k (Iec60958.rate_name rate) (fclk /. 1e6) ppm
       jit.rms_ns (jit.sin_pp_ns /. Iec60958.ui_ns rate) jit.sin_hz (if ok then "PASS" else "FAIL") (show v);
@@ -214,8 +217,8 @@ let controls () =
     let c = caught v in
     pr "%-50s chip %s, oracle %s   [%s]" name (if fst c then fst words else snd words) (if oracle_na then "not involved" else if snd c then fst words else snd words) (show v);
     (v, c) in
-  let v0, _ = run ~words:("clean", "NOT CLEAN") "clean stream (must pass)" sfs ~caught:(fun v -> (clean v ~expect:836, clean v ~expect:836)) in
-  check "control baseline clean" (clean v0 ~expect:836);
+  let v0, _ = run ~words:("clean", "NOT CLEAN") "clean stream (must pass)" sfs ~caught:(fun v -> (clean v ~expect:838, clean v ~expect:838)) in
+  check "control baseline clean" (clean v0 ~expect:838);
   let mod_sf i f = Array.mapi (fun j s -> if j = i then f s else s) sfs in
   (* index of a subframe of a given kind, from 200 on *)
   let find ?(from = 200) p = let r = ref 0 in (try Array.iteri (fun j (s : Iec60958.subframe) -> if j >= from && s.pre = p then (r := j; raise Exit)) sfs with Exit -> ()); !r in
@@ -241,9 +244,9 @@ let controls () =
       (v.rx_err > 0 || v.rx_cmp.mismatched > 0, v.or_err > 0 || v.or_cmp.mismatched > 0)));
   (* planted faults in the chip itself *)
   need "rx holdoff" (run ~oracle_na:true ~scfg:(Rx.sampler_cfg ~holdoff:35 ()) "chip fault: sampler holdoff 35 (below 1 UI)" sfs ~caught:(fun v ->
-      (not (clean v ~expect:836), true)));
+      (not (clean v ~expect:838), true)));
   need "rx timeout" (run ~oracle_na:true ~scfg:(Rx.sampler_cfg ~timeout:130 ()) "chip fault: sampler timeout 130 (above 3 UI)" sfs ~caught:(fun v ->
-      (not (clean v ~expect:836), true)));
+      (not (clean v ~expect:838), true)));
   (* transmitter: one wrong entry in the parity table *)
   let r, sfs_t, _, diff, _ = tx_run ~bank_fault:(fun b -> b.(512 + 0x5a) <- 1 - b.(512 + 0x5a)) ~rate ~fclk ~frames:450 ~seed:12 () in
   let o = Oracle.decode (Line.of_bounds ~fclk r.bounds).edges in
@@ -265,7 +268,7 @@ let roundtrip () =
       let line = Line.add_jitter ~seed:3 { Line.rms_ns = 1.5; sin_pp_ns = 0.2 *. Iec60958.ui_ns rate; sin_hz = 31000.; sin_phase = 1. }
           (Line.map_time (fun t -> t +. 123.) (Line.of_bounds ~fclk:fclk_tx r.bounds)) in
       let v = judge ~fclk:rx_fclk ~phase:0.7 ~rate sfs line in
-      let ok = clean v ~expect:(2 * 400) && diff = 0 in
+      let ok = clean v ~expect:(2 * 420 - 2) && diff = 0 in
       pr "round trip %s: chip TX at 60 MHz %+.0f ppm -> 1.5 ns rms + 0.2 UI p-p at 31 kHz -> chip RX at %.3f MHz: %s  %s" (Iec60958.rate_name rate) ppm (rx_fclk /. 1e6) (if ok then "PASS" else "FAIL") (show v);
       check "roundtrip" ok)
     [ (Iec60958.R44, -1000., 60e6); (R44, 0., 60e6); (R44, 1000., 60e6); (R48, -1000., 60e6); (R48, 1000., 60e6);
@@ -285,6 +288,20 @@ let jitter () =
           pr "%-9s %-10s %-8s %-10s %10.3f %10.4f %12.3f %10.4f %10.3f" (Iec60958.rate_name rate) (sprintf "%.3f" (fclk /. 1e6)) gname sname s.pp_ns (s.pp_ns /. ui) s.hp_peak_ns (s.hp_peak_ns /. ui) s.rms_ns)
         [ (4, "quarter", [||], "none"); (4, "quarter", [| 0.; 0.5; -0.5; 0.25 |], "+-0.5 ns"); (4, "quarter", [| 0.; 1.0; -1.0; 0.5 |], "+-1 ns");
           (2, "half", [||], "none"); (1, "clock", [||], "none") ])
+    [ (Iec60958.R44, 60e6); (R48, 60e6); (R44, 60.8523e6); (R48, 60.8523e6) ];
+  (* at the transmitted edges only, from the pacer model running the transmit firmware *)
+  pr "at the transmitted edges only (the pacer model driven by the TX firmware, random 16-bit audio, 20 ms; filter stepped per edge):";
+  List.iter (fun (rate, fclk) ->
+      let ui = Iec60958.ui_ns rate in
+      let r, _, _, _, inc = tx_run ~rate ~fclk ~frames:(int_of_float (0.02 *. Iec60958.rate_hz rate)) ~seed:21 () in
+      let tq = 1e9 /. fclk /. 4. and tc = 1e9 /. fclk in
+      let period = 4294967296. /. float inc in
+      let pairs = Array.of_list (List.filteri (fun _ x -> x <> None) (Array.to_list (Array.mapi (fun k (c, q, t) ->
+          if t = 1 then Some ((float r.enable_clock +. (float (k + 1) *. period)) *. tc, float ((4 * c) + q) *. tq) else None) r.bounds))
+          |> List.map Option.get) in
+      let s = Tie.measure_edges pairs in
+      pr "%-9s %-10s %-8s %-10s %10.3f %10.4f %12.3f %10.4f %10.3f   (%d edges)" (Iec60958.rate_name rate) (sprintf "%.3f" (fclk /. 1e6)) "quarter" "edges" s.pp_ns (s.pp_ns /. ui) s.hp_peak_ns (s.hp_peak_ns /. ui) s.rms_ns (Array.length pairs);
+      check "intrinsic jitter at edges below 0.025 UI" (s.hp_peak_ns /. ui < 0.025))
     [ (Iec60958.R44, 60e6); (R48, 60e6); (R44, 60.8523e6); (R48, 60.8523e6) ];
   (* the analytic quarter grid against the pacer model's actual boundaries *)
   let r, _, _, _, inc = tx_run ~rate:R44 ~fclk:60e6 ~frames:220 ~seed:4 () in
@@ -308,7 +325,7 @@ let tolerance () =
             let c = { rate; ppm; t0 = 100.; jit = { Line.rms_ns = 0.5; sin_pp_ns = !a *. ui; sin_hz = f; sin_phase = 0.3 }; frames = 220; frame0 = 100; seed = 5 } in
             let sfs = random_stream ~seed:5 ~rate ~frames:c.frames ~frame0:c.frame0 in
             let v = judge ~fclk ~phase:2. ~rate sfs (line_of_subframes c sfs) in
-            let ok = v.rx_cmp.mismatched = 0 && v.rx_cmp.compared >= 430 && v.rx_err = 0 && v.rx_par = 0 in
+            let ok = v.rx_cmp.mismatched = 0 && v.rx_cmp.compared >= 438 && v.rx_startup <= 1 && v.rx_trailing <= 1 && v.rx_err = 0 && v.rx_par = 0 in
             if ok then last_ok := !a else first_bad := !a;
             a := !a +. 0.05
           done;

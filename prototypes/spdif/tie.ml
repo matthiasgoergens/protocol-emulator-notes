@@ -39,3 +39,26 @@ let measure ~ui_ns (times : float array) =
     if k > settle then begin peak := Float.max !peak (Float.abs !y); ss := !ss +. (!y *. !y); incr cnt end
   done;
   { pp_ns = mx -. mn; hp_peak_ns = !peak; rms_ns = sqrt (!ss /. float (max 1 !cnt)) }
+
+(* the same at the transmitted edges only: [pairs] = (ideal, actual) times in ns of the boundaries
+   that carry a transition. Intrinsic jitter is defined at the transition zero crossings, which
+   are an irregular subset of the UI boundaries, so the filter is stepped with each edge's own dt. *)
+let measure_edges (pairs : (float * float) array) =
+  let n = Array.length pairs in
+  let sx = ref 0. and sy = ref 0. and sxx = ref 0. and sxy = ref 0. in
+  Array.iter (fun (x, t) -> let y = t -. x in sx := !sx +. x; sy := !sy +. y; sxx := !sxx +. (x *. x); sxy := !sxy +. (x *. y)) pairs;
+  let fn = float n in
+  let b = ((fn *. !sxy) -. (!sx *. !sy)) /. ((fn *. !sxx) -. (!sx *. !sx)) in
+  let a = (!sy -. (b *. !sx)) /. fn in
+  let tie = Array.map (fun (x, t) -> t -. x -. (a +. (b *. x))) pairs in
+  let mx = Array.fold_left Float.max neg_infinity tie and mn = Array.fold_left Float.min infinity tie in
+  let rc = 1. /. (2. *. Float.pi *. 700.) in
+  let y = ref 0. and peak = ref 0. and ss = ref 0. and cnt = ref 0 in
+  let t_start = fst pairs.(0) in
+  for k = 1 to n - 1 do
+    let dt = (fst pairs.(k) -. fst pairs.(k - 1)) *. 1e-9 in
+    let alpha = rc /. (rc +. dt) in
+    y := alpha *. (!y +. tie.(k) -. tie.(k - 1));
+    if (fst pairs.(k) -. t_start) *. 1e-9 > 10. *. rc then begin peak := Float.max !peak (Float.abs !y); ss := !ss +. (!y *. !y); incr cnt end
+  done;
+  { pp_ns = mx -. mn; hp_peak_ns = !peak; rms_ns = sqrt (!ss /. float (max 1 !cnt)) }
