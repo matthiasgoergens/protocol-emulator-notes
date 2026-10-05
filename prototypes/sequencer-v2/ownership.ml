@@ -12,6 +12,8 @@
    Anything not declared is forbidden. "Touch" means naming the resource, whether or not the
    instruction succeeds: a SEND to a full inbox has still looked at it.
 
+   [conflicts] below states the rules a declaration itself must keep.
+
    The declaration is checked two ways, from this one definition:
    - statically, by the hazard checker (../verif-oracles/hazard), over every reachable
      instruction, with bank addresses from a data-flow analysis of the bank pointer;
@@ -47,6 +49,42 @@ let check_well_formed (o : t) =
       List.iter (fun i -> if i < 0 || i > 3 then invalid_arg (Printf.sprintf "Ownership: T%d inbox or port %d" t i))
         (th.inbox_send @ th.inbox_recv @ th.port_out @ th.port_in))
     o
+
+(* Rules on a declaration itself, before any code is read; both checkers apply them (the hazard
+   checker as its OWNERSHIP rule, the bounded model checker before a run). Each violation is a
+   sentence.
+   - Bank: no address may be written by two threads, like a pin with two drivers. An address
+     one thread writes and another reads is a channel, not a fault.
+   - Ports: one thread per port and direction; a port is one external device's.
+   - Inboxes: inbox i belongs to thread i. Only thread i may receive from it: WAITC 10 polls
+     the executing thread's own inbox, so any other receiver could not wait for it, and a
+     second consumer would take bytes meant for thread i. An inbox has at most one declared
+     sender, unless it is listed in [shared_inboxes] (a declared multi-producer inbox): with
+     two senders the receiver cannot tell whose byte it took, and each sender's WAITC 11 sees
+     the other's bytes as lack of space. An inbox some thread sends to must be received by its
+     owner, or the sends fill it once and fail from then on. *)
+let meet r1 r2 = List.exists (fun (a, b) -> List.exists (fun (c, e) -> a <= e && c <= b) r2) r1
+
+let conflicts ?(shared_inboxes = []) (o : t) =
+  let pairs = List.concat (List.init 4 (fun t -> List.init (3 - t) (fun j -> (t, t + j + 1)))) in
+  let bank_and_ports =
+    List.concat_map (fun (t, u) ->
+        (if meet o.(t).bank_write o.(u).bank_write then [ Printf.sprintf "T%d and T%d may both write one bank address" t u ] else [])
+        @ List.filter_map (fun j -> if List.mem j o.(u).port_out then Some (Printf.sprintf "T%d and T%d may both send to port %d" t u j) else None) o.(t).port_out
+        @ List.filter_map (fun j -> if List.mem j o.(u).port_in then Some (Printf.sprintf "T%d and T%d may both receive from port %d" t u j) else None) o.(t).port_in)
+      pairs in
+  let inboxes =
+    List.concat (List.init 4 (fun i ->
+        let senders = List.filter (fun t -> List.mem i o.(t).inbox_send) [ 0; 1; 2; 3 ] in
+        List.filter_map (fun t ->
+            if t <> i && List.mem i o.(t).inbox_recv then Some (Printf.sprintf "T%d may receive from inbox %d, which is T%d's" t i i) else None)
+          [ 0; 1; 2; 3 ]
+        @ (if List.length senders > 1 && not (List.mem i shared_inboxes) then
+             [ Printf.sprintf "inbox %d has %d declared senders (%s) and is not declared shared" i (List.length senders)
+                 (String.concat ", " (List.map (Printf.sprintf "T%d") senders)) ] else [])
+        @ (if senders <> [] && not (List.mem i o.(i).inbox_recv) then
+             [ Printf.sprintf "inbox %d has a declared sender but T%d does not declare receiving it" i i ] else []))) in
+  bank_and_ports @ inboxes
 
 let ranges_text = function
   | [] -> "-"

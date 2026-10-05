@@ -1,0 +1,92 @@
+# command: powerup/run_powerup.sh cover
+# commit: ec1650d3c5c869bb2aa2556908902efa77cb9e21 (with uncommitted changes)
+# yosys: Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+# z3: Z3 version 5.1.0 - 64 bit
+# date: 2026-10-05T22:38:47+08:00
+== r1
+engine_0: Property proved.  Time =   332.55 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== r2
+engine_0: Property proved.  Time =    26.75 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== r1_bmc
+summary: engine_0 (smtbmc z3) returned pass
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== cover
+engine_0: ##   0:01:56  Unreached cover statement at powerup: vacuity_control_ante
+summary: engine_0 (smtbmc z3) returned FAIL
+summary:   reached cover statement powerup.bank_ante at powerup.sv:122.5-122.34 step 1
+summary:   reached cover statement powerup.cfg_ante at powerup.sv:124.5-124.43 step 2
+summary:   reached cover statement powerup.pins_ante at powerup.sv:118.5-118.41 step 2
+summary:   reached cover statement powerup.host_ante at powerup.sv:120.5-120.41 step 2
+summary:   reached cover statement powerup.ports_ante at powerup.sv:121.5-121.49 step 2
+summary: unreached cover statements:
+DONE (FAIL, rc=2)
+== u_cfg
+engine_0: Output 1 of miter "model/design_aiger" was asserted in frame 1.  Time =     0.03 sec
+summary: engine_0 (abc pdr) returned FAIL
+summary:   failed assertion powerup.cfg at powerup.sv:103.5-103.47 step 1
+DONE (FAIL, rc=2)
+counterexample, both copies (step 0 is the first clock; clear is high in the first RESET_CLOCKS steps):
+step          clear    imem_addr_a    imem_addr_b         imem_a         imem_b      pin_out_a      pin_out_b      cfg_out_a      cfg_out_b
+   0              1              0              0           8610           8610              0              0         101000           1000
+   1              0              0              0              0              0              0              0         101000           1000
+   2              0              0              0              0              0              0              0         101000           1000
+== u_dl
+engine_0: Output 2 of miter "model/design_aiger" was asserted in frame 4.  Time =     0.58 sec
+summary: engine_0 (abc pdr) returned FAIL
+summary:   failed assertion powerup.fetch at powerup.sv:94.5-94.51 step 4
+DONE (FAIL, rc=2)
+counterexample, both copies (step 0 is the first clock; clear is high in the first RESET_CLOCKS steps):
+step          clear    imem_addr_a    imem_addr_b         imem_a         imem_b      pin_out_a      pin_out_b      cfg_out_a      cfg_out_b
+   0              1              0              0           eac0           58c0              0              0           8000         808000
+   1              0              0              0           58e3           58e3              0              0              0              0
+   2              0             20             20           ca59           ca59              0              0              0              0
+   3              0              0              0           a348           a348              0              0              0              0
+   4              0             e3              0              0              0              0              0              0              0
+   5              0             e3              0              0              0              0              0              0              0
+== u_inbox
+engine_0: Property proved.  Time =    23.69 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== u_prev_pins
+engine_0: Property proved.  Time =    24.17 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== u_host_tag
+engine_0: Property proved.  Time =    26.74 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)
+== per-task verdicts (every assertion of powerup.sv at once; the antecedent covers are those of r1 below, on the same miter)
+PROPERTY powerup-r2: PROVED unbounded (abc pdr)
+PROPERTY powerup-r1_bmc: PROVED to 12 clocks (smtbmc)
+PROPERTY powerup-u_cfg: FAILED at step 1 (powerup.cfg )
+PROPERTY powerup-u_dl: FAILED at step 4 (powerup.fetch )
+PROPERTY powerup-u_inbox: PROVED unbounded (abc pdr)
+PROPERTY powerup-u_prev_pins: PROVED unbounded (abc pdr)
+PROPERTY powerup-u_host_tag: PROVED unbounded (abc pdr)
+== per-property report: r1 (proof) with cover (antecedents)
+PROPERTY pins: PROVED unbounded (abc pdr), one-clock reset; antecedent pins_ante reachable (step 2)
+PROPERTY fetch: PROVED unbounded (abc pdr), one-clock reset; antecedent fetch_ante reachable (step 3)
+PROPERTY host: PROVED unbounded (abc pdr), one-clock reset; antecedent host_ante reachable (step 2)
+PROPERTY ports: PROVED unbounded (abc pdr), one-clock reset; antecedent ports_ante reachable (step 2)
+PROPERTY bank: PROVED unbounded (abc pdr), one-clock reset; antecedent bank_ante reachable (step 1)
+PROPERTY fine: PROVED unbounded (abc pdr), one-clock reset; antecedent fine_ante reachable (step 6)
+PROPERTY cfg: PROVED unbounded (abc pdr), one-clock reset; antecedent cfg_ante reachable (step 2)
+PROPERTY vacuity_control: VACUOUS unbounded (abc pdr), one-clock reset; antecedent vacuity_control_ante unreachable (to the cover task's depth)
+COVER pins_ante: REACHABLE (step 2)
+COVER fetch_ante: REACHABLE (step 3)
+COVER host_ante: REACHABLE (step 2)
+COVER ports_ante: REACHABLE (step 2)
+COVER bank_ante: REACHABLE (step 1)
+COVER fine_ante: REACHABLE (step 6)
+COVER cfg_ante: REACHABLE (step 2)
+COVER vacuity_control_ante: UNREACHABLE (to the cover task's depth)

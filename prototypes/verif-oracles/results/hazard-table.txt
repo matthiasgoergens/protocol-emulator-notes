@@ -1,7 +1,7 @@
-# command: /home/matthias/prog/janestreet/emulator-wt-formal-followups/prototypes/verif-oracles/_build/default/hazard/hazard_controls.exe table
-# commit: 77647a06aa78ef7b097c1a0d8524ca77ad992b75 (with uncommitted changes)
+# command: /home/matthias/prog/janestreet/emulator-wt-adopt-formal-hygiene/prototypes/verif-oracles/_build/default/hazard/hazard_controls.exe table
+# commit: ec1650d3c5c869bb2aa2556908902efa77cb9e21 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T17:56:21+08:00
+# date: 2026-10-05T20:25:21+08:00
 SOLO table: every (kind, wait class, declaration); a row without a reason is REJECTED
   pin-drive                -         declared   allowed: the thread owns the pin
   pin-drive                -         undeclared REJECTED

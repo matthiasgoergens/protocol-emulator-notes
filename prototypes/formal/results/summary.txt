@@ -1,0 +1,89 @@
+# command: report.sh (from the result files; nothing re-run)
+# commit: ec1650d3c5c869bb2aa2556908902efa77cb9e21 (with uncommitted changes)
+# date: 2026-10-05T22:39:11+08:00
+# not here: section 3 (Kind 2, results/kind2.txt), section 4 (RTL against specification,
+#   results/equiv-*.txt; its non-vacuity evidence is the 28 of 28 planted bugs), and a-protocols,
+#   which no longer finishes (Findings 4, results/a-protocols-after-i2c-fix.txt)
+== bounded model checks and induction steps (results/bmc.txt)
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 1.2 left on its event: REACHABLE
+  COVER wait at 1.2 left at its deadline: REACHABLE
+  PROPERTY a-deadline-main.ml-programme: PROVED to 160 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  [control] PROPERTY a-deadline-planted-ldd21: FAILED at clock 89
+  COVER every contract's wait executes (antecedent): UNREACHABLE within 160 clocks
+  COVER wait at 1.200 left on its event: UNREACHABLE within 160 clocks
+  COVER wait at 1.200 left at its deadline: UNREACHABLE within 160 clocks
+  [control] PROPERTY a-deadline-planted-unreachable-wait: VACUOUS to 160 clocks; antecedent 'every contract's wait executes' unreachable
+  COVER two threads write pins (antecedent): REACHABLE
+  COVER thread 0 writes pins: REACHABLE
+  COVER thread 1 writes pins: REACHABLE
+  COVER thread 2 writes pins: REACHABLE
+  COVER thread 3 writes pins: REACHABLE
+  PROPERTY b-ownership: PROVED to 720 clocks (bounded); antecedent 'two threads write pins' reachable
+  [control] PROPERTY b-ownership-planted-mask01: FAILED at clock 95
+  [control] PROPERTY c-isolation-planted-ldb: FAILED at clock 28
+  PROPERTY c-isolation-uart-induction: PROVED (unbounded, by induction); hypotheses satisfiable
+  [control] PROPERTY c-isolation-planted-ldb-induction: FAILED (not inductive)
+  [control] PROPERTY c-isolation-uart-induction-without-ownership-assumption: FAILED (not inductive)
+  PROPERTY c-isolation-ldb-with-bank-ownership-induction: PROVED (unbounded, by induction); hypotheses satisfiable
+  [control] PROPERTY c-isolation-ldb-others-may-write-address-1-induction: FAILED (not inductive)
+  DECLARATION bridge A: keeps the rules
+  [control] DECLARATION bridge A, planted: T3 also declared to receive from inbox 2: REJECTED: T3 may receive from inbox 2, which is T2's
+  [control] DECLARATION bridge A, planted: T3 also declared to send to inbox 1: REJECTED: inbox 1 has 2 declared senders (T0, T3) and is not declared shared
+  [control] DECLARATION bridge A, planted: T2 no longer declared to receive from inbox 2: REJECTED: inbox 2 has a declared sender but T2 does not declare receiving it
+  [control] DECLARATION bridge A, planted: T0 and T3 both declared to write bank 0..15: REJECTED: T0 and T3 may both write one bank address
+  COVER some thread sends to or receives from an inbox (antecedent): REACHABLE (concrete witness, checked by the solver in 1.20 s)
+  COVER T0 sends to inbox 1: UNREACHABLE within 300 clocks
+  COVER T1 receives from inbox 1: REACHABLE (concrete witness, checked by the solver in 1.19 s)
+  COVER T1 sends to inbox 2: UNREACHABLE within 300 clocks
+  COVER T2 receives from inbox 2: REACHABLE (concrete witness, checked by the solver in 0.88 s)
+  PROPERTY e-ownership-bridge-a: PROVED to 300 clocks (bounded); antecedent 'some thread sends to or receives from an inbox' reachable
+  COVER thread 0 reads the bank (antecedent): REACHABLE
+  COVER thread 0 reads bank address 0: REACHABLE
+  COVER thread 0 reads bank address 1: REACHABLE
+  PROPERTY e-bank-uart-reads-0..1: PROVED to 440 clocks (bounded); antecedent 'thread 0 reads the bank' reachable
+  [control] PROPERTY e-bank-uart-declared-0-only: FAILED at clock 204
+  [control] PROPERTY e-ownership-planted-t3-receives-inbox-2: FAILED at clock 3
+  COVER a frame is sampled (antecedent): REACHABLE
+  COVER 2 frames received: REACHABLE
+  PROPERTY d-uart-every-byte: PROVED to 440 clocks (bounded); antecedent 'a frame is sampled' reachable
+  [control] PROPERTY d-uart-planted-stretch: FAILED at clock 98
+  COVER a frame is sampled (antecedent): REACHABLE
+  COVER 1 frames received: REACHABLE
+  PROPERTY d-uart-every-byte-any-arrival: PROVED to 208 clocks (bounded); antecedent 'a frame is sampled' reachable
+  COVER the other threads make the copies' other pins differ (antecedent): REACHABLE (concrete witness, checked by the solver in 0.94 s)
+  COVER the transmitter drives its pin low: REACHABLE (concrete witness, checked by the solver in 0.03 s)
+  PROPERTY c-isolation-uart: PROVED to 36 clocks (bounded); antecedent 'the other threads make the copies' other pins differ' reachable
+== power-up determinism (results/powerup.txt)
+  PROPERTY powerup-r2: PROVED unbounded (abc pdr)
+  PROPERTY powerup-r1_bmc: PROVED to 12 clocks (smtbmc)
+  [control] PROPERTY powerup-u_cfg: FAILED at step 1 (powerup.cfg )
+  [control] PROPERTY powerup-u_dl: FAILED at step 4 (powerup.fetch )
+  PROPERTY powerup-u_inbox: PROVED unbounded (abc pdr)
+  PROPERTY powerup-u_prev_pins: PROVED unbounded (abc pdr)
+  PROPERTY powerup-u_host_tag: PROVED unbounded (abc pdr)
+  PROPERTY pins: PROVED unbounded (abc pdr), one-clock reset; antecedent pins_ante reachable (step 2)
+  PROPERTY fetch: PROVED unbounded (abc pdr), one-clock reset; antecedent fetch_ante reachable (step 3)
+  PROPERTY host: PROVED unbounded (abc pdr), one-clock reset; antecedent host_ante reachable (step 2)
+  PROPERTY ports: PROVED unbounded (abc pdr), one-clock reset; antecedent ports_ante reachable (step 2)
+  PROPERTY bank: PROVED unbounded (abc pdr), one-clock reset; antecedent bank_ante reachable (step 1)
+  PROPERTY fine: PROVED unbounded (abc pdr), one-clock reset; antecedent fine_ante reachable (step 6)
+  PROPERTY cfg: PROVED unbounded (abc pdr), one-clock reset; antecedent cfg_ante reachable (step 2)
+  [control] PROPERTY vacuity_control: VACUOUS unbounded (abc pdr), one-clock reset; antecedent vacuity_control_ante unreachable (to the cover task's depth)
+  COVER pins_ante: REACHABLE (step 2)
+  COVER fetch_ante: REACHABLE (step 3)
+  COVER host_ante: REACHABLE (step 2)
+  COVER ports_ante: REACHABLE (step 2)
+  COVER bank_ante: REACHABLE (step 1)
+  COVER fine_ante: REACHABLE (step 6)
+  COVER cfg_ante: REACHABLE (step 2)
+  [control] COVER vacuity_control_ante: UNREACHABLE (to the cover task's depth)
+== UART miter against hardcaml_hobby_boards Uart.Tx (results/uart-miter.txt)
+  [control] PROPERTY uart-miter-constant: FAILED at step 210
+  [control] PROPERTY uart-miter-stretch: FAILED at step 90
+  [control] PROPERTY uart-miter-flip: FAILED at step 170
+  PROPERTY line: PROVED to 840 clocks (abc bmc3), 4 bytes, every value; antecedent line_ante reachable (step 810)
+  COVER line_ante: REACHABLE (step 810)
+== totals
+  properties:      22 PROVED 
+  controls (planted faults, must not be PROVED):      14 FAILED       2 VACUOUS 

@@ -1,12 +1,15 @@
 # command: main.exe (every scenario)
-# commit: 75d32c3d4e2c3beae2ee4fc1ba39ee083d46bac8
+# commit: ec1650d3c5c869bb2aa2556908902efa77cb9e21 (with uncommitted changes)
 # Z3 version 5.1.0 - 64 bit
-# date: 2026-10-05T11:18:12+08:00
-a-deadline-main.ml-programme: no violation; 160 clocks unrolled, 38 goals sent to the solver, 122 folded to false, 1169 definitions; solver 0.02 s, total 0.05 s
-  cover wait at 1.2 left on its event                      reachable
-  cover wait at 1.2 left at its deadline                   reachable
+# date: 2026-10-05T21:18:56+08:00
+a-deadline-main.ml-programme: no violation; 160 clocks unrolled, 38 goals sent to the solver, 122 folded to false, 1169 definitions; solver 0.01 s, total 0.05 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 1.2 left on its event: REACHABLE
+  COVER wait at 1.2 left at its deadline: REACHABLE
+PROPERTY a-deadline-main.ml-programme: PROVED to 160 clocks (bounded); antecedent 'every contract's wait executes' reachable
 
-a-deadline-planted-ldd21: VIOLATED at clock 89; 90 clocks unrolled, 21 goals sent to the solver, 69 folded to false, 644 definitions; solver 0.01 s, total 0.05 s
+a-deadline-planted-ldd21: VIOLATED at clock 89; 90 clocks unrolled, 21 goals sent to the solver, 69 folded to false, 644 definitions; solver 0.01 s, total 0.02 s
+PROPERTY a-deadline-planted-ldd21: FAILED at clock 89
   counterexample, the watched thread's slots (clock: address instruction | dl after | pin_in | slots since anchor):
        1: 1.0   setp mask=80 val=0 oe=1 q=0  | dl    0 | pin_in 00000000 | -
        5: 1.1   ldd 21                       | dl   21 | pin_in 00000000 | -
@@ -33,49 +36,22 @@ a-deadline-planted-ldd21: VIOLATED at clock 89; 90 clocks unrolled, 21 goals sen
       89: 1.2   waitp pin1==1 fail=5         | dl    0 | pin_in 00000000 | 21
   replay on Isa2.Spec: the monitor fires first at clock 89 (solver: clock 89) -> counterexample CONFIRMED
 
-(a) 15 WAITD contracts across the three programmes (SPI period 10 slots)
-a-waitd-uart-spi-i2c: no violation; 720 clocks unrolled, 0 goals sent to the solver, 720 folded to false, 0 definitions; solver 0.00 s, total 0.03 s
-  cover wait at 0.4 left at its deadline                   reachable
-  cover wait at 0.8 left at its deadline                   reachable
-  cover wait at 0.12 left at its deadline                  reachable
-  cover wait at 1.7 left at its deadline                   reachable
-  cover wait at 1.10 left at its deadline                  reachable
-  cover wait at 2.3 left at its deadline                   reachable
-  cover wait at 2.9 left at its deadline                   reachable
-  cover wait at 2.12 left at its deadline                  reachable
-  cover wait at 2.15 left at its deadline                  reachable
-  cover wait at 2.19 left at its deadline                  reachable
-  cover wait at 2.22 left at its deadline                  reachable
-  cover wait at 2.25 left at its deadline                  reachable
-  cover wait at 2.28 left at its deadline                  reachable
-  cover wait at 2.32 left at its deadline                  reachable
-  cover wait at 2.35 left at its deadline                  reachable
+a-deadline-planted-unreachable-wait: no violation; 160 clocks unrolled, 37 goals sent to the solver, 123 folded to false, 1196 definitions; solver 0.02 s, total 0.05 s
+  COVER every contract's wait executes (antecedent): UNREACHABLE within 160 clocks
+  COVER wait at 1.200 left on its event: UNREACHABLE within 160 clocks
+  COVER wait at 1.200 left at its deadline: UNREACHABLE within 160 clocks
+PROPERTY a-deadline-planted-unreachable-wait: VACUOUS to 160 clocks; antecedent 'every contract's wait executes' unreachable
 
-(a) 15 WAITD contracts across the three programmes (SPI period 8 slots)
-a-waitd-uart-spi8-i2c: no violation; 720 clocks unrolled, 0 goals sent to the solver, 720 folded to false, 0 definitions; solver 0.00 s, total 0.03 s
-  cover wait at 0.4 left at its deadline                   reachable
-  cover wait at 0.8 left at its deadline                   reachable
-  cover wait at 0.12 left at its deadline                  reachable
-  cover wait at 1.7 left at its deadline                   NOT REACHABLE (vacuous?)
-  cover wait at 1.10 left at its deadline                  NOT REACHABLE (vacuous?)
-  cover wait at 2.3 left at its deadline                   reachable
-  cover wait at 2.9 left at its deadline                   reachable
-  cover wait at 2.12 left at its deadline                  reachable
-  cover wait at 2.15 left at its deadline                  reachable
-  cover wait at 2.19 left at its deadline                  reachable
-  cover wait at 2.22 left at its deadline                  reachable
-  cover wait at 2.25 left at its deadline                  reachable
-  cover wait at 2.28 left at its deadline                  reachable
-  cover wait at 2.32 left at its deadline                  reachable
-  cover wait at 2.35 left at its deadline                  reachable
+b-ownership: no violation; 720 clocks unrolled, 646 goals sent to the solver, 74 folded to false, 99513 definitions; solver 60.80 s, total 61.32 s
+  COVER two threads write pins (antecedent): REACHABLE
+  COVER thread 0 writes pins: REACHABLE
+  COVER thread 1 writes pins: REACHABLE
+  COVER thread 2 writes pins: REACHABLE
+  COVER thread 3 writes pins: REACHABLE
+PROPERTY b-ownership: PROVED to 720 clocks (bounded); antecedent 'two threads write pins' reachable
 
-b-ownership: no violation; 720 clocks unrolled, 625 goals sent to the solver, 95 folded to false, 117 definitions; solver 0.06 s, total 0.12 s
-  cover thread 0 writes pins                               reachable
-  cover thread 1 writes pins                               reachable
-  cover thread 2 writes pins                               reachable
-  cover thread 3 writes pins                               reachable
-
-b-ownership-planted-mask01: VIOLATED at clock 95; 96 clocks unrolled, 1 goals sent to the solver, 95 folded to false, 117 definitions; solver 0.01 s, total 0.02 s
+b-ownership-planted-mask01: VIOLATED at clock 95; 96 clocks unrolled, 22 goals sent to the solver, 74 folded to false, 505 definitions; solver 0.01 s, total 0.01 s
+PROPERTY b-ownership-planted-mask01: FAILED at clock 95
   counterexample: pin writes and thread 3's slots (clock: thread address instruction -> pins written)
        3: t3 3.0   setp mask=80 val=0 oe=1 q=0  -> 80   (pin 6 in: 0)
        7: t3 3.1   ldd 20                       -> 00   (pin 6 in: 0)
@@ -100,7 +76,6 @@ b-ownership-planted-mask01: VIOLATED at clock 95; 96 clocks unrolled, 1 goals se
       73: t1 1.8   setp mask=02 val=1 oe=1 q=0  -> 02
       75: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
       79: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
-      82: t2 2.13  setp mask=20 val=0 oe=1 q=0  -> 20
       83: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
       87: t3 3.2   waitp pin6==1 fail=4         -> 00   (pin 6 in: 0)
       88: t0 0.6   sho pin0 lsb q=0             -> 01
@@ -110,43 +85,102 @@ b-ownership-planted-mask01: VIOLATED at clock 95; 96 clocks unrolled, 1 goals se
   pins written so far by thread: t0=01 t1=0e t2=30 t3=81
   replay on Isa2.Spec: the monitor fires first at clock 95 (solver: clock 95) -> counterexample CONFIRMED
 
-  c-isolation-planted-ldb depth    4:     704 definitions,    3 goals checked, solver    0.03 s, total    0.03 s
-  c-isolation-planted-ldb depth    8:    2189 definitions,    7 goals checked, solver    0.12 s, total    0.12 s
-  c-isolation-planted-ldb depth   12:    4013 definitions,   11 goals checked, solver    0.38 s, total    0.38 s
-  c-isolation-planted-ldb depth   16:    5875 definitions,   15 goals checked, solver    1.28 s, total    1.29 s
-  c-isolation-planted-ldb depth   20:    7737 definitions,   19 goals checked, solver    5.39 s, total    5.40 s
-  c-isolation-planted-ldb depth   24:    9599 definitions,   23 goals checked, solver   22.73 s, total   22.74 s
-  c-isolation-planted-ldb depth   28:   11461 definitions,   27 goals checked, solver   66.92 s, total   66.94 s
-c-isolation-planted-ldb: VIOLATED at clock 28; 29 clocks unrolled, 28 goals sent to the solver, 1 folded to false, 11515 definitions; solver 71.64 s, total 71.73 s
+  witnesses replayed on Isa2.Spec: 'the other threads make the copies' other pins differ' holds from clock 1; 'the transmitter drives its pin low' from clock 8
+  c-isolation-planted-ldb depth    4:     524 definitions,    3 goals checked, solver    0.01 s, total    0.01 s
+  c-isolation-planted-ldb depth    8:    1809 definitions,    7 goals checked, solver    0.06 s, total    0.06 s
+  c-isolation-planted-ldb depth   12:    3453 definitions,   11 goals checked, solver    0.12 s, total    0.12 s
+  c-isolation-planted-ldb depth   16:    5115 definitions,   15 goals checked, solver    0.35 s, total    0.35 s
+  c-isolation-planted-ldb depth   20:    6777 definitions,   19 goals checked, solver    1.36 s, total    1.38 s
+  c-isolation-planted-ldb depth   24:    8439 definitions,   23 goals checked, solver    5.76 s, total    5.77 s
+  c-isolation-planted-ldb depth   28:   10101 definitions,   27 goals checked, solver   21.96 s, total   21.98 s
+c-isolation-planted-ldb: VIOLATED at clock 28; 29 clocks unrolled, 28 goals sent to the solver, 1 folded to false, 10155 definitions; solver 30.23 s, total 30.34 s
+PROPERTY c-isolation-planted-ldb: FAILED at clock 28
   counterexample: the two copies side by side (clock: thread, copy a | copy b; pin 0 after the clock)
-       2: t2 stb                      [bank 0 <- 00] | sho pin6 lsb od cap q=0  | pin0 1 1
+       2: t2 stb                      [bank 0 <- 00] | sho pin6 lsb od psel cap q=0 | pin0 1 1
        4: t0 ldb                      | ldb                      | pin0 1 1
-       5: t1 send ch0 fail=144        | stb                      [bank 0 <- 46] | pin0 1 1
+       5: t1 nop                      | stb                      [bank 0 <- 24] | pin0 1 1
+       7: t3 stb                      [bank 0 <- 40] | stb                      [bank 0 <- 40] | pin0 1 1
        8: t0 setp mask=01 val=0 oe=1 q=0 | setp mask=01 val=0 oe=1 q=0 | pin0 0 0
+      10: t2 stb                      [bank 1 <- 00] | stb                      [bank 1 <- 24] | pin0 0 0
       12: t0 ldd 1                    | ldd 1                    | pin0 0 0
-      13: t1 stb                      [bank 0 <- 00] | in                       | pin0 0 0
-      14: t2 stb                      [bank 1 <- 00] | stb                      [bank 0 <- 84] | pin0 0 0
-      15: t3 recv ch7 fail=96         | stb                      [bank 0 <- 00] | pin0 0 0
       16: t0 waitd                    | waitd                    | pin0 0 0
       20: t0 waitd                    | waitd                    | pin0 0 0
+      21: t1 stb                      [bank 0 <- 01] | nop                      | pin0 0 0
       24: t0 ldc 8                    | ldc 8                    | pin0 0 0
       28: t0 sho pin0 lsb q=0         | sho pin0 lsb q=0         | pin0 0 1
   replay on Isa2.Spec: the monitor fires first at clock 28 (solver: clock 28) -> counterexample CONFIRMED
 
-c-isolation-uart-induction: the relation is inductive: pin 0 cannot depend on the other threads, at any depth; assumptions satisfiable; thread 0 can be at 26 addresses; 1161 definitions, 0.08 s
+c-isolation-uart-induction: the relation is inductive: pin 0 cannot depend on the other threads, at any depth; assumptions satisfiable; thread 0 can be at 26 addresses; 1001 definitions, 0.03 s
+PROPERTY c-isolation-uart-induction: PROVED (unbounded, by induction); hypotheses satisfiable
 
-c-isolation-planted-ldb-induction: NOT inductive (a counterexample to induction with thread 0 at pc 13); assumptions satisfiable; thread 0 can be at 26 addresses; 1200 definitions, 0.03 s
+c-isolation-planted-ldb-induction: NOT inductive (a counterexample to induction with thread 0 at pc 1); assumptions satisfiable; thread 0 can be at 26 addresses; 1040 definitions, 0.02 s
+PROPERTY c-isolation-planted-ldb-induction: FAILED (not inductive)
 
-c-isolation-uart-induction-without-ownership-assumption: NOT inductive (a counterexample to induction with thread 0 at pc 14); assumptions satisfiable; thread 0 can be at 26 addresses; 1125 definitions, 0.03 s
+c-isolation-uart-induction-without-ownership-assumption: NOT inductive (a counterexample to induction with thread 0 at pc 0); assumptions satisfiable; thread 0 can be at 26 addresses; 965 definitions, 0.01 s
+PROPERTY c-isolation-uart-induction-without-ownership-assumption: FAILED (not inductive)
 
-  d-uart-every-byte depth  100:      36 definitions,    4 goals checked, solver    0.00 s, total    0.01 s
-  d-uart-every-byte depth  200:      81 definitions,    9 goals checked, solver    0.00 s, total    0.03 s
-  d-uart-every-byte depth  300:    4798 definitions,  108 goals checked, solver    0.06 s, total    0.11 s
-  d-uart-every-byte depth  400:    9529 definitions,  208 goals checked, solver    0.09 s, total    0.15 s
-d-uart-every-byte: no violation; 440 clocks unrolled, 248 goals sent to the solver, 192 folded to false, 11847 definitions; solver 0.11 s, total 0.18 s
-  cover 2 frames received                                  reachable
+c-isolation-ldb-with-bank-ownership-induction: the relation is inductive: pin 0 cannot depend on the other threads, at any depth; assumptions satisfiable; thread 0 can be at 26 addresses; 1191 definitions, 0.04 s
+PROPERTY c-isolation-ldb-with-bank-ownership-induction: PROVED (unbounded, by induction); hypotheses satisfiable
+
+c-isolation-ldb-others-may-write-address-1-induction: NOT inductive (a counterexample to induction with thread 0 at pc 18); assumptions satisfiable; thread 0 can be at 26 addresses; 1191 definitions, 0.02 s
+PROPERTY c-isolation-ldb-others-may-write-address-1-induction: FAILED (not inductive)
+
+DECLARATION bridge A: keeps the rules
+DECLARATION bridge A, planted: T3 also declared to receive from inbox 2: REJECTED: T3 may receive from inbox 2, which is T2's
+DECLARATION bridge A, planted: T3 also declared to send to inbox 1: REJECTED: inbox 1 has 2 declared senders (T0, T3) and is not declared shared
+DECLARATION bridge A, planted: T2 no longer declared to receive from inbox 2: REJECTED: inbox 2 has a declared sender but T2 does not declare receiving it
+DECLARATION bridge A, planted: T0 and T3 both declared to write bank 0..15: REJECTED: T0 and T3 may both write one bank address
+
+  witness (the host sends 0x10 from clock 8), replayed on Isa2.Spec: T0 sends to inbox 1 at clock 620; T1 receives from inbox 1 at clock 5; T1 sends to inbox 2 at clock 785; T2 receives from inbox 2 at clock 6
+  (cover 'T1 sends to inbox 2' is reached at clock 785, beyond the bound of 300)
+  (cover 'T0 sends to inbox 1' is reached at clock 620, beyond the bound of 300)
+  e-ownership-bridge-a depth   50:     456 definitions,    0 goals checked, solver    0.00 s, total    0.00 s
+  e-ownership-bridge-a depth  100:    8366 definitions,   25 goals checked, solver    0.40 s, total    0.42 s
+  e-ownership-bridge-a depth  150:   31577 definitions,   63 goals checked, solver    4.01 s, total    4.08 s
+  e-ownership-bridge-a depth  200:   56923 definitions,  100 goals checked, solver   19.60 s, total   19.74 s
+  e-ownership-bridge-a depth  250:   84014 definitions,  138 goals checked, solver   62.35 s, total   62.57 s
+  e-ownership-bridge-a depth  300:  109396 definitions,  175 goals checked, solver  143.45 s, total  143.75 s
+e-ownership-bridge-a: no violation; 300 clocks unrolled, 175 goals sent to the solver, 125 folded to false, 110226 definitions; solver 244.76 s, total 245.21 s
+  COVER some thread sends to or receives from an inbox (antecedent): REACHABLE (concrete witness, checked by the solver in 1.20 s)
+  COVER T0 sends to inbox 1: UNREACHABLE within 300 clocks
+  COVER T1 receives from inbox 1: REACHABLE (concrete witness, checked by the solver in 1.19 s)
+  COVER T1 sends to inbox 2: UNREACHABLE within 300 clocks
+  COVER T2 receives from inbox 2: REACHABLE (concrete witness, checked by the solver in 0.88 s)
+PROPERTY e-ownership-bridge-a: PROVED to 300 clocks (bounded); antecedent 'some thread sends to or receives from an inbox' reachable
+
+e-bank-uart-reads-0..1: no violation; 440 clocks unrolled, 0 goals sent to the solver, 440 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER thread 0 reads the bank (antecedent): REACHABLE
+  COVER thread 0 reads bank address 0: REACHABLE
+  COVER thread 0 reads bank address 1: REACHABLE
+PROPERTY e-bank-uart-reads-0..1: PROVED to 440 clocks (bounded); antecedent 'thread 0 reads the bank' reachable
+
+e-bank-uart-declared-0-only: VIOLATED at clock 204; 205 clocks unrolled, 1 goals sent to the solver, 204 folded to false, 0 definitions; solver 0.00 s, total 0.00 s
+PROPERTY e-bank-uart-declared-0-only: FAILED at clock 204
+       4: t0 0.1   ldb                          reads bank address 0
+     204: t0 0.13  ldb                          reads bank address 1
+  replay on Isa2.Spec: the monitor fires first at clock 204 (solver: clock 204) -> counterexample CONFIRMED
+
+  witness (the host sends 0x10 from clock 8), replayed on Isa2.Spec: T0 sends to inbox 1 at clock 620; T1 receives from inbox 1 at clock 5; T1 sends to inbox 2 at clock 785; T2 receives from inbox 2 at clock 6; T3 receives from inbox 2 at clock 3
+  (cover 'T1 sends to inbox 2' is reached at clock 785, beyond the bound of 40)
+  (cover 'T0 sends to inbox 1' is reached at clock 620, beyond the bound of 40)
+e-ownership-planted-t3-receives-inbox-2: VIOLATED at clock 3; 4 clocks unrolled, 1 goals sent to the solver, 3 folded to false, 0 definitions; solver 0.00 s, total 0.00 s
+PROPERTY e-ownership-planted-t3-receives-inbox-2: FAILED at clock 3
+  counterexample: the offending clock and the UART line before it
+       3: t3 3.0   recv ch2 fail=0              inbox send 0 recv 4, port out 0 in 0, bank read - write -
+    the UART line (pin 0) is low at clocks 1,2,3 ...
+  replay on Isa2.Spec: the monitor fires first at clock 3 (solver: clock 3) -> counterexample CONFIRMED
+
+  d-uart-every-byte depth  100:      36 definitions,    4 goals checked, solver    0.00 s, total    0.00 s
+  d-uart-every-byte depth  200:      81 definitions,    9 goals checked, solver    0.00 s, total    0.01 s
+  d-uart-every-byte depth  300:    4798 definitions,  108 goals checked, solver    0.02 s, total    0.03 s
+  d-uart-every-byte depth  400:    9529 definitions,  208 goals checked, solver    0.05 s, total    0.07 s
+d-uart-every-byte: no violation; 440 clocks unrolled, 248 goals sent to the solver, 192 folded to false, 11849 definitions; solver 0.07 s, total 0.09 s
+  COVER a frame is sampled (antecedent): REACHABLE
+  COVER 2 frames received: REACHABLE
+PROPERTY d-uart-every-byte: PROVED to 440 clocks (bounded); antecedent 'a frame is sampled' reachable
 
 d-uart-planted-stretch: VIOLATED at clock 98; 99 clocks unrolled, 4 goals sent to the solver, 95 folded to false, 29 definitions; solver 0.00 s, total 0.01 s
+PROPERTY d-uart-planted-stretch: FAILED at clock 98
   the host's byte, taken at clock 4: 0x04 = 00000100 (lsb first on the line: 00100000)
   the line from the start edge (clock 8), one character per clock, '|' every bit period (20 clocks):
     |00000000000000000000|00000000000000000000|00000000000000000000|11111111111111111111|11111111111
@@ -155,67 +189,73 @@ d-uart-planted-stretch: VIOLATED at clock 98; 99 clocks unrolled, 4 goals sent t
 
   d-uart-every-byte-any-arrival depth    4:       0 definitions,    0 goals checked, solver    0.00 s, total    0.00 s
   d-uart-every-byte-any-arrival depth    8:       0 definitions,    0 goals checked, solver    0.00 s, total    0.00 s
-  d-uart-every-byte-any-arrival depth   12:     114 definitions,    2 goals checked, solver    0.01 s, total    0.01 s
+  d-uart-every-byte-any-arrival depth   12:     114 definitions,    2 goals checked, solver    0.00 s, total    0.00 s
   d-uart-every-byte-any-arrival depth   16:     335 definitions,    6 goals checked, solver    0.01 s, total    0.01 s
-  d-uart-every-byte-any-arrival depth   20:     555 definitions,   10 goals checked, solver    0.03 s, total    0.03 s
-  d-uart-every-byte-any-arrival depth   24:     775 definitions,   14 goals checked, solver    0.04 s, total    0.04 s
-  d-uart-every-byte-any-arrival depth   28:    1042 definitions,   18 goals checked, solver    0.05 s, total    0.05 s
-  d-uart-every-byte-any-arrival depth   32:    1304 definitions,   22 goals checked, solver    0.06 s, total    0.06 s
-  d-uart-every-byte-any-arrival depth   36:    1567 definitions,   26 goals checked, solver    0.07 s, total    0.08 s
-  d-uart-every-byte-any-arrival depth   40:    1833 definitions,   30 goals checked, solver    0.10 s, total    0.11 s
-  d-uart-every-byte-any-arrival depth   44:    2197 definitions,   34 goals checked, solver    0.14 s, total    0.14 s
-  d-uart-every-byte-any-arrival depth   48:    2526 definitions,   38 goals checked, solver    0.18 s, total    0.19 s
-  d-uart-every-byte-any-arrival depth   52:    2855 definitions,   42 goals checked, solver    0.25 s, total    0.26 s
-  d-uart-every-byte-any-arrival depth   56:    3187 definitions,   46 goals checked, solver    0.34 s, total    0.35 s
-  d-uart-every-byte-any-arrival depth   60:    3534 definitions,   50 goals checked, solver    0.45 s, total    0.47 s
-  d-uart-every-byte-any-arrival depth   64:    3882 definitions,   54 goals checked, solver    0.64 s, total    0.65 s
-  d-uart-every-byte-any-arrival depth   68:    4230 definitions,   58 goals checked, solver    0.85 s, total    0.87 s
-  d-uart-every-byte-any-arrival depth   72:    4578 definitions,   62 goals checked, solver    1.17 s, total    1.19 s
-  d-uart-every-byte-any-arrival depth   76:    4926 definitions,   66 goals checked, solver    1.56 s, total    1.58 s
-  d-uart-every-byte-any-arrival depth   80:    5274 definitions,   70 goals checked, solver    2.01 s, total    2.03 s
-  d-uart-every-byte-any-arrival depth   84:    5622 definitions,   74 goals checked, solver    2.67 s, total    2.69 s
-  d-uart-every-byte-any-arrival depth   88:    5970 definitions,   78 goals checked, solver    3.36 s, total    3.39 s
-  d-uart-every-byte-any-arrival depth   92:    6318 definitions,   82 goals checked, solver    4.22 s, total    4.24 s
-  d-uart-every-byte-any-arrival depth   96:    6666 definitions,   86 goals checked, solver    5.46 s, total    5.48 s
-  d-uart-every-byte-any-arrival depth  100:    7014 definitions,   90 goals checked, solver    6.56 s, total    6.58 s
-  d-uart-every-byte-any-arrival depth  104:    7362 definitions,   94 goals checked, solver    8.23 s, total    8.25 s
-  d-uart-every-byte-any-arrival depth  108:    7710 definitions,   98 goals checked, solver   10.41 s, total   10.44 s
-  d-uart-every-byte-any-arrival depth  112:    8058 definitions,  102 goals checked, solver   12.39 s, total   12.42 s
-  d-uart-every-byte-any-arrival depth  116:    8406 definitions,  106 goals checked, solver   14.95 s, total   14.98 s
-  d-uart-every-byte-any-arrival depth  120:    8754 definitions,  110 goals checked, solver   18.44 s, total   18.48 s
-  d-uart-every-byte-any-arrival depth  124:    9102 definitions,  114 goals checked, solver   23.53 s, total   23.56 s
-  d-uart-every-byte-any-arrival depth  128:    9450 definitions,  118 goals checked, solver   28.72 s, total   28.76 s
-  d-uart-every-byte-any-arrival depth  132:    9798 definitions,  122 goals checked, solver   34.49 s, total   34.53 s
-  d-uart-every-byte-any-arrival depth  136:   10146 definitions,  126 goals checked, solver   42.61 s, total   42.65 s
-  d-uart-every-byte-any-arrival depth  140:   10494 definitions,  130 goals checked, solver   52.43 s, total   52.47 s
-  d-uart-every-byte-any-arrival depth  144:   10842 definitions,  134 goals checked, solver   66.09 s, total   66.13 s
-  d-uart-every-byte-any-arrival depth  148:   11190 definitions,  138 goals checked, solver   78.62 s, total   78.66 s
-  d-uart-every-byte-any-arrival depth  152:   11538 definitions,  142 goals checked, solver   94.23 s, total   94.28 s
-  d-uart-every-byte-any-arrival depth  156:   11886 definitions,  146 goals checked, solver  116.00 s, total  116.04 s
-  d-uart-every-byte-any-arrival depth  160:   12234 definitions,  150 goals checked, solver  138.41 s, total  138.45 s
-  d-uart-every-byte-any-arrival depth  164:   12582 definitions,  154 goals checked, solver  163.10 s, total  163.15 s
-  d-uart-every-byte-any-arrival depth  168:   12930 definitions,  158 goals checked, solver  193.40 s, total  193.45 s
-  d-uart-every-byte-any-arrival depth  172:   13278 definitions,  162 goals checked, solver  223.24 s, total  223.30 s
-  d-uart-every-byte-any-arrival depth  176:   13626 definitions,  166 goals checked, solver  273.75 s, total  273.80 s
-  d-uart-every-byte-any-arrival depth  180:   13974 definitions,  170 goals checked, solver  327.24 s, total  327.29 s
-  d-uart-every-byte-any-arrival depth  184:   14322 definitions,  174 goals checked, solver  413.99 s, total  414.04 s
-  d-uart-every-byte-any-arrival depth  188:   14670 definitions,  178 goals checked, solver  476.20 s, total  476.26 s
-  d-uart-every-byte-any-arrival depth  192:   15018 definitions,  182 goals checked, solver  565.93 s, total  565.99 s
-  d-uart-every-byte-any-arrival depth  196:   15366 definitions,  186 goals checked, solver  712.64 s, total  712.70 s
-  d-uart-every-byte-any-arrival depth  200:   15714 definitions,  190 goals checked, solver  826.35 s, total  826.41 s
-  d-uart-every-byte-any-arrival depth  204:   16062 definitions,  194 goals checked, solver 1049.70 s, total 1049.76 s
-  d-uart-every-byte-any-arrival depth  208:   16410 definitions,  198 goals checked, solver 1251.48 s, total 1251.55 s
-d-uart-every-byte-any-arrival: no violation; 208 clocks unrolled, 198 goals sent to the solver, 10 folded to false, 16806 definitions; solver 1289.13 s, total 1290.69 s
-  cover 1 frames received                                  reachable
+  d-uart-every-byte-any-arrival depth   20:     555 definitions,   10 goals checked, solver    0.01 s, total    0.01 s
+  d-uart-every-byte-any-arrival depth   24:     775 definitions,   14 goals checked, solver    0.01 s, total    0.01 s
+  d-uart-every-byte-any-arrival depth   28:    1042 definitions,   18 goals checked, solver    0.02 s, total    0.02 s
+  d-uart-every-byte-any-arrival depth   32:    1304 definitions,   22 goals checked, solver    0.03 s, total    0.03 s
+  d-uart-every-byte-any-arrival depth   36:    1567 definitions,   26 goals checked, solver    0.05 s, total    0.05 s
+  d-uart-every-byte-any-arrival depth   40:    1833 definitions,   30 goals checked, solver    0.07 s, total    0.08 s
+  d-uart-every-byte-any-arrival depth   44:    2197 definitions,   34 goals checked, solver    0.11 s, total    0.12 s
+  d-uart-every-byte-any-arrival depth   48:    2526 definitions,   38 goals checked, solver    0.16 s, total    0.17 s
+  d-uart-every-byte-any-arrival depth   52:    2855 definitions,   42 goals checked, solver    0.24 s, total    0.24 s
+  d-uart-every-byte-any-arrival depth   56:    3187 definitions,   46 goals checked, solver    0.33 s, total    0.34 s
+  d-uart-every-byte-any-arrival depth   60:    3534 definitions,   50 goals checked, solver    0.46 s, total    0.47 s
+  d-uart-every-byte-any-arrival depth   64:    3882 definitions,   54 goals checked, solver    0.66 s, total    0.67 s
+  d-uart-every-byte-any-arrival depth   68:    4230 definitions,   58 goals checked, solver    0.90 s, total    0.91 s
+  d-uart-every-byte-any-arrival depth   72:    4578 definitions,   62 goals checked, solver    1.24 s, total    1.25 s
+  d-uart-every-byte-any-arrival depth   76:    4926 definitions,   66 goals checked, solver    1.66 s, total    1.67 s
+  d-uart-every-byte-any-arrival depth   80:    5274 definitions,   70 goals checked, solver    2.14 s, total    2.16 s
+  d-uart-every-byte-any-arrival depth   84:    5622 definitions,   74 goals checked, solver    2.84 s, total    2.85 s
+  d-uart-every-byte-any-arrival depth   88:    5970 definitions,   78 goals checked, solver    3.58 s, total    3.60 s
+  d-uart-every-byte-any-arrival depth   92:    6318 definitions,   82 goals checked, solver    4.51 s, total    4.53 s
+  d-uart-every-byte-any-arrival depth   96:    6666 definitions,   86 goals checked, solver    5.84 s, total    5.85 s
+  d-uart-every-byte-any-arrival depth  100:    7014 definitions,   90 goals checked, solver    7.05 s, total    7.06 s
+  d-uart-every-byte-any-arrival depth  104:    7362 definitions,   94 goals checked, solver    8.88 s, total    8.90 s
+  d-uart-every-byte-any-arrival depth  108:    7710 definitions,   98 goals checked, solver   11.34 s, total   11.36 s
+  d-uart-every-byte-any-arrival depth  112:    8058 definitions,  102 goals checked, solver   13.57 s, total   13.59 s
+  d-uart-every-byte-any-arrival depth  116:    8406 definitions,  106 goals checked, solver   16.44 s, total   16.46 s
+  d-uart-every-byte-any-arrival depth  120:    8754 definitions,  110 goals checked, solver   20.33 s, total   20.35 s
+  d-uart-every-byte-any-arrival depth  124:    9102 definitions,  114 goals checked, solver   26.08 s, total   26.11 s
+  d-uart-every-byte-any-arrival depth  128:    9450 definitions,  118 goals checked, solver   31.94 s, total   31.96 s
+  d-uart-every-byte-any-arrival depth  132:    9798 definitions,  122 goals checked, solver   38.43 s, total   38.45 s
+  d-uart-every-byte-any-arrival depth  136:   10146 definitions,  126 goals checked, solver   47.93 s, total   47.96 s
+  d-uart-every-byte-any-arrival depth  140:   10494 definitions,  130 goals checked, solver   59.21 s, total   59.23 s
+  d-uart-every-byte-any-arrival depth  144:   10842 definitions,  134 goals checked, solver   74.79 s, total   74.81 s
+  d-uart-every-byte-any-arrival depth  148:   11190 definitions,  138 goals checked, solver   89.28 s, total   89.31 s
+  d-uart-every-byte-any-arrival depth  152:   11538 definitions,  142 goals checked, solver  106.84 s, total  106.87 s
+  d-uart-every-byte-any-arrival depth  156:   11886 definitions,  146 goals checked, solver  130.90 s, total  130.93 s
+  d-uart-every-byte-any-arrival depth  160:   12234 definitions,  150 goals checked, solver  155.58 s, total  155.61 s
+  d-uart-every-byte-any-arrival depth  164:   12582 definitions,  154 goals checked, solver  183.14 s, total  183.17 s
+  d-uart-every-byte-any-arrival depth  168:   12930 definitions,  158 goals checked, solver  216.76 s, total  216.80 s
+  d-uart-every-byte-any-arrival depth  172:   13278 definitions,  162 goals checked, solver  249.64 s, total  249.67 s
+  d-uart-every-byte-any-arrival depth  176:   13626 definitions,  166 goals checked, solver  304.81 s, total  304.84 s
+  d-uart-every-byte-any-arrival depth  180:   13974 definitions,  170 goals checked, solver  362.84 s, total  362.87 s
+  d-uart-every-byte-any-arrival depth  184:   14322 definitions,  174 goals checked, solver  454.09 s, total  454.13 s
+  d-uart-every-byte-any-arrival depth  188:   14670 definitions,  178 goals checked, solver  518.95 s, total  518.99 s
+  d-uart-every-byte-any-arrival depth  192:   15018 definitions,  182 goals checked, solver  613.64 s, total  613.68 s
+  d-uart-every-byte-any-arrival depth  196:   15366 definitions,  186 goals checked, solver  776.59 s, total  776.63 s
+  d-uart-every-byte-any-arrival depth  200:   15714 definitions,  190 goals checked, solver  905.39 s, total  905.43 s
+  d-uart-every-byte-any-arrival depth  204:   16062 definitions,  194 goals checked, solver 1157.05 s, total 1157.09 s
+  d-uart-every-byte-any-arrival depth  208:   16410 definitions,  198 goals checked, solver 1389.71 s, total 1389.75 s
+d-uart-every-byte-any-arrival: no violation; 208 clocks unrolled, 198 goals sent to the solver, 10 folded to false, 16808 definitions; solver 1435.89 s, total 1437.49 s
+  COVER a frame is sampled (antecedent): REACHABLE
+  COVER 1 frames received: REACHABLE
+PROPERTY d-uart-every-byte-any-arrival: PROVED to 208 clocks (bounded); antecedent 'a frame is sampled' reachable
 
-  c-isolation-uart depth    4:     704 definitions,    3 goals checked, solver    0.02 s, total    0.03 s
-  c-isolation-uart depth    8:    2189 definitions,    7 goals checked, solver    0.12 s, total    0.12 s
-  c-isolation-uart depth   12:    4013 definitions,   11 goals checked, solver    0.37 s, total    0.38 s
-  c-isolation-uart depth   16:    5875 definitions,   15 goals checked, solver    1.27 s, total    1.28 s
-  c-isolation-uart depth   20:    7737 definitions,   19 goals checked, solver    5.23 s, total    5.24 s
-  c-isolation-uart depth   24:    9599 definitions,   23 goals checked, solver   21.78 s, total   21.79 s
-  c-isolation-uart depth   28:   11461 definitions,   27 goals checked, solver   61.90 s, total   61.91 s
-  c-isolation-uart depth   32:   13331 definitions,   31 goals checked, solver  328.63 s, total  328.65 s
-  c-isolation-uart depth   36:   15193 definitions,   35 goals checked, solver  918.68 s, total  918.71 s
-Terminated                 SMT_SOLVER=$Z3 nice ionice ./_build/default/main.exe "$s"
-# note (added by hand): c-isolation-uart was stopped after its 36 clocks had passed with no violation; its two cover queries had run for 22 min without an answer.
+  witnesses replayed on Isa2.Spec: 'the other threads make the copies' other pins differ' holds from clock 1; 'the transmitter drives its pin low' from clock 8
+  c-isolation-uart depth    4:     524 definitions,    3 goals checked, solver    0.01 s, total    0.01 s
+  c-isolation-uart depth    8:    1809 definitions,    7 goals checked, solver    0.06 s, total    0.06 s
+  c-isolation-uart depth   12:    3453 definitions,   11 goals checked, solver    0.11 s, total    0.11 s
+  c-isolation-uart depth   16:    5115 definitions,   15 goals checked, solver    0.33 s, total    0.34 s
+  c-isolation-uart depth   20:    6777 definitions,   19 goals checked, solver    1.33 s, total    1.34 s
+  c-isolation-uart depth   24:    8439 definitions,   23 goals checked, solver    5.80 s, total    5.81 s
+  c-isolation-uart depth   28:   10101 definitions,   27 goals checked, solver   22.35 s, total   22.37 s
+  c-isolation-uart depth   32:   11791 definitions,   31 goals checked, solver   70.91 s, total   70.93 s
+  c-isolation-uart depth   36:   13453 definitions,   35 goals checked, solver 1143.97 s, total 1143.99 s
+c-isolation-uart: no violation; 36 clocks unrolled, 35 goals sent to the solver, 1 folded to false, 14390 definitions; solver 1144.94 s, total 1145.15 s
+  COVER the other threads make the copies' other pins differ (antecedent): REACHABLE (concrete witness, checked by the solver in 0.94 s)
+  COVER the transmitter drives its pin low: REACHABLE (concrete witness, checked by the solver in 0.03 s)
+PROPERTY c-isolation-uart: PROVED to 36 clocks (bounded); antecedent 'the other threads make the copies' other pins differ' reachable
+

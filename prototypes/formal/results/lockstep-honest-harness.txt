@@ -1,0 +1,15 @@
+# honest harness (harness2.ml latches the address presented during clear), old RTL (commit d0d3f3e's sequencer2.ml)
+# command: lockstep2.exe 20 200 1 clean-only; date 2026-10-05
+  biased seed 1: first mismatch at clock 0 (pin_oe,full,lsend)
+lockstep biased   20 programmes x 200 clocks: 1297 mismatching clocks
+  uniform seed 1: first mismatch at clock 0 (host_in_ready,acc)
+lockstep uniform  20 programmes x 200 clocks: 856 mismatching clocks
+
+# honest harness, fixed RTL; same command
+lockstep biased   20 programmes x 200 clocks: 0 mismatching clocks
+lockstep uniform  20 programmes x 200 clocks: 0 mismatching clocks
+
+# honest harness, fixed RTL: lockstep2.exe 1000 5000; body identical to ../../sequencer-v2/results/lockstep.txt (diff shows only that file's 4 header lines)
+  CFG round latch ignored                          biased 28/30  uniform  3/30  caught  (seed 1001 clock 258: acc)
+  round latch loads every clock                    biased 30/30  uniform 30/30  caught  (seed 1001 clock 1: latch)
+ALL PASS

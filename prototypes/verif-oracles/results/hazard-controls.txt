@@ -1,7 +1,7 @@
-# command: /home/matthias/prog/janestreet/emulator-wt-formal-followups/prototypes/verif-oracles/_build/default/hazard/hazard_controls.exe
-# commit: 77647a06aa78ef7b097c1a0d8524ca77ad992b75 (with uncommitted changes)
+# command: /home/matthias/prog/janestreet/emulator-wt-adopt-formal-hygiene/prototypes/verif-oracles/_build/default/hazard/hazard_controls.exe
+# commit: ec1650d3c5c869bb2aa2556908902efa77cb9e21 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T17:56:22+08:00
+# date: 2026-10-05T20:25:22+08:00
 ok   T0 drives pin 0, which it owns                                           expected accepted             got accepted                   
 ok   T0 and T1 both drive pin 0 (T0 owns it)                                  expected rejected:pair        got rejected:pair+solo         [solo] (pin-drive, -, UNDECLARED) on pin 0 at T1 page 1 pc 0 (SETP); [pair] (pin-drive, pin-drive, different clocks, not shared) on pin 0 at T0 page 0 pc 0 (SETP) / T1 page 1 pc 0 (SETP)
 ok   T1 drives pin 3, owned by T0 (T0 never touches it)                       expected rejected:solo        got rejected:solo              [solo] (pin-drive, -, UNDECLARED) on pin 3 at T1 page 1 pc 0 (SHO)
@@ -23,11 +23,11 @@ ok   T0 SEND whose fail path jumps straight back (no deadline)                ex
 ok   T0 SEND whose fail path runs through nine NOPs and jumps back (review finding) expected rejected:solo        got rejected:solo              [solo] (send, UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 0 (SEND)
 ok   T0 SEND whose fail path ends in a HALT elsewhere (gives up: accepted)    expected accepted             got accepted                   
 ok   T0 LDD 50; SEND with a give-up path (deadline), T1 RECV                  expected accepted             got accepted                   
-ok   WAITC 11 spinning on a full inbox (no deadline)                          expected rejected:solo        got rejected:solo              [solo] (space-wait (WAITC 11), UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 2 (WAITC 11)
-ok   SEND to inbox 2, which nobody reads                                      expected rejected:counterpart got rejected:counterpart       [counterpart] send on inbox 2 with no recv/poll (WAITC 10) by another thread at T0 page 0 pc 1 (SEND)
-ok   two consumers (T1 and T2 RECV) of inbox 1                                expected rejected:pair        got rejected:pair              [pair] (recv, recv, different clocks, not shared) on inbox 1 at T1 page 1 pc 0 (RECV) / T2 page 2 pc 0 (RECV)
-ok   two producers (T0, T3) of inbox 1, not declared shared                   expected rejected:pair        got rejected:pair              [pair] (send, send, different clocks, not shared) on inbox 1 at T0 page 0 pc 1 (SEND) / T3 page 3 pc 1 (SEND)
-ok   RECV on inbox 1 by a thread with no grant                                expected rejected:solo        got rejected:solo              [solo] (recv, UNBOUNDED, UNDECLARED) on inbox 1 at T1 page 1 pc 0 (RECV)
+ok   WAITC 11 spinning on a full inbox (no deadline)                          expected rejected:solo        got rejected:ownership+solo    [solo] (space-wait (WAITC 11), UNBOUNDED, declared) on inbox 1 at T0 page 0 pc 2 (WAITC 11); [ownership] inbox 0 has a declared sender but T0 does not declare receiving it at the declaration
+ok   SEND to inbox 2, which nobody reads                                      expected rejected:counterpart got rejected:counterpart+ownership [ownership] inbox 2 has a declared sender but T2 does not declare receiving it at the declaration; [counterpart] send on inbox 2 with no recv/poll (WAITC 10) by another thread at T0 page 0 pc 1 (SEND)
+ok   two consumers (T1 and T2 RECV) of inbox 1                                expected rejected:pair        got rejected:ownership+pair    [pair] (recv, recv, different clocks, not shared) on inbox 1 at T1 page 1 pc 0 (RECV) / T2 page 2 pc 0 (RECV); [ownership] T2 may receive from inbox 1, which is T1's at the declaration
+ok   two producers (T0, T3) of inbox 1, not declared shared                   expected rejected:pair        got rejected:ownership+pair    [pair] (send, send, different clocks, not shared) on inbox 1 at T0 page 0 pc 1 (SEND) / T3 page 3 pc 1 (SEND); [ownership] inbox 1 has 2 declared senders (T0, T3) and is not declared shared at the declaration
+ok   RECV on inbox 1 by a thread with no grant                                expected rejected:solo        got rejected:ownership+solo    [solo] (recv, UNBOUNDED, UNDECLARED) on inbox 1 at T1 page 1 pc 0 (RECV); [ownership] inbox 1 has a declared sender but T1 does not declare receiving it at the declaration
 ok   T0 LDB from 16 and 17, owns 16..31                                       expected accepted             got accepted                   
 ok   T0 LDB from 16 and 17, owns 16 only                                      expected rejected:solo        got rejected:solo              [solo] (bank-read (LDB), -, UNDECLARED) on bank 0, addresses 17 outside 16 at T0 page 0 pc 3 (LDB)
 ok   T0 LDB in an endless loop: the pointer reaches every address; owns 0..63 expected rejected:solo        got rejected:solo              [solo] (bank-read (LDB), -, UNDECLARED) on bank 0, addresses 64,65,66,67,68,69,70,71,... (448 in all) outside 0..63 at T0 page 0 pc 2 (LDB); [solo] (bank-read (LDB), -, UNDECLARED) on bank 1, addresses 512,513,514,515,516,517,518,519,... (512 in all) outside 0..63 at T0 page 0 pc 2 (LDB)
@@ -42,8 +42,12 @@ ok   T1 SEND to out-port 0 (channel 4), not declared                          ex
 ok   T1 SEND to out-port 0, declared                                          expected accepted             got accepted                   
 ok   T1 RECV from in-port 2 (channel 6), owns in-port 1                       expected rejected:solo        got rejected:solo              [solo] (tap-pop, UNBOUNDED, UNDECLARED) on tap 2 at T1 page 1 pc 0 (RECV port)
 ok   T1 and T3 both declared on out-port 0                                    expected rejected:ownership   got rejected:ownership         [ownership] T1 and T3 may both send to port 0 at the declaration
-ok   T2 polls its own inbox (WAITC 10) without owning it                      expected rejected:solo        got rejected:solo              [solo] (poll (WAITC 10), UNBOUNDED, UNDECLARED) on inbox 2 at T2 page 2 pc 0 (WAITC 10); [solo] (recv, UNBOUNDED, UNDECLARED) on inbox 2 at T2 page 2 pc 1 (RECV)
+ok   T2 polls its own inbox (WAITC 10) without owning it                      expected rejected:solo        got rejected:ownership+solo    [solo] (poll (WAITC 10), UNBOUNDED, UNDECLARED) on inbox 2 at T2 page 2 pc 0 (WAITC 10); [solo] (recv, UNBOUNDED, UNDECLARED) on inbox 2 at T2 page 2 pc 1 (RECV); [ownership] T2 may receive from inbox 1, which is T1's at the declaration; [ownership] inbox 2 has a declared sender but T2 does not declare receiving it at the declaration
+ok   T2 declared to receive from inbox 1 (T1's), never does                   expected rejected:ownership   got rejected:ownership         [ownership] T2 may receive from inbox 1, which is T1's at the declaration
+ok   T0 and T3 declared senders of inbox 1, only T0 sends                     expected rejected:ownership   got rejected:ownership         [ownership] inbox 1 has 2 declared senders (T0, T3) and is not declared shared at the declaration
+ok   the same, inbox 1 declared shared by T0 and T3                           expected accepted             got accepted                   
+ok   T0 declared sender of inbox 2, T2 declares no receive (code sends nothing) expected rejected:ownership   got rejected:ownership         [ownership] inbox 2 has a declared sender but T2 does not declare receiving it at the declaration
 ok   a reachable reserved EXT operation (EXT 9)                               expected raised               got raised                     Unhandled: page 0 pc 0: reserved EXT operation 9
 
-42 cases; HAZARD CONTROLS PASS
+46 cases; HAZARD CONTROLS PASS
 exit 0

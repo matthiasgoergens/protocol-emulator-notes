@@ -126,6 +126,23 @@ let cases = [
   "T2 polls its own inbox (WAITC 10) without owning it", Reject "solo",
   progs [ 0, [ I.ldd 9; I.send ~ch:2 ~fail:3; halt_at 2; halt_at 3 ]; 2, [ I.waitc ~cond:I.c_inbox ~fail:0; I.recv ~ch:2 ~fail:1; halt_at 2 ] ],
   { no_decl with owns = owns [ 0, { nothing with inbox_send = [ 2 ] }; 2, { nothing with inbox_recv = [ 1 ] } ] };
+  (* rules on the declaration itself (Ownership.conflicts): the code keeps to the declaration,
+     only the declaration is wrong, so only the OWNERSHIP rule can catch these *)
+  "T2 declared to receive from inbox 1 (T1's), never does", Reject "ownership",
+  progs [ 0, [ I.ldd 9; I.send ~ch:1 ~fail:3; halt_at 2; halt_at 3 ]; 1, [ I.recv ~ch:1 ~fail:0; halt_at 1 ] ],
+  { no_decl with owns = owns [ 0, { nothing with inbox_send = [ 1 ] }; 1, { nothing with inbox_recv = [ 1 ] };
+                              2, { nothing with inbox_recv = [ 1 ] } ] };
+  "T0 and T3 declared senders of inbox 1, only T0 sends", Reject "ownership",
+  progs [ 0, [ I.ldd 9; I.send ~ch:1 ~fail:3; halt_at 2; halt_at 3 ]; 1, [ I.recv ~ch:1 ~fail:0; halt_at 1 ] ],
+  { no_decl with owns = owns [ 0, { nothing with inbox_send = [ 1 ] }; 1, { nothing with inbox_recv = [ 1 ] };
+                              3, { nothing with inbox_send = [ 1 ] } ] };
+  "the same, inbox 1 declared shared by T0 and T3", Accept,
+  progs [ 0, [ I.ldd 9; I.send ~ch:1 ~fail:3; halt_at 2; halt_at 3 ]; 1, [ I.recv ~ch:1 ~fail:0; halt_at 1 ] ],
+  { no_decl with owns = owns [ 0, { nothing with inbox_send = [ 1 ] }; 1, { nothing with inbox_recv = [ 1 ] };
+                              3, { nothing with inbox_send = [ 1 ] } ];
+                 shared = [ (Inbox 1, [ Thread 0; Thread 3 ]) ] };
+  "T0 declared sender of inbox 2, T2 declares no receive (code sends nothing)", Reject "ownership",
+  progs [], { no_decl with owns = owns [ 0, { nothing with inbox_send = [ 2 ] } ] };
   (* fail loudly *)
   "a reachable reserved EXT operation (EXT 9)", Raises,
   progs [ 0, [ I.ext 9 0; halt_at 1 ] ], no_decl;

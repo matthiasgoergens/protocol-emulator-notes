@@ -32,6 +32,7 @@ let deadline ?(cut = false) ~name ~store ~code ~(contracts : Props.contract list
   let m = Machine.create ~store ~code () in
   let mons = List.map P.deadline contracts in
   let by_event = Array.make (List.length contracts) Smt.ff and by_deadline = Array.make (List.length contracts) Smt.ff in
+  let executed = Array.make (List.length contracts) Smt.ff in
   let step k =
     let io = Machine.io ~k in
     let t, addr_before, _ = Machine.clock m ~k io in
@@ -41,6 +42,7 @@ let deadline ?(cut = false) ~name ~store ~code ~(contracts : Props.contract list
         if mon.contract.thread = t then begin
           let b, ev, dd = P.deadline_step mon ~addr_before ~addr_after ~io in
           bad := Smt.or_ !bad b;
+          executed.(i) <- Smt.or_ executed.(i) (Smt.eq addr_before (Smt.k ~w:10 mon.contract.wait));
           by_event.(i) <- Smt.or_ by_event.(i) ev; by_deadline.(i) <- Smt.or_ by_deadline.(i) dd
         end) mons;
     let cuts =
@@ -50,15 +52,18 @@ let deadline ?(cut = false) ~name ~store ~code ~(contracts : Props.contract list
         List.iteri (fun i (mon : P.deadline) -> mon.since <- Machine.cut_value ~prefix:"" ~k (Printf.sprintf "since%d" i) mon.since eqs) mons;
         Array.iteri (fun i x -> by_event.(i) <- Machine.cut_value ~prefix:"" ~k (Printf.sprintf "ev%d" i) x eqs) by_event;
         Array.iteri (fun i x -> by_deadline.(i) <- Machine.cut_value ~prefix:"" ~k (Printf.sprintf "dd%d" i) x eqs) by_deadline;
+        Array.iteri (fun i x -> executed.(i) <- Machine.cut_value ~prefix:"" ~k (Printf.sprintf "ex%d" i) x eqs) executed;
         !eqs
       end in
     !bad, cuts in
+  let antecedent = "every contract's wait executes" in
   let covers () =
+    (antecedent, Array.fold_left Smt.and_ Smt.tt executed) ::
     List.concat (List.mapi (fun i (c : Props.contract) ->
         let w = Printf.sprintf "wait at %d.%d" (c.wait lsr 8) (c.wait land 0xFF) in
         (match c.kind with Waitp _ -> [ w ^ " left on its event", by_event.(i) ] | Waitd -> [])
         @ [ w ^ " left at its deadline", by_deadline.(i) ]) contracts) in
-  let r = Bmc.run ~name ~depth ~step ~covers () in
+  let r = Bmc.run ~antecedent ~name ~depth ~step ~covers () in
   Bmc.report r;
   (match r.violation with
    | None -> ()
@@ -90,6 +95,14 @@ let a_main ~ldd ~name =
                    slots = 21; kind = Waitp (1, 1) } in
   deadline ~name ~store ~code:[| Havoc; Fixed; Havoc; Havoc |] ~contracts:[ contract ] ~depth:160 ()
 
+(* a control for the report itself: the same programme with the contract placed on an address
+   thread 1 never reaches, so no violation is possible and the verdict must be VACUOUS, not PROVED *)
+let a_vacuous ~name =
+  let store = Programmes.store_of [| Programmes.idle; Programmes.deadline_program ~ldd:20; Programmes.idle; Programmes.idle |] in
+  let contract = { Props.thread = 1; anchor = addr ~thread:1 1; wait = addr ~thread:1 200; fail = addr ~thread:1 5;
+                   slots = 21; kind = Waitp (1, 1) } in
+  deadline ~name ~store ~code:[| Havoc; Fixed; Havoc; Havoc |] ~contracts:[ contract ] ~depth:160 ()
+
 let a_protocols ?(cut = false) ~spi_period ~name () =
   let u = Programmes.uart ~bit_slots:5 [ 0x4F ] and spi = Programmes.spi_with ~period:spi_period in
   let store = Programmes.store_of [| u; spi; Programmes.i2c; Programmes.idle |] in
@@ -112,8 +125,12 @@ let ownership ~name ~timeout_mask ~depth =
     let t, _, e = Machine.clock m ~k io in
     wrote.(t) <- Smt.or_ wrote.(t) (Smt.not_ (Smt.eq e.pins_written (Smt.k ~w:8 0)));
     P.ownership_step own ~thread:t ~e, [] in
-  let covers () = List.init 4 (fun t -> Printf.sprintf "thread %d writes pins" t, wrote.(t)) in
-  let r = Bmc.run ~name ~depth ~step ~covers () in
+  (* the property can only fail once two threads have written pins *)
+  let antecedent = "two threads write pins" in
+  let two () = List.fold_left Smt.or_ Smt.ff
+      (List.concat (List.init 4 (fun t -> List.init (3 - t) (fun j -> Smt.and_ wrote.(t) wrote.(t + j + 1))))) in
+  let covers () = (antecedent, two ()) :: List.init 4 (fun t -> Printf.sprintf "thread %d writes pins" t, wrote.(t)) in
+  let r = Bmc.run ~antecedent ~name ~depth ~step ~covers () in
   Bmc.report r;
   (match r.violation with
    | None -> ()
@@ -179,7 +196,8 @@ let isolation ~name ~ldb ~depth () =
   let d1, _ = replay_cover w_differ and _, l2 = replay_cover w_low in
   pr "  witnesses replayed on Isa2.Spec: '%s' holds from %s; '%s' from %s\n" c_differ (show d1) c_low (show l2);
   let witnesses = (if d1 <> None then [ c_differ, w_differ ] else []) @ (if l2 <> None then [ c_low, w_low ] else []) in
-  let r = Bmc.run ~progress:4 ~witnesses ~name ~depth ~step ~covers () in
+  (* the property says something only once the other threads disturb their copies differently *)
+  let r = Bmc.run ~progress:4 ~witnesses ~antecedent:c_differ ~name ~depth ~step ~covers () in
   Bmc.report r;
   (match r.violation with
    | None -> ()
@@ -282,7 +300,15 @@ let isolation_induction ?(assume = true) ?(owned = false) ?(others_write = (2, 1
      | `Sat -> Printf.sprintf "NOT inductive (a counterexample to induction with thread 0 at pc %d)"
                  (Option.value cti ~default:(-1))
      | `Unknown e -> "unknown: " ^ e)
-    (if consistent then "satisfiable" else "CONTRADICTORY (vacuous)") (List.length reach) defs (Unix.gettimeofday () -. t0)
+    (if consistent then "satisfiable" else "CONTRADICTORY (vacuous)") (List.length reach) defs (Unix.gettimeofday () -. t0);
+  (* the antecedent of an induction step is its hypotheses: unsatisfiable hypotheses prove
+     anything, so they make the verdict VACUOUS *)
+  pr "PROPERTY %s: %s\n" name
+    (match r, consistent with
+     | _, false -> "VACUOUS (the induction hypotheses are contradictory)"
+     | `Unsat, true -> "PROVED (unbounded, by induction); hypotheses satisfiable"
+     | `Sat, true -> "FAILED (not inductive)"
+     | `Unknown e, true -> "UNDECIDED (" ^ e ^ ")")
 
 (* ---- (d) UART transmitter, every byte ---- *)
 
@@ -300,8 +326,11 @@ let uart_functional ~name ?stretch ?(anytime = false) ~bytes ~depth () =
     let io = if anytime then io else { io with host_in_valid = Smt.tt } in
     let t, _, e = Machine.clock m ~k io in
     P.uart_rx_step rx ~thread:t ~io ~e ~st:m.st, [] in
-  let covers () = [ Printf.sprintf "%d frames received" bytes, Smt.eq rx.frames (Smt.k ~w:8 bytes) ] in
-  let r = Bmc.run ~progress:(if anytime then 4 else 100) ~name ~depth ~step ~covers () in
+  (* the receiver checks samples only inside a frame: a whole frame sampled is the antecedent *)
+  let antecedent = "a frame is sampled" in
+  let covers () = [ antecedent, Smt.not_ (Smt.eq rx.frames (Smt.k ~w:8 0));
+                    Printf.sprintf "%d frames received" bytes, Smt.eq rx.frames (Smt.k ~w:8 bytes) ] in
+  let r = Bmc.run ~progress:(if anytime then 4 else 100) ~antecedent ~name ~depth ~step ~covers () in
   Bmc.report r;
   (match r.violation with
    | None -> ()
@@ -425,6 +454,10 @@ let uart_stimulus ~start ~byte =
       else if String.length base >= 4 && String.sub base 0 4 = "cut." then None else Some 0
 
 let resources ~name ?(plant = fun (_ : int array array) -> ()) ~owns ~depth () =
+  (* the declaration must keep the rules on declarations before a run means anything *)
+  (match Ownership.conflicts owns with
+   | [] -> ()
+   | l -> failwith (name ^ ": the ownership declaration breaks its rules: " ^ String.concat "; " l));
   let progs = Bridge_fw.Bridge_a_words.threads () in
   plant progs;
   let store = store_v2 progs in
@@ -442,7 +475,11 @@ let resources ~name ?(plant = fun (_ : int array array) -> ()) ~owns ~depth () =
       owns.(t).Ownership.inbox_recv;
     let bad = P.resources_step owns ~thread:t ~e in
     bad, Machine.cut m ~k in
-  let covers () = List.sort compare (Hashtbl.fold (fun k v acc -> (k, v) :: acc) touched []) in
+  (* the antecedent: some thread touches an inbox at all *)
+  let antecedent = "some thread sends to or receives from an inbox" in
+  let covers () =
+    (antecedent, Hashtbl.fold (fun _ v acc -> Smt.or_ acc v) touched Smt.ff)
+    :: List.sort compare (Hashtbl.fold (fun k v acc -> (k, v) :: acc) touched []) in
   (* one witness for every cover: the host sends ACK (0x10), which T0 receives and passes to T1,
      whose I2C master acknowledges and answers into inbox 2; replayed on Isa2.Spec first *)
   let w = uart_stimulus ~start:8 ~byte:Bridge_fw.Bridge_a_words.op_ack in
@@ -460,8 +497,9 @@ let resources ~name ?(plant = fun (_ : int array array) -> ()) ~owns ~depth () =
   pr "  witness (the host sends 0x%02x from clock 8), replayed on Isa2.Spec: %s\n" Bridge_fw.Bridge_a_words.op_ack
     (String.concat "; " (List.sort compare (Hashtbl.fold (fun n k acc -> Printf.sprintf "%s at clock %d" n k :: acc) seen [])));
   let witnesses = Hashtbl.fold (fun n k acc -> if k < depth then (n, w) :: acc else acc) seen [] in
+  let witnesses = if witnesses <> [] then (antecedent, w) :: witnesses else witnesses in
   Hashtbl.iter (fun n k -> if k >= depth then pr "  (cover '%s' is reached at clock %d, beyond the bound of %d)\n" n k depth) seen;
-  let r = Bmc.run ~progress:50 ~witnesses ~name ~depth ~step ~covers () in
+  let r = Bmc.run ~progress:50 ~witnesses ~antecedent ~name ~depth ~step ~covers () in
   Bmc.report r;
   (match r.violation with
    | None -> ()
@@ -496,15 +534,18 @@ let bank_ownership ~name ~reads ~depth =
   owns.(0) <- { Ownership.nothing with bank_read = reads };
   let code = [| Fixed; Fixed; Fixed; Fixed |] in
   let m = Machine.create ~bank ~store ~code () in
-  let read = Array.make 2 Smt.ff in
+  let read = Array.make 2 Smt.ff and any_read = ref Smt.ff in
   let step k =
     let io = Machine.io ~k in
     let t, _, e = Machine.clock m ~k io in
     let rd, ra = e.bank_read in
+    any_read := Smt.or_ !any_read rd;
     Array.iteri (fun i r -> read.(i) <- Smt.or_ r (Smt.and_ rd (Smt.eq ra (Smt.k ~w:10 i)))) read;
     P.resources_step owns ~thread:t ~e, [] in
-  let covers () = List.init 2 (fun i -> Printf.sprintf "thread 0 reads bank address %d" i, read.(i)) in
-  let r = Bmc.run ~name ~depth ~step ~covers () in
+  let antecedent = "thread 0 reads the bank" in
+  let covers () = (antecedent, !any_read)
+                  :: List.init 2 (fun i -> Printf.sprintf "thread 0 reads bank address %d" i, read.(i)) in
+  let r = Bmc.run ~antecedent ~name ~depth ~step ~covers () in
   Bmc.report r;
   (match r.violation with
    | None -> ()
@@ -517,9 +558,31 @@ let bank_ownership ~name ~reads ~depth =
      check_replay ~expected:kbad ~fired:!fired);
   r
 
+(* The rules on declarations themselves (Ownership.conflicts), on bridge A's declaration and on
+   planted variants of it; the hazard checker applies the same function (its OWNERSHIP rule). *)
+let declarations () =
+  let show name (o : Ownership.t) =
+    match Ownership.conflicts o with
+    | [] -> pr "DECLARATION %s: keeps the rules\n" name
+    | l -> pr "DECLARATION %s: REJECTED: %s\n" name (String.concat "; " l) in
+  let a = bridge_owns () in
+  show "bridge A" a;
+  let with_ t f = let o = Array.copy a in o.(t) <- f o.(t); o in
+  show "bridge A, planted: T3 also declared to receive from inbox 2"
+    (with_ 3 (fun th -> { th with Ownership.inbox_recv = [ 2 ] }));
+  show "bridge A, planted: T3 also declared to send to inbox 1"
+    (with_ 3 (fun th -> { th with Ownership.inbox_send = [ 1 ] }));
+  show "bridge A, planted: T2 no longer declared to receive from inbox 2"
+    (with_ 2 (fun th -> { th with Ownership.inbox_recv = [] }));
+  show "bridge A, planted: T0 and T3 both declared to write bank 0..15"
+    (let o = with_ 0 (fun th -> { th with Ownership.bank_write = [ (0, 15) ] }) in
+     o.(3) <- { (o.(3)) with Ownership.bank_write = [ (8, 23) ] }; o)
+
 let scenarios = [
+  "e-declarations", declarations;
   "a", (fun () -> ignore (a_main ~ldd:20 ~name:"a-deadline-main.ml-programme"));
   "a-planted", (fun () -> ignore (a_main ~ldd:21 ~name:"a-deadline-planted-ldd21"));
+  "a-vacuous-planted", (fun () -> ignore (a_vacuous ~name:"a-deadline-planted-unreachable-wait"));
   "a-protocols", (fun () -> ignore (a_protocols ~spi_period:10 ~name:"a-waitd-uart-spi-i2c" ()));
   "a-protocols-cut", (fun () -> ignore (a_protocols ~cut:true ~spi_period:10 ~name:"a-waitd-uart-spi-i2c-cut" ()));
   "a-spi8", (fun () -> ignore (a_protocols ~spi_period:8 ~name:"a-waitd-uart-spi8-i2c" ()));

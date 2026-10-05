@@ -1,0 +1,30 @@
+# command: powerup/run_powerup.sh r1 r1_bmc r2
+# commit: 079f0f2905a7ad0746d61bafd508065a724c1617 (with uncommitted changes)
+# yosys: Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+# z3: Z3 version 5.1.0 - 64 bit
+# date: 2026-10-05T19:32:27+08:00
+== r1
+engine_0: Output 0 of miter "model/design_aiger" was asserted in frame 1.  Time =     0.02 sec
+summary: engine_0 (abc pdr) returned FAIL
+summary:   failed assertion powerup.bank at powerup.sv:99.5-101.72 step 1
+DONE (FAIL, rc=2)
+counterexample, both copies (step 0 is the first clock; clear is high in the first RESET_CLOCKS steps):
+step          clear    imem_addr_a    imem_addr_b         imem_a         imem_b      pin_out_a      pin_out_b      cfg_out_a      cfg_out_b
+   0              1              0            200              0              0              0              0              0              0
+   1              0              0              0            200           f500              0              0              0              0
+   2              0              0              0            200           f500              0              0              0              0
+== r1_bmc
+summary: engine_0 (smtbmc z3) returned FAIL
+summary:   failed assertion powerup.bank at powerup.sv:99.5-101.72 step 1
+summary:   failed assertion powerup.host at powerup.sv:95.5-96.105 step 1
+DONE (FAIL, rc=2)
+counterexample, both copies (step 0 is the first clock; clear is high in the first RESET_CLOCKS steps):
+step          clear    imem_addr_a    imem_addr_b         imem_a         imem_b      pin_out_a      pin_out_b      cfg_out_a      cfg_out_b
+   0              1              1              0           f400           f400              0              0              0              0
+   1              0              0              0           f500           c000              0              0              0              0
+   2              0              0              0           f500           c000              0              0              0              0
+== r2
+engine_0: Property proved.  Time =    20.27 sec
+summary: engine_0 (abc pdr) returned PASS
+summary: engine_0 did not produce any traces
+DONE (PASS, rc=0)

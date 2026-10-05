@@ -18,10 +18,13 @@ Everything was run on 2026-10-05.
 | 2a | every WAITD of UART + SPI + I2C | 15 contracts, 720 clocks; **found a latent SPI compiler bug** (Findings) |
 | 2b | pin ownership | four programmes, 720 clocks; planted bug found at clock 95 |
 | 2c | isolation (2-copy miter) | BMC: planted bug found at clock 28; induction: holds at **every depth** for the UART; both covers now reachable by concrete witness (0.9 s, was unanswered after 22 min) |
-| 2e | ownership of bank, inboxes, ports | bridge A: no violation to 300 clocks; planted violations found; with bank ownership the bank-reading UART is isolated at **every depth** |
+| 2e | ownership of bank, inboxes, ports | bridge A: no violation to 300 clocks; planted violations found; with bank ownership the bank-reading UART is isolated at **every depth**; rules on the declaration itself (one writer per bank address, inbox i received only by thread i, one sender unless shared), shared with the hazard checker, 4 of 4 planted declarations rejected |
 | 2d | UART frame, every byte | 2 frames (440 clocks); planted bug found at clock 98 (byte 0x04) |
 | 3 | Kind 2 (k-induction, IC3) | deadline property **proved for all depths** in 0.2 s; UART times out at 15 min |
 | 4 | RTL against specification (Yosys) | equal for 23 clocks after reset, for every instruction stream and input; **28 of 28** planted RTL bugs found |
+| 5 | power-up determinism (SymbiYosys) | two copies from arbitrary register contents agree on every output after a one-clock reset, **unbounded** (abc pdr); **found a fetch bug in the RTL** (Findings 5), now fixed; 2 of 2 planted un-reset registers that reach an output are caught, 3 that cannot are correctly passed |
+| 6 | per-property report | every property PROVED, VACUOUS, FAILED or UNDECIDED, every cover REACHABLE or UNREACHABLE, across all engines (`results/summary.txt`); a planted vacuous property is reported VACUOUS |
+| 7 | our UART against Jane Street's `Uart.Tx` (SymbiYosys) | pin-equivalent for 4 frames and every 4 byte values, with an offset that shrinks by exactly one clock per back-to-back frame (3, 2, 1, 0), and **why no constant offset can hold** |
 
 ## 1. One interpreter, several value domains
 
@@ -220,6 +223,24 @@ checked on its own: the UART's own reads by e-bank and by the hazard checker (wh
 and rejects 0 only, at the same LDB); the other threads' by checking their programmes when
 there are any.
 
+**Rules on the declaration itself** (`Ownership.conflicts`, added 2026-10-05). A declaration
+can be wrong before any code runs, and a havoc thread in a proof is assumed to keep its
+declaration, so the declaration needs rules of its own. The same function is the hazard
+checker's OWNERSHIP rule (`../verif-oracles/README.md`), and `resources` refuses to run on a
+declaration that breaks it:
+- no bank address written by two threads; one thread per port and direction;
+- inbox i belongs to thread i, and only thread i may receive from it (WAITC 10 polls the
+  executing thread's own inbox, so another receiver could not wait for it);
+- at most one declared sender per inbox, unless declared shared;
+- an inbox some thread sends to must be received by its owner.
+
+Scenario `e-declarations` (`results/bmc.txt`) applies them to bridge A's declaration (keeps the
+rules) and to four planted variants, all rejected: T3 also declared to receive from inbox 2; T3
+also declared to send to inbox 1; T2 no longer declared to receive from inbox 2; T0 and T3
+declared to write overlapping bank ranges. The isolation inductions keep their own "anything
+else" declaration for the havoc threads (every inbox, the whole bank), which is deliberately
+looser than these rules: it is an over-approximation, not a design.
+
 Covers for e use one concrete witness: the host sends 0x10 (ACK) on the UART line from clock 8.
 Replayed on `Isa2.Spec`, T1 and T2 start receiving at clocks 5 and 6, T0 passes the byte to
 inbox 1 at clock 620 and T1 answers into inbox 2 at 785. The two later ones lie beyond the
@@ -350,6 +371,157 @@ change, prints N only.
 Not tried: `sat -tempinduct`. RTL-internal registers that the comparison cannot see (pending LDB,
 the previous pins) would probably need strengthening invariants first.
 
+## 5. Power-up determinism (SymbiYosys)
+
+After MarcosAsh's `formal/powerup.sby` (credits). `powerup/powerup.sv` instantiates two copies
+of the v2 core as it is synthesised (`powerup/emit_core.ml`: the Verilog of `tt/src`, no debug
+ports). No register of the core has an initial value, so each copy starts from its own arbitrary
+contents. Both copies get the same inputs on every clock, including clear. Clear is forced high
+for the first `RESET_CLOCKS` clocks, and free (but shared) afterwards. From then on every output
+must agree, one assertion per group: pins (level, output enable, quarter-clock levels), the
+fetch address, host, ports, bank, FINE, cfg. Data buses are compared only while their strobe is
+set. The memories are outside the core, as on the chip. Each copy's programme word is the
+store's output for the address that copy presented on the previous clock. Both copies get the
+same word when they presented the same address, and independent words otherwise. The bank's
+read data is modelled the same way. This is exactly "every register that can reach an output
+is reset": a register left out of the clear may differ, and the proof fails only if the
+difference reaches a pin.
+
+`Sequencer2.create ?unreset` builds named register groups without the clear, as planted faults;
+without it the generated Verilog is byte-identical to the build without the option.
+
+Results (`results/powerup.txt`; `powerup/run_powerup.sh`, SymbiYosys and Yosys 0.62 in the
+LibreLane container; abc pdr for the proofs, smtbmc with z3 for the bounded run and covers):
+
+| task | what | result |
+|---|---|---|
+| r1 | real core, one-clock reset | **PASS, unbounded** (abc pdr; 45 s, 333 s with the vacuity control added) |
+| r2 | real core, two-clock reset | PASS, unbounded (abc pdr, 27 to 171 s across runs) |
+| r1_bmc | as r1, bounded, 12 clocks | PASS |
+| u_cfg | `cfg` registers without the clear | **FAIL** at step 1 (`cfg_out` differs) |
+| u_dl | `dl` registers without the clear | **FAIL** at step 4: a wait in thread 0 ends at a different clock, so the fetch addresses part |
+| u_inbox | inbox data without the clear | PASS: read only while `full`, which is reset |
+| u_prev_pins | `prev_pins` without the clear | PASS: selected only after a SETP with q > 0, by which time it holds a reset value |
+| u_host_tag | `host_tag` without the clear | PASS: compared only with `host_out_valid`, and OUT writes it first |
+
+The three passing planted faults are the point of comparing outputs rather than demanding a
+reset on every register: those registers really cannot reach a pin before they are written.
+
+**What the first run found** (`results/powerup-before-fetch-fix.txt`, commit d0d3f3e). With a
+one-clock reset, r1 failed at step 1. During the clear clock the core presented a fetch address
+computed from the power-up contents of `thread`, `pc` and `page`. The store latched that word,
+and thread 0 executed it as its first instruction (copy a ran `f500`, copy b `c000`, an IN,
+whose ready strobe differed). With a longer reset the proof passed, but a simulation (iverilog,
+boot pcs 10, 20, 30, 40) showed thread 0 then executing the word at **thread 1's** boot address:
+`thread` is 0 during clear, so the core presented the address for thread 0 + 1. The lockstep test
+missed both because `harness2.ml` did not model this: after clear it set the store's address to
+thread 0's boot address itself. The TT harness boots every thread at 0, which hides it too.
+
+The fix (`../sequencer-v2/sequencer2.ml`): while clear is high the core presents thread 0's boot
+address. `harness2.ml` now latches whatever address the core presents during clear, as an SRAM
+does. With the honest harness and the old RTL, the lockstep test fails at clock 0 in every
+programme (`lockstep2.exe 20 200`: 1297 and 856 mismatching clocks); with the fix, `lockstep2.exe
+1000 5000` gives output identical to `../sequencer-v2/results/lockstep.txt`.
+
+Limits: the inputs `boot_pc` and `boot_page` are free on every clock (on the chip they are a
+configuration register); the stores are modelled per address, not as a whole memory, which only
+adds behaviours. The proof is of the core alone; the TT wrapper's own registers (its loader) are
+outside it.
+
+## 6. Per-property report
+
+After smprather's per-property PROVED / REACHABLE / VACUOUS summary (credits). Every assertion
+names a cover for its **antecedent**: the condition under which it can fail at all. A property is
+PROVED only when the engine finds no violation **and** its antecedent is reachable within the
+same bound; if the antecedent is unreachable the verdict is VACUOUS, never a pass. The format is
+the same for every engine:
+
+    PROPERTY <name>: PROVED <scope>; antecedent <cover> reachable
+    PROPERTY <name>: VACUOUS <scope>; antecedent <cover> unreachable
+    PROPERTY <name>: FAILED at clock <k>
+    PROPERTY <name>: UNDECIDED (...)
+    COVER <name>: REACHABLE | UNREACHABLE within <n> clocks | UNDECIDED
+
+- **Our BMC** (`bmc.ml`): `Bmc.run` takes a mandatory `~antecedent`, the name of one of its
+  covers, and fails if the cover is missing. The antecedents: (a) every contract's wait executes;
+  (b) two threads write pins; (c) the other threads make the copies' other pins differ; (d) a
+  frame is sampled; (e) some thread touches an inbox; e-bank: thread 0 reads the bank. For an
+  induction step the antecedent is its hypotheses: unsatisfiable hypotheses make it VACUOUS.
+- **SymbiYosys** (`sby_report.py`): each `label: assert` needs a `label_ante: cover`; the script
+  combines the proof's log with the cover task's log. Where smtbmc's covers are too slow (the
+  UART miter, 840 clocks), the antecedent is asserted negated as `label_ante_reach` and checked
+  by abc bmc3: a failure at step n means reachable at step n.
+- `report.sh` collects every PROPERTY and COVER line into `results/summary.txt` and marks the
+  planted faults and controls, where FAILED or VACUOUS is the expected answer.
+
+Controls for the report itself: `a-vacuous-planted` places a deadline contract on an address the
+programme never reaches; it has no violation, and is reported **VACUOUS**, not PROVED. In
+`powerup.sv`, `vacuity_control` asserts an implication whose antecedent (the output enables
+differ) the other assertions rule out; it must be reported VACUOUS too.
+
+Two things this caught while it was being built. sby's summary listed only 5 of the 7 reached
+covers in one run, so a report read from the summary called two reachable antecedents undecided;
+`sby_report.py` reads the engine's own "Reached cover statement" lines. And the first antecedent
+written for the UART miter counted falling edges on the lines, which data bits produce too: it
+was reached at step 606, before the last frame had started, and so certified less than it
+claimed. It now requires every byte taken by both transmitters and our last frame finished.
+
+Not in the report: Kind 2 (section 3) and the RTL-against-specification runs (section 4), whose
+non-vacuity evidence is the 28 of 28 planted bugs; and a-protocols (Findings 4).
+
+## 7. Our UART against Jane Street's `Uart.Tx`
+
+After MarcosAsh's `fsm_miter` (credits). The reference is `Uart.Tx` from
+github.com/janestreet/hardcaml_hobby_boards (MIT), `src/uart.ml`, commit 9e6aeca (2025-10-30). It
+is not vendored: `uart-miter/build_hobby_tx.sh` compiles the unmodified upstream files from a
+checkout in `/var/tmp` next to our `emit_hobby_tx.ml`, which fixes the configuration (8 data bits,
+no parity, one stop bit, 20 clocks per bit) and writes Verilog. The upstream source needs Hardcaml
+v0.18 and `ppx_hardcaml`, which the shared switch 5.3.0 lacks (v0.17, no ppx), so it builds in a
+project-local opam switch, `/var/tmp/formal-hygiene/hobby-switch`, with v0.18~preview.130.106+341
+from Jane Street's opam repository.
+
+Our side is the v2 core (the Verilog of `tt/src`) running the compiler's UART programme on
+thread 0, pin 0, 5 slots (20 clocks) per bit, taking each byte from the host with IN: the
+programme of property (d). `uart_rom.exe` writes it as the store's contents; the store reads
+in one clock, as on the chip. `uart-miter/uart_pair.v` runs both on the same bytes.
+
+**Measured first, in simulation** (`results/uart-miter.txt`, iverilog, 4 bytes). Our core takes
+byte k when its IN executes. The Tx takes a byte in its Start state while `data_in_valid` is high.
+
+| feeding the Tx | Tx frame starts | our frame starts | offset |
+|---|---|---|---|
+| each byte valid one clock after our core takes it ("locked") | 7, 208, 409, 610 | 10, 210, 410, 610 | 3, 2, 1, 0 |
+| every byte valid as soon as the Tx can take it | 2, 203, 404, 605 | 10, 210, 410, 610 | 8, 7, 6, 5 |
+
+**Why no constant offset holds.** Back to back, the Tx needs 10 × 20 + 1 = 201 clocks per frame:
+after the stop bit's last enable it spends one more bit period in Complete, then one clock in
+Start to take the next byte, so its stop bit is 21 clocks. Our frame is exactly 200 clocks: the
+next byte's IN sits inside the stop bit's 5 slots. In general the Tx's back-to-back period is
+10 × clocks_per_bit + 1, always odd, and ours is a whole number of 4-clock slots, so no
+clocks_per_bit makes them equal; the offset changes by one clock per frame whichever way the Tx
+is fed. Within a frame the waveforms are identical: start and data bits are 20 clocks on both.
+
+**The proof** (`uart-miter/uart_miter.sv`, SymbiYosys, abc bmc3): the bytes are free constants
+(every value of all four), the Tx is fed locked, and every clock from reset to 840 our line at t
+equals the Tx's line at t − d, with d = 3, 2, 1, 0 in our frames 1 to 4 (before the first, 3).
+The Tx's line before its reset has taken effect counts as idle.
+
+| task | what | result |
+|---|---|---|
+| bmc | 4 frames, every 4 byte values, offsets 3, 2, 1, 0 | **PASS to 840 clocks** (0.11 s) |
+| ante | antecedent: all four bytes taken by both, our last frame finished | reachable at clock 810 (our last frame started at 610) |
+| constant | the same with one constant offset, 3 | **FAIL** at clock 210, our second start bit |
+| flip | the Tx given each byte XOR 0x80 | **FAIL** at clock 170, bit 7 of the first byte |
+| stretch | our programme with the compiler's fault injector (data bit 3 of byte 1 three slots longer), 2 bytes | **FAIL** at clock 90 |
+
+abc decides the 840 clocks in a tenth of a second because, with the timing locked, everything
+but the byte values is deterministic; the three controls show the property is not vacuous
+(and the antecedent shows the whole horizon is compared).
+
+Limits: four frames, back to back, host always ready; a fifth would need the Tx to be behind
+ours (d = −1). The Tx's `data_in_ready` is high exactly in its Start state, which the feeding
+logic uses as its accept signal; that is read from the upstream source, not from a spec.
+
 ## Findings
 
 1. **Latent bug in the SPI compiler** (`../deadline-sequencer/compiler.ml`, not fixed here).
@@ -375,6 +547,9 @@ the previous pins) would probably need strengthening invariants first.
    unmodified HEAD gives the same numbers, so this comes from the merge, not from the follow-ups. The UART and SPI contracts are unaffected in
    principle; splitting the I2C thread out, or giving it a stretching bound, is the obvious next
    step. Not done here.
+5. **Thread 0's first fetch after reset came from the wrong address** (section 5). Found by the
+   power-up determinism proof; fixed in `../sequencer-v2/sequencer2.ml`, and the harness that hid
+   it now models the store's latch during clear.
 
 ## Credits and prior art
 
@@ -390,6 +565,16 @@ the previous pins) would probably need strengthening invariants first.
   - MarcosAsh's abstract-interpretation programme verifier (intervals over phase, period and
     cycles since an edge) is the unbounded alternative to (a). **It has not been read yet**; the
     backlog's advice to read it before building ours still stands for the programme verifier.
+- **MarcosAsh**, github.com/MarcosAsh/protocol-emulator (Apache-2.0): power-up determinism as
+  a two-copy proof from arbitrary flop contents (`formal/powerup.sby`), and a miter of firmware
+  against `hardcaml_hobby_boards`' `Uart.Tx` (`make -C formal fsm_miter`). Ideas only; sections
+  5 and 7 are our own.
+- **smprather**, github.com/smprather/janestreet-blog-serial-protocol-emulator (MIT): every
+  property reported as PROVED, REACHABLE or VACUOUS, vacuous never counting as a pass
+  (`formal/run_formal.sh`). Idea only; section 6 is our own.
+- **Jane Street**, github.com/janestreet/hardcaml_hobby_boards (MIT, Copyright (c) 2025 Jane
+  Street Group, LLC): `Uart.Tx` (`src/uart.ml`, `src/uart_types.ml`), the reference circuit of
+  section 7. Used unmodified from a checkout outside this repository; no code copied.
 - Tools: z3 (MIT, from the `z3-solver` wheel), Kind 2 (Apache-2.0), Yosys (ISC, in the
   LibreLane image), Hardcaml.
 
@@ -409,6 +594,15 @@ equiv/run_equiv.sh bugs 16
 equiv/run_equiv.sh bug 12 "SKEQ skip lands on pc+1"
 ./_build/default/equiv/miter.exe --sim 20000 ["BUG"]   # the miter in Cyclesim, a smoke test
 ```
+
+Per-property report (section 6): `./report.sh` (reads the result files, runs nothing).
+
+UART miter (section 7): `uart-miter/run_uart_miter.sh [TASK...]`, after making the project-local
+switch as `uart-miter/build_hobby_tx.sh` describes.
+
+Power-up determinism (section 5): `powerup/run_powerup.sh [TASK...]`. It needs the LibreLane
+image and the z3 venv above (`Z3ENV`); the container has no `/lib64`, so the script runs the
+host's z3 through the host's dynamic loader, mounted read-only.
 
 Kind 2: the v3.0.0 release binary (github.com/kind2-mc/kind2/releases), on `PATH` or in
 `KIND2`. `BMC_SMT_LOG=DIR` saves the SMT-LIB of each BMC run, replayable with `z3 FILE`.

@@ -1,0 +1,52 @@
+# Our UART programme against Jane Street's Uart.Tx (README.md, section 7). Run by run_uart_miter.sh,
+# which builds hobby_uart_tx.v (build_hobby_tx.sh), uart_rom*.v (../uart_rom.exe) and core.v.
+#   bmc        4 frames, every 4 byte values, per-frame offsets 3, 2, 1, 0: must PASS (abc bmc3)
+#   ante       the antecedent (all four frames on both lines) is reachable: as the negated assertion
+#              line_ante_reach, which must FAIL (abc bmc3; the smtbmc cover was too slow, and so
+#              was replaying abc's 810-step trace in smtbmc, hence aigsmt none: abc's frame number
+#              is the step)
+#   constant   the same with one constant offset (3): must FAIL at the second frame
+#   flip       the Tx given byte XOR 0x80 (only data bit 7 differs): must FAIL
+#   stretch    our programme with the compiler's fault injector (data bit 3 of byte 1 three
+#              slots longer): must FAIL. 2 bytes: the injector unrolls the first byte's loop, and
+#              4 bytes would not fit the 64-word programme
+[tasks]
+bmc
+ante bmc_only
+constant bmc_only
+stretch bmc_only
+flip bmc_only
+
+[options]
+bmc: mode bmc
+bmc: aigsmt z3
+bmc: depth 840
+bmc_only: mode bmc
+bmc_only: aigsmt z3
+ante: aigsmt none
+bmc_only: depth 840
+
+[engines]
+bmc: abc bmc3
+bmc_only: abc bmc3
+
+[script]
+read -formal core.v hobby_uart_tx.v uart_pair.v uart_miter.sv
+bmc: read -formal uart_rom.v
+flip: read -formal uart_rom.v
+ante: read -formal uart_rom.v
+ante: chparam -set ANTE_AS_ASSERT 1 uart_miter
+constant: read -formal uart_rom.v
+stretch: read -formal uart_rom_stretch.v
+constant: chparam -set CONSTANT 1 uart_miter
+flip: chparam -set FLIP 128 uart_miter
+stretch: chparam -set N_BYTES 2 uart_miter
+prep -top uart_miter
+
+[files]
+core.v
+hobby_uart_tx.v
+uart_pair.v
+uart_miter.sv
+uart_rom.v
+uart_rom_stretch.v

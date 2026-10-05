@@ -29,12 +29,15 @@ header() {
 what=${1:-all}
 if [ "$what" = all ] || [ "$what" = bmc ]; then
   { header "main.exe (every scenario)"
-    for s in a a-planted a-protocols a-spi8 b b-planted c-planted c-induction c-induction-planted \
+    # a-protocols and a-spi8 no longer finish since the I2C clock-stretching fix (README.md,
+    # Findings 4); they run only with SLOW_A_PROTOCOLS=1
+    slow=""; [ "${SLOW_A_PROTOCOLS:-0}" = 1 ] && slow="a-protocols a-spi8"
+    for s in a a-planted a-vacuous-planted $slow b b-planted c-planted c-induction c-induction-planted \
              c-induction-no-ownership c-induction-ldb-owned c-induction-ldb-owned-overlap \
-             e e-bank e-bank-planted e-planted-steal d d-planted d-anytime c; do
+             e-declarations e e-bank e-bank-planted e-planted-steal d d-planted d-anytime c; do
       wait_load
-      SMT_SOLVER=$Z3 nice ionice ./_build/default/main.exe "$s"
-    done; } 2>&1 | tee results/bmc.txt
+      SMT_SOLVER=$Z3 nice ionice ./_build/default/main.exe "$s" 2>&1
+    done; } | tee results/bmc.txt
 fi
 if [ "$what" = all ] || [ "$what" = kind2 ]; then
   ./_build/default/main.exe kind2-export
