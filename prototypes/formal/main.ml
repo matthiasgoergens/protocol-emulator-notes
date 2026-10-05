@@ -361,7 +361,7 @@ let scenarios = [
       export_kind2_uart ~stretch:(3, 3) ~anytime:false ~bytes:1 ~file:"kind2/uart-planted-stretch.lus" ());
   "d", (fun () -> ignore (uart_functional ~name:"d-uart-every-byte" ~bytes:2 ~depth:440 ()));
   "d-planted", (fun () -> ignore (uart_functional ~name:"d-uart-planted-stretch" ~stretch:(3, 3) ~bytes:2 ~depth:440 ()));
-  "d-anytime", (fun () -> ignore (uart_functional ~name:"d-uart-every-byte-any-arrival" ~anytime:true ~bytes:1 ~depth:240 ()));
+  "d-anytime", (fun () -> ignore (uart_functional ~name:"d-uart-every-byte-any-arrival" ~anytime:true ~bytes:1 ~depth:208 ()));
 ]
 
 let () =

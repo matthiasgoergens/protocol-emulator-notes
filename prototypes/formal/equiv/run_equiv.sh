@@ -45,7 +45,8 @@ EOF
   else status=ERROR; fi
   local vars
   vars=$(grep --only-matching --extended-regexp "Solving problem with [0-9]+ variables and [0-9]+ clauses" "$WORK/$name.log" 2>/dev/null | sed 's/Solving problem with //' || true)
-  printf '%s depth %s: %s, %.0f s (%s)\n' "$name" "$depth" "$status" "$(echo "$t1 - $t0" | bc)" "$vars"
+  # depth counts Yosys time steps; step 1 is the clearing clock, so N steps check N - 1 clocks
+  printf '%s depth %s (%s clocks after the clear): %s, %.0f s (%s)\n' "$name" "$depth" "$((depth - 1))" "$status" "$(echo "$t1 - $t0" | bc)" "$vars"
 }
 
 header() {
