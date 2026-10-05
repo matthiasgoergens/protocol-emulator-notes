@@ -1,0 +1,60 @@
+# Power-up determinism (README.md, section 5). Run by run_powerup.sh, which generates the core
+# variants (core-*.v) with emit_core.exe. Tasks:
+#   r1, r2              the real core, reset held for 1 or 2 clocks: unbounded proof (abc pdr)
+#   r1_bmc              the same as r1, bounded, for a readable trace (smtbmc, z3)
+#   cover               the covers of powerup.sv are reachable after a 1-clock reset (smtbmc, z3)
+#   u_cfg, u_dl         planted faults that must FAIL: cfg or dl registers left out of the clear
+#   u_inbox, u_prev_pins, u_host_tag
+#                       registers left out of the clear that cannot reach an output before
+#                       they are written: the proof must still PASS (it is about outputs)
+[tasks]
+r1 prove clean
+r2 prove clean
+r1_bmc bmc clean
+cover clean
+u_cfg prove
+u_dl prove
+u_inbox prove
+u_prev_pins prove
+u_host_tag prove
+
+[options]
+prove: mode prove
+prove: aigsmt z3
+bmc: mode bmc
+bmc: depth 12
+cover: mode cover
+cover: depth 40
+
+[engines]
+prove: abc pdr
+bmc: smtbmc z3
+cover: smtbmc z3
+
+[script]
+clean: read -formal core.v
+u_cfg: read -formal core-cfg.v
+u_dl: read -formal core-dl.v
+u_inbox: read -formal core-inbox.v
+u_prev_pins: read -formal core-prev_pins.v
+u_host_tag: read -formal core-host_tag.v
+read -formal powerup.sv
+r1: chparam -set RESET_CLOCKS 1 powerup
+r1_bmc: chparam -set RESET_CLOCKS 1 powerup
+r2: chparam -set RESET_CLOCKS 2 powerup
+cover: chparam -set RESET_CLOCKS 1 powerup
+u_cfg: chparam -set RESET_CLOCKS 1 powerup
+u_dl: chparam -set RESET_CLOCKS 1 powerup
+u_inbox: chparam -set RESET_CLOCKS 1 powerup
+u_prev_pins: chparam -set RESET_CLOCKS 1 powerup
+u_host_tag: chparam -set RESET_CLOCKS 1 powerup
+prep -top powerup
+
+[files]
+powerup.sv
+clean: core.v
+u_cfg: core-cfg.v
+u_dl: core-dl.v
+u_inbox: core-inbox.v
+u_prev_pins: core-prev_pins.v
+u_host_tag: core-host_tag.v

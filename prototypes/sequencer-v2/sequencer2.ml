@@ -53,25 +53,32 @@ type outputs = {
   dbg : (string * Signal.t) list;
 }
 
-let create ?bug ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_in ~host_in_valid ~port_in
+(* [unreset] names register groups built without the clear, as planted faults for the power-up
+   determinism proof (../formal/powerup): "cfg", "dl", "host_tag", "inbox", "prev_pins". The
+   default (none) is the real core. *)
+let unreset_groups = [ "cfg"; "dl"; "host_tag"; "inbox"; "prev_pins" ]
+
+let create ?bug ?(unreset = []) ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_in ~host_in_valid ~port_in
     ~port_in_valid ~port_out_ready ~flags ~ctl_valid ~ctl_thread ~ctl_page ~ctl_pc ~boot_page ~boot_pc ~bank_rdata () =
   let is b = match bug with Some x -> x = b | None -> false in
   let spec = Reg_spec.create ~clock ~clear () in
   let open Always in
   let thread = Variable.reg spec ~width:2 in
-  let regs width = Array.init n_threads (fun _ -> Variable.reg spec ~width) in
   (* pc and page have no reset of their own: clear loads them from boot_pc and boot_page, the
      host's per-thread start address (a configuration register outside the core) *)
   let spec_nc = Reg_spec.create ~clock () in
+  List.iter (fun g -> if not (List.mem g unreset_groups) then invalid_arg ("Sequencer2: unreset " ^ g)) unreset;
+  let spec_of g = if List.mem g unreset then spec_nc else spec in
+  let regs ?(group = "") width = Array.init n_threads (fun _ -> Variable.reg (spec_of group) ~width) in
   let pcs = Array.init n_threads (fun _ -> Variable.reg spec_nc ~width:8) in
   let pages = Array.init n_threads (fun _ -> Variable.reg spec_nc ~width:2) in
-  let accs = regs 8 and cnts = regs 12 and dls = regs 12 in
-  let bps = regs 10 and fines = regs 8 and armed = regs 1 and cfgs = regs 8 and lsend = regs 3 in
-  let inbox = regs 8 and full = regs 1 in
+  let accs = regs 8 and cnts = regs 12 and dls = regs ~group:"dl" 12 in
+  let bps = regs 10 and fines = regs 8 and armed = regs 1 and cfgs = regs ~group:"cfg" 8 and lsend = regs 3 in
+  let inbox = regs ~group:"inbox" 8 and full = regs 1 in
   let pin_out = Variable.reg spec ~width:8 and pin_oe = Variable.reg spec ~width:8 in
-  let prev_pins = Variable.reg spec ~width:8 and q_reg = Variable.reg spec ~width:2 in
+  let prev_pins = Variable.reg (spec_of "prev_pins") ~width:8 and q_reg = Variable.reg spec ~width:2 in
   let latch = Variable.reg spec ~width:8 in
-  let host_out = Variable.reg spec ~width:8 and host_tag = Variable.reg spec ~width:3 in
+  let host_out = Variable.reg spec ~width:8 and host_tag = Variable.reg (spec_of "host_tag") ~width:3 in
   let host_out_valid = Variable.reg spec ~width:1 in
   let port_out_data = Variable.reg spec ~width:8 and port_out_valid = Variable.reg spec ~width:4 in
   let fine_out = Variable.reg spec ~width:8 and fine_valid = Variable.reg spec ~width:1 in
@@ -282,7 +289,7 @@ let create ?bug ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_in ~host_in_vali
     bank_wdata = (if is Stb_data_cnt then select cnt 7 0 else acc);
     fine_out = fine_out.value; fine_valid = fine_valid.value; cfg_out = cat (values cfgs); dbg }
 
-let circuit ?bug ?(debug = true) () =
+let circuit ?bug ?unreset ?(debug = true) () =
   let clock = input "clock" 1 and clear = input "clear" 1 in
   let imem_data = input "imem_data" 16 and pin_in = input "pin_in" 8 and pin_in4 = input "pin_in4" 32 in
   let host_in = input "host_in" 8 and host_in_valid = input "host_in_valid" 1 in
@@ -293,7 +300,7 @@ let circuit ?bug ?(debug = true) () =
   let ctl_page = input "ctl_page" 2 and ctl_pc = input "ctl_pc" 8 in
   let bank_rdata = input "bank_rdata" 8 in
   let boot_page = input "boot_page" 8 and boot_pc = input "boot_pc" 32 in
-  let o = create ?bug ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_in ~host_in_valid ~port_in
+  let o = create ?bug ?unreset ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_in ~host_in_valid ~port_in
       ~port_in_valid ~port_out_ready ~flags ~ctl_valid ~ctl_thread ~ctl_page ~ctl_pc ~boot_page ~boot_pc ~bank_rdata () in
   Circuit.create_exn ~name:"deadline_sequencer_v2"
     ([ output "imem_addr" o.imem_addr; output "pin_out" o.pin_out; output "pin_oe" o.pin_oe
