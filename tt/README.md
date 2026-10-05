@@ -1,8 +1,11 @@
 # tt/: Tiny Tapeout submission harness
 
-Group A of `notes/learned-from-others.md` (items T1, T2, V28, V32, A12), first step. Nothing here has
-been through LibreLane, precheck or any place-and-route; the timing script has only been run on a
-metrics file from another project.
+Group A of `notes/learned-from-others.md` (items T1, T2, V28, V32, A12), first step. `scripts/harden.sh`
+has hardened it once, as Tiny Tapeout's ihp-cmos5l action would (2026-10-05, LibreLane 3.1.0.dev3,
+6x4 tiles, 20 ns): 9,621 cells, 0 routing DRC, 0 Magic DRC, 0 LVS errors, worst setup slack
++10.39 ns, hold +0.12 ns, in 29 minutes (17 of them Magic DRC). Record in
+`../tools/librelane-tt/results/tt-harden/`. It has not been through the precheck, and the timing
+script has only been run on a metrics file from another project.
 
 ## Contents
 

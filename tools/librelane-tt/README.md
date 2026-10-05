@@ -59,6 +59,13 @@ With this image the same block runs to the end: 67 steps in 197 s, exit 0, Magic
 LEF in 7.2 s each. Results: `prototypes/postlayout-roundtrip/README.md`, "The same block with
 LibreLane 3.1.0.dev3".
 
+The Tiny Tapeout harness in `tt/` also hardens end to end through `tt/scripts/harden.sh`
+(`tt_tool.py --create-user-config --ihp` and `--harden --ihp`, the 6x4 tile, its DEF template):
+exit 0 after 1,763 s, 9,621 cells, routing DRC 0, Magic DRC 0, LVS 0, antenna 0, worst setup
+slack +10.39 ns and hold +0.12 ns at 20 ns; Magic DRC took 17 minutes and detailed routing 10.
+`pdk.json` there records LibreLane 3.1.0.dev3 and IHP-Open-PDK 2bbec755, as the action's would
+(`results/tt-harden/`; the run itself is in `/var/tmp/librelane-tt/tt-harden-1/`).
+
 ## Where this still differs from the action
 
 - **Container engine.** The action uses the GitHub runner's docker and pulls by tag; here rootless
@@ -66,8 +73,12 @@ LibreLane 3.1.0.dev3".
   as `--dockerized` itself does after re-launching; `tt/scripts/harden.sh` goes through
   `tt_tool.py` and `python -m librelane --dockerized` exactly as the action does, with
   `LIBRELANE_CONTAINER_ENGINE` and `LIBRELANE_IMAGE_OVERRIDE` pointing at podman and this image.
-- **Mounts.** `--dockerized` mounts `$HOME` read-write into the container. `harden.sh` sets HOME
-  to its scratch directory for that call, so only the stage and the PDK are visible.
+- **Mounts.** `--dockerized` mounts `$HOME` and `PDK_ROOT` read-write into the container.
+  `harden.sh` sets HOME to its scratch directory for that call, so only the stage and the PDK are
+  visible; the PDK is still mounted writable there, as in the action (`run_pnr.sh` mounts it
+  read-only).
+- **Provenance fields.** `commit_id.json` names a throwaway repository (`harden.sh` stages a copy
+  of `tt/` and commits it), and `workflow_url` is null outside GitHub Actions.
 - **Flow configuration.** `run_pnr.sh` runs our block's own `librelane.json` (no Tiny Tapeout
   tile, DEF template or pin order, and KLayout XOR, DRC and LVS switched off); only `harden.sh`
   uses the Tiny Tapeout configuration (`tt_tool.py --create-user-config`).
