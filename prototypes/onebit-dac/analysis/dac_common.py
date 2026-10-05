@@ -50,10 +50,11 @@ def read_bits(path, n=None):
 # for audio-band results only the area matters, and every impairment below is an area error.
 #  - level: the pin is high (V_hi) or low (0). The stored bit F is 1 for y = -1, so the pin
 #    drives NOT F (the pin stage's invert, or the host negates the words).
-#  - supply: V_hi = V0 + n_s, n_s white over the step rate with in-band density given as an
-#    rms voltage in 20 Hz-20 kHz (the IO rail of the audio pins).
+#  - supply: V_hi = V0 + n_s, n_s low-pass noise (one pole at 100 kHz) given by its rms in
+#    20 Hz-20 kHz (the IO rail of the audio pins).
 #  - rise/fall asymmetry: a rising edge loses V*tr_eff of area, a falling edge gains V*tf_eff;
-#    only delta = tf_eff - tr_eff per pulse is signal dependent.
+#    with tr_eff = t0 - delta/2 and tf_eff = t0 + delta/2 the t0 parts cancel per pulse and
+#    every edge adds V*delta/2: an error proportional to the number of transitions.
 #  - jitter: an edge displaced by dt changes the area by -/+ V*dt (rising/falling), dt ~ N(0, sj).
 #  - aggressor bounce: k_pads pads on the same rail switching with random data at the audio
 #    pin's edges move each edge by kd * (bounce voltage), the bounce being bmax * (number
@@ -61,42 +62,70 @@ def read_bits(path, n=None):
 
 
 @njit(cache=True)
-def _areas(bits, T, V0, delta, sj, sv_step, kpads, bmax, kd, seed):
+def _edge_dt(sj, kpads, bmax, kd):
+    dt = 0.0
+    if sj > 0:
+        dt += sj * np.random.standard_normal()
+    if kpads > 0:
+        ns = 0
+        for _ in range(kpads):
+            if np.random.random() < 0.5:
+                ns += 1
+        dt += kd * bmax * (ns - kpads / 2) / (kpads / 2)
+    return dt
+
+
+@njit(cache=True)
+def _areas(bits, T, V0, delta, sj, sv_step, kpads, bmax, kd, seed, mode):
+    """mode 0: NRZ on one pin; 1: NRZ differential (pin and its complement, same clock edge,
+    output = difference / 2); 2: RZ on one pin (a 1 is high for the first half step)."""
     np.random.seed(seed)
     n = bits.shape[0]
     a = np.empty(n, dtype=np.float64)
     prev = 1 - bits[0]
+    # supply noise: white noise through one pole at 100 kHz (regulator noise and hum are
+    # low-frequency; sv_step is the rms of this process)
+    al = np.exp(-2 * np.pi * 100e3 * T)
+    ns = 0.0
     for i in range(n):
         b = 1 - bits[i]
-        vhi = V0 + sv_step * np.random.standard_normal() if sv_step > 0 else V0
-        area = T * vhi * b
+        if sv_step > 0:
+            ns = al * ns + np.sqrt(1 - al * al) * sv_step * np.random.standard_normal()
+        vhi = V0 + ns
+        if mode == 2:
+            area = 0.0
+            if b == 1:
+                dt1 = _edge_dt(sj, kpads, bmax, kd)
+                dt2 = _edge_dt(sj, kpads, bmax, kd)
+                # every edge adds V*delta/2 (rise/fall asymmetry); a late rise loses, a late fall gains
+                area = vhi * T / 2 + V0 * (delta + dt2 - dt1)
+            a[i] = area
+            prev = b
+            continue
         d = b - prev
+        dt = _edge_dt(sj, kpads, bmax, kd) if d != 0 else 0.0
+        e = 0.0
         if d != 0:
-            dt = 0.0
-            if sj > 0:
-                dt += sj * np.random.standard_normal()
-            if kpads > 0:
-                ns = 0
-                for _ in range(kpads):
-                    if np.random.random() < 0.5:
-                        ns += 1
-                dt += kd * bmax * (ns - kpads / 2) / (kpads / 2)
-            if d > 0:
-                area -= V0 * (dt + 0.5 * delta)   # rising: late edge loses area; half the asymmetry
-            else:
-                area += V0 * (dt + 0.5 * delta)   # falling: late edge gains area
-        a[i] = area
+            e = V0 * (0.5 * delta - d * dt)
+        if mode == 0:
+            a[i] = T * vhi * b + e
+        else:
+            # complement pin: same supply sample, opposite edge, same asymmetry contribution
+            ec = 0.0
+            if d != 0:
+                ec = V0 * (0.5 * delta + d * dt)
+            a[i] = 0.5 * ((T * vhi * b + e) - (T * vhi * (1 - b) + ec)) + 0.5 * T * V0
         prev = b
     return a
 
 
 class Impair:
-    def __init__(self, V0=3.3, delta=0.0, sj=0.0, sv_inband=0.0, kpads=0, bmax=0.0, kd=0.0, seed=1):
-        self.V0, self.delta, self.sj, self.sv_inband = V0, delta, sj, sv_inband
+    def __init__(self, V0=3.3, delta=0.0, sj=0.0, sv_inband=0.0, kpads=0, bmax=0.0, kd=0.0, seed=1, mode=0):
+        self.V0, self.delta, self.sj, self.sv_inband, self.mode = V0, delta, sj, sv_inband, mode
         self.kpads, self.bmax, self.kd, self.seed = kpads, bmax, kd, seed
 
     def label(self):
-        p = []
+        p = [["", "differential", "RZ"][self.mode]] if self.mode else []
         if self.delta: p.append(f"asym {self.delta*1e12:.0f} ps")
         if self.sj: p.append(f"jitter {self.sj*1e12:.0f} ps rms")
         if self.sv_inband: p.append(f"supply {self.sv_inband*1e6:.0f} uV in-band")
@@ -105,10 +134,10 @@ class Impair:
 
     def areas(self, bits):
         T = 1.0 / FM
-        # white supply noise: in-band rms sv over 20 kHz -> per-step rms sv * sqrt((FM/2)/20e3)
-        sv_step = self.sv_inband * np.sqrt((FM / 2) / 20e3)
+        # one-pole noise at 100 kHz: the fraction of its power below 20 kHz is (2/pi) atan(0.2)
+        sv_step = self.sv_inband / np.sqrt(2 / np.pi * np.arctan(20e3 / 100e3))
         return _areas(bits.astype(np.int8), T, self.V0, self.delta, self.sj, sv_step, self.kpads,
-                      self.bmax, self.kd, self.seed)
+                      self.bmax, self.kd, self.seed, self.mode)
 
 
 # Reconstruction filter: pin -> R1 1 kohm -> C1 2.2 nF (72 kHz pole), buffered, then a
@@ -186,4 +215,9 @@ def write_wav(path, l, r, fs):
     x = np.stack([l, r], axis=1)
     x = x - x.mean(axis=0)
     peak = np.max(np.abs(x))
-    wavfile.write(path, int(round(fs)), (x / max(peak, 1e-9) * 0.9 * (2 ** 31 - 1)).astype(np.int32))
+    # 16-bit with TPDF dither, normalised to -1 dBFS peak (for listening; the numbers in
+    # results/ come from the floating-point signal, not from these files)
+    rng = np.random.default_rng(0)
+    v = x / max(peak, 1e-9) * 0.89 * 32767
+    v = v + rng.uniform(-0.5, 0.5, v.shape) + rng.uniform(-0.5, 0.5, v.shape)
+    wavfile.write(path, int(round(fs)), np.clip(np.round(v), -32768, 32767).astype(np.int16))

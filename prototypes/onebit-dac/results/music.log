@@ -1,0 +1,8 @@
+o2 mode B ideal                                                        -> wav/music_o2_modeB_ideal.wav
+o3 mode A ideal                                                        -> wav/music_o3_modeA_ideal.wav
+o3 mode B ideal                                                        -> wav/music_o3_modeB_ideal.wav
+o3 mode B asym 100 ps, jitter 30 ps rms, supply 3 uV in-band           -> wav/music_o3_modeB_quietrail.wav
+o3 mode B asym 100 ps, jitter 30 ps rms, supply 3 uV in-band, 8 pads x 0.20 V bounce, 1.0 ps/mV -> wav/music_o3_modeB_sharedrail.wav
+o4 mode B ideal                                                        -> wav/music_o4_modeB_ideal.wav
+underrun policy hold: 8 gaps of 20 ms, 16 edges; high-passed (>4 kHz) peak within 1 ms of an edge, dB re the gapless output there: median +0.2, worst +3.0 -> wav/underrun_hold_o3_modeA.wav
+underrun policy zero: 8 gaps of 20 ms, 16 edges; high-passed (>4 kHz) peak within 1 ms of an edge, dB re the gapless output there: median +19.3, worst +33.7 -> wav/underrun_zero_o3_modeA.wav

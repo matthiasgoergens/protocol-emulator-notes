@@ -1,0 +1,8 @@
+# analysis/explore_scaled.py output (2026-10-05): CIFB designs with inter-stage gains 2^-m, a_k as used in sim/dac.ml.
+# SQNR here: exact integer sine, no dither, modulator alone; "max stable" is a crude run-length test.
+N=2 Hinf=4.0 m=[0, 1] a=[15689, 7845] SQNR(-3 dB re a1/2)=86.7 dB smax=[31723, 26612] max stable ~0.95 a1
+N=2 Hinf=2.0 m=[0, 1] a=[15689, 10716] SQNR(-3 dB re a1/2)=85.4 dB smax=[31724, 26524] max stable ~0.95 a1
+N=3 Hinf=1.5 m=[0, 2, 1] a=[10173, 11190, 15582] SQNR(-3 dB re a1/2)=99.2 dB smax=[31460, 30432, 30787] max stable ~0.95 a1
+N=3 Hinf=1.7 m=[0, 2, 1] a=[11094, 8949, 9976] SQNR(-3 dB re a1/2)=101.5 dB smax=[32123, 24788, 23226] max stable ~0.95 a1
+N=4 Hinf=1.5 m=[0, 2, 2, 1] a=[5312, 9817, 10465, 14719] SQNR(-3 dB re a1/2)=94.8 dB smax=[22796, 32590, 29584, 29477] max stable ~0.95 a1
+N=4 Hinf=1.4 m=[0, 3, 2, 1] a=[6597, 7523, 9624, 15924] SQNR(-3 dB re a1/2)=96.4 dB smax=[31981, 26916, 27586, 29565] max stable ~0.95 a1

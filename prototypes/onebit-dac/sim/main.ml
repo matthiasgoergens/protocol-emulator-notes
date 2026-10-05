@@ -73,11 +73,11 @@ let test_words ~n ~amp ~seed =
 module SysM = Dac.System (struct include Model type t = Model.t end)
 
 (* system run on the model: per-step words and pin bits, for both channels *)
-let system_run ?(log_inputs = false) ?pause ~order ~clocks ~amp () =
+let system_run ?(log_inputs = false) ?pause ?(sample_clocks = Dac.sample_clocks) ~order ~clocks ~amp () =
   let d = Dac.design_of order in
   let ops = Dac.run_ops d in
-  let l, r = test_words ~n:(clocks / Dac.sample_clocks + 4) ~amp ~seed:3 in
-  let sys = SysM.create ~log_inputs ?pause ~ops_l:ops ~ops_r:ops ~bytes:(Dac.frame_bytes l r) () in
+  let l, r = test_words ~n:(clocks / sample_clocks + 4) ~amp ~seed:3 in
+  let sys = SysM.create ~log_inputs ?pause ~sample_clocks ~ops_l:ops ~ops_r:ops ~bytes:(Dac.frame_bytes l r) () in
   let steps = [| ref []; ref [] |] in
   for _ = 1 to clocks do
     let st = SysM.cycle sys in
@@ -128,17 +128,20 @@ let rtl_lockstep order clocks amp =
        inputs
    with Exit -> ());
   match !bad with
-  | None -> pr "%s: %d clocks (setup and %d modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled %d times\n" order !n !ticks !fchanges
+  | None ->
+    let c k = Option.value ~default:0 (Hashtbl.find_opt m.Model.cov k) in
+    pr "%s: %d clocks (setup and %d modulator steps on the left), every state bit compared each clock: 0 mismatches; left pin toggled %d times; model events: saturated %d, lane_loop %d, repeat_tick %d\n" order !n !ticks !fchanges (c "saturated") (c "lane_loop") (c "repeat_tick")
   | Some (c, d) -> pr "%s: MISMATCH at clock %d:\n  %s\n" order c (String.concat "\n  " d)
 
 (* pump timing and underruns: commit clocks modulo the sample period, steps per sample *)
-let pump_check clocks =
+let pump_check sample_clocks clocks =
   let pause c = c >= 400_000 && c < 520_000 in
-  let sys, _, steps = system_run ~pause ~order:"o3" ~clocks ~amp:8000. () in
+  pr "sample period %d clocks (%d steps)\n" sample_clocks (sample_clocks / Dac.period);
+  let sys, _, steps = system_run ~pause ~sample_clocks ~order:"o3" ~clocks ~amp:8000. () in
   let commits = List.rev sys.SysM.commits in
   let phases = Hashtbl.create 8 in
-  List.iter (fun (c, sg, _) -> Hashtbl.replace phases (sg, c mod Dac.sample_clocks) (1 + Option.value ~default:0 (Hashtbl.find_opt phases (sg, c mod Dac.sample_clocks)))) commits;
-  pr "commits: %d; (segment, clock mod %d) -> count:\n" (List.length commits) Dac.sample_clocks;
+  List.iter (fun (c, sg, _) -> Hashtbl.replace phases (sg, c mod sample_clocks) (1 + Option.value ~default:0 (Hashtbl.find_opt phases (sg, c mod sample_clocks)))) commits;
+  pr "commits: %d; (segment, clock mod %d) -> count:\n" (List.length commits) sample_clocks;
   Hashtbl.iter (fun (sg, ph) n -> pr "  seg %d phase %4d: %d\n" sg ph n) phases;
   let ur = List.rev sys.SysM.underruns in
   pr "underrun reports: %d (host paused clocks 400000-519999)\n" (List.length ur);
@@ -165,11 +168,12 @@ let () =
   match Array.to_list Sys.argv with
   | [ _; "check-fast"; o; c; a ] -> check_fast o (int_of_string c) (float_of_string a)
   | [ _; "rtl-lockstep"; o; c; a ] -> rtl_lockstep o (int_of_string c) (float_of_string a)
-  | [ _; "pump-check"; c ] -> pump_check (int_of_string c)
+  | [ _; "pump-check"; p; c ] -> pump_check (int_of_string p) (int_of_string c)
   | [ _; "render"; o; i; p; s; sh ] -> render o i p (int_of_string s) (int_of_string sh)
   | [ _; "lockstep"; n; c ] -> lockstep (int_of_string n) (int_of_string c)
   | [ _; "controls"; n; c ] -> controls false (int_of_string n) (int_of_string c)
   | [ _; "controls-new"; n; c ] -> controls true (int_of_string n) (int_of_string c)
   | [ _; "coverage"; n; c ] -> coverage (int_of_string n) (int_of_string c)
+  | [ _; "verilog-pe" ] -> Hardcaml.Rtl.print Verilog (Upe_rtl.pe_circuit ())
   | [ _; "verilog-array" ] -> Hardcaml.Rtl.print Verilog (Upe_rtl.array_circuit ~state_ports:false ())
   | _ -> prerr_endline "usage: main.exe lockstep N C | controls N C | controls-new N C | coverage N C | verilog-array"

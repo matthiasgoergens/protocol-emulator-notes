@@ -65,7 +65,7 @@ let fast_step f w =
   out
 
 (* ---- the pump thread (ISA v2), thread 0 ----
-   Every 340 slots (1360 clocks): for each of the 4 bytes of a frame (L lo, L hi, R lo, R hi):
+   Every 340 slots (1360 clocks; 85 slots for mode B's 340 clocks): for each of the 4 bytes of a frame (L lo, L hi, R lo, R hi):
    at dl = 0, WAITC host_in_valid is a one-slot branch; IN; SEND to port 4 (left) or 5
    (right). The port glue sends a port's first byte as the feed's low byte and its second as
    the high byte, which commits the word (E2). If a byte is missing (underrun), U_k reports it
@@ -76,7 +76,8 @@ module A = Isa2
 (* threads 1-3 are parked here (HALT = JMP self); the DAC needs only thread 0 *)
 let idle_pc = 200
 
-let pump_programme () =
+let pump_programme ?(sample_clocks = sample_clocks) () =
+  let slots = sample_clocks / 4 in
   (* addresses: B_k = 1 + 3k; LDD at 13; JMP at 14; U_k at 15 + 4k *)
   let b k = 1 + (3 * k) and u k = 15 + (4 * k) in
   let body =
@@ -85,9 +86,9 @@ let pump_programme () =
         (List.init 4 (fun k ->
              let ch = if k < 2 then 4 else 5 in
              [ A.waitc ~cond:A.c_host ~fail:(u k); A.in_; A.send ~ch ~fail:(b k + 3) ]))
-    @ [ A.ldd 326; A.jmp 0 ]
+    @ [ A.ldd (slots - 14); A.jmp 0 ]
   in
-  let under = List.concat (List.init 4 (fun k -> [ A.outi ~tag:1 k; A.ldd 335; A.waitd; A.jmp (b k) ])) in
+  let under = List.concat (List.init 4 (fun k -> [ A.outi ~tag:1 k; A.ldd (slots - 5); A.waitd; A.jmp (b k) ])) in
   let prog = body @ under in
   assert (List.length body = 15);
   let mem = Array.make A.store_len (A.jmp 0) in
@@ -157,10 +158,10 @@ module System (S : SIM) = struct
     push { idle with mbx_wr = true; mbx_seg = 3; mbx_sel = 3; mbx_byte = period };
     List.rev !l
 
-  let create ?(log_inputs = false) ?(depth = 16) ?(pause = fun _ -> false) ~ops_l ~ops_r ~bytes () =
+  let create ?(log_inputs = false) ?(depth = 16) ?(pause = fun _ -> false) ?(sample_clocks = sample_clocks) ~ops_l ~ops_r ~bytes () =
     let arr = S.create () in
     let t =
-      { arr; seq = A.init ~boot:[| (0, 0); (0, idle_pc); (0, idle_pc); (0, idle_pc) |] (); mem = pump_programme ();
+      { arr; seq = A.init ~boot:[| (0, 0); (0, idle_pc); (0, idle_pc); (0, idle_pc) |] (); mem = pump_programme ~sample_clocks ();
         host = { fifo = Queue.create (); depth; next = 0; bytes; link_busy = 0; pause };
         clk = 0; port_hi = [| false; false |]; pend = idle; inputs_log = []; log_inputs;
         commits = []; underruns = [] }
