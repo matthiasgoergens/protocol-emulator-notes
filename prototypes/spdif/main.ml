@@ -13,23 +13,36 @@ let pre_of_oracle = function Oracle.Z -> Iec60958.B | X -> M | Y -> W
 
 (* ---- comparing a decoded stream with what was sent ---- *)
 
-type cmp = { offset : int; compared : int; mismatched : int; first_bad : int }
+type cmp = { offset : int; compared : int; mismatched : int; first_bad : int; resyncs : int; skipped : int }
 
-(* [got] is a list of (preamble, slots); find where it starts in [sent], then compare *)
+(* [got] is a list of (preamble, slots); find where it starts in [sent], then compare item by
+   item. After a mismatch, look for the next four items a little further on or back in [sent]
+   (a receiver that dropped or invented subframes and then resynchronised); [skipped] counts the
+   sent subframes jumped over that way. *)
 let compare_stream (sent : Iec60958.subframe array) (got : (Iec60958.preamble * int) array) =
   let n = Array.length sent and m = Array.length got in
-  let eq j k = let (p, s) = got.(k) in sent.(j).pre = p && sent.(j).slots land lnot 15 = s land lnot 15 in
-  let ok j = let r = ref true in for k = 0 to min 3 (m - 1) do if j + k >= n || not (eq (j + k) k) then r := false done; !r in
+  let eq j k = j >= 0 && j < n && k < m && (let (p, s) = got.(k) in sent.(j).pre = p && sent.(j).slots land lnot 15 = s land lnot 15) in
+  let run4 j k = let r = ref true in for d = 0 to min 3 (m - 1 - k) do if not (eq (j + d) (k + d)) then r := false done; !r in
   let off = ref (-1) in
-  (try for j = 0 to n - 1 do if !off < 0 && ok j then (off := j; raise Exit) done with Exit -> ());
-  if m = 0 || !off < 0 then { offset = -1; compared = 0; mismatched = m; first_bad = 0 }
+  (try for j = 0 to n - 1 do if !off < 0 && run4 j 0 then (off := j; raise Exit) done with Exit -> ());
+  if m = 0 || !off < 0 then { offset = -1; compared = 0; mismatched = m; first_bad = 0; resyncs = 0; skipped = 0 }
   else begin
-    let bad = ref 0 and first = ref (-1) and c = ref 0 in
+    let bad = ref 0 and first = ref (-1) and c = ref 0 and j = ref !off and rs = ref 0 and sk = ref 0 in
     for k = 0 to m - 1 do
-      let j = !off + k in
-      if j < n then begin incr c; if not (eq j k) then (incr bad; if !first < 0 then first := k) end
+      if !j < n then begin
+        incr c;
+        if eq !j k then incr j
+        else begin
+          incr bad; if !first < 0 then first := k;
+          (* the next items: same place, or up to 4 sent subframes further, or 2 back *)
+          let cand = List.find_opt (fun d -> run4 (!j + d) (k + 1)) [ 1; 2; 3; 4; 5; 0; -1 ] in
+          match cand with
+          | Some d -> if d <> 1 then (incr rs; sk := !sk + (d - 1)); j := !j + d
+          | None -> incr j
+        end
+      end
     done;
-    { offset = !off; compared = !c; mismatched = !bad; first_bad = !first }
+    { offset = !off; compared = !c; mismatched = !bad; first_bad = !first; resyncs = !rs; skipped = !sk }
   end
 
 let rx_got (d : Rx.decoded) =
@@ -55,17 +68,19 @@ let line_of_subframes (c : src_cfg) ?(mangle = fun (l : int array) -> l) sfs =
 
 let clocks_for ~fclk (l : Line.t) = int_of_float ((l.edges.(Array.length l.edges - 1) +. 3000.) *. fclk *. 1e-9)
 
-type verdict = { rx_cmp : cmp; rx_err : int; rx_par : int; rx_cs_ok : int; rx_cs_bad : int; or_cmp : cmp; or_err : int; or_par : int; or_cs_ok : int; or_cs_bad : int; rr : Rx.run_result }
+type verdict = { rx_cmp : cmp; rx_err : int; rx_startup : int; rx_detail : string; rx_par : int; rx_cs_ok : int; rx_cs_bad : int; or_cmp : cmp; or_err : int; or_par : int; or_cs_ok : int; or_cs_bad : int; rr : Rx.run_result }
 
 let judge ?(impl = Rx.Rtl) ?scfg ~fclk ~phase ~rate (sfs : Iec60958.subframe array) (line : Line.t) =
   let samples = Line.sample ~fclk ~phase ~clocks:(clocks_for ~fclk line) line in
   let rr = Rx.run ~impl ?scfg ~samples () in
-  let d = Rx.decode rr in
+  let end_clock = int_of_float ((line.edges.(Array.length line.edges - 1) -. phase) *. fclk *. 1e-9) in
+  let d = Rx.decode ~end_clock rr in
   let csl, csr = cs_pair rate in
   let rx_cs_ok = List.length (List.filter (fun (_, l, r) -> l = csl && r = csr) d.cs_blocks) in
   let o = Oracle.decode line.edges in
   let or_cs_ok = List.length (List.filter (fun (l, r) -> l = csl && r = csr) o.blocks) in
-  { rx_cmp = compare_stream sfs (rx_got d); rx_err = d.count_errors + d.prefix_errors + d.short_records + rr.overflows + rr.sampler_overruns;
+  { rx_cmp = compare_stream sfs (rx_got d); rx_err = d.count_errors + d.prefix_errors + d.short_records + rr.overflows + rr.sampler_overruns; rx_startup = d.startup_errors;
+    rx_detail = sprintf "count %d prefix %d short %d overflow %d overrun %d; after the last edge %d" d.count_errors d.prefix_errors d.short_records rr.overflows rr.sampler_overruns d.trailing_errors;
     rx_par = List.length (List.filter (fun (s : Rx.rx_subframe) -> s.parity_bad) d.subframes);
     rx_cs_ok; rx_cs_bad = List.length d.cs_blocks - rx_cs_ok;
     or_cmp = compare_stream sfs (oracle_got o); or_err = o.violations + o.bad_preambles + o.frame_errors;
@@ -77,9 +92,9 @@ let clean v ~expect =
   && v.or_cmp.mismatched = 0 && v.or_cmp.compared >= expect && v.or_err = 0 && v.or_par = 0 && v.or_cs_ok >= 1 && v.or_cs_bad = 0
 
 let show v =
-  sprintf "chip: %d/%d ok (offset %d), errors %d, parity %d, cs blocks %d ok %d bad | oracle: %d/%d ok, errors %d, parity %d, cs %d ok %d bad"
-    (v.rx_cmp.compared - v.rx_cmp.mismatched) v.rx_cmp.compared v.rx_cmp.offset v.rx_err v.rx_par v.rx_cs_ok v.rx_cs_bad
-    (v.or_cmp.compared - v.or_cmp.mismatched) v.or_cmp.compared v.or_err v.or_par v.or_cs_ok v.or_cs_bad
+  sprintf "chip: %d/%d equal (offset %d, %d resync, %d sent skipped), errors %d [%s] (+%d while locking), parity %d, cs blocks %d ok %d bad | oracle: %d/%d equal (%d resync, %d skipped), errors %d, parity %d, cs %d ok %d bad"
+    (v.rx_cmp.compared - v.rx_cmp.mismatched) v.rx_cmp.compared v.rx_cmp.offset v.rx_cmp.resyncs v.rx_cmp.skipped v.rx_err v.rx_detail v.rx_startup v.rx_par v.rx_cs_ok v.rx_cs_bad
+    (v.or_cmp.compared - v.or_cmp.mismatched) v.or_cmp.compared v.or_cmp.resyncs v.or_cmp.skipped v.or_err v.or_par v.or_cs_ok v.or_cs_bad
 
 (* ---- subcommands ---- *)
 
@@ -184,17 +199,17 @@ let controls () =
   let rate = Iec60958.R44 and fclk = 60e6 in
   let base = { rate; ppm = 500.; t0 = 300.; jit = { Line.rms_ns = 1.0; sin_pp_ns = 10.; sin_hz = 20000.; sin_phase = 0. }; frames = 420; frame0 = 150; seed = 99 } in
   let sfs = random_stream ~seed:base.seed ~rate ~frames:base.frames ~frame0:base.frame0 in
-  let run ?scfg name ?mangle sfs_sent ~caught =
+  let run ?(words = ("CAUGHT", "missed")) ?(oracle_na = false) ?scfg name ?mangle sfs_sent ~caught =
     let v = judge ?scfg ~fclk ~phase:3. ~rate sfs (line_of_subframes base ?mangle sfs_sent) in
     let c = caught v in
-    pr "%-44s chip %s, oracle %s   [%s]" name (if fst c then "CAUGHT" else "missed") (if snd c then "CAUGHT" else "missed") (show v);
+    pr "%-50s chip %s, oracle %s   [%s]" name (if fst c then fst words else snd words) (if oracle_na then "not involved" else if snd c then fst words else snd words) (show v);
     (v, c) in
-  let v0, _ = run "clean stream (must pass)" sfs ~caught:(fun v -> (not (clean v ~expect:836), not (clean v ~expect:836))) in
+  let v0, _ = run ~words:("clean", "NOT CLEAN") "clean stream (must pass)" sfs ~caught:(fun v -> (clean v ~expect:836, clean v ~expect:836)) in
   check "control baseline clean" (clean v0 ~expect:836);
   let mod_sf i f = Array.mapi (fun j s -> if j = i then f s else s) sfs in
   (* index of a subframe of a given kind, from 200 on *)
-  let find p = let r = ref 0 in (try Array.iteri (fun j (s : Iec60958.subframe) -> if j >= 200 && s.pre = p then (r := j; raise Exit)) sfs with Exit -> ()); !r in
-  let iM = find M and iB = find B in
+  let find ?(from = 200) p = let r = ref 0 in (try Array.iteri (fun j (s : Iec60958.subframe) -> if j >= from && s.pre = p then (r := j; raise Exit)) sfs with Exit -> ()); !r in
+  let iM = find M and iB = find B and iB0 = find ~from:0 B in
   let need name (_, (a, b)) = check name (a && b) in
   need "wrong preamble" (run "wrong preamble (an M sent as W)" (mod_sf iM (fun s -> { s with pre = W })) ~caught:(fun v ->
       (v.rx_cmp.mismatched > 0 || v.rx_err > 0, v.or_cmp.mismatched > 0 || v.or_err > 0)));
@@ -203,7 +218,7 @@ let controls () =
   need "parity" (run "parity bit flipped" (mod_sf 301 (fun s -> { s with slots = s.slots lxor (1 lsl 31) })) ~caught:(fun v ->
       (v.rx_par > 0, v.or_par > 0)));
   (* a channel-status bit error with the parity kept right: only the channel status shows it *)
-  let csf = (iB + 2 * 37) in
+  let csf = (iB0 + 2 * 37) in   (* in the one complete block of the capture *)
   need "channel status" (run "channel-status bit flipped (frame 37, parity kept)" (mod_sf csf (fun s -> { s with slots = s.slots lxor (1 lsl 30) lxor (1 lsl 31) })) ~caught:(fun v ->
       (v.rx_cs_bad > 0 && v.rx_par = 0, v.or_cs_bad > 0 && v.or_par = 0)));
   (* a biphase violation: no transition at the boundary between slots 5 and 6 (two zero aux bits) of subframe 250 *)
@@ -215,21 +230,21 @@ let controls () =
   need "dropped half-bit" (run "dropped half-bit (one UI removed)" ~mangle:drop sfs ~caught:(fun v ->
       (v.rx_err > 0 || v.rx_cmp.mismatched > 0, v.or_err > 0 || v.or_cmp.mismatched > 0)));
   (* planted faults in the chip itself *)
-  need "rx holdoff" (run ~scfg:(Rx.sampler_cfg ~holdoff:35 ()) "chip fault: sampler holdoff 35 (below 1 UI)" sfs ~caught:(fun v ->
+  need "rx holdoff" (run ~oracle_na:true ~scfg:(Rx.sampler_cfg ~holdoff:35 ()) "chip fault: sampler holdoff 35 (below 1 UI)" sfs ~caught:(fun v ->
       (not (clean v ~expect:836), true)));
-  need "rx timeout" (run ~scfg:(Rx.sampler_cfg ~timeout:130 ()) "chip fault: sampler timeout 130 (above 3 UI)" sfs ~caught:(fun v ->
+  need "rx timeout" (run ~oracle_na:true ~scfg:(Rx.sampler_cfg ~timeout:130 ()) "chip fault: sampler timeout 130 (above 3 UI)" sfs ~caught:(fun v ->
       (not (clean v ~expect:836), true)));
   (* transmitter: one wrong entry in the parity table *)
   let r, sfs_t, _, diff, _ = tx_run ~bank_fault:(fun b -> b.(512 + 0x5a) <- 1 - b.(512 + 0x5a)) ~rate ~fclk ~frames:450 ~seed:12 () in
   let o = Oracle.decode (Line.of_bounds ~fclk r.bounds).edges in
   let opar = List.length (List.filter (fun (s : Oracle.sub) -> not s.parity_ok) o.subs) in
   let affected = Array.fold_left (fun a (s : Iec60958.subframe) -> a + (if (Iec60958.audio24 s lsr 8) land 0xff = 0x5a || (Iec60958.audio24 s lsr 16) land 0xff = 0x5a then 1 else 0)) 0 sfs_t in
-  pr "%-44s reference compare: %d UIs differ; oracle parity errors %d (subframes with a 0x5a sample byte: %d)" "chip fault: TX parity table entry 0x5a wrong" diff opar affected;
+  pr "%-50s reference compare: %d UIs differ; oracle parity errors %d (subframes with a 0x5a sample byte: %d)" "chip fault: TX parity table entry 0x5a wrong" diff opar affected;
   check "tx parity table control" (diff > 0 && opar > 0 && opar = affected);
   let r2, _, _, diff2, _ = tx_run ~bank_fault:(fun b -> b.(256 + 0x33) <- b.(256 + 0x33) lxor 0x40) ~rate ~fclk ~frames:450 ~seed:12 () in
   let o2 = Oracle.decode (Line.of_bounds ~fclk r2.bounds).edges in
   let oc2 = compare_stream sfs_t (oracle_got o2) in
-  pr "%-44s reference compare: %d UIs differ; oracle: %d of %d subframes differ, %d parity errors" "chip fault: TX hi_expand entry 0x33 wrong" diff2 oc2.mismatched oc2.compared
+  pr "%-50s reference compare: %d UIs differ; oracle: %d of %d subframes differ, %d parity errors" "chip fault: TX hi_expand entry 0x33 wrong" diff2 oc2.mismatched oc2.compared
     (List.length (List.filter (fun (s : Oracle.sub) -> not s.parity_ok) o2.subs));
   check "tx expand control" (diff2 > 0 && oc2.mismatched > 0)
 

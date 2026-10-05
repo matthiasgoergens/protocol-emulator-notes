@@ -215,15 +215,19 @@ type rx_subframe = { kind : kind; slots : int; parity_bad : bool; at : int }
 type decoded = {
   subframes : rx_subframe list;
   count_errors : int; prefix_errors : int; short_records : int;
+  startup_errors : int;   (* errors before the first complete subframe: the receiver locking on mid-stream *)
+  trailing_errors : int;  (* errors after [end_clock], the last edge of the capture: a stream cut mid-subframe *)
   cs_blocks : (int * int array * int array) list;   (* (clock, left 192 bits, right 192 bits), complete blocks only *)
 }
 
-let decode (r : run_result) =
+let decode ?(end_clock = max_int) (r : run_result) =
+  let locked = ref false and su = ref 0 and tr = ref 0 in
   let bytes = ref [] and sfs = ref [] and ce = ref 0 and pe = ref 0 and short = ref 0 and blocks = ref [] in
   let seen_block = ref false in
   Array.iter (fun ev ->
       if ev.tag = tag_data then bytes := ev.byte :: !bytes
       else if ev.tag = tag_status then begin
+        locked := true;
         (match !bytes with
          | [ h2; l2; h1; l1 ] ->
            let kind = match ev.byte land 3 with 1 -> KB | 2 -> KM | _ -> KW in
@@ -234,8 +238,8 @@ let decode (r : run_result) =
            sfs := { kind; slots = d lsl 4; parity_bad = ev.byte land 4 <> 0; at = ev.clock } :: !sfs
          | _ -> incr short);
         bytes := []
-      end else if ev.tag = tag_count_err then (incr ce; bytes := [])
-      else if ev.tag = tag_prefix_err then (incr pe; bytes := [])
+      end else if ev.tag = tag_count_err then ((if ev.clock >= end_clock then incr tr else if !locked then incr ce else incr su); bytes := [])
+      else if ev.tag = tag_prefix_err then ((if ev.clock >= end_clock then incr tr else if !locked then incr pe else incr su); bytes := [])
       else if ev.tag = tag_block then begin
         (match ev.snapshot with
          | Some s when !seen_block ->
@@ -243,4 +247,4 @@ let decode (r : run_result) =
          | _ -> ());
         seen_block := true
       end) r.events;
-  { subframes = List.rev !sfs; count_errors = !ce; prefix_errors = !pe; short_records = !short; cs_blocks = List.rev !blocks }
+  { subframes = List.rev !sfs; count_errors = !ce; prefix_errors = !pe; short_records = !short; startup_errors = !su; trailing_errors = !tr; cs_blocks = List.rev !blocks }

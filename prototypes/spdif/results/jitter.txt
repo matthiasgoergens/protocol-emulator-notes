@@ -1,0 +1,30 @@
+# command: main.exe jitter
+# commit: 91673214596eebe63da99382729b2face2ecc38b
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T18:07:36+08:00
+transmit jitter: TIE of every UI boundary of the pin NCO, against a least-squares line; 'peak HP' after AES3's 700 Hz intrinsic-jitter filter
+limits: AES3-1992 6.2.5.1 intrinsic jitter < 0.025 UI peak (filtered); IEC 60958-3 consumer intrinsic jitter 0.05 UI (Cirrus/Wolfson white paper's summary, unverified against the standard)
+rate      clock      grid     skew           p-p ns     p-p UI   peak HP ns    peak UI     rms ns
+44.1 kHz  60.000     quarter  none            4.138     0.0234        2.071     0.0117      1.202
+44.1 kHz  60.000     quarter  +-0.5 ns        5.110     0.0288        2.601     0.0147      1.258
+44.1 kHz  60.000     quarter  +-1 ns          6.110     0.0345        3.166     0.0179      1.411
+44.1 kHz  60.000     half     none            8.277     0.0467        4.140     0.0234      2.405
+44.1 kHz  60.000     clock    none           16.610     0.0938        8.302     0.0469      4.809
+48 kHz    60.000     quarter  none            3.906     0.0240        1.956     0.0120      1.200
+48 kHz    60.000     quarter  +-0.5 ns        4.906     0.0301        2.512     0.0154      1.256
+48 kHz    60.000     quarter  +-1 ns          5.906     0.0363        3.074     0.0189      1.409
+48 kHz    60.000     half     none            8.073     0.0496        4.038     0.0248      2.404
+48 kHz    60.000     clock    none           16.406     0.1008        8.201     0.0504      4.809
+44.1 kHz  60.852     quarter  none            4.108     0.0232        2.054     0.0116      1.186
+44.1 kHz  60.852     quarter  +-0.5 ns        5.108     0.0288        2.615     0.0148      1.242
+44.1 kHz  60.852     quarter  +-1 ns          6.108     0.0345        3.177     0.0179      1.397
+44.1 kHz  60.852     half     none            8.217     0.0464        4.106     0.0232      2.371
+44.1 kHz  60.852     clock    none           16.433     0.0928        8.216     0.0464      4.742
+48 kHz    60.852     quarter  none            4.108     0.0252        2.054     0.0126      1.186
+48 kHz    60.852     quarter  +-0.5 ns        5.108     0.0314        2.618     0.0161      1.242
+48 kHz    60.852     quarter  +-1 ns          6.108     0.0375        3.182     0.0195      1.397
+48 kHz    60.852     half     none            8.216     0.0505        4.113     0.0253      2.371
+48 kHz    60.852     clock    none           16.434     0.1010        8.249     0.0507      4.742
+check: the pacer model's 28189 boundaries lie on the analytic quarter-grid placement to within 0.000 ns (the model truncates inc/4)
+ALL CHECKS PASS
+exit 0
