@@ -1,31 +1,70 @@
-(* Netlist extraction from a routed IHP SG13G2 GDS.
+(* Netlist extraction from a routed IHP SG13G2 or SG13CMOS5L GDS.
 
    The algorithm is the one from Matthias's solution to Jane Street's August
    2026 ASIC puzzle (hardware-2026-08/oxcaml/extract.ml, after work/extract.py):
    union-find over the conductor shapes of the flattened layout, where two
    shapes are joined when they are on the same metal and touch, or when one is
-   a via and the other is one of the two metals the via joins.  Standard-cell
-   pins are found from the cells' own pin labels, transformed by the instance
-   placement, and the top-level labels become the ports.  What changed for
-   SG13G2 is the layer map and the label conventions, below.
+   a via and the other is one of the two metals the via joins and the two
+   overlap.  Standard-cell pins are found from the cells' own pin labels,
+   transformed by the instance placement, and the top-level labels become the
+   ports.  What changed for IHP is the layer map and the label conventions,
+   below.
 
-   Layer numbers are from the PDK's KLayout layer map
-   (libs.tech/klayout/tech/sg13g2.map): drawing datatype 0, pin datatype 2,
-   pin-name text datatype 25, fill datatype 22 (fill is never a conductor
-   here: it is not connected to anything by design). *)
+   Layer numbers are from the PDKs' KLayout layer maps
+   (libs.tech/klayout/tech/sg13g2.map, sg13cmos5l.map): drawing datatype 0,
+   pin datatype 2, pin-name text datatype 25, fill datatype 22 (fill is never
+   a conductor here: it is not connected to anything by design). *)
 
 type metal = { mname : string; mlayer : int }
 
-let metals =
-  [| { mname = "Metal1"; mlayer = 8 }; { mname = "Metal2"; mlayer = 10 };
-     { mname = "Metal3"; mlayer = 30 }; { mname = "Metal4"; mlayer = 50 };
-     { mname = "Metal5"; mlayer = 67 }; { mname = "TopMetal1"; mlayer = 126 };
-     { mname = "TopMetal2"; mlayer = 134 } |]
+(* A technology: the conductor stack, the via table (via layer, its name, and
+   the indices into [metals] of the two metals it joins), and the standard
+   cells' name prefix. *)
+type tech = {
+  tname : string;
+  metals : metal array;
+  vias : (int * string * int * int) list;
+  cell_prefix : string;
+  ignore_prefixes : string list;  (* cells with no signal pins *)
+}
 
-(* via layer, its name, and the indices into [metals] of the two metals it joins *)
-let vias =
-  [ (19, "Via1", 0, 1); (29, "Via2", 1, 2); (49, "Via3", 2, 3); (66, "Via4", 3, 4);
-    (125, "TopVia1", 4, 5); (133, "TopVia2", 5, 6) ]
+(* SG13G2: libs.tech/klayout/tech/sg13g2.map, seven metals. *)
+let sg13g2 = {
+  tname = "sg13g2";
+  metals =
+    [| { mname = "Metal1"; mlayer = 8 }; { mname = "Metal2"; mlayer = 10 };
+       { mname = "Metal3"; mlayer = 30 }; { mname = "Metal4"; mlayer = 50 };
+       { mname = "Metal5"; mlayer = 67 }; { mname = "TopMetal1"; mlayer = 126 };
+       { mname = "TopMetal2"; mlayer = 134 } |];
+  vias =
+    [ (19, "Via1", 0, 1); (29, "Via2", 1, 2); (49, "Via3", 2, 3); (66, "Via4", 3, 4);
+      (125, "TopVia1", 4, 5); (133, "TopVia2", 5, 6) ];
+  cell_prefix = "sg13g2_";
+  ignore_prefixes = [ "sg13g2_fill_"; "sg13g2_decap_" ];
+}
+
+(* SG13CMOS5L, the variant the Tiny Tapeout IHP shuttle uses:
+   libs.tech/klayout/tech/sg13cmos5l.map ("M1-M4-TM1 stack"; "Via4, Metal5,
+   TopVia2, TopMetal2 not available").  The same layer numbers as SG13G2,
+   with one trap: TopVia1 (125) joins Metal4 to TopMetal1 here, not Metal5,
+   so the SG13G2 table would cut every TopMetal1 strap off the rest of its
+   net.  The stack, the via table and the supply names agree with
+   elementalcollision/retrace (tools/retrace/tech.py, IHP_SG13CMOS5L, and
+   docs/TEMPO_LVS.md section 2, Apache-2.0); the table here was written from
+   the map, not copied.  The antenna diode sg13cmos5l_antennanp is kept as an
+   instance: its pin A is a load on a signal net (retrace, same section). *)
+let sg13cmos5l = {
+  tname = "sg13cmos5l";
+  metals =
+    [| { mname = "Metal1"; mlayer = 8 }; { mname = "Metal2"; mlayer = 10 };
+       { mname = "Metal3"; mlayer = 30 }; { mname = "Metal4"; mlayer = 50 };
+       { mname = "TopMetal1"; mlayer = 126 } |];
+  vias = [ (19, "Via1", 0, 1); (29, "Via2", 1, 2); (49, "Via3", 2, 3); (125, "TopVia1", 3, 4) ];
+  cell_prefix = "sg13cmos5l_";
+  ignore_prefixes = [ "sg13cmos5l_fill_"; "sg13cmos5l_decap_" ];
+}
+
+let techs = [ sg13g2; sg13cmos5l ]
 
 (* Cont (layer 6) joins Metal1 to Activ and GatPoly, i.e. into the
    transistors.  It is deliberately not followed: through diffusion it would
@@ -39,19 +78,15 @@ let metal_datatypes = [ 0; 2 ]
 let via_datatype = 0
 let text_datatype = 25
 
-let metal_index layer =
+let metal_index tech layer =
   let r = ref None in
-  Array.iteri (fun i m -> if m.mlayer = layer then r := Some i) metals;
+  Array.iteri (fun i m -> if m.mlayer = layer then r := Some i) tech.metals;
   !r
 
-let via_metals layer =
-  List.find_map (fun (l, _, lo, hi) -> if l = layer then Some (lo, hi) else None) vias
+let via_metals tech layer =
+  List.find_map (fun (l, _, lo, hi) -> if l = layer then Some (lo, hi) else None) tech.vias
 
-let cell_prefix = "sg13g2_"
-
-(* cells with no signal pins, or (antenna diode) with a pin that is only a load *)
-let ignore_prefixes = [ "sg13g2_fill_"; "sg13g2_decap_" ]
-
+(* standard-cell supply pins, the same names in both variants *)
 let power_pins = [ "VDD"; "VSS" ]
 
 let starts_with s p =
@@ -254,6 +289,7 @@ let uf_union uf a b =
 
 type inst = {
   iname : string;            (* u<index>@x,y in um: GDS keeps no instance names *)
+  iref : Gds.ref_;           (* the placement: origin (dbu), reflection, angle *)
   icell : string;
   nets : (string * int option) list;  (* signal pin -> net; None = no metal under the label *)
 }
@@ -267,6 +303,7 @@ type netlist = {
   ncomponents : int;
   foreign_layers : (int * int * int) list;
   via_touches : int;
+  tech : tech;
   (* via-metal pairs that touch along an edge or at a corner without
      overlapping, and so are not joined *)
   (* layer, datatype, count of shapes drawn in the top cell itself (the
@@ -283,9 +320,28 @@ type geometry = {
 
 let grid_cell = 200000L (* 2 um in centi-dbu at 1 nm dbu *)
 
-let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
+(* The technology is read from the GDS: the cells it contains must all come
+   from one of the two libraries, or the extraction stops.  A layout with no
+   standard cells at all (the synthetic test cases) gets SG13CMOS5L's table
+   unless [tech] says otherwise; on the layers those cases use, Metal1 to
+   Metal3 and Via1, the two tables agree. *)
+let detect_tech (lib : Gds.lib) =
+  let uses t = List.exists (fun (c : Gds.cell) -> starts_with c.name t.cell_prefix) lib.cell_order in
+  match List.filter uses techs with
+  | [ t ] -> Some t
+  | [] -> None
+  | ts -> failwith ("GDS mixes standard cells of " ^ String.concat " and " (List.map (fun t -> t.tname) ts))
+
+let extract ?(log = fun _ -> ()) ?tech ~(gds_path : string) ~(top_name : string) ()
   : netlist * geometry =
   let lib = Gds.parse gds_path in
+  let tech =
+    match tech, detect_tech lib with
+    | Some t, Some d when t != d -> failwith (Printf.sprintf "asked for %s, GDS has %s cells" t.tname d.tname)
+    | Some t, _ | None, Some t -> t
+    | None, None -> sg13cmos5l in
+  log ("technology " ^ tech.tname);
+  let metal_index = metal_index tech and via_metals = via_metals tech in
   let top =
     match Hashtbl.find_opt lib.Gds.cells top_name with
     | Some c -> c
@@ -298,8 +354,8 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
   List.iter (fun (r0 : Gds.ref_) ->
     List.iter (fun (r : Gds.ref_) ->
       let cn = r.rcell in
-      if starts_with cn cell_prefix
-         && not (List.exists (starts_with cn) ignore_prefixes)
+      if starts_with cn tech.cell_prefix
+         && not (List.exists (starts_with cn) tech.ignore_prefixes)
          && Hashtbl.mem lib.cells cn then begin
         let cell = Hashtbl.find lib.cells cn in
         let xf = Gds.ref_xform r in
@@ -312,7 +368,7 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
             Hashtbl.replace pins l.ltext ((quant dbu p, l.llayer) :: old)
           end) cell.labels;
         let ox, oy = r.rorigin in
-        instances := (cn, (ox *. dbu, oy *. dbu), pins) :: !instances
+        instances := (cn, (ox *. dbu, oy *. dbu), pins, r) :: !instances
       end) (Gds.expand_array r0)) top.refs;
   let instances = Array.of_list (List.rev !instances) in
   (* conductor shapes *)
@@ -363,7 +419,7 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
       (cells_of_bbox s.bbox)) shapes;
   let uf = uf_create nshapes in
   let stamp = Array.make nshapes (-1) in
-  let via_touches = ref 0 in
+  let via_touches = ref 0 and touch_pairs = ref [] in
   for i = 0 to nshapes - 1 do
     let si = shapes.(i) in
     List.iter (fun key ->
@@ -379,12 +435,27 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
               | Metal _, Metal _ -> if poly_intersect si sj then uf_union uf i j
               | _ ->
                 if poly_overlap_positive si sj then uf_union uf i j
-                else if poly_intersect si sj then incr via_touches
+                else if poly_intersect si sj then begin
+                  incr via_touches;
+                  touch_pairs := (i, j) :: !touch_pairs
+                end
           end) js)
       (cells_of_bbox si.bbox)
   done;
   log (Printf.sprintf "%d connected components; %d via-metal pairs touch without overlapping (not joined)"
          uf.count !via_touches);
+  (* for each such pair: would joining it have merged two components? *)
+  let name_of = function
+    | Metal m -> tech.metals.(m).mname
+    | Via (lo, _) -> List.fold_left (fun acc (_, n, l, _) -> if l = lo then n else acc) "via" tech.vias in
+  List.iter (fun (i, j) ->
+    let (x0, y0, x1, y1) = shapes.(i).bbox and (u0, v0, u1, v1) = shapes.(j).bbox in
+    let um v = Int64.to_float v /. (dbu *. 1e5) *. dbu in
+    log (Printf.sprintf "  touch: %s (%.3f,%.3f)-(%.3f,%.3f) and %s (%.3f,%.3f)-(%.3f,%.3f): %s"
+           (name_of shapes.(i).kind) (um x0) (um y0) (um x1) (um y1)
+           (name_of shapes.(j).kind) (um u0) (um v0) (um u1) (um v1)
+           (if uf_find uf i = uf_find uf j then "same component anyway" else "different components")))
+    (List.rev !touch_pairs);
   let point_net (p : pt) layer =
     match metal_index layer with
     | None -> None
@@ -399,7 +470,7 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
   in
   let unresolved = ref [] in
   let inst_arr =
-    Array.mapi (fun idx (cn, (x, y), pins) ->
+    Array.mapi (fun idx (cn, (x, y), pins, iref) ->
       let iname = Printf.sprintf "u%d@%.2f,%.2f" idx x y in
       let nets =
         Hashtbl.fold (fun pin pts acc ->
@@ -408,7 +479,7 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
           (pin, found) :: acc) pins []
         |> List.sort compare
       in
-      { iname; icell = cn; nets })
+      { iname; iref; icell = cn; nets })
       instances
   in
   (* top-level ports: every name label on a metal; a port may carry several
@@ -446,7 +517,7 @@ let extract ?(log = fun _ -> ()) ~(gds_path : string) ~(top_name : string) ()
   let shape_net = Array.init nshapes (fun i -> Hashtbl.find_opt remap (uf_find uf i)) in
   ({ instances = inst_arr; ports; nnets = Hashtbl.length remap;
      unresolved = List.rev !unresolved; nshapes; ncomponents = uf.count; foreign_layers;
-     via_touches = !via_touches },
+     via_touches = !via_touches; tech },
    { shapes; shape_net; dbu_um = dbu })
 
 (* Plain-text netlist, one instance per line, for diffing between runs. *)

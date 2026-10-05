@@ -1,0 +1,61 @@
+baseline: 0 errors (extract 0.39 s)
+cut candidates (top-level Via1-3 and Metal2-3 elements on signal nets): 27220 (2630 boundaries, 12225 paths, 12365 via references)
+cut 1: layer 29 via VIA_Via2_YX at bytes 798100 (net n169)
+  cut    cut01.gds: nets +1, 1 errors (0.37 s)
+           undriven net n169, read by 1: u7@173.28,15.12/sg13cmos5l_buf_1.A
+cut 2: layer 10 path at bytes 1187760 (net n434)
+  cut    cut02.gds: nets +1, 1 errors (0.38 s)
+           undriven net n466, read by 1: u246@100.80,83.16/sg13cmos5l_nand2_1.B
+cut 3: layer 10 boundary at bytes 1320626 (net n1009)
+  cut    cut03.gds: nets +0, 0 errors (0.36 s)  NO EFFECT ON CONNECTIVITY
+cut 4: layer 10 boundary at bytes 1271282 (net n483)
+  cut    cut04.gds: nets +0, 0 errors (0.37 s)  NO EFFECT ON CONNECTIVITY
+cut 5: layer 30 path at bytes 1559252 (net n125)
+  cut    cut05.gds: nets +1, 1 errors (0.36 s)
+           undriven net n125, read by 1: port pin_oe[6]
+cut 6: layer 29 via VIA_Via2_YX at bytes 634442 (net n302)
+  cut    cut06.gds: nets +1, 1 errors (0.37 s)
+           undriven net n2082, read by 1: u1978@92.64,15.12/sg13cmos5l_mux4_1.S0
+cut 7: layer 10 boundary at bytes 1255922 (net n1718)
+  cut    cut07.gds: nets +0, 0 errors (0.36 s)  NO EFFECT ON CONNECTIVITY
+cut 8: layer 10 boundary at bytes 1350962 (net n506)
+  cut    cut08.gds: nets +0, 0 errors (0.37 s)  NO EFFECT ON CONNECTIVITY
+cut 9: layer 10 path at bytes 848880 (net n1611)
+  cut    cut09.gds: nets +1, 1 errors (0.37 s)
+           undriven net n2085, read by 1: u2008@99.84,120.96/sg13cmos5l_nand2_1.A
+cut 10: layer 10 path at bytes 980062 (net n1333)
+  cut    cut10.gds: nets +1, 3 errors (0.37 s)
+           undriven net n1364, read by 2: u1140@11.04,105.84/sg13cmos5l_dfrbpq_1.CLK, u1134@10.08,113.40/sg13cmos5l_dfrbpq_1.CLK
+           u1134@10.08,113.40: clock pin CLK: n1364 is not driven
+           u1140@11.04,105.84: clock pin CLK: n1364 is not driven
+short 1: Metal2 n236 to n228
+  short  short01.gds: nets -1, 1 errors (0.37 s)
+           net n228 has 2 drivers: u75@172.80,37.80/sg13cmos5l_mux2_1.X, u41@149.28,37.80/sg13cmos5l_dfrbpq_1.Q
+short 2: Metal2 n1226 to n1299
+  short  short02.gds: nets -1, 1 errors (0.36 s)
+           net n1226 has 2 drivers: u1424@97.44,151.20/sg13cmos5l_buf_1.X, u1083@75.84,120.96/sg13cmos5l_buf_1.X
+short 3: Metal2 n193 to n198
+  short  short03.gds: nets -1, 1 errors (0.37 s)
+           net n193 has 2 drivers: u183@127.68,22.68/sg13cmos5l_buf_1.X, u22@166.08,30.24/sg13cmos5l_dlygate4sd3_1.X
+short 4: Metal2 n241 to n562
+  short  short04.gds: nets -1, 1 errors (0.36 s)
+           net n241 has 2 drivers: u473@159.84,52.92/sg13cmos5l_dfrbpq_1.Q, u469@168.48,75.60/sg13cmos5l_nand2_1.Y
+short 5: Metal2 n550 to n331
+  short  short05.gds: nets -1, 1 errors (0.37 s)
+           net n331 has 2 drivers: u472@132.96,52.92/sg13cmos5l_dlygate4sd3_1.X, u126@112.32,45.36/sg13cmos5l_buf_1.X
+short 6: Metal2 n470 to n469
+  short  short06.gds: nets -1, 1 errors (0.37 s)
+           net n469 has 2 drivers: u260@100.32,90.72/sg13cmos5l_and2_1.X, u248@103.20,90.72/sg13cmos5l_a21oi_1.Y
+short 7: Metal2 n176 to n761
+  short  short07.gds: nets -1, 1 errors (0.37 s)
+           net n176 has 2 drivers: u567@96.48,45.36/sg13cmos5l_o21ai_1.Y, u9@149.76,22.68/sg13cmos5l_buf_1.X
+short 8: Metal2 n1624 to n1448
+  short  short08.gds: nets -1, 1 errors (0.36 s)
+           net n1448 has 2 drivers: u1614@115.68,136.08/sg13cmos5l_buf_1.X, u1319@84.96,158.76/sg13cmos5l_buf_1.X
+short 9: Metal2 n1284 to n1176
+  short  short09.gds: nets -1, 1 errors (0.37 s)
+           net n1176 has 2 drivers: u1558@141.60,113.40/sg13cmos5l_buf_1.X, u1307@83.04,158.76/sg13cmos5l_buf_1.X
+short 10: Metal2 n1510 to n1507
+  short  short10.gds: nets -1, 1 errors (0.38 s)
+           net n1507 has 2 drivers: u1271@41.76,189.00/sg13cmos5l_dlygate4sd3_1.X, u1269@43.68,189.00/sg13cmos5l_tiehi.L_HI
+controls: 16 of 16 effective planted faults caught structurally (4 had no effect)

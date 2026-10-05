@@ -5,13 +5,16 @@
 #      (exactly one driver per net, no floating input, every clock pin on the clock tree);
 #   3. plant cuts and shorts in copies of the GDS and require every effective one to be caught;
 #   4. if the block has a lockstep executable, run the extracted netlist against the RTL.
-# Usage: roundtrip.sh GDS TOP RTL.v OUTDIR [LOCKSTEP_EXE RUNS CYCLES]
+# Usage: [PDK=ihp-sg13cmos5l PDK_ROOT=...] roundtrip.sh GDS TOP RTL.v OUTDIR [LOCKSTEP_EXE RUNS CYCLES]
+# PDK defaults to ihp-sg13g2 under ~/.ciel; the extractor reads the variant from the GDS's cell names.
 set -o errexit -o nounset -o pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 GDS=$1 TOP=$2 RTL=$3 OUT=$4
-STD=${PDK_ROOT:-$HOME/.ciel/ihp-sg13g2}/ihp-sg13g2/libs.ref/sg13g2_stdcell
-MODELS=$STD/verilog/sg13g2_stdcell.v
-LIBERTY=$STD/lib/sg13g2_stdcell_typ_1p20V_25C.lib
+PDK=${PDK:-ihp-sg13g2}
+LIB=${PDK#ihp-}_stdcell
+STD=${PDK_ROOT:-$HOME/.ciel/ihp-sg13g2}/$PDK/libs.ref/$LIB
+MODELS=$STD/verilog/$LIB.v
+LIBERTY=$STD/lib/${LIB}_typ_1p20V_25C.lib
 BIN=$HERE/_build/default
 mkdir --parents "$OUT/controls"
 (cd "$HERE" && opam exec --switch=5.3.0 -- dune build)

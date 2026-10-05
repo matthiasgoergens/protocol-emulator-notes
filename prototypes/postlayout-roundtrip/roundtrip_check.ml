@@ -11,6 +11,8 @@ let time f =
   let r = f () in
   (r, Unix.gettimeofday () -. t0)
 
+let starts_with = Extract.starts_with
+
 let log s = Printf.printf "  %s\n%!" s
 
 let extract_and_check ?(quiet = false) ~gds ~top ~lib ~ports () =
@@ -60,31 +62,68 @@ let controls gds top rtl models outdir n seed =
   let gdslib = Gds.parse gds in
   let topc = Hashtbl.find gdslib.Gds.cells top in
   let k = gdslib.Gds.dbu_um *. 1e5 in (* centi-dbu per dbu *)
-  let q x = Int64.of_float (Float.round (Float.of_int x *. k)) in
   (* shape bbox -> net, to name the net an element of the top cell belongs to *)
   let net_of_bbox = Hashtbl.create 65536 in
   Array.iteri (fun i (s : Extract.shape) ->
     Option.iter (fun net -> Hashtbl.replace net_of_bbox (s.kind, s.bbox) net) geo.shape_net.(i))
     geo.shapes;
+  (* The element of the top cell a cut removes, and the net it is on.  A
+     Magic-written GDS (the sg13g2 run) has every wire and via cut as a
+     boundary in the top cell; a KLayout-written one (the sg13cmos5l run)
+     has wires as paths and vias as references to VIA_* cells, so a control
+     that only looked at boundaries removed nothing but redundant patches
+     (ten of ten cuts had no effect on the first sg13cmos5l run). *)
+  let lookup kind pts =
+    let pts = Array.map (Extract.quant gdslib.Gds.dbu_um) pts in
+    Hashtbl.find_opt net_of_bbox (kind, Extract.bbox_of pts) in
+  let fl (x, y) = (Float.of_int x, Float.of_int y) in
+  let via_cut_layer name =
+    match Hashtbl.find_opt gdslib.cells name with
+    | Some c ->
+      List.find_map (fun (p : Gds.poly) ->
+        if Extract.via_metals nl.tech p.player <> None && p.pdt = Extract.via_datatype then Some p else None) c.polys
+    | None -> None in
+  let elem_layer (e : Gds.elem) =
+    match e.ekind with
+    | `sref -> Option.map (fun (p : Gds.poly) -> p.player) (via_cut_layer e.esname)
+    | _ -> Some e.elayer in
   let elem_net (e : Gds.elem) =
-    let kind =
-      match Extract.metal_index e.elayer, Extract.via_metals e.elayer with
-      | Some m, _ -> Some (Extract.Metal m)
-      | _, Some (lo, hi) -> Some (Extract.Via (lo, hi))
-      | _ -> None in
-    match kind, Array.length e.exy with
-    | Some kind, np when np >= 4 && e.ekind = `boundary ->
-      let pts = Array.map (fun (x, y) -> (q x, q y)) (Array.sub e.exy 0 (np - 1)) in
-      Hashtbl.find_opt net_of_bbox (kind, Extract.bbox_of pts)
+    match e.ekind with
+    | `boundary when Array.length e.exy >= 4 ->
+      let pts = Array.map fl (Array.sub e.exy 0 (Array.length e.exy - 1)) in
+      (match Extract.metal_index nl.tech e.elayer, Extract.via_metals nl.tech e.elayer with
+       | Some m, _ -> lookup (Extract.Metal m) pts
+       | _, Some (lo, hi) -> lookup (Extract.Via (lo, hi)) pts
+       | _ -> None)
+    | `path ->
+      (match Extract.metal_index nl.tech e.elayer,
+             List.find_opt (fun (h : Gds.path) -> h.hlayer = e.elayer && h.hpts = e.exy) topc.paths with
+       | Some m, Some h ->
+         (match Gds.path_rects h with r :: _ -> lookup (Extract.Metal m) r | [] -> None)
+       | _ -> None)
+    | `sref when starts_with e.esname "VIA_" ->
+      (match via_cut_layer e.esname,
+             List.find_opt (fun (r : Gds.ref_) -> r.rcell = e.esname && r.rorigin = fl e.exy.(0)) topc.refs with
+       | Some cut, Some r ->
+         let xf = Gds.ref_xform r in
+         (match Extract.via_metals nl.tech cut.player with
+          | Some (lo, hi) -> lookup (Extract.Via (lo, hi)) (Array.map (fun p -> Gds.xapply xf (fl p)) cut.ppts)
+          | None -> None)
+       | _ -> None)
     | _ -> None
   in
   let cut_candidates =
     List.filter (fun (e : Gds.elem) ->
-      List.mem e.elayer [ 19; 29; 49; 10; 30 ] && e.edt = 0
+      (match elem_layer e with Some l -> List.mem l [ 19; 29; 49; 10; 30 ] | None -> false)
+      && (e.ekind = `sref || e.edt = 0)
       && (match elem_net e with Some x -> signal x | None -> false)) topc.elems
     |> Array.of_list in
-  Printf.printf "cut candidates (top-level Via1-3 and Metal2-3 shapes on signal nets): %d\n"
-    (Array.length cut_candidates);
+  let kinds = List.map (fun k ->
+      Printf.sprintf "%d %s" (List.length (List.filter (fun (e : Gds.elem) -> e.ekind = k) (Array.to_list cut_candidates)))
+        (match k with `boundary -> "boundaries" | `path -> "paths" | _ -> "via references"))
+      [ `boundary; `path; `sref ] in
+  Printf.printf "cut candidates (top-level Via1-3 and Metal2-3 elements on signal nets): %d (%s)\n"
+    (Array.length cut_candidates) (String.concat ", " kinds);
   let results = ref [] in
   let run_one label path =
     let nl', _, r, t, _ = extract_and_check ~quiet:true ~gds:path ~top ~lib ~ports () in
@@ -104,7 +143,8 @@ let controls gds top rtl models outdir n seed =
     let e = cut_candidates.(Random.int (Array.length cut_candidates)) in
     let path = Filename.concat outdir (Printf.sprintf "cut%02d.gds" i) in
     let net = Option.get (elem_net e) in
-    Printf.printf "cut %d: layer %d element at bytes %d (net n%d)\n" i e.elayer e.estart net;
+    Printf.printf "cut %d: layer %d %s at bytes %d (net n%d)\n" i (Option.get (elem_layer e))
+      (match e.ekind with `sref -> "via " ^ e.esname | `path -> "path" | _ -> "boundary") e.estart net;
     Mutate.cut ~src:gds ~dst:path ~elem:e;
     run_one "cut" path
   done;

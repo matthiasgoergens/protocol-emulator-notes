@@ -38,7 +38,8 @@ type path = {
 
 type elem = { ekind : [ `boundary | `path | `sref | `text | `none ];
               elayer : int; edt : int; estart : int; eend : int;
-              exy : (int * int) array }
+              exy : (int * int) array;
+              esname : string (* the referenced cell, for SREF/AREF; "" otherwise *) }
 
 type cell = {
   name : string;
@@ -164,7 +165,8 @@ let parse path : lib =
        e_colrow := Some (get_i16 d p, get_i16 d (p + 2))
      | 0x11 -> (* ENDEL *)
        cur_elems := { ekind = !el_kind; elayer = !e_layer; edt = !e_dt;
-                      estart = !el_start; eend = !off + len; exy = !e_xy }
+                      estart = !el_start; eend = !off + len; exy = !e_xy;
+                      esname = (if !el_kind = `sref then !e_sname else "") }
                     :: !cur_elems;
        (match !el_kind with
         | `boundary ->

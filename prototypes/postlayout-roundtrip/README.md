@@ -38,7 +38,7 @@ reads as 0, so both kinds of tool agree with the broken chip unless the structur
 | file | what |
 | --- | --- |
 | `gds.ml` | GDSII parser and hierarchy flattening (from the puzzle solution) |
-| `extract.ml` | SG13G2 layer map, connectivity, pins and ports, routing on unknown layers |
+| `extract.ml` | SG13G2 and SG13CMOS5L layer maps, connectivity, pins and ports, routing on unknown layers |
 | `cells.ml` | reads the PDK Verilog models into gates and flip-flops |
 | `sim.ml` | two-valued cycle simulator of the extracted netlist |
 | `check.ml` | structural checks |
@@ -48,7 +48,7 @@ reads as 0, so both kinds of tool agree with the broken chip unless the structur
 | `test_via_overlap.ml` | synthetic GDS cases for the join rule (vias must overlap, same-layer metal may abut) |
 | `generic_lockstep.ml` | block-independent lockstep: random values on every input, every output compared |
 | `seq_lockstep.ml` | the deadline sequencer's lockstep with its real harness, plus planted crossed wires |
-| `run_pnr.sh` | LibreLane 3.0.14 in its container, in a scratch directory, keeping the GDS |
+| `run_pnr.sh` | LibreLane 3.0.14 in its container, in a scratch directory, keeping the GDS (`sg13g2` or `sg13cmos5l`) |
 | `roundtrip.sh` | the whole round trip for one block |
 | `results/` | the logs behind every number below |
 
@@ -142,6 +142,71 @@ sequencer's GDS the change does nothing: the extracted netlist is byte-identical
 touch without overlapping (the extractor now counts and logs them), and the 20 planted controls give
 the same log as before. So this was a latent false short that LibreLane's routing never produced,
 and the eleven cases stay as a regression test.
+
+## Port to SG13CMOS5L, the shuttle's PDK
+
+Tiny Tapeout's IHP shuttle uses `sg13cmos5l`, not `sg13g2`: its layer map says "M1-M4-TM1 stack"
+and "Via4, Metal5, TopVia2, TopMetal2 not available". Everything above was measured on `sg13g2`, so
+the round trip was ported and rerun on the same block. The variant's facts below agree with what
+[elementalcollision/retrace](https://github.com/elementalcollision/retrace) found for its own
+`sg13cmos5l` LVS (`tools/retrace/tech.py`, `docs/TEMPO_LVS.md` section 2, Apache-2.0); our tables
+were written from the PDK files, no code was copied.
+
+- **PDK.** ciel 3.0's `ihp-sg13` releases do not carry the revision Tiny Tapeout pins, so the PDK
+  is a checkout of IHP-Open-PDK 2bbec755 made with `install_sg13cmos5l.sh` from
+  TinyTapeout/tt-gds-action (branch `ihp-cmos5l`), in `/var/tmp/roundtrip-cmos5l/pdk`; the shared
+  `~/.ciel` is untouched. `run_pnr.sh BLOCK SCRATCH TAG ihp-sg13cmos5l` with `PDK_ROOT` set uses
+  it, mounted read-only.
+- **Layers.** Same numbers as `sg13g2`, five metals, and one trap: TopVia1 (125) joins **Metal4** to
+  TopMetal1 here, not Metal5. With the `sg13g2` table the 38 TopVia1 cuts in this block would hang
+  the TopMetal1 power straps (57 shapes, carrying `VPWR`/`VGND` labels) on a Metal5 that does not
+  exist. The extractor now reads the variant from the GDS's cell names, refuses a GDS that mixes
+  both libraries, and logs which table it used (`extract.ml`, `sg13g2` and `sg13cmos5l`).
+- **Cells.** Same 84 cell names; the user primitives moved to `sg13cmos5l_udp.v` and their tables
+  are identical to `sg13g2`'s apart from comments and spacing. Two model changes broke our reader:
+  `sighold` has an `` `ifdef DISPLAY_HOLD `` branch with a drive-strength `buf` (the tokenizer now
+  follows `` `define``/`` `ifdef``/`` `else``/`` `endif `` and reads the branch a plain simulator would),
+  and every flip-flop ties its error input with `buf (xcr_0, 0)`, a bare `0` that read as a wire
+  and made all nine flip-flop types look like combinational loops (bare `0`/`1` are now constants).
+  After that the model-against-liberty test gives the same 2,636 comparisons and 0 disagreements as
+  on `sg13g2`, with the same 14 latch, tristate and sighold cells skipped; the two planted model
+  faults give 5 disagreements, as before (`results/sg13cmos5l/test_cells*.log`).
+- **Tie cells, antenna diodes, supplies.** `tiehi`/`tielo` outputs are their own Metal1 islands
+  (we never follow Cont, so no resistor cut is needed; retrace verified the same with poly joined).
+  `antennanp` is kept as an instance, its pin `A` a load; the flow inserted none in this block.
+  Cell supplies are `VDD`/`VSS` (not extracted as pins); the block's supply ports are `VPWR`/`VGND`
+  on Metal4 and TopMetal1.
+- **Orientations.** The comparison below maps all eight LEF/DEF orientations from the reference's
+  transform; this block uses N, S, FN and FS. For E, our map gives DEF y = GDS y - width, the
+  formula retrace derived from its SRAM macro.
+- **Place and route** (`results/sg13cmos5l/`): LibreLane 3.0.14 in its container cannot finish a
+  `sg13cmos5l` run. The PDK's Magic techfile requires Magic 8.3.657 and the image has 8.3.623;
+  Magic then fails to read the DEF ("No cut layer") and spins at 100% CPU with an empty log (13
+  minutes in `Magic.StreamOut`, 7 in `Magic.WriteLEF`; 4 and 8 s on `sg13g2`). Every step up to
+  and including KLayout's stream-out (the primary GDS writer) completes, so the round trip uses
+  that step's GDS and the DEF and `nl.v` it was written from (steps 56, 53, 52), and the run was
+  stopped there. Tiny Tapeout's own action installs LibreLane 3.1.0.dev3, which presumably carries a
+  newer Magic; not tried here. Same design and constraints as above: die 190.31 x 209.03 um,
+  2,983 components (2,016 logic cells), worst setup slack +6.69 ns at the slow corner, no hold,
+  slew or capacitance violations (`sta_summary.rpt`).
+
+| step | sg13cmos5l result |
+| --- | --- |
+| extraction | 84,198 conductor shapes, 6,491 components, 2,016 instances, 2,085 nets, 0.40 s |
+| structural check | clean: 0 undriven, 0 multiply driven, 189 flip-flops on the clock tree, 3 unread (the CTS dummy loads) |
+| lockstep with the sequencer's harness | 300 programmes x 2,000 cycles: 0 mismatching cycles, 2.89 million output-bit toggles |
+| generic random-input lockstep | 300 x 2,000 cycles: 0 mismatching cycles |
+| planted cuts and shorts (seed 1) | 16 of 16 effective caught structurally (4 cuts removed redundant patches and had no effect); lockstep 13 of 16 |
+| crossed wires (`--swaps 50 1`, 20 programmes) | 47 differ, 1 caught only structurally, 2 by neither |
+
+KLayout writes a different GDS from Magic: wires as paths and vias as references to `VIA_*` cells,
+where the `sg13g2` GDS (Magic's) has every wire and cut flattened into boundaries. The first
+`sg13cmos5l` controls run therefore cut only boundaries, which here are redundant patches: 10 of 10
+cuts had no effect. The cut planting now also removes paths and via references (27,220 candidates:
+2,630 boundaries, 12,225 paths, 12,365 via references); on `sg13g2` it picks the same ten elements
+as before. Two via-metal pairs in this GDS touch without overlapping (a Via1 and a Via2 abutting the
+ends of short Metal2 pieces at one stack); both pairs lie in one component anyway, so the
+touch-versus-overlap rule changes nothing here either, and the extractor now names such pairs.
 
 ## What it does not check
 

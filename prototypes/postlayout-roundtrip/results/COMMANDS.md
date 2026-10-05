@@ -19,3 +19,12 @@ M = the PDK's sg13g2_stdcell.v, L = sg13g2_stdcell_typ_1p20V_25C.lib.
 - test_via_overlap_before.log / test_via_overlap.log: test_via_overlap.exe /var/tmp/roundtrip-cmos5l/p3/viatest.gds,
   before and after via joins required positive overlap (2026-10-05, branch roundtrip-cmos5l); check.log was
   regenerated after the change (identical netlist; the extract line now counts touch-only via pairs)
+- sg13cmos5l/ (2026-10-05, branch roundtrip-cmos5l): PDK = IHP-Open-PDK 2bbec755 via TinyTapeout/tt-gds-action
+  install_sg13cmos5l.sh into /var/tmp/roundtrip-cmos5l/pdk; P&R `PDK_ROOT=... ./run_pnr.sh ../deadline-sequencer
+  /var/tmp/roundtrip-cmos5l/pnr seq15ns_cmos5l ihp-sg13cmos5l`, stopped in Magic.WriteLEF (magic_version.log);
+  G5 = runs/seq15ns_cmos5l/56-klayout-streamout/deadline_sequencer.gds (copied to /var/tmp/roundtrip-cmos5l/final/),
+  M5 = sg13cmos5l_stdcell.v. check.log, controls.log (OUTDIR 10 1), lockstep_full.log (300 2000),
+  lockstep_generic.log (300 2000 --generic), lockstep_gds_controls.log (20 2000 OUTDIR/*.gds),
+  lockstep_swaps.log (20 2000 --swaps 50 1), test_cells.log and test_cells_planted.log (same plants as above),
+  sta_summary.rpt (step 55). ../controls.log was regenerated for sg13g2 after the cut planting learnt paths
+  and via references (same ten cuts and ten shorts as before).

@@ -1,5 +1,8 @@
-(* Functional models of the SG13G2 standard cells, read from the PDK's
-   Verilog models (libs.ref/sg13g2_stdcell/verilog/sg13g2_stdcell.v).
+(* Functional models of the SG13G2 and SG13CMOS5L standard cells, read from
+   the PDK's Verilog models (libs.ref/sg13g2_stdcell/verilog/sg13g2_stdcell.v,
+   libs.ref/sg13cmos5l_stdcell/verilog/sg13cmos5l_stdcell.v; the latter keeps
+   its user primitives in sg13cmos5l_udp.v, whose tables are the same as
+   SG13G2's apart from comments and spacing).
 
    The Verilog models, not the liberty files, on purpose: synthesis mapped
    the design with the liberty functions, so reading the liberty here would
@@ -54,6 +57,7 @@ let tokenize (s : string) : tok array =
   let n = String.length s in
   let toks = ref [] in
   let i = ref 0 in
+  let defines = Hashtbl.create 16 and conds = ref [] in
   let is_id c =
     (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
     || c = '_' || c = '$' || c = '\'' in
@@ -66,8 +70,30 @@ let tokenize (s : string) : tok array =
       while !i + 1 < n && not (s.[!i] = '*' && s.[!i + 1] = '/') do incr i done;
       i := !i + 2
     end
-    else if c = '`' then (* compiler directive: drop the line *)
-      while !i < n && s.[!i] <> '\n' do incr i done
+    else if c = '`' then begin
+      (* compiler directive: drop the line, but follow `define and the
+         `ifdef/`ifndef/`else/`endif branches, so that only the branch a
+         simulator without +define options would compile is read (the
+         sg13cmos5l sighold model has a `ifdef DISPLAY_HOLD branch that this
+         tokenizer cannot parse) *)
+      let j = ref !i in
+      while !j < n && s.[!j] <> '\n' do incr j done;
+      let words = String.split_on_char ' ' (String.sub s (!i + 1) (!j - !i - 1))
+                  |> List.map String.trim |> List.filter (( <> ) "") in
+      let active () = List.for_all Fun.id !conds in
+      (match words with
+       | "define" :: name :: _ -> if active () then Hashtbl.replace defines name ()
+       | [ "ifdef"; name ] -> conds := Hashtbl.mem defines name :: !conds
+       | [ "ifndef"; name ] -> conds := (not (Hashtbl.mem defines name)) :: !conds
+       | [ "else" ] ->
+         (match !conds with c :: rest -> conds := (not c) :: rest | [] -> failwith "`else without `ifdef")
+       | [ "endif" ] ->
+         (match !conds with _ :: rest -> conds := rest | [] -> failwith "`endif without `ifdef")
+       | ("ifdef" | "ifndef" | "elsif") :: _ -> failwith ("unsupported directive: " ^ String.concat " " words)
+       | _ -> ());
+      i := !j
+    end
+    else if not (List.for_all Fun.id !conds) then incr i
     else if is_id c then begin
       let j = ref !i in
       while !j < n && is_id s.[!j] do incr j done;
@@ -79,6 +105,7 @@ let tokenize (s : string) : tok array =
       incr i
     end
   done;
+  if !conds <> [] then failwith "`ifdef without `endif";
   Array.of_list (List.rev !toks)
 
 let prim_of_string = function
@@ -144,7 +171,10 @@ let parse_library (path : string) : (string, cell) Hashtbl.t =
           (match t.(!pos) with Id _ -> incr pos | _ -> ());
           if t.(!pos) <> Sym '(' then failwith (name ^ ": expected (");
           incr pos;
-          let args = List.map undelay (idents ')') in
+          (* a bare 0 or 1 is a constant: sg13cmos5l's flip-flops tie the
+             primitive's unused error input with "buf (xcr_0, 0)" *)
+          let const = function "0" -> "1'b0" | "1" -> "1'b1" | w -> w in
+          let args = List.map (fun w -> const (undelay w)) (idents ')') in
           skip_stmt ();
           (match prim_of_string p, args with
            | Some g, out :: ins -> gates := { gprim = g; gout = out; gins = Array.of_list ins } :: !gates
