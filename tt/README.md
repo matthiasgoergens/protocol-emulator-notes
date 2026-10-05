@@ -14,6 +14,7 @@ metrics file from another project.
 | `scripts/regen.sh` | generates the core's Verilog; rewrites it only when its contents change |
 | `test/` | cocotb test (`make` for RTL, `make GATES=yes` for a gate-level netlist once one exists) |
 | `scripts/corner-report.py` | setup and hold slack per corner from a LibreLane run directory |
+| `scripts/harden.sh` | hardens the project as Tiny Tapeout's ihp-cmos5l GDS action does (tt-support-tools d66cf17, LibreLane 3.1.0.dev3), in a scratch directory, with the pinned image from `../tools/librelane-tt` |
 | `../.github/workflows/tt-harness.yaml` | generates the Verilog and runs the RTL test; no secrets, read-only token |
 
 Top level: `deadline_sequencer_v2` is the sequencer-v2 core, which group A of `notes/learned-from-others.md` names (sequencer-v2) as the
@@ -23,6 +24,7 @@ integrated top, see `notes/codex-brainstorm-2026-09-25.md`), so the wrapper is m
 ## Commands
 
     cd tt/test && uv run --no-project --python 3.12 --with-requirements requirements.txt make
+    tt/scripts/harden.sh /var/tmp/tt-harden/NEW-DIR        # needs tools/librelane-tt/build.sh once
     tt/scripts/corner-report.py <librelane-run-dir>
 
 `make` generates `src/deadline_sequencer_v2.v` first, which needs Hardcaml v0.17 (opam switch 5.3.0

@@ -150,10 +150,15 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 - **Layout round trip ported to sg13cmos5l (`roundtrip-cmos5l`, merged 2026-10-05):** via joins now
   need real overlap (4 of 11 synthetic cases were wrong before); placements and nets match the
   place-and-route record exactly (2,983 of 2,983, and 2,080 of 2,080 nets as endpoint sets); X
-  simulation shows every flop leaves X after one clear cycle. **Blocker:** LibreLane 3.0.14 cannot
-  finish a cmos5l run (the PDK's Magic techfile needs Magic 8.3.657; the image has 8.3.623, and
-  StreamOut hangs), so the cmos5l GDS came from KLayout at step 56. Tiny Tapeout's action installs
-  LibreLane 3.1.0.dev3: move to that for every cmos5l run (groups E and F, the TT harness).
+  simulation shows every flop leaves X after one clear cycle. LibreLane 3.0.14 cannot finish a
+  cmos5l run (the PDK's Magic techfile needs Magic 8.3.657; the image has 8.3.623, and StreamOut
+  hangs), so that GDS came from KLayout at step 56.
+- **LibreLane pinned to Tiny Tapeout's 3.1.0.dev3 (`librelane-tt`, 2026-10-05):**
+  `tools/librelane-tt/` builds the action's image, digest-pinned, under rootless podman (Magic
+  8.3.674). The cmos5l sequencer run now completes (197 s) and both its KLayout and Magic GDS pass
+  the round trip (2,900 of 2,900 placements, 1,989 of 1,989 nets, lockstep clean).
+  `run_pnr.sh` defaults to it for cmos5l, and `tt/scripts/harden.sh` runs the action's
+  `tt_tool.py --harden` on it. Use it for every cmos5l run (groups E and F, the TT harness).
 - **sigrok judge landed (`tools/sigrok-judge`, `tools/peers`, merged 2026-10-05):** sigrok-cli
   0.7.2, pinned in a container and run only as an external program, decodes UART, SPI, I2C,
   PS/2, CAN, USB-LS and S/PDIF traces. Every clean trace passes and each protocol has two planted
