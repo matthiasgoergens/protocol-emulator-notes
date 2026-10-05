@@ -53,15 +53,18 @@ let sample ~fclk ?(phase = 0.) ~clocks (l : t) =
   done;
   out
 
-(* raw one-byte-per-sample capture for sigrok (-I binary), sampled every [ts] ns *)
+(* raw one-byte-per-sample capture for sigrok (-I binary), sampled every [ts] ns, starting 20
+   samples before the first edge (sigrok's spdif decoder learns the pulse widths from the first
+   intervals, so a long idle lead-in would be taken for one) *)
 let to_binary ~ts ~path (l : t) =
   let oc = open_out_bin path in
   let n = Array.length l.edges in
   let tend = if n = 0 then 0. else l.edges.(n - 1) +. 2000. in
   let i = ref 0 and lv = ref l.level0 in
+  let t0 = if n = 0 then 0. else Float.max 0. (l.edges.(0) -. (20. *. ts)) in
   let k = ref 0 in
-  while float !k *. ts <= tend do
-    let t = float !k *. ts in
+  while t0 +. (float !k *. ts) <= tend do
+    let t = t0 +. (float !k *. ts) in
     while !i < n && l.edges.(!i) <= t do lv := 1 - !lv; incr i done;
     output_byte oc !lv; incr k
   done;

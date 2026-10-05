@@ -1,0 +1,28 @@
+# command: main.exe demo 1.0
+# commit: 8de2de4f7af45dfdbf09e272cb5b182ad3a24f10 (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T18:13:48+08:00
+demo: synthesiser (16 upe_v0 PEs, one step per frame) -> TX firmware -> NCO pacer: 60000000 clocks (1.00 s), 44101 frames sourced, underruns 0 (101 s)
+demo: oracle decoded 44099 frames, 0 violations, 0 parity errors, 229 cs blocks; 44099 of 44099 frames equal the synthesiser's tap word (left and right)
+demo: chip RX (137 s): 44099 frames, errors 1, parity 0, 229 cs blocks; 44099 of 44099 frames equal the oracle's (offset 0)
+  |S/PDIF ANALYSER                         |
+  |rate   44106.6 Hz (measured)            |
+  |frames 44099  blocks 229                |
+  |errors parity 0  framing 1  invalid 0   |
+  |L #####################...   -6.3 dBFS  |
+  |R #####################...   -6.3 dBFS  |
+  |channel status (left):                  |
+  |  use         consumer                  |
+  |  audio       linear PCM                |
+  |  copy        permitted (Cp=1)          |
+  |  emphasis    none                      |
+  |  mode        00                        |
+  |  category    CD (IEC 60908)            |
+  |  L bit       1                         |
+  |  source      0                         |
+  |  channel     1 (left)                  |
+  |  fs          44.1 kHz                  |
+  |  clock acc   level II                  |
+  |  word length 16 bits                   |
+ALL CHECKS PASS
+exit 0

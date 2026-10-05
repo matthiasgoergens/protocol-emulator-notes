@@ -165,7 +165,17 @@ let tx_suite () =
       Array.iter (fun (s : Iec60958.subframe) ->
           fprintf oc2 "%s %06x %d %d %d %d\n" (Iec60958.preamble_name s.pre) (Iec60958.audio24 s) (Iec60958.slot s 28) (Iec60958.slot s 29) (Iec60958.slot s 30) (Iec60958.slot s 31)) sfs;
       close_out oc2)
-    [ (Iec60958.R44, 60e6); (R48, 60e6); (R44, 60.8523e6); (R48, 60.8523e6) ]
+    [ (Iec60958.R44, 60e6); (R48, 60e6); (R44, 60.8523e6); (R48, 60.8523e6) ];
+  (* a control for the sigrok comparison: one wrong hi_expand entry in the transmitter's bank,
+     judged against the stream that should have been sent *)
+  let r, sfs, _, diff, _ = tx_run ~bank_fault:(fun b -> b.(256 + 0x33) <- b.(256 + 0x33) lxor 0x40) ~rate:R44 ~fclk:60e6 ~frames:450 ~seed:11 () in
+  Line.to_binary ~ts:(1e9 /. 60e6 /. 4.) ~path:"results/sigrok/control-44k1-60000.bin" (Line.of_bounds ~fclk:60e6 r.bounds);
+  let oc2 = open_out "results/sigrok/control-44k1-60000.expected" in
+  fprintf oc2 "# samplerate %.0f\n" (4. *. 60e6);
+  Array.iter (fun (s : Iec60958.subframe) ->
+      fprintf oc2 "%s %06x %d %d %d %d\n" (Iec60958.preamble_name s.pre) (Iec60958.audio24 s) (Iec60958.slot s 28) (Iec60958.slot s 29) (Iec60958.slot s 30) (Iec60958.slot s 31)) sfs;
+  close_out oc2;
+  pr "sigrok control capture written: hi_expand entry 0x33 corrupted, %d UIs differ from the reference" diff
 
 let random_jitter st rate =
   let ui = Iec60958.ui_ns rate in
@@ -386,7 +396,8 @@ let demo seconds =
   let t1 = Unix.gettimeofday () in
   let samples = Line.sample ~fclk:60e6 ~phase:1.1 ~clocks:(clocks_for ~fclk:60e6 line) line in
   let rr = Rx.run ~impl:Rtl ~samples () in
-  let d = Rx.decode rr in
+  let end_clock = int_of_float ((line.edges.(Array.length line.edges - 1) -. 1.1) *. 60e6 *. 1e-9) in
+  let d = Rx.decode ~end_clock rr in
   let got = Array.of_list d.subframes in
   let nf = Array.length got / 2 in
   let j0 = (let r = ref 0 in (try Array.iteri (fun i (s : Rx.rx_subframe) -> if s.kind <> KW then (r := i; raise Exit)) got with Exit -> ()); !r) in
@@ -399,18 +410,48 @@ let demo seconds =
   for off = 0 to 20 do if !best < 0 && nf > 50 && Array.sub gl 10 30 = Array.sub ol (10 + off) 30 then best := off done;
   let eq = ref 0 in
   if !best >= 0 then Array.iteri (fun i x -> if i + !best < nfr && ol.(i + !best) = x && orr.(i + !best) = gr.(i) then incr eq) gl;
-  pr "demo: chip RX (%.0f s): %d frames, errors %d, parity %d, %d cs blocks; %d of %d frames equal the oracle's (offset %d)"
-    (Unix.gettimeofday () -. t1) nf (d.count_errors + d.prefix_errors + d.short_records) (List.length (List.filter (fun (s : Rx.rx_subframe) -> s.parity_bad) d.subframes))
+  pr "demo: chip RX (%.0f s): %d frames, errors %d (+%d after the last edge), parity %d, %d cs blocks; %d of %d frames equal the oracle's (offset %d)"
+    (Unix.gettimeofday () -. t1) nf (d.count_errors + d.prefix_errors + d.short_records) d.trailing_errors (List.length (List.filter (fun (s : Rx.rx_subframe) -> s.parity_bad) d.subframes))
     (List.length d.cs_blocks) !eq nf !best;
-  check "demo chip rx" (!eq = nf && nf > 0);
+  check "demo chip rx" (!eq = nf && nf > 0 && d.count_errors + d.prefix_errors + d.short_records = 0);
   let rep = Analyser.report ~fclk:60e6 d in
   let oc = open_out "results/demo/analyser.txt" in
   List.iter (fun l -> fprintf oc "|%s|\n" l) rep.lines; close_out oc;
   List.iter (fun l -> pr "  |%s|" l) rep.lines;
   check "analyser fs" (Float.abs (rep.measured_fs -. (44100. *. (1. +. 150e-6))) < 5.)
 
+(* sigrok's annotations: "Preamble X", 28 bit lines, "Aux", "Sample", "Audio 0x..", "V" or "E",
+   "S: u", "C: c", "P: p" per subframe. It checks no parity, so P is compared as a value. *)
+let sigrok_compare ann expected =
+  let read f = let ic = open_in f in let rec go a = match input_line ic with l -> go (l :: a) | exception End_of_file -> close_in ic; List.rev a in go [] in
+  let strip l = match String.index_opt l ':' with Some i -> String.trim (String.sub l (i + 1) (String.length l - i - 1)) | None -> l in
+  let subs = ref [] and cur = ref None and unknown = ref 0 in
+  List.iter (fun l ->
+      let a = strip l in
+      let w = String.split_on_char ' ' a in
+      match w with
+      | [ "Preamble"; p ] -> cur := Some (p, 0, 0, 0, 0)
+      | [ "Unknown"; "Preamble" ] -> incr unknown; cur := None
+      | [ "Audio"; x ] -> (match !cur with Some (p, _, v, u, c) -> cur := Some (p, int_of_string x, v, u, c) | None -> ())
+      | [ "E" ] -> (match !cur with Some (p, au, _, u, c) -> cur := Some (p, au, 1, u, c) | None -> ())
+      | [ "S:"; x ] -> (match !cur with Some (p, au, v, _, c) -> cur := Some (p, au, v, int_of_string x, c) | None -> ())
+      | [ "C:"; x ] -> (match !cur with Some (p, au, v, u, _) -> cur := Some (p, au, v, u, int_of_string x) | None -> ())
+      | [ "P:"; x ] -> (match !cur with Some (p, au, v, u, c) -> subs := (sprintf "%s %06x %d %d %d %s" p au v u c x) :: !subs; cur := None | None -> ())
+      | _ -> ()) (read ann);
+  let got = Array.of_list (List.rev !subs) in
+  let exp = Array.of_list (List.filter (fun l -> l <> "" && l.[0] <> '#') (read expected)) in
+  let n = Array.length exp and m = Array.length got in
+  let off = ref (-1) in
+  (try for j = 0 to n - 4 do if m >= 4 && !off < 0 && got.(0) = exp.(j) && got.(1) = exp.(j + 1) && got.(2) = exp.(j + 2) && got.(3) = exp.(j + 3) then (off := j; raise Exit) done with Exit -> ());
+  let eq = ref 0 and cmp = ref 0 in
+  if !off >= 0 then Array.iteri (fun k g -> if !off + k < n then (incr cmp; if exp.(!off + k) = g then incr eq)) got;
+  pr "sigrok %s: %d subframes annotated (%d unknown preambles); aligned at sent subframe %d; %d of %d equal to the sent (preamble, 24-bit audio, V, U, C, P)"
+    (Filename.basename ann) m !unknown !off !eq !cmp;
+  check "sigrok" (!off >= 0 && !off <= 2 && !eq = !cmp && !cmp >= n - 6)
+
 let () =
   (match Array.to_list Sys.argv |> List.tl with
+  | [ "sigrok-compare"; a; e ] -> sigrok_compare a e
   | [ "pacer" ] -> pacer_lockstep 200
   | [ "tx" ] -> tx_suite ()
   | [ "rx"; n; seed ] -> rx_random (int_of_string n) (int_of_string seed)

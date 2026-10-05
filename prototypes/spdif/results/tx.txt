@@ -1,7 +1,7 @@
 # command: main.exe tx
-# commit: 90b63f6ec32d721bcf75818f0402277b8d542bb4
+# commit: 8de2de4f7af45dfdbf09e272cb5b182ad3a24f10 (with uncommitted changes)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T18:06:41+08:00
+# date: 2026-10-05T18:19:18+08:00
 tx 44.1 kHz at 60.000 MHz: inc 0x1815a07b; 57472 UIs against the reference encoder, 0 differ; underruns 0; pacer RTL = model on all 612644 clocks; T0 138 words, T1 8
    oracle on the pin's edges: 898/898 subframes equal, 0 violations, 0 bad preambles, 0 frame errors, 0 parity errors, cs blocks 2 equal of 2; UI 177.140 ns
 tx 48 kHz at 60.000 MHz: inc 0x1a36e2eb; 57472 UIs against the reference encoder, 0 differ; underruns 0; pacer RTL = model on all 562900 clocks; T0 138 words, T1 8
@@ -10,5 +10,6 @@ tx 44.1 kHz at 60.852 MHz: inc 0x17bf4556; 57472 UIs against the reference encod
    oracle on the pin's edges: 898/898 subframes equal, 0 violations, 0 bad preambles, 0 frame errors, 0 parity errors, cs blocks 2 equal of 2; UI 177.133 ns
 tx 48 kHz at 60.852 MHz: inc 0x19d8e4b8; 57472 UIs against the reference encoder, 0 differ; underruns 0; pacer RTL = model on all 570890 clocks; T0 138 words, T1 8
    oracle on the pin's edges: 898/898 subframes equal, 0 violations, 0 bad preambles, 0 frame errors, 0 parity errors, cs blocks 2 equal of 2; UI 162.761 ns
+sigrok control capture written: hi_expand entry 0x33 corrupted, 11 UIs differ from the reference
 ALL CHECKS PASS
 exit 0
