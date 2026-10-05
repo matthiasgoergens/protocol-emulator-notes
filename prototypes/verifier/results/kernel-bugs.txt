@@ -1,0 +1,16 @@
+# command: main.exe kernel-bugs
+# commit: 9c49ad6b1035187575a0218017b60510bdc5e859
+# ocamlopt 5.3.0
+# date: 2026-10-05T20:34:23+08:00
+kernel bug  1 (a wait that proceeds takes one slot less at most): caught by selftest, random 150, sweep, planted
+kernel bug  2 (a wait that times out takes one slot less): caught by random 150, sweep
+kernel bug  3 (LDD loads one less): caught by selftest, controls, random 150, sweep
+kernel bug  4 (JNZ falls through on cnt = 1): caught by selftest, controls, random 150, sweep
+kernel bug  5 (SKNE/SKEQ decided the wrong way): caught by random 150
+kernel bug  6 (a push-pull SHO assumed driven whatever its enable): caught by random 150
+kernel bug  7 (WAITD takes one slot less): caught by selftest, controls, random 150, sweep, planted
+kernel bug  8 (no deadline check): caught by selftest, planted
+kernel bug  9 (no closure check (every state counts as covered)): caught by controls
+kernel bug 10 (no gap check): caught by selftest, controls, planted
+kernel bugs: 10 planted, 0 not caught
+# elapsed 294.98 s, max rss 177880 kB

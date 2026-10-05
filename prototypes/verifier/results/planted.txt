@@ -1,0 +1,207 @@
+# command: main.exe planted
+# commit: 9c49ad6b1035187575a0218017b60510bdc5e859
+# ocamlopt 5.3.0
+# date: 2026-10-05T20:02:40+08:00
+PLANTED spi_p8 (LDD a wraps to 4095)         REJECTED  entries    71  events    28
+    pc 8: 4098 slots may pass without an event in state byte 0 bit 1 mosi, whose deadline is 2
+    path (9 instructions from pc 0):
+        0  setp mask=06 val=0 oe=1 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  setp mask=08 val=1 oe=1 q=0  state sclk and mosi low                  dl=0 since=1 due=1 time=1
+        2  lda 0xa5                     state cs idle                            dl=0 since=1 due=1 time=2
+        3  setp mask=08 val=0 oe=1 q=0  state cs idle                            dl=0 since=2 due=2 time=3
+        4  ldc 8                        state byte 0 cs asserted                 dl=0 since=1 due=1 time=4
+        5  sho pin2 msb q=0             state byte 0 cs asserted                 dl=0 since=2 due=2 time=5
+        6  ldd 4095                     state byte 0 bit 1 mosi                  dl=0 since=1 due=1 time=6
+        7  waitd                        state byte 0 bit 1 mosi                  dl=4095 since=2 due=4097 time=7
+        8  setp mask=02 val=1 oe=1 q=0  state byte 0 bit 1 mosi                  dl=0 since=4098 due=4098 time=4103
+    pc 8: event p1:set=1 (byte 0 bit 1 sclk rise) has gap 4098 slots, declared 2
+    pc 8: 4098 slots may pass without an event in state byte 0 bit 2 mosi, whose deadline is 2
+    ... 16 violations in all
+    interpreter (1 run): fails: slot 8 pc 7: 3 slots without an event in state byte 0 bit 1 mosi (deadline 2)
+
+PLANTED i2c without WAITP (stretch-blind)    REJECTED  entries    15  events     4
+    pc 14: event p5:set=0 (gap 8) is not one the specification accepts in state byte 0 bit 1 scl released
+    path (15 instructions from pc 0, last 14 shown):
+        1  ldd 1                        state START sda low                      dl=0 since=1 due=1 time=1
+        2  waitd                        state START sda low                      dl=1 since=2 due=3 time=2
+        3  setp mask=20 val=0 oe=1 q=0  state START sda low                      dl=0 since=4 due=4 time=4
+        4  lda 0xa0                     state START scl low                      dl=0 since=1 due=1 time=5
+        5  ldc 8                        state START scl low                      dl=0 since=2 due=2 time=6
+        6  sho pin4 msb od q=0          state START scl low                      dl=0 since=3 due=3 time=7
+        7  ldd 2                        state byte 0 bit 1 sda                   dl=0 since=1 due=1 time=8
+        8  waitd                        state byte 0 bit 1 sda                   dl=2 since=2 due=4 time=9
+        9  ldd 4095                     state byte 0 bit 1 sda                   dl=0 since=5 due=5 time=12
+       10  setp mask=20 val=0 oe=0 q=0  state byte 0 bit 1 sda                   dl=4095 since=6 due=4101 time=13
+       11  nop                          state byte 0 bit 1 scl released          dl=4094 since=1 due=4095 time=14
+       12  ldd 4                        state byte 0 bit 1 scl released          dl=4093 since=2 due=4095 time=15
+       13  waitd                        state byte 0 bit 1 scl released          dl=4 since=3 due=7 time=16
+       14  setp mask=20 val=0 oe=1 q=0  state byte 0 bit 1 scl released          dl=0 since=8 due=8 time=21
+    interpreter (12 runs): fails: slot 21 pc 14: event p5:set=0 not accepted in state byte 0 bit 1 scl released
+
+PLANTED i2c, the ack's WAITP missing         REJECTED  entries   111  events    52
+    pc 24: event p4:sample (gap 4) is not one the specification accepts in state byte 0 ack scl released
+    path (95 instructions from pc 0, last 14 shown):
+       11  waitp pin5==1 fail=37        state byte 0 bit 8 scl released          dl=4094 since=1 due=4095 time=126..28784
+       12  ldd 4                        state byte 0 bit 8: scl seen high        dl=0..4093 since=1 due=1..4094 time=127..32879
+       13  waitd                        state byte 0 bit 8: scl seen high        dl=4 since=2 due=6 time=128..32880
+       14  setp mask=20 val=0 oe=1 q=0  state byte 0 bit 8: scl seen high        dl=0 since=7 due=7 time=133..32885
+       15  jnz 6                        state byte 0 bit 8 scl low               dl=0 since=1 due=1 time=134..32886
+       16  setp mask=10 val=0 oe=0 q=0  state byte 0 bit 8 scl low               dl=0 since=2 due=2 time=135..32887
+       17  ldd 2                        state byte 0 ack sda released            dl=0 since=1 due=1 time=136..32888
+       18  waitd                        state byte 0 ack sda released            dl=2 since=2 due=4 time=137..32889
+       19  ldd 4095                     state byte 0 ack sda released            dl=0 since=5 due=5 time=140..32892
+       20  setp mask=20 val=0 oe=0 q=0  state byte 0 ack sda released            dl=4095 since=6 due=4101 time=141..32893
+       21  nop                          state byte 0 ack scl released            dl=4094 since=1 due=4095 time=142..32894
+       22  ldd 0                        state byte 0 ack scl released            dl=4093 since=2 due=4095 time=143..32895
+       23  waitd                        state byte 0 ack scl released            dl=0 since=3 due=3 time=144..32896
+       24  shi pin4 msb                 state byte 0 ack scl released            dl=0 since=4 due=4 time=145..32897
+    interpreter (12 runs): fails: slot 145 pc 24: event p4:sample not accepted in state byte 0 ack scl released
+
+PLANTED i2c, stretch limit LDD missing before a release REJECTED  entries   129  events    63
+    pc 11: event p5:timeout(1) (byte 0 bit 1: timeout) has gap 1 slots, declared 4095
+    path (12 instructions from pc 0):
+        0  setp mask=10 val=0 oe=1 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  ldd 1                        state START sda low                      dl=0 since=1 due=1 time=1
+        2  waitd                        state START sda low                      dl=1 since=2 due=3 time=2
+        3  setp mask=20 val=0 oe=1 q=0  state START sda low                      dl=0 since=4 due=4 time=4
+        4  lda 0xa0                     state START scl low                      dl=0 since=1 due=1 time=5
+        5  ldc 8                        state START scl low                      dl=0 since=2 due=2 time=6
+        6  sho pin4 msb od q=0          state START scl low                      dl=0 since=3 due=3 time=7
+        7  ldd 2                        state byte 0 bit 1 sda                   dl=0 since=1 due=1 time=8
+        8  waitd                        state byte 0 bit 1 sda                   dl=2 since=2 due=4 time=9
+        9  nop                          state byte 0 bit 1 sda                   dl=0 since=5 due=5 time=12
+       10  setp mask=20 val=0 oe=0 q=0  state byte 0 bit 1 sda                   dl=0 since=6 due=6 time=13
+       11  waitp pin5==1 fail=37        state byte 0 bit 1 scl released          dl=0 since=1 due=1 time=14
+    pc 11: event p5:timeout(1) (byte 0 bit 2: timeout) has gap 1 slots, declared 4095
+    pc 11: event p5:timeout(1) (byte 0 bit 3: timeout) has gap 1 slots, declared 4095
+    ... 8 violations in all
+    interpreter (12 runs): fails: slot 30 pc 11: byte 0 bit 2: timeout gap 1, declared 4095
+
+PLANTED i2c, a WAITP's timeout target is the next word REJECTED  entries   137  events    55
+    pc 13: 2 slots may pass without an event in state byte 0 bit 1: timed out, whose deadline is 1
+    path (14 instructions from pc 0):
+        0  setp mask=10 val=0 oe=1 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  ldd 1                        state START sda low                      dl=0 since=1 due=1 time=1
+        2  waitd                        state START sda low                      dl=1 since=2 due=3 time=2
+        3  setp mask=20 val=0 oe=1 q=0  state START sda low                      dl=0 since=4 due=4 time=4
+        4  lda 0xa0                     state START scl low                      dl=0 since=1 due=1 time=5
+        5  ldc 8                        state START scl low                      dl=0 since=2 due=2 time=6
+        6  sho pin4 msb od q=0          state START scl low                      dl=0 since=3 due=3 time=7
+        7  ldd 2                        state byte 0 bit 1 sda                   dl=0 since=1 due=1 time=8
+        8  waitd                        state byte 0 bit 1 sda                   dl=2 since=2 due=4 time=9
+        9  ldd 4095                     state byte 0 bit 1 sda                   dl=0 since=5 due=5 time=12
+       10  setp mask=20 val=0 oe=0 q=0  state byte 0 bit 1 sda                   dl=4095 since=6 due=4101 time=13
+       11  waitp pin5==1 fail=12        state byte 0 bit 1 scl released          dl=4094 since=1 due=4095 time=14
+       12  ldd 4                        state byte 0 bit 1: timed out            dl=0 since=1 due=1 time=4109
+       13  waitd                        state byte 0 bit 1: timed out            dl=4 since=2 due=6 time=4110
+    pc 13: 2 slots may pass without an event in state byte 0 bit 2: timed out, whose deadline is 1
+    pc 13: 2 slots may pass without an event in state byte 0 bit 3: timed out, whose deadline is 1
+    ... 24 violations in all
+    interpreter (12 runs): fails: slot 4169 pc 13: 2 slots without an event in state byte 0 bit 4: timed out (deadline 1)
+
+PLANTED uart, a data-bit LDD one short       REJECTED  entries    82  events    21
+    pc 6: event p0:sho=1 (byte 0 data bit 2) has gap 15 slots, declared 16
+    path (11 instructions from pc 0):
+        0  setp mask=01 val=1 oe=1 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  lda 0x4f                     state idle high                          dl=0 since=1 due=1 time=1
+        2  setp mask=01 val=0 oe=1 q=0  state idle high                          dl=0 since=2 due=2 time=2
+        3  ldd 12                       state byte 0 start bit                   dl=0 since=1 due=1 time=3
+        4  waitd                        state byte 0 start bit                   dl=12 since=2 due=14 time=4
+        5  ldc 8                        state byte 0 start bit                   dl=0 since=15 due=15 time=17
+        6  sho pin0 lsb q=0             state byte 0 start bit                   dl=0 since=16 due=16 time=18
+        7  ldd 11                       state byte 0 data bit 1                  dl=0 since=1 due=1 time=19
+        8  waitd                        state byte 0 data bit 1                  dl=11 since=2 due=13 time=20
+        9  jnz 6                        state byte 0 data bit 1                  dl=0 since=14 due=14 time=32
+        6  sho pin0 lsb q=0             state byte 0 data bit 1                  dl=0 since=15 due=15 time=33
+    pc 6: event p0:sho=1 (byte 0 data bit 3) has gap 15 slots, declared 16
+    pc 6: event p0:sho=1 (byte 0 data bit 4) has gap 15 slots, declared 16
+    ... 8 violations in all
+    interpreter (1 run): fails: slot 33 pc 6: byte 0 data bit 2 gap 15, declared 16
+
+PLANTED uart, HALT before the second stop bit REJECTED  entries    79  events    20
+    pc 22: 16..? slots may pass without an event in state byte 1 data bit 8, whose deadline is 16
+    path (79 instructions from pc 0, last 14 shown):
+       21  jnz 18                       state byte 1 data bit 5                  dl=0 since=15 due=15 time=257
+       18  sho pin0 lsb q=0             state byte 1 data bit 5                  dl=0 since=16 due=16 time=258
+       19  ldd 12                       state byte 1 data bit 6                  dl=0 since=1 due=1 time=259
+       20  waitd                        state byte 1 data bit 6                  dl=12 since=2 due=14 time=260
+       21  jnz 18                       state byte 1 data bit 6                  dl=0 since=15 due=15 time=273
+       18  sho pin0 lsb q=0             state byte 1 data bit 6                  dl=0 since=16 due=16 time=274
+       19  ldd 12                       state byte 1 data bit 7                  dl=0 since=1 due=1 time=275
+       20  waitd                        state byte 1 data bit 7                  dl=12 since=2 due=14 time=276
+       21  jnz 18                       state byte 1 data bit 7                  dl=0 since=15 due=15 time=289
+       18  sho pin0 lsb q=0             state byte 1 data bit 7                  dl=0 since=16 due=16 time=290
+       19  ldd 12                       state byte 1 data bit 8                  dl=0 since=1 due=1 time=291
+       20  waitd                        state byte 1 data bit 8                  dl=12 since=2 due=14 time=292
+       21  jnz 18                       state byte 1 data bit 8                  dl=0 since=15 due=15 time=305
+       22  jmp 22                       state byte 1 data bit 8                  dl=0 since=16..? due=16..? time=306..?
+    interpreter (1 run): fails: slot 307 pc 22: 17 slots without an event in state byte 1 data bit 8 (deadline 16)
+
+PLANTED uart, LDC 7 (a bit short)            REJECTED  entries    35  events     9
+    pc 10: event p0:set=1 (gap 16) is not one the specification accepts in state byte 0 data bit 7
+    path (35 instructions from pc 0, last 14 shown):
+        9  jnz 6                        state byte 0 data bit 4                  dl=0 since=15 due=15 time=81
+        6  sho pin0 lsb q=0             state byte 0 data bit 4                  dl=0 since=16 due=16 time=82
+        7  ldd 12                       state byte 0 data bit 5                  dl=0 since=1 due=1 time=83
+        8  waitd                        state byte 0 data bit 5                  dl=12 since=2 due=14 time=84
+        9  jnz 6                        state byte 0 data bit 5                  dl=0 since=15 due=15 time=97
+        6  sho pin0 lsb q=0             state byte 0 data bit 5                  dl=0 since=16 due=16 time=98
+        7  ldd 12                       state byte 0 data bit 6                  dl=0 since=1 due=1 time=99
+        8  waitd                        state byte 0 data bit 6                  dl=12 since=2 due=14 time=100
+        9  jnz 6                        state byte 0 data bit 6                  dl=0 since=15 due=15 time=113
+        6  sho pin0 lsb q=0             state byte 0 data bit 6                  dl=0 since=16 due=16 time=114
+        7  ldd 12                       state byte 0 data bit 7                  dl=0 since=1 due=1 time=115
+        8  waitd                        state byte 0 data bit 7                  dl=12 since=2 due=14 time=116
+        9  jnz 6                        state byte 0 data bit 7                  dl=0 since=15 due=15 time=129
+       10  setp mask=01 val=1 oe=1 q=0  state byte 0 data bit 7                  dl=0 since=16 due=16 time=130
+    interpreter (1 run): fails: slot 130 pc 10: event p0:set=1 not accepted in state byte 0 data bit 7
+
+PLANTED spi, cs released one slot early      REJECTED  entries    13  events     6
+    pc 12: event p3:set=1 (gap 1) is not one the specification accepts in state byte 0 bit 1 sclk fall
+    path (13 instructions from pc 0):
+        0  setp mask=06 val=0 oe=1 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  setp mask=08 val=1 oe=1 q=0  state sclk and mosi low                  dl=0 since=1 due=1 time=1
+        2  lda 0xa5                     state cs idle                            dl=0 since=1 due=1 time=2
+        3  setp mask=08 val=0 oe=1 q=0  state cs idle                            dl=0 since=2 due=2 time=3
+        4  ldc 8                        state byte 0 cs asserted                 dl=0 since=1 due=1 time=4
+        5  sho pin2 msb q=0             state byte 0 cs asserted                 dl=0 since=2 due=2 time=5
+        6  ldd 3                        state byte 0 bit 1 mosi                  dl=0 since=1 due=1 time=6
+        7  waitd                        state byte 0 bit 1 mosi                  dl=3 since=2 due=5 time=7
+        8  setp mask=02 val=1 oe=1 q=0  state byte 0 bit 1 mosi                  dl=0 since=6 due=6 time=11
+        9  ldd 5                        state byte 0 bit 1 sclk rise             dl=0 since=1 due=1 time=12
+       10  waitd                        state byte 0 bit 1 sclk rise             dl=5 since=2 due=7 time=13
+       11  setp mask=02 val=0 oe=1 q=0  state byte 0 bit 1 sclk rise             dl=0 since=8 due=8 time=19
+       12  setp mask=08 val=1 oe=1 q=0  state byte 0 bit 1 sclk fall             dl=0 since=1 due=1 time=20
+    interpreter (1 run): fails: slot 20 pc 12: event p3:set=1 not accepted in state byte 0 bit 1 sclk fall
+
+PLANTED deadline programme, LDD 30 against a declared 20 REJECTED  entries     7  events     5
+    pc 2: event p1:seen=1 (input seen) has gap 2..32 slots, declared 2..22
+    path (3 instructions from pc 0):
+        0  setp mask=80 val=0 oe=1 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  ldd 30                       state timeout pin low                    dl=0 since=1 due=1 time=1
+        2  waitp pin1==1 fail=5         state timeout pin low                    dl=30 since=2 due=32 time=2
+    pc 2: event p1:timeout(1) (timeout) has gap 32 slots, declared 22
+    interpreter (12 runs): fails: slot 23 pc 2: 23 slots without an event in state timeout pin low (deadline 22)
+
+PLANTED uart, LDA replaced by IN (waits for the host) REJECTED  entries    82  events    21
+    pc 14: 16..? slots may pass without an event in state byte 0 stop bit, whose deadline is 16
+    path (43 instructions from pc 0, last 14 shown):
+        9  jnz 6                        state byte 0 data bit 6                  dl=0 since=15 due=15 time=113
+        6  sho pin0 lsb q=0             state byte 0 data bit 6                  dl=0 since=16 due=16 time=114
+        7  ldd 12                       state byte 0 data bit 7                  dl=0 since=1 due=1 time=115
+        8  waitd                        state byte 0 data bit 7                  dl=12 since=2 due=14 time=116
+        9  jnz 6                        state byte 0 data bit 7                  dl=0 since=15 due=15 time=129
+        6  sho pin0 lsb q=0             state byte 0 data bit 7                  dl=0 since=16 due=16 time=130
+        7  ldd 12                       state byte 0 data bit 8                  dl=0 since=1 due=1 time=131
+        8  waitd                        state byte 0 data bit 8                  dl=12 since=2 due=14 time=132
+        9  jnz 6                        state byte 0 data bit 8                  dl=0 since=15 due=15 time=145
+       10  setp mask=01 val=1 oe=1 q=0  state byte 0 data bit 8                  dl=0 since=16 due=16 time=146
+       11  ldd 12                       state byte 0 stop bit                    dl=0 since=1 due=1 time=147
+       12  waitd                        state byte 0 stop bit                    dl=12 since=2 due=14 time=148
+       13  in                           state byte 0 stop bit                    dl=0 since=15 due=15 time=161
+       14  setp mask=01 val=0 oe=1 q=0  state byte 0 stop bit                    dl=0 since=16..? due=16..? time=162..?
+    pc 14: event p0:set=0 (byte 1 start bit) has gap 16..? slots, declared 16
+    interpreter (1 run): fails: slot 163 pc 13: 17 slots without an event in state byte 0 stop bit (deadline 16)
+
+planted: 11 bugs, 0 not rejected
+# elapsed 0.36 s, max rss 7676 kB

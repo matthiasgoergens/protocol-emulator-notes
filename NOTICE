@@ -15,5 +15,10 @@ Third-party material, under its own licence:
 - tt/src/config.json, tt/test/requirements.txt, and the layout of tt/test/Makefile and tt/test/tb.v:
   from TinyTapeout/ttihp-verilog-template (cmos5l branch, commit b86a2a7), Apache-2.0, with the
   files' SPDX headers kept; see tt/README.md.
+- prototypes/verifier/interval.ml: derived from src/interval.ml of MarcosAsh/protocol-emulator,
+  https://github.com/MarcosAsh/protocol-emulator (commit 3333f0c), by Marcos Ashton Iglesias,
+  Apache-2.0; the changes are listed in the file's header.
+- tools/peers/vendor/verilog-uart/: alexforencich/verilog-uart, https://github.com/alexforencich/verilog-uart
+  (commit 1b867e53), MIT, unmodified, with its licence file; see tools/peers/README.md.
 
 Ideas taken from other public work are credited where they are used (see notes/backlog.md).

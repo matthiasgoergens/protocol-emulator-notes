@@ -1,0 +1,6 @@
+; Abstract-interpretation timing verifier for ISA v2 programmes (README.md). isa2.ml, compat.ml,
+; isa.ml and compiler.ml are links to the prototypes' own files, not copies.
+(executable
+ (name main)
+ (modules isa2 compat isa compiler interval spec kernel analyser programmes sim sha256 main)
+ (libraries unix))
