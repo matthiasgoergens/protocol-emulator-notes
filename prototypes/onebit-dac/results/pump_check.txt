@@ -1,0 +1,14 @@
+commits: 1010; (segment, clock mod 1360) -> count:
+  seg 3 phase   49: 505
+  seg 0 phase   25: 505
+underrun reports: 84 (host paused clocks 400000-519999)
+  clock 406648 byte 0
+  clock 408008 byte 0
+  clock 409368 byte 0
+  clock 518168 byte 0
+  clock 519528 byte 0
+left: 80000 steps; run lengths of equal consecutive words (length -> count):
+  2 -> 1
+  136 -> 503
+  11560 -> 1
+host bytes sent 2036 of 2368; frames consumed 505

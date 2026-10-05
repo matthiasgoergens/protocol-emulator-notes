@@ -1,0 +1,11 @@
+ashr_logical         caught: fastest gsrc         74 cycles; 13 of 13 generators  (onebit-dac X1: A >> ashr is logical, not arithmetic)
+    first diff: PE4: S=0001 P=8000 Pv=false F=false L=true cfg=989a001ec5d9b256 | S=0001 P=8000 Pv=false F=false L=false cfg=989a001ec5d9b256
+lane_loop_own_end    caught: fastest logic        16 cycles; 12 of 13 generators  (onebit-dac E1: lane loop takes the segment's own end, not the run's)
+    first diff: PE0: S=fffe P=084a Pv=false F=false L=true cfg=d4227fff00084a56 | S=fffe P=084a Pv=false F=false L=false cfg=d4227fff00084a56
+repeat_off_by_one    caught: fastest dac           8 cycles; 13 of 13 generators  (onebit-dac E2: repeat ticks every R + 1 clocks)
+    first diff: seg0: flo 00/00 fhi 00/00 fv true/false ctrl 58/58 rep 3/3 cnt 0/3 fw 0000/0000
+repeat_hi_token      caught: fastest dac         184 cycles; 13 of 13 generators  (onebit-dac E2: a high-byte write still makes a token in repeat mode)
+    first diff: seg0: flo 00/00 fhi 97/97 fv false/true ctrl 38/38 rep 3/3 cnt 2/2 fw 9700/9700
+repeat_not_atomic    caught: fastest gf2         454 cycles; 13 of 13 generators  (onebit-dac E2: repeat mode presents {high, low} live instead of the committed word)
+    first diff: PE2: S=0000 P=8015 Pv=false F=false L=false cfg=000e2bd5e343db84 | S=0000 P=803b Pv=false F=false L=false cfg=000e2bd5e343db84
+5 of 5 planted bugs caught
