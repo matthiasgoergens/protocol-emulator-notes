@@ -194,6 +194,32 @@ def netlist(case, corner, temp):
                  f"xp vss vdd iovss iovdd c p sg13g2_IOPadOut30mA\n" + pkg("o", "p", "o", cpart + "p"))
         save += ["c", "p", "o"]
         tstep = "5p"
+    elif case.startswith("hdmi4"):
+        # hdmi4_<Rs>_r<Mbit/s>: all four TMDS pairs (8 x 30 mA pads, independent PRBS7 phases)
+        # switching together, with IOVDD and IOVSS each reaching the pads through 1 nH + 0.1 ohm
+        # (about two bond wires in parallel) and 100 pF of on-die IO decoupling (an assumption:
+        # the ring's real decoupling is not in the netlist). Ground bounce is v(iovss) and
+        # 3.3 V - v(iovdd); the eye is measured on pair 0.
+        _, rs, rpart = case.split("_")
+        ui = 1e-6 / float(rpart[1:])
+        tstop = 2e-9 + 250 * ui
+        h = h.replace("viovdd iovdd 0", "viovdd iovdd_x 0").replace("viovss iovss 0 0", "viovss iovss_x 0 0")
+        body += ("liovdd iovdd_x iovdd_l 1n\nriovdd iovdd_l iovdd 0.1\nliovss iovss_x iovss_l 1n\nriovss iovss_l iovss 0.1\n"
+                 "cdecap iovdd iovss 100p\n")
+        for q in range(4):
+            bits = prbs7(250, seed=(0x7F >> q) | 0x40 if q else 0x7F)
+            nb = [1 - b for b in bits]
+            body += (f"vcp{q} cp{q} 0 pwl({pwl_bits(bits, vdd, ui=ui)})\nvcn{q} cn{q} 0 pwl({pwl_bits(nb, vdd, ui=ui)})\n"
+                     f"xpp{q} vss vdd iovss iovdd cp{q} pp{q} sg13g2_IOPadOut30mA\n"
+                     f"xpn{q} vss vdd iovss iovdd cn{q} pn{q} sg13g2_IOPadOut30mA\n"
+                     + pkg(f"p{q}", f"pp{q}", f"op{q}", "5p") + pkg(f"n{q}", f"pn{q}", f"on{q}", "5p") +
+                     f"rsp{q} op{q} hp{q} {rs}\nrsn{q} on{q} hn{q} {rs}\n"
+                     + ladder(f"p{q}", f"hp{q}", f"sp{q}", sections=30, l="10n", c="4p")
+                     + ladder(f"n{q}", f"hn{q}", f"sn{q}", sections=30, l="10n", c="4p") +
+                     f"rtp{q} sp{q} avcc 50\nrtn{q} sn{q} avcc 50\ncsp{q} sp{q} 0 1.5p\ncsn{q} sn{q} 0 1.5p\n")
+        body += "vavcc avcc 0 3.3\n"
+        save += ["sp0", "sn0", "iovss", "iovdd", "op0"]
+        tstep = "5p"
     elif case.startswith("hdmi"):
         # hdmi_<Rs>_r<Mbit/s>: one TMDS pair driven pseudo-differentially by two 30 mA pads in
         # antiphase, PRBS7 NRZ. Each pin: 2 nH + 5 pF (package + pin + trace), series Rs at the

@@ -100,8 +100,12 @@ With a pin low, the line sits at 3.3 V × (Rs + Ron) / (Rs + Ron + 50), so the p
 - **Avoid 120 Ω.** It gives a bigger swing, but 1.4-1.9 V p-p exceeds the 1.2 V maximum I remember, and its 2.9 V common mode is below the window.
 - **The TMDS limits used here are from memory and NOT checked against the DVI or HDMI text:** a receiver needs at least 150 mV differential; the common mode must lie between AVcc − 300 mV and AVcc − 37.5 mV; the swing must stay under 1.2 V p-p.
 
+**Ground bounce, simulated** (`results/pads_hdmi.txt`; one corner, tt 27 °C). All 8 pads switch together, with IOVDD and IOVSS each through 1 nH and an assumed 100 pF of on-die IO decoupling:
+- **the IO rails bounce by 0.37-0.41 V p-p;**
+- **the pair's differential eye barely changes:** open over 0.86-0.90 UI against 0.93 without bounce, with the same swing and height. A pseudo-differential pair rejects bounce common to both pins.
+- **The real casualty would be single-ended inputs on the same ring:** 0.4 V of IOVSS bounce against a 0.59 V input threshold. Keep fast inputs (Ethernet receive) away from the HDMI pins, or do not run both at once.
+
 **Not modelled:**
-- ground bounce from 8 pads switching together;
 - cable loss: 1 m at 125 MHz is small, but longer cables matter;
 - skew between the pads of a pair, which shows up as common-mode noise;
 - whether a given monitor accepts a 24 MHz pixel clock.

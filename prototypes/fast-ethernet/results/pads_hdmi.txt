@@ -81,3 +81,11 @@ p2c duty cycle (ideal 50 %) / delay from the pad crossing its own threshold to p
 | ff 27C | 58 % / 0.36 ns | 51 % / 0.58 ns | 52 % / 0.83 ns | 51 % / 1.13 ns |
 | ff 85C | 58 % / 0.35 ns | 51 % / 0.59 ns | 51 % / 0.81 ns | 50 % / 1.10 ns |
 
+
+# raw: /var/tmp/fast-eth/pads/gb-{a,b}/ (hdmi4_270_r250 tt 27 netlist from padsim.py with the grounding change shown; the unmodified hdmi4 netlist stops at t = 0 because core VSS (ideal) and the inductive IOVSS meet inside the level shifters)
+## Simultaneous switching: 8 x 30 mA pads (4 TMDS pairs, Rs 270 ohm, 250 Mbit/s, pairs 0 and 1 carry identical data), tt 27 C
+IOVDD and IOVSS each through 1 nH + 0.1 ohm, 100 pF between the IO rails (assumed on-die decoupling)
+| variant | IOVSS bounce p-p (mV) | IOVDD droop p-p (mV) | pair-0 diff swing p-p (mV) | eye height (mV) | eye open >= 150 mV (UI) | without bounce (same pair, single-pair run) |
+|---|---|---|---|---|---|---|
+| a: core VSS tied to IOVSS | 385 | 368 | 1039 | 930 | 0.86 | 1018 mV p-p, 931 mV, 0.93 UI |
+| b: plus 50 pF from each IO rail to board ground | 403 | 410 | 1039 | 924 | 0.90 | 1018 mV p-p, 931 mV, 0.93 UI |
