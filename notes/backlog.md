@@ -131,6 +131,21 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   only the full-resolution iverilog comparison does (359,985 cycles differ). Make the small
   mode detect it too. Fourteen improvement proposals for hardcaml-latency are in
   `notes/latency-adoption.md`.
+- **Formal checking landed (`symbolic-bmc`, merged 2026-10-05; `prototypes/formal/README.md`):**
+  - **The interpreter:** ISA v2's interpreter is a functor over integers, SMT terms and Hardcaml
+    signals.
+  - **Incremental BMC with z3:** deadlines, pin ownership, isolation (proved at every depth by
+    relational induction) and UART correctness.
+  - **Kind 2** proves the deadline property for all depths.
+  - **RTL equals the spec** for 23 clocks from reset for every instruction stream (Yosys
+    SAT), and all 28 planted RTL bugs are caught at depth 15.
+  - **Follow-ups:**
+    - the functorised interpreter is 1.2–2.9× slower on integers (bridge A 9 s to 26 s): restore
+      a fast integer path, or specialise;
+    - the shared data bank, inboxes and ports have no ownership discipline like the pins;
+    - isolation's two non-vacuity cover queries ran 22 minutes without an answer.
+
+    The SPI period-8 compiler bug it found is fixed (period ≥ 10).
 - **Open after the 2026-10-05 fixes (`fix-findings`, merged):**
   - bridge B's SPI master still has a mailbox send with no timeout;
   - `prototypes/systolic-storage/seqtrace/check.sh` fails because its copy of `isa.ml` is stale;
