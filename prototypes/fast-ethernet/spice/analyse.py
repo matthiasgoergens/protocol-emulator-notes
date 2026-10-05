@@ -277,6 +277,106 @@ def inputs():
         print(f"| {c} {tmp}C | " + " | ".join(row) + " |")
     print()
 
+
+# ---------------------------------------------------------------- 2026-10-05: bit-rate eyes, HDMI
+def eye_ui(t, v, bits, ui, t0=2e-9, tmin=None, lo_level=None, hi_level=None, open_at=0.0):
+    """2-level eye at bit period ui. Finds the delay by correlation, then for 80 phases the eye
+    height (min of 1-bits minus max of 0-bits). Returns (best height, width in seconds of the
+    phases where the height exceeds open_at, delay)."""
+    tmin = tmin if tmin is not None else 40 * ui
+    lv = np.array([2 * b - 1 for b in bits], dtype=float)
+    m = t > tmin
+    best_d, best_c = 0.0, -1e99
+    for d in np.arange(0, 12e-9, 0.05e-9):
+        k = np.clip(((t[m] - t0 - d) // ui).astype(int), 0, len(bits) - 1)
+        cc = np.dot(v[m] - v[m].mean(), lv[k])
+        if cc > best_c: best_c, best_d = cc, d
+    hs = []
+    phases = np.linspace(0, ui, 81)[:-1]
+    for ph in phases:
+        ts = t0 + np.arange(len(bits)) * ui + best_d + ph
+        ok = (ts > tmin) & (ts < t[-1])
+        x = np.interp(ts[ok], t, v); b = np.array(bits)[ok]
+        hs.append(x[b == 1].min() - x[b == 0].max())
+    hs = np.array(hs)
+    return hs.max(), (hs > open_at).sum() * (phases[1] - phases[0]), best_d
+
+def rate_of(case): return float(case.split("_r")[1])
+
+def rates():
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import padsim
+    bits = padsim.prbs7(250)
+    print("## 30 mA pad, PRBS7 NRZ at 120 / 240 / 250 Mbit/s into 2 nH + C, at the pin")
+    print("eye height as % of IOVDD at the best phase; eye width = phases where the eye is open by more than 50 % of IOVDD\n")
+    print("| load, rate | corner | rise 10-90 (ns) | fall 10-90 (ns) | eye height (% IOVDD) | eye width at 50 % (ns / UI) |")
+    print("|---|---|---|---|---|---|")
+    for case in ("rcap10_r120", "rcap10_r240", "rcap10_r250", "rcap5_r250"):
+        ui = 1e-6 / rate_of(case)
+        for c, tmp in ORDER:
+            d = load(case, c, tmp)
+            if d is None: print(f"| {case} | {c} {tmp}C | missing |"); continue
+            io = CORN[c][1]
+            t, v = uniform(d["time"], d["v(o)"])
+            r, f = edge_times(t, v, 0, io)
+            h, w, _ = eye_ui(t, v, bits, ui, open_at=0.5 * io)
+            print(f"| {case[1:].replace('_r', ' pF, ')} Mb/s | {c} {tmp}C | {ns(np.mean(r))} | {ns(np.mean(f))} | {100 * h / io:.0f} | {ns(w)} / {w / ui:.2f} |")
+    print()
+
+def hdmi():
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import padsim
+    bits = padsim.prbs7(250)
+    print("## HDMI / DVI pair from two 30 mA pads in antiphase, series Rs at the chip, 1.1 m of 50 ohm per conductor, sink 50 ohm to 3.3 V")
+    print("differential at the sink (v(sp) - v(sn)). Eye width = phases with an opening of at least 150 mV, the minimum TMDS")
+    print("receiver input as I remember it (NOT checked against the DVI 1.0 / HDMI text). Common mode = mean of the two lines.\n")
+    print("| Rs, rate | corner | diff swing p-p (mV) | eye height (mV) | eye width >= 150 mV (ns / UI) | rise 20-80 (ns) | line low / common mode (V) |")
+    print("|---|---|---|---|---|---|---|")
+    for case in ("hdmi_270_r120", "hdmi_270_r240", "hdmi_270_r250", "hdmi_120_r120", "hdmi_120_r250"):
+        ui = 1e-6 / rate_of(case)
+        for c, tmp in ORDER:
+            d = load(case, c, tmp)
+            if d is None: print(f"| {case} | {c} {tmp}C | missing |"); continue
+            t, vp = uniform(d["time"], d["v(sp)"]); _, vn = uniform(d["time"], d["v(sn)"])
+            v = vp - vn
+            m = t > 40 * ui
+            hi, lo = np.percentile(v[m], 99), np.percentile(v[m], 1)
+            r, _ = edge_times(t, v, lo + 0.25 * (hi - lo) - 0.125 * (hi - lo) / 0.75 * 0, hi)  # 10-90 of the swing
+            a, b = lo + 0.2 * (hi - lo), lo + 0.8 * (hi - lo)
+            ca, cb = crossings(t[m], v[m], a), crossings(t[m], v[m], b)
+            r2080 = [y - x for x, u in ca if u for y in [min((z for z, uu in cb if uu and z > x), default=np.nan)] if y - x < ui]
+            h, w, _ = eye_ui(t, v, bits, ui, open_at=0.150)
+            low = min(np.percentile(vp[m], 1), np.percentile(vn[m], 1))
+            cm = ((vp + vn) / 2)[m].mean()
+            rs, rate = case.split("_")[1], rate_of(case)
+            print(f"| {rs} ohm, {rate:.0f} Mb/s | {c} {tmp}C | {1000 * (hi - lo):.0f} | {1000 * h:.0f} | {ns(w)} / {w / ui:.2f} | {ns(np.nanmean(r2080))} | {low:.2f} / {cm:.2f} |")
+    print()
+
+def inputs125():
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import padsim
+    print("## sg13g2_IOPadIn at 125 MHz (250 Mbit/s toggling) and 62.5 MHz, through 50 ohm + 3 pF + 2 nH")
+    print("p2c duty cycle (ideal 50 %) / delay from the pad crossing its own threshold to p2c at VDD/2; 'no toggle' if p2c swings < 90 % of VDD\n")
+    cases = ["inf_125", "inac_600_125", "inac_300_125", "inac_300_62.5"]
+    print("| corner | " + " | ".join(cases) + " |"); print("|---" * (len(cases) + 1) + "|")
+    for c, tmp in ORDER:
+        vdd = CORN[c][0]; row = []
+        for case in cases:
+            d = load(case, c, tmp)
+            if d is None: row.append("missing"); continue
+            t, p = uniform(d["time"], d["v(p2c)"]); _, pad = uniform(d["time"], d["v(pad)"])
+            m = t > t[-1] / 3
+            sw = p[m].max() - p[m].min()
+            if sw < 0.9 * vdd: row.append(f"no toggle ({sw:.2f} V)"); continue
+            duty = (p[m] > vdd / 2).mean() * 100
+            thr = padsim.threshold(c, tmp)
+            cin = [x for x, u in crossings(t[m], pad[m], thr)]
+            cout = [x for x, u in crossings(t[m], p[m], vdd / 2)]
+            dl = np.nanmedian([min((y - x for y in cout if y > x), default=np.nan) for x in cin])
+            row.append(f"{duty:.0f} % / {ns(dl)} ns")
+        print(f"| {c} {tmp}C | " + " | ".join(row) + " |")
+    print()
+
 if __name__ == "__main__":
     what = sys.argv[1:] or ["toggle", "eyes_cap", "eye_sfp", "eye_tx", "inputs"]
     for w in what:

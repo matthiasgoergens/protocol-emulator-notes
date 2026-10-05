@@ -184,6 +184,60 @@ def netlist(case, corner, temp):
                  # 1 m of 100 ohm twisted pair (lossless here; loss is in the channel model), 100 ohm
                  "tl seca secb la lb z0=100 td=5n\nrl la lb 100\nrlr lb 0 1meg\n")
         save += ["oa", "ob", "pria", "prib", "seca", "secb", "la", "lb"]
+    elif case.startswith("rcap"):
+        # rcap<C>_r<Mbit/s>: PRBS7 NRZ at the given bit rate, 30 mA pad into 2 nH + C pF
+        cpart, rpart = case[4:].split("_r")
+        ui = 1e-6 / float(rpart)
+        bits = prbs7(250)
+        tstop = 2e-9 + 250 * ui
+        body += (f"vc c 0 pwl({pwl_bits(bits, vdd, ui=ui)})\n"
+                 f"xp vss vdd iovss iovdd c p sg13g2_IOPadOut30mA\n" + pkg("o", "p", "o", cpart + "p"))
+        save += ["c", "p", "o"]
+        tstep = "5p"
+    elif case.startswith("hdmi"):
+        # hdmi_<Rs>_r<Mbit/s>: one TMDS pair driven pseudo-differentially by two 30 mA pads in
+        # antiphase, PRBS7 NRZ. Each pin: 2 nH + 5 pF (package + pin + trace), series Rs at the
+        # chip, then 10 cm of board and 1 m of cable as one 50 ohm line per conductor (30-section
+        # LC ladder, 0.2 ns per section, 6 ns, lossless), then the sink: 50 ohm to AVcc = 3.3 V
+        # per conductor and 1.5 pF input capacitance. A real TMDS source is a 10 mA current
+        # switch; with Rs the low level is 3.3 V x (Rs + Ron) / (Rs + Ron + 50).
+        _, rs, rpart = case.split("_")
+        ui = 1e-6 / float(rpart[1:])
+        bits = prbs7(250)
+        nbits = [1 - b for b in bits]
+        tstop = 2e-9 + 250 * ui
+        body += (f"vcp cp 0 pwl({pwl_bits(bits, vdd, ui=ui)})\nvcn cn 0 pwl({pwl_bits(nbits, vdd, ui=ui)})\n"
+                 f"xpp vss vdd iovss iovdd cp pp sg13g2_IOPadOut30mA\n"
+                 f"xpn vss vdd iovss iovdd cn pn sg13g2_IOPadOut30mA\n"
+                 + pkg("p", "pp", "op", "5p") + pkg("n", "pn", "on", "5p") +
+                 f"rsp op hp {rs}\nrsn on hn {rs}\n"
+                 + ladder("p", "hp", "sp", sections=30, l="10n", c="4p")
+                 + ladder("n", "hn", "sn", sections=30, l="10n", c="4p") +
+                 "vavcc avcc 0 3.3\nrtp sp avcc 50\nrtn sn avcc 50\ncsp sp 0 1.5p\ncsn sn 0 1.5p\n")
+        save += ["op", "on", "sp", "sn"]
+        tstep = "5p"
+    elif case.startswith("inf_"):
+        # inf_<MHz>: full-swing 0..IOVDD square at the given frequency (edges 10 % of the period,
+        # at most 1 ns) into IOPadIn via 50 ohm, 3 pF, 2 nH
+        f = float(case.split("_")[1]) * 1e6
+        per = 1 / f; e = min(1e-9, 0.1 * per)
+        body += (f"vs s 0 pulse(0 {iovdd} 2n {e:.3e} {e:.3e} {per/2 - e:.4e} {per:.4e})\nrs s pb 50\n"
+                 "cpb pb 0 3p\nlb pb pad 2n\n"
+                 f"xi vss vdd iovss iovdd p2c pad sg13g2_IOPadIn\ncl p2c 0 10f\n")
+        save += ["s", "pad", "p2c"]
+        tstop = 2e-9 + 20 * per
+        tstep = "5p"
+    elif case.startswith("inac_"):
+        # inac_<amp mV>_<MHz>: sine of that peak amplitude centred on this corner's threshold
+        _, amp, mhz = case.split("_")
+        thr = threshold(corner, temp)
+        f = float(mhz) * 1e6
+        body += (f"vs s 0 sin({thr:.4f} {float(amp)/1000} {f:.4e})\nrs s pb 50\n"
+                 "cpb pb 0 3p\nlb pb pad 2n\n"
+                 f"xi vss vdd iovss iovdd p2c pad sg13g2_IOPadIn\ncl p2c 0 10f\n")
+        save += ["s", "pad", "p2c"]
+        tstop = 2e-9 + 20 / f
+        tstep = "5p"
     elif case == "in_dc":
         body += (f"vpad pad 0 0\nxi vss vdd iovss iovdd p2c pad sg13g2_IOPadIn\ncl p2c 0 5f\n")
         ctl = f"dc vpad 0 {iovdd} 0.002\nwrdata /work/out.dat v(pad) v(p2c)\n"
@@ -210,7 +264,7 @@ def netlist(case, corner, temp):
     # eye_tx needs a 20 ps maximum step: with the default the run stops ("timestep too small")
     # at 114 ns, when the transformer current first pulls a pad below ground; with it, it gets
     # to about 1.13 us of 1.28 (reproduced in /var/tmp/fast-eth/pads-dbg/tx-{a,b,c})
-    maxstep = " 0 20p" if case in ("eye_tx", "eye_sfp") else ""  # eye_sfp stopped the same way
+    maxstep = " 0 20p" if case in ("eye_tx", "eye_sfp") or case.startswith("hdmi") else ""  # eye_sfp stopped the same way
     ctl = (f"tran {tstep} {tstop:.4e}{maxstep}\n"
            f"wrdata /work/out.dat {' '.join('v(' + s + ')' for s in save)}\n")
     return h + body + control(ctl)

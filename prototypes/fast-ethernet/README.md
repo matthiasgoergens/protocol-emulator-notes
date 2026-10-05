@@ -220,7 +220,31 @@ On a short cable almost all of that goes away: 2 m of Cat5e loses about 0.3 dB a
 - **Sampling:** +200 ppm and 0.2 ns RMS jitter;
 - **Scoring:** decoded by the CDR and the RTL receiver.
 
-TX_RX_TABLE
+Results (`results/tx_summary.txt`, from `results/tx_sweep.txt`). **The sweep was cut short by a host restart: 127 of 144 cells.** Frame loss, all sizes, with 64 B / 1518 B in brackets; 200 frames per cell; 0 false accepts in all cells.
+- **"Eye":** the analogue eye at the slicer input, upper / lower.
+- **g:** the receive transformer ratio (1 is a normal MagJack, 2 an extra 1:2 step-up).
+- **Corners:** pad dead zone and threshold shift per corner, against a fixed bias divider.
+
+| cable | eye (mV) | 4/UI, g=1, tt / ss / ff | 4/UI, g=2, tt / ss / ff | 2/UI, g=1, tt |
+|---|---|---|---|---|
+| 1-10 m | 726-584 | 0 % / **100 %** / 0 % | 0 % / 0 % / 0 % | 46-52 % |
+| 20 m | 427 / 409 | 94 % / 100 % / 53 % | 0 % / 19 % / 0 % | 100 % |
+| 30 m | 266 / 248 | 100 % everywhere | 92-100 % | 100 % |
+| 50 m and longer | closed | 100 % | 100 % | 100 % |
+
+**Verdict for copper receive.**
+
+**At 4 samples per UI it works to about 10 m with a normal MagJack, at typical and fast silicon.** The knee is at about 20 m, where the cable's loss brings the levels close to the fixed ±0.5 V thresholds.
+
+**Slow silicon fails even at 1 m**, for a different reason. The pad needs about ±0.2 V of overdrive, and its threshold sits 44 mV below what a fixed divider assumes, which leaves almost no margin. Two fixes:
+- a 1:2 step-up (with Ethernet-class inductance, since an RF balun's 2 MHz corner would add baseline wander);
+- a threshold servo through a PWM pin, which moves the bias with the pad.
+
+The step-up also takes typical silicon to 20 m.
+
+**At 2 samples per UI it loses about half the frames even at 1 m**, the same tracker weakness as for FX.
+
+**Past 30 m the eye is closed**, and a receiver needs what a PHY has: an equaliser that adapts to the cable and thresholds that track the amplitude. My fixed passive shelf equaliser cells (20-50 m) all came out with a closed eye, worse than no equaliser. That is a defect in how I scaled the equaliser in `tx_channel.py` (it re-normalises the gain at 30 MHz), not a measurement of what a shelf can do; those cells are excluded.
 
 ## Reusable units
 
