@@ -439,6 +439,15 @@ let () =
   | [ "compose" ] -> cmd_compose ()
   | [ "mutants" ] -> cmd_mutants ()
   | [ "random"; n ] -> cmd_random (int_of_string n)
+  | [ "step"; word; acc ] ->
+    (* the kernel's outcomes for one instruction word (hex) with acc known (decimal) or "?" *)
+    let w = int_of_string ("0x" ^ word) in
+    let k = { (Kernel.start_key (Spec.unconstrained "step")) with acc = (if acc = "?" then Any else Known (int_of_string acc)) } in
+    Printf.printf "%s\n" (disasm w);
+    List.iter (fun (r : Kernel.raw) ->
+        Printf.printf "  next pc %d acc %s cnt %s dl %s elapsed %s event %s\n" r.next_pc (Kernel.known_to_string r.acc')
+          (Kernel.known_to_string r.cnt') (Interval.to_string r.dl') (Interval.to_string r.elapsed) (Spec.event_to_string r.ev))
+      (Kernel.transfer w k (Interval.exactly 0))
   | [ "random-show"; n ] ->
     (* the n-th random programme of [cmd_random], its listing and its table *)
     let rng = Random.State.make [| 2026 |] in
