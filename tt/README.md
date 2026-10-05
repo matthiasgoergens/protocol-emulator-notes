@@ -10,11 +10,11 @@ metrics file from another project.
 |---|---|
 | `info.yaml`, `src/config.json`, `docs/info.md` | project description, flow configuration and datasheet text; layout and `config.json` from the template |
 | `src/project.v` | hand-written wrapper `tt_um_seqv2` (placeholder: 64-word register programme store loaded serially) |
-| `src/deadline_sequencer_v2.v` | generated from `prototypes/sequencer-v2/emit2.ml`; never edit |
-| `scripts/regen.sh` | `regen.sh` rewrites the generated file; `regen.sh --check` fails if the committed file differs from what Hardcaml generates today |
+| `src/deadline_sequencer_v2.v` | build output, not committed: generated from `prototypes/sequencer-v2/emit2.ml` by `scripts/regen.sh`, which `test/Makefile` runs on every `make` |
+| `scripts/regen.sh` | generates the core's Verilog; rewrites it only when its contents change |
 | `test/` | cocotb test (`make` for RTL, `make GATES=yes` for a gate-level netlist once one exists) |
 | `scripts/corner-report.py` | setup and hold slack per corner from a LibreLane run directory |
-| `../.github/workflows/tt-harness.yaml` | runs the RTL test; no secrets, read-only token |
+| `../.github/workflows/tt-harness.yaml` | generates the Verilog and runs the RTL test; no secrets, read-only token |
 
 Top level: `deadline_sequencer_v2` is the sequencer-v2 core, which group A of `notes/learned-from-others.md` names (sequencer-v2) as the
 chip core to harden. No note names a Tiny Tapeout top level yet (there is no
@@ -22,11 +22,16 @@ integrated top, see `notes/codex-brainstorm-2026-09-25.md`), so the wrapper is m
 
 ## Commands
 
-    tt/scripts/regen.sh --check                 # needs opam switch 5.3.0 with hardcaml
     cd tt/test && uv run --no-project --python 3.12 --with-requirements requirements.txt make
     tt/scripts/corner-report.py <librelane-run-dir>
 
-cocotb 2.0.1 does not build on Python 3.14, hence the pinned interpreter.
+`make` generates `src/deadline_sequencer_v2.v` first, which needs Hardcaml v0.17 (opam switch 5.3.0
+on this machine; `OPAM_SWITCH=` uses the current environment). cocotb 2.0.1 does not build on
+Python 3.14, hence the pinned interpreter.
+
+The generated Verilog is not committed, so it can never drift from its source. The Tiny Tapeout
+GDS action reads Verilog from `src/` and does not run OCaml, so a GDS workflow has to generate it in
+a step before the action, as `tt-harness.yaml` does before the test.
 
 ## Credits
 
@@ -37,9 +42,9 @@ Ideas and code taken from other public work, by GitHub repository:
   `test/Makefile`, `test/tb.v`, `test/test.py` and `test/requirements.txt`. Files adapted from
   it keep their SPDX identifier and say where they come from. Code copied: `config.json`,
   `requirements.txt`, adapted `Makefile` and `tb.v`.
-- **TeslaCoilerOW/ttihp-protocol-emulator** (Apache-2.0): the idea of a check that fails when
-  committed generated Verilog differs from its generator (their `make check-generated`), and of
-  a 6x4 variant as the fallback size. Idea only; `regen.sh` is our own.
+- **TeslaCoilerOW/ttihp-protocol-emulator** (Apache-2.0): the idea of a 6x4 variant as the
+  fallback size. Their `make check-generated` (fail when committed generated Verilog differs from
+  its generator) prompted ours; we went further and stopped committing the generated file.
 - **joshvern/pinscript-cmos5l-feasibility** (Apache-2.0): the practice of reporting each timing
   corner separately. Idea only; `corner-report.py` is our own. The metric names it reads are
   LibreLane's.

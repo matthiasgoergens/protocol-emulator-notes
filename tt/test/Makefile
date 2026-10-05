@@ -51,3 +51,10 @@ COCOTB_TEST_MODULES = test
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
+
+# The core's Verilog is generated from Hardcaml, never committed. regen.sh rewrites it only when its
+# contents change, so running it on every make is cheap and never leaves a stale copy.
+$(SRC_DIR)/deadline_sequencer_v2.v: FORCE
+	../scripts/regen.sh $@
+.PHONY: FORCE
+FORCE:

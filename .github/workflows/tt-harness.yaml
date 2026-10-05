@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
-# Runs the Tiny Tapeout harness checks that need no secrets and no place-and-route:
-# the RTL cocotb test. The check-generated step needs the Hardcaml toolchain and is run locally
-# (tt/scripts/regen.sh --check); it is not repeated here.
+# Runs the Tiny Tapeout harness checks that need no secrets and no place-and-route: generate the
+# core's Verilog from Hardcaml (it is not committed) and run the RTL cocotb test on it.
 name: tt-harness
 on:
   push:
-    paths: ["tt/**", ".github/workflows/tt-harness.yaml"]
+    paths: ["tt/**", "prototypes/sequencer-v2/**", ".github/workflows/tt-harness.yaml"]
   pull_request:
-    paths: ["tt/**"]
+    paths: ["tt/**", "prototypes/sequencer-v2/**"]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -16,7 +16,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get install --yes iverilog
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.3"
+      # Same Hardcaml as the local switch, so CI generates the same Verilog.
+      - run: opam install --yes dune hardcaml.v0.17.0
       - uses: astral-sh/setup-uv@v5
-      - name: cocotb RTL test
+      - name: generate Verilog and run the cocotb RTL test
         working-directory: tt/test
+        env:
+          OPAM_SWITCH: ""
         run: uv run --no-project --python 3.12 --with-requirements requirements.txt make
+      - name: the generated file exists and is not a stub
+        run: test "$(wc --lines < tt/src/deadline_sequencer_v2.v)" -ge 1000
+      - name: no failing test in the cocotb results
+        run: test -s tt/test/results.xml && ! grep --quiet --extended-regexp '<(failure|error)' tt/test/results.xml

@@ -5,3 +5,10 @@
 runs/
 fpga_pio/
 _build/
+
+# generated from Hardcaml by tt/scripts/regen.sh; never committed
+tt/src/deadline_sequencer_v2.v
+prototypes/sequencer-v2/synth/rtl/deadline_sequencer_v2.v
+tt/test/sim_build/
+tt/test/results.xml
+tt/test/*.fst

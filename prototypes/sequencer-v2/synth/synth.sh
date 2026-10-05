@@ -13,6 +13,9 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 LIB=/home/matthias/.ciel/ihp-sg13g2/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib
 mkdir --parents "$HERE/logs" "$HERE/reports"
 cd "$HERE"
+# rtl/ holds build output, not committed: generate it from the Hardcaml source first.
+mkdir --parents rtl
+"$HERE/../../../tt/scripts/regen.sh" "$HERE/rtl/deadline_sequencer_v2.v"
 export DOCKER_CONFIG=/var/tmp/claude-notes/dockercfg
 f=deadline_sequencer_v2
 S="read_verilog -sv rtl/$f.v; hierarchy -check -top $f; synth -top $f -flatten; \
