@@ -18,7 +18,7 @@ Everything was run on 2026-10-05.
 | 2a | every WAITD of UART + SPI + I2C | 15 contracts, 720 clocks; **found a latent SPI compiler bug** (Findings) |
 | 2b | pin ownership | four programmes, 720 clocks; planted bug found at clock 95 |
 | 2c | isolation (2-copy miter) | BMC: planted bug found at clock 28; induction: holds at **every depth** for the UART; both covers now reachable by concrete witness (0.9 s, was unanswered after 22 min) |
-| 2e | ownership of bank, inboxes, ports | bridge A: no violation to 300 clocks; planted violations found; with bank ownership the bank-reading UART is isolated at **every depth** |
+| 2e | ownership of bank, inboxes, ports | bridge A: no violation to 300 clocks; planted violations found; with bank ownership the bank-reading UART is isolated at **every depth**; rules on the declaration itself (one writer per bank address, inbox i received only by thread i, one sender unless shared), shared with the hazard checker, 4 of 4 planted declarations rejected |
 | 2d | UART frame, every byte | 2 frames (440 clocks); planted bug found at clock 98 (byte 0x04) |
 | 3 | Kind 2 (k-induction, IC3) | deadline property **proved for all depths** in 0.2 s; UART times out at 15 min |
 | 4 | RTL against specification (Yosys) | equal for 23 clocks after reset, for every instruction stream and input; **28 of 28** planted RTL bugs found |
@@ -221,6 +221,24 @@ isolated without a bound, as the immediate-only UART was. Each assumption is a p
 checked on its own: the UART's own reads by e-bank and by the hazard checker (which accepts 0..1
 and rejects 0 only, at the same LDB); the other threads' by checking their programmes when
 there are any.
+
+**Rules on the declaration itself** (`Ownership.conflicts`, added 2026-10-05). A declaration
+can be wrong before any code runs, and a havoc thread in a proof is assumed to keep its
+declaration, so the declaration needs rules of its own. The same function is the hazard
+checker's OWNERSHIP rule (`../verif-oracles/README.md`), and `resources` refuses to run on a
+declaration that breaks it:
+- no bank address written by two threads; one thread per port and direction;
+- inbox i belongs to thread i, and only thread i may receive from it (WAITC 10 polls the
+  executing thread's own inbox, so another receiver could not wait for it);
+- at most one declared sender per inbox, unless declared shared;
+- an inbox some thread sends to must be received by its owner.
+
+Scenario `e-declarations` (`results/bmc.txt`) applies them to bridge A's declaration (keeps the
+rules) and to four planted variants, all rejected: T3 also declared to receive from inbox 2; T3
+also declared to send to inbox 1; T2 no longer declared to receive from inbox 2; T0 and T3
+declared to write overlapping bank ranges. The isolation inductions keep their own "anything
+else" declaration for the havoc threads (every inbox, the whole bank), which is deliberately
+looser than these rules: it is an over-approximation, not a design.
 
 Covers for e use one concrete witness: the host sends 0x10 (ACK) on the UART line from clock 8.
 Replayed on `Isa2.Spec`, T1 and T2 start receiving at clocks 5 and 6, T0 passes the byte to

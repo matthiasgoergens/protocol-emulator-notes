@@ -409,20 +409,15 @@ let where_of u = if u.addr < 0 then Printf.sprintf "%s (%s)" (actor_name u.actor
 
 let last_waived : string list ref = ref []
 
-(* Ownership declarations that overlap where they must not: two threads that may write one bank
-   address (like two drivers of one pin), or two threads on one port in the same direction (a
-   port is one external device's). A bank address one thread writes and another reads is a
-   declared channel, not a fault; it is listed by [channels]. Inboxes need no rule here: two
-   senders or two receivers of one inbox are PAIR rejections already, and a declared
-   multi-producer inbox is [shared]. *)
-let meet r1 r2 = List.exists (fun (a, b) -> List.exists (fun (c, e) -> a <= e && c <= b) r2) r1
+(* Ownership declarations that break the rules of the declaration itself
+   (../../sequencer-v2/ownership.ml, [Ownership.conflicts]): two writers of one bank address, two
+   threads on one port in one direction, an inbox received by a thread other than its owner, an
+   inbox with two senders that is not declared shared, an inbox sent to that its owner does not
+   receive. Inboxes declared shared here are those of a [shared] group on [Inbox i]. *)
+let meet = Ownership.meet
 let overlaps (d : decl) =
-  let o = d.owns in
-  List.concat (List.init 4 (fun t -> List.concat (List.init 4 (fun u ->
-      if t >= u then [] else
-        (if meet o.(t).bank_write o.(u).bank_write then [ Printf.sprintf "T%d and T%d may both write one bank address" t u ] else [])
-        @ List.filter_map (fun j -> if List.mem j o.(u).port_out then Some (Printf.sprintf "T%d and T%d may both send to port %d" t u j) else None) o.(t).port_out
-        @ List.filter_map (fun j -> if List.mem j o.(u).port_in then Some (Printf.sprintf "T%d and T%d may both receive from port %d" t u j) else None) o.(t).port_in))))
+  let shared_inboxes = List.filter_map (fun (r, _) -> match r with Inbox i -> Some i | Pin _ | Bankr _ | Feed _ | Tap _ -> None) d.shared in
+  Ownership.conflicts ~shared_inboxes d.owns
 
 (* What the declaration lets one thread pass to another: bank addresses written by one and read
    by the other, and inboxes. A thread with no incoming channel is isolated from the others'

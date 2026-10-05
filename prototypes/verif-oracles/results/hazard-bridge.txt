@@ -1,3 +1,7 @@
+# command: /home/matthias/prog/janestreet/emulator-wt-adopt-formal-hygiene/prototypes/verif-oracles/_build/default/hazard-mp/hazard_bridge.exe
+# commit: ec1650d3c5c869bb2aa2556908902efa77cb9e21 (with uncommitted changes)
+# ocaml 5.3.0, hardcaml (version: v0.17.0)
+# date: 2026-10-05T20:25:22+08:00
 T0: bank read -, write -; inbox send 1, recv -; port out -, in -
 T1: bank read -, write -; inbox send 2, recv 1; port out -, in -
 T2: bank read -, write -; inbox send -, recv 2; port out -, in -
@@ -178,3 +182,4 @@ bridge B: 0 rejected combination(s), no waiver (bridge_lib's spi_master answers 
 control: 2 SEND(s) to inbox 2 in T1; with fail = own address the checker rejects 2
 
 HAZARD BRIDGE B PASS (bridge B accepted without a waiver: 0 rejections; control: 2 of 2 sends rejected)
+exit 0

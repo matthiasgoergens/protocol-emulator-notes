@@ -224,8 +224,9 @@ The hazards and how each is caught:
 | two consumers, undeclared producers, a send nobody receives | PAIR and COUNTERPART | yes ×4 |
 | bank address, inbox or port outside the thread's ownership declaration (below) | SOLO (kind, undeclared) missing | yes ×7, plus 4 planted in bridge A and 1 in the bank-reading UART |
 | two threads declared to write one bank address, or to use one port in the same direction | OWNERSHIP | yes ×2 |
+| a declaration that breaks the inbox rules: a receiver other than the owner, two senders not declared shared, a sender with no receiver | OWNERSHIP | yes ×3, and the declared-shared twin accepted |
 
-42 controls, 42 as expected (`results/hazard-controls.txt`). The controls include accepted
+46 controls, 46 as expected (`results/hazard-controls.txt`). The controls include accepted
 twins, so a checker that rejects everything fails too.
 
 **Ownership of the bank, the inboxes and the ports** (added 2026-10-05, after the isolation
@@ -244,7 +245,26 @@ thread and read by another is listed as a channel, not rejected. The same declar
 checked by bounded model checking in `../formal` (scenarios e, e-bank) and is the assumption that
 makes the UART isolated even when it reads the bank (`../formal/README.md`).
 
-The 15 new controls: LDB inside and outside a declared range, an endless LDB loop, BANK from an
+**Rules on the declaration itself** (added 2026-10-05, `Ownership.conflicts` in
+`../sequencer-v2/ownership.ml`; the OWNERSHIP rule here and the bounded model checker in `../formal`
+apply the same function):
+- no bank address may be written by two threads; one thread per port and direction;
+- inbox i belongs to thread i, and only thread i may receive from it: WAITC 10 polls the
+  executing thread's own inbox, so another receiver could not wait for it;
+- an inbox has at most one declared sender unless it is declared shared (a `shared` group on
+  `Inbox i`);
+- an inbox some thread sends to must be received by its owner.
+
+PAIR already rejects two consumers or two producers that the *code* has; these rules catch the
+same faults in a declaration whose code does not (yet) show them, which is what the model checker
+assumes of havoc threads. Four controls where only the declaration is wrong (46 in all, all as
+expected): T2 declared to receive from T1's inbox; two declared senders of inbox 1 (rejected),
+and the same declared shared (accepted); a declared sender of inbox 2 with no declared receiver.
+Five earlier controls whose declarations were sloppy in the same ways now also report OWNERSHIP
+besides the rule they test. Every real programme's declaration (the demo, 10BASE-T, JTAG and SWD,
+bridges A and B) keeps the rules.
+
+The 15 controls added with ownership: LDB inside and outside a declared range, an endless LDB loop, BANK from an
 unknown byte, the carry from 511 to 512, overlapping and disjoint write ranges, ports used with
 and without a declaration, a port declared to two threads, and WAITC 10 on an inbox not owned.
 

@@ -454,6 +454,10 @@ let uart_stimulus ~start ~byte =
       else if String.length base >= 4 && String.sub base 0 4 = "cut." then None else Some 0
 
 let resources ~name ?(plant = fun (_ : int array array) -> ()) ~owns ~depth () =
+  (* the declaration must keep the rules on declarations before a run means anything *)
+  (match Ownership.conflicts owns with
+   | [] -> ()
+   | l -> failwith (name ^ ": the ownership declaration breaks its rules: " ^ String.concat "; " l));
   let progs = Bridge_fw.Bridge_a_words.threads () in
   plant progs;
   let store = store_v2 progs in
@@ -554,7 +558,28 @@ let bank_ownership ~name ~reads ~depth =
      check_replay ~expected:kbad ~fired:!fired);
   r
 
+(* The rules on declarations themselves (Ownership.conflicts), on bridge A's declaration and on
+   planted variants of it; the hazard checker applies the same function (its OWNERSHIP rule). *)
+let declarations () =
+  let show name (o : Ownership.t) =
+    match Ownership.conflicts o with
+    | [] -> pr "DECLARATION %s: keeps the rules\n" name
+    | l -> pr "DECLARATION %s: REJECTED: %s\n" name (String.concat "; " l) in
+  let a = bridge_owns () in
+  show "bridge A" a;
+  let with_ t f = let o = Array.copy a in o.(t) <- f o.(t); o in
+  show "bridge A, planted: T3 also declared to receive from inbox 2"
+    (with_ 3 (fun th -> { th with Ownership.inbox_recv = [ 2 ] }));
+  show "bridge A, planted: T3 also declared to send to inbox 1"
+    (with_ 3 (fun th -> { th with Ownership.inbox_send = [ 1 ] }));
+  show "bridge A, planted: T2 no longer declared to receive from inbox 2"
+    (with_ 2 (fun th -> { th with Ownership.inbox_recv = [] }));
+  show "bridge A, planted: T0 and T3 both declared to write bank 0..15"
+    (let o = with_ 0 (fun th -> { th with Ownership.bank_write = [ (0, 15) ] }) in
+     o.(3) <- { (o.(3)) with Ownership.bank_write = [ (8, 23) ] }; o)
+
 let scenarios = [
+  "e-declarations", declarations;
   "a", (fun () -> ignore (a_main ~ldd:20 ~name:"a-deadline-main.ml-programme"));
   "a-planted", (fun () -> ignore (a_main ~ldd:21 ~name:"a-deadline-planted-ldd21"));
   "a-vacuous-planted", (fun () -> ignore (a_vacuous ~name:"a-deadline-planted-unreachable-wait"));
