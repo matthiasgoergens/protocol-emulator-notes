@@ -247,7 +247,14 @@ assignments, not from what the checker infers.
     (every SEND to inbox 2 pointed back at itself) and the checker rejects 4 of 4.
   - Bridge tests (v1 and v2) pass and gain "answer deadline A": with T2 stopped, every answer
     beyond the inbox depth is reported and the I2C traffic still matches the reference.
-  - Not changed: bridge B's SPI master still answers with `fail = self`; it was not checked here.
+  - **Bridge B fixed 2026-10-05** (`small-fixes`): the SPI master (`spi_master` in
+    `multi-proto/bridge_lib.ml`) answers the same way, at its two SENDs (the transfer's reply and
+    the protocol error), with `replylost` reporting 0xFB. The checker accepts it with no waiver;
+    the control (both SENDs back to fail = self) is rejected 2 of 2. v2's SHX wants the capture
+    pin one below the output pin, so the checked copy has SCLK 4, MOSI 3, MISO 2 instead of
+    bridges.ml's 2, 3, 4; the code is otherwise the same. `multi-proto/bridges.ml` gains "answer
+    deadline B". B has no RTS, so the receiver overflows while the master waits out a deadline;
+    the test only requires that T1 goes on and reports lost answers.
 
 **Not checked:**
 

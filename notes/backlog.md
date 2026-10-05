@@ -144,10 +144,8 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
 - **Latency checking adopted (`latency-adopt`, merged 2026-10-05):** the HDMI pixel path is rewritten
   with `Delayed` and `align`, and is cycle-identical to the original; five prototypes fail
-  `dune test` on a latency regression. Gap: in the small 5-frame Cyclesim test, the planted
-  end-to-end latency mutant gives 0 of 1,375 cycles different, so that test cannot detect it;
-  only the full-resolution iverilog comparison does (359,985 cycles differ). Make the small
-  mode detect it too. Fourteen improvement proposals for hardcaml-latency are in
+  `dune test` on a latency regression. The small 5-frame Cyclesim test
+  now detects the end-to-end latency mutant too (555 of 1,375 cycles differ against the good design; `small-fixes`, 2026-10-05). Fourteen improvement proposals for hardcaml-latency are in
   `notes/latency-adoption.md`.
 - **Formal checking landed (`symbolic-bmc`, merged 2026-10-05; `prototypes/formal/README.md`):**
   - **The interpreter:** ISA v2's interpreter is a functor over integers, SMT terms and Hardcaml
@@ -165,8 +163,7 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
 
     The SPI period-8 compiler bug it found is fixed (period ≥ 10).
 - **Open after the 2026-10-05 fixes (`fix-findings`, merged):**
-  - bridge B's SPI master still has a mailbox send with no timeout;
-  - `prototypes/systolic-storage/seqtrace/check.sh` fails because its copy of `isa.ml` is stale;
+  - (done on `small-fixes`: bridge B's SPI master now has the reply deadline; seqtrace uses symlinks and its check passes.)
   - the I2C fix changed the timing within one SCL low phase (SDA now moves 2 slots after SCL
     falls; low phases 28→36 and 44→40 clocks). It was accepted by the coordinator as within I2C's
     own timing rules, but rerun the FPGA I2C tests on the board;

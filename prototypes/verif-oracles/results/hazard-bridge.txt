@@ -1,7 +1,7 @@
-# command: /home/matthias/prog/janestreet/emulator-wt-fix-findings/prototypes/verif-oracles/_build/default/hazard-mp/hazard_bridge.exe
-# commit: 61e8b0434af942db81aa64a2d74766d20d505576 (with uncommitted changes)
+# command: /home/matthias/prog/janestreet/emulator-wt-small-fixes/prototypes/verif-oracles/_build/default/hazard-mp/hazard_bridge.exe
+# commit: 447595d0d341a0777453b3c3cacd7e11750857a3 (with uncommitted changes: bridge_lib.ml spi_master deadline, hazard_bridge.ml bridge B)
 # ocaml 5.3.0, hardcaml (version: v0.17.0)
-# date: 2026-10-05T09:00:29+08:00
+# date: 2026-10-05T16:32:42+08:00
 == bridge A on v2: T0 UART RX -> inbox 1 -> T1 I2C master -> inbox 2 -> T2 UART TX; T3 SPI neighbour
    uses: inbox 1 T0: send/bounded, space-wait (WAITC 11)/bounded
    uses: inbox 1 T1: recv/UNBOUNDED, recv/bounded
@@ -44,4 +44,42 @@ bridge A: 0 rejected combination(s), no waiver (bridge_lib's i2c_master now answ
 control: 4 SEND(s) to inbox 2 in T1; with fail = own address the checker rejects 4
 
 HAZARD BRIDGE PASS (bridge A accepted without a waiver: 0 rejections; control: 4 of 4 sends rejected)
+== bridge B on v2: T0 UART RX -> inbox 1 -> T1 SPI master -> inbox 2 -> T2 UART TX; T3 I2C neighbour
+   uses: inbox 1 T0: send/bounded
+   uses: inbox 1 T1: recv/UNBOUNDED, recv/bounded
+   uses: inbox 2 T1: send/bounded
+   uses: inbox 2 T2: recv/UNBOUNDED
+   uses: pin 0 T0: pin-sample
+   uses: pin 1 T2: pin-drive
+   uses: pin 2 T1: pin-sample
+   uses: pin 3 T1: pin-drive
+   uses: pin 4 T1: pin-drive
+   uses: pin 5 T1: pin-drive
+   uses: pin 6 T3: pin-drive, pin-sample
+   uses: pin 7 T3: pin-drive, pin-sample
+   ACCEPTED: no rejected combination
+
+bridge B: 0 rejected combination(s), no waiver (bridge_lib's spi_master answers into inbox 2 with LDD 4095; SEND ch2 -> replylost)
+
+== control: the same with T1's SENDs to inbox 2 made fail = own address (the code before the fix)
+   uses: inbox 1 T0: send/bounded
+   uses: inbox 1 T1: recv/UNBOUNDED, recv/bounded
+   uses: inbox 2 T1: send/UNBOUNDED
+   uses: inbox 2 T2: recv/UNBOUNDED
+   uses: pin 0 T0: pin-sample
+   uses: pin 1 T2: pin-drive
+   uses: pin 2 T1: pin-sample
+   uses: pin 3 T1: pin-drive
+   uses: pin 4 T1: pin-drive
+   uses: pin 5 T1: pin-drive
+   uses: pin 6 T3: pin-drive, pin-sample
+   uses: pin 7 T3: pin-drive, pin-sample
+   REJECTED [solo] (send, UNBOUNDED, declared) on inbox 2
+      at T1 page 1 pc 40 (SEND)
+   REJECTED [solo] (send, UNBOUNDED, declared) on inbox 2
+      at T1 page 1 pc 45 (SEND)
+
+control: 2 SEND(s) to inbox 2 in T1; with fail = own address the checker rejects 2
+
+HAZARD BRIDGE B PASS (bridge B accepted without a waiver: 0 rejections; control: 2 of 2 sends rejected)
 exit 0

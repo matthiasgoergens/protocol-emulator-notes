@@ -1,0 +1,11 @@
+# the rewrite replaced by the end-to-end 'latency' mutant (misdeclare), small mode; temporary edit of test/test_latency.ml, reverted
+# stdout (first lines) and stderr (failures); exit 1
+pattern, small mode, 5 frames: 555 of 1375 cycles differ (all of word_b, word_g, word_r, toggle, led_1hz)
+pattern, 640x480, 1 frame + 1000: 157404 of 421000 cycles differ (all of word_b, word_g, word_r, toggle, led_1hz)
+e2e mutant 'latency', small mode, 5 frames: 0 of 1375 cycles differ (all of word_b, word_g, word_r, toggle, led_1hz)
+e2e mutant 'latency' (rewrite) against the ORIGINAL good design, small mode, 5 frames: 555 of 1375 cycles differ (all of word_b, word_g, word_r, toggle, led_1hz)
+e2e mutant 'latency' (original) against the REWRITTEN good design, small mode, 5 frames: 0 of 1375 cycles differ (all of word_b, word_g, word_r, toggle, led_1hz)
+FAIL: pattern, small mode, 5 frames: rewrite differs from the original, first at cycle 0
+FAIL: pattern, 640x480, 1 frame + 1000: rewrite differs from the original, first at cycle 0
+FAIL: e2e mutant 'latency' (original) against the REWRITTEN good design, small mode, 5 frames: no cycle differs, so the lockstep comparison cannot see this fault
+3 failure(s)

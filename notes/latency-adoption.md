@@ -51,8 +51,11 @@ Evidence that the rewrite behaves exactly as before:
 - **Cyclesim** (`test/test_latency.ml`, against frozen copies in `test/reference/`): 0 of
   1,375 cycles differ over 5 small frames, and 0 of 421,000 over a whole 640x480 frame plus
   1,000 cycles. The comparison covers every output. The end-to-end "latency" mutant is also
-  identical to the original mutant, and it still differs from the good design on 440
-  cycles.
+  identical to the original mutant. Since 2026-10-05 the small mode also checks that the
+  comparison itself sees the fault: the rewritten mutant against the original good design
+  differs on 555 of 1,375 cycles (and the original mutant against the rewritten good design on
+  555), so a rewrite that introduced the mutant's fault would fail even there
+  (`results/latency/small-mode-mutant-detected.txt`).
 - **Verilog under iverilog** (`test/rtl-compare/run.sh`, `results/latency/rtl-compare-*.txt`,
   run at 8085f91): old `rtl/gen` against new, side by side. The pattern gives 0 of 900,000
   cycles different. The demo gives 0 of 2,500,000, which includes 3.5 frames after the
