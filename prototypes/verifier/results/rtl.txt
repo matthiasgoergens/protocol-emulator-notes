@@ -1,0 +1,167 @@
+# command: rtl/run_rtl.sh 
+# commit: c6c98fb35c09a7280ed0f8372103f469175b707a
+# yosys: Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)
+# z3: Z3 version 5.1.0 - 64 bit
+# date: 2026-10-06T12:33:04+08:00
+== deadline: image deadline_ldd20, main.exe rtl deadline_ldd20 DIR , core core.v; expected: pass
+deadline_ldd20: thread 0, 5 certificate lines, 3 channel pins, bounded runs to 116 clocks
+SBY  1:56:38 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:21 (21)
+SBY  1:56:38 [cert_prove] summary: engine_0 (abc pdr) returned PASS
+SBY  1:56:38 [cert_prove] summary: engine_0 did not produce any traces
+SBY  1:56:38 [cert_prove] DONE (PASS, rc=0)
+PROPERTY deadline-events: PROVED unbounded (abc pdr); antecedent events_ante reachable (step 17)
+PROPERTY deadline-levels: PROVED unbounded (abc pdr); antecedent levels_ante reachable (step 17)
+PROPERTY deadline-subslot: PROVED unbounded (abc pdr); antecedent subslot_ante reachable (step 17)
+PROPERTY deadline-deadline_: PROVED unbounded (abc pdr); antecedent deadline__ante reachable (step 17)
+PROPERTY deadline-quiet: PROVED unbounded (abc pdr); antecedent quiet_ante reachable (step 17)
+PROPERTY deadline-page: PROVED unbounded (abc pdr); antecedent page_ante reachable (step 17)
+PROPERTY deadline-slots: PROVED to 548 clocks (abc bmc3), past every event's slot (rtl.ml); antecedent slots_ante reachable (step 17)
+COVER deadline-final_3: REACHABLE (step 97)
+COVER deadline-final_5: REACHABLE (step 17)
+== uart: image uart_b5_n1, main.exe rtl uart_b5_n1 DIR , core core.v; expected: pass
+uart_b5_n1: thread 0, 11 certificate lines, 1 channel pins, bounded runs to 212 clocks
+SBY  2:06:42 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:04:18 (258)
+SBY  2:06:42 [cert_prove] summary: engine_0 (abc pdr) returned PASS
+SBY  2:06:42 [cert_prove] summary: engine_0 did not produce any traces
+SBY  2:06:42 [cert_prove] DONE (PASS, rc=0)
+PROPERTY uart-events: PROVED unbounded (abc pdr); antecedent events_ante reachable (step 193)
+PROPERTY uart-levels: PROVED unbounded (abc pdr); antecedent levels_ante reachable (step 193)
+PROPERTY uart-data: PROVED unbounded (abc pdr); antecedent data_ante reachable (step 193)
+PROPERTY uart-subslot: PROVED unbounded (abc pdr); antecedent subslot_ante reachable (step 193)
+PROPERTY uart-deadline_: PROVED unbounded (abc pdr); antecedent deadline__ante reachable (step 193)
+PROPERTY uart-quiet: PROVED unbounded (abc pdr); antecedent quiet_ante reachable (step 193)
+PROPERTY uart-page: PROVED unbounded (abc pdr); antecedent page_ante reachable (step 193)
+PROPERTY uart-slots: PROVED to 260 clocks (abc bmc3), past every event's slot (rtl.ml); antecedent slots_ante reachable (step 193)
+COVER uart-final_11: REACHABLE (step 193)
+== spi: image spi_p10_n1, main.exe rtl spi_p10_n1 DIR , core core.v; expected: pass
+spi_p10_n1: thread 1, 28 certificate lines, 3 channel pins, bounded runs to 365 clocks
+SBY  2:22:06 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:14:55 (895)
+SBY  2:22:06 [cert_prove] summary: engine_0 (abc pdr) returned PASS
+SBY  2:22:06 [cert_prove] summary: engine_0 did not produce any traces
+SBY  2:22:06 [cert_prove] DONE (PASS, rc=0)
+PROPERTY spi-events: PROVED unbounded (abc pdr); antecedent events_ante reachable (step 346)
+PROPERTY spi-levels: PROVED unbounded (abc pdr); antecedent levels_ante reachable (step 346)
+PROPERTY spi-data: PROVED unbounded (abc pdr); antecedent data_ante reachable (step 346)
+PROPERTY spi-subslot: PROVED unbounded (abc pdr); antecedent subslot_ante reachable (step 346)
+PROPERTY spi-deadline_: PROVED unbounded (abc pdr); antecedent deadline__ante reachable (step 346)
+PROPERTY spi-quiet: PROVED unbounded (abc pdr); antecedent quiet_ante reachable (step 346)
+PROPERTY spi-page: PROVED unbounded (abc pdr); antecedent page_ante reachable (step 346)
+PROPERTY spi-slots: PROVED to 601 clocks (abc bmc3), past every event's slot (rtl.ml); antecedent slots_ante reachable (step 346)
+COVER spi-final_28: REACHABLE (step 346)
+== i2c: image i2c_q4_n1_l7, main.exe rtl i2c_q4_n1_l7 DIR , core core.v; expected: pass
+i2c_q4_n1_l7: thread 2, 63 certificate lines, 2 channel pins, bounded runs to 914 clocks
+SBY  2:39:45 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:30:01 (1801)
+SBY  2:39:45 [cert_prove] summary: engine_0 (abc pdr) did not return a status
+SBY  2:39:45 [cert_prove] summary: engine_0 did not produce any traces
+SBY  2:39:45 [cert_prove] DONE (TIMEOUT, rc=8)
+PROPERTY i2c-events: PROVED to 1814 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent events_ante reachable (step 655)
+PROPERTY i2c-levels: PROVED to 1814 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent levels_ante reachable (step 655)
+PROPERTY i2c-subslot: PROVED to 1814 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent subslot_ante reachable (step 655)
+PROPERTY i2c-deadline_: PROVED to 1814 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent deadline__ante reachable (step 655)
+PROPERTY i2c-quiet: PROVED to 1814 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent quiet_ante reachable (step 655)
+PROPERTY i2c-page: PROVED to 1814 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent page_ante reachable (step 655)
+PROPERTY i2c-slots: PROVED to 1814 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent slots_ante reachable (step 655)
+COVER i2c-final_6: REACHABLE (step 91)
+COVER i2c-final_12: REACHABLE (step 155)
+COVER i2c-final_18: REACHABLE (step 219)
+COVER i2c-final_24: REACHABLE (step 283)
+COVER i2c-final_30: REACHABLE (step 347)
+COVER i2c-final_36: REACHABLE (step 411)
+COVER i2c-final_42: REACHABLE (step 475)
+COVER i2c-final_48: REACHABLE (step 539)
+COVER i2c-final_54: REACHABLE (step 603)
+COVER i2c-final_61: REACHABLE (step 671)
+COVER i2c-final_63: REACHABLE (step 655)
+== uart-3bytes: image uart_b16_n3, main.exe rtl uart_b16_n3 DIR , core core.v; expected: pass
+uart_b16_n3: thread 0, 31 certificate lines, 1 channel pins, bounded runs to 1888 clocks
+SBY  4:17:43 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:30:01 (1801)
+SBY  4:17:43 [cert_prove] summary: engine_0 (abc pdr) did not return a status
+SBY  4:17:43 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:17:43 [cert_prove] DONE (TIMEOUT, rc=8)
+PROPERTY uart-3bytes-events: PROVED to 2068 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent events_ante reachable (step 1869)
+PROPERTY uart-3bytes-levels: PROVED to 2068 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent levels_ante reachable (step 1869)
+PROPERTY uart-3bytes-data: PROVED to 2068 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent data_ante reachable (step 1869)
+PROPERTY uart-3bytes-subslot: PROVED to 2068 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent subslot_ante reachable (step 1869)
+PROPERTY uart-3bytes-deadline_: PROVED to 2068 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent deadline__ante reachable (step 1869)
+PROPERTY uart-3bytes-quiet: PROVED to 2068 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent quiet_ante reachable (step 1869)
+PROPERTY uart-3bytes-page: PROVED to 2068 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent page_ante reachable (step 1869)
+PROPERTY uart-3bytes-slots: PROVED to 2068 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent slots_ante reachable (step 1869)
+COVER uart-3bytes-final_31: REACHABLE (step 1869)
+== spi-2bytes: image spi_p16_n2, main.exe rtl spi_p16_n2 DIR , core core.v; expected: pass
+spi_p16_n2: thread 1, 54 certificate lines, 3 channel pins, bounded runs to 1085 clocks
+SBY  4:26:54 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:30:01 (1801)
+SBY  4:26:54 [cert_prove] summary: engine_0 (abc pdr) did not return a status
+SBY  4:26:54 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:26:54 [cert_prove] DONE (TIMEOUT, rc=8)
+PROPERTY spi-2bytes-events: PROVED to 1781 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent events_ante reachable (step 1066)
+PROPERTY spi-2bytes-levels: PROVED to 1781 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent levels_ante reachable (step 1066)
+PROPERTY spi-2bytes-data: PROVED to 1781 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent data_ante reachable (step 1066)
+PROPERTY spi-2bytes-subslot: PROVED to 1781 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent subslot_ante reachable (step 1066)
+PROPERTY spi-2bytes-deadline_: PROVED to 1781 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent deadline__ante reachable (step 1066)
+PROPERTY spi-2bytes-quiet: PROVED to 1781 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent quiet_ante reachable (step 1066)
+PROPERTY spi-2bytes-page: PROVED to 1781 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent page_ante reachable (step 1066)
+PROPERTY spi-2bytes-slots: PROVED to 1781 clocks (abc bmc3; abc pdr stopped at its 1800 s limit); antecedent slots_ante reachable (step 1066)
+COVER spi-2bytes-final_54: REACHABLE (step 1066)
+== deadline-gap-narrowed: image deadline_ldd20, main.exe rtl deadline_ldd20 DIR --gap 1 2..21, core core.v; expected: fail
+deadline_ldd20: thread 0, 5 certificate lines, 3 channel pins, bounded runs to 116 clocks
+SBY  4:23:59 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:53 (53)
+SBY  4:23:59 [cert_prove] summary: engine_0 (abc pdr) returned FAIL
+SBY  4:23:59 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:23:59 [cert_prove] DONE (FAIL, rc=2)
+PROPERTY deadline-gap-narrowed-events: FAILED at step 92 (abc pdr)
+== i2c-gap-narrowed: image i2c_q4_n1_l7, main.exe rtl i2c_q4_n1_l7 DIR --gap 4 1..6, core core.v; expected: fail
+i2c_q4_n1_l7: thread 2, 63 certificate lines, 2 channel pins, bounded runs to 914 clocks
+SBY  4:25:19 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:30 (30)
+SBY  4:25:19 [cert_prove] summary: engine_0 (abc pdr) returned FAIL
+SBY  4:25:19 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:25:19 [cert_prove] DONE (FAIL, rc=2)
+PROPERTY i2c-gap-narrowed-events: FAILED at step 86 (abc pdr)
+== uart-gap-shifted: image uart_b5_n1, main.exe rtl uart_b5_n1 DIR --gap 2 4, core core.v; expected: fail
+uart_b5_n1: thread 0, 11 certificate lines, 1 channel pins, bounded runs to 212 clocks
+SBY  4:26:04 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY  4:26:04 [cert_prove] summary: engine_0 (abc pdr) returned FAIL
+SBY  4:26:04 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:26:04 [cert_prove] DONE (FAIL, rc=2)
+PROPERTY uart-gap-shifted-events: FAILED at step 32 (abc pdr)
+== uart-data-shifted: image uart_b5_n1, main.exe rtl uart_b5_n1 DIR --data-shift, core core.v; expected: fail
+uart_b5_n1: thread 0, 11 certificate lines, 1 channel pins, bounded runs to 212 clocks
+SBY  4:26:50 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY  4:26:50 [cert_prove] summary: engine_0 (abc pdr) returned FAIL
+SBY  4:26:50 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:26:50 [cert_prove] DONE (FAIL, rc=2)
+PROPERTY uart-data-shifted-data: FAILED at step 32 (abc pdr)
+== spi-data-shifted: image spi_p10_n1, main.exe rtl spi_p10_n1 DIR --data-shift, core core.v; expected: fail
+spi_p10_n1: thread 1, 28 certificate lines, 3 channel pins, bounded runs to 365 clocks
+SBY  4:27:53 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:04 (4)
+SBY  4:27:53 [cert_prove] summary: engine_0 (abc pdr) returned FAIL
+SBY  4:27:53 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:27:53 [cert_prove] DONE (FAIL, rc=2)
+PROPERTY spi-data-shifted-data: FAILED at step 25 (abc pdr)
+== uart-mutant-waitd-early: image uart_b5_n1, main.exe rtl uart_b5_n1 DIR , core core-mutant0.v; expected: fail
+uart_b5_n1: thread 0, 11 certificate lines, 1 channel pins, bounded runs to 212 clocks
+SBY  4:28:05 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:02 (2)
+SBY  4:28:05 [cert_prove] summary: engine_0 (abc pdr) returned FAIL
+SBY  4:28:05 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:28:05 [cert_prove] DONE (FAIL, rc=2)
+PROPERTY uart-mutant-waitd-early-events: FAILED at step 28 (abc pdr)
+== deadline-mutant-wait-fail-early: image deadline_ldd20, main.exe rtl deadline_ldd20 DIR , core core-mutant1.v; expected: fail
+deadline_ldd20: thread 0, 5 certificate lines, 3 channel pins, bounded runs to 116 clocks
+SBY  4:30:16 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:09 (9)
+SBY  4:30:16 [cert_prove] summary: engine_0 (abc pdr) returned FAIL
+SBY  4:30:16 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:30:16 [cert_prove] DONE (FAIL, rc=2)
+PROPERTY deadline-mutant-wait-fail-early-events: FAILED at step 88 (abc pdr)
+== i2c-mutant-wait-fail-early: image i2c_q4_n1_l7, main.exe rtl i2c_q4_n1_l7 DIR , core core-mutant1.v; expected: fail
+i2c_q4_n1_l7: thread 2, 63 certificate lines, 2 channel pins, bounded runs to 914 clocks
+SBY  4:30:55 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:19 (19)
+SBY  4:30:55 [cert_prove] summary: engine_0 (abc pdr) returned FAIL
+SBY  4:30:55 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:30:55 [cert_prove] DONE (FAIL, rc=2)
+PROPERTY i2c-mutant-wait-fail-early-events: FAILED at step 82 (abc pdr)
+== spi-mutant-sho-lsb-first: image spi_p10_n1, main.exe rtl spi_p10_n1 DIR , core core-mutant2.v; expected: fail
+spi_p10_n1: thread 1, 28 certificate lines, 3 channel pins, bounded runs to 365 clocks
+SBY  4:31:55 [cert_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:04 (4)
+SBY  4:31:55 [cert_prove] summary: engine_0 (abc pdr) returned FAIL
+SBY  4:31:55 [cert_prove] summary: engine_0 did not produce any traces
+SBY  4:31:55 [cert_prove] DONE (FAIL, rc=2)
+PROPERTY spi-mutant-sho-lsb-first-data: FAILED at step 25 (abc pdr)
