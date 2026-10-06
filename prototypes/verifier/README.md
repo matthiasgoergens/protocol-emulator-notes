@@ -23,7 +23,7 @@ and the certificates on the RTL (section 8).
 | controls | perturbed certificates and specifications the kernel must reject, including each declared data bit flipped | **1,922 of 1,922 rejected** |
 | kernel bugs | planted bugs in the kernel that some check must catch | **11 of 11 caught** |
 | kernel proof | the kernel's one-instruction step against `Isa2`'s interpreter, by z3, for every instruction word (section 4) | **65,536 words x 8 key shapes: 524,288 queries, all unsatisfiable**; 8 of 8 planted step bugs give a counterexample |
-| RTL | certificates as SymbiYosys properties on the v2 core (section 8) | see section 8 and `results/rtl.txt` |
+| RTL | certificates as SymbiYosys properties on the v2 core, every input free (section 8) | deadline programme, UART, SPI: **every property PROVED unbounded** (abc pdr); I2C with WAITP, a 3-byte UART, a 2-byte SPI: PROVED to a bound past every event's slot; every antecedent and final state reachable; **8 of 8 controls FAILED** |
 | compose | demo composition (UART, SPI, I2C, watchdog on four threads) and pin ownership | proved; planted pin clash rejected |
 | certificates | per-image certificates, ledger with SHA-256 of image and certificate | 530 images; `ledger-check` finds a matching certificate for every one |
 
@@ -117,10 +117,10 @@ PLANTED spi_p8 (LDD a wraps to 4095)         REJECTED  entries    71  events    
 line per pin event with its pc, instruction, specification transition, slot interval, gap and
 declared gap. `results/ledger.txt` lists every sweep image's SHA-256 with its certificate's
 SHA-256; `main.exe ledger-check results/ledger.txt` recomputes them and fails when an image has
-no matching certificate. Five certificates are committed in `results/certs/`. Unlike
-TeslaCoilerOW's, our certificates are **not proved on the RTL**: they are tied to the
-interpreter by the cross-check, and the interpreter to the RTL by `../sequencer-v2`'s lockstep
-test.
+no matching certificate. Five certificates are committed in `results/certs/`. Like
+TeslaCoilerOW's, they are now proved on the RTL, for a representative set of images (section 8);
+every other image is tied to the RTL through the interpreter (the cross-check, and
+`../sequencer-v2`'s lockstep test).
 
 ## 3. Specifications
 
@@ -329,6 +329,88 @@ if that happens:
   why; the argument is now written out there (`main.ml`, above `predecessors`). It found no
   vacuity or slot-alignment fault in the RTL monitor and no other unsoundness in the checked
   outcomes, by its own account without certainty about the thread-1 scope.
+
+## 8. Certificates on the RTL
+
+(2026-10-06; `rtl.ml`, `rtl/run_rtl.sh`, `results/rtl.txt`, the generated monitors in
+`results/rtl/`.) The certificates were tied to the interpreter by runs and the interpreter to the
+RTL by the lockstep test. Here a certificate becomes SymbiYosys properties of the v2 core itself
+(`../sequencer-v2/sequencer2.ml`, the Verilog of `tt/src` as `../formal/powerup/emit_core.exe`
+writes it, in the LibreLane container's Yosys 0.62).
+
+**From the certificate's text.** `main.exe rtl NAME DIR` writes the certificate exactly as the
+ledger hashes it, parses that text back (`Rtl.parse`) and generates the monitor from it: each
+channel-event line (pc, outcome, state from and to, slot interval, gap interval, q, declared
+data), the header's input bytes and every state's deadline. Nothing of the analysis is used.
+The image is taken from the sweep and must have the SHA-256 the certificate names.
+
+**The environment** is the verifier's assumptions, as constraints on the RTL's inputs: every
+input free on every clock (A1); the host control port never addresses thread T (A2); the store
+holds the image on T's page, and every fetch for T is asserted to be on that page (A3, checked);
+every other thread executes an arbitrary instruction word on each of its clocks, constrained only
+not to write the channel's pins (A5: SETP's mask, SHO's pin and pair partner), so the proof also
+covers whatever the other threads do. One clock of clear, then free-running. Where the
+specification declares data, the image's LDA immediates are free constants: one proof covers
+every value of the input bytes.
+
+**The monitor** reads only the core's ports. The store address presented the clock before T
+executes is T's pc for that slot; the pins after the slot are what it did. A slot is an event
+when its pc holds an instruction that touches the channel and it did not stay (a WAITP that
+stays has made no event yet), and the next pc tells the outcome (pc + 1 proceeds, the fail target
+times out). Ghost state: the specification state and the slots since the last event. Properties,
+each with an antecedent cover (the certificate's last state reached) as `../formal`'s
+per-property report requires:
+
+| property | asserts |
+|---|---|
+| events | every event is a certificate line from the current state at that pc with that outcome, its gap inside the line's interval |
+| slots | every event's slot inside its line's interval |
+| levels | each channel pin a write touches left at the line's level; every other channel pin unchanged; no other slot of T changes the channel |
+| data | the data pin left at the declared bit of the (free) input byte: driven to it (push-pull), or driven 0 / released (open drain) |
+| subslot | the quarter-clock levels switch at the line's q, and are steady otherwise |
+| deadline_ | the slots since the last event never exceed the current state's deadline |
+| quiet | no clock that is not T's changes a channel pin or shows a quarter-clock level unlike the pin's |
+| page | every fetch for T is on page T |
+
+**Results** (`results/rtl.txt`):
+
+| image | what | engine | result |
+|---|---|---|---|
+| `deadline_ldd20` | deadline programme, WAITP with timeout | abc pdr, 21 s | **all 7 PROVED unbounded**; slots to 548 clocks; both final states (event, timeout) reachable |
+| `uart_b5_n1` | UART, bit 5 slots, 1 byte, data | abc pdr, 258 s | **all 8 PROVED unbounded**; slots to 260 clocks |
+| `spi_p10_n1` | SPI, period 10, 1 byte, data | abc pdr, 895 s | **all 8 PROVED unbounded**; slots to 601 clocks |
+| `i2c_q4_n1_l7` | I2C, WAITP on SCL, stretch limit 7 | pdr stopped at 30 min; abc bmc3, 27 min | all 7 **PROVED to 1,814 clocks**; all 11 final states (each timeout, and the end of the frame) reachable |
+| `uart_b16_n3` | UART, bit 16 slots, 3 bytes | pdr stopped at 30 min; bmc3, 98 s | all 8 PROVED to 2,068 clocks |
+| `spi_p16_n2` | SPI, period 16, 2 bytes | pdr stopped at 30 min; bmc3 | all 8 PROVED to 1,781 clocks |
+
+**Why the bounds suffice for the slots.** An absolute slot counter makes pdr learn the whole
+timeline (with it, pdr did not converge on the 3-byte UART in 20 minutes; without it, pdr
+proves the smaller images but still not the 3-byte UART in 30 minutes), so the slot intervals are
+checked by bounded runs only. The bound is past every event: the certificate's states are
+acyclic (every line leads to a later state, which the generator checks), so at most [states]
+events happen, and each comes within the deadline of the state before it (the deadline property,
+proved unbounded where pdr finishes), so every event's slot is below [states] x (largest
+deadline or gap) + 1, and the run lasts that many slots and two more. Where pdr did not finish
+(the last three rows), the same bounded run checks every property, and that is all that is
+claimed for them: a fault that shows only after the bound, such as a channel write long after the
+frame has ended, is not excluded there. pdr was also tried on the I2C with stretch limit 1
+(30 minutes, no verdict).
+
+**Controls**, each of which must fail and does (`results/rtl.txt`): a certificate with a gap
+narrowed by one slot, on the deadline programme (2..22 to 2..21: FAILED, events, clock 92, a 22-slot
+wait) and on the I2C (the first SCL observation 1..7 to 1..6: FAILED, events, clock 86); an exact
+gap moved by one slot on the UART (5 to 4: FAILED, events, clock 32); every declared data bit moved
+to the next bit, on the UART and on the SPI (FAILED, data, clocks 32 and 25); and three RTL
+mutants in `Sequencer2.cert_mutants` (kept out of the lockstep's list): WAITD leaving at dl = 1
+(UART: FAILED, events, clock 28), a wait timing out at dl = 1 (deadline programme and I2C: FAILED,
+events, clocks 88 and 82), SHO shifting lsb first whatever its flag (SPI: FAILED, data, clock 25).
+
+**What this does not cover.** A representative set, not every image of the sweep; three of the
+six only to a bound. The other threads are assumed not to write the channel's pins (A5); `compose`
+checks that for real programmes. Thread T's pc is read from the store address, so the RTL's
+own fetch path is trusted to present the pc it executes next (the lockstep test and the power-up
+proof of `../formal` cover it). The first event is checked from the first clock after a single
+clear clock with the boot pc 0.
 
 ## Files
 
