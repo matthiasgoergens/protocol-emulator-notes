@@ -28,3 +28,8 @@
  (name compare_def)
  (modules compare_def)
  (libraries roundtrip))
+
+(executable
+ (name cellcheck)
+ (modules cellcheck)
+ (libraries roundtrip))
