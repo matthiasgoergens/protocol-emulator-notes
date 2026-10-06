@@ -1,0 +1,13 @@
+# run.py hv_nmos ENVS=W=0.30 WMW=0.15 LMW=0.45 PDK=cmos5l (IHP-Open-PDK 2bbec755dc67ca3db0261c3d6163e15735d66710) commit daef101 2026-10-06T08:04:49+08:00
+hv_nmos  mos_tt   27C  stored 1  written  0.468 V  after 1us  0.467  100us  0.390  1ms  0.071  10ms  0.000  crossings 0.45V@22.5us  0.40V@87.1us  0.35V@157.3us  0.30V@237.0us  0.25V@330.9us
+hv_nmos  mos_tt   27C  stored 0  written -0.076 V  after 1us -0.031  100us -0.003  1ms -0.001  10ms  0.000  crossings 0.25V@-  0.30V@-  0.35V@-  0.40V@-
+hv_nmos  mos_tt   85C  stored 1  written  0.551 V  after 1us  0.550  100us  0.463  1ms  0.085  10ms  0.000  crossings 0.45V@116.8us  0.40V@182.3us  0.35V@253.6us  0.30V@333.5us  0.25V@427.1us
+hv_nmos  mos_tt   85C  stored 0  written -0.076 V  after 1us -0.028  100us -0.018  1ms -0.004  10ms  0.000  crossings 0.25V@-  0.30V@-  0.35V@-  0.40V@-
+hv_nmos  mos_ff   27C  stored 1  written  0.554 V  after 1us  0.553  100us  0.460  1ms  0.082  10ms  0.001  crossings 0.45V@112.1us  0.40V@176.8us  0.35V@248.1us  0.30V@327.6us  0.25V@420.0us
+hv_nmos  mos_ff   27C  stored 0  written -0.077 V  after 1us -0.030  100us -0.017  1ms -0.003  10ms  0.001  crossings 0.25V@-  0.30V@-  0.35V@-  0.40V@-
+hv_nmos  mos_ff   85C  stored 1  written  0.632 V  after 1us  0.630  100us  0.501  1ms  0.086  10ms  0.001  crossings 0.45V@154.0us  0.40V@214.8us  0.35V@283.9us  0.30V@362.1us  0.25V@453.0us
+hv_nmos  mos_ff   85C  stored 0  written -0.072 V  after 1us -0.035  100us -0.030  1ms -0.005  10ms  0.001  crossings 0.25V@-  0.30V@-  0.35V@-  0.40V@-
+hv_nmos  mos_ss   27C  stored 1  written  0.366 V  after 1us  0.369  100us  0.304  1ms  0.055  10ms  0.000  crossings 0.45V@0.0us  0.40V@0.0us  0.35V@28.5us  0.30V@107.3us  0.25V@200.6us
+hv_nmos  mos_ss   27C  stored 0  written -0.083 V  after 1us -0.050  100us -0.002  1ms  0.001  10ms  0.000  crossings 0.25V@-  0.30V@-  0.35V@-  0.40V@-
+hv_nmos  mos_ss   85C  stored 1  written  0.462 V  after 1us  0.461  100us  0.382  1ms  0.069  10ms  0.000  crossings 0.45V@13.9us  0.40V@76.2us  0.35V@145.0us  0.30V@223.7us  0.25V@316.8us
+hv_nmos  mos_ss   85C  stored 0  written -0.076 V  after 1us -0.031  100us -0.001  1ms -0.000  10ms  0.000  crossings 0.25V@-  0.30V@-  0.35V@-  0.40V@-

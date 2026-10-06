@@ -1,0 +1,7 @@
+               91674 GC_BANK EXPIRED read of row 9: never written
+check 1: 32 of 32 rows read back
+check 2: 1007 random reads correct, expired reads so far 1
+           414558162 GC_BANK EXPIRED read of row 4: 6000 ns after its write, bound 5000 ns
+check 3: late read returned xxxxxxxx err x, expired reads 2
+PASS (2 expired reads flagged)
+/home/matthias/prog/janestreet/emulator-wt-gain-cell-macro/prototypes/gain-cell-macro/rtl/tb_bank.v:133: $finish called at 414566496 (1ps)

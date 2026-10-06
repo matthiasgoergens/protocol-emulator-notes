@@ -1,0 +1,10 @@
+control drc-sliver: precheck exit 1 (rejected, as it should be)
+| KLayout pin label overlapping drawing | ✅ |
+| KLayout SG13CMOS5L DRC | ❌ Fail: Klayout sg13cmos5l failed with 9 DRC violations |
+| KLayout zero area | ✅ |
+| KLayout Checks | ✅ |
+| Pin check | ✅ |
+| Boundary check | ✅ |
+| Layer check | ✅ |
+| Cell name check | ✅ |
+| Analog pin check | ✅ |

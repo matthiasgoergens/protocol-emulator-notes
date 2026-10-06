@@ -4,7 +4,10 @@ Group A of `notes/learned-from-others.md` (items T1, T2, V28, V32, A12), first s
 has hardened it once, as Tiny Tapeout's ihp-cmos5l action would (2026-10-05, LibreLane 3.1.0.dev3,
 6x4 tiles, 20 ns): 9,621 cells, 0 routing DRC, 0 Magic DRC, 0 LVS errors, worst setup slack
 +10.39 ns, hold +0.12 ns, in 29 minutes (17 of them Magic DRC). Record in
-`../tools/librelane-tt/results/tt-harden/`. It has not been through the precheck, and the timing
+`../tools/librelane-tt/results/tt-harden/`. That output has been through Tiny Tapeout's precheck
+(`scripts/precheck.sh`, all 9 checks pass, 2026-10-06; record in `../tools/librelane-tt/results/tt-precheck/`)
+and the gate-level test. The precheck passing says nothing about the design: it checks the
+shuttle's geometry and pin rules, and the wrapper is still a placeholder. The timing
 script has only been run on a metrics file from another project.
 
 ## Contents
@@ -18,6 +21,9 @@ script has only been run on a metrics file from another project.
 | `test/` | cocotb test (`make` for RTL, `make GATES=yes` for a gate-level netlist once one exists) |
 | `scripts/corner-report.py` | setup and hold slack per corner from a LibreLane run directory |
 | `scripts/harden.sh` | hardens the project as Tiny Tapeout's ihp-cmos5l GDS action does (tt-support-tools d66cf17, LibreLane 3.1.0.dev3), in a scratch directory, with the pinned image from `../tools/librelane-tt` |
+| `scripts/precheck.sh`, `scripts/precheck-controls.sh` | Tiny Tapeout's precheck on a hardened stage, with its KLayout from the pinned image; and copies of the submission with one planted error each, which the precheck must reject |
+| `scripts/stage-for-action.sh` | lays tt/ out at a workspace root, as the GDS action needs (see below) |
+| `../.github/workflows/tt-gds.yaml` | Tiny Tapeout's own gds, precheck and gl_test actions on tt/, by hand only; read-only token, no secrets; never run on GitHub yet |
 | `../.github/workflows/tt-harness.yaml` | generates the Verilog and runs the RTL test; no secrets, read-only token |
 
 Top level: `deadline_sequencer_v2` is the sequencer-v2 core, which group A of `notes/learned-from-others.md` names (sequencer-v2) as the
@@ -28,7 +34,12 @@ integrated top, see `notes/codex-brainstorm-2026-09-25.md`), so the wrapper is m
 
     cd tt/test && uv run --no-project --python 3.12 --with-requirements requirements.txt make
     tt/scripts/harden.sh /var/tmp/tt-harden/NEW-DIR        # needs tools/librelane-tt/build.sh once
+    tt/scripts/precheck.sh /var/tmp/tt-harden/NEW-DIR /var/tmp/tt-precheck/NEW-REPORT   # after harden.sh; about 20 minutes
+    tt/scripts/precheck-controls.sh /var/tmp/tt-harden/NEW-DIR /var/tmp/tt-precheck/CONTROLS quick
     tt/scripts/corner-report.py <librelane-run-dir>
+
+The gate-level test is `make GATES=yes` in `test/` with `PDK_ROOT` set and the stage's
+`tt_submission/<top>.v` copied to `test/gate_level_netlist.v`.
 
 `make` generates `src/deadline_sequencer_v2.v` first, which needs Hardcaml v0.17 (opam switch 5.3.0
 on this machine; `OPAM_SWITCH=` uses the current environment). cocotb 2.0.1 does not build on
@@ -37,6 +48,39 @@ Python 3.14, hence the pinned interpreter.
 The generated Verilog is not committed, so it can never drift from its source. The Tiny Tapeout
 GDS action reads Verilog from `src/` and does not run OCaml, so a GDS workflow has to generate it in
 a step before the action, as `tt-harness.yaml` does before the test.
+
+## Does the GDS action need its own repository?
+
+No, but it cannot be pointed at `tt/` either; the project has to be laid out at the workspace root
+first, which `scripts/stage-for-action.sh` does and `../.github/workflows/tt-gds.yaml` uses. Read from
+TinyTapeout/tt-gds-action, branch ihp-cmos5l, commit 3412659, and tt-support-tools d66cf17:
+
+- The action has no input for a project directory: its inputs are `tools-repo`, `tools-ref`, `pdk` and
+  `librelane-version` (`action.yml` lines 8-31). Every step runs in the workspace root and
+  names root-relative paths: `./tt/tt_tool.py --create-user-config` (line 90), `--harden` (103),
+  `--create-tt-submission` (179), and the uploads `src/*` and `info.yaml` (174, 186, 189).
+- `tt_tool.py` itself could be pointed elsewhere: `--project-dir` exists (`tt_tool.py` line 12,
+  default `.`), and `Project` reads `<dir>/info.yaml` and `<dir>/src` from it (`project.py` 74-87). But
+  the action never passes it; its `TT_ARGS` is only `--ihp` (`action.yml` lines 42-55).
+- `tt_tool.py` also needs the project directory to be a git repository with a remote: `get_git_remote`
+  and `get_git_commit_hash` call `Repo(local_dir).remotes[0]` and `.commit()` (`project.py` 293-296)
+  and `harden` calls both before it starts. A subdirectory of a clone is not that (`Repo` does not
+  search parent directories by default).
+- The action checks tt-support-tools out at `path: tt` (`action.yml` line 76), which is this repository's
+  own `tt/`. Run at the root of a checkout of this repository, that checkout step would put a second
+  repository on top of the project.
+- The precheck action downloads the `tt_submission` artifact into the workspace root and finds
+  `info.yaml` by walking up from the GDS (`precheck.py`, "while not os.path.exists(f"{yaml_dir}/info.yaml")"),
+  and the gl_test action reads `test/requirements.txt` and copies the netlist to `test/` of the
+  workspace root (`gl_test/action.yml` lines 57, 62, 76).
+
+So the workflow checks this repository out into `repo/`, and `stage-for-action.sh` copies `tt/info.yaml`,
+`src/`, `docs/` and `test/` to the root, generates the core's Verilog into `src/`, and makes the root a
+throwaway git repository whose remote is this repository's URL (as `harden.sh` does). Checked locally:
+in a stage made that way, `tt_tool.py --create-user-config --ihp` at d66cf17 writes the same
+`user_config.json` as the stage `harden.sh` hardened. Not checked: the workflow on GitHub. One
+consequence of the throwaway root: `commit_id.json` names the stage's commit, not a commit of the real
+repository (the stage's commit message gives that one).
 
 ## Credits
 

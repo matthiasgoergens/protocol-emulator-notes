@@ -1,0 +1,45 @@
+control pin-name: precheck exit 1 (rejected, as it should be)
+| KLayout pin label overlapping drawing | ✅ |
+| KLayout zero area | ✅ |
+| KLayout Checks | ✅ |
+| Pin check | ❌ Fail: Some ports are missing or have wrong dimensions, see 2 LEF errors above |
+| Boundary check | ✅ |
+| Layer check | ✅ |
+| Cell name check | ✅ |
+| Analog pin check | ✅ |
+control boundary: precheck exit 1 (rejected, as it should be)
+| KLayout pin label overlapping drawing | ✅ |
+| KLayout zero area | ✅ |
+| KLayout Checks | ✅ |
+| Pin check | ✅ |
+| Boundary check | ❌ Fail: Shapes outside project area |
+| Layer check | ✅ |
+| Cell name check | ✅ |
+| Analog pin check | ✅ |
+control forbidden-layer: precheck exit 1 (rejected, as it should be)
+| KLayout pin label overlapping drawing | ✅ |
+| KLayout zero area | ✅ |
+| KLayout Checks | ❌ Fail: Forbidden layer TopMetal1.drawing found in /var/tmp/librelane-tt/controls-quick-1/forbidden-layer/tt_submission/tt_um_seqv2.gds |
+| Pin check | ✅ |
+| Boundary check | ✅ |
+| Layer check | ❌ Fail: Invalid layers in GDS: {(126, 0)} |
+| Cell name check | ✅ |
+| Analog pin check | ✅ |
+control top-name: precheck exit 1 (rejected, as it should be)
+| KLayout pin label overlapping drawing | ✅ |
+| KLayout zero area | ✅ |
+| KLayout Checks | ❌ Fail: Top macro name mismatch: expected tt_um_seqv2, got tt_um_wrong |
+| Pin check | ❌ Fail: Wrong cell at GDS top-level |
+| Boundary check | ✅ |
+| Layer check | ✅ |
+| Cell name check | ✅ |
+| Analog pin check | ✅ |
+control layer: precheck exit 1 (rejected, as it should be)
+| KLayout pin label overlapping drawing | ✅ |
+| KLayout zero area | ✅ |
+| KLayout Checks | ✅ |
+| Pin check | ✅ |
+| Boundary check | ✅ |
+| Layer check | ❌ Fail: Invalid layers in GDS: {(200, 7)} |
+| Cell name check | ✅ |
+| Analog pin check | ✅ |

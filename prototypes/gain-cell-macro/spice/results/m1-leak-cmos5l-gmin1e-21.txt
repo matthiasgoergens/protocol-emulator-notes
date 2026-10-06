@@ -1,0 +1,7 @@
+# leak.py  ENVS= GMIN=1e-21 PDK=cmos5l (IHP-Open-PDK 2bbec755dc67ca3db0261c3d6163e15735d66710) commit daef101 2026-10-06T08:08:52+08:00
+mos_tt   27C  droop over 1 ms from 0.55 V:  full +0.047   mw_only +0.000   ms_only +0.054   ms_hv +0.000   mwlv_only +0.550
+mos_tt   85C  droop over 1 ms from 0.55 V:  full +0.068   mw_only +0.000   ms_only +0.078   ms_hv +0.001   mwlv_only +0.550
+mos_ff   27C  droop over 1 ms from 0.55 V:  full +0.136   mw_only +0.000   ms_only +0.151   ms_hv +0.000   mwlv_only +0.550
+mos_ff   85C  droop over 1 ms from 0.55 V:  full +0.181   mw_only +0.000   ms_only +0.200   ms_hv +0.001   mwlv_only +0.550
+mos_ss   27C  droop over 1 ms from 0.55 V:  full +0.011   mw_only +0.000   ms_only +0.014   ms_hv +0.000   mwlv_only +0.040
+mos_ss   85C  droop over 1 ms from 0.55 V:  full +0.019   mw_only +0.000   ms_only +0.021   ms_hv +0.001   mwlv_only +0.550

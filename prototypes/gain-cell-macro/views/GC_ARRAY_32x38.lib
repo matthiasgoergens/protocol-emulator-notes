@@ -1,0 +1,49 @@
+library (GC_ARRAY_32x38) {
+  delay_model : table_lookup ;
+  time_unit : "1ns" ;
+  voltage_unit : "1V" ;
+  current_unit : "1mA" ;
+  capacitive_load_unit (1, pf) ;
+  pulling_resistance_unit : "1kohm" ;
+  leakage_power_unit : "1nW" ;
+  nom_process : 1 ; nom_voltage : 1.2 ; nom_temperature : 25 ;
+  voltage_map (GND, 0.0) ;
+  slew_lower_threshold_pct_rise : 20 ; slew_upper_threshold_pct_rise : 80 ;
+  slew_lower_threshold_pct_fall : 20 ; slew_upper_threshold_pct_fall : 80 ;
+  input_threshold_pct_rise : 50 ; input_threshold_pct_fall : 50 ;
+  output_threshold_pct_rise : 50 ; output_threshold_pct_fall : 50 ;
+  default_max_transition : 2.0 ;
+  type (bus_WWL) { base_type : array ; data_type : bit ; bit_width : 32 ; bit_from : 31 ; bit_to : 0 ; downto : true ; }
+  type (bus_RWL) { base_type : array ; data_type : bit ; bit_width : 32 ; bit_from : 31 ; bit_to : 0 ; downto : true ; }
+  type (bus_WBL) { base_type : array ; data_type : bit ; bit_width : 38 ; bit_from : 37 ; bit_to : 0 ; downto : true ; }
+  type (bus_RBL) { base_type : array ; data_type : bit ; bit_width : 38 ; bit_from : 37 ; bit_to : 0 ; downto : true ; }
+  cell (GC_ARRAY_32x38) {
+    area : 4050.000 ;
+    dont_use : true ; dont_touch : true ; is_macro_cell : true ;
+    pg_pin (GND) { voltage_name : GND ; pg_type : primary_ground ; }
+    bus (WWL) {
+      bus_type : bus_WWL ;
+      direction : input ;
+      capacitance : 0.017 ;
+      related_ground_pin : GND ;
+    }
+    bus (RWL) {
+      bus_type : bus_RWL ;
+      direction : input ;
+      capacitance : 0.0176 ;
+      related_ground_pin : GND ;
+    }
+    bus (WBL) {
+      bus_type : bus_WBL ;
+      direction : input ;
+      capacitance : 0.014 ;
+      related_ground_pin : GND ;
+    }
+    bus (RBL) {
+      bus_type : bus_RBL ;
+      direction : inout ;
+      capacitance : 0.014 ;
+      related_ground_pin : GND ;
+    }
+  }
+}

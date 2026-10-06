@@ -122,7 +122,7 @@ precheck yet, and the real top level, with all the blocks above, is not integrat
 | `tt/` | the Tiny Tapeout harness |
 | `notes/` | architecture, backlog, prior-art surveys, and what we learnt from other entrants and from the solvers of Jane Street's earlier [ASIC puzzle](https://blog.janestreet.com/asic-puzzle-results/) |
 | `measurements/` | early area studies: an RP2040 PIO clone and a FABulous embedded-FPGA tile on the same process |
-| `brainstorm-*.md`, `synthesis.md`, `second-layer/` | the opening brainstorm (see "How this was made") |
+| `brainstorm-*.md`, `synthesis.md`, `second-layer/` | the opening brainstorm: independent idea lists from the same prompt, compared in `synthesis.md` |
 | `datapoints.md`, `PLAN.md`, `techniques.md` | early measured facts, the first plan, and ways a large host can do the work a tiny chip cannot |
 
 ## Reproducing
@@ -133,14 +133,6 @@ file names the command and commit that produced it. Synthesis and place and rout
 LibreLane in containers; the Python tools run through [uv](https://docs.astral.sh/uv/). The IHP
 process design kit and third-party sources are not vendored unless stated; the notes name the
 commits used.
-
-## How this was made
-
-The work was done with AI assistants, which wrote much of the code and the first drafts of the
-notes: mainly Claude, with Codex, Kimi and DeepSeek for brainstorming and adversarial reviews. The brainstorm files at the top level are three
-independent idea lists written by Claude, Codex and Kimi from the same prompt, compared in
-`synthesis.md`, plus `brainstorm-wild.md`, which deliberately ignores where they agree. The
-verification above is set up so that no result depends on trusting any one model's output.
 
 ## Credits
 
