@@ -4,35 +4,38 @@
 # verdict: PROVED; 122 table entries, 31 channel events checked
 # assumptions: kernel.ml A1-A5. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot
 # columns: pc, instruction, pins touched, specification state from -> to, slot of the event,
-#          gap since the previous channel event, declared gap
+#          gap since the previous channel event, declared gap, declared data (the level is that
+#          bit of that input byte: driven for a push-pull write, driven 0 or released for open drain)
+# input bytes: byte0=0x4f byte1=0x4b byte2=0x21
+# deadlines: 0:16 1:16 2:16 3:16 4:16 5:16 6:16 7:16 8:16 9:16 10:16 11:16 12:16 13:16 14:16 15:16 16:16 17:16 18:16 19:16 20:16 21:16 22:16 23:16 24:16 25:16 26:16 27:16 28:16 29:16 30:16
   0  setp mask=01 val=1 oe=1 q=0 p0:set=1                     0 -> 1   slot 0          gap 0         declared 0..16
   2  setp mask=01 val=0 oe=1 q=0 p0:set=0                     1 -> 2   slot 2          gap 2         declared 1..16
-  6  sho pin0 lsb q=0           p0:sho=1                     2 -> 3   slot 18         gap 16        declared 16
-  6  sho pin0 lsb q=0           p0:sho=1                     3 -> 4   slot 34         gap 16        declared 16
-  6  sho pin0 lsb q=0           p0:sho=1                     4 -> 5   slot 50         gap 16        declared 16
-  6  sho pin0 lsb q=0           p0:sho=1                     5 -> 6   slot 66         gap 16        declared 16
-  6  sho pin0 lsb q=0           p0:sho=0                     6 -> 7   slot 82         gap 16        declared 16
-  6  sho pin0 lsb q=0           p0:sho=0                     7 -> 8   slot 98         gap 16        declared 16
-  6  sho pin0 lsb q=0           p0:sho=1                     8 -> 9   slot 114        gap 16        declared 16
-  6  sho pin0 lsb q=0           p0:sho=0                     9 -> 10  slot 130        gap 16        declared 16
+  6  sho pin0 lsb q=0           p0:sho=1                     2 -> 3   slot 18         gap 16        declared 16 data byte0.bit0
+  6  sho pin0 lsb q=0           p0:sho=1                     3 -> 4   slot 34         gap 16        declared 16 data byte0.bit1
+  6  sho pin0 lsb q=0           p0:sho=1                     4 -> 5   slot 50         gap 16        declared 16 data byte0.bit2
+  6  sho pin0 lsb q=0           p0:sho=1                     5 -> 6   slot 66         gap 16        declared 16 data byte0.bit3
+  6  sho pin0 lsb q=0           p0:sho=0                     6 -> 7   slot 82         gap 16        declared 16 data byte0.bit4
+  6  sho pin0 lsb q=0           p0:sho=0                     7 -> 8   slot 98         gap 16        declared 16 data byte0.bit5
+  6  sho pin0 lsb q=0           p0:sho=1                     8 -> 9   slot 114        gap 16        declared 16 data byte0.bit6
+  6  sho pin0 lsb q=0           p0:sho=0                     9 -> 10  slot 130        gap 16        declared 16 data byte0.bit7
  10  setp mask=01 val=1 oe=1 q=0 p0:set=1                    10 -> 11  slot 146        gap 16        declared 16
  14  setp mask=01 val=0 oe=1 q=0 p0:set=0                    11 -> 12  slot 162        gap 16        declared 16
- 18  sho pin0 lsb q=0           p0:sho=1                    12 -> 13  slot 178        gap 16        declared 16
- 18  sho pin0 lsb q=0           p0:sho=1                    13 -> 14  slot 194        gap 16        declared 16
- 18  sho pin0 lsb q=0           p0:sho=0                    14 -> 15  slot 210        gap 16        declared 16
- 18  sho pin0 lsb q=0           p0:sho=1                    15 -> 16  slot 226        gap 16        declared 16
- 18  sho pin0 lsb q=0           p0:sho=0                    16 -> 17  slot 242        gap 16        declared 16
- 18  sho pin0 lsb q=0           p0:sho=0                    17 -> 18  slot 258        gap 16        declared 16
- 18  sho pin0 lsb q=0           p0:sho=1                    18 -> 19  slot 274        gap 16        declared 16
- 18  sho pin0 lsb q=0           p0:sho=0                    19 -> 20  slot 290        gap 16        declared 16
+ 18  sho pin0 lsb q=0           p0:sho=1                    12 -> 13  slot 178        gap 16        declared 16 data byte1.bit0
+ 18  sho pin0 lsb q=0           p0:sho=1                    13 -> 14  slot 194        gap 16        declared 16 data byte1.bit1
+ 18  sho pin0 lsb q=0           p0:sho=0                    14 -> 15  slot 210        gap 16        declared 16 data byte1.bit2
+ 18  sho pin0 lsb q=0           p0:sho=1                    15 -> 16  slot 226        gap 16        declared 16 data byte1.bit3
+ 18  sho pin0 lsb q=0           p0:sho=0                    16 -> 17  slot 242        gap 16        declared 16 data byte1.bit4
+ 18  sho pin0 lsb q=0           p0:sho=0                    17 -> 18  slot 258        gap 16        declared 16 data byte1.bit5
+ 18  sho pin0 lsb q=0           p0:sho=1                    18 -> 19  slot 274        gap 16        declared 16 data byte1.bit6
+ 18  sho pin0 lsb q=0           p0:sho=0                    19 -> 20  slot 290        gap 16        declared 16 data byte1.bit7
  22  setp mask=01 val=1 oe=1 q=0 p0:set=1                    20 -> 21  slot 306        gap 16        declared 16
  26  setp mask=01 val=0 oe=1 q=0 p0:set=0                    21 -> 22  slot 322        gap 16        declared 16
- 30  sho pin0 lsb q=0           p0:sho=1                    22 -> 23  slot 338        gap 16        declared 16
- 30  sho pin0 lsb q=0           p0:sho=0                    23 -> 24  slot 354        gap 16        declared 16
- 30  sho pin0 lsb q=0           p0:sho=0                    24 -> 25  slot 370        gap 16        declared 16
- 30  sho pin0 lsb q=0           p0:sho=0                    25 -> 26  slot 386        gap 16        declared 16
- 30  sho pin0 lsb q=0           p0:sho=0                    26 -> 27  slot 402        gap 16        declared 16
- 30  sho pin0 lsb q=0           p0:sho=1                    27 -> 28  slot 418        gap 16        declared 16
- 30  sho pin0 lsb q=0           p0:sho=0                    28 -> 29  slot 434        gap 16        declared 16
- 30  sho pin0 lsb q=0           p0:sho=0                    29 -> 30  slot 450        gap 16        declared 16
+ 30  sho pin0 lsb q=0           p0:sho=1                    22 -> 23  slot 338        gap 16        declared 16 data byte2.bit0
+ 30  sho pin0 lsb q=0           p0:sho=0                    23 -> 24  slot 354        gap 16        declared 16 data byte2.bit1
+ 30  sho pin0 lsb q=0           p0:sho=0                    24 -> 25  slot 370        gap 16        declared 16 data byte2.bit2
+ 30  sho pin0 lsb q=0           p0:sho=0                    25 -> 26  slot 386        gap 16        declared 16 data byte2.bit3
+ 30  sho pin0 lsb q=0           p0:sho=0                    26 -> 27  slot 402        gap 16        declared 16 data byte2.bit4
+ 30  sho pin0 lsb q=0           p0:sho=1                    27 -> 28  slot 418        gap 16        declared 16 data byte2.bit5
+ 30  sho pin0 lsb q=0           p0:sho=0                    28 -> 29  slot 434        gap 16        declared 16 data byte2.bit6
+ 30  sho pin0 lsb q=0           p0:sho=0                    29 -> 30  slot 450        gap 16        declared 16 data byte2.bit7
  34  setp mask=01 val=1 oe=1 q=0 p0:set=1                    30 -> 31  slot 466        gap 16        declared 16

@@ -13,7 +13,13 @@
      main.exe controls          perturbed certificates: the kernel must reject each
      main.exe certs DIR         per-image timing certificates and the ledger
      main.exe ledger-check FILE recompute every certificate and compare with the ledger
-     main.exe kernel-bugs       planted bugs in the kernel: each must make a check above fail *)
+     main.exe kernel-bugs       planted bugs in the kernel: each must make a check above fail
+     main.exe rtl NAME DIR [--gap N G] [--data-shift] [--thread T]
+                                the certificate of NAME and the SymbiYosys check of it on the RTL
+                                (rtl.ml): DIR/NAME.cert, DIR/cert_check.sv, DIR/depth (of
+                                the bounded runs), DIR/finals (the final states); with
+                                --gap, the N-th channel-event line's gap replaced by G, with
+                                --data-shift, every declared data bit moved to the next (controls) *)
 
 open Programmes
 
@@ -76,15 +82,23 @@ let cert_text v =
     v.rep.entries v.rep.events_checked;
   p "# assumptions: kernel.ml A1-A5. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot\n";
   p "# columns: pc, instruction, pins touched, specification state from -> to, slot of the event,\n";
-  p "#          gap since the previous channel event, declared gap\n";
+  p "#          gap since the previous channel event, declared gap, declared data (the level is that\n";
+  p "#          bit of that input byte: driven for a push-pull write, driven 0 or released for open drain)\n";
+  (match v.img.spec.bytes with
+   | [||] -> ()
+   | b -> p "# input bytes: %s\n" (String.concat " " (Array.to_list (Array.mapi (fun i x -> Printf.sprintf "byte%d=0x%02x" i x) b))));
+  (* each state's deadline (Spec.deadline): the most slots without a channel event *)
+  p "# deadlines: %s\n" (String.concat " " (List.filter_map (fun a -> match Spec.deadline v.img.spec a with
+      | Some d -> Some (Printf.sprintf "%d:%d" a d) | None -> None) (List.init v.img.spec.states Fun.id)));
   let preds = List.sort_uniq compare (List.map (fun (x : Kernel.prediction) ->
       (x.p_time.Interval.lo, x.p_pc, x.p_from, Interval.to_string x.p_time,
        Spec.event_to_string x.p_ev, x.p_to, Option.map Interval.to_string x.p_gap,
-       Option.map Interval.to_string x.p_allowed, x.p_q, x.p_word)) v.rep.predictions) in
-  List.iter (fun (_, pc, from, time, ev, to_, gap, allowed, q, w) ->
-      p "%3d  %-26s %-26s %3d -> %-3s slot %-10s%s gap %-9s declared %s\n" pc (disasm w) ev from
+       Option.map Interval.to_string x.p_allowed, x.p_q, x.p_word, x.p_data)) v.rep.predictions) in
+  List.iter (fun (_, pc, from, time, ev, to_, gap, allowed, q, w, data) ->
+      p "%3d  %-26s %-26s %3d -> %-3s slot %-10s%s gap %-9s declared %s%s\n" pc (disasm w) ev from
         (match to_ with Some t -> string_of_int t | None -> "-") time (if q <> 0 then Printf.sprintf " q%d" q else "")
-        (Option.value gap ~default:"-") (Option.value allowed ~default:"-")) preds;
+        (Option.value gap ~default:"-") (Option.value allowed ~default:"-")
+        (match data with Some d -> " data " ^ Spec.data_to_string d | None -> "")) preds;
   List.iter (fun x -> p "VIOLATION %s\n" (Kernel.violation_to_string v.img.spec x)) v.rep.violations;
   Buffer.contents b
 
@@ -341,6 +355,16 @@ let cmd_controls () =
                 if (Kernel.check spec img.words cert).violations = [] then
                   (incr m; incr missed; Printf.printf "  NOT REJECTED %s: declared gap of %s %+d\n" img.name tr.label d)) [ -1; 1 ])
         img.spec.transitions;
+      (* the declared data, perturbed: each declared bit flipped in turn *)
+      List.iter (fun (tr : Spec.transition) -> match tr.data with
+          | None -> ()
+          | Some (i, b) ->
+            let bytes = Array.copy img.spec.bytes in
+            bytes.(i) <- bytes.(i) lxor (1 lsl b);
+            incr n; incr total;
+            if (Kernel.check { img.spec with bytes } img.words cert).violations = [] then
+              (incr m; incr missed; Printf.printf "  NOT REJECTED %s: declared %s flipped\n" img.name (Spec.data_to_string (i, b))))
+        img.spec.transitions;
       Printf.printf "%-28s %5d perturbed certificates or specifications, %d not rejected\n%!" img.name !n !m) imgs;
   Printf.printf "controls: %d, not rejected %d\n" !total !missed;
   if !missed > 0 then exit 1
@@ -405,7 +429,8 @@ let kernel_bug_names = [
   7, "WAITD takes one slot less";
   8, "no deadline check";
   9, "no closure check (every state counts as covered)";
-  10, "no gap check" ]
+  10, "no gap check";
+  11, "no data check" ]
 
 let cmd_kernel_bugs () =
   let checks = [ [ "selftest" ]; [ "controls" ]; [ "random"; "150" ]; [ "sweep" ]; [ "planted" ] ] in
@@ -423,6 +448,33 @@ let cmd_kernel_bugs () =
   Printf.printf "kernel bugs: %d planted, %d not caught
 " (List.length kernel_bug_names) !missed;
   if !missed > 0 then exit 1
+
+(* the certificate on the RTL (rtl.ml): the certificate's text, optionally edited (a control),
+   parsed back and turned into SystemVerilog *)
+let cmd_rtl name dir opts =
+  let img = find name in
+  let v = verify img in
+  if not (accepted v) then (prerr_endline (name ^ " is not proved"); exit 1);
+  let text = cert_text v in
+  let rec go text thread = function
+    | "--gap" :: n :: g :: r -> go (Rtl.edit_gap text (int_of_string n) g) thread r
+    | "--data-shift" :: r -> go (Rtl.edit_data text) thread r
+    | "--thread" :: t :: r -> go text (int_of_string t) r
+    | [] -> text, thread
+    | x :: _ -> prerr_endline ("rtl: unknown option " ^ x); exit 2 in
+  let text, thread = go text img.thread opts in
+  let c = Rtl.parse text in
+  if c.Rtl.sha <> Sha256.digest (Sha256.image_bytes img.words) then (prerr_endline "certificate is not of this image"; exit 1);
+  (try Unix.mkdir dir 0o755 with Unix.Unix_error (Unix.EEXIST, _, _) -> ());
+  let write f s = let oc = open_out (Filename.concat dir f) in output_string oc s; close_out oc in
+  write (name ^ ".cert") text;
+  let sv, depth, finals, slots_depth = Rtl.generate ~thread ~words:img.words c in
+  write "slots_depth" (string_of_int slots_depth ^ "\n");
+  write "cert_check.sv" sv;
+  write "depth" (string_of_int depth ^ "\n");
+  write "finals" (String.concat " " (List.map string_of_int finals) ^ "\n");
+  Printf.printf "%s: thread %d, %d certificate lines, %d channel pins, bounded runs to %d clocks\n" name thread
+    (List.length c.lines) (List.length c.pins) depth
 
 let () =
   let args = Array.to_list Sys.argv |> List.tl in
@@ -461,5 +513,9 @@ let () =
   | [ "controls" ] -> cmd_controls ()
   | [ "certs"; dir ] -> cmd_certs dir
   | [ "ledger-check"; file ] -> cmd_ledger_check file
+  | "rtl" :: name :: dir :: opts -> cmd_rtl name dir opts
+  | [ "kernel-z3"; first; last ] ->
+    (* the kernel's step against Isa2 by z3, for every word in [FIRST, LAST] (hex) *)
+    Kernel_proof.run ~first:(int_of_string ("0x" ^ first)) ~last:(int_of_string ("0x" ^ last))
   | [ "list" ] -> List.iter (fun i -> print_endline i.name) (all_images ())
   | _ -> prerr_endline "usage: main.exe [--bug N] selftest|verify NAME|sweep|planted|compose|mutants|random N|controls|certs DIR|ledger-check FILE|list|kernel-bugs"; exit 2

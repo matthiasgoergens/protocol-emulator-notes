@@ -1,0 +1,76 @@
+# command: kernel_z3.sh 
+# commit: e1f40892735f66921c732c7f9c400348f89f5449
+# Z3 version 5.1.0 - 64 bit
+# date: 2026-10-06T09:53:51+08:00
+== the proof: every word, 8 key shapes each (kernel_proof.ml)
+OPCODE NOP     32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op00: elapsed 26.70 s, max rss 43316 kB
+OPCODE SETP    32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op01: elapsed 32.11 s, max rss 86688 kB
+OPCODE LDC     32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op02: elapsed 26.95 s, max rss 42988 kB
+OPCODE LDD     32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op03: elapsed 1.05 s, max rss 40832 kB
+OPCODE LDA     32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op04: elapsed 26.32 s, max rss 43256 kB
+OPCODE WAITP   32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op05: elapsed 253.18 s, max rss 272088 kB
+OPCODE WAITD   32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op06: elapsed 102.14 s, max rss 46152 kB
+OPCODE SHO     32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op07: elapsed 41.81 s, max rss 65700 kB
+OPCODE SHI     32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op08: elapsed 34.32 s, max rss 43308 kB
+OPCODE JMP     32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op09: elapsed 29.36 s, max rss 43328 kB
+OPCODE JNZ     32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op10: elapsed 39.52 s, max rss 58348 kB
+OPCODE OUT     32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op11: elapsed 31.41 s, max rss 43080 kB
+OPCODE IN      32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op12: elapsed 82.45 s, max rss 45292 kB
+OPCODE MBX     32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op13: elapsed 245.12 s, max rss 271996 kB
+OPCODE WAITC   32768 queries (words x 8 key shapes):  32768 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# op14: elapsed 198.79 s, max rss 328584 kB
+OPCODE SKNE     2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext00: elapsed 2.34 s, max rss 57868 kB
+OPCODE SKEQ     2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext01: elapsed 2.32 s, max rss 57488 kB
+OPCODE FINE     2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext02: elapsed 1.62 s, max rss 42624 kB
+OPCODE CNTA     2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext03: elapsed 1.72 s, max rss 42832 kB
+OPCODE LDB      2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext04: elapsed 1.61 s, max rss 42544 kB
+OPCODE STB      2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext05: elapsed 1.63 s, max rss 42448 kB
+OPCODE BANK     2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext06: elapsed 1.78 s, max rss 41916 kB
+OPCODE CFG      2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext07: elapsed 1.63 s, max rss 42364 kB
+OPCODE EXT8     2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext08: elapsed 1.63 s, max rss 42680 kB
+OPCODE EXT9     2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext09: elapsed 1.60 s, max rss 42456 kB
+OPCODE EXT10    2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext10: elapsed 1.61 s, max rss 42432 kB
+OPCODE EXT11    2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext11: elapsed 1.63 s, max rss 42540 kB
+OPCODE EXT12    2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext12: elapsed 1.61 s, max rss 42508 kB
+OPCODE EXT13    2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext13: elapsed 1.63 s, max rss 42692 kB
+OPCODE EXT14    2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext14: elapsed 1.64 s, max rss 42620 kB
+OPCODE EXT15    2048 queries (words x 8 key shapes):   2048 unsatisfiable (0 folded before the solver), 0 counterexamples, 0 unknown -> PROVED
+# ext15: elapsed 1.60 s, max rss 42424 kB
+== planted kernel bugs in the step: each must give a counterexample
+PLANTED kernel bug1 (bug1 --bug 1 kernel-z3 5000 50ff): CAUGHT, COUNTEREXAMPLE 5000 (waitp pin0==0 fail=0), cnt known, acc known, dl [lo, hi]: pc1=63 dl1=0 d=0 j=0 dlo=0 dhi=0 kn=98 ko=98 pin_oe=98 pin_in=0 latch=1 cfg1=0
+PLANTED kernel bug2 (bug2 --bug 2 kernel-z3 5000 50ff): CAUGHT, COUNTEREXAMPLE 5000 (waitp pin0==0 fail=0), cnt known, acc known, dl [lo, hi]: pc1=122 dl1=0 d=14 j=14 dlo=9 dhi=14 kn=96 ko=96 pin_oe=96 pin_in=0 latch=1 cfg1=128
+PLANTED kernel bug3 (bug3 --bug 3 kernel-z3 3000 30ff): CAUGHT, COUNTEREXAMPLE 3001 (ldd 1), cnt known, acc known, dl [lo, hi]: dl1=0 d=0 j=0 dlo=0 dhi=0 kn=254 ko=254 pin_oe=254
+PLANTED kernel bug4 (bug4 --bug 4 kernel-z3 a000 a0ff): CAUGHT, COUNTEREXAMPLE a000 (jnz 0), cnt known, acc known, dl [lo, hi]: pc1=75 cnt1=1 dl1=0 d=0 j=0 dlo=0 dhi=1 kn=2 ko=2 pin_oe=2
+PLANTED kernel bug5 (bug5 --bug 5 kernel-z3 f000 f1ff): CAUGHT, COUNTEREXAMPLE f000 (skne 0x00), cnt known, acc known, dl [lo, hi]: pc1=160 acc1=0 dl1=450 d=450 j=0 dlo=387 dhi=1473 kn=248 ko=248 pin_oe=248
+PLANTED kernel bug6 (bug6 --bug 6 kernel-z3 7000 70ff): CAUGHT, COUNTEREXAMPLE 7000 (sho pin0 lsb q=0), cnt known, acc known, dl [lo, hi]: acc1=0 dl1=2 d=2 j=0 dlo=0 dhi=129 kn=22 ko=22 pin_oe=22 pin_out=0
+PLANTED kernel bug7 (bug7 --bug 7 kernel-z3 6000 6000): CAUGHT, COUNTEREXAMPLE 6000 (waitd), cnt known, acc known, dl [lo, hi]: pc1=153 dl1=0 d=0 j=0 dlo=0 dhi=0 kn=28 ko=28 pin_oe=28
+PLANTED kernel bug12 (bug12 --bug 12 kernel-z3 1000 10ff): CAUGHT, COUNTEREXAMPLE 1011 (setp mask=01 val=0 oe=0 q=1), cnt known, acc known, dl [lo, hi]: dl1=0 d=0 j=0 dlo=0 dhi=0 kn=38 ko=38 pin_oe=38 pin_out=1

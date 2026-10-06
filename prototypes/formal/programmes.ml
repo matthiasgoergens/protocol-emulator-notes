@@ -33,7 +33,8 @@ let uart_from_host ?stretch ~bit_slots n =
    LDD 4095 (README.md, "Findings") *)
 let spi_with ~period = fst (Compiler.spi_master { sclk = 1; mosi = 2; cs = 3; period; sbytes = [ 0xA5 ] })
 let spi = spi_with ~period:10
-let i2c = fst (Compiler.i2c_write { sda = 4; scl = 5; q = 4; ibytes = [ 0xA0 ] })
+let i2c_with ?stretch_limit () = fst (Compiler.i2c_write ?stretch_limit { sda = 4; scl = 5; q = 4; ibytes = [ 0xA0 ] })
+let i2c = i2c_with ()
 
 (* ../deadline-sequencer/main.ml's deadline programme: wait up to the deadline for pin 1 to rise;
    pin 6 reports the event, pin 7 the timeout. [ldd] is its deadline immediate (20 there). *)
@@ -69,5 +70,28 @@ let waitd_contracts ~thread (p : int array) : Props.contract list =
     if opcode p.(pc) = 6 && opcode p.(pc - 1) = 3 then
       l := { Props.thread; anchor = addr ~thread (pc - 1); wait = addr ~thread pc; fail = addr ~thread (pc + 1);
              slots = (p.(pc - 1) land 0xFFF) + 1; kind = Waitd } :: !l
+  done;
+  List.rev !l
+
+(* every WAITP of thread [thread]'s base-ISA programme whose deadline is loaded by an LDD n one or
+   two words before it (the I2C master's "LDD stretch_limit; release SCL; WAITP scl=1"), with the
+   ISA's rule as its contract: the window is n + 1 slots counted from the LDD, the wait proceeds
+   on the slot its pin shows the value, and on the last slot of the window it takes its fail
+   target. Nothing between the LDD and the WAITP may load the deadline register again. *)
+let waitp_contracts ~thread (p : int array) : Props.contract list =
+  let l = ref [] in
+  for pc = 1 to Array.length p - 1 do
+    if opcode p.(pc) = 5 then begin
+      let anchor = if opcode p.(pc - 1) = 3 then Some (pc - 1)
+        else if pc >= 2 && opcode p.(pc - 2) = 3 && opcode p.(pc - 1) <> 3 && opcode p.(pc - 1) <> 6 then Some (pc - 2)
+        else None in
+      match anchor with
+      | None -> ()
+      | Some a ->
+        let w = p.(pc) in
+        let pin = (w lsr 9) land 7 and value = (w lsr 8) land 1 and fail = w land (Isa.prog_len - 1) in
+        l := { Props.thread; anchor = addr ~thread a; wait = addr ~thread pc; fail = addr ~thread fail;
+               slots = (p.(a) land 0xFFF) + 1; kind = Waitp (pin, value) } :: !l
+    end
   done;
   List.rev !l

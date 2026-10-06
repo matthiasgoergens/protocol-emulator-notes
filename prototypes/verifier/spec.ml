@@ -72,7 +72,12 @@ let matches (pats : (int * pat) list) (e : event) =
   && List.for_all2 (fun (p, pat) (q, k) -> p = q && matches_kind pat k)
        (List.sort compare pats) e
 
-type transition = { src : int; pats : (int * pat) list; gap : Interval.t; dst : int; label : string }
+(* [data = Some (i, b)]: the transition's event writes data, and the level it leaves on its one
+   data pin is bit [b] of the programme's input byte [i] (the [bytes] of the specification): driven
+   0 or 1 for a push-pull write, driven 0 or released for an open-drain one. So the specification
+   states which values the bits take, not only when they change. *)
+type transition = { src : int; pats : (int * pat) list; gap : Interval.t; dst : int; label : string;
+                    data : (int * int) option }
 
 type t = {
   name : string;
@@ -81,6 +86,7 @@ type t = {
   transitions : transition list;
   states : int;
   state_name : int -> string;
+  bytes : int array;               (* the input bytes the [data] of transitions refer to *)
 }
 
 let outgoing s a = List.filter (fun tr -> tr.src = a) s.transitions
@@ -113,8 +119,24 @@ let overlap a b =
   List.length sa = List.length sb
   && List.for_all2 (fun (p, x) (q, y) -> p = q && some_kind x y) sa sb
 
+(* the level a data transition requires of the write it accepts, if it declares one *)
+let data_level s tr =
+  match tr.data with
+  | None -> None
+  | Some (i, b) ->
+    let v = (s.bytes.(i) lsr b) land 1 in
+    let od = List.exists (fun (_, p) -> p = Data_od) tr.pats in
+    Some (if od then (if v = 1 then Z else L) else (if v = 1 then H else L))
+
+let data_to_string (i, b) = Printf.sprintf "byte%d.bit%d" i b
+
 let well_formed s =
   List.for_all (fun tr ->
+      (match tr.data with
+       | None -> true
+       | Some (i, b) ->
+         i >= 0 && i < Array.length s.bytes && b >= 0 && b < 8
+         && List.length (List.filter (fun (_, p) -> p = Data_pp || p = Data_od) tr.pats) = 1) &&
       List.for_all (fun (p, _) -> List.mem p s.pins) tr.pats
       && List.for_all (fun tr' -> tr == tr' || tr'.src <> tr.src || not (overlap tr.pats tr'.pats))
            s.transitions) s.transitions
@@ -131,16 +153,16 @@ let builder () = { n = 1; cur = 0; trs = []; names = [ (0, "start") ] }
 
 let fresh b name = let s = b.n in b.n <- b.n + 1; b.names <- (s, name) :: b.names; s
 
-let add b ~src pats gap ~dst label = b.trs <- { src; pats; gap; dst; label } :: b.trs
+let add ?data b ~src pats gap ~dst label = b.trs <- { src; pats; gap; dst; label; data } :: b.trs
 
-let step b pats gap label =
+let step ?data b pats gap label =
   let s = fresh b label in
-  add b ~src:b.cur pats gap ~dst:s label; b.cur <- s
+  add ?data b ~src:b.cur pats gap ~dst:s label; b.cur <- s
 
-let finish b ~name ~pins =
+let finish ?(bytes = [||]) b ~name ~pins =
   let names = b.names in
   let s = { name; pins = List.sort_uniq compare pins; start = 0; transitions = List.rev b.trs;
-            states = b.n;
+            states = b.n; bytes;
             state_name = (fun a -> match List.assoc_opt a names with Some n -> n | None -> string_of_int a) } in
   if not (well_formed s) then failwith ("specification not deterministic or names a pin outside its channel: " ^ name);
   s

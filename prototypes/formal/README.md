@@ -16,6 +16,7 @@ Everything was run on 2026-10-05.
 | 1 | interpreter generic over values | lockstep and all ported suites unchanged; integer speed restored (bridge A 31.7 s → 10.2 s, 9.4 s before the functor) |
 | 2a | deadline waits | `main.ml`'s deadline programme: no violation to 160 clocks, with the other three threads unconstrained; planted bug found at clock 89 |
 | 2a | every WAITD of UART + SPI + I2C | 15 contracts, 720 clocks; **found a latent SPI compiler bug** (Findings) |
+| 2a | the same after the I2C clock-stretching fix (`results/a-protocols.txt`) | UART + SPI: 5 contracts, 720 clocks beside the real I2C master, 0.17 s; I2C: its 8 WAITD contracts (and at stretch limit 7 its 3 WAITP contracts) **for every state at their anchor, at every depth**, 0.1 s; planted off-by-one LDD found (Findings 4) |
 | 2b | pin ownership | four programmes, 720 clocks; planted bug found at clock 95 |
 | 2c | isolation (2-copy miter) | BMC: planted bug found at clock 28; induction: holds at **every depth** for the UART; both covers now reachable by concrete witness (0.9 s, was unanswered after 22 min) |
 | 2e | ownership of bank, inboxes, ports | bridge A: no violation to 300 clocks; planted violations found; with bank ownership the bank-reading UART is isolated at **every depth**; rules on the declaration itself (one writer per bank address, inbox i received only by thread i, one sender unless shared), shared with the hazard checker, 4 of 4 planted declarations rejected |
@@ -467,7 +468,7 @@ was reached at step 606, before the last frame had started, and so certified les
 claimed. It now requires every byte taken by both transmitters and our last frame finished.
 
 Not in the report: Kind 2 (section 3) and the RTL-against-specification runs (section 4), whose
-non-vacuity evidence is the 28 of 28 planted bugs; and a-protocols (Findings 4).
+non-vacuity evidence is the 28 of 28 planted bugs.
 
 ## 7. Our UART against Jane Street's `Uart.Tx`
 
@@ -538,15 +539,43 @@ logic uses as its accept signal; that is read from the upstream source, not from
 3. The bounded equivalence finds all 28 planted RTL bugs at 15 clocks. That includes three that
    uniform random simulation of the same miter misses in 20,000 clocks; the lockstep needed a
    biased generator for those.
-4. **(a) on the three protocols no longer finishes** (2026-10-05, `results/a-protocols-after-i2c-fix.txt`).
-   `results/bmc.txt` was recorded before the merge with the I2C clock-stretching fix
-   (5be80cf). The I2C master now waits on SCL, so its timing follows an input, the goals no
-   longer fold to constants (0 goals before), and the run did not finish in 30 minutes (69 goals
-   sent), nor in 15 minutes with the state cut. Scenario b (pin ownership, the same I2C
-   programme) still passes, but sends 646 goals instead of 625 and takes 55 s instead of 0.12 s;
-   unmodified HEAD gives the same numbers, so this comes from the merge, not from the follow-ups. The UART and SPI contracts are unaffected in
-   principle; splitting the I2C thread out, or giving it a stretching bound, is the obvious next
-   step. Not done here.
+4. **(a) on the three protocols stopped finishing, and finishes again** (`results/a-protocols-after-i2c-fix.txt`,
+   `results/a-protocols.txt`). `results/bmc.txt` was recorded before the merge with the I2C
+   clock-stretching fix (5be80cf). The I2C master now waits on SCL, so its timing follows an
+   input, the goals no longer fold to constants (0 goals before), and the run did not finish in
+   30 minutes (69 goals sent), nor in 15 minutes with the state cut. Scenario b (pin ownership,
+   the same I2C programme) still passes, but sends 646 goals instead of 625 and takes 55 s
+   instead of 0.12 s; unmodified HEAD gives the same numbers, so this comes from the merge.
+
+   **What replaces it** (2026-10-06). Bounding the stretch was tried first and does not help:
+   the I2C master's contracts from reset with a stretch limit of 2 slots (every input still
+   free) did not finish in 30 minutes, with or without the cut. Splitting does:
+   - `a-protocols-uart-spi`: the UART's and SPI's 5 WAITD contracts, exactly as before (every
+     input free, 720 clocks, all four threads running their programmes), now beside the real
+     I2C master (stretch limit 4095). Their goals fold again: **no violation, 0.17 s**.
+   - `a-protocols-i2c-local`: each of the I2C master's 8 WAITD contracts from **every state at
+     its anchor**: every register of every thread, the pins, the latch and the bank free, every
+     input free, the other threads executing unconstrained words; the run lasts the window plus
+     two slots. A static check (`entered_only_at_anchor`) shows each wait is entered only
+     through its anchor's straight line. Together these cover every execution of the wait at
+     every depth from reset (the argument is in `main.ml`, above `predecessors`); the
+     antecedent (the wait executes) is shown reachable from reset on `Isa2.Spec` with every pin
+     read high. **8 of 8 PROVED, 0.1 s.**
+   - `a-protocols-i2c-local-l7`: the same with the stretch limit 7 and the 3 WAITP contracts
+     added (window: limit + 1 slots from the LDD two words before the WAITP; both the event and
+     the timeout covers reached in each window). **11 of 11 PROVED.** The WAITP contracts at the
+     real limit, 4095, would need a 4,097-slot window and are not run.
+   - `a-protocols-i2c-local-planted`: the first WAITD's LDD one larger: **FAILED at clock 8.**
+
+   What changes, exactly. Before the fix, a-protocols checked the I2C master's WAITD contracts
+   along its one path from reset, to 720 clocks. Now they are checked from every state at their
+   anchor, which includes every state reachable from reset, at any depth, and every input; the
+   price is one assumption on the free state, that the thread's cfg is 0 (bit 7 would make the
+   wait read the round latch where the monitor reads the pin), which holds because cfg is 0 at
+   reset and the programme has no CFG instruction (checked). The UART and SPI part is unchanged.
+   The whole-system, from-reset run of the I2C master is what no longer finishes; a-spi8 (the
+   latent SPI bug, Findings 1) uses the same whole-system run and stays behind
+   `SLOW_A_PROTOCOLS=1`.
 5. **Thread 0's first fetch after reset came from the wrong address** (section 5). Found by the
    power-up determinism proof; fixed in `../sequencer-v2/sequencer2.ml`, and the harness that hid
    it now models the store's latch during clear.

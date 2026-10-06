@@ -8,18 +8,22 @@ path from pc 0 that reaches it. It also writes a per-image timing certificate (t
 slot of every pin write) and a ledger of image hashes.
 
 Results are in `results/`, each file headed by its command, commit and date; `./run_all.sh`
-regenerates them (niced, waiting while the load is above 20). Everything was run on 2026-10-05.
+regenerates them (niced, waiting while the load is above 20). Everything was run on 2026-10-05,
+and again on 2026-10-06 with the data levels (section 3), the kernel's proof by z3 (section 4)
+and the certificates on the RTL (section 8).
 
 | check | what | result |
 |---|---|---|
 | sweep | every programme the compiler emits in the sweep's parameter ranges (UART, SPI, I2C, UART from the host), plus the formal suite's deadline and watchdog programmes | **530 of 530 proved** |
 | interpreter cross-check | each image run on `Isa2.Spec`; every measured state and event must lie in the certificate | 9,299 runs, 2,674,218 instruction entries and 441,297 channel events measured: **none outside the certificate**, no proved image with a failing run |
-| planted | 11 planted bugs, including SPI at period 8 (LDD wraps to 4095) and I2C without WAITP | **11 of 11 rejected**, each with a path |
-| mutants | every single-word mutant of five programmes, judged against interpreter runs | 1,220 mutants: 275 rejected with a failing run, 943 proved with every run meeting the specification, **0 proved with a failing run**, 2 rejected with no failing run (both genuine, section 5) |
-| precision | correct programmes rejected | **0** of 1,045 correct programmes (530 sweep, 514 deterministic mutants, the balanced branch); 1 before the relational `due` (the balanced branch) |
+| planted | 13 planted bugs, including SPI at period 8 (LDD wraps to 4095), I2C without WAITP, and two with the right timing and the wrong data | **13 of 13 rejected**, each with a path |
+| mutants | every single-word mutant of five programmes, judged against interpreter runs | 1,220 mutants: 279 rejected with a failing run, 940 proved with every run meeting the specification, **0 proved with a failing run**, 1 rejected with no failing run (genuine, section 5) |
+| precision | correct programmes rejected | **0** of 1,042 correct programmes (530 sweep, 511 deterministic mutants, the balanced branch); 1 before the relational `due` (the balanced branch) |
 | random | random programmes against `Isa2.Spec` with random inputs | 3,000 programmes, 9,000 runs, 22,676,780 instruction entries: **0 outside the certificate** |
-| controls | perturbed certificates and specifications the kernel must reject | **1,898 of 1,898 rejected** |
-| kernel bugs | planted bugs in the kernel that some check must catch | **10 of 10 caught** |
+| controls | perturbed certificates and specifications the kernel must reject, including each declared data bit flipped | **1,922 of 1,922 rejected** |
+| kernel bugs | planted bugs in the kernel that some check must catch | **11 of 11 caught** |
+| kernel proof | the kernel's one-instruction step against `Isa2`'s interpreter, by z3, for every instruction word (section 4) | **65,536 words x 8 key shapes: 524,288 queries, all unsatisfiable**; 8 of 8 planted step bugs give a counterexample |
+| RTL | certificates as SymbiYosys properties on the v2 core, every input free (section 8) | deadline programme, UART, SPI: **every property PROVED unbounded** (abc pdr); I2C with WAITP, a 3-byte UART, a 2-byte SPI: PROVED to a bound past every event's slot; every antecedent and final state reachable; **8 of 8 controls FAILED** |
 | compose | demo composition (UART, SPI, I2C, watchdog on four threads) and pin ownership | proved; planted pin clash rejected |
 | certificates | per-image certificates, ledger with SHA-256 of image and certificate | 530 images; `ledger-check` finds a matching certificate for every one |
 
@@ -113,10 +117,10 @@ PLANTED spi_p8 (LDD a wraps to 4095)         REJECTED  entries    71  events    
 line per pin event with its pc, instruction, specification transition, slot interval, gap and
 declared gap. `results/ledger.txt` lists every sweep image's SHA-256 with its certificate's
 SHA-256; `main.exe ledger-check results/ledger.txt` recomputes them and fails when an image has
-no matching certificate. Five certificates are committed in `results/certs/`. Unlike
-TeslaCoilerOW's, our certificates are **not proved on the RTL**: they are tied to the
-interpreter by the cross-check, and the interpreter to the RTL by `../sequencer-v2`'s lockstep
-test.
+no matching certificate. Five certificates are committed in `results/certs/`. Like
+TeslaCoilerOW's, they are now proved on the RTL, for a representative set of images (section 8);
+every other image is tied to the RTL through the interpreter (the cross-check, and
+`../sequencer-v2`'s lockstep test).
 
 ## 3. Specifications
 
@@ -135,6 +139,20 @@ words:
 - **Deadline programme** and **watchdog** (`../formal/programmes.ml`): the report pin within
   [2, ldd + 2] slots, or the timeout pin at exactly ldd + 2, one slot after the wait.
 
+**Data levels** (2026-10-06). The UART and SPI specifications also state which value each data
+bit takes, as a function of the input byte: UART data bit j of byte i is bit j - 1 of the byte
+(lsb first), SPI MOSI bit j is bit 8 - j (msb first), both from the compiler's comments. A
+transition carries `data = (i, b)`; the specification carries the bytes the image sends (the
+LDA immediates). The kernel rejects a data event whose level is not exactly the declared one,
+and an unknown level (an unknown accumulator) too; the cross-check checks the measured level;
+each certificate line prints its declaration (`data byte0.bit3`), and the certificate's header
+the input bytes and every state's deadline. Section 8 checks the same declarations on the RTL
+for every byte value. Controls: two planted programmes with the right timing and the wrong
+data (a byte's LDA one off, SPI shifted lsb first) are rejected; each declared bit flipped in
+the specification is rejected (24 controls); kernel bug 11 (no data check) is caught by
+`selftest`, `controls` and `planted`. Three UART and SPI mutants that were proved before (an
+LDA immediate plus or minus one, timing intact) are now rejected with a failing run.
+
 Writing the SPI specification from the source found one discrepancy: `spi_master` lists "cs
 high" before "sclk and mosi low", but its item list is reversed as a whole, so the image sets
 SCLK and MOSI first. Harmless (CS is high from reset either way, being released), but the
@@ -142,7 +160,44 @@ comment-level reading was wrong; the specification follows the image and says wh
 
 ## 4. Soundness evidence
 
-Three kinds, each measured, none a proof (section 7):
+A proof of the kernel's step by z3, and three kinds of measured evidence:
+
+**The step, proved against the interpreter** (`kernel_proof.ml`, `kernel_z3.sh`,
+`results/kernel-z3.txt`, 2026-10-06). The kernel's transfer function is written once over a
+domain of values (`Kernel.Step`), as `Isa2`'s interpreter is: on integers it is the kernel (the
+outputs of planted, precision, compose, controls, sweep, mutants, random and the 530
+certificates are byte-identical to the version before), on SMT terms it is compared by z3 with
+`Isa2.Make (Smt.Value)`, the formal prototype's symbolic instance of the one interpreter. For
+every instruction word (all 65,536) and eight shapes of key (cnt known or not, acc known or not,
+the deadline register's upper bound given or not), z3 is asked for a concrete thread state in
+the key, inputs and a slot that no outcome of the step covers: same next pc, cnt and acc where
+known, dl in the outcome's interval, the known enables, elapsed slots and event slot, the
+timing rule `step` relies on (`Plain`, `By_due`, `Unbounded`: dl afterwards is max(d - elapsed,
+0); `Load n`: n; `Until_due`: elapsed is d + 1), the pins written exactly the outcome's writes
+at levels it allows, an observation's pin reading its value and a timeout's not, and the
+quarter-clock levels moving at the outcome's q. Waits are proved by induction over their slot j.
+The free state is everything not in the key: all registers of all four threads, the pins, the
+latch, the bank, every input.
+
+| opcode | queries | result |
+|---|---|---|
+| NOP, SETP, LDC, LDD, LDA, WAITP, WAITD, SHO, SHI, JMP, JNZ, OUT, IN, MBX, WAITC | 32,768 each | **PROVED** (all unsatisfiable) |
+| EXT: SKNE, SKEQ, FINE, CNTA, LDB, STB, BANK, CFG, reserved 8 to 15 | 2,048 each | **PROVED** |
+
+Controls: the kernel's seven planted step bugs (section 6) and one more for the sub-slot (SETP's
+q taken as 0) each give a counterexample. Two runs before the last found faults in the proof,
+not the kernel: WAITD's outcome says its event slot is 0 while the wait leaves at slot d (there
+is no event, and `step` reads the slot only for events, so the obligation now asks it only of
+outcomes with events); and the induction admitted a slot j > 0 of a WAITC on a bit of the known
+accumulator that already holds, which no execution reaches (the hypothesis now says the
+condition is false after slot 0, and a stay keeps it). The codex review added the sub-slot
+comparison. Limits: the proof is of `transfer`, not of `step`'s interval arithmetic or of
+`check` (closure, gap and deadline comparisons), which stay checked by the controls and runs
+below; thread 1 only (thread 0 differs in reading the latch from its own pin input, a special
+case of the free latch here; threads 2 and 3 only in which flags and inbox are theirs); the
+enables in the key are assumed not changed by other threads between slots (A5).
+
+The measured evidence:
 
 **Interpreter cross-check** (`sim.ml`). Each image runs on `Isa2.Spec`, the semantics every other
 test uses, at its thread's page with the other threads halted. At every first issue of an
@@ -169,7 +224,7 @@ ports and flags on every clock (one run in four with the pins held low, so waits
 22,676,780 measured instruction entries, none outside the certificate. This checks the kernel's
 step for every opcode against the interpreter, independently of any specification.
 
-The checks found two kernel bugs while this was being built, both fixed: a push-pull SHO was
+The checks found two kernel bugs while this was being built, both fixed (before the proof): a push-pull SHO was
 taken to drive its pin whatever the pin's output enable (found by the mutants' cross-check; the
 key now keeps the enables, A5), and an open upper bound on `due` became `max_int` and overflowed
 (found by the random programmes).
@@ -189,6 +244,8 @@ key now keeps the enables, A5), and an open upper bound on `due` became `max_int
 | SPI, CS released inside the bit loop | CS event where MOSI is declared | fails |
 | deadline programme, LDD 30 against a declared 20 | observation gap 2..32, declared 2..22; timeout gap 32 | no run reaches it (random inputs see pin 1 high early) |
 | UART, LDA replaced by IN | unbounded wait where the next start bit is due | fails |
+| UART, the second byte's LDA 0x4A, declared 0x4B | data bit 1 of byte 1 leaves 0, declared 1 | fails |
+| SPI, SHO lsb first (msb flag cleared) | MOSI bit 1 leaves 1, declared bit 7 = 0 | fails |
 
 Plus pin ownership (`results/compose.txt`): a watchdog whose timeout writes pin 0 (the UART's)
 is rejected in the demo composition.
@@ -199,12 +256,13 @@ Precision here means: how often is a correct programme rejected?
 
 - **Sweep:** 0 of 530 compiled programmes rejected; every interpreter run of each meets its
   specification.
-- **Mutants:** of the 514 mutants that are deterministic (every reachable instruction has one
+- **Mutants:** of the 511 mutants that are deterministic (every reachable instruction has one
   outcome taking a known number of slots, so one interpreter run is the whole truth) and meet
-  their specification, 0 rejected. Two non-deterministic mutants are rejected with no failing
-  run; both are real violations under A1 that the runs' inputs did not make: a SEND to inbox 0
-  that would time out (to a fail target past the programme) if another thread had filled the
-  inbox, and a WAITP on pin 7 that would time out if the pin read low. With only random
+  their specification, 0 rejected. One non-deterministic mutant is rejected with no failing
+  run, a real violation under A1 that the runs' inputs did not make: a WAITP on pin 7 that
+  would time out if the pin read low. (Until the data levels, a second one was: a SEND to inbox
+  0 in place of the UART's LDA, which would time out if another thread had filled the inbox;
+  its runs now fail, the byte never being loaded.) With only random
   stretching, 79 mutants were in this class (the runs rarely got past the first byte's
   timeouts); adding runs without stretching and the targeted runs turned 77 of them into failing
   runs.
@@ -230,38 +288,135 @@ if that happens:
 - `controls`: perturbed certificates (an entry removed, since/time/dl/due moved by a slot) and
   perturbed specifications (each exact declared gap moved by one slot) must be rejected by the
   kernel; this is what catches a kernel whose closure or gap check has gone missing.
-- `kernel-bugs`: ten bugs planted in the kernel, each of which must make some check fail.
+- `kernel-bugs`: eleven bugs planted in the kernel, each of which must make some check fail.
+- `kernel_z3.sh`: the step's planted bugs (and bug 12, the sub-slot) must each give z3 a
+  counterexample.
+- `rtl/run_rtl.sh`: a certificate with a gap narrowed or a data bit moved, and three RTL
+  mutants, must each fail on the RTL (section 8).
 
 ## 7. Open soundness gaps
 
-- **The kernel is not proved.** Its step is checked against `Isa2.Spec` by runs (random
-  programmes, mutants, the sweep), not by proof; MarcosAsh's kernel is proved against his RTL by
-  SAT. A transfer bug on an instruction or input pattern the runs never make would go unseen.
-  The ten planted kernel bugs show the runs catch bugs of the kinds planted, not all.
+- **The kernel's `step` and `check` are not proved.** Its one-instruction transfer is proved
+  against `Isa2`'s interpreter by z3 for every word (section 4); the interval arithmetic that
+  turns outcomes into since, due and time, and the closure, gap and deadline comparisons of
+  `check`, are checked by the controls and the runs only. The proof is for thread 1 and assumes
+  A5 for the enables between slots.
 - **The specifications are trusted.** They are written from the compiler's comments; a
-  specification that declares the wrong gap proves the wrong thing. Data levels are not
-  checked: a data event accepts any level, so the verifier proves when bits change, not which.
+  specification that declares the wrong gap proves the wrong thing. Data levels are declared
+  for the UART and SPI only (section 3); the I2C's data bits and the deadline programme have
+  none, so there the verifier proves when bits change, not which.
 - **Events are writes, not edges.** A write that leaves the level unchanged counts as an event;
   the claim is that pins change only at declared events, at declared times.
-- **No link to the RTL.** Certificates are not proved on the RTL (TeslaCoilerOW proves his per
-  segment); the interpreter is tied to the RTL by `../sequencer-v2`'s lockstep test only.
+- **The RTL link is per image.** Section 8 proves certificates on the RTL for a representative
+  set, not for every image of the sweep, and the larger images only to a bound; every other
+  image is tied to the RTL through the interpreter (the cross-check, and `../sequencer-v2`'s
+  lockstep test).
 - **Assumptions.** A2 (host control), A3 (fixed page), A4 (sub-slot q and FINE) and A5
   (enables) are not checked by the kernel; `compose` checks the part of A5 about other threads'
-  writes, using the same analysis. Inter-thread mailbox protocols are treated as arbitrary
-  inputs (A1), so a thread that waits on another is only bounded by its own deadline register.
+  writes, using the same analysis. Section 8 assumes A2 and A5 on the RTL as well and checks A3
+  (the page) there. Inter-thread mailbox protocols are treated as arbitrary inputs (A1), so a
+  thread that waits on another is only bounded by its own deadline register.
 - **The cross-check's own logic** (when an issue is the first of an instruction, how a WAITP's
   outcome is read off the run) is a second implementation of parts of the ISA, in `sim.ml`.
 - **Base ISA.** The verifier analyses the compiler's output after `../sequencer-v2/compat.ml`'s
   translation to ISA v2, not the base ISA on the original core.
-- **Codex review** (gpt-6-luna, once, read-only): reported one soundness gap, that SHO with
-  capture keeps a known accumulator. Refuted by measurement: `main.exe step 7910 0` shows the
-  accumulator becomes unknown (`kernel.ml`, `if cap then Any`). It found no other gap in the
-  opcode cases, the `due` rules or the deadline check, at medium confidence by its own account.
+- **Codex reviews** (gpt-6-luna, read-only, once each). 2026-10-05: reported that SHO with
+  capture keeps a known accumulator; refuted by measurement (`main.exe step 7910 0`: the
+  accumulator becomes unknown). 2026-10-06, of the z3 proof, the RTL properties and
+  `../formal`'s local I2C contracts: (1) the z3 proof did not compare the quarter-clock levels
+  with the outcome's q, so a wrong q would have gone unseen; fixed (the comparison, and planted
+  bug 12 as its control). (2) `../formal` called its bounded local runs unbounded without saying
+  why; the argument is now written out there (`main.ml`, above `predecessors`). It found no
+  vacuity or slot-alignment fault in the RTL monitor and no other unsoundness in the checked
+  outcomes, by its own account without certainty about the thread-1 scope.
+
+## 8. Certificates on the RTL
+
+(2026-10-06; `rtl.ml`, `rtl/run_rtl.sh`, `results/rtl.txt`, the generated monitors in
+`results/rtl/`.) The certificates were tied to the interpreter by runs and the interpreter to the
+RTL by the lockstep test. Here a certificate becomes SymbiYosys properties of the v2 core itself
+(`../sequencer-v2/sequencer2.ml`, the Verilog of `tt/src` as `../formal/powerup/emit_core.exe`
+writes it, in the LibreLane container's Yosys 0.62).
+
+**From the certificate's text.** `main.exe rtl NAME DIR` writes the certificate exactly as the
+ledger hashes it, parses that text back (`Rtl.parse`) and generates the monitor from it: each
+channel-event line (pc, outcome, state from and to, slot interval, gap interval, q, declared
+data), the header's input bytes and every state's deadline. Nothing of the analysis is used.
+The image is taken from the sweep and must have the SHA-256 the certificate names.
+
+**The environment** is the verifier's assumptions, as constraints on the RTL's inputs: every
+input free on every clock (A1); the host control port never addresses thread T (A2); the store
+holds the image on T's page, and every fetch for T is asserted to be on that page (A3, checked);
+every other thread executes an arbitrary instruction word on each of its clocks, constrained only
+not to write the channel's pins (A5: SETP's mask, SHO's pin and pair partner), so the proof also
+covers whatever the other threads do. One clock of clear, then free-running. Where the
+specification declares data, the image's LDA immediates are free constants: one proof covers
+every value of the input bytes.
+
+**The monitor** reads only the core's ports. The store address presented the clock before T
+executes is T's pc for that slot; the pins after the slot are what it did. A slot is an event
+when its pc holds an instruction that touches the channel and it did not stay (a WAITP that
+stays has made no event yet), and the next pc tells the outcome (pc + 1 proceeds, the fail target
+times out). Ghost state: the specification state and the slots since the last event. Properties,
+each with an antecedent cover (the certificate's last state reached) as `../formal`'s
+per-property report requires:
+
+| property | asserts |
+|---|---|
+| events | every event is a certificate line from the current state at that pc with that outcome, its gap inside the line's interval |
+| slots | every event's slot inside its line's interval |
+| levels | each channel pin a write touches left at the line's level; every other channel pin unchanged; no other slot of T changes the channel |
+| data | the data pin left at the declared bit of the (free) input byte: driven to it (push-pull), or driven 0 / released (open drain) |
+| subslot | the quarter-clock levels switch at the line's q, and are steady otherwise |
+| deadline_ | the slots since the last event never exceed the current state's deadline |
+| quiet | no clock that is not T's changes a channel pin or shows a quarter-clock level unlike the pin's |
+| page | every fetch for T is on page T |
+
+**Results** (`results/rtl.txt`):
+
+| image | what | engine | result |
+|---|---|---|---|
+| `deadline_ldd20` | deadline programme, WAITP with timeout | abc pdr, 21 s | **all 7 PROVED unbounded**; slots to 548 clocks; both final states (event, timeout) reachable |
+| `uart_b5_n1` | UART, bit 5 slots, 1 byte, data | abc pdr, 258 s | **all 8 PROVED unbounded**; slots to 260 clocks |
+| `spi_p10_n1` | SPI, period 10, 1 byte, data | abc pdr, 895 s | **all 8 PROVED unbounded**; slots to 601 clocks |
+| `i2c_q4_n1_l7` | I2C, WAITP on SCL, stretch limit 7 | pdr stopped at 30 min; abc bmc3, 27 min | all 7 **PROVED to 1,814 clocks**; all 11 final states (each timeout, and the end of the frame) reachable |
+| `uart_b16_n3` | UART, bit 16 slots, 3 bytes | pdr stopped at 30 min; bmc3, 98 s | all 8 PROVED to 2,068 clocks |
+| `spi_p16_n2` | SPI, period 16, 2 bytes | pdr stopped at 30 min; bmc3 | all 8 PROVED to 1,781 clocks |
+
+**Why the bounds suffice for the slots.** An absolute slot counter makes pdr learn the whole
+timeline (with it, pdr did not converge on the 3-byte UART in 20 minutes; without it, pdr
+proves the smaller images but still not the 3-byte UART in 30 minutes), so the slot intervals are
+checked by bounded runs only. The bound is past every event: the certificate's states are
+acyclic (every line leads to a later state, which the generator checks), so at most [states]
+events happen, and each comes within the deadline of the state before it (the deadline property,
+proved unbounded where pdr finishes), so every event's slot is below [states] x (largest
+deadline or gap) + 1, and the run lasts that many slots and two more. Where pdr did not finish
+(the last three rows), the same bounded run checks every property, and that is all that is
+claimed for them: a fault that shows only after the bound, such as a channel write long after the
+frame has ended, is not excluded there. pdr was also tried on the I2C with stretch limit 1
+(30 minutes, no verdict).
+
+**Controls**, each of which must fail and does (`results/rtl.txt`): a certificate with a gap
+narrowed by one slot, on the deadline programme (2..22 to 2..21: FAILED, events, clock 92, a 22-slot
+wait) and on the I2C (the first SCL observation 1..7 to 1..6: FAILED, events, clock 86); an exact
+gap moved by one slot on the UART (5 to 4: FAILED, events, clock 32); every declared data bit moved
+to the next bit, on the UART and on the SPI (FAILED, data, clocks 32 and 25); and three RTL
+mutants in `Sequencer2.cert_mutants` (kept out of the lockstep's list): WAITD leaving at dl = 1
+(UART: FAILED, events, clock 28), a wait timing out at dl = 1 (deadline programme and I2C: FAILED,
+events, clocks 88 and 82), SHO shifting lsb first whatever its flag (SPI: FAILED, data, clock 25).
+
+**What this does not cover.** A representative set, not every image of the sweep; three of the
+six only to a bound. The other threads are assumed not to write the channel's pins (A5); `compose`
+checks that for real programmes. Thread T's pc is read from the store address, so the RTL's
+own fetch path is trusted to present the pc it executes next (the lockstep test and the power-up
+proof of `../formal` cover it). The first event is checked from the first clock after a single
+clear clock with the boot pc 0.
 
 ## Files
 
-`kernel.ml` (trusted step and check), `analyser.ml` (fixpoint), `spec.ml` (specifications),
-`interval.ml` (intervals, adapted from MarcosAsh), `programmes.ml` (images, specifications,
-planted bugs, precision cases), `sim.ml` (interpreter cross-check), `sha256.ml`, `main.ml`
-(commands), `run_all.sh`. `isa2.ml`, `compat.ml`, `isa.ml` and `compiler.ml` are links to the
-prototypes' own files.
+`kernel.ml` (trusted step, generic over a value domain, and check), `analyser.ml` (fixpoint),
+`spec.ml` (specifications), `interval.ml` (intervals, adapted from MarcosAsh), `programmes.ml`
+(images, specifications, planted bugs, precision cases), `sim.ml` (interpreter cross-check),
+`sha256.ml`, `kernel_proof.ml` and `kernel_z3.sh` (the step against `Isa2` by z3), `rtl.ml` and
+`rtl/run_rtl.sh` (certificates on the RTL), `main.ml` (commands), `run_all.sh`. `isa2.ml`,
+`compat.ml`, `isa.ml`, `compiler.ml` and `smt.ml` are links to the prototypes' own files.

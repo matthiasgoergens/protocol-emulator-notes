@@ -24,6 +24,7 @@ type bug =
   | Waitc_byte_4bits | Waitc_space_own | Waitc_flag_thread0 | Waitc_host_inverted
   | Skne_inverted | Skeq_skip_one | Fine_no_disarm | Cnta_7bits
   | Ldb_no_increment | Ldb_wrong_thread | Ldb_reads_next | Stb_data_cnt | Bank_hi_ignored | Cfg_latch_ignored | Latch_every_clock
+  | Waitd_early | Wait_fail_early | Sho_msb_ignored
 
 let bugs =
   [ Pc6, "pc wraps at 6 bits"; Page_ignored, "page bits not in the fetch address";
@@ -43,6 +44,13 @@ let bugs =
     Ldb_reads_next, "LDB reads bp + 1"; Stb_data_cnt, "STB writes cnt[7:0]";
     Bank_hi_ignored, "BANK ignores imm"; Cfg_latch_ignored, "CFG round latch ignored";
     Latch_every_clock, "round latch loads every clock" ]
+
+(* Mutants for the certificate check on the RTL (../verifier/rtl.ml): timing and data faults in
+   the instructions the protocol programmes use. Not in [bugs], so the lockstep test's and the
+   equivalence check's lists of planted bugs are unchanged. *)
+let cert_mutants =
+  [ Waitd_early, "WAITD leaves at dl = 1"; Wait_fail_early, "a wait times out at dl = 1";
+    Sho_msb_ignored, "SHO shifts lsb first whatever its msb flag" ]
 
 type outputs = {
   imem_addr : Signal.t; pin_out : Signal.t; pin_oe : Signal.t; pin_sub : Signal.t;
@@ -125,12 +133,13 @@ let create ?bug ?(unreset = []) ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_
   let push = Variable.wire ~default:gnd and pop = Variable.wire ~default:gnd in
   let bank_we = Variable.wire ~default:gnd and bank_re = Variable.wire ~default:gnd in
   let stay = [ pc_next <-- pc ] in
-  let fail_or_stay = [ if_ (dl ==:. 0) [ pc_next <-- addr ] stay ] in
+  let dl_out = if is Wait_fail_early then dl <=:. 1 else dl ==:. 0 in
+  let fail_or_stay = [ if_ dl_out [ pc_next <-- addr ] stay ] in
   let pin_write =
     [ when_ (arm ==:. 1) [ fine_out <-- sel fines; fine_valid <-- vdd
                          ; (if is Fine_no_disarm then proc [] else armed_n <-- gnd) ] ] in
   (* SHO: b0 on pin, b1 on pin+1 when paired *)
-  let msb = pin_val in
+  let msb = if is Sho_msb_ignored then gnd else pin_val in
   let b0 = mux2 msb (bit acc 7) (bit acc 0) in
   let b1 = mux2 psel (mux2 msb (bit acc 6) (bit acc 1))
       (if is Pair_no_complement then b0 else ~:b0) in
@@ -190,7 +199,7 @@ let create ?bug ?(unreset = []) ~clock ~clear ~imem_data ~pin_in ~pin_in4 ~host_
         ; opc Isa2.op_ldd, [ dl_next <-- imm12 ]
         ; opc Isa2.op_lda, [ acc_next <-- imm8 ]
         ; opc Isa2.op_waitp, [ if_ (pin_bit ==: pin_val) [] fail_or_stay ]
-        ; opc Isa2.op_waitd, [ if_ (dl ==:. 0) [] stay ]
+        ; opc Isa2.op_waitd, [ if_ (if is Waitd_early then dl <=:. 1 else dl ==:. 0) [] stay ]
         ; opc Isa2.op_sho,
           [ proc pin_write
           ; pin_out_n <-- sho_out; pin_oe_n <-- sho_oe

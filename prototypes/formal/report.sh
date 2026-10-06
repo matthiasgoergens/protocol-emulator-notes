@@ -19,9 +19,10 @@ section() {   # title, file, planted-pattern
   echo "# commit: $(git rev-parse HEAD)$(git diff --quiet HEAD -- . || echo ' (with uncommitted changes)')"
   echo "# date: $(date --iso-8601=seconds)"
   echo "# not here: section 3 (Kind 2, results/kind2.txt), section 4 (RTL against specification,"
-  echo "#   results/equiv-*.txt; its non-vacuity evidence is the 28 of 28 planted bugs), and a-protocols,"
-  echo "#   which no longer finishes (Findings 4, results/a-protocols-after-i2c-fix.txt)"
+  echo "#   results/equiv-*.txt; its non-vacuity evidence is the 28 of 28 planted bugs); the whole-system"
+  echo "#   a-protocols, which no longer finishes, is replaced by its split (Findings 4, results/a-protocols.txt)"
   section "bounded model checks and induction steps" results/bmc.txt 'planted|without-ownership|may-write|declared-0-only'
+  section "a-protocols, split (Findings 4)" results/a-protocols.txt 'planted'
   section "power-up determinism" results/powerup.txt 'u_cfg|u_dl|vacuity_control'
   section "UART miter against hardcaml_hobby_boards Uart.Tx" results/uart-miter.txt 'constant|stretch|flip'
 } > results/summary.txt.tmp

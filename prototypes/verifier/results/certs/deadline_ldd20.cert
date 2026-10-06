@@ -4,7 +4,9 @@
 # verdict: PROVED; 7 table entries, 5 channel events checked
 # assumptions: kernel.ml A1-A5. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot
 # columns: pc, instruction, pins touched, specification state from -> to, slot of the event,
-#          gap since the previous channel event, declared gap
+#          gap since the previous channel event, declared gap, declared data (the level is that
+#          bit of that input byte: driven for a push-pull write, driven 0 or released for open drain)
+# deadlines: 0:0 1:22 2:1 4:1
   0  setp mask=80 val=0 oe=1 q=0 p7:set=0                     0 -> 1   slot 0          gap 0         declared 0
   2  waitp pin1==1 fail=5       p1:seen=1                    1 -> 4   slot 2..22      gap 2..22     declared 2..22
   3  setp mask=40 val=1 oe=1 q=0 p6:set=1                     4 -> 5   slot 3..23      gap 1         declared 1

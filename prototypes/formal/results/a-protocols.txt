@@ -1,0 +1,147 @@
+# command: main.exe a-protocols-uart-spi a-protocols-i2c-local a-protocols-i2c-local-l7 a-protocols-i2c-local-planted
+# commit: c257d7374ccca41cf49d1d5452ddea6a95f08ffa
+# Z3 version 5.1.0 - 64 bit
+# date: 2026-10-06T09:18:25+08:00
+# the a-protocols split of README.md, Findings 4; the two runs from reset with stretch limit 2 that did not finish are recorded at the end
+(a) 5 WAITD and 0 WAITP contracts of threads 0,1 (UART, SPI period 10 slots, I2C stretch limit 4095), all three running, 720 clocks
+a-waitd-uart-spi-beside-i2c-l4095: no violation; 720 clocks unrolled, 0 goals sent to the solver, 720 folded to false, 0 definitions; solver 0.00 s, total 0.17 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 0.4 left at its deadline: REACHABLE
+  COVER wait at 0.8 left at its deadline: REACHABLE
+  COVER wait at 0.12 left at its deadline: REACHABLE
+  COVER wait at 1.7 left at its deadline: REACHABLE
+  COVER wait at 1.10 left at its deadline: REACHABLE
+PROPERTY a-waitd-uart-spi-beside-i2c-l4095: PROVED to 720 clocks (bounded); antecedent 'every contract's wait executes' reachable
+
+(a) locally: 8 contracts of thread 2, each from every state at its anchor; no CFG in the programme: true
+a-local-i2c-l4095-2.2-window: no violation; 16 clocks unrolled, 0 goals sent to the solver, 16 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.2 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l4095-2.2-window: PROVED to 16 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.2 is entered only through its anchor at 2.1: yes
+a-local-i2c-l4095-2.8-window: no violation; 20 clocks unrolled, 0 goals sent to the solver, 20 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.8 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l4095-2.8-window: PROVED to 20 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.8 is entered only through its anchor at 2.7: yes
+a-local-i2c-l4095-2.13-window: no violation; 28 clocks unrolled, 0 goals sent to the solver, 28 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.13 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l4095-2.13-window: PROVED to 28 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.13 is entered only through its anchor at 2.12: yes
+a-local-i2c-l4095-2.18-window: no violation; 20 clocks unrolled, 0 goals sent to the solver, 20 folded to false, 0 definitions; solver 0.00 s, total 0.00 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.18 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l4095-2.18-window: PROVED to 20 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.18 is entered only through its anchor at 2.17: yes
+a-local-i2c-l4095-2.23-window: no violation; 12 clocks unrolled, 0 goals sent to the solver, 12 folded to false, 0 definitions; solver 0.00 s, total 0.00 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.23 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l4095-2.23-window: PROVED to 12 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.23 is entered only through its anchor at 2.22: yes
+a-local-i2c-l4095-2.26-window: no violation; 16 clocks unrolled, 0 goals sent to the solver, 16 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.26 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l4095-2.26-window: PROVED to 16 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.26 is entered only through its anchor at 2.25: yes
+a-local-i2c-l4095-2.31-window: no violation; 24 clocks unrolled, 0 goals sent to the solver, 24 folded to false, 0 definitions; solver 0.00 s, total 0.00 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.31 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l4095-2.31-window: PROVED to 24 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.31 is entered only through its anchor at 2.30: yes
+a-local-i2c-l4095-2.36-window: no violation; 12 clocks unrolled, 0 goals sent to the solver, 12 folded to false, 0 definitions; solver 0.00 s, total 0.00 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.36 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l4095-2.36-window: PROVED to 12 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.36 is entered only through its anchor at 2.35: yes
+PROPERTY a-local-i2c-l4095-2.2: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 10 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l4095-2.8: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 38 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l4095-2.13: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 66 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l4095-2.18: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 550 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l4095-2.23: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 578 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l4095-2.26: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 590 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l4095-2.31: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 614 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l4095-2.36: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 646 (Isa2.Spec, every pin high)
+
+(a) locally: 11 contracts of thread 2, each from every state at its anchor; no CFG in the programme: true
+a-local-i2c-l7-2.2-window: no violation; 16 clocks unrolled, 0 goals sent to the solver, 16 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.2 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.2-window: PROVED to 16 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.2 is entered only through its anchor at 2.1: yes
+a-local-i2c-l7-2.8-window: no violation; 20 clocks unrolled, 0 goals sent to the solver, 20 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.8 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.8-window: PROVED to 20 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.8 is entered only through its anchor at 2.7: yes
+a-local-i2c-l7-2.13-window: no violation; 28 clocks unrolled, 0 goals sent to the solver, 28 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.13 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.13-window: PROVED to 28 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.13 is entered only through its anchor at 2.12: yes
+a-local-i2c-l7-2.18-window: no violation; 20 clocks unrolled, 0 goals sent to the solver, 20 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.18 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.18-window: PROVED to 20 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.18 is entered only through its anchor at 2.17: yes
+a-local-i2c-l7-2.23-window: no violation; 12 clocks unrolled, 0 goals sent to the solver, 12 folded to false, 0 definitions; solver 0.00 s, total 0.00 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.23 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.23-window: PROVED to 12 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.23 is entered only through its anchor at 2.22: yes
+a-local-i2c-l7-2.26-window: no violation; 16 clocks unrolled, 0 goals sent to the solver, 16 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.26 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.26-window: PROVED to 16 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.26 is entered only through its anchor at 2.25: yes
+a-local-i2c-l7-2.31-window: no violation; 24 clocks unrolled, 0 goals sent to the solver, 24 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.31 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.31-window: PROVED to 24 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.31 is entered only through its anchor at 2.30: yes
+a-local-i2c-l7-2.36-window: no violation; 12 clocks unrolled, 0 goals sent to the solver, 12 folded to false, 0 definitions; solver 0.00 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.36 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.36-window: PROVED to 12 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.36 is entered only through its anchor at 2.35: yes
+a-local-i2c-l7-2.11-window: no violation; 40 clocks unrolled, 8 goals sent to the solver, 32 folded to false, 346 definitions; solver 0.01 s, total 0.02 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.11 left on its event: REACHABLE
+  COVER wait at 2.11 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.11-window: PROVED to 40 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.11 is entered only through its anchor at 2.9: yes
+a-local-i2c-l7-2.21-window: no violation; 40 clocks unrolled, 8 goals sent to the solver, 32 folded to false, 443 definitions; solver 0.01 s, total 0.01 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.21 left on its event: REACHABLE
+  COVER wait at 2.21 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.21-window: PROVED to 40 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.21 is entered only through its anchor at 2.19: yes
+a-local-i2c-l7-2.34-window: no violation; 40 clocks unrolled, 8 goals sent to the solver, 32 folded to false, 334 definitions; solver 0.01 s, total 0.02 s
+  COVER every contract's wait executes (antecedent): REACHABLE
+  COVER wait at 2.34 left on its event: REACHABLE
+  COVER wait at 2.34 left at its deadline: REACHABLE
+PROPERTY a-local-i2c-l7-2.34-window: PROVED to 40 clocks (bounded); antecedent 'every contract's wait executes' reachable
+  the wait at 2.34 is entered only through its anchor at 2.32: yes
+PROPERTY a-local-i2c-l7-2.2: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 10 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l7-2.8: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 38 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l7-2.13: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 66 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l7-2.18: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 550 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l7-2.23: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 578 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l7-2.26: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 590 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l7-2.31: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 614 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l7-2.36: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 646 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l7-2.11: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 58 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l7-2.21: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 570 (Isa2.Spec, every pin high)
+PROPERTY a-local-i2c-l7-2.34: PROVED for every state at its anchor (unbounded); antecedent 'the wait executes' reachable from reset at clock 638 (Isa2.Spec, every pin high)
+COVER a-local-i2c-l7-2.11 timeout from reset: REACHABLE (the wait executes at clock 58 with every pin low)
+COVER a-local-i2c-l7-2.21 timeout from reset: not reached with every pin low (only the first release's wait is)
+COVER a-local-i2c-l7-2.34 timeout from reset: not reached with every pin low (only the first release's wait is)
+
+(a) locally, planted: the I2C master's first WAITD's LDD one larger (2), against the contract of the original
+a-local-i2c-planted-ldd-plus-1: VIOLATED at clock 8; 9 clocks unrolled, 1 goals sent to the solver, 8 folded to false, 0 definitions; solver 0.00 s, total 0.00 s
+PROPERTY a-local-i2c-planted-ldd-plus-1: FAILED at clock 8
+  (not replayed: the run starts from an arbitrary state)
+
+# elapsed 0.37 s
+== a-protocols-i2c-l2 (I2C stretch limit 2, its WAITD and WAITP contracts from reset, 720 clocks, every input free): stopped by timeout 1800 with no verdict (2026-10-06, /var/tmp/verifier-rtl/gap4/i2c-l2.out)
+== a-protocols-i2c-l2-cut (the same with Machine.cut): stopped by timeout 1800 with no verdict (/var/tmp/verifier-rtl/gap4/i2c-l2-cut.out)

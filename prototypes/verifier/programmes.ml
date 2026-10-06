@@ -38,8 +38,10 @@ let ex = Interval.exactly
 (* UART 8N1, lsb first, on pin [u]: [b] slots a bit; data bit [k] of the first byte [d] slots
    longer when [stretch = Some (k, d)] (compiler.ml: "Start bit ... width 4+x = bit_slots",
    "Data bit: ... 4+x", "Stop: ... 4+x"). The idle level is set within one bit of the start, the
-   first start bit follows within a bit time, and every later cell boundary is exact. *)
-let uart_spec ?(host = false) ~u ~b ~nbytes ~stretch () =
+   first start bit follows within a bit time, and every later cell boundary is exact. With
+   [bytes] (the bytes the programme sends), data bit j of byte i is declared to be bit j - 1 of
+   that byte, lsb first ("lsb first" in compiler.ml's uart_tx). *)
+let uart_spec ?(host = false) ?bytes ~u ~b ~nbytes ~stretch () =
   let bl = builder () in
   step bl [ (u, Set H) ] (Interval.range 0 b) "idle high";
   for i = 0 to nbytes - 1 do
@@ -51,19 +53,22 @@ let uart_spec ?(host = false) ~u ~b ~nbytes ~stretch () =
       | true, 0 -> Interval.at_least 1 | true, _ -> Interval.at_least b in
     step bl [ (u, Set L) ] start_gap (Printf.sprintf "byte %d start bit" i);
     for j = 1 to 8 do
-      step bl [ (u, Data_pp) ] (ex (if j = 1 then b else width (j - 1))) (Printf.sprintf "byte %d data bit %d" i j)
+      let data = Option.map (fun _ -> (i, j - 1)) bytes in
+      step ?data bl [ (u, Data_pp) ] (ex (if j = 1 then b else width (j - 1))) (Printf.sprintf "byte %d data bit %d" i j)
     done;
     step bl [ (u, Set H) ] (ex (width 8)) (Printf.sprintf "byte %d stop bit" i)
   done;
-  finish bl ~name:(Printf.sprintf "uart b=%d bytes=%d%s%s" b nbytes (if host then " from host" else "")
+  finish ?bytes bl ~name:(Printf.sprintf "uart b=%d bytes=%d%s%s" b nbytes (if host then " from host" else "")
                      (match stretch with Some (k, d) -> Printf.sprintf " stretch=%d+%d" k d | None -> ""))
     ~pins:[ u ]
 
 (* SPI mode 0, msb first, period [p] slots (compiler.ml: "High width 3+b = P/2"; the bit loop
    "SHO(0) ... SETP sclk=1 (3+a) ... SETP sclk=0 (6+a+b) JNZ, next SHO at 8+a+b" with
    a + b = P - 8). So SCLK is high for P/2 and low for P/2, MOSI changes 2 slots after each fall
-   and so P/2 - 2 before each rise, and CS changes 2 slots from its neighbours. *)
-let spi_spec ~sclk ~mosi ~cs ~p ~nbytes =
+   and so P/2 - 2 before each rise, and CS changes 2 slots from its neighbours. With [bytes],
+   MOSI's bit j of byte i is declared to be bit 8 - j of that byte, msb first ("msb first" in
+   compiler.ml's spi_master). *)
+let spi_spec ?bytes ~sclk ~mosi ~cs ~p ~nbytes () =
   let bl = builder () in
   (* the compiler lists "cs high" before "sclk and mosi low" in its source, but its item list is
      reversed as a whole at the end, so the image sets sclk and mosi first *)
@@ -72,13 +77,14 @@ let spi_spec ~sclk ~mosi ~cs ~p ~nbytes =
   for i = 0 to nbytes - 1 do
     step bl [ (cs, Set L) ] (ex 2) (Printf.sprintf "byte %d cs asserted" i);
     for j = 1 to 8 do
-      step bl [ (mosi, Data_pp) ] (ex 2) (Printf.sprintf "byte %d bit %d mosi" i j);
+      let data = Option.map (fun _ -> (i, 8 - j)) bytes in
+      step ?data bl [ (mosi, Data_pp) ] (ex 2) (Printf.sprintf "byte %d bit %d mosi" i j);
       step bl [ (sclk, Set H) ] (ex (p / 2 - 2)) (Printf.sprintf "byte %d bit %d sclk rise" i j);
       step bl [ (sclk, Set L) ] (ex (p / 2)) (Printf.sprintf "byte %d bit %d sclk fall" i j)
     done;
     step bl [ (cs, Set H) ] (ex 2) (Printf.sprintf "byte %d cs released" i)
   done;
-  finish bl ~name:(Printf.sprintf "spi p=%d bytes=%d" p nbytes) ~pins:[ sclk; mosi; cs ]
+  finish ?bytes bl ~name:(Printf.sprintf "spi p=%d bytes=%d" p nbytes) ~pins:[ sclk; mosi; cs ]
 
 (* I2C master write with clock stretching, quarter period [q] slots, stretch limit [lm] slots
    (compiler.ml, i2c_write). Every release of SCL is followed by an observation of SCL high within
@@ -142,7 +148,8 @@ let uart ?(thread = 0) ?stretch ~b bytes =
   let p, _ = Compiler.uart_tx { upin = 0; bit_slots = b; ubytes = bytes; stretch } in
   { name = Printf.sprintf "uart_b%d_n%d%s" b (List.length bytes)
         (match stretch with Some (k, d) -> Printf.sprintf "_s%d+%d" k d | None -> "");
-    words = v2_of_base p; spec = uart_spec ~u:0 ~b ~nbytes:(List.length bytes) ~stretch (); thread; env = Pull_up }
+    words = v2_of_base p; spec = uart_spec ~bytes:(Array.of_list bytes) ~u:0 ~b ~nbytes:(List.length bytes) ~stretch ();
+    thread; env = Pull_up }
 
 (* the same, each byte from the host (IN in place of LDA), as ../formal/programmes.ml's
    uart_from_host: the data and the wait for it are inputs *)
@@ -155,7 +162,7 @@ let uart_host ?(thread = 0) ~b n =
 let spi ?(thread = 1) ~p bytes =
   let w, _ = Compiler.spi_master { sclk = 1; mosi = 2; cs = 3; period = p; sbytes = bytes } in
   { name = Printf.sprintf "spi_p%d_n%d" p (List.length bytes); words = v2_of_base w;
-    spec = spi_spec ~sclk:1 ~mosi:2 ~cs:3 ~p ~nbytes:(List.length bytes); thread; env = Pull_up }
+    spec = spi_spec ~bytes:(Array.of_list bytes) ~sclk:1 ~mosi:2 ~cs:3 ~p ~nbytes:(List.length bytes) (); thread; env = Pull_up }
 
 let i2c ?(thread = 2) ?(lm = 4095) ~q bytes =
   let w, _ = Compiler.i2c_write ~stretch_limit:lm { sda = 4; scl = 5; q; ibytes = bytes } in
@@ -229,7 +236,7 @@ let planted () =
      compiler did before it gained its assertion (formal/README.md, Findings 1) *)
   let spi8 = { (with_words spi10 ~name:"PLANTED spi_p8 (LDD a wraps to 4095)" (fun w ->
       w.(nth_op w 3 0) <- Isa2.ldd 4095; w.(nth_op w 3 1) <- Isa2.ldd 1; w))
-               with spec = spi_spec ~sclk:1 ~mosi:2 ~cs:3 ~p:8 ~nbytes:1 } in
+               with spec = spi_spec ~bytes:[| 0xA5 |] ~sclk:1 ~mosi:2 ~cs:3 ~p:8 ~nbytes:1 () } in
   let i2c1 = i2c ~q:4 [ 0xA0 ] in
   let no_waitp = with_words i2c1 ~name:"PLANTED i2c without WAITP (stretch-blind)" (fun w ->
       Array.map (fun x -> if opcode x = Isa2.op_waitp then Isa2.nop else x) w) in
@@ -255,7 +262,13 @@ let planted () =
                                           spec = (deadline ()).spec } in
   let in_wait = with_words uart16 ~name:"PLANTED uart, LDA replaced by IN (waits for the host)" (fun w ->
       let i = nth_op w Isa2.op_lda 1 in w.(i) <- Isa2.in_; w) in
-  [ spi8; no_waitp; one_waitp; no_limit; wrong_fail; uart_off; uart_halt; uart_ldc; spi_cs; dl30; in_wait ]
+  (* data levels (Spec [data]): the timing is right, the bits are not the declared ones *)
+  let uart_byte = with_words uart16 ~name:"PLANTED uart, the second byte's LDA is 0x4A, declared 0x4B" (fun w ->
+      let i = nth_op w Isa2.op_lda 1 in w.(i) <- Isa2.lda 0x4A; w) in
+  let spi_lsb = with_words (spi ~p:16 [ 0x4F ]) ~name:"PLANTED spi, SHO lsb first (its msb flag cleared)" (fun w ->
+      let i = nth_op w Isa2.op_sho 0 in w.(i) <- w.(i) land lnot 0x100; w) in
+  [ spi8; no_waitp; one_waitp; no_limit; wrong_fail; uart_off; uart_halt; uart_ldc; spi_cs; dl30; in_wait;
+    uart_byte; spi_lsb ]
 
 (* ---- hand-written programmes that are correct but hard for the analysis (precision) ---- *)
 
