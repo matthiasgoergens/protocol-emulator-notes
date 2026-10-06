@@ -41,7 +41,8 @@ let bugs =
     "prog_byte_order", "a programme word's bytes swapped";
     "pecfg_seg", "PECFG selects the segment from address bits 10:9";
     "status_not_cleared", "writing STATUS does not clear the sticky bits";
-    "hostin_overwrite", "a push into a full HOSTIN FIFO is accepted" ]
+    "hostin_overwrite", "a push into a full HOSTIN FIFO is accepted";
+    "array_unreset", "the PE array is not cleared by the reset" ]
 
 let config = Chip_spec.default_config
 
@@ -205,7 +206,7 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   let cfg_seg = if is "pecfg_seg" then select act_addr 10 9 else select act_addr 9 8 in
   let fixed_seg = if is "fixed_port_seg1" then 1 else 0 in
   let arr =
-    Upe.Upe_rtl.array_create ~layout:cfg.layout ~clear:reset ~clock
+    Upe.Upe_rtl.array_create ~layout:cfg.layout ?clear:(if is "array_unreset" then None else Some reset) ~clock
       { mbx_wr; mbx_seg; mbx_sel; mbx_byte;
         acfg_wr = act_is t_pecfg; acfg_seg = cfg_seg; acfg_byte = act_byte;
         ainit_wr = act_is t_peinit; ainit_seg = select act_addr 9 8; ainit_byte = act_byte;
