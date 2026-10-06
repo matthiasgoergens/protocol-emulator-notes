@@ -3,7 +3,7 @@
 #
 #   make              RTL simulation of ../src (Icarus, cocotb)
 #   make GATES=yes    gate-level simulation of gate_level_netlist.v; needs PDK_ROOT and a netlist
-#                     copied here from a LibreLane/tt-gds-action run (we have not run one yet)
+#                     copied here from a LibreLane/tt-gds-action run (tt_submission/<top>.v)
 # defaults
 SIM ?= icarus
 FST ?= -fst # Use more efficient FST format
@@ -32,6 +32,9 @@ COMPILE_ARGS    += -DGL_TEST
 COMPILE_ARGS    += -DFUNCTIONAL
 COMPILE_ARGS    += -DSIM
 VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13cmos5l/libs.ref/sg13cmos5l_io/verilog/sg13cmos5l_io.v
+# The user-defined primitives (ihp_dff_r, ihp_mux2, ...) that the cell models instantiate live in a file of
+# their own; the template's Makefile does not list it, and a netlist with flip-flops then fails to elaborate.
+VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/verilog/sg13cmos5l_udp.v
 VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/verilog/sg13cmos5l_stdcell.v
 
 # this gets copied in by the GDS action workflow
