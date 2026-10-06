@@ -3,8 +3,11 @@
    RTL's port list.  With "controls", also plant cuts and shorts in copies of
    the GDS and show that each is caught.
 
-   roundtrip_check.exe check    GDS TOP RTL.v MODELS.v [NETLIST_OUT]
-   roundtrip_check.exe controls GDS TOP RTL.v MODELS.v OUTDIR N SEED *)
+   roundtrip_check.exe [--both-edges] check    GDS TOP RTL.v MODELS.v [NETLIST_OUT]
+   roundtrip_check.exe [--both-edges] controls GDS TOP RTL.v MODELS.v OUTDIR N SEED
+
+   SRAM macros in the GDS are found by name (macros.ml); their functional
+   models and LEFs are read from the PDK next to MODELS.v. *)
 
 let time f =
   let t0 = Unix.gettimeofday () in
@@ -15,15 +18,28 @@ let starts_with = Extract.starts_with
 
 let log s = Printf.printf "  %s\n%!" s
 
-let extract_and_check ?(quiet = false) ~gds ~top ~lib ~ports () =
+(* "--both-edges": flip-flops whose clock arrives inverted take the falling
+   edge (the combined chip's pin stage); without it they are errors *)
+let both_edges = ref false
+
+(* the clock port: "clock" (the Hardcaml blocks) or "clk" (Tiny Tapeout's top) *)
+let clock_of ports =
+  match List.find_opt (fun c -> List.mem (c, Check.In) ports) [ "clock"; "clk" ] with
+  | Some c -> c
+  | None -> "clock"
+
+let extract_and_check ?(quiet = false) ~gds ~top ~lib ~models ~ports () =
   let (nl, geo), t_ext =
     time (fun () -> Extract.extract ~log:(if quiet then ignore else log) ~gds_path:gds ~top_name:top ()) in
-  let report, t_chk = time (fun () -> Check.run ~lib ~ports ~clock:"clock" nl) in
+  Macros.add_to_lib ~models lib nl;
+  let report, t_chk =
+    time (fun () -> Check.run ~falling_ok:!both_edges ~lib ~ports ~clock:(clock_of ports) nl) in
   (nl, geo, report, t_ext, t_chk)
 
 let print_report (r : Check.report) ~limit =
   List.iter (fun (k, v) -> Printf.printf "  %-28s %d\n" k v) r.stats;
   Printf.printf "  errors: %d, warnings: %d\n" (List.length r.errors) (List.length r.warnings);
+  List.iter (fun (k, v) -> Printf.printf "  errors of kind %-20s %d\n" k v) r.kinds;
   List.iteri (fun i e -> if i < limit then Printf.printf "    ERROR %s\n" e) r.errors;
   List.iteri (fun i e -> if i < limit then Printf.printf "    warn  %s\n" e) r.warnings
 
@@ -32,16 +48,39 @@ let check gds top rtl models out =
   let ports = Check.rtl_ports rtl in
   Printf.printf "models: %d cells read in %.2f s; RTL ports: %d bits\n" (Hashtbl.length lib) t_lib
     (List.length ports);
-  let nl, _, report, t_ext, t_chk = extract_and_check ~gds ~top ~lib ~ports () in
-  Printf.printf "extract: %.2f s (%d shapes, %d components, %d instances, %d nets)\ncheck: %.3f s\n"
-    t_ext nl.nshapes nl.ncomponents (Array.length nl.instances) nl.nnets t_chk;
+  let nl, _, report, t_ext, t_chk = extract_and_check ~gds ~top ~lib ~models ~ports () in
+  Printf.printf "extract: %.2f s (%d shapes, %d components, %d instances, %d nets)\ncheck: %.3f s (clock port %s%s)\n"
+    t_ext nl.nshapes nl.ncomponents (Array.length nl.instances) nl.nnets t_chk (clock_of ports)
+    (if !both_edges then ", both edges allowed" else "");
+  (* each macro's pin labels in the GDS against its LEF *)
+  let macro_cells =
+    List.sort_uniq compare (Array.to_list (Array.map (fun (i : Extract.inst) -> i.icell) nl.instances))
+    |> List.filter Macros.is_macro in
+  let lef_problems =
+    if macro_cells = [] then []
+    else begin
+      let glib = Gds.parse gds in
+      List.concat_map (fun m ->
+        let lef = Macros.lef_of ~models m in
+        let npins, nlabels, problems = Macros.check_labels_against_lef ~lef ~gds:glib ~tech:nl.tech m in
+        Printf.printf "macro %s: %d LEF signal pins, %d GDS pin labels, %d disagreements (%s)\n" m npins nlabels
+          (List.length problems) lef;
+        List.iter (fun p -> Printf.printf "    %s\n" p) problems;
+        problems) macro_cells
+    end in
   print_report report ~limit:50;
   Option.iter (Extract.write_netlist nl) out;
   (* the netlist must also simulate: build the flattened model *)
   let sim, t_sim = time (fun () -> Sim.create lib nl) in
   Printf.printf "simulator: %d primitive gates, %d flip-flops, built in %.2f s\n"
     (Array.length sim.gates) (Array.length sim.ffs) t_sim;
-  let ok = report.errors = [] in
+  if macro_cells <> [] then begin
+    let rise, fall, bad = Sim.classify_clocks sim ~clock:(clock_of ports) in
+    Printf.printf "simulator clock edges: %d flip-flops and macros on the rising edge, %d on the falling, %d unresolved\n"
+      rise fall (List.length bad);
+    Array.iter (fun (m : Sim.mem) -> Printf.printf "simulator macro %s: %d words x %d bits\n" m.mowner m.mspec.words m.mspec.width) sim.mems
+  end;
+  let ok = report.errors = [] && lef_problems = [] in
   print_endline (if ok then "STRUCTURE CLEAN" else "STRUCTURE ERRORS");
   exit (if ok then 0 else 1)
 
@@ -55,7 +94,7 @@ let controls gds top rtl models outdir n seed =
   Random.init seed;
   let lib = Cells.parse_library models in
   let ports = Check.rtl_ports rtl in
-  let nl, geo, report, t_ext, _ = extract_and_check ~quiet:true ~gds ~top ~lib ~ports () in
+  let nl, geo, report, t_ext, _ = extract_and_check ~quiet:true ~gds ~top ~lib ~models ~ports () in
   Printf.printf "baseline: %d errors (extract %.2f s)\n" (List.length report.errors) t_ext;
   if report.errors <> [] then failwith "baseline is not clean; controls would mean nothing";
   let signal = is_signal_net nl in
@@ -126,7 +165,7 @@ let controls gds top rtl models outdir n seed =
     (Array.length cut_candidates) (String.concat ", " kinds);
   let results = ref [] in
   let run_one label path =
-    let nl', _, r, t, _ = extract_and_check ~quiet:true ~gds:path ~top ~lib ~ports () in
+    let nl', _, r, t, _ = extract_and_check ~quiet:true ~gds:path ~top ~lib ~models ~ports () in
     let caught = r.errors <> [] in
     (* a planted fault that leaves the connectivity as it was is no fault:
        say so, rather than count it either way *)
@@ -185,7 +224,9 @@ let controls gds top rtl models outdir n seed =
     caught (List.length !results) (2 * n - List.length !results)
 
 let () =
-  match Array.to_list Sys.argv |> List.tl with
+  let args = Array.to_list Sys.argv |> List.tl in
+  if List.mem "--both-edges" args then both_edges := true;
+  match List.filter (( <> ) "--both-edges") args with
   | [ "check"; gds; top; rtl; models ] -> check gds top rtl models None
   | [ "check"; gds; top; rtl; models; out ] -> check gds top rtl models (Some out)
   | [ "controls"; gds; top; rtl; models; outdir; n; seed ] ->
