@@ -468,7 +468,8 @@ let cmd_rtl name dir opts =
   (try Unix.mkdir dir 0o755 with Unix.Unix_error (Unix.EEXIST, _, _) -> ());
   let write f s = let oc = open_out (Filename.concat dir f) in output_string oc s; close_out oc in
   write (name ^ ".cert") text;
-  let sv, depth, finals = Rtl.generate ~thread ~words:img.words c in
+  let sv, depth, finals, slots_depth = Rtl.generate ~thread ~words:img.words c in
+  write "slots_depth" (string_of_int slots_depth ^ "\n");
   write "cert_check.sv" sv;
   write "depth" (string_of_int depth ^ "\n");
   write "finals" (String.concat " " (List.map string_of_int finals) ^ "\n");

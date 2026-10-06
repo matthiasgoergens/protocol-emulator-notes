@@ -64,7 +64,7 @@ wait_load() {
 
 # prepare a job's directory and sby file; print the sby tasks to run
 prepare() {
-  local job=$1 line img opts core expect dir depth finals
+  local job=$1 line img opts core expect dir depth finals sdepth
   line=$(echo "$JOBLIST" | grep "^$job|")
   img=$(field "$line" 2); opts=$(field "$line" 3); core=$(field "$line" 4); expect=$(field "$line" 5)
   dir=$WORK/$job
@@ -72,11 +72,12 @@ prepare() {
   # shellcheck disable=SC2086
   "$MAIN" rtl "$img" "$dir" $opts > "$dir/generate.txt"
   cp "$WORK/$core.v" "$dir/core.v"
-  depth=$(cat "$dir/depth"); finals=$(cat "$dir/finals")
+  depth=$(cat "$dir/depth"); finals=$(cat "$dir/finals"); sdepth=$(cat "$dir/slots_depth")
   {
     echo "[tasks]"
     echo "prove"
     if [ "$expect" = pass ]; then
+      echo "slots"
       echo "reach_done reach"
       for f in $finals; do echo "reach_fin_$f reach"; done
     fi
@@ -88,6 +89,9 @@ prepare() {
     # and the model's design_aiger.ywa names the outputs
     echo "prove: aigsmt none"
     if [ "$expect" = pass ]; then
+      echo "slots: mode bmc"
+      echo "slots: depth $sdepth"
+      echo "slots: aigsmt none"
       echo "reach: mode bmc"
       echo "reach: depth $depth"
       echo "reach: aigsmt none"
@@ -95,12 +99,13 @@ prepare() {
     echo
     echo "[engines]"
     echo "prove: abc pdr"
-    if [ "$expect" = pass ]; then echo "reach: abc bmc3"; fi
+    if [ "$expect" = pass ]; then echo "slots: abc bmc3"; echo "reach: abc bmc3"; fi
     echo
     echo "[script]"
     echo "read -formal core.v"
     echo "prove: read -formal cert_check.sv"
     if [ "$expect" = pass ]; then
+      echo "slots: read -formal -DSLOTS cert_check.sv"
       echo "reach_done: read -formal -DREACH=done cert_check.sv"
       for f in $finals; do echo "reach_fin_$f: read -formal -DREACH=fin_$f cert_check.sv"; done
     fi
@@ -156,7 +161,7 @@ reach_step() {
     cat "$dir/generate.txt"
     grep --extended-regexp 'summary: engine|Assert failed|failed assertion|DONE|Elapsed clock' "$dir/prove.out" \
       | sed 's/^SBY [0-9:]* \[[^]]*\] //' || echo "no result (see $dir/prove.out)"
-    labels=$(grep --only-matching --extended-regexp '[a-z_]+: assert' "$dir/cert_check.sv" | sed 's/: assert//' | grep --invert-match '^reach$')
+    labels=$(grep --only-matching --extended-regexp '[a-z_]+: assert' "$dir/cert_check.sv" | sed 's/: assert//' | grep --invert-match --extended-regexp '^(reach|slots)$')
     if grep --quiet 'DONE (PASS' "$dir/prove.out"; then
       if [ -f "$dir/reach_done.out" ]; then s=$(reach_step "$dir/reach_done.out"); else s=""; fi
       for l in $labels; do
@@ -165,6 +170,14 @@ reach_step() {
           echo "PROPERTY $j-$l: VACUOUS unbounded (abc pdr); antecedent ${l}_ante unreachable within $(cat "$dir/depth") clocks"
         else echo "PROPERTY $j-$l: UNDECIDED (proof passed, antecedent not decided)"; fi
       done
+      if [ -f "$dir/slots.out" ]; then
+        if grep --quiet 'DONE (PASS' "$dir/slots.out"; then
+          if [ -n "$s" ]; then echo "PROPERTY $j-slots: PROVED to $(cat "$dir/slots_depth") clocks (abc bmc3), past every event's slot (rtl.ml); antecedent slots_ante reachable (step $s)"
+          else echo "PROPERTY $j-slots: VACUOUS to $(cat "$dir/slots_depth") clocks; antecedent unreachable"; fi
+        elif grep --quiet 'DONE (FAIL' "$dir/slots.out"; then
+          echo "PROPERTY $j-slots: FAILED at step $(grep --only-matching --max-count=1 'asserted in frame [0-9]*' "$dir/slots.out" | sed 's/.* //')"
+        else echo "PROPERTY $j-slots: UNDECIDED (see $dir/slots.out)"; fi
+      fi
       for f in $(cat "$dir/finals"); do
         [ -f "$dir/reach_fin_$f.out" ] || continue
         s=$(reach_step "$dir/reach_fin_$f.out")

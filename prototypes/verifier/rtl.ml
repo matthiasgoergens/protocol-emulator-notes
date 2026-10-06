@@ -25,7 +25,14 @@
    specification state and the slots since the previous event as ghost state, and asserts:
 
    events    every event is a line of the certificate: from the current state, at that pc, with
-             that outcome, with its slot and its gap inside the line's intervals
+             that outcome, with its gap inside the line's interval
+   slots     every event's slot is inside its line's interval. Kept apart, under SLOTS, because
+             an absolute slot counter makes abc pdr learn the whole timeline (it did not converge
+             on the UART in 20 minutes); checked by a bounded run instead, whose bound covers
+             every event: the certificate's states are acyclic (every line leads to a later
+             state, checked here), so at most [states] events happen, each within the largest
+             deadline of the one before (the deadline property), so every event's slot is below
+             [states] x (largest deadline or gap) + 1
    levels    every channel pin a write event touches is left at the line's level (driven 0,
              driven 1, released), and every channel pin it does not touch is unchanged; no other
              slot of T changes a channel pin
@@ -220,6 +227,8 @@ let generate ~thread:t ~(words : int array) (c : cert) =
   let max_slot = List.fold_left (fun m l -> max m (finite_hi l.slot)) 0 c.lines in
   let slot_cap = max_slot + 2 in
   let gw = bits_for since_cap and slw = bits_for slot_cap in
+  List.iter (fun l -> if l.to_ <= l.from_ then fail "line %S does not lead to a later state" l.text) c.lines;
+  let slot_bound = (max_state + 1) * (max max_deadline max_gap) + 1 in
   let final = List.fold_left (fun m l -> max m l.to_) 0 c.lines in
   (* the final states: reached by a line, left by none (the end of the frame, or of a timeout) *)
   let finals = List.sort_uniq compare (List.filter_map (fun l ->
@@ -302,7 +311,8 @@ let generate ~thread:t ~(words : int array) (c : cert) =
   p "  wire step = started && fetch_t && have;   // slot s of T is complete; imem_addr is the pc of slot s + 1\n";
   p "  wire [7:0] P = pc_s, P2 = imem_addr[7:0];\n";
   (* ghost state *)
-  p "  reg [%d:0] astate = %s;\n  reg [%d:0] since = %s;\n  reg [%d:0] slot = %s;\n" (sw - 1) (vlit sw 0) (gw - 1) (vlit gw 0) (slw - 1) (vlit slw 0);
+  p "  reg [%d:0] astate = %s;\n  reg [%d:0] since = %s;\n" (sw - 1) (vlit sw 0) (gw - 1) (vlit gw 0);
+  p "`ifdef SLOTS\n  reg [%d:0] slot = %s;\n`endif\n" (slw - 1) (vlit slw 0);
   p "  reg done = 1'b0;          // the certificate's last state has been reached\n";
   List.iter (fun a -> p "  reg fin_%d = 1'b0;         // final state %d has been reached\n" a a) finals;
   (* event classification *)
@@ -314,7 +324,7 @@ let generate ~thread:t ~(words : int array) (c : cert) =
   p "  wire event_ = step && ev_pc && !stays;\n";
   (* the lines *)
   p "  // one match per certificate line: state, pc, outcome (by the next pc), slot and gap\n";
-  p "  wire [%d:0] m_where, m_time;\n" (nlines - 1);
+  p "  wire [%d:0] m_where, m_gap;\n`ifdef SLOTS\n  wire [%d:0] m_slot;\n`endif\n" (nlines - 1) (nlines - 1);
   List.iteri (fun j l ->
       let cond_iv name (iv : Interval.t) w =
         let lo = if iv.lo > 0 then Some (Printf.sprintf "%s >= %s" name (vlit w iv.lo)) else None in
@@ -322,7 +332,8 @@ let generate ~thread:t ~(words : int array) (c : cert) =
         match List.filter_map Fun.id [ lo; hi ] with [] -> "1'b1" | l -> String.concat " && " l in
       p "  // %s\n" l.text;
       p "  assign m_where[%d] = astate == %s && P == 8'd%d && P2 == 8'd%d;\n" j (vlit sw l.from_) l.pc (successor words l);
-      p "  assign m_time[%d] = %s && %s;\n" j (cond_iv "slot" l.slot slw) (cond_iv "since" l.gap gw)) c.lines;
+      p "  assign m_gap[%d] = %s;\n" j (cond_iv "since" l.gap gw);
+      p "`ifdef SLOTS\n  assign m_slot[%d] = %s;\n`endif\n" j (cond_iv "slot" l.slot slw)) c.lines;
   (* levels, data and sub-slot per line *)
   let level_expr pin = function
     | L -> Some (Printf.sprintf "vis_a[%d:%d] == 2'b10" (2 * pin + 1) (2 * pin))
@@ -365,14 +376,14 @@ let generate ~thread:t ~(words : int array) (c : cert) =
   p "  always @(posedge clock) if (step) begin\n";
   p "    if (event_) begin astate <= next_state; since <= %s; end\n" (vlit gw 1);
   p "    else if (since != %s) since <= since + %s;\n" (vlit gw since_cap) (vlit gw 1);
-  p "    if (slot != %s) slot <= slot + %s;\n" (vlit slw slot_cap) (vlit slw 1);
+  p "`ifdef SLOTS\n    if (slot != %s) slot <= slot + %s;\n`endif\n" (vlit slw slot_cap) (vlit slw 1);
   p "    if (event_ && next_state == %s) done <= 1'b1;\n" (vlit sw final);
   List.iter (fun a -> p "    if (event_ && next_state == %s) fin_%d <= 1'b1;\n" (vlit sw a) a) finals;
   p "  end\n";
   (* properties *)
   p "  // ---- properties ----\n";
   p "  always @(*) if (step) begin\n";
-  p "    events: assert (!event_ || (m_where & m_time) != %d'd0);\n" nlines;
+  p "    events: assert (!event_ || (m_where & m_gap) != %d'd0);\n" nlines;
   p "    levels: assert (event_ ? (m_where & m_level) != %d'd0 : (vis_a & VCH) == (vis_b & VCH));\n" nlines;
   (* without declared data there is nothing to assert: no data property, rather than a vacuous one *)
   if symbolic then p "    data: assert (!event_ || (m_where & m_data) != %d'd0);\n" nlines;
@@ -381,6 +392,8 @@ let generate ~thread:t ~(words : int array) (c : cert) =
   p "  end\n";
   p "  always @(*) if (past1 && phase != 2'd%d) quiet: assert ((vis & VCH) == (vis_prev & VCH) && %s);\n" ((t + 1) land 3) (steady "pin_sub");
   p "  always @(*) if (fetch_t && started) page: assert (imem_addr[9:8] == T);\n";
+  p "`ifdef SLOTS\n  always @(*) if (step) slots: assert (!event_ || (m_where & m_slot) != %d'd0);\n" nlines;
+  p "  always @(*) slots_ante: cover (done);\n`endif\n";
   p "  // antecedents: the certificate's last state (state %d) is reached\n" final;
   List.iter (fun n -> p "  always @(*) %s_ante: cover (done);\n" n)
     ([ "events"; "levels" ] @ (if symbolic then [ "data" ] else []) @ [ "subslot"; "deadline_"; "quiet"; "page" ]);
@@ -389,4 +402,4 @@ let generate ~thread:t ~(words : int array) (c : cert) =
   p "  // reachable at step n. REACH names the signal (done, or fin_N)\n";
   p "`ifdef REACH\n  always @(*) reach: assert (!`REACH);\n`endif\n";
   p "endmodule\n";
-  Buffer.contents b, (4 * (slot_cap + 2) + t + 8), finals
+  Buffer.contents b, (4 * (slot_cap + 2) + t + 8), finals, (4 * (max slot_bound slot_cap + 2) + t + 8)
