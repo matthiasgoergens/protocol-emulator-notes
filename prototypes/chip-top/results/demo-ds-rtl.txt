@@ -1,0 +1,15 @@
+== UART, SPI and I2C (../deadline-sequencer firmware, unchanged) on the combined chip
+  uart_tx: 38 words
+  spi_master: 27 words
+  i2c_write: 64 words
+  the board is driven by the RTL's pads
+  host link: 10720 clocks busy loading and draining (of 14500)
+  RTL and specification agree on every pad, every clock: true
+  uart decoded: 0x4f@42 0x4b@682 0x21@1322
+  spi decoded:  0xa5 0x3c
+  i2c decoded:  0xa0+ack 0x5a+ack stop=true; host received: 0x00 0x00
+  uart tx edge spacing: 20 edges, all spacings multiples of 64 cycles: true (worst deviation 0 cycles)
+  spi sclk period within bytes: 12 spacings, all 64: true
+  i2c scl high widths: 18, all 32: true
+  trace written to /var/tmp/chip-top-traces
+UART/SPI/I2C on the combined chip: PASS

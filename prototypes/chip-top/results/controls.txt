@@ -1,0 +1,56 @@
+commit 56a7c2d
+pin_lane_swap        caught: seed 5000 clock  3560  (sequencer pins 0 and 1 swapped at the pad source select)
+    first diff: pad 1: spec 0 rtl f
+quarter_swap         caught: seed 5011 clock  9508  (quarters 1 and 2 of a sequencer pin's nibble swapped)
+    first diff: pad 1: spec 3 rtl 5
+pinin_quarter0       caught: seed 5000 clock  3542  (pin_in takes the quarter-0 sample instead of the latest)
+    first diff: seq latch: spec 3e rtl 3c
+pinin_lane_swap      caught: seed 5000 clock  3546  (logical input pins 2 and 3 read each other's pads)
+    first diff: seq latch: spec 1a rtl 16
+mbx_port_swap        caught: seed 5000 clock  3556  (SEND on port 1 writes segment 2's feed)
+    first diff: seg2 feed valid: spec 0 rtl 1
+recv_port_swap       caught: seed 5001 clock  3380  (RECV on port 2 reads port 3's holding register)
+    first diff: port 2 hold state: spec 1 rtl 0
+send_order           caught: seed 5000 clock  3543  (a port's first SEND byte goes in as the high byte)
+    first diff: seg3 feed valid: spec 0 rtl 1
+tap_seg_miswire      caught: seed 5000 clock  2708  (port p's holding register takes segment p+1's tap)
+    first diff: port 0 hold state: spec 1 rtl 0
+fixed_port_seg1      caught: seed 5004 clock  5783  (the recovered-bit stream goes to segment 1's fixed port)
+    first diff: pe0 S: spec 8887 rtl c443
+host_mbx_priority    caught: seed 5000 clock 11742  (a host feed write wins over a thread's SEND, which is lost)
+    first diff: seg2 feed low: spec 0 rtl 79
+flag_off_by_one      caught: seed 5000 clock  3566  (flag f uses flag f+1's select)
+    first diff: seq pc0: spec db rtl c7
+flag_thread_rot      caught: seed 5000 clock  3543  (thread t sees thread t+1's flags)
+    first diff: seq pc1: spec b6 rtl b9
+nibble_order         caught: seed 5000 clock  1282  (the host link takes a byte's low nibble first)
+    first diff: seq pc0: spec c6 rtl 0
+read_nibble_order    caught: seed 5000 clock  4618  (the host link sends a byte's low nibble first)
+    first diff: pad 10: spec 0 rtl f
+hostin_ungated       caught: seed 5005 clock  6889  (the threads' IN pops the FIFO while the core is held in clear)
+    first diff: hostin count: spec 4 rtl 3
+bank_ungated         caught: seed 5003 clock  3739  (a STB writes the bank while the core is held in clear)
+    first diff: seq acc0: spec f9 rtl 0
+hostout_no_latch     caught: seed 5019 clock  4171  (HOSTOUT pops on the data byte even when the tag byte said empty)
+    first diff: hostout count: spec 1 rtl 0
+smp_pin_swap         caught: seed 5000 clock  5080  (sampler pins 0 and 1 swapped)
+    first diff: rbuf: spec 19 rtl 0
+uio_oe_swap          caught: seed 5000 clock  1466  (the output enables of uio 6 and 7 swapped)
+    first diff: uio_oe: spec 40 rtl 80
+boot_pc_swap         caught: seed 5000 clock  1290  (boot pcs of threads 1 and 2 swapped)
+    first diff: seq pc1: spec b4 rtl 0
+restart_page         caught: seed 5000 clock  6035  (the restart register's page ignored)
+    first diff: seq page0: spec 1 rtl 0
+es_quarter_rev       caught: seed 5000 clock  3523  (the edge sampler sees the quarters in reverse order)
+    first diff: edge sampler: spec 1 rtl d
+nco_inc_bytes        caught: seed 5000 clock  3707  (the NCO increment's two low bytes swapped)
+    first diff: nco: spec f31 rtl f33
+prog_byte_order      caught: seed 5000 clock  3538  (a programme word's bytes swapped)
+    first diff: seq pc0: spec c9 rtl c6
+pecfg_seg            caught: seed 5000 clock  2745  (PECFG selects the segment from address bits 10:9)
+    first diff: pe0 cfg0: spec b0 rtl 0
+status_not_cleared   caught: seed 5000 clock 10400  (writing STATUS does not clear the sticky bits)
+    first diff: rbuf: spec 2a rtl 2b
+hostin_overwrite     caught: seed 5000 clock  8029  (a push into a full HOSTIN FIFO is accepted)
+    first diff: rbuf: spec 2b rtl 29
+27 of 27 planted integration bugs caught

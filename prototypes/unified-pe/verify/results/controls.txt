@@ -1,83 +1,93 @@
-sat_off_by_one       uniform: 125     fastest biased: lane         84 cycles; 11 of 11 biased generators catch it  (saturating add clamps to 0x7ffe)
-    first diff: PE5: S=0000 P=7fff Pv=false F=true L=true cfg=0000ad6819c8ee96 | S=0000 P=7ffe Pv=false F=true L=true cfg=0000ad6819c8ee96
-sat_as_wrap          uniform: 125     fastest biased: lane         84 cycles; 11 of 11 biased generators catch it  (saturating add wraps when the carry-in is the lane)
-    first diff: PE5: S=0000 P=7fff Pv=false F=true L=true cfg=0000ad6819c8ee96 | S=0000 P=8f69 Pv=false F=true L=true cfg=0000ad6819c8ee96
-carry_bit15          uniform: 22      fastest biased: stream       15 cycles; 11 of 11 biased generators catch it  (carry out taken from bit 15)
-    first diff: PE0: S=ffff P=8001 Pv=false F=false L=true cfg=34f8f72bee000113 | S=ffff P=8001 Pv=false F=false L=false cfg=34f8f72bee000113
-cin_ignored          uniform: 25      fastest biased: arith        12 cycles; 11 of 11 biased generators catch it  (lane carry-in dropped)
-    first diff: PE0: S=fffe P=0000 Pv=false F=false L=false cfg=0000b930f8d77854 | S=ffff P=0000 Pv=false F=false L=false cfg=0000b930f8d77854
-max_unsigned         uniform: 60      fastest biased: maxmin       13 cycles; 11 of 11 biased generators catch it  (max compares unsigned)
-    first diff: PE0: S=0000 P=0000 Pv=false F=true L=true cfg=00bd52f8d42bee00 | S=ffff P=ffff Pv=false F=true L=true cfg=00bd52f8d42bee00
-min_is_max           uniform: 57      fastest biased: arith        20 cycles; 11 of 11 biased generators catch it  (min returns the larger)
-    first diff: PE0: S=ffff P=0000 Pv=false F=true L=false cfg=0001138365eacf5a | S=0000 P=0000 Pv=false F=true L=false cfg=0001138365eacf5a
-max_loser_x          uniform: 94      fastest biased: lane         34 cycles; 11 of 11 biased generators catch it  (max always reports X as the loser)
-    first diff: PE2: S=0000 P=ffff Pv=false F=false L=false cfg=c5948acdd9970001 | S=0000 P=0000 Pv=false F=false L=false cfg=c5948acdd9970001
-and_not              uniform: 117     fastest biased: maxmin       52 cycles; 11 of 11 biased generators catch it  (AND computes X AND NOT Y)
-    first diff: PE4: S=3450 P=3450 Pv=true F=false L=true cfg=000035d7a93200ca | S=0000 P=3450 Pv=true F=false L=true cfg=000035d7a93200ca
-or_is_xor            uniform: 44      fastest biased: gsrc         20 cycles; 11 of 11 biased generators catch it  (OR computes XOR)
-    first diff: PE1: S=0001 P=0001 Pv=false F=false L=false cfg=0000be307a772bee | S=0000 P=0001 Pv=false F=false L=false cfg=0000be307a772bee
-gate_inverted        uniform: 13      fastest biased: gsrc         12 cycles; 11 of 11 biased generators catch it  (gating passes Y when g = 0)
-    first diff: PE0: S=0001 P=0000 Pv=false F=false L=false cfg=0000be307a772bee | S=0000 P=0000 Pv=false F=false L=false cfg=0000be307a772bee
-neg_no_plus1         uniform: 138     fastest biased: arith        13 cycles; 11 of 11 biased generators catch it  (negation without the +1)
-    first diff: PE0: S=ffff P=0000 Pv=false F=true L=true cfg=00b930f8d7785400 | S=fffe P=0000 Pv=false F=true L=true cfg=00b930f8d7785400
-gneg_always          uniform: 54      fastest biased: stream       34 cycles; 11 of 11 biased generators catch it  (negate-by-g negates regardless of g)
-    first diff: PE2: S=0000 P=0001 Pv=false F=false L=false cfg=4c076ab6b3ac0001 | S=0000 P=0000 Pv=false F=false L=false cfg=4c076ab6b3ac0001
-bit_off_by_one       uniform: 149     fastest biased: maxmin       53 cycles; 11 of 11 biased generators catch it  (bit test reads A[i+1])
-    first diff: PE4: S=0001 P=3450 Pv=false F=false L=false cfg=0035d7a93200ca00 | S=0001 P=34ca Pv=false F=true L=false cfg=0035d7a93200ca00
-s15_xor_uses_s14     uniform: 41      fastest biased: gsrc         20 cycles; 11 of 11 biased generators catch it  (S[15] ^ lane uses S[14])
-    first diff: PE0: S=8001 P=0000 Pv=false F=true L=false cfg=0001138365eacf5a | S=0000 P=0000 Pv=false F=false L=false cfg=0001138365eacf5a
-crc_pairlo_ignored   uniform: 258     fastest biased: maxmin       61 cycles; 11 of 11 biased generators catch it  (CRC feedback ignores pairlo)
-    first diff: PE4: S=a628 P=a628 Pv=false F=false L=true cfg=003773b49cfe3200 | S=fffe P=fffe Pv=true F=false L=true cfg=003773b49cfe3200
-g_from_F_inverted    uniform: 68      fastest biased: gf2          21 cycles; 11 of 11 biased generators catch it  (g = F reads NOT F)
-    first diff: PE1: S=0000 P=0000 Pv=false F=true L=true cfg=0000bd14ff4a2bee | S=0000 P=0000 Pv=false F=false L=false cfg=0000bd14ff4a2bee
-window_17            uniform: 5226    fastest biased: gsrc        372 cycles;  9 of 11 biased generators catch it  (window accepts d = 16)
-    first diff: PE10: S=078e P=ff91 Pv=false F=false L=true cfg=0000aa98569ef7c1 | S=f793 P=ff91 Pv=false F=false L=true cfg=0000aa98569ef7c1
-window_bit_order     uniform: 1464    fastest biased: logic       101 cycles; 11 of 11 biased generators catch it  (window tests S[d] instead of S[15 - d])
-    first diff: PE8: S=98ff P=98ff Pv=false F=false L=true cfg=01727cce98ffff00 | S=6700 P=6700 Pv=false F=false L=true cfg=01727cce98ffff00
-merge_colour_hi      uniform: 68      fastest biased: stream       15 cycles; 11 of 11 biased generators catch it  (merge takes K[15:8] as colour)
-    first diff: PE0: S=ffff P=8001 Pv=false F=false L=true cfg=34f8f72bee000113 | S=ffff P=8000 Pv=false F=false L=true cfg=34f8f72bee000113
-g_in_zero            uniform: 3349    fastest biased: pair         93 cycles; 11 of 11 biased generators catch it  (g_in tied to 0 across the segment 2/3 cut)
-    first diff: PE8: S=0001 P=0001 Pv=false F=false L=true cfg=0162546752840c00 | S=0000 P=0000 Pv=false F=true L=true cfg=0162546752840c00
-shr_sin_bit14        uniform: 22      fastest biased: arith        13 cycles; 11 of 11 biased generators catch it  (right shift inserts sin at bit 14)
-    first diff: PE0: S=ffff P=0000 Pv=false F=true L=true cfg=00b930f8d7785400 | S=7fff P=0000 Pv=false F=true L=true cfg=00b930f8d7785400
-sin_s15_uses_own     uniform: 40      fastest biased: gsrc         14 cycles; 11 of 11 biased generators catch it  (sin = s15_in uses own S[15])
-    first diff: PE0: S=8001 P=4000 Pv=false F=false L=true cfg=be307a772bee0001 | S=8001 P=c000 Pv=false F=false L=true cfg=be307a772bee0001
-swb_cond_inverted    uniform: 70      fastest biased: arith        12 cycles; 11 of 11 biased generators catch it  (conditional writeback writes when g = 0)
-    first diff: PE0: S=fffe P=0000 Pv=false F=false L=false cfg=0000b930f8d77854 | S=0000 P=0000 Pv=false F=false L=false cfg=0000b930f8d77854
-pwb_loser_is_winner  uniform: 22      fastest biased: arith        12 cycles; 11 of 11 biased generators catch it  (P <- loser gives the winner)
-    first diff: PE0: S=fffe P=0000 Pv=false F=false L=false cfg=0000b930f8d77854 | S=fffe P=fffe Pv=false F=false L=false cfg=0000b930f8d77854
-zero_on_x            uniform: 37      fastest biased: gsrc         39 cycles; 11 of 11 biased generators catch it  (zero flag tests X)
-    first diff: PE1: S=0000 P=0000 Pv=false F=true L=true cfg=0000be307a772bee | S=0000 P=0000 Pv=false F=false L=true cfg=0000be307a772bee
-lout_s15_old         uniform: 24      fastest biased: lane         41 cycles; 11 of 11 biased generators catch it  (lane out S[15] registers the old S)
-    first diff: PE2: S=5145 P=c413 Pv=false F=false L=true cfg=00014451bb8c7fc2 | S=5145 P=c413 Pv=false F=false L=false cfg=00014451bb8c7fc2
-lane_bc_wrong_seg    uniform: 445     fastest biased: lane         93 cycles; 11 of 11 biased generators catch it  (PEs of segment 3 take segment 2's broadcast bit)
-    first diff: PE8: S=d8c1 P=0000 Pv=false F=false L=true cfg=01959c8a89d8c100 | S=273e P=0000 Pv=false F=true L=false cfg=01959c8a89d8c100
-stream_ignored       uniform: 33      fastest biased: stream       13 cycles; 11 of 11 biased generators catch it  (stream mode steps every clock)
-    first diff: PE0: S=0000 P=8750 Pv=false F=false L=false cfg=00fd34f8f72bee00 | S=7ffe P=0001 Pv=false F=true L=true cfg=00fd34f8f72bee00
-del_ignored          uniform: 190     fastest biased: stream       15 cycles; 11 of 11 biased generators catch it  (deletion never drops)
-    first diff: PE0: S=ffff P=8001 Pv=false F=false L=true cfg=34f8f72bee000113 | S=ffff P=8001 Pv=true F=false L=true cfg=34f8f72bee000113
-follow_ignored       uniform: 17      fastest biased: lane         14 cycles; 11 of 11 biased generators catch it  (follow steps every clock)
-    first diff: PE0: S=d411 P=0000 Pv=false F=false L=false cfg=a119fbc72bee0001 | S=d411 P=0000 Pv=false F=false L=true cfg=a119fbc72bee0001
-loop_from_prev       uniform: 906     fastest biased: logic        58 cycles; 11 of 11 biased generators catch it  (segment 2's loop-back takes segment 1's end)
-    first diff: PE4: S=ffff P=ffff Pv=false F=false L=false cfg=00000000c2bf2633 | S=ffff P=0000 Pv=false F=false L=false cfg=00000000c2bf2633
-join_lane_zero       uniform: 275     fastest biased: maxmin       35 cycles; 11 of 11 biased generators catch it  (join does not pass the lane)
-    first diff: PE4: S=0000 P=ec9a Pv=false F=false L=true cfg=0000000000000000 | S=0000 P=ec9a Pv=false F=false L=false cfg=0000000000000000
-feed_valid_sticky    uniform: 201     fastest biased: lane        170 cycles; 11 of 11 biased generators catch it  (feed valid lasts two clocks)
-    first diff: PE0: S=0500 P=0000 Pv=false F=true L=false cfg=0001138365eacf5a | S=0500 P=0000 Pv=true F=true L=false cfg=0001138365eacf5a
-fixed_swapped        uniform: 258     fastest biased: arith         5 cycles; 11 of 11 biased generators catch it  (segment 3 takes segment 2's fixed port)
-    first diff: PE8: S=0000 P=7057 Pv=true F=false L=false cfg=0000000000000000 | S=0000 P=bc89 Pv=true F=false L=false cfg=0000000000000000
-cfg_chain_order      uniform: 9       fastest biased: arith         9 cycles; 11 of 11 biased generators catch it  (configuration bytes 2 and 3 swapped in the chain)
-    first diff: PE0: S=0000 P=0000 Pv=false F=false L=false cfg=0000000000b930f8 | S=0000 P=0000 Pv=false F=false L=false cfg=00000000b90030f8
-init_no_shift        uniform: 21      fastest biased: arith        21 cycles; 11 of 11 biased generators catch it  (init chain overwrites S instead of shifting)
-    first diff: PE0: S=ffa0 P=0000 Pv=false F=true L=false cfg=0001138365eacf5a | S=00a0 P=0000 Pv=false F=true L=false cfg=0001138365eacf5a
-tap_always_s         uniform: 41      fastest biased: arith        20 cycles; 11 of 11 biased generators catch it  (tap ignores tap_p)
-    first diff: tap0: 0000/fffe v false/false f false/false
-bc_chain_ignored     uniform: 105     fastest biased: stream       37 cycles; 11 of 11 biased generators catch it  (control bit 5 (broadcast from the previous segment) ignored)
-    first diff: PE2: S=0000 P=0000 Pv=false F=true L=true cfg=b6b3ac0001ec195a | S=0000 P=0000 Pv=false F=true L=false cfg=b6b3ac0001ec195a
-pv_hold_on_stop      uniform: 245     fastest biased: chains      214 cycles; 11 of 11 biased generators catch it  (valid clears when the segment stops)
-    first diff: PE8: S=af34 P=90d6 Pv=true F=false L=false cfg=00000f1442bc631b | S=af34 P=90d6 Pv=false F=false L=false cfg=00000f1442bc631b
-yone_is_two          uniform: 25      fastest biased: arith        12 cycles; 11 of 11 biased generators catch it  (Y = 1 gives 2)
-    first diff: PE0: S=fffe P=0000 Pv=false F=false L=false cfg=0000b930f8d77854 | S=fffd P=0000 Pv=false F=false L=false cfg=0000b930f8d77854
-xsel_a_is_s          uniform: 276     fastest biased: maxmin       35 cycles; 11 of 11 biased generators catch it  (X = A gives S when the op is XOR)
-    first diff: PE2: S=680f P=680f Pv=true F=false L=true cfg=92d354fd2d000080 | S=0000 P=0000 Pv=true F=false L=true cfg=92d354fd2d000080
-41 of 41 planted bugs caught
+sat_off_by_one       uniform: 46      fastest biased: lane         48 cycles; 12 of 12 biased generators catch it  (saturating add clamps to 0x7ffe)
+    first diff: PE3: S=7fff P=44e9 Pv=false F=true L=false cfg=00008590630e473b | S=7ffe P=44e9 Pv=false F=true L=false cfg=00008590630e473b
+sat_as_wrap          uniform: 46      fastest biased: lane         57 cycles; 12 of 12 biased generators catch it  (saturating add wraps when the carry-in is the lane)
+    first diff: PE4: S=7fff P=00d9 Pv=false F=true L=false cfg=c8a5f8000c44d94f | S=9ee2 P=00d9 Pv=false F=true L=true cfg=c8a5f8000c44d94f
+carry_bit15          uniform: 44      fastest biased: gf2          12 cycles; 12 of 12 biased generators catch it  (carry out taken from bit 15)
+    first diff: PE0: S=7fff P=0000 Pv=false F=false L=true cfg=001823d6d74309bb | S=7fff P=0000 Pv=false F=false L=false cfg=001823d6d74309bb
+cin_ignored          uniform: 145     fastest biased: gf2          11 cycles; 12 of 12 biased generators catch it  (lane carry-in dropped)
+    first diff: PE0: S=ffff P=0000 Pv=false F=false L=false cfg=00001823d6d74309 | S=0000 P=0000 Pv=false F=false L=false cfg=00001823d6d74309
+max_unsigned         uniform: 40      fastest biased: logic        20 cycles; 12 of 12 biased generators catch it  (max compares unsigned)
+    first diff: PE0: S=fffe P=084a Pv=false F=false L=true cfg=00084a561ea48599 | S=fffe P=fffc Pv=false F=false L=true cfg=00084a561ea48599
+min_is_max           uniform: 20      fastest biased: arith        12 cycles; 12 of 12 biased generators catch it  (min returns the larger)
+    first diff: PE0: S=0000 P=0000 Pv=false F=false L=false cfg=00184b5070970001 | S=0000 P=0001 Pv=false F=false L=false cfg=00184b5070970001
+max_loser_x          uniform: 40      fastest biased: maxmin       44 cycles; 12 of 12 biased generators catch it  (max always reports X as the loser)
+    first diff: PE2: S=002f P=6e4b Pv=false F=false L=true cfg=00000e92dcd0cddf | S=002f P=7000 Pv=false F=false L=true cfg=00000e92dcd0cddf
+and_not              uniform: 61      fastest biased: logic        13 cycles; 12 of 12 biased generators catch it  (AND computes X AND NOT Y)
+    first diff: PE0: S=fffe P=0000 Pv=false F=false L=false cfg=1822f5d4227fff00 | S=fffe P=0000 Pv=false F=true L=false cfg=1822f5d4227fff00
+or_is_xor            uniform: 21      fastest biased: maxmin       17 cycles; 12 of 12 biased generators catch it  (OR computes XOR)
+    first diff: PE0: S=48da P=48da Pv=false F=false L=true cfg=089f76000848921e | S=40da P=40da Pv=false F=false L=true cfg=089f76000848921e
+gate_inverted        uniform: 11      fastest biased: pair         20 cycles; 12 of 12 biased generators catch it  (gating passes Y when g = 0)
+    first diff: PE1: S=b7ac P=4854 Pv=false F=false L=false cfg=001923d4546a09bb | S=b7ac P=4854 Pv=false F=false L=true cfg=001923d4546a09bb
+neg_no_plus1         uniform: 41      fastest biased: stream       20 cycles; 12 of 12 biased generators catch it  (negation without the +1)
+    first diff: PE1: S=0000 P=0000 Pv=false F=false L=false cfg=000041c79de0c6a4 | S=0000 P=ffff Pv=false F=false L=false cfg=000041c79de0c6a4
+gneg_always          uniform: 20      fastest biased: stream       12 cycles; 12 of 12 biased generators catch it  (negate-by-g negates regardless of g)
+    first diff: PE0: S=0000 P=2a44 Pv=true F=false L=false cfg=000041c79de0c6a4 | S=0000 P=0000 Pv=true F=false L=false cfg=000041c79de0c6a4
+bit_off_by_one       uniform: 36      fastest biased: chains       34 cycles; 12 of 12 biased generators catch it  (bit test reads A[i+1])
+    first diff: PE2: S=0001 P=f27f Pv=true F=false L=false cfg=c020d2d9b3ac0000 | S=fffe P=f200 Pv=false F=false L=false cfg=c020d2d9b3ac0000
+s15_xor_uses_s14     uniform: 79      fastest biased: lane         36 cycles; 12 of 12 biased generators catch it  (S[15] ^ lane uses S[14])
+    first diff: PE2: S=a39e P=1683 Pv=false F=false L=false cfg=630e473b00168310 | S=a39e P=1683 Pv=false F=false L=true cfg=630e473b00168310
+crc_pairlo_ignored   uniform: 67      fastest biased: pair         12 cycles; 12 of 12 biased generators catch it  (CRC feedback ignores pairlo)
+    first diff: PE0: S=ffff P=0000 Pv=false F=false L=false cfg=001923d4546a09bb | S=ffff P=0000 Pv=false F=true L=false cfg=001923d4546a09bb
+g_from_F_inverted    uniform: 53      fastest biased: stream       13 cycles; 12 of 12 biased generators catch it  (g = F reads NOT F)
+    first diff: PE0: S=0000 P=038c Pv=true F=false L=false cfg=0041c79de0c6a400 | S=0000 P=03a4 Pv=true F=true L=false cfg=0041c79de0c6a400
+window_17            uniform: 1079    fastest biased: window      100 cycles;  8 of 12 biased generators catch it  (window accepts d = 16)
+    first diff: PE1: S=9b27 P=d632 Pv=true F=false L=false cfg=000001c79ee0c6a4 | S=9b27 P=d6a4 Pv=true F=true L=false cfg=000001c79ee0c6a4
+window_bit_order     uniform: 706     fastest biased: window       63 cycles; 12 of 12 biased generators catch it  (window tests S[d] instead of S[15 - d])
+    first diff: PE1: S=9b27 P=c9a4 Pv=true F=true L=false cfg=000001c79ee0c6a4 | S=9b27 P=c958 Pv=true F=false L=false cfg=000001c79ee0c6a4
+merge_colour_hi      uniform: 56      fastest biased: lane         13 cycles; 12 of 12 biased generators catch it  (merge takes K[15:8] as colour)
+    first diff: PE0: S=55d3 P=00d1 Pv=false F=false L=true cfg=0033d9d20255d100 | S=55d3 P=0055 Pv=false F=false L=true cfg=0033d9d20255d100
+g_in_zero            uniform: 1023    fastest biased: pair        101 cycles; 12 of 12 biased generators catch it  (g_in tied to 0 across the segment 2/3 cut)
+    first diff: PE8: S=230d P=230d Pv=false F=false L=false cfg=016254675294a800 | S=6240 P=6240 Pv=false F=false L=false cfg=016254675294a800
+shr_sin_bit14        uniform: 20      fastest biased: gf2          12 cycles; 12 of 12 biased generators catch it  (right shift inserts sin at bit 14)
+    first diff: PE0: S=7fff P=0000 Pv=false F=false L=true cfg=001823d6d74309bb | S=3fff P=0000 Pv=false F=false L=true cfg=001823d6d74309bb
+sin_s15_uses_own     uniform: 116     fastest biased: stream       33 cycles; 12 of 12 biased generators catch it  (sin = s15_in uses own S[15])
+    first diff: PE2: S=0000 P=0054 Pv=false F=true L=true cfg=007ad938da265400 | S=ffff P=0054 Pv=false F=false L=false cfg=007ad938da265400
+swb_cond_inverted    uniform: 45      fastest biased: lane         12 cycles; 12 of 12 biased generators catch it  (conditional writeback writes when g = 0)
+    first diff: PE0: S=0000 P=0000 Pv=false F=false L=true cfg=000033d9d20255d1 | S=ffff P=0000 Pv=false F=false L=true cfg=000033d9d20255d1
+pwb_loser_is_winner  uniform: 20      fastest biased: maxmin       16 cycles; 12 of 12 biased generators catch it  (P <- loser gives the winner)
+    first diff: PE0: S=0848 P=0001 Pv=false F=false L=false cfg=3a089f7600084892 | S=0848 P=0848 Pv=false F=false L=false cfg=3a089f7600084892
+zero_on_x            uniform: 36      fastest biased: maxmin       12 cycles; 12 of 12 biased generators catch it  (zero flag tests X)
+    first diff: PE0: S=0001 P=0000 Pv=false F=false L=false cfg=00021cfb3a089f76 | S=0001 P=0000 Pv=false F=true L=false cfg=00021cfb3a089f76
+lout_s15_old         uniform: 21      fastest biased: lane         43 cycles; 12 of 12 biased generators catch it  (lane out S[15] registers the old S)
+    first diff: PE3: S=dfe5 P=47bf Pv=false F=false L=false cfg=00008590630e473b | S=dfe5 P=47bf Pv=false F=false L=true cfg=00008590630e473b
+lane_bc_wrong_seg    uniform: 94      fastest biased: arith        92 cycles; 12 of 12 biased generators catch it  (PEs of segment 3 take segment 2's broadcast bit)
+    first diff: PE8: S=0000 P=0000 Pv=false F=true L=true cfg=0012f819ec440001 | S=0000 P=0000 Pv=false F=false L=false cfg=0012f819ec440001
+stream_ignored       uniform: 14      fastest biased: arith        13 cycles; 12 of 12 biased generators catch it  (stream mode steps every clock)
+    first diff: PE0: S=0000 P=0000 Pv=false F=false L=false cfg=184b507097000100 | S=0000 P=0000 Pv=false F=false L=true cfg=184b507097000100
+del_ignored          uniform: 18      fastest biased: stream       18 cycles; 12 of 12 biased generators catch it  (deletion never drops)
+    first diff: PE0: S=0000 P=35df Pv=false F=false L=false cfg=c6a4000868741ea4 | S=0000 P=35df Pv=true F=false L=false cfg=c6a4000868741ea4
+follow_ignored       uniform: 13      fastest biased: pair         13 cycles; 12 of 12 biased generators catch it  (follow steps every clock)
+    first diff: PE0: S=ffff P=0000 Pv=false F=false L=false cfg=1923d4546a09bb00 | S=0001 P=00bb Pv=false F=false L=false cfg=1923d4546a09bb00
+loop_from_prev       uniform: 448     fastest biased: stream        6 cycles; 12 of 12 biased generators catch it  (segment 2's loop-back takes segment 1's end)
+    first diff: PE4: S=0000 P=0000 Pv=false F=false L=false cfg=0000000000000000 | S=0000 P=8001 Pv=true F=false L=false cfg=0000000000000000
+join_lane_zero       uniform: 791     fastest biased: lane          4 cycles; 12 of 12 biased generators catch it  (join does not pass the lane)
+    first diff: PE2: S=0000 P=0000 Pv=false F=false L=true cfg=0000000000000000 | S=0000 P=0000 Pv=false F=false L=false cfg=0000000000000000
+feed_valid_sticky    uniform: 320     fastest biased: dac          16 cycles; 12 of 12 biased generators catch it  (feed valid lasts two clocks)
+    first diff: PE4: S=0000 P=0000 Pv=false F=false L=false cfg=0000000000000000 | S=0000 P=0000 Pv=true F=false L=false cfg=0000000000000000
+fixed_swapped        uniform: 5       fastest biased: gf2           5 cycles; 12 of 12 biased generators catch it  (segment 3 takes segment 2's fixed port)
+    first diff: PE8: S=0000 P=9a19 Pv=false F=false L=false cfg=0000000000000000 | S=0000 P=0001 Pv=false F=false L=false cfg=0000000000000000
+cfg_chain_order      uniform: 8       fastest biased: arith         8 cycles; 12 of 12 biased generators catch it  (configuration bytes 2 and 3 swapped in the chain)
+    first diff: PE0: S=0000 P=0000 Pv=false F=false L=false cfg=0000000000184b50 | S=0000 P=0000 Pv=false F=false L=false cfg=0000000018004b50
+init_no_shift        uniform: 21      fastest biased: gf2          21 cycles; 12 of 12 biased generators catch it  (init chain overwrites S instead of shifting)
+    first diff: PE0: S=ff28 P=1fff Pv=false F=false L=false cfg=000848541b42cf5a | S=0028 P=1fff Pv=false F=false L=false cfg=000848541b42cf5a
+tap_always_s         uniform: 40      fastest biased: chains       23 cycles; 12 of 12 biased generators catch it  (tap ignores tap_p)
+    first diff: tap0: 0000/0068 v false/false f false/false
+bc_chain_ignored     uniform: 34      fastest biased: lane          4 cycles; 12 of 12 biased generators catch it  (control bit 5 (broadcast from the previous segment) ignored)
+    first diff: PE4: S=0000 P=0000 Pv=false F=false L=true cfg=0000000000000000 | S=0000 P=0000 Pv=false F=false L=false cfg=0000000000000000
+pv_hold_on_stop      uniform: 179     fastest biased: window      237 cycles; 12 of 12 biased generators catch it  (valid clears when the segment stops)
+    first diff: PE3: S=8661 P=c20b Pv=true F=false L=false cfg=000019c93ed82654 | S=8661 P=c20b Pv=false F=false L=false cfg=000019c93ed82654
+yone_is_two          uniform: 40      fastest biased: logic        11 cycles; 12 of 12 biased generators catch it  (Y = 1 gives 2)
+    first diff: PE0: S=fffe P=0000 Pv=false F=false L=false cfg=00001822f5d4227f | S=fffd P=0000 Pv=false F=false L=false cfg=00001822f5d4227f
+xsel_a_is_s          uniform: 132     fastest biased: logic        54 cycles; 12 of 12 biased generators catch it  (X = A gives S when the op is XOR)
+    first diff: PE4: S=0000 P=0000 Pv=false F=false L=true cfg=ba9c64ee01000000 | S=ffff P=ffff Pv=false F=false L=true cfg=ba9c64ee01000000
+ashr_logical         uniform: 62      fastest biased: gsrc         74 cycles; 12 of 12 biased generators catch it  (onebit-dac X1: A >> ashr is logical, not arithmetic)
+    first diff: PE4: S=0001 P=8000 Pv=false F=false L=true cfg=989a001ec5d9b256 | S=0001 P=8000 Pv=false F=false L=false cfg=989a001ec5d9b256
+lane_loop_own_end    uniform: 1876    fastest biased: logic        16 cycles; 11 of 12 biased generators catch it  (onebit-dac E1: lane loop takes the segment's own end, not the run's)
+    first diff: PE0: S=fffe P=084a Pv=false F=false L=true cfg=d4227fff00084a56 | S=fffe P=084a Pv=false F=false L=false cfg=d4227fff00084a56
+repeat_off_by_one    uniform: 393     fastest biased: dac           8 cycles; 12 of 12 biased generators catch it  (onebit-dac E2: repeat ticks every R + 1 clocks)
+    first diff: seg0: flo 00/00 fhi 00/00 fv true/false ctrl 58/58 rep 3/3 cnt 0/3 fw 0000/0000
+repeat_hi_token      uniform: 364     fastest biased: dac         184 cycles; 12 of 12 biased generators catch it  (onebit-dac E2: a high-byte write still makes a token in repeat mode)
+    first diff: seg0: flo 00/00 fhi 97/97 fv false/true ctrl 38/38 rep 3/3 cnt 2/2 fw 9700/9700
+repeat_not_atomic    uniform: 1819    fastest biased: gf2         454 cycles; 12 of 12 biased generators catch it  (onebit-dac E2: repeat mode presents {high, low} live instead of the committed word)
+    first diff: PE2: S=0000 P=8015 Pv=false F=false L=false cfg=000e2bd5e343db84 | S=0000 P=803b Pv=false F=false L=false cfg=000e2bd5e343db84
+46 of 46 planted bugs caught

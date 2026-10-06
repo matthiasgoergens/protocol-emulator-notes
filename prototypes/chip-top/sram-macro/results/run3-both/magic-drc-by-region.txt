@@ -1,0 +1,15 @@
+  30720  sram512   Metal2 minimum area < 5760 (M2.d)
+  30720  sram1024  Metal2 minimum area < 5760 (M2.d)
+  25958  sram1024  Can't overlap those layers
+  25944  sram512   Can't overlap those layers
+    594  sram512   Extension of tie diffusion beyond tie contact < 6.0um (LU.d, LU.d1)
+    578  sram1024  Extension of tie diffusion beyond tie contact < 6.0um (LU.d, LU.d1)
+    455  sram1024  N-Diffusion spacing to N-well in SRAM < 54 (NW.d exception)
+    376  sram512   This layer can't abut or partially overlap between subcells
+    288  sram1024  This layer can't abut or partially overlap between subcells
+    229  sram512   N-Diffusion spacing to N-well in SRAM < 54 (NW.d exception)
+     83  sram1024  N-diffusion overlap of contact in SRAM < 4 (Cnt.c SRAM exception)
+     39  sram512   N-diffusion overlap of contact in SRAM < 4 (Cnt.c SRAM exception)
+     27  sram1024  N-diffusion overlap of N-diffusion contact < 14 (Cnt.c)
+     21  sram512   N-diffusion overlap of N-diffusion contact < 14 (Cnt.c)
+total 116032 {'sram512': 57923, 'sram1024': 58109}

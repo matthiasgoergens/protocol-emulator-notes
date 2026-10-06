@@ -1,0 +1,14 @@
+LOOMPDN macro sram512 orient MX bbox 12.000 40.000 248.800 231.340 status FIRM
+LOOMPDN stripe VPWR x 230.510..232.610 y 3.560..707.080 runs inside sram512/VDD! + sram512/VDDARRAY!
+LOOMPDN stripe VPWR x 163.070..165.170 y 3.560..707.080 runs inside sram512/VDD! + sram512/VDDARRAY!
+LOOMPDN stripe VPWR x 95.630..97.730 y 3.560..707.080 runs inside sram512/VDD! + sram512/VDDARRAY!
+LOOMPDN stripe VPWR x 28.190..30.290 y 3.560..707.080 runs inside sram512/VDD! + sram512/VDDARRAY!
+LOOMPDN stripe VGND x 236.130..238.230 y 3.560..707.080 runs inside sram512/VSS!
+LOOMPDN stripe VGND x 168.690..170.790 y 3.560..707.080 runs inside sram512/VSS!
+LOOMPDN stripe VGND x 101.250..103.350 y 3.560..707.080 runs inside sram512/VSS!
+LOOMPDN stripe VGND x 33.810..35.910 y 3.560..707.080 runs inside sram512/VSS!
+LOOMPDN sram512/VSS!: 4 stripe(s)
+LOOMPDN sram512/VDD!: 4 stripe(s)
+LOOMPDN sram512/VDDARRAY!: 4 stripe(s)
+LOOMPDN check_power_grid -net VPWR
+LOOMPDN check_power_grid -net VGND

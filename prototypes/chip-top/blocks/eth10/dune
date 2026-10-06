@@ -1,0 +1,5 @@
+; ../../../eth10-node: the edge-tracking sampler, the CRC unit and the matcher with enable, each
+; with its model; model.ml is the matcher's closed-form specification (symlinks).
+(library
+ (name eth10)
+ (libraries hardcaml))

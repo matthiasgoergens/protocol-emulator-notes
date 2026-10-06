@@ -1,4 +1,15 @@
-(* upe_v1: the unified processing element as specified in notes/architecture-v0.md section 2.4,
+(* Extended (2026-10-06, for ../../chip-top) with three generic additions that ../../onebit-dac/sim
+   proposed, built and verified on a copy of this file; each is marked "onebit-dac" below:
+   - X1, op bits 36:33 "ashr": when X = A (xsel 1), X = A shifted right arithmetically by ashr;
+   - E1, control bit 6 "lane loop": the lane at a segment's first PE comes from the end of the
+     segment's joined run (this segment and the following segments whose source is join),
+     whatever the A source;
+   - E2, mailbox sel 3 "feed repeat": with a nonzero period R the feed presents its word as
+     valid on one clock in every R, and a high-byte write commits {high, low} atomically
+     without making a token of its own.
+   Everything else is unchanged.
+
+   upe_v1: the unified processing element as specified in notes/architecture-v0.md section 2.4,
    turned into a concrete encoding. Written from the note's prose, not from rtl/upe.v.
 
    Configuration: 8 bytes per PE on a byte-wide chain, b0 (least significant) .. b7.
@@ -24,7 +35,8 @@
    30        stream     step only when A is valid (else every clock the segment runs)
    31        tap_p      this PE's tap is P (else S); used where the PE ends a segment
    32        follow     step exactly when the left PE steps (PROPOSED addition, see README)
-   47:33     unused
+   36:33     ashr       onebit-dac X1: with xsel = 1, X = A >>> ashr (arithmetic)
+   47:37     unused
 
    The Y operand after its modifier is yn = n ? ~yv : yv (ones' complement), n the negation.
    The adder computes X + yn + c with c = cin_lane ? lane_in : n, so "negate" is exact
@@ -58,13 +70,14 @@ type op = {
   stream : bool;
   tap_p : bool;
   follow : bool;
+  ashr : int;
   k : int;
 }
 
 let nop =
   { xsel = 0; sinsel = 0; ysel = 0; ymod = 0; gsel = 0; bitsel = 0; pairlo = false; alu = 0;
     cin_lane = false; swb = 0; pwb = 0; fwb = 0; lout = 0; lane_bc = false; del = false;
-    stream = false; tap_p = false; follow = false; k = 0 }
+    stream = false; tap_p = false; follow = false; ashr = 0; k = 0 }
 
 let b2i b = if b then 1 else 0
 
@@ -73,7 +86,7 @@ let op_word o =
   lor (o.bitsel lsl 11) lor (b2i o.pairlo lsl 15) lor (o.alu lsl 16) lor (b2i o.cin_lane lsl 19)
   lor (o.swb lsl 20) lor (o.pwb lsl 22) lor (o.fwb lsl 24) lor (o.lout lsl 26)
   lor (b2i o.lane_bc lsl 28) lor (b2i o.del lsl 29) lor (b2i o.stream lsl 30)
-  lor (b2i o.tap_p lsl 31) lor (b2i o.follow lsl 32)
+  lor (b2i o.tap_p lsl 31) lor (b2i o.follow lsl 32) lor (o.ashr lsl 33)
 
 let field w lo n = (w lsr lo) land ((1 lsl n) - 1)
 let flag w b = (w lsr b) land 1 = 1
@@ -83,7 +96,7 @@ let decode_word w k =
     gsel = field w 8 3; bitsel = field w 11 4; pairlo = flag w 15; alu = field w 16 3;
     cin_lane = flag w 19; swb = field w 20 2; pwb = field w 22 2; fwb = field w 24 2;
     lout = field w 26 2; lane_bc = flag w 28; del = flag w 29; stream = flag w 30;
-    tap_p = flag w 31; follow = flag w 32; k }
+    tap_p = flag w 31; follow = flag w 32; ashr = field w 33 4; k }
 
 (* the 8 configuration bytes, b0 first *)
 let bytes_of_op o =
@@ -99,7 +112,7 @@ let op_of_bytes b =
 (* ---- the array ----
    16 PEs in one chain, cut into segments of 2, 2, 4 and 8. Per segment: a feed register (two
    bytes; writing the high byte presents the word as valid for exactly one clock), a control
-   register (bits 2:0 the first PE's source: 0 join (the previous segment's end; zero for
+   register (onebit-dac: bit 6 lane loop, see the header; sel 3 the repeat period; bits 2:0 the first PE's source: 0 join (the previous segment's end; zero for
    segment 0), 1 loop (own segment's end), 2 feed, 3 fixed neighbour (an external port: a bank
    read port or the recovered-bit stream), 4-7 zero; bit 3 the broadcast lane bit; bit 4 run; bit 5 (PROPOSED) take the broadcast from the
    previous segment instead, so joined segments share one broadcast),
@@ -116,6 +129,21 @@ let n_pe = 16
 let seg_start = [| 0; 2; 4; 8 |]
 let seg_end = [| 1; 3; 7; 15 |]
 let seg_of i = if i < 2 then 0 else if i < 4 then 1 else if i < 8 then 2 else 3
+
+(* The layout as a parameter (added for ../../chip-top, which starts with fewer PEs and grows):
+   always four segments, of [sizes] PEs each, at least one. The constants above are the default
+   layout, which every test here uses. *)
+type layout = { n : int; start : int array; end_ : int array }
+
+let layout_of_sizes sizes =
+  if Array.length sizes <> 4 || Array.exists (fun s -> s < 1) sizes then
+    invalid_arg "Spec.layout_of_sizes: four segments of at least one PE each";
+  let start = Array.make 4 0 in
+  for j = 1 to 3 do start.(j) <- start.(j - 1) + sizes.(j - 1) done;
+  { n = Array.fold_left ( + ) 0 sizes; start; end_ = Array.init 4 (fun j -> start.(j) + sizes.(j) - 1) }
+
+let default_layout = layout_of_sizes [| 2; 2; 4; 8 |]
+let seg_in l i = if i < l.start.(1) then 0 else if i < l.start.(2) then 1 else if i < l.start.(3) then 2 else 3
 
 type inputs = {
   mbx_wr : bool;
@@ -139,7 +167,7 @@ let idle =
 
 (* Everything that is state, for lockstep comparison. *)
 type pe_state = { s : int; p : int; pv : bool; f : bool; l : bool; cfg : int array }
-type seg_state = { flo : int; fhi : int; fv : bool; ctrl : int }
+type seg_state = { flo : int; fhi : int; fv : bool; ctrl : int; rep : int; cnt : int; fw : int }
 type tap = { td : int; tv : bool; tf : bool }
 type state = { pes : pe_state array; segs : seg_state array; taps : tap array }
 
@@ -160,8 +188,8 @@ let diff (a : state) (b : state) =
     (fun j (x : seg_state) ->
       let y = b.segs.(j) in
       if x <> y then
-        out := Printf.sprintf "seg%d: flo %02x/%02x fhi %02x/%02x fv %b/%b ctrl %02x/%02x" j x.flo y.flo
-                 x.fhi y.fhi x.fv y.fv x.ctrl y.ctrl :: !out)
+        out := Printf.sprintf "seg%d: flo %02x/%02x fhi %02x/%02x fv %b/%b ctrl %02x/%02x rep %d/%d cnt %d/%d fw %04x/%04x" j x.flo y.flo
+                 x.fhi y.fhi x.fv y.fv x.ctrl y.ctrl x.rep y.rep x.cnt y.cnt x.fw y.fw :: !out)
     a.segs;
   Array.iteri
     (fun j (x : tap) ->

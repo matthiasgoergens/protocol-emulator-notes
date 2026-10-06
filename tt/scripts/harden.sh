@@ -5,7 +5,9 @@
 # `python -m librelane --dockerized`, but the container is localhost/librelane-tt:3.1.0.dev3 under
 # rootless podman (tools/librelane-tt/) instead of the action's docker pull of the same image.
 #   tt/scripts/harden.sh STAGE        STAGE: a new scratch directory, e.g. /var/tmp/tt-harden/run1
-# Needs: the image (tools/librelane-tt/build.sh), uv, opam switch 5.3.0 for regen.sh, and PDK_ROOT
+#   CHIP_SIZES=2,2,2,2 tt/scripts/harden.sh STAGE    the combined chip with another PE layout
+#   TT_VARIANT=seqv2 tt/scripts/harden.sh STAGE      the earlier sequencer-only harness
+# Needs: the image (tools/librelane-tt/build.sh), uv, opam switch 5.3.0 for the generators, and PDK_ROOT
 # pointing at an ihp-sg13cmos5l checkout from the action's install_sg13cmos5l.sh (IHP-Open-PDK
 # 2bbec755); the default is the copy in /var/tmp/roundtrip-cmos5l/pdk.
 # The project is copied into STAGE, which is made a throwaway git repository because tt_tool.py
@@ -28,7 +30,20 @@ STAGE=$(cd "$STAGE" && pwd)
 
 # The project: info.yaml, src/, docs/ and the generated core, in a throwaway repository.
 cp --recursive "$TT/info.yaml" "$TT/src" "$TT/docs" "$STAGE/"
-"$HERE/regen.sh" "$STAGE/src/deadline_sequencer_v2.v"
+# The combined chip (prototypes/chip-top) by default, its PE layout from CHIP_SIZES; TT_VARIANT=seqv2
+# hardens the earlier sequencer-only harness (variants/seqv2: wrapper src/project.v).
+if [ "${TT_VARIANT:-chip}" = seqv2 ]; then
+  cp "$TT/variants/seqv2/info.yaml" "$STAGE/info.yaml"; cp "$TT/variants/seqv2/config.json" "$STAGE/src/config.json"
+  cp "$TT/variants/seqv2/info.md" "$STAGE/docs/info.md"
+  "$HERE/regen.sh" "$STAGE/src/deadline_sequencer_v2.v"
+else
+  "$HERE/regen_chip.sh" "$STAGE/src/chip_tt.v" macros "${CHIP_SIZES:-1,1,1,1}" 512
+fi
+# Host-load cap, not part of the design: OpenROAD would otherwise start one thread per host CPU.
+# Only the stage's copy of config.json gets the key (as prototypes/chip-top/sram-macro/scripts/harden.sh).
+THREADS=${HARDEN_THREADS:-6}
+sed --in-place "0,/^{/s//{\n  \"OPENROAD_THREADS\": $THREADS,/" "$STAGE/src/config.json"
+grep --quiet "\"OPENROAD_THREADS\": $THREADS," "$STAGE/src/config.json" || { echo "could not set OPENROAD_THREADS"; exit 2; }
 git -C "$STAGE" init --quiet
 git -C "$STAGE" remote add origin https://github.com/local/tt-harden-stage.git
 git -C "$STAGE" add info.yaml src docs

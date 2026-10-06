@@ -1,0 +1,123 @@
+
+===========================================================================
+report_checks -unconstrained
+===========================================================================
+======================= nom_slow_1p08V_125C Corner ===================================
+
+Startpoint: uio_in[6] (input port clocked by clk)
+Endpoint: uo_out[2] (output port clocked by clk)
+Path Group: clk
+Path Type: max
+
+Fanout         Cap        Slew       Delay        Time   Description
+---------------------------------------------------------------------------------------------
+                                  0.000000    0.000000   clock clk (rise edge)
+                                  0.000000    0.000000   clock network delay (propagated)
+                                  4.000000    4.000000 ^ input external delay
+     1    0.002787    0.032480    0.003870    4.003870 ^ uio_in[6] (in)
+                                                         uio_in[6] (net)
+                      0.032480    0.000000    4.003870 ^ input16/A (sg13cmos5l_buf_1)
+     3    0.063500    0.404785    0.369848    4.373717 ^ input16/X (sg13cmos5l_buf_1)
+                                                         net16 (net)
+                      0.405191    0.011183    4.384901 ^ fanout30/A (sg13cmos5l_buf_1)
+     8    0.076311    0.486819    0.562792    4.947692 ^ fanout30/X (sg13cmos5l_buf_1)
+                                                         net30 (net)
+                      0.487037    0.009012    4.956705 ^ _342_/A (sg13cmos5l_nor2_1)
+     1    0.003808    0.113229    0.178833    5.135538 v _342_/Y (sg13cmos5l_nor2_1)
+                                                         _102_ (net)
+                      0.113229    0.000160    5.135698 v _347_/A2 (sg13cmos5l_a22oi_1)
+     1    0.009650    0.180807    0.224665    5.360363 ^ _347_/Y (sg13cmos5l_a22oi_1)
+                                                         _105_ (net)
+                      0.180807    0.000607    5.360970 ^ _348_/B (sg13cmos5l_nand2_1)
+     1    0.042342    0.405584    0.433972    5.794941 v _348_/Y (sg13cmos5l_nand2_1)
+                                                         uo_out[2] (net)
+                      0.405695    0.005953    5.800895 v uo_out[2] (out)
+                                              5.800895   data arrival time
+
+                                 20.000000   20.000000   clock clk (rise edge)
+                                  0.000000   20.000000   clock network delay (propagated)
+                                 -0.250000   19.750002   clock uncertainty
+                                  0.000000   19.750002   clock reconvergence pessimism
+                                 -4.000000   15.750001   output external delay
+                                             15.750001   data required time
+---------------------------------------------------------------------------------------------
+                                             15.750001   data required time
+                                             -5.800895   data arrival time
+---------------------------------------------------------------------------------------------
+                                              9.949107   slack (MET)
+
+
+
+
+===========================================================================
+report_checks --slack_max -0.01
+============================================================================
+======================= nom_slow_1p08V_125C Corner ===================================
+
+No paths found.
+
+
+===========================================================================
+ report_check_types -max_slew -max_cap -max_fanout -violators
+============================================================================
+======================= nom_slow_1p08V_125C Corner ===================================
+
+max slew
+
+Pin                                        Limit        Slew       Slack
+------------------------------------------------------------------------
+sram512/A_ADDR[4]                       0.595200    0.751533   -0.156333 (VIOLATED)
+sram1024/A_ADDR[4]                      0.595200    0.751393   -0.156193 (VIOLATED)
+sram512/A_ADDR[1]                       0.595200    0.743038   -0.147838 (VIOLATED)
+sram1024/A_ADDR[1]                      0.595200    0.743015   -0.147814 (VIOLATED)
+sram1024/A_ADDR[2]                      0.595200    0.728952   -0.133752 (VIOLATED)
+sram512/A_ADDR[2]                       0.595200    0.728921   -0.133721 (VIOLATED)
+sram512/A_BM[2]                         0.595200    0.721329   -0.126129 (VIOLATED)
+sram1024/A_BM[2]                        0.595200    0.721221   -0.126021 (VIOLATED)
+sram1024/A_ADDR[0]                      0.595200    0.711717   -0.116517 (VIOLATED)
+sram512/A_ADDR[0]                       0.595200    0.711687   -0.116487 (VIOLATED)
+sram512/A_DIN[3]                        0.595200    0.710799   -0.115599 (VIOLATED)
+sram1024/A_DIN[3]                       0.595200    0.710698   -0.115498 (VIOLATED)
+sram512/A_DIN[2]                        0.595200    0.656656   -0.061456 (VIOLATED)
+sram1024/A_DIN[2]                       0.595200    0.656472   -0.061272 (VIOLATED)
+sram512/A_BM[3]                         0.595200    0.655194   -0.059994 (VIOLATED)
+sram1024/A_BM[3]                        0.595200    0.655057   -0.059857 (VIOLATED)
+sram512/A_DIN[0]                        0.595200    0.647675   -0.052475 (VIOLATED)
+sram1024/A_DIN[0]                       0.595200    0.647466   -0.052266 (VIOLATED)
+sram1024/A_BM[1]                        0.595200    0.638816   -0.043616 (VIOLATED)
+sram512/A_BM[1]                         0.595200    0.638807   -0.043607 (VIOLATED)
+sram512/A_WEN                           0.595200    0.600581   -0.005381 (VIOLATED)
+sram1024/A_WEN                          0.595200    0.600317   -0.005117 (VIOLATED)
+
+max fanout
+
+Pin                                   Limit Fanout  Slack
+---------------------------------------------------------
+clkbuf_0_clk_regs/X                       8     16     -8 (VIOLATED)
+
+
+
+===========================================================================
+report_parasitic_annotation -report_unannotated
+============================================================================
+Found 9 unannotated drivers.
+ ena
+ clkload0/Y
+ clkload1/Y
+ clkload2/Y
+ clkload3/Y
+ clkload4/Y
+ clkload5/Y
+ clkload6/Y
+ clkload7/Y
+Found 0 partially unannotated drivers.
+
+===========================================================================
+max slew violation count 22
+max fanout violation count 1
+max cap violation count 0
+============================================================================
+
+===========================================================================
+check_setup -verbose -unconstrained_endpoints -multiple_clock -no_clock -no_input_delay -loops -generated_clocks
+===========================================================================

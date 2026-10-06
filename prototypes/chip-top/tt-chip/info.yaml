@@ -1,0 +1,53 @@
+# Tiny Tapeout project information for the combined chip (prototypes/chip-top).
+# Layout from TinyTapeout/ttihp-verilog-template (Apache-2.0), cmos5l branch, yaml_version 6.
+project:
+  title:        "Programmable protocol chip, combined prototype v0"
+  author:       "Matthias Goergens"
+  discord:      ""
+  description:  "Four-thread deadline sequencer, PE array, pin stage, streamer, sampler, edge sampler, CRC unit, matcher and pin NCO behind a 4-bit host link; generated from Hardcaml"
+  language:     "Verilog"
+  clock_hz:     50000000
+
+  tiles: "6x4"
+
+  top_module:  "tt_um_chip_top"
+
+  # chip_tt.v is generated (tt/scripts/regen_chip.sh); the SRAM macros come in through MACROS in
+  # src/config.json, whose "nl" entries name their port-only blackboxes.
+  source_files:
+    - "chip_project.v"
+    - "chip_tt.v"
+
+pinout:
+  # Inputs
+  ui[0]: "in0"
+  ui[1]: "in1"
+  ui[2]: "in2"
+  ui[3]: "in3"
+  ui[4]: "in4"
+  ui[5]: "in5"
+  ui[6]: "in6"
+  ui[7]: "in7"
+
+  # Outputs
+  uo[0]: "out0"
+  uo[1]: "out1"
+  uo[2]: "out2"
+  uo[3]: "out3"
+  uo[4]: "out4"
+  uo[5]: "out5"
+  uo[6]: "out6"
+  uo[7]: "out7"
+
+  # Bidirectional pins
+  uio[0]: "host_d0"
+  uio[1]: "host_d1"
+  uio[2]: "host_d2"
+  uio[3]: "host_d3"
+  uio[4]: "host_strobe"
+  uio[5]: "host_read"
+  uio[6]: "io14"
+  uio[7]: "io15"
+
+# Do not change!
+yaml_version: 6

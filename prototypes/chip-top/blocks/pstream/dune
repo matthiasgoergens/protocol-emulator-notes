@@ -1,0 +1,4 @@
+; ../../../pin-streamer: model and RTL (symlinks).
+(library
+ (name pstream)
+ (libraries hardcaml))

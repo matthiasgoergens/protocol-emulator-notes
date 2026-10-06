@@ -27,6 +27,13 @@ It knows nothing about any protocol. Framing bits, clock phases, line codes and 
 
 **A real finding along the way.** Without the per-entry vector count, the last word had to be padded, and the padding showed on the pins. For UART it made a phantom start bit, and the independent receiver decoded a tenth byte that was never sent. For 10BASE-T, no drivable level can stand in for "output disabled". The 4-bit count per entry fixes both, at 4 flip-flops per FIFO slot.
 
+**A bug found by integration (2026-10-06, `../chip-top`).** The lockstep above never pushed into
+a full FIFO. The chip's host link does, and the RTL refused such a push even when the head left the
+FIFO in the same clock, while the model (which reads before the write lands) accepted it. A second
+lockstep that also pushes into a full FIFO failed on 198,264 of 400,000 clocks before the fix and
+passes after it; the fix is one OR in the push condition. The protocol checks and
+`../pin-sampler`'s checks give the same results as before.
+
 ## Area (Yosys, sg13g2 typical corner)
 
 **11,359 µm², 460 cells**, of which 128 flip-flops come to 6,270 µm², 80 of them the FIFO. For comparison:

@@ -1,0 +1,19 @@
+; ../../../deadline-sequencer's UART, SPI and I2C demo, unchanged (symlinks): its compiler, its
+; decoders, its base-ISA assembler (isa.ml without the interpreter, as ../../../sequencer-v2/ports
+; does) and, from demo.ml, the I2C slave, the payloads, [build] and [check_multiples] (the bench
+; itself, [run] and the mains, are cut out: chip-top runs the firmware on the chip instead).
+(library
+ (name ds)
+ (modules isa compiler decoders demo_cut)
+ (flags (:standard -w -32-27-26-69-37))
+ (libraries hardcaml))
+
+(rule
+ (with-stdout-to
+  isa.ml
+  (run sed "/^type state/,$d" %{dep:isa.ml.orig})))
+
+(rule
+ (with-stdout-to
+  demo_cut.ml
+  (run sed -e "/^let run /,/^let uart_bytes/{/^let uart_bytes/!d;}" -e "/^let main_demo/,$d" %{dep:demo.ml.orig})))

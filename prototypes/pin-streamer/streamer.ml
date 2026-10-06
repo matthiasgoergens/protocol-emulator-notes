@@ -8,7 +8,10 @@ let create ?(fault = false) ~clock ~clear ~period ~width ~od_mask ~idle_out ~idl
   (* FIFO: four words, read and write pointers, count *)
   let rd = wire 2 and wr = wire 2 and fcount = wire 3 in
   let full = fcount ==:. depth and empty = fcount ==:. 0 in
-  let push = host_push &: ~:full in
+  (* the FIFO is read before this clock's host write lands (model.ml), so a push into a full FIFO
+     is accepted when the head leaves in the same clock (found by ../chip-top) *)
+  let pop_w = wire 1 in
+  let push = host_push &: (~:full |: pop_w) in
   let slots = List.init depth (fun i -> reg spec ~enable:(push &: (wr ==:. i)) (concat_msb [ host_count; host_data ])) in
   let head_entry = mux rd slots in
   let head = select head_entry 15 0 and head_count = select head_entry 19 16 in
@@ -16,6 +19,7 @@ let create ?(fault = false) ~clock ~clear ~period ~width ~od_mask ~idle_out ~idl
   let tick = cnt ==:. 0 in
   let need = tick &: (left ==:. 0) in
   let pop = need &: ~:empty in
+  pop_w <== pop;
   let word_src = mux2 pop head word in
   let per_word = mux2 (width ==:. 1) (of_int ~width:5 16) (mux2 (width ==:. 2) (of_int ~width:5 (if fault then 7 else 8)) (of_int ~width:5 4)) in
   (* a count of 0, or more than a word holds, means a full word *)

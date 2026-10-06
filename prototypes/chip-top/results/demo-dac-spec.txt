@@ -1,0 +1,9 @@
+== one-bit DAC (../onebit-dac, order 2, mode A) on the combined chip, 4 PEs
+  the board is driven by the specification's pads
+  RTL and specification agree on every pad, every clock: true
+  host: 1600 of 1600 bytes sent, underrun reports 0, HOSTIN overflow false
+  pin edges by clock phase mod 10: 37244 0 1 0 0 0 0 0 0 0 (sampled at phase 5)
+  bitstream: 54349 steps compared with ../onebit-dac's fast model (pin configured by step 95, modulator started at step 152; lead-in of 28 steps on word 0 fitted): 0 wrong
+  the fit: 1 of the 2,001 lead-ins tried give 0 wrong bits; the next best gives 19654 wrong
+  control: the same bits against the order-3 model: 26276 of 54444 wrong
+one-bit DAC on the combined chip: PASS

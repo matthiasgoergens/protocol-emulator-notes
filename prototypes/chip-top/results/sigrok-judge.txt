@@ -1,0 +1,29 @@
+# command: judge.py --traces /var/tmp/chip-top-traces --only uart,spi,i2c
+# commit: a84e2d3bc34288480dc8e2c7f6676384459b4bb7
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# date: 2026-10-06T09:10:35+08:00
+# analyser rate: as simulated
+uart: PASS: decoded 4F 4B 21
+  tooth uart: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 47 4B 21, sent 4F 4B 21
+  tooth uart: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 8F 8B 41, sent 4F 4B 21
+      decoder warning: Frame error
+      decoder warning: Frame error
+spi: PASS: decoded A5 3C
+  tooth spi: MOSI inverted around the third clock rising edge: CAUGHT
+      decoded 85 3C, sent A5 3C
+  tooth spi: MOSI 40 samples late against SCLK (period 64): CAUGHT
+      decoded 52 9E, sent A5 3C
+i2c: PASS: decoded [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c: SDA inverted over the high phase of the third SCL pulse: CAUGHT
+      decoded [Start; Address write: 40; ACK; Data write: 5A; ACK; Stop], sent [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c: SDA 24 samples late against SCL: CAUGHT
+      decoded [Start; Address write: 40; NACK; Data write: 68], sent [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+
+protocols with no sigrok decoder:
+  10BASE-T (ethernet-10base-t, eth10-node, pin-sampler, sequencer-ethernet, multi-proto Ethernet): libsigrokdecode 0.5.3 has no decoder for Manchester-coded 10BASE-T or an Ethernet MAC frame (see results/sigrok-decoders.txt); the Ethernet prototypes keep their scapy-based oracles.
+
+ALL CHECKS PASS

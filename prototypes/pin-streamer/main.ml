@@ -8,7 +8,7 @@ let sim_of ?fault () =
   let i n = Cyclesim.in_port sim n and o n = Cyclesim.out_port sim n in
   sim, i, o
 
-let lockstep ?fault ~seed ~cycles () =
+let lockstep ?fault ?(push_when_full = false) ~seed ~cycles () =
   Random.init seed;
   let width = [| 1; 2; 4 |].(Random.int 3) in
   let cfg = { Model.period = 1 + Random.int 6; width; od_mask = Random.int 16; idle_out = Random.int 16; idle_oe = Random.int 16 } in
@@ -21,7 +21,9 @@ let lockstep ?fault ~seed ~cycles () =
   let bad = ref 0 in
   for _ = 1 to cycles do
     (* bursty host traffic, so the FIFO both fills and runs dry *)
-    let push = Random.int 4 = 0 && not (Model.full m) in
+    (* [push_when_full]: the host also pushes into a full FIFO, which must be accepted exactly
+       when the head is popped in the same clock (the model reads before the write lands) *)
+    let push = Random.int 4 = 0 && (push_when_full || not (Model.full m)) in
     let data = Random.int 0x10000 and count = (if Random.bool () then 0 else Random.int 16) in
     i "host_push" := Bits.of_int ~width:1 (if push then 1 else 0);
     i "host_data" := Bits.of_int ~width:16 data; i "host_count" := Bits.of_int ~width:4 count;
@@ -41,6 +43,14 @@ let () =
   for seed = 1 to 200 do total := !total + lockstep ~seed ~cycles:2000 () done;
   Printf.printf "lockstep, 200 random configurations x 2000 clocks: %d mismatching clocks -> %s\n" !total
     (if !total = 0 then "PASS" else "FAIL")
+
+(* the same with pushes into a full FIFO: found by ../chip-top, whose host link pushes without
+   looking at [full] first; the RTL refused such a push even when the head left in the same clock *)
+let () =
+  let total = ref 0 in
+  for seed = 1 to 200 do total := !total + lockstep ~push_when_full:true ~seed ~cycles:2000 () done;
+  Printf.printf "lockstep with pushes into a full FIFO, 200 random configurations x 2000 clocks: %d mismatching clocks -> %s\n"
+    !total (if !total = 0 then "PASS" else "FAIL")
 
 (* control: a planted fault (7 vectors per word at width 2 instead of 8) must be caught *)
 let () =

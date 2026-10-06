@@ -1,0 +1,4 @@
+; ../../../unified-pe/verify: the PE array's specification, model, RTL and Cyclesim wrapper (symlinks).
+(library
+ (name upe)
+ (libraries hardcaml))
