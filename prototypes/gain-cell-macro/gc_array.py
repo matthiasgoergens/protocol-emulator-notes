@@ -45,6 +45,7 @@ VAR = V("3T", "thick", 0.45, True)
 G = geometry(VAR)
 H = G["H"]                  # row height, 2.75 um
 SPLIT = 19                  # data columns between straps
+SWG = 1.00                  # strap width: draw2's 0.60 plus room for the N+ contact (strap_gc)
 
 # edge geometry (um)
 EL = 1.80                   # left edge region: RWL pads in two columns, then the Metal3 pins
@@ -82,26 +83,44 @@ def strap_gc(lib):
     its substrate tie only by abutment: the contact sits on the P+ part of the bar, and the N+
     part (every storage transistor's source) joins it through the silicide alone. Silicon would
     connect them, but the LVS deck does not see silicide, so it extracted every bar as a floating
-    net. Here the pSD stops 0.09 past the P+ contact (Cnt.g2) and a second contact sits on the
-    N+ part, 0.09 clear of the pSD (Cnt.g1); Metal1 joins the two."""
+    net. Here a second contact sits on the N+ part, 0.09 clear of the pSD (Cnt.g1), and Metal1
+    joins the two. The strap is 1.00 um wide instead of 0.60 so the P+ tie still reaches 0.3 um
+    clear of the N+ diffusion on either side, which Magic's butted-tap rule wants (pSD.e/f): with
+    0.60 the tie was only 0.49 um long between two N+ regions."""
     c = lib.new_cell("STRAP_GC")
     for s in (1, -1):
         def r(layer, x0, y0, x1, y1):
             a, b = sorted((s * y0, s * y1))
             R(c, layer, x0, a, x1, b)
         for w in G["wwls"]:
-            r("GatPoly", 0, w[0], SW, w[1])
-        r("ThickGateOx", 0, 0, SW, G["tgo_top"])
-        r("Activ", 0, G["bar"][0], SW, G["bar"][1])
-        r("GatPoly", 0, G["rwl"][0], SW, G["rwl"][1])
+            r("GatPoly", 0, w[0], SWG, w[1])
+        r("ThickGateOx", 0, 0, SWG, G["tgo_top"])
+        r("Activ", 0, G["bar"][0], SWG, G["bar"][1])
+        r("GatPoly", 0, G["rwl"][0], SWG, G["rwl"][1])
         ym = (G["bar"][0] + G["bar"][1]) / 2
-        r("pSD", -0.20, G["bar"][0] - 0.12, 0.29, G["bar"][1] + 0.12)   # 0.49 x 0.54: pSD.a, pSD.k
+        r("pSD", -0.20, G["bar"][0] - 0.12, 0.45, G["bar"][1] + 0.12)   # 0.65 x 0.54: pSD.a, pSD.k
         r("Cont", 0.04, ym - 0.08, 0.20, ym + 0.08)                     # on the P+ tie
-        r("Cont", 0.38, ym - 0.08, 0.54, ym + 0.08)                     # on the N+ bar
-        r("Metal1", 0.015, ym - 0.215, 0.59, ym + 0.215)
+        r("Cont", 0.54, ym - 0.08, 0.70, ym + 0.08)                     # on the N+ bar
+        r("Metal1", 0.015, ym - 0.215, 0.75, ym + 0.215)
         r("Via1", 0.025, ym - 0.095, 0.215, ym + 0.095)
     R(c, "Metal2", 0.02, -H, 0.22, H)                                    # GND
     return c
+
+
+def stack_jog(c, x, y, yp):
+    """Cont on poly at (x, y), Metal1, Via1, then Metal2 running vertically to yp, where Via2 and
+    a Metal3 landing take the line to its pin. The Metal3 stub and pin are 0.30 um tall, as
+    tall as the landing, so a router's via landing on the pin leaves no notch narrower than
+    M3.b against the landing (the second bank harden had 30 such notches). The jog spreads the pins of neighbouring rows to
+    the row pitch: two tile pairs put their read word lines only 0.51 um apart, too close for a
+    router's Metal3 landing beside a neighbour's pin (M3.b in the first bank harden)."""
+    R(c, "Cont", x - 0.08, y - 0.08, x + 0.08, y + 0.08)
+    R(c, "Metal1", x - 0.155, y - 0.155, x + 0.155, y + 0.155)     # area 0.096 >= 0.09 (M1.d)
+    R(c, "Via1", x - 0.095, y - 0.095, x + 0.095, y + 0.095)
+    lo, hi = sorted((y, yp))
+    R(c, "Metal2", x - 0.155, lo - 0.25, x + 0.155, hi + 0.25)    # area >= 0.155 (M2.d)
+    R(c, "Via2", x - 0.095, yp - 0.095, x + 0.095, yp + 0.095)
+    R(c, "Metal3", x - 0.145, yp - 0.145, x + 0.145, yp + 0.145)
 
 
 def build(rows, cols, lib):
@@ -115,11 +134,11 @@ def build(rows, cols, lib):
     for k in range(cols):
         if k % SPLIT == 0:
             straps.append(x)
-            x += SW
+            x += SWG
         xs.append(x)
         x += PX
     straps.append(x)
-    x += SW
+    x += SWG
     width = round(x, 3)
     top = 2 * H * pairs
     for j in range(pairs):
@@ -174,17 +193,18 @@ def build(rows, cols, lib):
             xp = XA if h == 0 else XB
             r("GatPoly", xp - 0.15, ya, 0, yb)                       # extension to the strap
             r("GatPoly", xp - 0.15, ym - 0.15, xp + 0.15, ym + 0.15)  # contact pad
-            stack_m1_to_m3(m, xp + ox, ym + oy)
-            r("Metal3", -EL, ym - 0.10, xp + 0.145, ym + 0.10)
-            addpin(f"RWL[{row}]", "Metal3", -EL, ym - 0.10, -EL + PINLEN, ym + 0.10)
+            yp = yc + s * H / 2                                       # the row's centre
+            stack_jog(m, xp + ox, ym + oy, yp + oy)
+            r("Metal3", -EL, yp - 0.15, xp + 0.145, yp + 0.15)
+            addpin(f"RWL[{row}]", "Metal3", -EL, yp - 0.15, -EL + PINLEN, yp + 0.15)
             # WWL: poly 0.45 tall at s * (wwl[0] .. wwl[1]); contact on the line itself
             wa, wb = sorted((yc + s * G["wwl"][0], yc + s * G["wwl"][1]))
             wm = (wa + wb) / 2
             xw = width + 0.42
             r("GatPoly", width, wa, xw + 0.15, wb)
-            stack_m1_to_m3(m, xw + ox, wm + oy)
-            r("Metal3", xw - 0.145, wm - 0.10, width + ER, wm + 0.10)
-            addpin(f"WWL[{row}]", "Metal3", width + ER - PINLEN, wm - 0.10, width + ER, wm + 0.10)
+            stack_jog(m, xw + ox, wm + oy, yp + oy)
+            r("Metal3", xw - 0.145, yp - 0.15, width + ER, yp + 0.15)
+            addpin(f"WWL[{row}]", "Metal3", width + ER - PINLEN, yp - 0.15, width + ER, yp + 0.15)
     for c, x0 in enumerate(xs):
         # RBL (x0 + 0.23 .. 0.43) down to the bottom edge, WBL (x0 + 0.64 .. 0.84) up to the top
         r("Metal2", x0 + 0.23, -EB, x0 + 0.43, -0.15)
@@ -279,7 +299,12 @@ def write_lib(info, path):
            '  voltage_unit : "1V" ;', '  current_unit : "1mA" ;', '  capacitive_load_unit (1, pf) ;',
            '  pulling_resistance_unit : "1kohm" ;', '  leakage_power_unit : "1nW" ;',
            '  nom_process : 1 ; nom_voltage : 1.2 ; nom_temperature : 25 ;',
-           '  voltage_map (GND, 0.0) ;']
+           '  voltage_map (GND, 0.0) ;',
+           '  slew_lower_threshold_pct_rise : 20 ; slew_upper_threshold_pct_rise : 80 ;',
+           '  slew_lower_threshold_pct_fall : 20 ; slew_upper_threshold_pct_fall : 80 ;',
+           '  input_threshold_pct_rise : 50 ; input_threshold_pct_fall : 50 ;',
+           '  output_threshold_pct_rise : 50 ; output_threshold_pct_fall : 50 ;',
+           '  default_max_transition : 2.0 ;']
     for nm, n in (("WWL", rows), ("RWL", rows), ("WBL", cols), ("RBL", cols)):
         out += [f"  type (bus_{nm}) {{ base_type : array ; data_type : bit ; bit_width : {n} ; "
                 f"bit_from : {n - 1} ; bit_to : 0 ; downto : true ; }}"]
@@ -314,9 +339,15 @@ if __name__ == "__main__":
     rows = int(sys.argv[1]) if len(sys.argv) > 1 else 32
     cols = int(sys.argv[2]) if len(sys.argv) > 2 else 38
     prefix = sys.argv[3] if len(sys.argv) > 3 else f"GC_ARRAY_{rows}x{cols}"
-    lib = gdstk.Library(unit=1e-6, precision=5e-9)
+    lib = gdstk.Library(unit=1e-6, precision=1e-9)   # 1 nm database units, as Magic requires
     m, info = build(rows, cols, lib)
-    lib.write_gds(prefix + ".gds")
+    # one flat cell: Magic checks each cell of a hierarchy on its own, and the tiles, straps
+    # and edges share diffusion and implant across cell boundaries (the strap's P+ tie reaches
+    # into the neighbouring tile), which it reports as broken butted ties and overlaps
+    m.flatten()
+    out = gdstk.Library(unit=1e-6, precision=1e-9)
+    out.add(m)
+    out.write_gds(prefix + ".gds")
     write_lef(info, prefix + ".lef")
     write_cir(info, prefix + ".cir")
     write_lib(info, prefix + ".lib")

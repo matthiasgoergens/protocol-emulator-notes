@@ -40,3 +40,10 @@ mos_ff 27C: no read sweep
 mos_ff   85C  written 0.556 V, reads 1 down to 0.080 V, 0 up to 0.075 V, precharge reaches 1.080 V: lifetime of a 1 > 10.68 ms (not yet at 0.080 V; lowest level reported 0.1 V)
 mos_ss   27C  written 0.266 V, reads 1 down to 0.345 V, 0 up to 0.338 V, precharge reaches 1.080 V: lifetime of a 1 unreadable at once (written 0.266 V < 0.345 V)
 mos_ss 85C: no read sweep
+# banklife.py results/m2-bankread-nand4-1v20-cbl35.txt results/m2-ret-tw33-1v20.txt  (VDD 1.2; read as 1 when the sense output exceeds VDD/2 at the sample edge)
+mos_tt   27C  written 0.482 V, reads 1 down to 0.262 V, 0 up to 0.250 V, precharge reaches 1.200 V: lifetime of a 1 19.40 ms
+mos_tt   85C  written 0.566 V, reads 1 down to 0.206 V, 0 up to 0.200 V, precharge reaches 1.200 V: lifetime of a 1 19.19 ms
+mos_ff   27C  written 0.567 V, reads 1 down to 0.163 V, 0 up to 0.163 V, precharge reaches 1.200 V: lifetime of a 1 10.10 ms
+mos_ff   85C  written 0.648 V, reads 1 down to 0.105 V, 0 up to 0.100 V, precharge reaches 1.200 V: lifetime of a 1 10.32 ms
+mos_ss   27C  written 0.383 V, reads 1 down to 0.366 V, 0 up to 0.363 V, precharge reaches 1.200 V: lifetime of a 1 6.91 ms
+mos_ss   85C  written 0.479 V, reads 1 down to 0.314 V, 0 up to 0.313 V, precharge reaches 1.200 V: lifetime of a 1 26.83 ms

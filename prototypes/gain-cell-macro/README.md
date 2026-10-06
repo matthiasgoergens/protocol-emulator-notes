@@ -95,9 +95,95 @@ None of this includes mismatch (no Monte Carlo of the thick cell exists), neighb
 the real periphery; section 2 replaces the ideal precharge switch and the 0.5 V criterion with
 standard cells.
 
+## 2. Periphery and the bank layout
+
+**Size.** The bank is 32 words of 32 bits (1 kbit of payload, smaller than architecture-v0's
+4 kbit banks): 32 rows of 38 columns, 32 data bits and a 6-bit Berger check, the count of 0s in
+the data word (`notes/gain-cell-compiler.md`, "Detect expiry"). 32 rows is the column the read
+was simulated with in `../gain-cell/`, so no new column length enters untested.
+
+**Circuit** (`rtl/gc_bank.v`, all standard cells of `sg13cmos5l_stdcell`):
+- one flop per word line (32 WWL, 32 RWL), so no decoder glitch ever reaches a word line;
+- one flop per write bit line;
+- per read bit line, an `ebufn_2` with A tied high as the precharge, and as the sense a
+  `nand4_1` with all four inputs on RBL. Four series NMOS against four parallel PMOS switch
+  above VDD / 2, so a smaller discharge reads as 1. Both are instantiated by hand, and the
+  resizer may not touch RBL (`RSZ_DONT_TOUCH_RX`); the final netlist has no buffer on any RBL
+  (7 references to each of the 38 nets, all ports of these cells or the macro);
+- the Berger encoder on the write data and the checker on the captured word (`rerr`).
+
+**Timing** (60 MHz, architecture-v0 2.8; cycle counts are parameters): a write drives the bit
+lines for a cycle, raises WWL for 2 cycles (33 ns) and holds the bit lines at least one cycle
+after; 4 cycles per write. A read raises RWL and stops the precharge at the accept edge,
+captures the sense outputs 2 cycles (33 ns) later, then precharges for at least one cycle;
+3 cycles per read. Refresh-free: no access waits for, or is delayed by, a refresh; a word must
+simply be rewritten within its lifetime (below), which is the compiler's job.
+
+**Read path in SPICE** (`spice/bankread.py`): the standard cells' transistor netlists, a
+32-cell column with 31 unselected cells storing 1 at 0.70 V, RBL left at 0 V by the previous
+read and precharged for one cycle only, the sense output taken 0.3 ns before the capture edge.
+The precharge reaches VDD in every corner. Joined with the write-and-hold runs for a 33 ns
+write (`spice/banklife.py`, `spice/results/m2-banklife.txt`). Lifetime of a written 1:
+
+| VDD, sense, RBL load | tt 27 | tt 85 | ff 27 | ff 85 | ss 27 | ss 85 |
+|---|---|---|---|---|---|---|
+| 1.20 V, inverter, 30 fF (`m2-bankread-1v20.txt`) | 19.0 ms | 18.0 | 9.2 | 8.4 | 9.6 | 26.9 |
+| 1.20 V, NAND4, 30 fF (`m2-bankread-nand4-1v20.txt`) | 20.4 | 20.0 | 10.8 | > 10.9 | 10.0 | 28.6 |
+| **1.20 V, NAND4, 35 fF** (`m2-bankread-nand4-1v20-cbl35.txt`) | **19.4** | **19.2** | **10.1** | **10.3** | **6.9** | **26.8** |
+| 1.14 V, NAND4, 30 fF (`m2-bankread-nand4-1v14.txt`) | 15.5 | 17.1 | 8.9 | 9.0 | unreadable | 19.0 |
+| 1.08 V, NAND4, 30 fF (`m2-bankread-nand4-1v08.txt`) | 9.4 | 13.9 | 7.5 | 7.8 | unreadable | 7.5 |
+
+35 fF is the bit line's load after place and route: 2.3–19.7 fF of routed wire on the 38 RBL
+nets (`bank/results/b7`, the bank's SPEF, nominal RC) plus about 13 fF of Metal2 inside the
+array (estimated, 88 µm next to two bit lines). The NAND4 lowers the readable level by 7–26 mV
+at tt and ff and does nothing at ss/27 °C.
+
+**The slow cold corner sets the bank's limits.**
+- At 1.20 V it lives 6.9 ms, but its written 1 (0.383 V) is only 17 mV above the lowest
+  readable level (0.366 V). Any mismatch, which is not simulated for this cell, eats that.
+- **Below 1.20 V it does not work.** A thick-oxide write transistor passes VDD minus its
+  threshold: 0.327 V at 1.14 V and 0.266 V at 1.08 V, against 0.378 and 0.396 V needed. Neither
+  a 300 ns write (0.349 V at 1.08 V, `m2-ret-tw300-1v08-ss27.txt`) nor 4 cycles of evaluation
+  (needs 0.345 V, `m2-bankread-nand4-1v08-eval4.txt`) closes it. The standard-cell libraries
+  are characterised at 1.08 V, so a supply that may sag 10 % needs a boosted write word line
+  (`../gain-cell/tricks-thick/`) or a sense amplifier; neither is here.
+- The read-path figures are nominal corners; the cell has no Monte Carlo.
+
+**Layout** (`bank/config.json`, `bank/harden.sh`: LibreLane 3.1.0.dev3, the pinned image, the
+array placed as a macro at (73, 60) in a 190 × 210 µm die). Run `b7`
+(`bank/results/b7/metrics.json`):
+- Magic DRC 0, KLayout DRC 0, routing DRC 0, antenna 0, KLayout/Magic XOR 0;
+- netgen LVS: circuits match uniquely (the array as a black box, `lvs.netgen.rpt`);
+- **full KLayout LVS of the whole bank, the array's 3,648 transistors included:** match
+  (`lvs/m2-gc_bank_32x32-full.log`, hierarchical mode; `pnl2spice.py` turns the powered netlist
+  into the schematic). Two planted faults fail as they should: one sense gate's input moved to
+  the neighbouring bit line (`lvs/m2-planted-bank-sense-input.log`) and one read transistor's
+  gate moved to the next row's word line inside the array (`lvs/m2-planted-bank-array-cell.log`).
+  The flat mode reports a mismatch only because every standard cell's pin labels become
+  top-level pins (the cross-reference itself matches);
+- setup slack +7.17 ns (slow corner), hold +0.18 ns (fast), at 16.667 ns;
+- 1,341 standard cells, 21,134 µm², against 4,050 µm² of array: **the periphery is 84 % of
+  the bank**, 152 of its cells flops (7,446 µm²). Bank die 39,900 µm², 39 µm² per payload bit;
+  the array alone is 3.33 µm² per bit with its edges, 3.05 µm² in its core.
+
+What it took (each a finding about the hand-drawn array, now fixed in `gc_array.py`):
+- the GDS needs 1 nm database units, or Magic refuses it;
+- Magic checks each cell of a hierarchy alone, and the tiles and straps share diffusion and
+  implant across cell edges, so it reported 2,584 overlaps and 96 broken butted ties: the macro
+  is now one flat cell;
+- Magic's butted-tap rule (pSD.e/f) wants the P+ tie to reach 0.3 µm clear of N+ on some side:
+  the strap grew from 0.60 to 1.00 µm (the array from 43.8 to 45.0 µm wide);
+- read word-line pins only 0.51 µm apart left notches below M3.b next to the router's landings;
+  the pins now sit at the row pitch (2.75 µm), jogged in Metal2, and are 0.30 µm tall.
+
 ## Files
 
 - `gc_array.py`: the macro array generator (GDS, LEF, LVS schematic).
 - `drc.sh`, `lvs.sh`: the cmos5l DRC and LVS decks in the pinned image; logs in `drc/`, `lvs/`.
 - `spice/run.sh`: runs a simulation script against the cmos5l or the old PDK; `spice/results/`.
 - `spice/gate_current.py`: DC gate current of the storage and write transistors.
+- `spice/bankread.py`, `spice/banklife.py`: the bank's read path and its lifetimes.
+- `magic_drc.sh`: Magic DRC of one GDS cell with the sg13cmos5l techfile.
+- `rtl/`: the bank (`gc_bank.v`), its behavioural models, testbenches and `sim.sh`.
+- `bank/`: the bank's LibreLane configuration, `harden.sh` and results.
+- `pnl2spice.py`: powered netlist to SPICE for a full KLayout LVS.
