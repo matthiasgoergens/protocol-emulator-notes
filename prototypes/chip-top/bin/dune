@@ -7,3 +7,8 @@
  (name demos)
  (modules demos)
  (libraries hardcaml chip seqv2 upe ds dacdemo unix))
+
+(executable
+ (name emit)
+ (modules emit)
+ (libraries hardcaml chip upe))

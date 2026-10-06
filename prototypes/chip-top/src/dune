@@ -1,4 +1,4 @@
 (library
  (name chip)
  (wrapped false)
- (libraries hardcaml seqv2 upe pstream psample eth10 mphase))
+ (libraries base hardcaml seqv2 upe pstream psample eth10 mphase))

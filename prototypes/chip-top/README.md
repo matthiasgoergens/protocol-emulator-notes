@@ -8,7 +8,12 @@ puts them behind one Hardcaml top level for Tiny Tapeout 6x4 (IHP sg13cmos5l), w
 - the existing demos, unchanged, driven through the host link;
 - a harden with the pinned flow, to measure the whole-chip placement factor (gap G13).
 
-Status: milestone 1 (this plan). Results are added below each milestone as they land.
+Status: milestones 1-3 done (plan; top level, specification and lockstep; demos through the host
+link). Milestone 4 (area and G13) is below.
+
+Build: `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17). Then
+`_build/default/bin/lockstep.exe run 400 12000`, `... controls 30 12000`, `... layouts 40 12000`,
+`_build/default/bin/demos.exe ds DIR`, `... dac 400`. Results in `results/`.
 
 ## 1. Integration plan
 
@@ -98,8 +103,8 @@ clocks.
 - **Commands** are bytes in the write direction: `{op, target}`, then address high, address low
   and a count byte n, which means n + 1 bytes. op 1 writes the n + 1 data bytes that follow; op 2
   reads: the host raises R and reads 2 (n + 1) nibbles. Each data byte goes to (target, address)
-  and the address increments. Any change of R returns the command parser to idle, which is also
-  the way to resynchronise.
+  and the address increments. Lowering R returns the command parser to idle, which is also the way to
+  resynchronise.
 
 | target | write | read |
 |---|---|---|
@@ -168,3 +173,104 @@ recorded with each harden.
    `../postlayout-roundtrip`'s lockstep and `compare_def` on the hardened layout if practical.
 
 Generated Verilog is never committed (as `../../tt/scripts/regen.sh` does).
+
+## 2. The top level, the specification and the lockstep (milestone 2)
+
+| file | what it is |
+|---|---|
+| `src/regs.ml` | the host-visible encoding: link targets, register map, pad and source codes |
+| `src/chip_spec.ml` | the executable specification of the core, composed from the blocks' models |
+| `src/chip_rtl.ml` | the core in Hardcaml: the blocks' RTL unchanged, and the glue; 27 plantable integration bugs |
+| `src/host.ml`, `src/board.ml` | the host's side of the link, and the board: the stage's pad timing, the outside world |
+| `src/tt_top.ml`, `bin/emit.exe` | the Tiny Tapeout top (`chip_tt`): core, stage on both edges, reset synchroniser, memories |
+| `bin/lockstep.exe` | random lockstep and the planted-bug controls |
+| `blocks/*` | symlinks to the blocks' sources, one dune library each |
+
+**What the specification composes, and what is new.** The sequencer is ISA v2's interpreter, the
+array is `unified-pe/verify/model.ml`, the streamer, sampler, edge sampler, CRC unit and matcher
+are their own models. Written new, because nothing specified them: the glue (host link, FIFOs,
+register file, pin map, flag selects, port holds, memories) and the pin NCO (its RTL has no
+model; the spec follows `nco.ml`'s header). The glue is specified once in `chip_spec.ml` and
+built separately in `chip_rtl.ml`; they share only the encoding in `regs.ml`.
+
+**Lockstep** (`results/lockstep.txt`, `results/lockstep_layouts.txt`). Each trial: the host
+loads random programmes (biased towards ports, mailboxes, WAITC on flags, the bank), random pin
+maps, flag selects, assist configurations, PE configurations and init chains, a matcher chain,
+bank bytes; then runs, while random host traffic continues (FIFO traffic, register and status
+reads, feed writes, restarts, port resets, stops with store and bank access, refused writes,
+assist reconfiguration under hold) and random pad inputs toggle at per-pad rates; a quarter of
+the trials reset the chip mid-run. Five generators: mixed, ports, host, memory and race.
+Compared every clock: every output pad's four-quarter nibble and the uio enables; the full
+architectural state of the sequencer (every thread's registers, inboxes, latch), every PE (S,
+P, valid, F, lane, 64 configuration bits), every segment register (feed, control, repeat,
+committed word), the port SEND order and RECV holds, the host FIFO counts, the CRC register,
+the NCO register, the matcher sum, the edge sampler's outputs and the link's read buffer.
+- 400 trials × 12,000 clocks at 4 PEs (1|1|1|1), 1024-word store: **4,800,000 clocks, 0
+  mismatches**; coverage counts every opcode, 79,128 SENDs to segments, 8,762 RECVs, 63,851
+  OUTs, 369 host feed writes held back by a SEND, 46 HOSTOUT entries arriving between a read's
+  two bytes.
+- At 8 PEs (2|2|2|2), 16 PEs (2|2|4|8) and with a 256-word store: 480,000 clocks each, 0
+  mismatches.
+
+**Planted integration bugs: 27 of 27 caught** (`results/controls.txt`): swapped pin lanes,
+swapped quarters, input pin map and quarter, SEND to the wrong segment, RECV from the wrong
+port, SEND byte order, a hold taking the wrong segment's tap, the recovered-bit stream on the
+wrong fixed port, host feed writes beating thread SENDs, flag select off by one, flags of the
+wrong thread, both host-link nibble orders, IN and STB strobes not gated in clear, HOSTOUT
+popping without its tag, sampler pins, uio enables, boot pcs, the restart page, edge-sampler
+quarter order, NCO byte order, programme byte order, PECFG segment bits, sticky status, HOSTIN
+overwrite. Two needed biased generators: the ungated STB (the memory mode puts STB at a boot
+word, which the core fetches on every clock in clear) and HOSTOUT without its tag (the race
+mode); the first version of the ungated-STB bug was structurally a no-op, which the control
+showed.
+
+**Found by integration, fixed in the blocks' own commits:**
+- `pin-streamer` (b2c1433): the RTL refused a push into a full FIFO even when the head left in
+  the same clock; the model accepted it. Its lockstep never pushed into a full FIFO. New test:
+  198,264 mismatching clocks before, 0 after.
+- `unified-pe/verify` took the one-bit DAC's three additions (d56d9d0) and a layout parameter
+  with an embeddable `array_create` (b24bf63); all its results rerun identically.
+
+**Found by integration, handled in the glue (no block change):**
+- The core's strobes (IN pop, STB, port pops) are combinational of the fetched word and are not
+  masked by its clear, so the glue gates them with run. Without that, a store word fetched in
+  clear writes the bank and pops FIFOs (the two "ungated" controls).
+- The edge sampler's bit output is defined only while its valid is high (its RTL leaves the
+  last unrolled sub-sample's value there). The glue holds the last recovered bit, so pads,
+  flags, the sampler and the fixed port see a level.
+- The streamer and sampler models take a width of 1, 2 or 4; the registers reset to width 1,
+  and the assists reset held (control register 0 resets to 2).
+
+**Contracts the specification assumes** (the random host keeps them; a real host must):
+the streamer's, sampler's and matcher's configuration changes only while the assists are held
+(their models fix the configuration at creation, and the matcher's closed form counts from its
+last clear); widths 1, 2 or 4, periods at least 1, a CRC mask of the form 2^w - 1; the host-link
+timing of section 1; after resetting the chip mid-transaction the host starts again.
+
+## 3. The demos through the host link (milestone 3)
+
+`bin/demos.exe`. Each demo runs the specification and the RTL together on the board and compares
+every pad every clock; both agree throughout in every run below.
+
+**UART, SPI and I2C** (`results/demo-ds.txt`). The firmware is `../deadline-sequencer`'s
+compiler output, unchanged; the host's loader translates it to ISA v2 (`compat.ml`), relocates
+thread t to offset 64 t and loads it through PROG. UART, SCLK, MOSI and CS on `uo_out[3:0]`;
+SDA and SCL on `uio[6]`, `uio[7]`, the open-drain pins, with the demo's own I2C slave model on
+the bus. The demo's own decoders: UART "OK!" (0x4f 0x4b 0x21), SPI 0xa5 0x3c, I2C 0xa0+ack
+0x5a+ack and STOP, the host reads the two ACK bytes 0x00 0x00 from HOSTOUT; edge timing as the
+original checks it (UART edges at multiples of 64 clocks, SPI SCLK period 64, SCL high 32).
+**PASS.** The chip's trace through `tools/sigrok-judge` (`results/sigrok-judge.txt`): UART, SPI
+and I2C decoded by sigrok's decoders, and all six teeth caught.
+
+**One-bit DAC** (`results/demo-dac.txt`). `../onebit-dac`'s pump firmware and order-2 PE
+configuration (FB1, I1, FB2, I2, without the pass-through PEs) on the 4-PE chip as one run over
+the four segments; the host streams a 997 Hz tone at -6 dB through HOSTIN, polling the FIFO
+count and HOSTOUT for underrun reports. The pin is segment 3's flag through the pad select,
+inverted. Judged against `../onebit-dac`'s bit-exact fast model: **54,349 steps (400 samples), 0
+wrong bits**; the start of the modulator is placed exactly, and the lead-in on the feed's
+initial word 0 is the one fitted parameter. Control: the same bits against the order-3 model
+are 48 % wrong. No underruns, no overflow. **PASS.**
+
+What the demos do not show: the UART/SPI/I2C pins run with q = 0 only (the base ISA), so the
+quarter grid is exercised by the lockstep alone; the DAC uses one channel (four PEs); S/PDIF
+was not run.
