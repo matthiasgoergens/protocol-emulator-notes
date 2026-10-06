@@ -1,0 +1,230 @@
+Hold buffers: where they were and why (synth/holds.py; run directories as named).
+
+Cause. LibreLane's base.sdc applies the 0.25 ns clock uncertainty to hold as well as setup, and
+the flow adds 0.1 ns of hold margin after placement. sg13cmos5l has no enable flip-flop, so every
+register with an enable or a synchronous clear is a flip-flop whose Q returns to its own D through
+one or two gates. Such a self-loop has no skew and no jitter between launch and capture (same
+flip-flop, same edge), but its clock-to-Q plus one gate is shorter than 0.35 ns plus the hold
+time at the typical corner, so the flow buffered almost all of them. The both-edges pin stage and
+the macros were not the cause: 102 of the 3,206 buffers (3 %) sit behind the stage's flip-flops,
+none behind a macro output, and under 20 feed macro pins (the worst hold endpoint before repair
+was the 512x16's A_DIN, but it took few buffers).
+
+Measured on the CTS database of the 4-PE harden (results/harden-pe4), typical corner, endpoints
+with hold slack under the 0.1 ns margin, by hold uncertainty: 0.25 ns 1,692; 0.15 ns 72; 0.10 ns
+27; 0.05 ns 16; 0 ns 9. Fix: tt/src/chip.sdc, base.sdc with the uncertainty on setup only and
+0.1 ns on hold (propagated clocks, the 5 % derate and the flow's hold margins stay).
+
+=================== holds-pe4
+# /var/tmp/chip-top-harden/pe4-apart/runs/wokwi: 3206 hold buffers
+
+## by the flip-flop or pin they feed (origin of the sink)
+    933  cell o21ai_1   
+    476  cell inv_1     
+    238  cell nand2_1   
+    165  cell mux2_1    
+    134  cell nor2_1    
+    107  cell a21oi_1   
+     88  flop D         src/chip_rtl.ml:74 < src/chip_rtl.ml:251
+     87  flop D         upe/upe_rtl.ml:96 < upe/upe_rtl.ml:280
+     80  cell a22oi_1   
+     62  flop D         src/chip_rtl.ml:217 < src/chip_rtl.ml:216
+     61  cell nor2b_1   
+     58  cell buf_1     
+     54  cell xnor2_1   
+     54  flop D         eth10/matcher_en.ml:24 < eth10/matcher_en.ml:20
+     51  flop D         pstream/streamer.ml:15 < src/chip_rtl.ml:257
+     42  cell xor2_1    
+     34  cell nor3_1    
+     32  flop D         seqv2/sequencer2.ml:81 < src/chip_rtl.ml:121
+     27  cell a21o_1    
+     23  flop D         psample/sampler.ml:36 < src/chip_rtl.ml:273
+     22  flop D         upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+     22  cell and2_1    
+     22  cell nand2b_1  
+     20  flop D         upe/upe_rtl.ml:224 < upe/upe_rtl.ml:214
+     20  flop D         upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280
+     18  cell nand3_1   
+     18  flop D         mphase/nco.ml:22 < src/chip_rtl.ml:310
+     17  flop D         eth10/crc_unit.ml:76 < src/chip_rtl.ml:306
+     16  flop D         src/chip_rtl.ml:74 < src/chip_rtl.ml:244
+     15  flop D         eth10/matcher_en.ml:16 < eth10/matcher_en.ml:17
+     14  flop D         pstream/streamer.ml:35 < src/chip_rtl.ml:257
+     13  flop D         psample/sampler.ml:15 < src/chip_rtl.ml:273
+     11  flop D         upe/upe_rtl.ml:220 < upe/upe_rtl.ml:214
+     10  cell nand4_1   
+      9  flop D         eth10/matcher_en.ml:21 < eth10/matcher_en.ml:20
+      9  cell and3_1    
+      8  flop D         src/chip_rtl.ml:88
+      8  cell nor4_1    
+      7  flop D         eth10/matcher_en.ml:22 < eth10/matcher_en.ml:20
+      6  cell a221oi_1  
+
+## by the driver behind them
+    539  flop: src/chip_rtl.ml:92
+    417  logic a21oi_1
+    178  flop: upe/upe_rtl.ml:96 < upe/upe_rtl.ml:280
+    143  logic o21ai_1
+    129  flop: seqv2/sequencer2.ml:83 < src/chip_rtl.ml:121
+    128  flop: src/chip_rtl.ml:74 < src/chip_rtl.ml:244
+     88  flop: src/chip_rtl.ml:74 < src/chip_rtl.ml:251
+     79  flop: psample/sampler.ml:36 < src/chip_rtl.ml:273
+     74  flop: src/chip_rtl.ml:217 < src/chip_rtl.ml:216
+     72  logic mux2_1
+     71  flop: pstream/streamer.ml:15 < src/chip_rtl.ml:257
+     67  flop: upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280
+     65  flop: eth10/matcher_en.ml:24 < eth10/matcher_en.ml:20
+     61  logic nor2_1
+     60  flop: upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+     58  flop: seqv2/sequencer2.ml:84 < src/chip_rtl.ml:121
+     51  logic a221oi_1
+     49  logic a22oi_1
+     36  flop: seqv2/sequencer2.ml:85 < src/chip_rtl.ml:121
+     35  flop: upe/upe_rtl.ml:219 < upe/upe_rtl.ml:214
+     35  flop: upe/upe_rtl.ml:220 < upe/upe_rtl.ml:214
+     32  flop: mphase/stage.ml:66 < mphase/stage.ml:63
+     32  flop: upe/upe_rtl.ml:216 < upe/upe_rtl.ml:214
+     32  flop: upe/upe_rtl.ml:217 < upe/upe_rtl.ml:214
+     32  flop: seqv2/sequencer2.ml:81 < src/chip_rtl.ml:121
+
+## chain heads by kind (3190 chains)
+   2115  self-loop (flip-flop back to itself)
+    927  from logic (an input of a gate)
+    148  flip-flop to another flip-flop
+
+=================== holds-pe8
+# /var/tmp/chip-top-harden/pe8-apart/runs/wokwi: 3696 hold buffers
+
+## by the flip-flop or pin they feed (origin of the sink)
+    886  cell o21ai_1   
+    523  cell inv_1     
+    370  cell mux2_1    
+    204  cell nand2_1   
+    180  cell a21oi_1   
+    178  flop D         upe/upe_rtl.ml:96 < upe/upe_rtl.ml:280
+    175  cell nor2_1    
+    106  cell buf_1     
+     88  flop D         src/chip_rtl.ml:74 < src/chip_rtl.ml:251
+     77  cell a22oi_1   
+     70  cell nor2b_1   
+     60  flop D         upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280
+     55  flop D         src/chip_rtl.ml:217 < src/chip_rtl.ml:216
+     54  cell xnor2_1   
+     51  flop D         upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+     47  flop D         eth10/matcher_en.ml:24 < eth10/matcher_en.ml:20
+     42  cell nor3_1    
+     41  cell xor2_1    
+     33  flop D         pstream/streamer.ml:15 < src/chip_rtl.ml:257
+     32  flop D         upe/upe_rtl.ml:224 < upe/upe_rtl.ml:214
+     32  flop D         seqv2/sequencer2.ml:81 < src/chip_rtl.ml:121
+     30  cell a21o_1    
+     27  flop D         eth10/crc_unit.ml:76 < src/chip_rtl.ml:306
+     23  cell nand3_1   
+     21  cell and2_1    
+     21  flop D         mphase/nco.ml:22 < src/chip_rtl.ml:310
+     18  cell nand2b_1  
+     17  flop D         psample/sampler.ml:36 < src/chip_rtl.ml:273
+     16  flop D         eth10/matcher_en.ml:16 < eth10/matcher_en.ml:17
+     15  flop D         upe/upe_rtl.ml:220 < upe/upe_rtl.ml:214
+     13  flop D         src/chip_rtl.ml:74 < src/chip_rtl.ml:244
+     13  flop D         pstream/streamer.ml:35 < src/chip_rtl.ml:257
+     12  flop D         upe/upe_rtl.ml:240 < upe/upe_rtl.ml:242
+     12  cell nand4_1   
+     11  flop D         psample/sampler.ml:15 < src/chip_rtl.ml:273
+     11  cell nor4_1    
+     10  flop D         eth10/matcher_en.ml:21 < eth10/matcher_en.ml:20
+      9  cell and3_1    
+      8  flop D         upe/upe_rtl.ml:120 < upe/upe_rtl.ml:280
+      7  cell or2_1     
+
+## by the driver behind them
+    525  flop: src/chip_rtl.ml:92
+    411  logic a21oi_1
+    394  flop: upe/upe_rtl.ml:96 < upe/upe_rtl.ml:280
+    187  logic o21ai_1
+    138  logic mux2_1
+    130  flop: seqv2/sequencer2.ml:83 < src/chip_rtl.ml:121
+    128  flop: src/chip_rtl.ml:74 < src/chip_rtl.ml:244
+    116  flop: upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+     88  flop: src/chip_rtl.ml:74 < src/chip_rtl.ml:251
+     79  flop: psample/sampler.ml:36 < src/chip_rtl.ml:273
+     77  flop: upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280
+     76  logic a22oi_1
+     74  flop: src/chip_rtl.ml:217 < src/chip_rtl.ml:216
+     68  flop: pstream/streamer.ml:15 < src/chip_rtl.ml:257
+     63  flop: eth10/matcher_en.ml:24 < eth10/matcher_en.ml:20
+     57  flop: seqv2/sequencer2.ml:84 < src/chip_rtl.ml:121
+     53  logic a221oi_1
+     47  logic nor3_1
+     39  flop: upe/upe_rtl.ml:120 < upe/upe_rtl.ml:280
+     37  flop: seqv2/sequencer2.ml:85 < src/chip_rtl.ml:121
+     34  flop: upe/upe_rtl.ml:219 < upe/upe_rtl.ml:214
+     33  flop: upe/upe_rtl.ml:220 < upe/upe_rtl.ml:214
+     32  flop: mphase/stage.ml:66 < mphase/stage.ml:63
+     32  flop: upe/upe_rtl.ml:216 < upe/upe_rtl.ml:214
+     32  logic nor2_1
+
+## chain heads by kind (3680 chains)
+   2394  self-loop (flip-flop back to itself)
+   1071  from logic (an input of a gate)
+    215  flip-flop to another flip-flop
+
+=================== holds-e4
+# /var/tmp/chip-timing/exp/e4-pe4-m3/runs/quick: 656 hold buffers
+
+## by the flip-flop or pin they feed (origin of the sink)
+    425  cell inv_1     
+     48  cell nor2b_1   
+     42  cell nand2_1   
+     31  cell o21ai_1   
+     22  cell a21oi_1   
+     21  cell nor2_1    
+     14  cell a22oi_1   
+      8  cell buf_2     
+      8  cell mux2_1    
+      5  cell and2_1    
+      2  cell nand3_1   
+      2  cell buf_4     
+      2  cell xor2_1    
+      2  cell nand3b_1  
+      1  cell buf_1     
+      1  flop D         
+      1  cell nor3_1    
+      1  flop D         eth10/matcher_en.ml:16 < eth10/matcher_en.ml:18
+      1  flop D         eth10/matcher_en.ml:21 < eth10/matcher_en.ml:20
+      1  flop D         eth10/matcher_en.ml:22 < eth10/matcher_en.ml:20
+      1  cell a21o_1    
+      0  cell nor4_1    
+
+## by the driver behind them
+     93  flop: src/chip_rtl.ml:76 < src/chip_rtl.ml:76
+     66  flop: upe/upe_rtl.ml:261 < upe/upe_rtl.ml:246
+     63  flop: seqv2/sequencer2.ml:83 < src/chip_rtl.ml:123
+     42  flop: src/chip_rtl.ml:246 < src/chip_rtl.ml:245
+     34  flop: upe/upe_rtl.ml:102 < upe/upe_rtl.ml:314
+     32  flop: mphase/stage.ml:66 < mphase/stage.ml:63
+     28  flop: seqv2/sequencer2.ml:81 < src/chip_rtl.ml:123
+     21  flop: seqv2/sequencer2.ml:84 < src/chip_rtl.ml:123
+     17  flop: eth10/matcher_en.ml:22 < eth10/matcher_en.ml:20
+     16  flop: src/chip_rtl.ml:387
+     16  flop: mphase/stage.ml:67 < mphase/stage.ml:63
+     16  flop: upe/upe_rtl.ml:251 < upe/upe_rtl.ml:246
+     15  flop: eth10/matcher_en.ml:24 < eth10/matcher_en.ml:20
+     12  logic a22oi_1
+     12  flop: upe/upe_rtl.ml:256 < upe/upe_rtl.ml:246
+     12  flop: src/chip_rtl.ml:209
+     12  flop: psample/sampler.ml:43 < src/chip_rtl.ml:285
+     10  logic o21ai_1
+      9  flop: src/chip_rtl.ml:315
+      8  flop: src/chip_rtl.ml:167
+      8  flop: src/chip_rtl.ml:267
+      8  flop: seqv2/sequencer2.ml:91 < src/chip_rtl.ml:123
+      8  flop: eth10/matcher_en.ml:16 < eth10/matcher_en.ml:17
+      6  flop: pstream/streamer.ml:15 < src/chip_rtl.ml:269
+      6  flop: upe/upe_rtl.ml:255 < upe/upe_rtl.ml:246
+
+## chain heads by kind (648 chains)
+    467  self-loop (flip-flop back to itself)
+    153  flip-flop to another flip-flop
+     28  from logic (an input of a gate)
+

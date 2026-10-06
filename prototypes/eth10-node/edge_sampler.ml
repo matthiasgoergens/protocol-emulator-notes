@@ -105,7 +105,12 @@ let step_sub_rtl (c : cfg_signals) (r : rst) ~active s =
   let edge = active &: (s <>: r.prev) in
   let d = mux2 (r.since ==:. since_max) r.since (r.since +:. 1) in
   let is_nrz = c.s_mode ==:. 2 and is_manch = c.s_mode ==:. 0 in
-  let qual = edge &: (d >=: c.s_holdoff) in
+  (* d >= holdoff and d > timeout, compared on since itself so that the comparisons do not wait
+     for the increment (four of these steps run in series in one clock): since + 1 >= h is
+     since >= h - 1 for h > 0, and saturation at since_max changes neither answer except
+     d > timeout when both are since_max. formal/edge_step_equiv checks this against the plain form. *)
+  let qual = edge &: ((c.s_holdoff ==:. 0) |: (r.since >=: c.s_holdoff -:. 1)) in
+  let d_gt_timeout = (r.since >=: c.s_timeout) &: ~:((r.since ==:. since_max) &: (c.s_timeout ==:. since_max)) in
   (* in burst, Manchester / biphase mark *)
   let mb_bit = mux2 is_manch s r.unq in
   let mb_since = mux2 qual (zero 10) d in
@@ -118,7 +123,7 @@ let step_sub_rtl (c : cfg_signals) (r : rst) ~active s =
   let since_b = mux2 is_nrz mb_since mb_since in   (* both modes: 0 on a qualified edge, else d *)
   let emit_b = mux2 is_nrz nrz_emit qual in
   let bit_b = mux2 is_nrz s mb_bit ^: c.s_invert in
-  let ended = since_b >: c.s_timeout in
+  let ended = ~:qual &: d_gt_timeout in   (* since_b > timeout: since_b is 0 when qual, else d *)
   let in_b = r.in_burst in
   let nr =
     { prev = mux2 active s r.prev;
@@ -128,7 +133,15 @@ let step_sub_rtl (c : cfg_signals) (r : rst) ~active s =
       until = mux2 in_b (mux2 is_nrz nrz_until r.until) (mux2 edge c.s_offset r.until) } in
   nr, in_b &: emit_b, bit_b, in_b &: ended
 
-let create ~clock ~clear ~n ~(cfg : cfg_signals) ~samples ~active =
+(* [create_with_level] also returns [level]: the last emitted bit, held while no bit is emitted
+   (0 after clear), as a register of its own. It equals [mux2 valid bit last] where [last] is that
+   mux registered, the hold a consumer would otherwise build after the outputs; one multiplexer
+   and the valid register's fan-out shorter. *)
+let rec create ~clock ~clear ~n ~cfg ~samples ~active =
+  let bit, valid, burst_end, overrun, in_burst, _ = create_with_level ~clock ~clear ~n ~cfg ~samples ~active in
+  bit, valid, burst_end, overrun, in_burst
+
+and create_with_level ~clock ~clear ~n ~(cfg : cfg_signals) ~samples ~active =
   let spec = Reg_spec.create ~clock ~clear () in
   let w_prev = wire 1 and w_in = wire 1 and w_since = wire 10 and w_unq = wire 1 and w_until = wire 8 in
   let r0 = { prev = reg spec w_prev; in_burst = reg spec w_in; since = reg spec w_since; unq = reg spec w_unq; until = reg spec w_until } in
@@ -144,7 +157,9 @@ let create ~clock ~clear ~n ~(cfg : cfg_signals) ~samples ~active =
   w_prev <== !r.prev; w_in <== !r.in_burst; w_since <== !r.since; w_unq <== !r.unq; w_until <== !r.until;
   (* outputs registered: they describe the clock just sampled *)
   let bit = reg spec !first_b and valid = reg spec !first_v and burst_end = reg spec !ended and overrun = reg spec !over in
-  bit, valid, burst_end, overrun, r0.in_burst
+  let level = wire 1 in
+  level <== reg spec (mux2 !first_v !first_b level);
+  bit, valid, burst_end, overrun, r0.in_burst, level
 
 let circuit ~n =
   let clock = input "clock" 1 and clear = input "clear" 1 in

@@ -1,0 +1,329 @@
+Critical paths of the hardened chip at the slow corner (nom_slow_1p08V_125C), by RTL origin.
+
+Runs: results/harden-pe4 (/var/tmp/chip-top-harden/pe4-apart) and results/harden-pe8
+(/var/tmp/chip-top-harden/pe8-apart), 20 ns clock. Netlist names are mapped back to the OCaml
+call sites that built them by bin/origins.exe (Hardcaml's caller ids; an anonymous signal _N of
+the Verilog is the net chip._N) and synth/paths.py; synth/sta.sh reran OpenSTA on the final
+netlist and SPEF with up to 4 paths per endpoint (3,000 paths), so that paths hidden behind the
+single worst start point show too. The "-noes" tables repeat it with the edge sampler's valid
+register set false (its bit register, built on the same source line, remains), to show the next
+tier. bin/rtlpaths.exe traces the same routes on the
+Hardcaml graph, where every signal still has its name and origin.
+
+Summary
+- Every one of the 81 (4 PEs) and 265 (8 PEs) violating endpoints is a PE register (S, P, F, L, pv
+  of upe_rtl.ml), and every worst path starts at the edge sampler's registered outputs
+  (edge_sampler.ml:146, "valid" and "bit"; now named es_valid and es_bit_raw).
+- Route (rtlpaths, confirmed by the STA cell counts of 35-38 logic cells): es_valid -> es_level
+  (chip_rtl.ml, the held recovered bit) -> segment 0's fixed port -> PE 0's A input (the
+  segment's source multiplexer, upe_rtl.ml:260) -> window subtract and bitmap read (115-118) ->
+  g multiplexer (125) -> THE g CHAIN: every PE's g source 7 takes the previous PE's g, across
+  segment boundaries, one multiplexer per PE (upe_rtl.ml:125 and the g wires, 239) -> the last PE's
+  gating, negation and 17-bit add (134-139), overflow and saturation (142-145), result
+  multiplexer (153), S/P/F/L next-state multiplexers (160-174) -> register.
+  The step chain (follow, upe_rtl.ml:158) ripples through every PE the same way and feeds every
+  PE register's enable. The g chain is why 8 PEs are 5 ns worse than 4: 7 hops instead of 3.
+- Without the edge sampler's registers (4 PEs) the same PE route starts at the segment control register
+  (upe_rtl.ml:228, the source select of segment 0): -1.38 ns (4 PEs), -3.98 ns (8 PEs).
+- Second family: the programme store's SRAM output -> sequencer decode -> the threads'
+  accumulator and pc registers (sequencer2.ml:81 and 83). The macro's clock-to-output is 6.25 ns
+  at this corner (its liberty), leaving 10 ns at 60 MHz: +0.49 ns at 4 PEs but -4.67 ns at 8 PEs,
+  where the placement is longer.
+- Third: the input stage (stage.ml:63) -> the edge sampler's four unrolled sub-sample steps
+  (edge_sampler.ml:134, 146): 31-36 cells, +2.3 ns (4 PEs) and -0.10 ns (8 PEs) at 20 ns.
+- Fourth: the reset synchroniser (tt_top.ml:45, now reset_sync) -> the clear of every register:
+  +1.07 ns at 4 PEs, 11 cells, mostly fan-out buffering.
+- Most of the path delay is not logic depth but undersized drivers: on the worst 4-PE path,
+  seven cells (buf_1 fan-out buffers, an and2_1, an a221oi_1, an a22oi_1, a nand2_1) each take
+  0.86-1.41 ns driving 0.12-0.25 pF with 1.0-1.7 ns slews, about 7.5 ns of its 24.8 ns. The
+  flow's setup repair ran on placement parasitics, reported "No setup violations found" and did
+  not size for the routed wires; no maximum transition was set (MAX_TRANSITION_CONSTRAINT None).
+
+=============== pe4-groups
+## the 25 worst (start origin, end origin) pairs: worst slack, number of reported paths, logic cells
+1.  -4.171 ns    16 paths  36 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   wire/1 @ upe/upe_rtl.ml:239 < upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+2.  -4.073 ns   256 paths  35 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   wire/16 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+3.  -3.845 ns   240 paths  35 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   comb/1 @ upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+4.  -3.538 ns    23 paths  36 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   wire/1 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+5.  -3.385 ns     8 paths  35 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   comb/1 @ upe/upe_rtl.ml:113 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+6.  -2.442 ns     8 paths  35 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   comb/1 @ upe/upe_rtl.ml:283 < src/chip_rtl.ml:207
+7.  +0.485 ns   112 paths  13 cells
+      from sram_512x16(?)
+      to   reg/8 @ seqv2/sequencer2.ml:83 < src/chip_rtl.ml:121
+8.  +0.850 ns   128 paths  16 cells
+      from sram_512x16(?)
+      to   reg/8 @ seqv2/sequencer2.ml:81 < src/chip_rtl.ml:121
+9.  +1.072 ns   128 paths  11 cells
+      from reg/1 @ 
+      to   reg/16 @ src/chip_rtl.ml:217 < src/chip_rtl.ml:216
+10.  +1.543 ns     5 paths   3 cells
+      from reg/1 @ 
+      to   wire/1 @ mphase/stage.ml:37 < mphase/stage.ml:52 < mphase/stage.ml:47
+11.  +1.558 ns     5 paths   3 cells
+      from reg/1 @ 
+      to   reg/1 @ mphase/stage.ml:38 < mphase/stage.ml:52 < mphase/stage.ml:47
+12.  +2.059 ns    19 paths  14 cells
+      from reg/1 @ 
+      to   sram_512x16(?)
+13.  +2.283 ns    32 paths  32 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/8 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+14.  +2.319 ns    15 paths  10 cells
+      from reg/1 @ 
+      to   reg/2 @ src/chip_rtl.ml:217 < src/chip_rtl.ml:216
+15.  +2.560 ns    12 paths  33 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+16.  +2.593 ns     8 paths  33 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/1 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+17.  +2.596 ns    32 paths  19 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   reg/8 @ psample/sampler.ml:41 < src/chip_rtl.ml:273
+18.  +2.914 ns   483 paths   9 cells
+      from reg/1 @ 
+      to   reg/8 @ src/chip_rtl.ml:92
+19.  +2.929 ns    40 paths  31 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/10 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+20.  +2.942 ns     4 paths  10 cells
+      from reg/1 @ 
+      to   wire/1 @ src/chip_rtl.ml:192
+=============== pe4-groups-noes
+## the 25 worst (start origin, end origin) pairs: worst slack, number of reported paths, logic cells
+1.  -1.384 ns   240 paths  35 cells
+      from reg/7 @ upe/upe_rtl.ml:228 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   comb/1 @ upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+2.  -1.315 ns   256 paths  34 cells
+      from reg/7 @ upe/upe_rtl.ml:228 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   wire/16 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+3.  -1.242 ns    16 paths  35 cells
+      from reg/7 @ upe/upe_rtl.ml:228 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   wire/1 @ upe/upe_rtl.ml:239 < upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+4.  -0.817 ns    23 paths  35 cells
+      from reg/7 @ upe/upe_rtl.ml:228 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   wire/1 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+5.  -0.664 ns     8 paths  34 cells
+      from reg/7 @ upe/upe_rtl.ml:228 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   comb/1 @ upe/upe_rtl.ml:113 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+6.  +0.415 ns     8 paths  35 cells
+      from reg/7 @ upe/upe_rtl.ml:228 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   comb/1 @ upe/upe_rtl.ml:283 < src/chip_rtl.ml:207
+7.  +0.485 ns   113 paths  13 cells
+      from sram_512x16(?)
+      to   reg/8 @ seqv2/sequencer2.ml:83 < src/chip_rtl.ml:121
+8.  +0.850 ns   128 paths  16 cells
+      from sram_512x16(?)
+      to   reg/8 @ seqv2/sequencer2.ml:81 < src/chip_rtl.ml:121
+9.  +1.072 ns   128 paths  11 cells
+      from reg/1 @ src/tt_top.ml:45
+      to   reg/16 @ src/chip_rtl.ml:217 < src/chip_rtl.ml:216
+10.  +1.543 ns     5 paths   3 cells
+      from reg/1 @ src/tt_top.ml:45
+      to   wire/1 @ mphase/stage.ml:37 < mphase/stage.ml:52 < mphase/stage.ml:47
+11.  +1.558 ns     5 paths   3 cells
+      from reg/1 @ src/tt_top.ml:45
+      to   reg/1 @ mphase/stage.ml:38 < mphase/stage.ml:52 < mphase/stage.ml:47
+12.  +2.059 ns    19 paths  14 cells
+      from reg/1 @ src/tt_top.ml:45
+      to   sram_512x16(?)
+13.  +2.283 ns    32 paths  32 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/8 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+14.  +2.319 ns    15 paths  10 cells
+      from reg/1 @ src/tt_top.ml:45
+      to   reg/2 @ src/chip_rtl.ml:217 < src/chip_rtl.ml:216
+15.  +2.560 ns    12 paths  33 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+16.  +2.593 ns     8 paths  33 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/1 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+17.  +2.914 ns   536 paths   9 cells
+      from reg/1 @ src/tt_top.ml:45
+      to   reg/8 @ src/chip_rtl.ml:92
+18.  +2.929 ns    40 paths  31 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/10 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+19.  +2.942 ns     4 paths  10 cells
+      from reg/1 @ src/tt_top.ml:45
+      to   wire/1 @ src/chip_rtl.ml:192
+20.  +3.081 ns     8 paths  10 cells
+      from reg/1 @ src/tt_top.ml:45
+      to   reg/2 @ seqv2/sequencer2.ml:82 < src/chip_rtl.ml:121
+=============== pe8-groups
+## the 20 worst (start origin, end origin) pairs: worst slack, number of reported paths, logic cells
+1.  -9.209 ns   256 paths  38 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   comb/1 @ upe/upe_rtl.ml:120 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+2.  -8.665 ns    16 paths  35 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   wire/1 @ upe/upe_rtl.ml:239 < upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+3.  -8.088 ns   256 paths  35 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   wire/16 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+4.  -7.156 ns    66 paths  38 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   wire/1 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+5.  -6.703 ns   480 paths  35 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   comb/1 @ upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+6.  -6.134 ns    28 paths  38 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   comb/1 @ upe/upe_rtl.ml:283 < src/chip_rtl.ml:207
+7.  -4.674 ns    98 paths  14 cells
+      from sram_512x16(?)
+      to   reg/8 @ seqv2/sequencer2.ml:83 < src/chip_rtl.ml:121
+8.  -2.023 ns   119 paths  18 cells
+      from sram_512x16(?)
+      to   reg/8 @ seqv2/sequencer2.ml:81 < src/chip_rtl.ml:121
+9.  -0.103 ns     8 paths  36 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/1 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+10.  +0.260 ns    12 paths  36 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+11.  +0.337 ns   125 paths   6 cells
+      from sram_512x16(?)
+      to   reg/10 @ seqv2/sequencer2.ml:84 < src/chip_rtl.ml:121
+12.  +0.834 ns    32 paths  35 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/8 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+13.  +1.069 ns    31 paths   7 cells
+      from sram_512x16(?)
+      to   comb/1 @ seqv2/sequencer2.ml:277 < src/chip_rtl.ml:121
+14.  +1.096 ns     4 paths  38 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   comb/1 @ upe/upe_rtl.ml:113 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+15.  +1.096 ns    22 paths  19 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   reg/8 @ psample/sampler.ml:41 < src/chip_rtl.ml:273
+16.  +1.145 ns    31 paths   6 cells
+      from sram_512x16(?)
+      to   comb/1 @ src/chip_rtl.ml:416 < src/chip_rtl.ml:420 < src/chip_rtl.ml:438
+17.  +1.459 ns    40 paths  33 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/10 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+18.  +1.819 ns     5 paths   3 cells
+      from reg/1 @ src/tt_top.ml:45
+      to   reg/1 @ mphase/stage.ml:38 < mphase/stage.ml:52 < mphase/stage.ml:47
+19.  +1.823 ns     5 paths   3 cells
+      from reg/1 @ src/tt_top.ml:45
+      to   wire/1 @ mphase/stage.ml:37 < mphase/stage.ml:52 < mphase/stage.ml:47
+20.  +1.878 ns    10 paths  20 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/8 @ psample/sampler.ml:41 < src/chip_rtl.ml:273
+
+=============== pe8-groups-noes
+## the 20 worst (start origin, end origin) pairs: worst slack, number of reported paths, logic cells
+1.  -7.522 ns   225 paths  38 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   comb/1 @ upe/upe_rtl.ml:120 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+2.  -6.979 ns    16 paths  35 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   wire/1 @ upe/upe_rtl.ml:239 < upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+3.  -6.402 ns   226 paths  35 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   wire/16 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+4.  -5.470 ns    45 paths  38 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   wire/1 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+5.  -5.017 ns   425 paths  35 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   comb/1 @ upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+6.  -4.674 ns   102 paths  14 cells
+      from sram_512x16(?)
+      to   reg/8 @ seqv2/sequencer2.ml:83 < src/chip_rtl.ml:121
+7.  -4.448 ns    26 paths  38 cells
+      from reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+      to   comb/1 @ upe/upe_rtl.ml:283 < src/chip_rtl.ml:207
+8.  -3.983 ns     4 paths  38 cells
+      from reg/7 @ upe/upe_rtl.ml:228 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   comb/1 @ upe/upe_rtl.ml:120 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+9.  -3.393 ns     8 paths  37 cells
+      from reg/7 @ upe/upe_rtl.ml:228 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   comb/1 @ upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+10.  -2.960 ns     4 paths  37 cells
+      from reg/7 @ upe/upe_rtl.ml:228 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   wire/16 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+11.  -2.023 ns   117 paths  18 cells
+      from sram_512x16(?)
+      to   reg/8 @ seqv2/sequencer2.ml:81 < src/chip_rtl.ml:121
+12.  -0.931 ns    26 paths  37 cells
+      from reg/8 @ upe/upe_rtl.ml:219 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   wire/16 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+13.  -0.150 ns     6 paths  39 cells
+      from reg/8 @ upe/upe_rtl.ml:219 < upe/upe_rtl.ml:214 < src/chip_rtl.ml:207
+      to   wire/1 @ upe/upe_rtl.ml:111 < upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+14.  -0.103 ns     8 paths  36 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/1 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+15.  +0.260 ns    12 paths  36 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/1 @ eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+16.  +0.337 ns   115 paths   6 cells
+      from sram_512x16(?)
+      to   reg/10 @ seqv2/sequencer2.ml:84 < src/chip_rtl.ml:121
+17.  +0.834 ns    32 paths  35 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/8 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+18.  +1.069 ns    28 paths   7 cells
+      from sram_512x16(?)
+      to   comb/1 @ seqv2/sequencer2.ml:277 < src/chip_rtl.ml:121
+19.  +1.145 ns    28 paths   6 cells
+      from sram_512x16(?)
+      to   comb/1 @ src/chip_rtl.ml:416 < src/chip_rtl.ml:420 < src/chip_rtl.ml:438
+20.  +1.459 ns    40 paths  33 cells
+      from reg/1 @ mphase/stage.ml:63
+      to   reg/10 @ eth10/edge_sampler.ml:134 < src/chip_rtl.ml:289
+
+
+=============== RTL route of the worst 8-PE path (bin/rtlpaths.exe 2,2,2,2 3 _1729, before the fixes; depth in gate levels of a crude model)
+
+ 1. depth 95  end _7512 (reg, 1 bits) @ blocks/upe/upe_rtl.ml:173 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+          0  _1729    blocks/eth10/edge_sampler.ml:146 < src/chip_rtl.ml:289
+          2  _1775    src/chip_rtl.ml:293
+          2  _182     src/chip_rtl.ml:187
+          2  _6564    src/chip_rtl.ml:211
+          5  _6566    blocks/upe/upe_rtl.ml:260 < src/chip_rtl.ml:207
+          5  _6630    blocks/upe/upe_rtl.ml:115 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         13  _6637    blocks/upe/upe_rtl.ml:118 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         22  _6673    blocks/upe/upe_rtl.ml:125 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         22  _184     blocks/upe/upe_rtl.ml:239 < blocks/upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+         25  _6778    blocks/upe/upe_rtl.ml:125 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         25  _187     blocks/upe/upe_rtl.ml:239 < blocks/upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+         28  _6930    blocks/upe/upe_rtl.ml:125 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         28  _189     blocks/upe/upe_rtl.ml:239 < blocks/upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+         31  _7023    blocks/upe/upe_rtl.ml:125 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         31  _192     blocks/upe/upe_rtl.ml:239 < blocks/upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+         34  _7171    blocks/upe/upe_rtl.ml:125 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         34  _194     blocks/upe/upe_rtl.ml:239 < blocks/upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+         37  _7264    blocks/upe/upe_rtl.ml:125 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         37  _197     blocks/upe/upe_rtl.ml:239 < blocks/upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+         40  _7408    blocks/upe/upe_rtl.ml:125 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         40  _200     blocks/upe/upe_rtl.ml:239 < blocks/upe/upe_rtl.ml:242 < src/chip_rtl.ml:207
+         43  _7500    blocks/upe/upe_rtl.ml:125 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         45  _7617    blocks/upe/upe_rtl.ml:126 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         45  _7618    blocks/upe/upe_rtl.ml:127 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         47  _7621    blocks/upe/upe_rtl.ml:132 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         47  _7646    blocks/upe/upe_rtl.ml:139 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         81  _7654    blocks/upe/upe_rtl.ml:140 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         81  _7655    blocks/upe/upe_rtl.ml:142 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         85  _7663    blocks/upe/upe_rtl.ml:145 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         88  _7689    blocks/upe/upe_rtl.ml:153 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         88  _202     blocks/upe/upe_rtl.ml:122 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         93  _7502    blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+         95  _7503    blocks/upe/upe_rtl.ml:163 < blocks/upe/upe_rtl.ml:280 < src/chip_rtl.ml:207
+

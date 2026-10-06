@@ -465,6 +465,6 @@ let () =
       (fun sizes ->
         ignore (run_design ~cfg:{ cfg with layout = Upe.Spec.layout_of_sizes sizes } ~trials:(int_of_string n)
                   ~clocks:(int_of_string c) ~seed0:100))
-      [ [| 1; 1; 1; 1 |]; [| 2; 2; 2; 2 |]; [| 2; 2; 4; 8 |] ];
+      [ [| 1; 1; 1; 1 |]; [| 2; 2; 2; 2 |]; [| 3; 3; 3; 3 |]; [| 2; 2; 4; 8 |] ];
     ignore (run_design ~cfg:{ cfg with prog_words = 256 } ~trials:(int_of_string n) ~clocks:(int_of_string c) ~seed0:200)
   | _ -> prerr_endline "usage: lockstep.exe run N CLOCKS [SEED] | controls N CLOCKS | layouts N CLOCKS | coverage SIZES N CLOCKS SEED NEVER_FILE [wide]; run N CLOCKS SEED wide and controls N CLOCKS wide: the wide generator (Gen)"

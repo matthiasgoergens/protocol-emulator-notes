@@ -28,6 +28,22 @@ default is the 2|2|4|8 above, so every result in this file is unchanged (rerun: 
 3|1|4|2: 0 mismatches in 2,517,892 clocks, and five planted bugs caught at every layout
 (`results/lockstep_layouts.txt`).
 
+**g and step chains as a parallel prefix (2026-10-06, for `../../chip-top`'s timing).** A PE's g
+with source 7 is the previous PE's g, and a following PE's step is the previous PE's step; the
+RTL built both as a ripple through every PE of the array, one multiplexer per PE, which made the
+chip's critical path grow with the PE count (`../../chip-top/results/critical-paths.txt`). The
+array now resolves both chains as a Kogge-Stone prefix over (passes on, own value) pairs:
+log2 n levels instead of n. The function is unchanged, so all results are byte-identical when
+rerun: lockstep, controls (`g_in_zero` is now planted in the prefix's input and still caught),
+cells, shared faults, the four layouts, and the latency lint.
+The ALU's `x + yn + c` is now one adder, with c entering as the carry into bit 1 of
+`{x, c} + {yn, c}`, instead of an adder followed by a 17-bit incrementer; same results, rerun
+byte-identical. That adder, the two signed comparisons (max, min) and the window's 8-bit
+difference are now parallel-prefix (Kogge-Stone) adders (`prefix_add`, `signed_ge`), so that they
+are log2 n levels deep after area-mode synthesis instead of a ripple; a SAT proof against
+Hardcaml's operators is `../../chip-top/formal/arith_equiv` (with a failing control), and the
+block's results rerun byte-identical.
+
 ## Files and commands
 
 | file | what it is |

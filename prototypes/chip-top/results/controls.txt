@@ -1,4 +1,4 @@
-commit 56a7c2d
+commit 38b91e9 with the edge sampler's held level, 2026-10-06T17:29:15+08:00
 pin_lane_swap        caught: seed 5000 clock  3560  (sequencer pins 0 and 1 swapped at the pad source select)
     first diff: pad 1: spec 0 rtl f
 quarter_swap         caught: seed 5011 clock  9508  (quarters 1 and 2 of a sequencer pin's nibble swapped)
@@ -33,8 +33,8 @@ bank_ungated         caught: seed 5003 clock  3739  (a STB writes the bank while
     first diff: seq acc0: spec f9 rtl 0
 hostout_no_latch     caught: seed 5019 clock  4171  (HOSTOUT pops on the data byte even when the tag byte said empty)
     first diff: hostout count: spec 1 rtl 0
-smp_pin_swap         caught: seed 5000 clock  5080  (sampler pins 0 and 1 swapped)
-    first diff: rbuf: spec 19 rtl 0
+smp_pin_swap         caught: seed 5000 clock  3514  (sampler pins 0 and 1 swapped)
+    first diff: sampler empty: spec 0 rtl 1
 uio_oe_swap          caught: seed 5000 clock  1466  (the output enables of uio 6 and 7 swapped)
     first diff: uio_oe: spec 40 rtl 80
 boot_pc_swap         caught: seed 5000 clock  1290  (boot pcs of threads 1 and 2 swapped)
@@ -53,4 +53,6 @@ status_not_cleared   caught: seed 5000 clock 10400  (writing STATUS does not cle
     first diff: rbuf: spec 2a rtl 2b
 hostin_overwrite     caught: seed 5000 clock  8029  (a push into a full HOSTIN FIFO is accepted)
     first diff: rbuf: spec 2b rtl 29
-27 of 27 planted integration bugs caught
+array_unreset        caught: seed 5008 clock 10492  (the PE array is not cleared by the reset)
+    first diff: pe0 S: spec 0 rtl 7974
+28 of 28 planted integration bugs caught

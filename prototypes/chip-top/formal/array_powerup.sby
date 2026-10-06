@@ -1,0 +1,25 @@
+# Power-up determinism of the PE array: formal/run_array_powerup.sh generates array.v (with the
+# clear the chip now drives from its reset) and array_noclear.v (the array before, the control:
+# must FAIL), 4 PEs (1|1|1|1), and the state width W.
+[tasks]
+clear prove
+noclear prove
+
+[options]
+prove: mode prove
+# no SMT solver in the image: no counterexample trace, the verdict only
+prove: aigsmt none
+
+[engines]
+prove: abc pdr
+
+[script]
+clear: read -formal -D W=__W__ array.v
+noclear: read -formal -D W=__W__ array_noclear.v
+read -formal -D W=__W__ array_powerup.sv
+prep -top array_powerup
+
+[files]
+array_powerup.sv
+clear: array.v
+noclear: array_noclear.v

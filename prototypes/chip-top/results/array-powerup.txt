@@ -1,0 +1,14 @@
+# formal/run_array_powerup.sh 1,1,1,1: 692 state bits per copy; commit 0d2d63c (with uncommitted changes); 2026-10-06T15:05:05+08:00
+== clear: DONE (PASS, rc=0)
+SBY  7:05:03 [array_powerup_clear] summary: engine_0 (abc pdr) returned PASS
+SBY  7:05:03 [array_powerup_clear] summary: engine_0 did not produce any traces
+== noclear: DONE (FAIL, rc=2)
+SBY  7:05:05 [array_powerup_noclear] summary: engine_0 (abc pdr) returned FAIL
+SBY  7:05:05 [array_powerup_noclear] summary: engine_0 did not produce any traces
+# formal/run_array_powerup.sh 2,2,2,2: 1088 state bits per copy; commit 0d2d63c (with uncommitted changes); 2026-10-06T15:00:58+08:00
+== clear: DONE (PASS, rc=0)
+SBY  7:00:55 [array_powerup_clear] summary: engine_0 (abc pdr) returned PASS
+SBY  7:00:55 [array_powerup_clear] summary: engine_0 did not produce any traces
+== noclear: DONE (FAIL, rc=2)
+SBY  7:00:58 [array_powerup_noclear] summary: engine_0 (abc pdr) returned FAIL
+SBY  7:00:58 [array_powerup_noclear] summary: engine_0 did not produce any traces

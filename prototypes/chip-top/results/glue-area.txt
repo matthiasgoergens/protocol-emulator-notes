@@ -1,0 +1,96 @@
+Area by RTL origin (synth/area_by_origin.py on the synthesis netlist of each run; flip-flops by the
+call site that built them, combinational cells shared equally among the flip-flops they feed).
+Typical-liberty areas, so the totals are a little above the synthesis report's.
+
+By block, 4 PEs, before (results/harden-pe4) and after the timing work (the 4-PE run of
+section 6's experiments, e4):
+-- /var/tmp/chip-top-harden/pe4-apart/runs/wokwi: 297666 um2 of standard cells (typical liberty areas), by origin
+    89620  glue (chip_rtl.ml)
+    82229  PE array (4 PEs)
+    43801  sequencer
+    26540  edge sampler, CRC, matcher
+    24537  sampler, streamer
+    20721  pin stage and NCO
+     4005  other
+-- /var/tmp/chip-timing/exp/e4-pe4-m3/runs/quick: 299446 um2 of standard cells (typical liberty areas), by origin
+    92644  glue (chip_rtl.ml)
+    82912  PE array (4 PEs)
+    44593  sequencer
+    24278  sampler, streamer
+    20861  pin stage and NCO
+    18751  edge sampler, CRC, matcher
+     7339  other
+
+The glue's largest items (chip_rtl.ml line numbers of commit 7a12915 and later): the register
+file (line 92-99, about 43,000 um2: 550 configuration bits, each a flip-flop with its enable
+multiplexer), the host FIFOs (fifo slots, about 17,000), the host link's read multiplexer into
+rbuf (about 9,000). Each is fixed by the host-visible register map and FIFO depths of
+chip_spec.ml; none was reduced here. What the placed area lost is the hold buffers:
+3,206 of 16.3 um2 each (52,350 um2) at 4 PEs before, 656 (10,710 um2) after (results/holds.txt).
+
+Full table, 4 PEs before:
+# /var/tmp/chip-top-harden/pe4-apart/runs/wokwi: 297666 um2 of standard cells (typical liberty areas), by origin
+    total    flops    logic  origin
+    44539    26944    17595  src/chip_rtl.ml:92
+    19300     3527    15773  upe/upe_rtl.ml:111
+    17798     6271    11528  seqv2/sequencer2.ml:83
+    17004    10582     6422  src/chip_rtl.ml:74
+    15716    10386     5330  upe/upe_rtl.ml:96
+    14767     2939    11828  upe/upe_rtl.ml:280
+    12892     1568    11324  seqv2/sequencer2.ml:81
+     9443      196     9248  upe/upe_rtl.ml:239
+     8937      441     8496  src/chip_rtl.ml:144
+     7157     3429     3728  eth10/matcher_en.ml:24
+     7015     3723     3292  src/chip_rtl.ml:217
+     6546     3919     2627  psample/sampler.ml:36
+     6488     3919     2569  pstream/streamer.ml:15
+     5700     1568     4132  eth10/crc_unit.ml:76
+     5167     2743     2424  seqv2/sequencer2.ml:84
+     4985     1029     3956  eth10/edge_sampler.ml:134
+     3674       98     3576  upe/upe_rtl.ml:283
+     3548     1568     1980  mphase/nco.ml:22
+     3536      147     3390  eth10/edge_sampler.ml:146
+     3449      490     2960  mphase/stage.ml:54
+     3287     1568     1719  upe/upe_rtl.ml:220
+     3249       98     3151  upe/upe_rtl.ml:113
+     3149      686     2463  mphase/stage.ml:49
+     2910     1274     1636  psample/sampler.ml:15
+     2822     1764     1058  seqv2/sequencer2.ml:85
+     2809     1225     1585  src/chip_rtl.ml:143
+     2795        0     2795  output port
+     2765     1813      952  eth10/matcher_en.ml:16
+     2486     1568      919  upe/upe_rtl.ml:216
+     2450     1568      883  upe/upe_rtl.ml:219
+     2449     1568      881  upe/upe_rtl.ml:217
+     2418     1568      850  upe/upe_rtl.ml:224
+     2359      539     1820  mphase/stage.ml:37
+     2177     1568      610  mphase/stage.ml:67
+     2108      735     1374  pstream/streamer.ml:35
+     2108     1323      785  upe/upe_rtl.ml:228
+     2047      637     1410  mphase/stage.ml:38
+     2032     1568      464  mphase/stage.ml:66
+     2010     1225      785  src/chip_rtl.ml:145
+     1960     1470      490  mphase/stage.ml:63
+     1720      784      936  seqv2/sequencer2.ml:277
+     1703     1078      625  src/chip_rtl.ml:88
+     1629      833      796  pstream/streamer.ml:18
+     1628      784      844  psample/sampler.ml:43
+     1466      392     1074  seqv2/sequencer2.ml:88
+     1248      637      611  src/chip_rtl.ml:70
+     1235      784      451  eth10/matcher_en.ml:21
+     1223      784      439  src/chip_rtl.ml:255
+     1162      735      427  eth10/matcher_en.ml:22
+     1109      392      717  src/chip_rtl.ml:416
+     1012      539      473  seqv2/sequencer2.ml:89
+      934      392      542  psample/sampler.ml:41
+      924      588      336  seqv2/sequencer2.ml:91
+      882      196      686  upe/upe_rtl.ml:226
+      858       98      760  src/chip_rtl.ml:310
+      673      343      330  pstream/streamer.ml:9
+      663      294      369  src/tt_top.ml:50
+      612      392      220  src/chip_rtl.ml:372
+      588      147      441  psample/sampler.ml:32
+      553      343      210  src/chip_rtl.ml:97
+      547      245      302  src/list0.ml:66
+      521      196      325  pstream/streamer.ml:47
+      512      196      316  pstream/streamer.ml:46

@@ -8,8 +8,8 @@
     376  sram512   This layer can't abut or partially overlap between subcells
     288  sram1024  This layer can't abut or partially overlap between subcells
     229  sram512   N-Diffusion spacing to N-well in SRAM < 54 (NW.d exception)
-     77  sram1024  N-diffusion overlap of contact in SRAM < 4 (Cnt.c SRAM exception)
-     40  sram512   N-diffusion overlap of contact in SRAM < 4 (Cnt.c SRAM exception)
+     79  sram1024  N-diffusion overlap of contact in SRAM < 4 (Cnt.c SRAM exception)
+     42  sram512   N-diffusion overlap of contact in SRAM < 4 (Cnt.c SRAM exception)
      27  sram1024  N-diffusion overlap of N-diffusion contact < 14 (Cnt.c)
      21  sram512   N-diffusion overlap of N-diffusion contact < 14 (Cnt.c)
-total 141979 {'sram1024': 84055, 'sram512': 57924}
+total 141983 {'sram1024': 84057, 'sram512': 57926}

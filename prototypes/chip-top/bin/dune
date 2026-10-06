@@ -13,7 +13,32 @@
  (modules emit)
  (libraries hardcaml chip upe))
 
+(executable
+ (name origins)
+ (modules origins)
+ (libraries hardcaml chip upe sexplib0))
+
+(executable
+ (name rtlpaths)
+ (modules rtlpaths)
+ (libraries hardcaml chip upe sexplib0))
+
+(executable
+ (name emit_array)
+ (modules emit_array)
+ (libraries hardcaml upe))
+
 (executables
  (names gate_lockstep edge_phase)
  (modules twoedge gate_lockstep edge_phase)
  (libraries hardcaml chip upe mphase roundtrip unix))
+
+(executable
+ (name edge_step)
+ (modules edge_step)
+ (libraries hardcaml eth10))
+
+(executable
+ (name arith_equiv)
+ (modules arith_equiv)
+ (libraries hardcaml upe))

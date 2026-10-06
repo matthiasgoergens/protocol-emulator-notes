@@ -88,7 +88,38 @@ type pe_out = {
   tap : t;
 }
 
-let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
+(* [g_resolved] and [step_resolved], when given, are this PE's g and step as the array resolves
+   them (see [resolve_chain] below); the PE then exports its own contribution to each chain
+   ([g_link], [step_link]) instead of reading [g_in] and [lstep_in]. Without them the PE computes
+   both from [g_in] and [lstep_in] itself, as a single PE does. *)
+type link = { pass : t; local : t }
+
+(* a + b + cin as a parallel-prefix (Kogge-Stone) adder: carries in log2 (n + 1) levels instead of
+   a ripple through n bits, so that the PE's add and compare are not the length of its operands
+   in series. Returns the n-bit sum. Synthesis keeps the structure: area-mode mapping does not
+   turn it back into a ripple. *)
+let prefix_add a b cin =
+  let n = width a in
+  let g = Array.init n (fun i -> bit a i &: bit b i) and p = Array.init n (fun i -> bit a i ^: bit b i) in
+  (* element 0 is the carry-in, element i + 1 is bit i: (generate, propagate) *)
+  let cur = Array.init (n + 1) (fun i -> if i = 0 then (cin, gnd) else (g.(i - 1), p.(i - 1))) in
+  let d = ref 1 in
+  while !d <= n do
+    let prev = Array.copy cur in
+    for i = !d to n do
+      let gh, ph = prev.(i) and gl, pl = prev.(i - !d) in
+      cur.(i) <- (gh |: (ph &: gl), ph &: pl)
+    done;
+    d := 2 * !d
+  done;
+  concat_lsb (List.init n (fun i -> p.(i) ^: fst cur.(i)))
+
+(* signed a >= b, from the sign of the exact difference in n + 1 bits *)
+let signed_ge a b =
+  let n = width a in
+  ~:(msb (prefix_add (sresize a (n + 1)) (~:(sresize b (n + 1))) vdd))
+
+let pe ?(pe_index = 0) ?(cut = 8) ?g_resolved ?step_resolved spec (i : pe_in) =
   (* configuration chain: b.(0) takes the input byte *)
   let b = Array.make 8 (zero 8) in
   let prev = ref i.cfg_in in
@@ -112,7 +143,7 @@ let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
   let lane_in = mux2 lane_bc i.bcast i.alane in
   let s15 = msb s in
   (* window: A.hi - K.hi in 8 bits, then the bitmap read MSB first *)
-  let d = select i.a 15 8 -: select k 15 8 in
+  let d = prefix_add (select i.a 15 8) (~:(select k 15 8)) vdd in
   let in_win = if is "window_17" then d <=:. 16 else select d 7 4 ==:. 0 in
   let bitmap = if is "window_bit_order" then s else reverse s in
   let window = in_win &: mux (select d 3 0) (bits_lsb bitmap) in
@@ -122,7 +153,9 @@ let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
   let result = wire 16 in
   let f_src = if is "g_from_F_inverted" then ~:f else f in
   let g_in = if is "g_in_zero" && pe_index = cut then gnd else i.g_in in
-  let g = mux gsel [ vdd; bit_a; lane_in; s15_x; crc_fb; f_src; window; g_in ] in
+  (* g source 7 passes the previous PE's g on: the chain's link is (pass, local) *)
+  let g_link = { pass = gsel ==:. 7; local = mux gsel [ vdd; bit_a; lane_in; s15_x; crc_fb; f_src; window; gnd ] } in
+  let g = match g_resolved with Some g -> g | None -> mux2 g_link.pass g_in g_link.local in
   let sin = mux sinsel [ g; lane_in; (if is "sin_s15_uses_own" then s15 else i.s15_in); lsb i.a ] in
   let shl = concat_msb [ select s 14 0; sin ] in
   let shr = if is "shr_sin_bit14" then concat_msb [ gnd; sin; select s 14 1 ] else concat_msb [ sin; select s 15 1 ] in
@@ -136,15 +169,17 @@ let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
   let n = (ymod ==:. 3) |: ((ymod ==:. 2) &: (if is "gneg_always" then vdd else g)) in
   let yn = yv ^: repeat n 16 in
   let c = mux2 (if is "cin_ignored" then gnd else cin_lane) lane_in (if is "neg_no_plus1" then gnd else n) in
-  let sum = uresize x 17 +: uresize yn 17 +: uresize c 17 in
+  (* x + yn + c as one adder: c enters as the carry into bit 1 of {x, c} + {yn, c}, instead of a
+     second, 17-bit incrementer after the first adder *)
+  let sum = prefix_add (uresize x 17) (uresize yn 17) c in
   let wsum = select sum 15 0 in
   let cout = if is "carry_bit15" then bit sum 15 else msb sum in
   let ovf = (msb x ==: msb yn) &: (msb wsum ^: msb x) in
   let ovf = if is "sat_as_wrap" then ovf &: ~:cin_lane else ovf in
   let smax = of_int ~width:16 (if is "sat_off_by_one" then 0x7ffe else 0x7fff) in
   let sat = mux2 ovf (mux2 (msb x) (of_int ~width:16 0x8000) smax) wsum in
-  let x_ge = if is "max_unsigned" then x >=: yn else x >=+ yn in
-  let x_le = x <=+ yn in
+  let x_ge = if is "max_unsigned" then x >=: yn else signed_ge x yn in
+  let x_le = signed_ge yn x in
   let x_le = if is "min_is_max" then x_ge else x_le in
   let mx = mux2 x_ge x yn and mx_l = if is "max_loser_x" then x else mux2 x_ge yn x in
   let mn = mux2 x_le x yn and mn_l = mux2 x_le yn x in
@@ -155,7 +190,9 @@ let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
   let loser = if is "pwb_loser_is_winner" then result else loser in
   let zero_ = (if is "zero_on_x" then x else result) ==:. 0 in
   let step_self = mux2 (if is "stream_ignored" then gnd else stream) i.av vdd in
-  let step = i.run &: mux2 (if is "follow_ignored" then gnd else follow) i.lstep_in step_self in
+  let follows = if is "follow_ignored" then gnd else follow in
+  let step_link = { pass = i.run &: follows; local = i.run &: step_self } in
+  let step = match step_resolved with Some s -> s | None -> mux2 step_link.pass i.lstep_in step_link.local in
   let cond_w = if is "swb_cond_inverted" then ~:g else g in
   let s_next = mux swb [ s; result; x; mux2 cond_w result s ] in
   let merge = mux2 g (concat_msb [ select i.a 15 8; (if is "merge_colour_hi" then select k 15 8 else select k 7 0) ]) i.a in
@@ -173,7 +210,7 @@ let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
   f <== reg spec ~enable:step f_next;
   l <== reg spec ~enable:step l_next;
   let tap = if is "tap_always_s" then s else mux2 tap_p p s in
-  { s; p; pv; f; l; g; step; cfg; cfg_out = b.(7); init_out = select s 15 8; tap }
+  ({ s; p; pv; f; l; g; step; cfg; cfg_out = b.(7); init_out = select s 15 8; tap }, g_link, step_link)
 
 (* The single PE as a circuit, for synthesis against the area probe. *)
 let pe_circuit () =
@@ -185,7 +222,7 @@ let pe_circuit () =
       s15_in = inp "s15_in" 1; cb_in = inp "cb_in" 1; g_in = inp "g_in" 1; lstep_in = inp "lstep_in" 1;
       init_wr = inp "init_wr" 1; init_in = inp "init_in" 8; cfg_wr = inp "cfg_wr" 1; cfg_in = inp "cfg_in" 8 }
   in
-  let o = pe spec i in
+  let o, _, _ = pe spec i in
   Circuit.create_exn ~name:"upe_v1"
     [ output "p" o.p; output "pv" o.pv; output "l" o.l; output "g" o.g; output "step" o.step;
       output "s15" (msb o.s); output "cfg_out" o.cfg_out; output "init_out" o.init_out;
@@ -201,13 +238,35 @@ type array_in = {
   fixed_d : t array; fixed_v : t array;
 }
 
+(* A chain in which element i is [local i] unless it passes element i - 1's value on
+   ([pass i]), and element -1 is 0, resolved as a parallel prefix (Kogge-Stone): log2 n levels of
+   2:1 multiplexers instead of n in a row. Combining an earlier span a with a later span b gives
+   (pass a && pass b, if pass b then local a else local b). *)
+let resolve_chain (links : link array) =
+  let n = Array.length links in
+  let cur = Array.mapi (fun i l -> if i = 0 then { pass = gnd; local = mux2 l.pass gnd l.local } else l) links in
+  let d = ref 1 in
+  while !d < n do
+    let prev = Array.copy cur in
+    for i = !d to n - 1 do
+      let a = prev.(i - !d) and b = prev.(i) in
+      cur.(i) <- { pass = a.pass &: b.pass; local = mux2 b.pass a.local b.local }
+    done;
+    d := 2 * !d
+  done;
+  Array.map (fun l -> l.local) cur
+
 type seg_regs = { flo : t; fhi : t; fv : t; fv0 : t; ctrl : t; rep : t; cnt : t; fw : t; word : t }
 type array_out = { tap_d : t array; tap_v : t array; tap_f : t array; pes : pe_out array; segs : seg_regs array }
 
-let array_create ?(layout = Spec.default_layout) ~clock (inp : array_in) =
+(* [clear], when given, is a synchronous clear of every register of the array (the PEs' state and
+   configuration chains, the feed and control registers) to 0, the model's initial state. The
+   block's own tests run without it; ../../chip-top clears the array with the chip's reset, so
+   that nothing observable depends on the flip-flops' power-up values. *)
+let array_create ?(layout = Spec.default_layout) ?clear ~clock (inp : array_in) =
   let open Spec in
   let n_pe = layout.n and seg_start = layout.start and seg_end = layout.end_ and seg_of = seg_in layout in
-  let spec = Reg_spec.create ~clock () in
+  let spec = Reg_spec.create ~clock ?clear () in
   let { mbx_wr; mbx_seg; mbx_sel; mbx_byte; acfg_wr = cfg_wr; acfg_seg = cfg_seg; acfg_byte = cfg_byte;
         ainit_wr = init_wr; ainit_seg = init_seg; ainit_byte = init_byte; fixed_d; fixed_v } = inp in
   let segregs =
@@ -240,6 +299,8 @@ let array_create ?(layout = Spec.default_layout) ~clock (inp : array_in) =
       cfg = wire 64; cfg_out = wire 8; init_out = wire 8; tap = wire 16 }
   in
   let w = Array.init n_pe (fun _ -> wires ()) in
+  let g_res = Array.init n_pe (fun _ -> wire 1) and step_res = Array.init n_pe (fun _ -> wire 1) in
+  let g_links = Array.make n_pe { pass = gnd; local = gnd } and step_links = Array.make n_pe { pass = gnd; local = gnd } in
   for i = 0 to n_pe - 1 do
     let sg = seg_of i in
     let first = i = seg_start.(sg) in
@@ -276,8 +337,8 @@ let array_create ?(layout = Spec.default_layout) ~clock (inp : array_in) =
       else alane
     in
     let bseg = if is "lane_bc_wrong_seg" && sg = 3 then 2 else sg in
-    let o =
-      pe ~pe_index:i ~cut:seg_start.(3) spec
+    let o, g_link, step_link =
+      pe ~pe_index:i ~cut:seg_start.(3) ~g_resolved:g_res.(i) ~step_resolved:step_res.(i) spec
         { run = bit c 4; a; av; alane; bcast = bc.(bseg);
           s15_in = (if i > 0 then msb w.(i - 1).s else gnd);
           cb_in = (if i < n_pe - 1 then msb w.(i + 1).s else gnd);
@@ -291,8 +352,14 @@ let array_create ?(layout = Spec.default_layout) ~clock (inp : array_in) =
     let (t : pe_out) = w.(i) in
     t.s <== o.s; t.p <== o.p; t.pv <== o.pv; t.f <== o.f; t.l <== o.l; t.g <== o.g;
     t.step <== o.step; t.cfg <== o.cfg; t.cfg_out <== o.cfg_out; t.init_out <== o.init_out;
-    t.tap <== o.tap
+    t.tap <== o.tap;
+    g_links.(i) <- g_link; step_links.(i) <- step_link
   done;
+  (* g and step: PE i's value is its own [local] unless it [pass]es the previous PE's on; PE 0's
+     previous is 0. The planted bug cuts g's chain at segment 3. *)
+  let g_links = Array.mapi (fun i l -> if is "g_in_zero" && i = seg_start.(3) && i > 0 then { pass = gnd; local = mux2 l.pass gnd l.local } else l) g_links in
+  Array.iteri (fun i v -> g_res.(i) <== v) (resolve_chain g_links);
+  Array.iteri (fun i v -> step_res.(i) <== v) (resolve_chain step_links);
   { tap_d = Array.map (fun e -> w.(e).tap) seg_end; tap_v = Array.map (fun e -> w.(e).pv) seg_end;
     tap_f = Array.map (fun e -> w.(e).f) seg_end; pes = w; segs = segregs }
 

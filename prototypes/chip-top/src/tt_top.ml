@@ -43,7 +43,7 @@ let fold_half n = concat_lsb [ bit n 0; bit n 0; bit n 2; bit n 2 ]
    the stage clocked edge by edge. *)
 let reset_sync ~clk ~rst_n =
   let sync = Reg_spec.create ~clock:clk () in
-  reg sync (reg sync (~:rst_n))
+  reg sync (reg sync (~:rst_n) -- "reset_meta") -- "reset_sync"
 
 let core_side ?(cfg = Chip_spec.default_config) ~memories ~clk ~reset ~smp () =
   let mems = match memories with `Behavioural -> Chip_rtl.behavioural | `Macros -> { Chip_rtl.prog_mem = macro_mem; bank_mem = macro_mem } in

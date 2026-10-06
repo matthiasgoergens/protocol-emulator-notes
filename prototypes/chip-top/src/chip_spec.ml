@@ -64,7 +64,7 @@ type t = {
   send_hi : bool array;                      (* per port: the next SEND byte is the high byte *)
   hold_st : int array;                       (* per port: 0 empty, 1 low byte next, 2 high byte next *)
   hold_w : int array;
-  pe : UM.t;
+  mutable pe : UM.t;
   mutable str : SM.t;
   mutable smp : PM.t;
   mutable es : ES.st;
@@ -312,10 +312,9 @@ let step t ~smp ~reset =
   let out = outputs t in
   let taps = taps t in
   if reset then begin
-    (* the array has no reset: it runs on with idle inputs; segment 0's fixed port still shows the
-       edge sampler's output register during this clock *)
-    UM.cycle t.pe
-      { US.idle with fixed_d = [| es_level t; 0; 0; 0 |]; fixed_v = [| t.es_out.valid; false; false; false |] };
+    (* the reset clears the array too: every PE's state and configuration, the feed and control
+       registers, as at power-up *)
+    t.pe <- UM.create ~layout:t.cfg.layout ();
     reset_all t ~smp;
     out
   end
