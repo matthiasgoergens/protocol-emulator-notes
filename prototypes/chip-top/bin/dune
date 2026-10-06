@@ -22,3 +22,8 @@
  (name rtlpaths)
  (modules rtlpaths)
  (libraries hardcaml chip upe sexplib0))
+
+(executable
+ (name emit_array)
+ (modules emit_array)
+ (libraries hardcaml upe))

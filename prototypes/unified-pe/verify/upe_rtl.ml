@@ -232,10 +232,14 @@ let resolve_chain (links : link array) =
 type seg_regs = { flo : t; fhi : t; fv : t; fv0 : t; ctrl : t; rep : t; cnt : t; fw : t; word : t }
 type array_out = { tap_d : t array; tap_v : t array; tap_f : t array; pes : pe_out array; segs : seg_regs array }
 
-let array_create ?(layout = Spec.default_layout) ~clock (inp : array_in) =
+(* [clear], when given, is a synchronous clear of every register of the array (the PEs' state and
+   configuration chains, the feed and control registers) to 0, the model's initial state. The
+   block's own tests run without it; ../../chip-top clears the array with the chip's reset, so
+   that nothing observable depends on the flip-flops' power-up values. *)
+let array_create ?(layout = Spec.default_layout) ?clear ~clock (inp : array_in) =
   let open Spec in
   let n_pe = layout.n and seg_start = layout.start and seg_end = layout.end_ and seg_of = seg_in layout in
-  let spec = Reg_spec.create ~clock () in
+  let spec = Reg_spec.create ~clock ?clear () in
   let { mbx_wr; mbx_seg; mbx_sel; mbx_byte; acfg_wr = cfg_wr; acfg_seg = cfg_seg; acfg_byte = cfg_byte;
         ainit_wr = init_wr; ainit_seg = init_seg; ainit_byte = init_byte; fixed_d; fixed_v } = inp in
   let segregs =

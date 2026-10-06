@@ -205,7 +205,7 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   let cfg_seg = if is "pecfg_seg" then select act_addr 10 9 else select act_addr 9 8 in
   let fixed_seg = if is "fixed_port_seg1" then 1 else 0 in
   let arr =
-    Upe.Upe_rtl.array_create ~layout:cfg.layout ~clock
+    Upe.Upe_rtl.array_create ~layout:cfg.layout ~clear:reset ~clock
       { mbx_wr; mbx_seg; mbx_sel; mbx_byte;
         acfg_wr = act_is t_pecfg; acfg_seg = cfg_seg; acfg_byte = act_byte;
         ainit_wr = act_is t_peinit; ainit_seg = select act_addr 9 8; ainit_byte = act_byte;
