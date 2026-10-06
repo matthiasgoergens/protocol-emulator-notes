@@ -133,9 +133,17 @@ let a_protocols ?(cut = false) ?(watch = [ 0; 1; 2 ]) ?i2c_limit ?(waitp = false
    from an arbitrary state in which the thread is about to execute its anchor: every register of
    every thread, the pins, the latch and the bank are free variables, every input is free, the
    other threads execute unconstrained words (Havoc), and the run lasts the window plus two
-   slots. With [entered_only_at_anchor] (no path reaches the wait without passing the anchor in
-   the window's straight line), this covers every execution of the wait, at every depth: it
-   implies a-protocols' bounded result for this thread, for any number of clocks. One
+   slots. Why that covers every execution of the wait, at every depth, though each run is
+   bounded: (1) by [entered_only_at_anchor], every slot in which the wait executes follows an
+   execution of its anchor through the window's straight line, so it lies in the window of the
+   anchor's most recent execution; (2) the monitor's verdict on a slot depends only on the slots
+   since that anchor (since is reset there), and a wait still executing at slot [slots] of the
+   window must leave then, or the monitor fires, so no execution of the wait lies past slot
+   [slots] + 1 of its window; (3) the run starts from every state the anchor can execute in (all
+   registers, pins, latch, bank, other threads free), and lasts [slots] + 2 slots. So a
+   violation at any depth from reset is a violation inside some window, which some run of this
+   check reproduces from the state at that window's anchor. This implies a-protocols' bounded
+   result for this thread, for any number of clocks. One
    constraint on the free state: the thread's cfg is 0 (bit 7, the round latch, would make the
    wait read the latch where the monitor reads the pin; cfg is 0 at reset and the programme has
    no CFG instruction, which [entered_only_at_anchor]'s caller checks). *)
