@@ -2,7 +2,7 @@
 # The kernel's abstract step against Isa2's interpreter, by z3 (README.md section 4,
 # kernel_proof.ml): every instruction word, every shape of key, in one process per opcode (one
 # z3 each), at most JOBS (default 2) at once, niced, each started only while the 1-minute load
-# is below MAXLOAD (18). Then the planted kernel bugs of the step (Kernel.planted_bug 1 to 7),
+# is below MAXLOAD (18). Then the planted kernel bugs of the step (Kernel.planted_bug 1 to 7 and 12),
 # each on the opcode it touches: each must give a counterexample.
 #   ./kernel_z3.sh            all of it
 #   ./kernel_z3.sh proof      the proof only
@@ -56,6 +56,7 @@ bugs() {
   echo "bug5 --bug 5 kernel-z3 f000 f1ff"     # SKNE/SKEQ decided the wrong way
   echo "bug6 --bug 6 kernel-z3 7000 70ff"     # a push-pull SHO assumed driven whatever its enable
   echo "bug7 --bug 7 kernel-z3 6000 6000"     # WAITD takes one slot less
+  echo "bug12 --bug 12 kernel-z3 1000 10ff"   # SETP's quarter-clock sub-slot taken as 0
 }
 
 if [ "$what" = all ] || [ "$what" = proof ]; then ranges | run_jobs; fi

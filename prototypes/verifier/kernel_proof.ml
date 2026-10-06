@@ -27,12 +27,14 @@
    An outcome r covers a slot that leaves when its guard holds and:
    - the next pc is r's; cnt and acc are r's where r knows them; dl is in r's interval; the
      enables r knows are those of the pins;
-   - j + 1 is in r's elapsed and j in r's event slot;
+   - j + 1 is in r's elapsed, and j in r's event slot when r has an event;
    - its timing holds as [Kernel.step] uses it: Plain, By_due, Unbounded: dl afterwards is
      max(d - (j + 1), 0) (and By_due ends by d + 1); Load n: dl is n; Until_due: j + 1 = d + 1
      and dl is 0;
    - its events are the interpreter's: the pins written are exactly r's writes, each left at a
-     level its Spec.level allows; an observation's pin read its value, a timeout's did not. *)
+     level its Spec.level allows; an observation's pin read its value, a timeout's did not;
+   - the quarter-clock levels (pin_sub) move from the old pins to the new at r's sub-slot q
+     (added after the codex review: without it a wrong q in a certificate would go unseen). *)
 
 module Sym = Isa2.Make (Smt.Value)
 
@@ -149,9 +151,15 @@ let query w shape =
       | By_due -> and_ (eq dl' (sat_minus d16 j1)) (ule j1 (add ~w:16 d16 (c 16 1)))
       | Load n -> eq dl' (c 16 n)
       | Until_due -> and_ (eq j1 (add ~w:16 d16 (c 16 1))) (eq dl' (c 16 0)) in
-    conj [ r.guard; eq pc' r.gnext_pc; known cnt' r.gcnt'; known acc' r.gacc'; in_interval dl' r.gdl';
+    (* the quarter-clock view: the pins move at sub-slot r.gq (A4: FINE is not bounded) *)
+    let subslot = eq st.pin_sub (Sym.sub_of ~old_:pre_out ~new_:st.pin_out ~q:(c 2 r.gq)) in
+    conj [ r.guard; eq pc' r.gnext_pc; known cnt' r.gcnt'; known acc' r.gacc'; in_interval dl' r.gdl'; subslot;
            eq (logand st.pin_oe r.goe_known') (logand r.goe' r.goe_known');
-           in_interval j1 r.gelapsed; in_interval j r.gat; events; timing ] in
+           in_interval j1 r.gelapsed;
+           (* the event slot means something only with an event: Kernel.step uses [at] for the
+              time and gap of events alone, and WAITD's outcome says at = 0 while it leaves at
+              slot d (the first run of this proof found that, 2026-10-06) *)
+           (if r.gev = [] then tt else in_interval j r.gat); events; timing ] in
   and_ pre (not_ (or_ stay (disj (List.map covers outcomes)))), pre, List.length outcomes
 
 let op_name w =

@@ -188,7 +188,8 @@ module Step (D : DOM) = struct
           [ 0; 1; 2; 3; 4; 5; 6; 7 ] in
       let kmask = D.k ~w:8 mask in
       let oe' = logor (logand k.goe (lognot ~w:8 kmask)) (if bit_w 2 then kmask else D.k ~w:8 0) in
-      [ one ~ev ~q:(w land 3) ~oe:(logor k.goe_known kmask, oe') pc1 ]
+      (* bug 12 (for kernel_z3.sh only; nothing else reads q): SETP's sub-slot taken as 0 *)
+      [ one ~ev ~q:(if bug 12 then 0 else w land 3) ~oe:(logor k.goe_known kmask, oe') pc1 ]
     | 2 -> [ one ~cnt:(GKnown (D.k ~w:12 imm12)) pc1 ]           (* LDC *)
     | 3 ->                                                       (* LDD: no decrement this slot *)
       let n = if bug 3 then max 0 (imm12 - 1) else imm12 in
