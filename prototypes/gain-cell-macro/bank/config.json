@@ -1,0 +1,29 @@
+{
+  "DESIGN_NAME": "gc_bank_32x32",
+  "VERILOG_FILES": ["dir::gc_bank.v"],
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 16.667,
+  "FP_SIZING": "absolute",
+  "DIE_AREA": [0, 0, 120, 160],
+  "PL_TARGET_DENSITY_PCT": 55,
+  "MACROS": {
+    "GC_ARRAY_32x38": {
+      "gds": ["dir::macro/GC_ARRAY_32x38.gds"],
+      "lef": ["dir::macro/GC_ARRAY_32x38.lef"],
+      "vh": ["dir::macro/GC_ARRAY_32x38.bb.v"],
+      "lib": {"*": ["dir::macro/GC_ARRAY_32x38.lib"]},
+      "instances": {"array_i": {"location": [38.0, 35.0], "orientation": "N"}}
+    }
+  },
+  "FP_MACRO_HORIZONTAL_HALO": 2,
+  "FP_MACRO_VERTICAL_HALO": 2,
+  "PDN_MACRO_CONNECTIONS": ["array_i VPWR VGND NOVDD GND"],
+  "PDN_HORIZONTAL_HALO": 2,
+  "PDN_VERTICAL_HALO": 2,
+  "RSZ_DONT_TOUCH_RX": "rbl",
+  "RUN_KLAYOUT_XOR": true,
+  "RUN_MAGIC_DRC": true,
+  "RUN_KLAYOUT_DRC": true,
+  "RUN_LVS": true,
+  "RUN_IRDROP_REPORT": false
+}

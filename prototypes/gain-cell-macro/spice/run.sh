@@ -32,7 +32,7 @@ for e in $ENVS; do envargs="$envargs --env $e"; done
 {
   echo "# $script $* ENVS=$ENVS GMIN=${GMIN:-default} SED=${SED:-none} PDK=$pdk ($(cat "$root/$sub/SOURCES" 2>/dev/null || echo "$root")) commit $(git -C "$here" rev-parse --short HEAD) $(date --iso-8601=seconds)"
   # shellcheck disable=SC2086
-  nice ionice --class 3 podman run --rm $envargs \
+  nice ionice --class 3 podman run --rm --env OMP_NUM_THREADS=1 $envargs \
     --volume "$root:/pdkroot:ro" --volume "$work:/work" --workdir /work \
     spice-retention:latest sh -c "ln -s /pdkroot/$sub /pdk && python3 $script $*"
 } > "$here/results/$name.txt" 2>&1

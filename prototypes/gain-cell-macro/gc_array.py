@@ -256,6 +256,60 @@ def write_cir(info, path):
     open(path, "w").write("\n".join(out))
 
 
+# Pin capacitances for the Liberty view, in pF. Estimates, not extraction: per word line, COLS
+# gates (thick oxide W 0.15 x L 0.45 at about 5 fF/um2; thin W 0.30 x L 0.13 at about
+# 9 fF/um2) plus the poly line; per bit line, ROWS / 2 shared contacts' junctions plus the
+# Metal2 track at about 0.12 fF/um. Section 2 of README.md replaces the bit-line figure with
+# the extracted one where it matters (RBL).
+def pin_caps(info):
+    cols, rows = info["cols"], info["rows"]
+    wwl = cols * 0.15 * 0.45 * 5.0 + info["width"] * 0.10
+    rwl = cols * 0.30 * 0.13 * 9.0 + info["width"] * 0.10
+    bl = rows / 2 * 0.2 + info["H"] * 0.12
+    return {k: round(v / 1000, 4) for k, v in dict(WWL=wwl, RWL=rwl, WBL=bl, RBL=bl).items()}
+
+
+def write_lib(info, path):
+    """A Liberty view with no timing arcs: the array has no clock and no internal timing that a
+    static timing tool could use. The bank's controller guarantees the analogue timing (word
+    line and evaluation pulses of whole clock cycles); this view gives the tools the pin loads."""
+    c = pin_caps(info)
+    rows, cols = info["rows"], info["cols"]
+    out = [f"library ({info['name']}) {{", '  delay_model : table_lookup ;', '  time_unit : "1ns" ;',
+           '  voltage_unit : "1V" ;', '  current_unit : "1mA" ;', '  capacitive_load_unit (1, pf) ;',
+           '  pulling_resistance_unit : "1kohm" ;', '  leakage_power_unit : "1nW" ;',
+           '  nom_process : 1 ; nom_voltage : 1.2 ; nom_temperature : 25 ;',
+           '  voltage_map (GND, 0.0) ;']
+    for nm, n in (("WWL", rows), ("RWL", rows), ("WBL", cols), ("RBL", cols)):
+        out += [f"  type (bus_{nm}) {{ base_type : array ; data_type : bit ; bit_width : {n} ; "
+                f"bit_from : {n - 1} ; bit_to : 0 ; downto : true ; }}"]
+    out += [f"  cell ({info['name']}) {{", f"    area : {info['W'] * info['H']:.3f} ;",
+            "    dont_use : true ; dont_touch : true ; is_macro_cell : true ;",
+            "    pg_pin (GND) { voltage_name : GND ; pg_type : primary_ground ; }"]
+    for nm, d in (("WWL", "input"), ("RWL", "input"), ("WBL", "input"), ("RBL", "inout")):
+        out += [f"    bus ({nm}) {{", f"      bus_type : bus_{nm} ;", f"      direction : {d} ;",
+                f"      capacitance : {c[nm]} ;", "      related_ground_pin : GND ;", "    }"]
+    out += ["  }", "}", ""]
+    open(path, "w").write("\n".join(out))
+
+
+def write_bb(info, path):
+    rows, cols = info["rows"], info["cols"]
+    open(path, "w").write(f"""// blackbox of the hard macro {info['name']} (see gc_array.py)
+(* blackbox *)
+module {info['name']} (
+`ifdef USE_POWER_PINS
+    inout  wire GND,
+`endif
+    input  wire [{rows - 1}:0] WWL,
+    input  wire [{rows - 1}:0] RWL,
+    input  wire [{cols - 1}:0] WBL,
+    inout  wire [{cols - 1}:0] RBL
+);
+endmodule
+""")
+
+
 if __name__ == "__main__":
     rows = int(sys.argv[1]) if len(sys.argv) > 1 else 32
     cols = int(sys.argv[2]) if len(sys.argv) > 2 else 38
@@ -265,6 +319,8 @@ if __name__ == "__main__":
     lib.write_gds(prefix + ".gds")
     write_lef(info, prefix + ".lef")
     write_cir(info, prefix + ".cir")
+    write_lib(info, prefix + ".lib")
+    write_bb(info, prefix + ".bb.v")
     bits = rows * cols
     print(f"{info['name']}: {info['W']:.3f} x {info['H']:.3f} um = {info['W'] * info['H']:.1f} um2, "
           f"{bits} bits, {info['W'] * info['H'] / bits:.3f} um2 per bit (core {info['width']:.3f} x "
