@@ -40,7 +40,9 @@
      edge_phase.exe replay SIZES STIM TRACE   the outputs of an iverilog run of STIM (TRACE), with
                                               the reference compared
      edge_phase.exe gates GDS MODELS SIZES [fall2rise:K ...|all]
-                                              the extracted gates, the reference compared; "all"
+                                              the extracted gates, the reference compared (with
+                                              EDGE_PHASE_FFS=FILE, every flip-flop's number of
+                                              output changes for sim/gate_cov.py); "all"
                                               plants every falling-edge flip-flop on the rising
                                               edge in turn
      edge_phase.exe structure GDS MODELS [K ...|all]
@@ -68,12 +70,18 @@ let ref2_dut cfg =
   { name = "RTL"; rise = (fun ~rst_n ~pads -> Ref2.rise rf ~rst_n ~pads ~en:0b0011);
     fall = (fun ~pads -> Ref2.fall rf ~pads); outputs = (fun () -> Ref2.outputs rf) }
 
-let gates_dut (g : Gates.t) =
+(* [changes]: per flip-flop, how often its output changed (for gate_cov.py) *)
+let gates_dut ?changes (g : Gates.t) =
   Gates.reset g;
   let rst = ref 0 in
+  let prev = Array.make (Array.length g.sim.ffs) 0 in
+  let count () =
+    Option.iter (fun ch ->
+        Array.iteri (fun i (f : Sim.ff) -> let q = g.sim.v.(f.q) in if q <> prev.(i) then (ch.(i) <- ch.(i) + 1; prev.(i) <- q)) g.sim.ffs)
+      changes in
   { name = "gates";
-    rise = (fun ~rst_n ~pads -> rst := rst_n; Gates.set g ~rst_n ~pads; Sim.edge g.sim ~fall:false);
-    fall = (fun ~pads -> Gates.set g ~rst_n:!rst ~pads; Sim.edge g.sim ~fall:true);
+    rise = (fun ~rst_n ~pads -> rst := rst_n; Gates.set g ~rst_n ~pads; Sim.edge g.sim ~fall:false; count ());
+    fall = (fun ~pads -> Gates.set g ~rst_n:!rst ~pads; Sim.edge g.sim ~fall:true; count ());
     outputs = (fun () -> Gates.outputs g) }
 
 (* the outputs an event-driven simulation wrote, one hexadecimal word per half clock *)
@@ -455,8 +463,14 @@ let () =
     print_structure st;
     let (sbad, _, _) = st in
     if ks = [] then begin
-      let res = run_test ~seed (gates_dut g) [ ref2_dut cfg ] in
+      let changes = Array.make (Array.length g.sim.ffs) 0 in
+      let res = run_test ~seed (gates_dut ~changes g) [ ref2_dut cfg ] in
       print_result ~verbose:true res;
+      Option.iter (fun file ->
+          let oc = open_out file in
+          Array.iteri (fun i (f : Sim.ff) -> Printf.fprintf oc "%s %s %d\n" f.owner (if g.sim.ff_fall.(i) then "falling" else "rising") changes.(i)) g.sim.ffs;
+          close_out oc)
+        (Sys.getenv_opt "EDGE_PHASE_FFS");
       exit (if (fst res).input_ok && (fst res).output_ok && (fst res).mism = 0 && sbad = [] then 0 else 1)
     end else begin
       let caught = ref 0 and caught_any = ref 0 in

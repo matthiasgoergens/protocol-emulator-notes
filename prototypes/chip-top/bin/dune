@@ -1,7 +1,7 @@
 (executable
  (name lockstep)
  (modules lockstep)
- (libraries hardcaml chip pstream unix))
+ (libraries hardcaml chip pstream hwfuzz unix))
 
 (executable
  (name demos)

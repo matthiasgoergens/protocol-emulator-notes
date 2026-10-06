@@ -16,19 +16,30 @@ type t = {
    circuit, in [cov_accs] (Cov); Cov.enable must have been called before the circuit is built. *)
 let coverage = ref false
 
-(* The register file's entries are made in one loop (chip_rtl.ml), so they share a source line:
-   they are the first registers the core creates, one per Regs.rw_addresses entry, in order. *)
-let label_regfile (infos : Cov.reg array) =
-  let core = List.filter (fun (i : Cov.reg) -> i.file = "chip_rtl.ml") (Array.to_list infos) in
-  match core with
-  | [] -> infos
-  | first :: _ ->
-    let rf = List.filter (fun (i : Cov.reg) -> i.loc = first.loc) core in
-    if List.length rf <> List.length Regs.rw_addresses then infos
-    else
-      let tbl = Hashtbl.create 128 in
-      List.iteri (fun k (i : Cov.reg) -> Hashtbl.replace tbl i.uid (List.nth Regs.rw_addresses k)) rf;
-      Cov.relabel infos (fun i -> Option.map (fun a -> (Printf.sprintf "reg%02x" a, 0)) (Hashtbl.find_opt tbl i.uid))
+(* The register file's entries are made in one loop (chip_rtl.ml), so they share a source line, and
+   Circuit.create_exn renumbers signals, so their order says nothing either. Each one's write
+   enable compares the pending action's 16-bit address with its own address: that constant names
+   it. *)
+let regfile_labeller (r : Hardcaml.Signal.t) =
+  let open Hardcaml.Signal.Type in
+  match r with
+  | Reg { register = { reg_enable; _ }; _ } ->
+    let rec find depth (s : Hardcaml.Signal.t) =
+      if depth = 0 then None
+      else
+        match s with
+        | Op2 { op = Signal_eq; arg_a; arg_b; _ } ->
+          let c16 = function Const { constant; _ } when Hardcaml.Bits.width constant = 16 -> Some (Hardcaml.Bits.to_int constant) | _ -> None in
+          (match c16 arg_b with Some a -> Some a | None -> c16 arg_a)
+        | Op2 { op = Signal_and; arg_a; arg_b; _ } ->
+          (match find (depth - 1) arg_a with Some a -> Some a | None -> find (depth - 1) arg_b)
+        | Wire { driver; _ } -> find (depth - 1) !driver
+        | _ -> None in
+    if Hardcaml.Signal.width r <> 8 then None
+    else (match find 6 reg_enable with
+        | Some a when a < Regs.reg_space && Regs.rw_bits a > 0 -> Some (Printf.sprintf "reg%02x" a, 0)
+        | _ -> None)
+  | _ -> None
 
 let cache : (string * int array * int * bool, Circuit.t * Cov.acc option) Hashtbl.t = Hashtbl.create 8
 
@@ -38,7 +49,7 @@ let circuit_cov ?(cfg = Chip_spec.default_config) () =
   | Some c -> c
   | None ->
     let c = Chip_rtl.circuit ~cfg () in
-    let c = if !coverage then (let c', infos = Cov.instrument c in (c', Some (Cov.create_acc ~source:c (label_regfile infos)))) else (c, None) in
+    let c = if !coverage then (let c', infos = Cov.instrument ~labeller:regfile_labeller c in (c', Some (Cov.create_acc ~source:c infos))) else (c, None) in
     Hashtbl.replace cache key c;
     c
 

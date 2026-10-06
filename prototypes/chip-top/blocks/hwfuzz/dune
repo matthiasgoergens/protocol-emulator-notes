@@ -1,0 +1,4 @@
+; ../../../hwfuzz: the coverage-guided hardware fuzzer (symlink).
+(library
+ (name hwfuzz)
+ (libraries hardcaml))

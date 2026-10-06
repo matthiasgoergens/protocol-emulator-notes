@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# The combined chip's quick test suite (prototypes/chip-top/suite.sh quick): the lockstep against the
+# specification with the coverage-directed generator, the planted integration bugs, register toggle
+# coverage with a floor, and the edge-phase test of the both-edges pin stage on the Hardcaml
+# reference. Needs no PDK; the gate-level and Icarus runs need a harden and stay local.
+name: chip-top
+on:
+  push:
+    paths: ["prototypes/**", ".github/workflows/chip-top.yaml"]
+  pull_request:
+    paths: ["prototypes/**"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quick:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.3"
+      - run: opam install --yes dune hardcaml.v0.17.0
+      - name: chip-top suite, quick
+        env:
+          CHIP_TOP_DUNE: opam exec -- dune
+          CHIP_TOP_MAX_LOAD: "1000"
+          CHIP_TOP_OUT: ${{ runner.temp }}/chip-top-suite
+        run: prototypes/chip-top/suite.sh quick

@@ -52,8 +52,9 @@ let frames s =
 
 let rec strip s = match s with Signal.Type.Wire { driver; _ } when not (Signal.is_empty !driver) -> strip !driver | _ -> s
 
-(* Returns the instrumented circuit and the tapped registers, with uids of [c]. *)
-let instrument (c : Circuit.t) =
+(* Returns the instrumented circuit and the tapped registers, with uids of [c]. [labeller] may
+   name a register from its own structure (it takes precedence over the output names). *)
+let instrument ?(labeller = fun (_ : Signal.t) -> None) (c : Circuit.t) =
   let regs = ref [] in
   Signal_graph.iter (Circuit.signal_graph c) ~f:(fun s -> match s with Signal.Type.Reg _ -> regs := s :: !regs | _ -> ());
   let regs = List.sort (fun a b -> compare ((Signal.Type.Uid.to_int (Signal.uid a))) ((Signal.Type.Uid.to_int (Signal.uid b)))) !regs in
@@ -77,9 +78,12 @@ let instrument (c : Circuit.t) =
         let fr = frames r in
         let file, loc = match fr with (f, l) :: _ -> (f, l) | [] -> ("?", "?") in
         let label, label_off =
-          match Hashtbl.find_opt labels ((Signal.Type.Uid.to_int (Signal.uid r))) with
+          match labeller r with
           | Some x -> x
-          | None -> ((match Signal.names r with n :: _ -> n | [] -> ""), 0) in
+          | None ->
+            match Hashtbl.find_opt labels ((Signal.Type.Uid.to_int (Signal.uid r))) with
+            | Some x -> x
+            | None -> ((match Signal.names r with n :: _ -> n | [] -> ""), 0) in
         let i = { uid = (Signal.Type.Uid.to_int (Signal.uid r)); width = Signal.width r; offset = !off; loc; file; label; label_off } in
         off := !off + Signal.width r;
         i)
