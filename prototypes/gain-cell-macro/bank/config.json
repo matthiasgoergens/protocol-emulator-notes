@@ -1,0 +1,69 @@
+{
+  "DESIGN_NAME": "gc_bank_32x32",
+  "VERILOG_FILES": [
+    "dir::gc_bank.v"
+  ],
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 16.667,
+  "FP_SIZING": "absolute",
+  "DIE_AREA": [
+    0,
+    0,
+    190,
+    210
+  ],
+  "PL_TARGET_DENSITY_PCT": 60,
+  "MACROS": {
+    "GC_ARRAY_32x38": {
+      "gds": [
+        "dir::macro/GC_ARRAY_32x38.gds"
+      ],
+      "lef": [
+        "dir::macro/GC_ARRAY_32x38.lef"
+      ],
+      "vh": [
+        "dir::macro/GC_ARRAY_32x38.bb.v"
+      ],
+      "lib": {
+        "*": [
+          "dir::macro/GC_ARRAY_32x38.lib"
+        ]
+      },
+      "instances": {
+        "array_i": {
+          "location": [
+            73.0,
+            60.0
+          ],
+          "orientation": "N"
+        }
+      }
+    }
+  },
+  "FP_MACRO_HORIZONTAL_HALO": 5,
+  "FP_MACRO_VERTICAL_HALO": 5,
+  "PDN_MACRO_CONNECTIONS": [
+    "array_i VPWR VGND NOVDD GND"
+  ],
+  "PDN_HORIZONTAL_HALO": 2,
+  "PDN_VERTICAL_HALO": 2,
+  "RSZ_DONT_TOUCH_RX": "rbl",
+  "RUN_KLAYOUT_XOR": true,
+  "RUN_MAGIC_DRC": true,
+  "RUN_KLAYOUT_DRC": true,
+  "RUN_LVS": true,
+  "RUN_IRDROP_REPORT": false,
+  "//pdn": "Metal4 straps only (pdn_cfg.tcl): 1.0 um wide, VPWR then VGND 10 um apart, pitch 20.57 um (the array's GND stripe pitch), offset so every strap crossing the array misses its three internal GND stripes (array x 73 + 1.42 + 20.57 k) by at least 3.5 um.",
+  "PDN_CFG": "dir::pdn_cfg.tcl",
+  "PDN_MULTILAYER": false,
+  "PDN_VWIDTH": 1.0,
+  "PDN_VSPACING": 9.0,
+  "PDN_VPITCH": 20.57,
+  "PDN_VOFFSET": 2.45,
+  "//route": "no signal routing on Metal4 over the array: it would couple into the storage nodes",
+  "ROUTING_OBSTRUCTIONS": [
+    "Metal4 73.0 60.0 118.0 150.0"
+  ],
+  "//layers": "Metal1-Metal4 only, as a Tiny Tapeout tile (RT_MAX_LAYER Metal4): the first run with the PDK default routed signals on TopMetal1",
+  "RT_MAX_LAYER": "Metal4"
+}

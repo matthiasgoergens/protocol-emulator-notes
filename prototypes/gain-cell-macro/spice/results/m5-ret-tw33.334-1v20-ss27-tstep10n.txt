@@ -1,0 +1,2 @@
+# run.py hv_nmos ENVS=W=0.30 WMW=0.15 LMW=0.45 TWRITE=33.334 CASES=ss271 TSTOP=20m TSTEP=10n GMIN=1e-18 SED=s/^LEVELS1 = .*/LEVELS1 = [0.50, 0.45, 0.40, 0.375, 0.35, 0.325, 0.30, 0.25]/ PDK=cmos5l (IHP-Open-PDK 2bbec755dc67ca3db0261c3d6163e15735d66710) commit 16e9d63 2026-10-06T09:54:45+08:00
+hv_nmos  mos_ss   27C  stored 1  written  0.383 V  after 1us  0.386  100us  0.385  1ms  0.383  10ms  0.358  crossings 0.50V@0.0us  0.45V@0.0us  0.40V@0.0us  0.38V@3564.0us  0.35V@13138.0us  0.33V@-  0.30V@-  0.25V@-

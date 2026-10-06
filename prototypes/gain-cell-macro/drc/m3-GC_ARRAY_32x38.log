@@ -1,0 +1,542 @@
+06-Oct-2026 01:31:01 | INFO    | KLayout version detected: 0.30.9
+2026-10-06 01:31:01 +0000: Memory Usage (421792K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:01 +0000: Memory Usage (421440K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:01 +0000: Memory Usage (422364K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_cont.lyrdb
+2026-10-06 01:31:01 +0000: Memory Usage (422336K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_gatpolyfiller.lyrdb
+2026-10-06 01:31:01 +0000: Memory Usage (422364K) : tables selected: cont
+2026-10-06 01:31:01 +0000: Memory Usage (422336K) : tables selected: gatpolyfiller
+2026-10-06 01:31:02 +0000: Memory Usage (421480K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:02 +0000: Memory Usage (422828K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_pwellblock.lyrdb
+2026-10-06 01:31:02 +0000: Memory Usage (422828K) : tables selected: pwellblock
+2026-10-06 01:31:02 +0000: Memory Usage (429124K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:02 +0000: Memory Usage (429124K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:02 +0000: Memory Usage (429224K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:02 +0000: Memory Usage (437044K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:02 +0000: Memory Usage (429384K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:02 +0000: Memory Usage (434476K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:02 +0000: Memory Usage (420344K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:02 +0000: Memory Usage (421248K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_activfiller.lyrdb
+2026-10-06 01:31:02 +0000: Memory Usage (421248K) : tables selected: activfiller
+2026-10-06 01:31:03 +0000: Memory Usage (428296K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:03 +0000: Memory Usage (428296K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:03 +0000: Memory Usage (421508K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:03 +0000: Memory Usage (422404K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_contbar.lyrdb
+2026-10-06 01:31:03 +0000: Memory Usage (422404K) : tables selected: contbar
+2026-10-06 01:31:03 +0000: Memory Usage (422292K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:03 +0000: Memory Usage (423128K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_nwell.lyrdb
+2026-10-06 01:31:03 +0000: Memory Usage (423128K) : tables selected: nwell
+2026-10-06 01:31:03 +0000: Memory Usage (429280K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:03 +0000: Memory Usage (429856K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:03 +0000: Memory Usage (429944K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:03 +0000: Memory Usage (439236K) : Starting IHP-SG13CMOS5L DRC connectivity related derivations.
+2026-10-06 01:31:03 +0000: Memory Usage (439236K) : Starting IHP-SG13CMOS5L DRC connectivity setup
+2026-10-06 01:31:03 +0000: Memory Usage (442308K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:04 +0000: Memory Usage (420204K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:04 +0000: Memory Usage (421080K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_thickgateox.lyrdb
+2026-10-06 01:31:04 +0000: Memory Usage (421080K) : tables selected: thickgateox
+2026-10-06 01:31:04 +0000: Memory Usage (427896K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:04 +0000: Memory Usage (427896K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:04 +0000: Memory Usage (420204K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:04 +0000: Memory Usage (421104K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_nbulay.lyrdb
+2026-10-06 01:31:04 +0000: Memory Usage (421104K) : tables selected: nbulay
+2026-10-06 01:31:04 +0000: Memory Usage (427720K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:04 +0000: Memory Usage (427720K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:04 +0000: Memory Usage (420280K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:04 +0000: Memory Usage (421080K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_gatpoly.lyrdb
+2026-10-06 01:31:04 +0000: Memory Usage (421080K) : tables selected: gatpoly
+2026-10-06 01:31:04 +0000: Memory Usage (428424K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:04 +0000: Memory Usage (435632K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:05 +0000: Memory Usage (420428K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:05 +0000: Memory Usage (421836K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_latchup.lyrdb
+2026-10-06 01:31:05 +0000: Memory Usage (421836K) : tables selected: latchup
+2026-10-06 01:31:05 +0000: Memory Usage (428932K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:05 +0000: Memory Usage (419656K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:05 +0000: Memory Usage (420748K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_activ.lyrdb
+2026-10-06 01:31:05 +0000: Memory Usage (420748K) : tables selected: activ
+2026-10-06 01:31:05 +0000: Memory Usage (434376K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:05 +0000: Memory Usage (427656K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:05 +0000: Memory Usage (427656K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:05 +0000: Memory Usage (420480K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:05 +0000: Memory Usage (421572K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_psd.lyrdb
+2026-10-06 01:31:05 +0000: Memory Usage (421572K) : tables selected: psd
+2026-10-06 01:31:05 +0000: Memory Usage (428996K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:05 +0000: Memory Usage (428996K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:06 +0000: Memory Usage (422344K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:06 +0000: Memory Usage (423196K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_topvia1.lyrdb
+2026-10-06 01:31:06 +0000: Memory Usage (423196K) : tables selected: topvia1
+2026-10-06 01:31:06 +0000: Memory Usage (419904K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:06 +0000: Memory Usage (420772K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_metaln.lyrdb
+2026-10-06 01:31:06 +0000: Memory Usage (421028K) : tables selected: metaln
+2026-10-06 01:31:06 +0000: Memory Usage (422368K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:06 +0000: Memory Usage (423236K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_sealring.lyrdb
+2026-10-06 01:31:06 +0000: Memory Usage (423236K) : tables selected: sealring
+2026-10-06 01:31:06 +0000: Memory Usage (430356K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:06 +0000: Memory Usage (430356K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:06 +0000: Memory Usage (427868K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:06 +0000: Memory Usage (427868K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:07 +0000: Memory Usage (430376K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:07 +0000: Memory Usage (430376K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:07 +0000: Memory Usage (421040K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:07 +0000: Memory Usage (421852K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_metal1.lyrdb
+2026-10-06 01:31:07 +0000: Memory Usage (421852K) : tables selected: metal1
+2026-10-06 01:31:08 +0000: Memory Usage (422096K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:08 +0000: Memory Usage (422908K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_topmetal1.lyrdb
+2026-10-06 01:31:08 +0000: Memory Usage (422908K) : tables selected: topmetal1
+2026-10-06 01:31:08 +0000: Memory Usage (420944K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:08 +0000: Memory Usage (421836K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_metalnfiller.lyrdb
+2026-10-06 01:31:08 +0000: Memory Usage (421836K) : tables selected: metalnfiller
+2026-10-06 01:31:08 +0000: Memory Usage (428656K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:08 +0000: Memory Usage (428656K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:08 +0000: Memory Usage (428812K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:08 +0000: Memory Usage (428812K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:08 +0000: Memory Usage (429724K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:08 +0000: Memory Usage (429724K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:09 +0000: Memory Usage (421328K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:09 +0000: Memory Usage (422432K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_passiv.lyrdb
+2026-10-06 01:31:09 +0000: Memory Usage (422432K) : tables selected: passiv
+2026-10-06 01:31:09 +0000: Memory Usage (420724K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:09 +0000: Memory Usage (421848K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_vian.lyrdb
+2026-10-06 01:31:09 +0000: Memory Usage (421848K) : tables selected: vian
+2026-10-06 01:31:09 +0000: Memory Usage (421844K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:09 +0000: Memory Usage (422676K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_lbe.lyrdb
+2026-10-06 01:31:09 +0000: Memory Usage (422676K) : tables selected: lbe
+2026-10-06 01:31:09 +0000: Memory Usage (429864K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:09 +0000: Memory Usage (429864K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:09 +0000: Memory Usage (428936K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:09 +0000: Memory Usage (428936K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:09 +0000: Memory Usage (429528K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:09 +0000: Memory Usage (429528K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:01 +0000: Memory Usage (421396K) : Starting running IHP-SG13CMOS5L Klayout DRC maximum runset on /work/in.gds
+2026-10-06 01:31:01 +0000: Memory Usage (422236K) : IHP-SG13CMOS5L Klayout DRC maximum runset output at: /work/out/in_GC_ARRAY_32x38_sg13cmos5l_maximal.lyrdb
+Rule NW.a: 0 error(s)
+Rule NW.c: 0 error(s)
+Rule NW.c1: 0 error(s)
+Rule NW.d: 0 error(s)
+Rule NW.d1: 0 error(s)
+Rule NW.e: 0 error(s)
+Rule NW.e1: 0 error(s)
+Rule NW.f: 0 error(s)
+Rule NW.f1: 0 error(s)
+Rule PWB.a: 0 error(s)
+Rule PWB.b: 0 error(s)
+Rule PWB.c: 0 error(s)
+Rule NBL.a: 0 error(s)
+Rule NBLB.a: 0 error(s)
+Rule NBLB.b: 0 error(s)
+Rule NBLB.c: 0 error(s)
+Rule NBLB.d: 0 error(s)
+Rule Act.c: 0 error(s)
+Rule Act.d: 0 error(s)
+Rule Act.e: 0 error(s)
+Rule AFil.a: 0 error(s)
+Rule AFil.a1: 0 error(s)
+Rule AFil.b: 0 error(s)
+Rule AFil.i: 0 error(s)
+Rule TGO.a: 0 error(s)
+Rule TGO.b: 0 error(s)
+Rule TGO.c: 0 error(s)
+Rule TGO.d: 0 error(s)
+Rule TGO.e: 0 error(s)
+Rule Gat.a3: 0 error(s)
+Rule Gat.a4: 0 error(s)
+Rule Gat.b1: 0 error(s)
+Rule Gat.c: 0 error(s)
+Rule Gat.c: 0 error(s)
+Rule Gat.e: 0 error(s)
+Rule Gat.f: 0 error(s)
+Rule GFil.a: 0 error(s)
+Rule GFil.b: 0 error(s)
+Rule GFil.c: 0 error(s)
+Rule GFil.j: 0 error(s)
+Rule pSD.a: 0 error(s)
+Rule pSD.b: 0 error(s)
+Rule pSD.c: 0 error(s)
+Rule pSD.d: 0 error(s)
+Rule pSD.d1: 0 error(s)
+Rule pSD.e: 0 error(s)
+Rule pSD.f: 0 error(s)
+Rule pSD.g: 0 error(s)
+Rule pSD.g: 0 error(s)
+Rule pSD.i: 0 error(s)
+Rule pSD.i1: 0 error(s)
+Rule pSD.j: 0 error(s)
+Rule pSD.j1: 0 error(s)
+Rule pSD.k: 0 error(s)
+Rule pSD.l: 0 error(s)
+Rule pSD.m: 0 error(s)
+Rule pSD.n: 0 error(s)
+Rule nSDB.a: 0 error(s)
+Rule nSDB.b: 0 error(s)
+Rule nSDB.c: 0 error(s)
+Rule nSDB.e: 0 error(s)
+Rule EXTB.a: 0 error(s)
+Rule EXTB.b: 0 error(s)
+Rule EXTB.c: 0 error(s)
+Rule Sal.a: 0 error(s)
+Rule Sal.b: 0 error(s)
+Rule Sal.c: 0 error(s)
+Rule Sal.c: 0 error(s)
+Rule Sal.d: 0 error(s)
+Rule Sal.d: 0 error(s)
+Rule Sal.e: 0 error(s)
+Rule Cnt.b1: 0 error(s)
+Rule Cnt.f: 0 error(s)
+Rule Cnt.g: 0 error(s)
+Rule Cnt.h: 0 error(s)
+Rule Cnt.j: 0 error(s)
+Rule CntB.a: 0 error(s)
+Rule CntB.a: 0 error(s)
+Rule CntB.a1: 0 error(s)
+Rule CntB.b: 0 error(s)
+Rule CntB.b2: 0 error(s)
+Rule CntB.c: 0 error(s)
+Rule CntB.d: 0 error(s)
+Rule CntB.e: 0 error(s)
+Rule CntB.f: 0 error(s)
+Rule CntB.g: 0 error(s)
+Rule CntB.g1: 0 error(s)
+Rule CntB.g2: 0 error(s)
+Rule CntB.h: 0 error(s)
+Rule CntB.j: 0 error(s)
+Rule M1.c: 0 error(s)
+Rule M1.c1: 0 error(s)
+Rule M1.d: 0 error(s)
+Rule M2.c: 0 error(s)
+Rule M2.c1: 0 error(s)
+Rule M2.d: 0 error(s)
+Rule M3.c: 0 error(s)
+Rule M3.c1: 0 error(s)
+Rule M3.d: 0 error(s)
+Rule M4.c: 0 error(s)
+Rule M4.c1: 0 error(s)
+Rule M4.d: 0 error(s)
+Rule M1Fil.a1: 0 error(s)
+Rule M1Fil.b: 0 error(s)
+Rule M2Fil.a1: 0 error(s)
+Rule M2Fil.b: 0 error(s)
+Rule M3Fil.a1: 0 error(s)
+Rule M3Fil.b: 0 error(s)
+Rule M4Fil.a1: 0 error(s)
+Rule M4Fil.b: 0 error(s)
+Rule TM1Fil.a: 0 error(s)
+Rule TM1Fil.b: 0 error(s)
+Rule V1.b1: 0 error(s)
+Rule V1.c1: 0 error(s)
+Rule V2.b1: 0 error(s)
+Rule V2.c1: 0 error(s)
+Rule V3.b1: 0 error(s)
+Rule V3.c1: 0 error(s)
+Rule Rsil.a: 0 error(s)
+Rule Rsil.b: 0 error(s)
+Rule Rsil.c: 0 error(s)
+Rule Rsil.d: 0 error(s)
+Rule Rsil.e: 0 error(s)
+Rule Rsil.f: 0 error(s)
+Rule Rppd.a: 0 error(s)
+Rule Rppd.b: 0 error(s)
+Rule Rppd.c: 0 error(s)
+Rule Rppd.c: 0 error(s)
+Rule Rppd.d: 0 error(s)
+Rule Rppd.e: 0 error(s)
+Rule Rhi.a: 0 error(s)
+Rule Rhi.b: 0 error(s)
+Rule Rhi.c: 0 error(s)
+Rule Rhi.d: 0 error(s)
+Rule Rhi.d: 0 error(s)
+Rule Rhi.e: 0 error(s)
+Rule Rhi.f: 0 error(s)
+Rule nmosi.b: 0 error(s)
+Rule nmosi.c: 0 error(s)
+Rule nmosi.d: 0 error(s)
+Rule nmosi.f: 0 error(s)
+Rule nmosi.g: 0 error(s)
+Rule Sdiod.a: 0 error(s)
+Rule Sdiod.b: 0 error(s)
+Rule Sdiod.c: 0 error(s)
+Rule Pad.aR: 0 error(s)
+Rule Pad.a1: 0 error(s)
+Rule Pad.bR: 0 error(s)
+Rule Pad.d: 0 error(s)
+Rule Pad.dR: 0 error(s)
+Rule Pad.d1R: 0 error(s)
+Rule Pad.jR: 0 error(s)
+Rule Padc.d: 0 error(s)
+Rule Seal.a_Activ: 0 error(s)
+Rule Seal.a_pSD: 0 error(s)
+Rule Seal.a_Metal1: 0 error(s)
+Rule Seal.a_Metal2: 0 error(s)
+Rule Seal.a_Metal3: 0 error(s)
+Rule Seal.a_Metal4: 0 error(s)
+Rule Seal.a_TopMetal1: 0 error(s)
+Rule Seal.c: 0 error(s)
+Rule Seal.c: 0 error(s)
+Rule Seal.c1.Via1: 0 error(s)
+Rule Seal.c1.Via1: 0 error(s)
+Rule Seal.c1.Via2: 0 error(s)
+Rule Seal.c1.Via2: 0 error(s)
+Rule Seal.c1.Via3: 0 error(s)
+Rule Seal.c1.Via3: 0 error(s)
+Rule Seal.c2: 0 error(s)
+Rule Seal.c2: 0 error(s)
+Rule Seal.d.Cont: 0 error(s)
+Rule Seal.d.Via1: 0 error(s)
+Rule Seal.d.Via2: 0 error(s)
+Rule Seal.d.Via3: 0 error(s)
+Rule Seal.d.TopVia1: 0 error(s)
+Rule Seal.e: 0 error(s)
+Rule Seal.f.Activ: 0 error(s)
+Rule Seal.f.pSD: 0 error(s)
+Rule Seal.f.Metal1: 0 error(s)
+Rule Seal.f.Metal2: 0 error(s)
+Rule Seal.f.Metal3: 0 error(s)
+Rule Seal.f.Metal4: 0 error(s)
+Rule Seal.f.TopMetal1: 0 error(s)
+Rule LU.a: 0 error(s)
+Rule LU.c: 0 error(s)
+Rule LU.c1: 0 error(s)
+Rule LU.d: 0 error(s)
+Rule LU.d1: 0 error(s)
+Rule Slt.a.M1: 0 error(s)
+Rule Slt.b.M1: 0 error(s)
+Rule Slt.c.M1: 0 error(s)
+Rule Slt.e.M1: 0 error(s)
+Rule Slt.f.M1: 0 error(s)
+Rule Slt.h1: 0 error(s)
+Rule Slt.h1: 0 error(s)
+Rule Slt.a.M2: 0 error(s)
+Rule Slt.b.M2: 0 error(s)
+Rule Slt.c.M2: 0 error(s)
+Rule Slt.e.M2: 0 error(s)
+Rule Slt.f.M2: 0 error(s)
+Rule Slt.h2.M2: 0 error(s)
+Rule Slt.h2.M2: 0 error(s)
+Rule Slt.a.M3: 0 error(s)
+Rule Slt.b.M3: 0 error(s)
+Rule Slt.c.M3: 0 error(s)
+Rule Slt.e.M3: 0 error(s)
+Rule Slt.f.M3: 0 error(s)
+Rule Slt.h2.M3: 0 error(s)
+Rule Slt.h2.M3: 0 error(s)
+Rule Slt.a.M4: 0 error(s)
+Rule Slt.b.M4: 0 error(s)
+Rule Slt.c.M4: 0 error(s)
+Rule Slt.e.M4: 0 error(s)
+Rule Slt.f.M4: 0 error(s)
+Rule Slt.h2.M4: 0 error(s)
+Rule Slt.a.TM1: 0 error(s)
+Rule Slt.b.TM1: 0 error(s)
+Rule Slt.c.TM1: 0 error(s)
+Rule Slt.e.TM1: 0 error(s)
+Rule Slt.f.TM1: 0 error(s)
+Rule Slt.h3: 0 error(s)
+Rule NW.c1.dig: 0 error(s)
+Rule NW.d1.dig: 0 error(s)
+Rule NW.e1.dig: 0 error(s)
+Rule NW.f1.dig: 0 error(s)
+Rule Cnt.c.Digi: 0 error(s)
+Rule LBE.b2: 0 error(s)
+Rule LBE.e.dfPad: 0 error(s)
+Rule LBE.e.Passiv: 0 error(s)
+Rule LBE.f: 0 error(s)
+2026-10-06 01:31:10 +0000: Memory Usage (422396K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:10 +0000: Memory Usage (423248K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_topmetal1filler.lyrdb
+2026-10-06 01:31:10 +0000: Memory Usage (423248K) : tables selected: topmetal1filler
+2026-10-06 01:31:10 +0000: Memory Usage (421784K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:10 +0000: Memory Usage (422192K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:10 +0000: Memory Usage (423040K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_metalslits.lyrdb
+2026-10-06 01:31:10 +0000: Memory Usage (422592K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_pad.lyrdb
+2026-10-06 01:31:10 +0000: Memory Usage (423040K) : tables selected: metalslits
+2026-10-06 01:31:10 +0000: Memory Usage (422592K) : tables selected: pad
+2026-10-06 01:31:10 +0000: Memory Usage (429876K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:10 +0000: Memory Usage (429876K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:10 +0000: Memory Usage (429788K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:10 +0000: Memory Usage (429788K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:10 +0000: Memory Usage (429856K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:10 +0000: Memory Usage (429856K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:10 +0000: Memory Usage (421852K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:10 +0000: Memory Usage (422716K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_via1.lyrdb
+2026-10-06 01:31:10 +0000: Memory Usage (422716K) : tables selected: via1
+2026-10-06 01:31:10 +0000: Memory Usage (430116K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:10 +0000: Memory Usage (430116K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:11 +0000: Memory Usage (421728K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:11 +0000: Memory Usage (422784K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_forbidden_cmos5l.lyrdb
+2026-10-06 01:31:11 +0000: Memory Usage (422784K) : tables selected: forbidden_cmos5l
+2026-10-06 01:31:11 +0000: Memory Usage (421716K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:11 +0000: Memory Usage (422808K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_forbidden.lyrdb
+2026-10-06 01:31:11 +0000: Memory Usage (422808K) : tables selected: forbidden
+2026-10-06 01:31:11 +0000: Memory Usage (422708K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:11 +0000: Memory Usage (423832K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_angle.lyrdb
+2026-10-06 01:31:11 +0000: Memory Usage (423832K) : tables selected: angle
+2026-10-06 01:31:11 +0000: Memory Usage (429952K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:11 +0000: Memory Usage (429952K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:11 +0000: Memory Usage (429936K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:11 +0000: Memory Usage (429936K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:11 +0000: Memory Usage (430836K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:11 +0000: Memory Usage (430836K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:11 +0000: Memory Usage (422456K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:11 +0000: Memory Usage (423580K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_offgrid.lyrdb
+2026-10-06 01:31:11 +0000: Memory Usage (423580K) : tables selected: offgrid
+2026-10-06 01:31:11 +0000: Memory Usage (430684K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:11 +0000: Memory Usage (430684K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:12 +0000: Memory Usage (421020K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:12 +0000: Memory Usage (421916K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_pin.lyrdb
+2026-10-06 01:31:12 +0000: Memory Usage (421916K) : tables selected: pin
+2026-10-06 01:31:12 +0000: Memory Usage (429208K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:12 +0000: Memory Usage (429208K) : Starting IHP-SG13CMOS5L DRC rules.
+06-Oct-2026 01:31:12 | INFO    | KLayout DRC Check Passed: No DRC violations detected in the layout.
+06-Oct-2026 01:31:01 | INFO    | KLayout version detected: 0.30.9
+06-Oct-2026 01:31:12 | INFO    | KLayout DRC Check Passed: No DRC violations detected in the layout.
+2026-10-06 01:31:02 +0000: Memory Usage (420344K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:02 +0000: Memory Usage (421248K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_activfiller.lyrdb
+2026-10-06 01:31:02 +0000: Memory Usage (421248K) : tables selected: activfiller
+2026-10-06 01:31:03 +0000: Memory Usage (428296K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:03 +0000: Memory Usage (428296K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:05 +0000: Memory Usage (419656K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:05 +0000: Memory Usage (420748K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_activ.lyrdb
+2026-10-06 01:31:05 +0000: Memory Usage (420748K) : tables selected: activ
+2026-10-06 01:31:05 +0000: Memory Usage (427656K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:05 +0000: Memory Usage (427656K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:11 +0000: Memory Usage (422708K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:11 +0000: Memory Usage (423832K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_angle.lyrdb
+2026-10-06 01:31:11 +0000: Memory Usage (423832K) : tables selected: angle
+2026-10-06 01:31:11 +0000: Memory Usage (430836K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:11 +0000: Memory Usage (430836K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:03 +0000: Memory Usage (421508K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:03 +0000: Memory Usage (422404K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_contbar.lyrdb
+2026-10-06 01:31:03 +0000: Memory Usage (422404K) : tables selected: contbar
+2026-10-06 01:31:03 +0000: Memory Usage (429280K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:03 +0000: Memory Usage (429856K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:01 +0000: Memory Usage (421792K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:01 +0000: Memory Usage (422364K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_cont.lyrdb
+2026-10-06 01:31:01 +0000: Memory Usage (422364K) : tables selected: cont
+2026-10-06 01:31:02 +0000: Memory Usage (429224K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:02 +0000: Memory Usage (437044K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:11 +0000: Memory Usage (421728K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:11 +0000: Memory Usage (422784K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_forbidden_cmos5l.lyrdb
+2026-10-06 01:31:11 +0000: Memory Usage (422784K) : tables selected: forbidden_cmos5l
+2026-10-06 01:31:11 +0000: Memory Usage (429952K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:11 +0000: Memory Usage (429952K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:11 +0000: Memory Usage (421716K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:11 +0000: Memory Usage (422808K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_forbidden.lyrdb
+2026-10-06 01:31:11 +0000: Memory Usage (422808K) : tables selected: forbidden
+2026-10-06 01:31:11 +0000: Memory Usage (429936K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:11 +0000: Memory Usage (429936K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:01 +0000: Memory Usage (421440K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:01 +0000: Memory Usage (422336K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_gatpolyfiller.lyrdb
+2026-10-06 01:31:01 +0000: Memory Usage (422336K) : tables selected: gatpolyfiller
+2026-10-06 01:31:02 +0000: Memory Usage (429124K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:02 +0000: Memory Usage (429124K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:04 +0000: Memory Usage (420280K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:04 +0000: Memory Usage (421080K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_gatpoly.lyrdb
+2026-10-06 01:31:04 +0000: Memory Usage (421080K) : tables selected: gatpoly
+2026-10-06 01:31:04 +0000: Memory Usage (428424K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:04 +0000: Memory Usage (435632K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:05 +0000: Memory Usage (420428K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:05 +0000: Memory Usage (421836K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_latchup.lyrdb
+2026-10-06 01:31:05 +0000: Memory Usage (421836K) : tables selected: latchup
+2026-10-06 01:31:05 +0000: Memory Usage (428932K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:05 +0000: Memory Usage (434376K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:09 +0000: Memory Usage (421844K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:09 +0000: Memory Usage (422676K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_lbe.lyrdb
+2026-10-06 01:31:09 +0000: Memory Usage (422676K) : tables selected: lbe
+2026-10-06 01:31:09 +0000: Memory Usage (429528K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:09 +0000: Memory Usage (429528K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:07 +0000: Memory Usage (421040K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:07 +0000: Memory Usage (421852K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_metal1.lyrdb
+2026-10-06 01:31:07 +0000: Memory Usage (421852K) : tables selected: metal1
+2026-10-06 01:31:08 +0000: Memory Usage (428656K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:08 +0000: Memory Usage (428656K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:08 +0000: Memory Usage (420944K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:08 +0000: Memory Usage (421836K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_metalnfiller.lyrdb
+2026-10-06 01:31:08 +0000: Memory Usage (421836K) : tables selected: metalnfiller
+2026-10-06 01:31:08 +0000: Memory Usage (428812K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:08 +0000: Memory Usage (428812K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:06 +0000: Memory Usage (419904K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:06 +0000: Memory Usage (420772K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_metaln.lyrdb
+2026-10-06 01:31:06 +0000: Memory Usage (421028K) : tables selected: metaln
+2026-10-06 01:31:06 +0000: Memory Usage (427868K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:06 +0000: Memory Usage (427868K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:10 +0000: Memory Usage (422192K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:10 +0000: Memory Usage (423040K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_metalslits.lyrdb
+2026-10-06 01:31:10 +0000: Memory Usage (423040K) : tables selected: metalslits
+2026-10-06 01:31:10 +0000: Memory Usage (429856K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:10 +0000: Memory Usage (429856K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:04 +0000: Memory Usage (420204K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:04 +0000: Memory Usage (421104K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_nbulay.lyrdb
+2026-10-06 01:31:04 +0000: Memory Usage (421104K) : tables selected: nbulay
+2026-10-06 01:31:04 +0000: Memory Usage (427720K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:04 +0000: Memory Usage (427720K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:03 +0000: Memory Usage (422292K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:03 +0000: Memory Usage (423128K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_nwell.lyrdb
+2026-10-06 01:31:03 +0000: Memory Usage (423128K) : tables selected: nwell
+2026-10-06 01:31:03 +0000: Memory Usage (429944K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:03 +0000: Memory Usage (439236K) : Starting IHP-SG13CMOS5L DRC connectivity related derivations.
+2026-10-06 01:31:03 +0000: Memory Usage (439236K) : Starting IHP-SG13CMOS5L DRC connectivity setup
+2026-10-06 01:31:03 +0000: Memory Usage (442308K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:11 +0000: Memory Usage (422456K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:11 +0000: Memory Usage (423580K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_offgrid.lyrdb
+2026-10-06 01:31:11 +0000: Memory Usage (423580K) : tables selected: offgrid
+2026-10-06 01:31:11 +0000: Memory Usage (430684K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:11 +0000: Memory Usage (430684K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:10 +0000: Memory Usage (421784K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:10 +0000: Memory Usage (422592K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_pad.lyrdb
+2026-10-06 01:31:10 +0000: Memory Usage (422592K) : tables selected: pad
+2026-10-06 01:31:10 +0000: Memory Usage (429788K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:10 +0000: Memory Usage (429788K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:09 +0000: Memory Usage (421328K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:09 +0000: Memory Usage (422432K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_passiv.lyrdb
+2026-10-06 01:31:09 +0000: Memory Usage (422432K) : tables selected: passiv
+2026-10-06 01:31:09 +0000: Memory Usage (429864K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:09 +0000: Memory Usage (429864K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:12 +0000: Memory Usage (421020K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:12 +0000: Memory Usage (421916K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_pin.lyrdb
+2026-10-06 01:31:12 +0000: Memory Usage (421916K) : tables selected: pin
+2026-10-06 01:31:12 +0000: Memory Usage (429208K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:12 +0000: Memory Usage (429208K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:05 +0000: Memory Usage (420480K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:05 +0000: Memory Usage (421572K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_psd.lyrdb
+2026-10-06 01:31:05 +0000: Memory Usage (421572K) : tables selected: psd
+2026-10-06 01:31:05 +0000: Memory Usage (428996K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:05 +0000: Memory Usage (428996K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:02 +0000: Memory Usage (421740K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:02 +0000: Memory Usage (422828K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_pwellblock.lyrdb
+2026-10-06 01:31:02 +0000: Memory Usage (422828K) : tables selected: pwellblock
+2026-10-06 01:31:02 +0000: Memory Usage (429384K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:02 +0000: Memory Usage (434476K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:06 +0000: Memory Usage (422368K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:06 +0000: Memory Usage (423236K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_sealring.lyrdb
+2026-10-06 01:31:06 +0000: Memory Usage (423236K) : tables selected: sealring
+2026-10-06 01:31:07 +0000: Memory Usage (430376K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:07 +0000: Memory Usage (430376K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:01 +0000: Memory Usage (421396K) : Starting running IHP-SG13CMOS5L Klayout DRC maximum runset on /work/in.gds
+2026-10-06 01:31:01 +0000: Memory Usage (422236K) : IHP-SG13CMOS5L Klayout DRC maximum runset output at: /work/out/in_GC_ARRAY_32x38_sg13cmos5l_maximal.lyrdb
+2026-10-06 01:31:04 +0000: Memory Usage (420204K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:04 +0000: Memory Usage (421080K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_thickgateox.lyrdb
+2026-10-06 01:31:04 +0000: Memory Usage (421080K) : tables selected: thickgateox
+2026-10-06 01:31:04 +0000: Memory Usage (427896K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:04 +0000: Memory Usage (427896K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:10 +0000: Memory Usage (422396K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:10 +0000: Memory Usage (423248K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_topmetal1filler.lyrdb
+2026-10-06 01:31:10 +0000: Memory Usage (423248K) : tables selected: topmetal1filler
+2026-10-06 01:31:10 +0000: Memory Usage (429876K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:10 +0000: Memory Usage (429876K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:08 +0000: Memory Usage (422096K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:08 +0000: Memory Usage (422908K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_topmetal1.lyrdb
+2026-10-06 01:31:08 +0000: Memory Usage (422908K) : tables selected: topmetal1
+2026-10-06 01:31:08 +0000: Memory Usage (429724K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:08 +0000: Memory Usage (429724K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:06 +0000: Memory Usage (422344K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:06 +0000: Memory Usage (423196K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_topvia1.lyrdb
+2026-10-06 01:31:06 +0000: Memory Usage (423196K) : tables selected: topvia1
+2026-10-06 01:31:06 +0000: Memory Usage (430356K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:06 +0000: Memory Usage (430356K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:10 +0000: Memory Usage (421852K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:10 +0000: Memory Usage (422716K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_via1.lyrdb
+2026-10-06 01:31:10 +0000: Memory Usage (422716K) : tables selected: via1
+2026-10-06 01:31:10 +0000: Memory Usage (430116K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:10 +0000: Memory Usage (430116K) : Starting IHP-SG13CMOS5L DRC rules.
+2026-10-06 01:31:09 +0000: Memory Usage (420724K) : Starting running IHP-SG13CMOS5L KLayout DRC runset on /work/in.gds
+2026-10-06 01:31:09 +0000: Memory Usage (421848K) : IHP-SG13CMOS5L KLayout DRC runset output at: /work/out/in_GC_ARRAY_32x38_vian.lyrdb
+2026-10-06 01:31:09 +0000: Memory Usage (421848K) : tables selected: vian
+2026-10-06 01:31:09 +0000: Memory Usage (428936K) : Starting general IHP-SG13CMOS5L derivations.
+2026-10-06 01:31:09 +0000: Memory Usage (428936K) : Starting IHP-SG13CMOS5L DRC rules.

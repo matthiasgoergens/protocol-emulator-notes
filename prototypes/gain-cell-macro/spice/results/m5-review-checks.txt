@@ -1,0 +1,20 @@
+# Checks run after the codex review (codex-review.txt); every number from the files named.
+#
+# 1. Where between 1.14 and 1.20 V does ss/27 C stop reading a written 1?
+#    m5-ret-tw33-1v17-ss27.txt: written 0.356 V at VDD 1.17 V (33 ns write)
+#    m5-bankread-nand4-1v17-cbl35-ss27.txt: reads 1 only down to 0.374 V (NAND4, 35 fF)
+#    -> unreadable at 1.17 V already; at 1.20 V written 0.383 V against 0.365 V.
+#
+# 2. Retention time step and exact pulse: m5-ret-tw33.334-1v20-ss27-tstep10n.txt (33.334 ns
+#    write, 10 ns maximum step) against m2-ret-tw33-1v20.txt (33 ns, 100 ns step), ss/27 C:
+#    written 0.383 V in both; 0.35 V crossed at 13138.0 us against 13088.9 us (+0.4 %).
+#
+# 3. Interpolation of the 6.9 ms ss/27 C lifetime (1.20 V, NAND4, 35 fF). The m2 retention run
+#    reports no level between 0.383 V (written) and 0.35 V, so banklife.py interpolated over
+#    13.1 ms. The finer run reports 0.375 V at 3564.0 us (printed by run.py as "0.38V", its
+#    two-decimal label; banklife.py then read 0.38 V and gave 8.47 ms, which is wrong).
+#    By hand: fine read sweep m5-bankread-nand4-1v20-cbl35-ss27-fine.txt reads 1 down to
+#    0.365 V; between (0.375 V, 3564.0 us) and (0.350 V, 13138.0 us) linearly:
+#    3564.0 + (0.375 - 0.365) / 0.025 * 9574.0 = 7393.6 us = 7.39 ms.
+#    So the coarse 6.9 ms understates it by about 7 %; the README keeps 6.9 ms as the bound's
+#    reference and quotes 7.4 ms as the refined figure.

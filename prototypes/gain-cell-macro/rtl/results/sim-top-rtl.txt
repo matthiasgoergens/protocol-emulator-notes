@@ -1,0 +1,5 @@
+wait 2^8 cycles: bad_words 0 err_words 0 (want 0, 0)
+wait 2^11 cycles: bad_words 32 err_words 32 (want 32, 32)
+wait 2^4 cycles: bad_words 0 err_words 0 (want 0, 0)
+PASS (expired reads flagged by the model: 32)
+tb_top.v:36: $finish called at 51462450 (1ps)

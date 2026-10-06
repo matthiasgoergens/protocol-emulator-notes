@@ -1,0 +1,59 @@
+
+codex
+## Findings
+
+### High — the 1.20 V cold-corner margin is only a nominal model crossing
+
+[README.md](prototypes/gain-cell-macro/README.md:114) reports a 6.9 ms lifetime at 1.20 V, with the written level just 17 mV above the lowest readable level. That is the `ss/27 °C` result in `m2-banklife.txt` for a **35 fF** RBL load. It is a deterministic crossing of simulated curves, not a demonstrated operating margin: there is no cell mismatch, and the result depends on interpolating the threshold. The same row’s highest simulated stored-0 level that reads 0 is 0.363 V, only 3 mV below the 0.366 V read threshold (`m2-banklife.txt`, corresponding row). That is little evidence of robust stored-0 margin if a stored 0 can be disturbed upward.
+
+The 3.0 ms bound in section 3 is therefore a policy choice with a nominal factor of about 2.3 over this one simulated minimum, not a bound established for mismatch or silicon.
+
+**Measurement to settle it:** run mismatch simulations of the *full write, hold, and read path* at `ss/27 °C`, 1.20 V, with extracted RBL and word-line parasitics. Report the distributions of written-1 and stored-0 read margins and the resulting lifetime distribution; then validate retention and read errors on silicon across samples and temperature.
+
+### High — “below 1.20 V it does not work” is broader than the tested voltages
+
+The evidence in [README.md](prototypes/gain-cell-macro/README.md:115) is for 1.14 V and 1.08 V. At those points, the simulated `ss/27 °C` written-1 levels (0.327 V and 0.266 V) are below the respective read thresholds (0.378 V and 0.396 V); longer write and evaluation checks also fail at 1.08 V. That supports failure at those tested conditions. It does not establish a sharp 1.20 V minimum: no sweep just below 1.20 V is shown, and behaviour between the samples could depend on read/write timing and supply.
+
+**Measurement to settle it:** sweep VDD in small steps around the failing transition at `ss/27 °C`, using the bank’s actual WWL/RWL timing and load. Find the minimum supply at which both stored values read correctly with stated margin.
+
+### Medium — the bank read sweep does not establish worst-case read margin
+
+[bankread.py](prototypes/gain-cell-macro/spice/bankread.py:35) models 31 unselected cells at a fixed 0.70 V, a single lumped RWL resistor and capacitor, and a fixed 35 fF RBL capacitor in the highlighted worst-lifetime run. It does not establish that 0.70 V is the worst unselected-cell level across hold time, patterns, corner, or supply; nor that the lumped RC captures the farthest cell’s RWL arrival. The selected storage node is imposed as an initial condition, rather than reached by the preceding write-and-hold simulation.
+
+The sweep classifies reads using the inverter/NAND output at one sample time, with `y > VDD/2` as the decision ([bankread.py](prototypes/gain-cell-macro/spice/bankread.py:69)). That is a useful nominal test, but it does not measure flop setup/hold behaviour, noise, or output margin at the sampling instant. The 35 fF load is plausible from the stated routed-wire and array estimates, but the internal array contribution is estimated, and a single aggregate load does not show whether the routed worst-case column is the one tested.
+
+**Measurement to settle it:** simulate a full extracted column, including the farthest selected cell, distributed RWL/RBL parasitics, actual write-and-hold initial conditions, both data values, and the capture flop. Sweep patterns and corners; report output and input margins at the capture aperture. Compare the extraction’s worst RBL capacitance with 35 fF.
+
+### Medium — NAND4 sensing is plausible, but the tied-input result is not itself a margin proof
+
+The RTL instantiates `nand4_1` with all four inputs tied to RBL ([gc_bank.v](prototypes/gain-cell-macro/rtl/gc_bank.v:135)). Electrically, this makes a four-device pull-down stack oppose parallel PMOS pull-ups; it can shift the transfer characteristic relative to an inverter. The bank read simulations do instantiate that cell when run with NAND4, so this is more than an argument from gate topology.
+
+However, `banklife.py` defines the readable threshold where the NAND output crosses **VDD/2** ([banklife.py](prototypes/gain-cell-macro/spice/banklife.py:24)). That does not prove adequate low/high noise margin for the receiving flop under its actual input threshold, slew, setup, and supply conditions. In the 35 fF `ss/27 °C` result, the reported stored-0 limit and stored-1 limit are separated by only 3 mV (`m2-banklife.txt`, lines 48–49); that is not convincing stored-0 margin. The actual stored 0 is simulated as negative voltage after the write, so the sweep’s “0 up to” level is not a direct measure of how much upward disturbance a real stored 0 can tolerate.
+
+**Measurement to settle it:** use the library capture flop’s characterised input behaviour (or transistor-level flop) with the simulated RBL/sense waveform, and measure both decision margins over the sampling aperture, including a stored 0 disturbed upward through the full retention interval.
+
+### Medium — the 6.9 ms and 3.0 ms figures depend on an interpolated join
+
+[banklife.py](prototypes/gain-cell-macro/spice/banklife.py:24) linearly interpolates the sense-output crossing against selected SN values, then linearly interpolates the retention crossing between reported voltage/time points ([banklife.py](prototypes/gain-cell-macro/spice/banklife.py:50)). The script correctly matches results by corner and temperature, and the cited retention run is configured for a 33 ns write. That is close to, but not exactly, two 16.667 ns RTL cycles (about 33.334 ns). The retention simulation keeps WBL at the opposite value after the write, matching a hold condition that should be conservative for a stored 1.
+
+The interpolation is a reasonable estimate, but at the limiting `ss/27 °C` point the written voltage is only 17 mV above the interpolated threshold. The calculation does not attach an error bound to either interpolation or establish that the sampled SPICE points resolve that small margin. The 3.0 ms bound inherits this uncertainty.
+
+**Measurement to settle it:** directly simulate retention at the bank’s exact WWL pulse duration and read the cell at a sequence of hold times around the predicted crossing, using the full bank read path. Refine the stored-level sweep around the transition and report threshold/time sensitivity to timestep and interpolation.
+
+### Medium — lowering gmin is supported, but “the old results then reproduce” is not a general validation
+
+The README gives a credible mechanism for the default-gmin artefact: the cited PSP 103.8.2 code adds `gmin·V` across junctions, and the default 1e-12 S produces a leakage path large relative to a roughly 1.5 fF node ([README.md](prototypes/gain-cell-macro/README.md:58)). The reported default-gmin write-transistor-only droop, its lack of corner or temperature dependence, and agreement among the 1e-15, 1e-18, and 1e-21 runs support lowering gmin for these simulations.
+
+But agreement among three settings does not establish that every `gmin=1e-18` result is converged. The retention script uses `abstol=1e-18` and a maximum timestep of 100 ns ([run.py](prototypes/gain-cell/retention/run.py:58), [run.py](prototypes/gain-cell/retention/run.py:73)); the bank read uses `abstol=1e-15` and a 10 ps transient step ([bankread.py](prototypes/gain-cell-macro/spice/bankread.py:47), [bankread.py](prototypes/gain-cell-macro/spice/bankread.py:68)). A 100 ns maximum step may be too coarse to substantiate a precise crossing time unless the simulator’s internal stepping and event interpolation resolve it; the cited result files do not show convergence checks. Also, the old-number reproduction is for a specific old model/build and case, not proof that all old results are reproduced under all conditions.
+
+**Measurement to settle it:** rerun representative limiting retention cases at `gmin=1e-15`, `1e-18`, and `1e-21`, with tighter and looser current tolerances and progressively smaller maximum timesteps. Compare written level and crossing times, inspect convergence warnings and waveforms, and confirm the findings on an independent simulator or model implementation.
+
+### Low — the RTL timing description is mostly consistent, with a model-to-RTL timing gap to close
+
+In [gc_bank.v](prototypes/gain-cell-macro/rtl/gc_bank.v:79), WWL is asserted from the `WSET` edge and deasserted after the configured two `WON` cycles. WBL is set on the accepted-write edge and is not changed while `busy` blocks another accepted request. The row word lines are registered, so the RTL contains no combinational decoder path that could glitch a WWL/RWL. Reset can asynchronously clear a word line, but that is a falling transition.
+
+On read completion, the same clock edge lowers RWL and enables precharge ([gc_bank.v](prototypes/gain-cell-macro/rtl/gc_bank.v:91)). That overlap is not represented as an analogue overlap in `bankread.py`: its control edges are separated by 100 ps, with fixed driver delay. RTL register clock-to-Q and cell delays will create real skew; depending on which control arrives first, there can be a brief interval with RWL still active as precharge starts. The current idealised edge model does not demonstrate that this is harmless or that a stored 0 cannot be disturbed during it.
+
+**Measurement to settle it:** run transistor-level read-completion and write waveforms with extracted control paths and actual standard-cell delay/slew, across skew extremes. Confirm that the precharge/RWL transition does not cause a stored-0 upset or corrupt the next evaluation.
+
+No files were changed.

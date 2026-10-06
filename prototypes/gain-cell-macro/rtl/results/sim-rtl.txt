@@ -1,0 +1,8 @@
+               78338 GC_ARRAY EXPIRED read of row 9: never written
+check 1: 32 of 32 rows read back
+check 2: 1007 random reads correct, expired reads so far 1
+           414544826 GC_ARRAY EXPIRED read of row 4: 5987 ns after its write, bound 5000 ns
+check 3: late read returned xxxxxxxx err x, expired reads 2
+check 6: decayed word read 00000000 err 1
+PASS (2 expired reads flagged)
+/home/matthias/prog/janestreet/emulator-wt-gain-cell-macro/prototypes/gain-cell-macro/rtl/tb_bank.v:133: $finish called at 414716508 (1ps)

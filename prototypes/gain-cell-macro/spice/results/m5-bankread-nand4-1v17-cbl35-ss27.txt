@@ -1,0 +1,33 @@
+# bankread.py  ENVS=SENSE=nand4_1 VDD=1.17 CBL=35f CORNERS=ss27 SNSWEEP=0.30:0.45:0.005 GMIN=default SED=none PDK=cmos5l (IHP-Open-PDK 2bbec755dc67ca3db0261c3d6163e15735d66710) commit 16e9d63 2026-10-06T09:54:45+08:00
+bank read: N 32, T 16.667 ns, EVAL 2 cycles, DCTL 0.6 ns, SETUP 0.3 ns, CBL 35f, RWL 2.5k/15f, VDD 1.17, unselected SN 0.70, sense nand4_1; sample at 54.701 ns
+mos_ss   27C SN  0.300: RBL at E1  1.170  at sample  0.993  sense out -0.000  reads 0
+mos_ss   27C SN  0.305: RBL at E1  1.170  at sample  0.976  sense out -0.000  reads 0
+mos_ss   27C SN  0.310: RBL at E1  1.170  at sample  0.959  sense out -0.000  reads 0
+mos_ss   27C SN  0.315: RBL at E1  1.170  at sample  0.941  sense out -0.000  reads 0
+mos_ss   27C SN  0.320: RBL at E1  1.170  at sample  0.922  sense out -0.000  reads 0
+mos_ss   27C SN  0.325: RBL at E1  1.170  at sample  0.902  sense out -0.000  reads 0
+mos_ss   27C SN  0.330: RBL at E1  1.170  at sample  0.881  sense out -0.000  reads 0
+mos_ss   27C SN  0.335: RBL at E1  1.170  at sample  0.859  sense out  0.000  reads 0
+mos_ss   27C SN  0.340: RBL at E1  1.170  at sample  0.836  sense out  0.001  reads 0
+mos_ss   27C SN  0.345: RBL at E1  1.170  at sample  0.813  sense out  0.002  reads 0
+mos_ss   27C SN  0.350: RBL at E1  1.170  at sample  0.788  sense out  0.005  reads 0
+mos_ss   27C SN  0.355: RBL at E1  1.170  at sample  0.762  sense out  0.013  reads 0
+mos_ss   27C SN  0.360: RBL at E1  1.170  at sample  0.737  sense out  0.032  reads 0
+mos_ss   27C SN  0.365: RBL at E1  1.170  at sample  0.712  sense out  0.082  reads 0
+mos_ss   27C SN  0.370: RBL at E1  1.170  at sample  0.692  sense out  0.278  reads 0
+mos_ss   27C SN  0.375: RBL at E1  1.170  at sample  0.677  sense out  0.653  reads 1
+mos_ss   27C SN  0.380: RBL at E1  1.170  at sample  0.661  sense out  1.033  reads 1
+mos_ss   27C SN  0.385: RBL at E1  1.170  at sample  0.634  sense out  1.151  reads 1
+mos_ss   27C SN  0.390: RBL at E1  1.170  at sample  0.601  sense out  1.163  reads 1
+mos_ss   27C SN  0.395: RBL at E1  1.170  at sample  0.567  sense out  1.167  reads 1
+mos_ss   27C SN  0.400: RBL at E1  1.170  at sample  0.534  sense out  1.169  reads 1
+mos_ss   27C SN  0.405: RBL at E1  1.170  at sample  0.501  sense out  1.169  reads 1
+mos_ss   27C SN  0.410: RBL at E1  1.170  at sample  0.470  sense out  1.170  reads 1
+mos_ss   27C SN  0.415: RBL at E1  1.170  at sample  0.441  sense out  1.170  reads 1
+mos_ss   27C SN  0.420: RBL at E1  1.170  at sample  0.414  sense out  1.170  reads 1
+mos_ss   27C SN  0.425: RBL at E1  1.170  at sample  0.388  sense out  1.170  reads 1
+mos_ss   27C SN  0.430: RBL at E1  1.170  at sample  0.365  sense out  1.170  reads 1
+mos_ss   27C SN  0.435: RBL at E1  1.170  at sample  0.342  sense out  1.170  reads 1
+mos_ss   27C SN  0.440: RBL at E1  1.170  at sample  0.321  sense out  1.170  reads 1
+mos_ss   27C SN  0.445: RBL at E1  1.170  at sample  0.301  sense out  1.170  reads 1
+mos_ss   27C SN  0.450: RBL at E1  1.170  at sample  0.282  sense out  1.170  reads 1

@@ -1,0 +1,49 @@
+# banklife.py results/m2-bankread-1v20.txt results/m2-ret-tw33-1v20.txt  (VDD 1.2; read as 1 when the sense output exceeds VDD/2 at the sample edge)
+mos_tt   27C  written 0.482 V, reads 1 down to 0.265 V, 0 up to 0.263 V, precharge reaches 1.200 V: lifetime of a 1 19.03 ms
+mos_tt   85C  written 0.566 V, reads 1 down to 0.215 V, 0 up to 0.213 V, precharge reaches 1.200 V: lifetime of a 1 17.98 ms
+mos_ff   27C  written 0.567 V, reads 1 down to 0.172 V, 0 up to 0.163 V, precharge reaches 1.200 V: lifetime of a 1 9.24 ms
+mos_ff   85C  written 0.648 V, reads 1 down to 0.124 V, 0 up to 0.112 V, precharge reaches 1.200 V: lifetime of a 1 8.42 ms
+mos_ss   27C  written 0.383 V, reads 1 down to 0.359 V, 0 up to 0.350 V, precharge reaches 1.200 V: lifetime of a 1 9.55 ms
+mos_ss   85C  written 0.479 V, reads 1 down to 0.313 V, 0 up to 0.313 V, precharge reaches 1.200 V: lifetime of a 1 26.88 ms
+# banklife.py results/m2-bankread-1v08.txt results/m2-ret-tw33-1v08.txt  (VDD 1.08; read as 1 when the sense output exceeds VDD/2 at the sample edge)
+mos_tt   27C  written 0.383 V, reads 1 down to 0.297 V, 0 up to 0.288 V, precharge reaches 1.080 V: lifetime of a 1 8.86 ms
+mos_tt   85C  written 0.474 V, reads 1 down to 0.246 V, 0 up to 0.238 V, precharge reaches 1.080 V: lifetime of a 1 12.63 ms
+mos_ff   27C  written 0.474 V, reads 1 down to 0.205 V, 0 up to 0.200 V, precharge reaches 1.080 V: lifetime of a 1 6.91 ms
+mos_ff   85C  written 0.556 V, reads 1 down to 0.153 V, 0 up to 0.150 V, precharge reaches 1.080 V: lifetime of a 1 6.59 ms
+mos_ss   27C  written 0.266 V, reads 1 down to 0.395 V, 0 up to 0.388 V, precharge reaches 1.080 V: lifetime of a 1 unreadable at once (written 0.266 V < 0.395 V)
+mos_ss   85C  written 0.382 V, reads 1 down to 0.346 V, 0 up to 0.338 V, precharge reaches 1.080 V: lifetime of a 1 6.94 ms
+# banklife.py results/m2-bankread-nand4-1v20.txt results/m2-ret-tw33-1v20.txt  (VDD 1.2; read as 1 when the sense output exceeds VDD/2 at the sample edge)
+mos_tt   27C  written 0.482 V, reads 1 down to 0.256 V, 0 up to 0.250 V, precharge reaches 1.200 V: lifetime of a 1 20.43 ms
+mos_tt   85C  written 0.566 V, reads 1 down to 0.200 V, 0 up to 0.188 V, precharge reaches 1.200 V: lifetime of a 1 20.03 ms
+mos_ff   27C  written 0.567 V, reads 1 down to 0.157 V, 0 up to 0.150 V, precharge reaches 1.200 V: lifetime of a 1 10.82 ms
+mos_ff   85C  written 0.648 V, reads 1 down to 0.098 V, 0 up to 0.087 V, precharge reaches 1.200 V: lifetime of a 1 > 10.85 ms (not yet at 0.098 V; lowest level reported 0.1 V)
+mos_ss   27C  written 0.383 V, reads 1 down to 0.358 V, 0 up to 0.350 V, precharge reaches 1.200 V: lifetime of a 1 9.97 ms
+mos_ss   85C  written 0.479 V, reads 1 down to 0.306 V, 0 up to 0.300 V, precharge reaches 1.200 V: lifetime of a 1 28.59 ms
+# banklife.py results/m2-bankread-nand4-1v14.txt results/m2-ret-tw33-1v14.txt  (VDD 1.14; read as 1 when the sense output exceeds VDD/2 at the sample edge)
+mos_tt   27C  written 0.433 V, reads 1 down to 0.274 V, 0 up to 0.263 V, precharge reaches 1.140 V: lifetime of a 1 15.45 ms
+mos_tt   85C  written 0.520 V, reads 1 down to 0.218 V, 0 up to 0.213 V, precharge reaches 1.140 V: lifetime of a 1 17.09 ms
+mos_ff   27C  written 0.521 V, reads 1 down to 0.175 V, 0 up to 0.175 V, precharge reaches 1.140 V: lifetime of a 1 8.88 ms
+mos_ff   85C  written 0.602 V, reads 1 down to 0.116 V, 0 up to 0.112 V, precharge reaches 1.140 V: lifetime of a 1 8.99 ms
+mos_ss   27C  written 0.327 V, reads 1 down to 0.378 V, 0 up to 0.375 V, precharge reaches 1.140 V: lifetime of a 1 unreadable at once (written 0.327 V < 0.378 V)
+mos_ss   85C  written 0.430 V, reads 1 down to 0.325 V, 0 up to 0.313 V, precharge reaches 1.140 V: lifetime of a 1 19.00 ms
+# banklife.py results/m2-bankread-nand4-1v08.txt results/m2-ret-tw33-1v08.txt  (VDD 1.08; read as 1 when the sense output exceeds VDD/2 at the sample edge)
+mos_tt   27C  written 0.383 V, reads 1 down to 0.293 V, 0 up to 0.288 V, precharge reaches 1.080 V: lifetime of a 1 9.35 ms
+mos_tt   85C  written 0.474 V, reads 1 down to 0.236 V, 0 up to 0.225 V, precharge reaches 1.080 V: lifetime of a 1 13.93 ms
+mos_ff   27C  written 0.474 V, reads 1 down to 0.193 V, 0 up to 0.188 V, precharge reaches 1.080 V: lifetime of a 1 7.53 ms
+mos_ff   85C  written 0.556 V, reads 1 down to 0.133 V, 0 up to 0.125 V, precharge reaches 1.080 V: lifetime of a 1 7.75 ms
+mos_ss   27C  written 0.266 V, reads 1 down to 0.396 V, 0 up to 0.388 V, precharge reaches 1.080 V: lifetime of a 1 unreadable at once (written 0.266 V < 0.396 V)
+mos_ss   85C  written 0.382 V, reads 1 down to 0.343 V, 0 up to 0.338 V, precharge reaches 1.080 V: lifetime of a 1 7.53 ms
+# banklife.py results/m2-bankread-nand4-1v08-eval4.txt results/m2-ret-tw33-1v08.txt  (VDD 1.08; read as 1 when the sense output exceeds VDD/2 at the sample edge)
+mos_tt 27C: no read sweep
+mos_tt 85C: no read sweep
+mos_ff 27C: no read sweep
+mos_ff   85C  written 0.556 V, reads 1 down to 0.080 V, 0 up to 0.075 V, precharge reaches 1.080 V: lifetime of a 1 > 10.68 ms (not yet at 0.080 V; lowest level reported 0.1 V)
+mos_ss   27C  written 0.266 V, reads 1 down to 0.345 V, 0 up to 0.338 V, precharge reaches 1.080 V: lifetime of a 1 unreadable at once (written 0.266 V < 0.345 V)
+mos_ss 85C: no read sweep
+# banklife.py results/m2-bankread-nand4-1v20-cbl35.txt results/m2-ret-tw33-1v20.txt  (VDD 1.2; read as 1 when the sense output exceeds VDD/2 at the sample edge)
+mos_tt   27C  written 0.482 V, reads 1 down to 0.262 V, 0 up to 0.250 V, precharge reaches 1.200 V: lifetime of a 1 19.40 ms
+mos_tt   85C  written 0.566 V, reads 1 down to 0.206 V, 0 up to 0.200 V, precharge reaches 1.200 V: lifetime of a 1 19.19 ms
+mos_ff   27C  written 0.567 V, reads 1 down to 0.163 V, 0 up to 0.163 V, precharge reaches 1.200 V: lifetime of a 1 10.10 ms
+mos_ff   85C  written 0.648 V, reads 1 down to 0.105 V, 0 up to 0.100 V, precharge reaches 1.200 V: lifetime of a 1 10.32 ms
+mos_ss   27C  written 0.383 V, reads 1 down to 0.366 V, 0 up to 0.363 V, precharge reaches 1.200 V: lifetime of a 1 6.91 ms
+mos_ss   85C  written 0.479 V, reads 1 down to 0.314 V, 0 up to 0.313 V, precharge reaches 1.200 V: lifetime of a 1 26.83 ms
