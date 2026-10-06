@@ -39,7 +39,8 @@ def short(net):
 qnet = {}
 synth = [d for d in sorted(os.listdir(run)) if d.endswith("yosys-synthesis")]
 nl = os.path.join(run, synth[0], "tt_um_chip_top.nl.v") if synth else os.path.join(run, "final/nl/tt_um_chip_top.nl.v")
-txt = open(nl).read() + open(os.path.join(run, "final/nl/tt_um_chip_top.nl.v")).read()
+fin = os.path.join(run, "final/nl/tt_um_chip_top.nl.v")
+txt = open(nl).read() + (open(fin).read() if os.path.exists(fin) else "")
 for m in re.finditer(r"sg13cmos5l_(d\w+)\s+(\S+)\s*\((.*?)\);", txt, re.S):
     inst, body = m.group(2), m.group(3)
     q = re.search(r"\.Q\(([^)]*)\)", body)

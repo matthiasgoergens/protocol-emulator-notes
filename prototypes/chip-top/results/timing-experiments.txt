@@ -1,0 +1,34 @@
+Timing experiments: partial LibreLane runs to post-route STA (synth/quick_flow.sh), 16.67 ns
+unless noted, configuration = the base harden's (results/harden-pe4 or -pe8) plus the overrides
+listed. Slack in ns at nom_slow_1p08V_125C / nom_typ_1p20V_25C / nom_fast_1p32V_m40C; hold is the
+fast corner's. RTL is the branch at the time, as listed. Runs in /var/tmp/chip-timing/exp/.
+
+baseline (results/harden-pe4, 20 ns): slow -4.171 (81 vio) at 20 ns, typ +4.059, fast +4.622; hold buffers 3206, area 374588
+
+e1-pe4-flowfix         setup -4.486 (218 vio) +2.788  +3.376  hold +0.111  hold buffers 3208  area 378551 
+  CLOCK_PERIOD 16.67, MAX_TRANSITION 0.75, post-GRT setup repair, setup margins PL 0.2 / GRT 0.1
+  RTL: 7a12915^ (unchanged)
+e2-pe4                 setup -0.592 (16 vio)  +3.063  +3.624  hold +0.074  hold buffers 587   area 333046 
+  e1 + chip.sdc (hold uncertainty 0.1), setup margins 1.5 / 1.5
+  RTL: prefix g and step chains
+e3-pe4-delay           setup -3.683 (152 vio) +2.790  +3.343  hold +0.016  hold buffers 752   area 364629 
+  e2 + SYNTH_STRATEGY DELAY 1 (rejected: worse)
+  RTL: as e2
+e4-pe4-m3              setup -0.313 (4 vio)   +2.878  +3.509  hold +0.090  hold buffers 656   area 340109 
+  e2 with setup margins 3.0 / 3.0
+  RTL: + array reset
+e5-pe8-m3              setup -1.170 (2 vio)   +3.026  +3.600  hold -0.054  hold buffers 762   area 417272 
+  e4 at 8 PEs (2|2|2|2)
+  RTL: as e4
+e6-pe4-grtrepair       setup -1.399 (8 vio)   +2.912  +3.463  hold +0.123  hold buffers 2143  area 363294 
+  e4 + post-GRT design repair, GRT hold margin 0.15
+  RTL: + edge sampler compare, fused adder carry-in
+e7-pe4-prefixadd       setup -0.978 (14 vio)  +2.920  +3.491  hold +0.085  hold buffers 614   area 336637 
+  e6 with GRT hold margin 0.10
+  RTL: + prefix adder and comparisons
+e8-pe4-eslevel         setup -0.766 (5 vio)   +2.973  +3.533  hold +0.038  hold buffers 691   area 338730 
+  as e7
+  RTL: + edge sampler's held level register
+e9-pe4-wire            setup +0.255 (0 vio)   +3.095  +3.619  hold +0.031  hold buffers 78    area 335998 
+  e8 + MAX_TRANSITION 0.5, DESIGN_REPAIR_MAX_WIRE_LENGTH 400, hold margins PL 0.05 / GRT 0.05 (adopted in tt/src/config.json)
+  RTL: as e8

@@ -95,5 +95,39 @@ print("\n## by the flip-flop or pin they feed (origin of the sink)")
 for (k, o), c in count.most_common(40):
     print(f"{c:7.0f}  {k:14s} {o}")
 print("\n## by the driver behind them")
-for s, c in srcs.most_common(25):
+for s, c in srcs.most_common():
     print(f"{c:7d}  {s}")
+
+# Self-loops: a chain of hold buffers whose first non-hold driver is a flip-flop that the chain
+# feeds back into (through at most four gates): the register's own enable or clear multiplexer.
+def isflop(i): return "dfrbp" in insts[i][0]
+kinds = collections.Counter()
+for h in holds:
+    d = driver.get(insts[h][1]["A"])
+    if d and is_hold(d[0]):
+        continue  # not the head of its chain
+    src = d[0] if d else None
+    seen, frontier, flops = set(), [(insts[h][1]["X"], 0)], set()
+    while frontier:
+        n, k = frontier.pop()
+        for i, p in sinks.get(n, []):
+            if i in seen:
+                continue
+            seen.add(i)
+            if isflop(i):
+                flops.add(i)
+            elif k < 4 and not insts[i][0].startswith("RM_"):
+                for pp, nn in insts[i][1].items():
+                    if pp in OUT:
+                        frontier.append((nn, k + (0 if is_hold(i) else 1)))
+    if src and isflop(src) and src in flops:
+        kinds["self-loop (flip-flop back to itself)"] += 1
+    elif src and isflop(src):
+        kinds["flip-flop to another flip-flop"] += 1
+    elif src and insts[src][0].startswith("RM_"):
+        kinds["from an SRAM macro output"] += 1
+    else:
+        kinds["from logic (an input of a gate)"] += 1
+print(f"\n## chain heads by kind ({sum(kinds.values())} chains)")
+for k, c in kinds.most_common():
+    print(f"{c:7d}  {k}")

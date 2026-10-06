@@ -16,6 +16,8 @@ IMAGE=localhost/librelane-tt:3.1.0.dev3
 mkdir --parents "$NEW/src"; NEW=$(cd "$NEW" && pwd)
 cp --recursive "$BASE/tt" "$NEW/tt"
 cp "$BASE"/src/*.v "$BASE"/src/*.tcl "$BASE/src/config_merged.json" "$NEW/src/"
+# constraints files from this checkout's tt/src (the base stage may predate them)
+cp "$HERE"/../../../tt/src/*.sdc "$NEW/src/" 2>/dev/null || true
 "$HERE/../../../tt/scripts/regen_chip.sh" "$NEW/src/chip_tt.v" macros "$SIZES" 512
 if [ -n "$OVR" ]; then
   python3 - "$NEW/src/config_merged.json" "$OVR" <<'PY'

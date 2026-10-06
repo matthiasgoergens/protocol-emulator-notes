@@ -7,7 +7,7 @@ project:
   discord:      ""
   description:  "Four-thread deadline sequencer, PE array, pin stage, streamer, sampler, edge sampler, CRC unit, matcher and pin NCO behind a 4-bit host link; generated from Hardcaml"
   language:     "Verilog"
-  clock_hz:     50000000
+  clock_hz:     60000000
 
   tiles: "6x4"
 
