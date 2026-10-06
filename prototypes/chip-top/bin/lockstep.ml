@@ -358,9 +358,29 @@ let controls ~cfg ~trials ~clocks =
   Chip_rtl.bug := "";
   pr "%d of %d planted integration bugs caught\n" !caught (List.length Chip_rtl.bugs)
 
+(* the design with register toggle coverage (Cov): per block, and the never-changed bits listed
+   in [never_file] *)
+let coverage ~cfg ~trials ~clocks ~seed0 ~never_file =
+  Cov.enable ();
+  Chip_sim.coverage := true;
+  let ok = run_design ~cfg ~trials ~clocks ~seed0 in
+  (match Chip_sim.coverage_acc ~cfg () with
+   | Some acc ->
+     Cov.report ~title:(Printf.sprintf "RTL register coverage, layout %s" (layout_name cfg.layout)) acc;
+     let oc = open_out never_file in
+     Cov.write_never oc acc;
+     close_out oc;
+     pr "never-changed bits listed in %s\n" never_file
+   | None -> pr "no coverage recorded\n");
+  ok
+
 let () =
   let cfg = S.default_config in
   match Array.to_list Sys.argv with
+  | [ _; "coverage"; sizes; n; c; s; never_file ] ->
+    let sizes = Array.of_list (List.map int_of_string (String.split_on_char ',' sizes)) in
+    let cfg = { cfg with layout = Upe.Spec.layout_of_sizes sizes } in
+    exit (if coverage ~cfg ~trials:(int_of_string n) ~clocks:(int_of_string c) ~seed0:(int_of_string s) ~never_file then 0 else 1)
   | [ _; "run"; n; c ] -> exit (if run_design ~cfg ~trials:(int_of_string n) ~clocks:(int_of_string c) ~seed0:1 then 0 else 1)
   | [ _; "run"; n; c; s ] ->
     exit (if run_design ~cfg ~trials:(int_of_string n) ~clocks:(int_of_string c) ~seed0:(int_of_string s) then 0 else 1)
@@ -372,4 +392,4 @@ let () =
                   ~clocks:(int_of_string c) ~seed0:100))
       [ [| 1; 1; 1; 1 |]; [| 2; 2; 2; 2 |]; [| 2; 2; 4; 8 |] ];
     ignore (run_design ~cfg:{ cfg with prog_words = 256 } ~trials:(int_of_string n) ~clocks:(int_of_string c) ~seed0:200)
-  | _ -> prerr_endline "usage: lockstep.exe run N CLOCKS [SEED] | controls N CLOCKS | layouts N CLOCKS"
+  | _ -> prerr_endline "usage: lockstep.exe run N CLOCKS [SEED] | controls N CLOCKS | layouts N CLOCKS | coverage SIZES N CLOCKS SEED NEVER_FILE"

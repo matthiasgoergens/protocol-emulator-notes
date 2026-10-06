@@ -13,7 +13,7 @@
  (modules emit)
  (libraries hardcaml chip upe))
 
-(executable
- (name gate_lockstep)
- (modules gate_lockstep)
+(executables
+ (names gate_lockstep edge_phase)
+ (modules twoedge gate_lockstep edge_phase)
  (libraries hardcaml chip upe mphase roundtrip unix))
