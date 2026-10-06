@@ -9,7 +9,8 @@ puts them behind one Hardcaml top level for Tiny Tapeout 6x4 (IHP sg13cmos5l), w
 - a harden with the pinned flow, to measure the whole-chip placement factor (gap G13).
 
 Status: milestones 1-5 done: plan; top level, specification and lockstep; demos through the host
-link; area, hardens and G13; `tt/` points at this chip. Open issues are listed at the end.
+link; area, hardens and G13; `tt/` points at this chip. Section 6: 60 MHz is met at every corner
+with 4 PEs, the hold buffers fell from 3,206 to 78, the array has a reset. Open issues are listed at the end.
 
 Build: `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17). Then
 `_build/default/bin/lockstep.exe run 400 12000`, `... controls 30 12000`, `... layouts 40 12000`,
@@ -340,9 +341,9 @@ The 6x4 tile on sg13cmos5l has a 916,214 µm² die and a 902,417 µm² core (lar
 |---|---|
 | 4 PEs, macros side by side at the lower left, placement density 60 % (TT default) | global routing overflows Metal3 (1,601); detailed routing stalls near 400 violations after 61 iterations; stopped (`results/harden-pe4-d60/`) |
 | the same at density 45 % and 75 % | overflow 3,898 and 2,418 at global routing; stopped (`results/harden-pe4-d45/`, `-d75/`) |
-| **4 PEs, the 1024 x 8 moved to the right end of the core**, density 60 % | **passes**: global routing without overflow; routing DRC 0, LVS 0 (netgen: circuits match uniquely), antenna 0; **Tiny Tapeout's precheck 9 of 9**, KLayout SG13CMOS5L DRC clean; Magic DRC 141,979, every one inside a macro (`results/harden-pe4/`) |
+| **4 PEs, the 1024 x 8 moved to the right end of the core**, density 60 % | **passes**: global routing without overflow; routing DRC 0, LVS 0 (netgen: circuits match uniquely), antenna 0; **Tiny Tapeout's precheck 9 of 9**, KLayout SG13CMOS5L DRC clean; Magic DRC 141,979, every one inside a macro (`results/harden-pe4-20ns/`) |
 | 16 PEs (2\|2\|4\|8), same floorplan | 610,596 µm² of standard cells before routing (76 % of the free core); global routing: Metal3 demand 105 % of capacity, overflow 22,240; stopped (`results/harden-pe16-attempt/`) |
-| **8 PEs (2\|2\|2\|2)**, same floorplan | **passes**: global routing overflow 398 (Metal3 at 80 %), detailed routing to 0 in 15 iterations; LVS 0, antenna 0; **precheck 9 of 9**; Magic DRC all inside the macros (`results/harden-pe8/`) |
+| **8 PEs (2\|2\|2\|2)**, same floorplan | **passes**: global routing overflow 398 (Metal3 at 80 %), detailed routing to 0 in 15 iterations; LVS 0, antenna 0; **precheck 9 of 9**; Magic DRC all inside the macros (`results/harden-pe8-20ns/`) |
 
 **Why routing, not area, is the limit.** sg13cmos5l's block routes on Metal2 to Metal4 only
 (TopMetal1 belongs to Tiny Tapeout's top level), so **Metal3 is the only horizontal routing
@@ -352,7 +353,7 @@ wires (2.44 M µm against 2.22 M at 60 %), which made it worse, not better. What
 run was floorplanning: the 1024 x 8 macro (336 µm tall) in the middle of a 710 µm die split the
 horizontal routing channel.
 
-**The 4-PE chip in numbers** (`results/harden-pe4/`): 27,773 standard cells, 374,588 µm² after
+**The 4-PE chip in numbers** (`results/harden-pe4-20ns/`): 27,773 standard cells, 374,588 µm² after
 place and route (1.36 times the synthesised area: 3,206 hold buffers and 5,453 timing-repair
 buffers), 46 % of the core, wire length 1.40 M µm. Timing at 20 ns: setup +4.06 ns typical
 (about 63 MHz), +4.62 ns fast, **-4.17 ns at the slow corner** (81 endpoints; about 41 MHz);
@@ -383,7 +384,7 @@ synthesised, more than 14 PEs) and its wide selects (every pin and sampler selec
 pads' four quarters), and the 3,200-3,700 hold buffers that Tiny Tapeout's 0.25 ns clock
 uncertainty forces onto short register-to-register paths.
 
-**Timing of the 8-PE chip** (`results/harden-pe8/corners.txt`): setup +1.67 ns typical at 20 ns
+**Timing of the 8-PE chip** (`results/harden-pe8-20ns/corners.txt`): setup +1.67 ns typical at 20 ns
 (about 55 MHz), +4.44 ns fast, -9.21 ns at the slow corner (265 endpoints, about 34 MHz); hold
 positive everywhere. The longer critical path with more PEs points at the array's combinational
 chains (the step, g and lane-loop signals of a joined run ripple through every PE of the run in
@@ -421,24 +422,127 @@ at the right end), `docs/info.md` and the wrapper `src/chip_project.v` are the c
 the host link on the real both-edges stage and passes. The earlier sequencer harness stays in
 `tt/variants/seqv2/` (`TT_VARIANT=seqv2`, `make CHIP=no`, and CI's `tt-harness.yaml`).
 
+## 6. Timing at 60 MHz, the hold buffers, and the array's reset
+
+The host clocks the chip at 60 MHz (16.67 ns). Section 4's hardens ran at 20 ns and failed the
+slow corner (`nom_slow_1p08V_125C`) by 4.17 ns (4 PEs) and 9.21 ns (8 PEs).
+
+**Reading the paths.** Netlist nets keep Hardcaml's names, and an anonymous signal `_N` is the
+net `chip._N`; `bin/origins.exe` maps every signal to the OCaml call sites that built it
+(Hardcaml's caller ids), `synth/paths.py` groups a run's STA paths by start and end origin, and
+`synth/sta.sh` reruns OpenSTA on a run with several paths per endpoint. The glue's registers, the
+array's per-PE state and chains, the edge sampler's outputs and the reset synchroniser now have
+names. Findings (`results/critical-paths.txt`): every violating endpoint was a PE register,
+reached from the edge sampler's output register through segment 0's fixed port, PE 0's A input,
+the window difference, the g multiplexer, **the g chain** (a PE whose g source is 7 takes the
+previous PE's g, across segment boundaries, one multiplexer per PE: the reason 8 PEs were 5 ns
+worse than 4) and then the last PE's adder, saturation and result multiplexer. The step chain
+(follow) rippled the same way. Next: the programme store's SRAM into the sequencer (its
+clock-to-output is 6.25 ns at this corner), the input stage into the edge sampler's four unrolled
+sub-sample steps, and the reset's fan-out. About a third of the worst path's delay was undersized
+drivers on long wires (1.0-2.1 ns slews): the flow's setup repair judged timing on estimated
+parasitics and found nothing to do.
+
+**Fixes that keep every clock's behaviour** (each its own commit; the blocks' own results rerun
+byte-identical, and chip-top's lockstep identical):
+
+| change | where | how it is checked |
+|---|---|---|
+| g and step chains as a Kogge-Stone prefix: log2 n levels instead of n | `../unified-pe/verify` | block lockstep, controls, cells, shared faults, layouts, latency lint |
+| `x + yn + c` as one adder with a carry-in, then the adder, both signed comparisons and the window difference as prefix adders (`prefix_add`, `signed_ge`) | `../unified-pe/verify` | the same, and a SAT proof against Hardcaml's operators with a failing control (`formal/arith_equiv`, `results/arith-equiv.txt`) |
+| the edge sampler compares `since` with `holdoff - 1` and the timeout directly, not `since + 1` after the increment | `../eth10-node` | SAT proof of the sub-sample step against its plain form, with a failing holdoff + 1 control (`formal/edge_step_equiv`, `results/edge-step-equiv.txt`); `results/rx.txt` identical |
+| the edge sampler's held level as a register of its own (`create_with_level`), equal to the glue's `mux2 es_v es_b es_last` | `../eth10-node`, `src/chip_rtl.ml` | chip lockstep |
+
+Each moved the slow-corner slack of a 4-PE partial run (`results/timing-experiments.txt`); the
+runs vary by about a nanosecond from one netlist to the next, so the table records them rather
+than credits each change with a number. Rejected: Yosys's delay-oriented synthesis strategy
+(-3.68 ns against -0.59, and 30 % more wire).
+
+**The hold buffers.** 3,206 at 4 PEs and 3,696 at 8, 52,350 and 60,350 µm². The cause was not the
+macros or the both-edges stage (3 % of the buffers sit behind the stage's flip-flops, none behind
+a macro output) but the constraints: LibreLane's `base.sdc` applies the 0.25 ns clock
+uncertainty to hold as well as setup, and sg13cmos5l has no enable flip-flop, so every register
+with an enable or a synchronous clear has Q returning to its own D through a gate or two. That
+loop has no skew and no jitter between launch and capture, yet clock-to-Q plus one gate is
+shorter than 0.35 ns plus the hold time, so the flow buffered it: 2,115 of the 3,190 buffer
+chains were such self-loops (`results/holds.txt`). Measured after CTS at the typical corner,
+endpoints inside the hold margin by hold uncertainty: 1,692 at 0.25 ns, 72 at 0.15, 27 at 0.10.
+`../../tt/src/chip.sdc` is `base.sdc` with the uncertainty on setup only and 0.1 ns on hold;
+propagated clocks, the 5 % early/late derate and the flow's hold margins (now 0.05 ns after
+placement and after global routing) remain. **78 hold buffers at 4 PEs, 121 at 8**, and hold is
+positive at every corner (fast +0.031 and +0.025 ns).
+
+**The flow** (`../../tt/src/config.json`, above Tiny Tapeout's "do not change" line):
+`CLOCK_PERIOD` 16.67, `chip.sdc` for place and route and sign-off, a 0.5 ns transition limit
+and a 400 µm wire-length limit, design repair and setup repair after global routing, 3 ns of
+setup margin in both setup repairs. `../../tt/info.yaml` says 60 MHz.
+
+**The glue's area** (`results/glue-area.txt`, `synth/area_by_origin.py`: flip-flops by the call
+site that built them, combinational cells shared among the flip-flops they feed): about 90,000
+µm² of the 4-PE chip's 298,000 (typical-liberty areas); the register file (550 configuration
+bits, each a flip-flop with its enable multiplexer, about 43,000), the host FIFOs (17,000) and
+the host link's read multiplexer (9,000) are the largest items. Each is fixed by the host-visible
+register map and FIFO depths of the specification, and none was cut here. What came down is the
+placed area around it: the hold buffers above, so the growth from synthesis to placed cells fell
+from 1.36 to 1.21 (4 PEs) and from 1.35 to 1.22 (8 PEs).
+
+**The array's reset.** `Upe_rtl.array_create` takes an optional synchronous clear of every
+register (PE state and configuration chains, feed and control registers) to 0, the model's
+initial state, and `chip_rtl.ml` drives it from the chip's reset. This changes behaviour: before,
+the array ran on through a reset with idle inputs; now a reset clears it, so `chip_spec.ml` does
+the same (a fresh model on reset). Why change it rather than prove it harmless: it was not
+harmless. A pad whose source is a segment's tap bit, a flag on a tap, or a configuration that
+reads P or F before writing them showed the power-up value. The power-up proof
+(`formal/array_powerup.sby`, the method of `../formal/powerup`: two copies from arbitrary
+register contents, the same inputs, one clock of clear; every register and tap equal from then
+on) passes with the clear and fails without it, at 4 and 8 PEs (`results/array-powerup.txt`). A
+new planted bug, `array_unreset`, is caught by the lockstep (28 of 28). Cost: about 2,800 µm²
+of synthesis at 4 PEs together with the prefix adders (274,741 to 277,535).
+
+**Verification after all of it**: lockstep 4.8 M clocks at 4 PEs and 480,000 at each of 1|1|1|1,
+2|2|2|2, 3|3|3|3, 2|2|4|8 and a 256-word store, 0 mismatches (`results/lockstep.txt`,
+`results/lockstep_layouts.txt`); 28 of 28 planted integration bugs caught
+(`results/controls.txt`); both demos pass; the cocotb test of `../../tt/test` passes on the RTL.
+
+**The hardens** (Tiny Tapeout's flow through `../../tt/scripts/harden.sh`, 6x4, 16.67 ns, the
+1024 x 8 at the right end as before; setup / hold worst slack in ns):
+
+| PEs | slow 1.08 V 125 C | typical | fast | slowest corner's period | hold buffers | cells | DRC, LVS, antenna, precheck |
+|---|---|---|---|---|---|---|---|
+| 4 (1\|1\|1\|1), `results/harden-pe4/` | **+0.255** / +0.253 | +3.095 / +0.114 | +3.619 / +0.031 | 16.42 ns, 60.9 MHz | 78 | 26,004 | 0, match, 0, 9 of 9 |
+| 8 (2\|2\|2\|2), `results/harden-pe8/` | **-1.333** / +0.234 | +2.827 / +0.106 | +3.420 / +0.025 | 18.00 ns, 55.5 MHz | 121 | 32,822 | 0, match, 0, 9 of 9 |
+
+Magic DRC reports errors only inside the macros, as before (`magic-drc-by-region.txt`). The
+4-PE harden is the refresh of section 4's: it includes 9a50420's pad-select reset defaults and
+every change above. "Period" is the 16.67 ns clock minus the worst slack, so it includes the
+0.25 ns setup uncertainty. The post-layout round trip's edge-by-edge gate lockstep
+(`bin/gate_lockstep.exe`, two-edge, against this branch's Hardcaml) on both new GDS files: 8 x
+25,000 clocks each, 400,000 output words, 0 mismatching, and the 915 bytes written to the memories
+read back correctly (`gate-lockstep-two-edge.txt` in each harden directory).
+
+**What limits 8 PEs.** The 8 failing endpoints are PE registers reached from a segment's control
+register (its source select, `upe_rtl.ml` 308) or from a P register: the same PE route as before,
+now with the chains in log depth. Their worst cells are drivers of long wires (0.25-0.30 pF, 1.9-2.6 ns at this
+corner): global routing put Metal3, the only horizontal layer, at 81 % with an overflow of 1,049,
+and detailed routing's detours are longer than the parasitics the repairs sized for. The 4-PE
+chip has the same logic and meets 60 MHz with 0.26 ns to spare; at 8 PEs it is wire, not depth.
+
 ## Open issues
 
-- **Timing.** 60 MHz is not met at the slow corner (4 PEs: -4.17 ns at 20 ns; 8 PEs: -9.21 ns).
-  Name the glue's and the array's signals so the worst paths can be read, then pipeline or cut
-  them (suspects: the array's per-run ripple chains, the register-file read mux).
-- **Routing.** The glue's area and wiring (215,700 µm² synthesised; full 16-pad selects) and the
-  hold buffers limit the PE count more than the PEs do; 12 PEs untried.
-- **The PE array has no reset** (`../unified-pe/verify/upe_rtl.ml`): its state and segment
-  control registers power up unknown. Every pin and flag defaults away from it, so nothing
-  observable depends on it until the host configures the array, but a configuration that reads a
-  held field (F with fwb = hold, P before the first step) sees the power-up value. In simulation
-  everything starts at 0. A clear on the segment controls and the PE state, in the block's own
-  commit with an X-propagation test, would close it.
-- **Post-layout round trip**: done on both hardens (section 4). Gaps it reports: about a third of
-  the rising-edge flip-flops never change under its random host traffic (mostly the PE array), and
-  the stage's input samplers are pinned to the falling edge by the structural trace only; moving one
-  to the rising edge is not visible to that stimulus. The 4-PE GDS of record predates 9a50420, so
-  `tt/` today would build a slightly different 4-PE chip.
+- **Timing at 8 PEs and more.** 60 MHz is met at every corner with 4 PEs (+0.26 ns at the slow
+  corner). 8 PEs miss it at the slow corner only (-1.33 ns, about 55.5 MHz), on long Metal3 wires
+  around a congested horizontal layer (section 6); typical and fast have about 3 ns to spare.
+  Levers not tried: a floorplan with the PE rows nearer to each other, a register stage at each
+  segment's input (a change of the array's specification), a lower placement density only around
+  the array.
+- **Routing.** Metal3 is the limit (81 % at 8 PEs, 88 % at 12 at global routing). The glue's area
+  (about 90,000 µm², mostly the register file and the host FIFOs that the host-visible
+  specification fixes) was not cut.
+- **Post-layout round trip**: done on section 4's hardens and its gate lockstep on section 6's
+  4- and 8-PE GDS. Gaps it reports: about a third of the rising-edge flip-flops never change under
+  its random host traffic (mostly the PE array), and the stage's input samplers are pinned to the
+  falling edge by the structural trace only; moving one to the rising edge is not visible to that
+  stimulus. The 4-PE GDS of record now includes 9a50420.
 - **Not in v0**: the stuff tracker and line coder (probes only), fine delay, the gain-cell banks,
   the bank's fixed ports into the array, a second bit-path chain; the quarter-clock phases on
   silicon (the hardened stage uses both clock edges).
