@@ -88,7 +88,13 @@ type pe_out = {
   tap : t;
 }
 
-let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
+(* [g_resolved] and [step_resolved], when given, are this PE's g and step as the array resolves
+   them (see [resolve_chain] below); the PE then exports its own contribution to each chain
+   ([g_link], [step_link]) instead of reading [g_in] and [lstep_in]. Without them the PE computes
+   both from [g_in] and [lstep_in] itself, as a single PE does. *)
+type link = { pass : t; local : t }
+
+let pe ?(pe_index = 0) ?(cut = 8) ?g_resolved ?step_resolved spec (i : pe_in) =
   (* configuration chain: b.(0) takes the input byte *)
   let b = Array.make 8 (zero 8) in
   let prev = ref i.cfg_in in
@@ -122,7 +128,9 @@ let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
   let result = wire 16 in
   let f_src = if is "g_from_F_inverted" then ~:f else f in
   let g_in = if is "g_in_zero" && pe_index = cut then gnd else i.g_in in
-  let g = mux gsel [ vdd; bit_a; lane_in; s15_x; crc_fb; f_src; window; g_in ] in
+  (* g source 7 passes the previous PE's g on: the chain's link is (pass, local) *)
+  let g_link = { pass = gsel ==:. 7; local = mux gsel [ vdd; bit_a; lane_in; s15_x; crc_fb; f_src; window; gnd ] } in
+  let g = match g_resolved with Some g -> g | None -> mux2 g_link.pass g_in g_link.local in
   let sin = mux sinsel [ g; lane_in; (if is "sin_s15_uses_own" then s15 else i.s15_in); lsb i.a ] in
   let shl = concat_msb [ select s 14 0; sin ] in
   let shr = if is "shr_sin_bit14" then concat_msb [ gnd; sin; select s 14 1 ] else concat_msb [ sin; select s 15 1 ] in
@@ -155,7 +163,9 @@ let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
   let loser = if is "pwb_loser_is_winner" then result else loser in
   let zero_ = (if is "zero_on_x" then x else result) ==:. 0 in
   let step_self = mux2 (if is "stream_ignored" then gnd else stream) i.av vdd in
-  let step = i.run &: mux2 (if is "follow_ignored" then gnd else follow) i.lstep_in step_self in
+  let follows = if is "follow_ignored" then gnd else follow in
+  let step_link = { pass = i.run &: follows; local = i.run &: step_self } in
+  let step = match step_resolved with Some s -> s | None -> mux2 step_link.pass i.lstep_in step_link.local in
   let cond_w = if is "swb_cond_inverted" then ~:g else g in
   let s_next = mux swb [ s; result; x; mux2 cond_w result s ] in
   let merge = mux2 g (concat_msb [ select i.a 15 8; (if is "merge_colour_hi" then select k 15 8 else select k 7 0) ]) i.a in
@@ -173,7 +183,7 @@ let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
   f <== reg spec ~enable:step f_next;
   l <== reg spec ~enable:step l_next;
   let tap = if is "tap_always_s" then s else mux2 tap_p p s in
-  { s; p; pv; f; l; g; step; cfg; cfg_out = b.(7); init_out = select s 15 8; tap }
+  ({ s; p; pv; f; l; g; step; cfg; cfg_out = b.(7); init_out = select s 15 8; tap }, g_link, step_link)
 
 (* The single PE as a circuit, for synthesis against the area probe. *)
 let pe_circuit () =
@@ -185,7 +195,7 @@ let pe_circuit () =
       s15_in = inp "s15_in" 1; cb_in = inp "cb_in" 1; g_in = inp "g_in" 1; lstep_in = inp "lstep_in" 1;
       init_wr = inp "init_wr" 1; init_in = inp "init_in" 8; cfg_wr = inp "cfg_wr" 1; cfg_in = inp "cfg_in" 8 }
   in
-  let o = pe spec i in
+  let o, _, _ = pe spec i in
   Circuit.create_exn ~name:"upe_v1"
     [ output "p" o.p; output "pv" o.pv; output "l" o.l; output "g" o.g; output "step" o.step;
       output "s15" (msb o.s); output "cfg_out" o.cfg_out; output "init_out" o.init_out;
@@ -200,6 +210,24 @@ type array_in = {
   ainit_wr : t; ainit_seg : t; ainit_byte : t;
   fixed_d : t array; fixed_v : t array;
 }
+
+(* A chain in which element i is [local i] unless it passes element i - 1's value on
+   ([pass i]), and element -1 is 0, resolved as a parallel prefix (Kogge-Stone): log2 n levels of
+   2:1 multiplexers instead of n in a row. Combining an earlier span a with a later span b gives
+   (pass a && pass b, if pass b then local a else local b). *)
+let resolve_chain (links : link array) =
+  let n = Array.length links in
+  let cur = Array.mapi (fun i l -> if i = 0 then { pass = gnd; local = mux2 l.pass gnd l.local } else l) links in
+  let d = ref 1 in
+  while !d < n do
+    let prev = Array.copy cur in
+    for i = !d to n - 1 do
+      let a = prev.(i - !d) and b = prev.(i) in
+      cur.(i) <- { pass = a.pass &: b.pass; local = mux2 b.pass a.local b.local }
+    done;
+    d := 2 * !d
+  done;
+  Array.map (fun l -> l.local) cur
 
 type seg_regs = { flo : t; fhi : t; fv : t; fv0 : t; ctrl : t; rep : t; cnt : t; fw : t; word : t }
 type array_out = { tap_d : t array; tap_v : t array; tap_f : t array; pes : pe_out array; segs : seg_regs array }
@@ -240,6 +268,8 @@ let array_create ?(layout = Spec.default_layout) ~clock (inp : array_in) =
       cfg = wire 64; cfg_out = wire 8; init_out = wire 8; tap = wire 16 }
   in
   let w = Array.init n_pe (fun _ -> wires ()) in
+  let g_res = Array.init n_pe (fun _ -> wire 1) and step_res = Array.init n_pe (fun _ -> wire 1) in
+  let g_links = Array.make n_pe { pass = gnd; local = gnd } and step_links = Array.make n_pe { pass = gnd; local = gnd } in
   for i = 0 to n_pe - 1 do
     let sg = seg_of i in
     let first = i = seg_start.(sg) in
@@ -276,8 +306,8 @@ let array_create ?(layout = Spec.default_layout) ~clock (inp : array_in) =
       else alane
     in
     let bseg = if is "lane_bc_wrong_seg" && sg = 3 then 2 else sg in
-    let o =
-      pe ~pe_index:i ~cut:seg_start.(3) spec
+    let o, g_link, step_link =
+      pe ~pe_index:i ~cut:seg_start.(3) ~g_resolved:g_res.(i) ~step_resolved:step_res.(i) spec
         { run = bit c 4; a; av; alane; bcast = bc.(bseg);
           s15_in = (if i > 0 then msb w.(i - 1).s else gnd);
           cb_in = (if i < n_pe - 1 then msb w.(i + 1).s else gnd);
@@ -291,8 +321,14 @@ let array_create ?(layout = Spec.default_layout) ~clock (inp : array_in) =
     let (t : pe_out) = w.(i) in
     t.s <== o.s; t.p <== o.p; t.pv <== o.pv; t.f <== o.f; t.l <== o.l; t.g <== o.g;
     t.step <== o.step; t.cfg <== o.cfg; t.cfg_out <== o.cfg_out; t.init_out <== o.init_out;
-    t.tap <== o.tap
+    t.tap <== o.tap;
+    g_links.(i) <- g_link; step_links.(i) <- step_link
   done;
+  (* g and step: PE i's value is its own [local] unless it [pass]es the previous PE's on; PE 0's
+     previous is 0. The planted bug cuts g's chain at segment 3. *)
+  let g_links = Array.mapi (fun i l -> if is "g_in_zero" && i = seg_start.(3) && i > 0 then { pass = gnd; local = mux2 l.pass gnd l.local } else l) g_links in
+  Array.iteri (fun i v -> g_res.(i) <== v) (resolve_chain g_links);
+  Array.iteri (fun i v -> step_res.(i) <== v) (resolve_chain step_links);
   { tap_d = Array.map (fun e -> w.(e).tap) seg_end; tap_v = Array.map (fun e -> w.(e).pv) seg_end;
     tap_f = Array.map (fun e -> w.(e).f) seg_end; pes = w; segs = segregs }
 

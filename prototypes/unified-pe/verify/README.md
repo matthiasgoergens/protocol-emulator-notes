@@ -28,6 +28,15 @@ default is the 2|2|4|8 above, so every result in this file is unchanged (rerun: 
 3|1|4|2: 0 mismatches in 2,517,892 clocks, and five planted bugs caught at every layout
 (`results/lockstep_layouts.txt`).
 
+**g and step chains as a parallel prefix (2026-10-06, for `../../chip-top`'s timing).** A PE's g
+with source 7 is the previous PE's g, and a following PE's step is the previous PE's step; the
+RTL built both as a ripple through every PE of the array, one multiplexer per PE, which made the
+chip's critical path grow with the PE count (`../../chip-top/results/critical-paths.txt`). The
+array now resolves both chains as a Kogge-Stone prefix over (passes on, own value) pairs:
+log2 n levels instead of n. The function is unchanged, so all results are byte-identical when
+rerun: lockstep, controls (`g_in_zero` is now planted in the prefix's input and still caught),
+cells, shared faults, the four layouts, and the latency lint.
+
 ## Files and commands
 
 | file | what it is |
