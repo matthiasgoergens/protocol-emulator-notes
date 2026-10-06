@@ -12,3 +12,13 @@
  (name emit)
  (modules emit)
  (libraries hardcaml chip upe))
+
+(executable
+ (name origins)
+ (modules origins)
+ (libraries hardcaml chip upe sexplib0))
+
+(executable
+ (name rtlpaths)
+ (modules rtlpaths)
+ (libraries hardcaml chip upe sexplib0))

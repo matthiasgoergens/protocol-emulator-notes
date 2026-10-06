@@ -65,13 +65,14 @@ type outputs = { pad_nib : Signal.t; uio_oe : Signal.t; dbg : (string * Signal.t
 
 (* a FIFO of [depth] entries; a push into a full FIFO is taken when the head leaves in the same
    clock. Returns head, count, accept. *)
-let fifo spec ~depth ~push ~pop ~data =
+let fifo ~name spec ~depth ~push ~pop ~data =
   let pbits = address_bits_for depth in
-  let rd = wire pbits and wr = wire pbits and count = wire (pbits + 1) in
+  let ( -- ) s n = s -- (name ^ "_" ^ n) in
+  let rd = wire pbits -- "rd" and wr = wire pbits -- "wr" and count = wire (pbits + 1) -- "count" in
   let full = count ==:. depth and nonempty = count <>:. 0 in
   let popping = pop &: nonempty in
   let accept = push &: (~:full |: popping) in
-  let slots = List.init depth (fun i -> reg spec ~enable:(accept &: (wr ==:. i)) data) in
+  let slots = List.init depth (fun i -> reg spec ~enable:(accept &: (wr ==:. i)) data -- Printf.sprintf "slot%d" i) in
   rd <== reg spec (mux2 popping (rd +:. 1) rd);
   wr <== reg spec (mux2 accept (wr +:. 1) wr);
   count <== reg spec (count +: uresize accept (pbits + 1) -: uresize popping (pbits + 1));
@@ -95,7 +96,7 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
         else
           let rs = Reg_spec.override spec ~clear_to:(of_int ~width:8 (reset_value a)) in
           let d = uresize (select act_byte (w - 1) 0) 8 in
-          reg rs ~enable:(act_reg_at a) d)
+          reg rs ~enable:(act_reg_at a) d -- Printf.sprintf "cfgreg_%02x" a)
   in
   let reg32 a = concat_msb [ regs.(a + 3); regs.(a + 2); regs.(a + 1); regs.(a) ] in
   let run = bit regs.(r_ctrl) 0 and hold = bit regs.(r_ctrl) 1 in
@@ -211,13 +212,23 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
         fixed_d = Array.init 4 (fun j -> if j = fixed_seg then uresize es_bit 16 else zero 16);
         fixed_v = Array.init 4 (fun j -> if j = fixed_seg then es_valid else gnd) }
   in
+  (* names for timing reports: the array's per-PE and per-segment state, and its g and step chains *)
+  Array.iteri (fun i (pe : Upe.Upe_rtl.pe_out) ->
+      let nm f x = ignore (x -- Printf.sprintf "pe%d_%s" i f) in
+      nm "s" pe.s; nm "p" pe.p; nm "pv" pe.pv; nm "f" pe.f; nm "l" pe.l; nm "g" pe.g; nm "step" pe.step;
+      nm "cfg" pe.cfg; nm "tap" pe.tap) arr.pes;
+  Array.iteri (fun j (r : Upe.Upe_rtl.seg_regs) ->
+      let nm f x = ignore (x -- Printf.sprintf "seg%d_%s" j f) in
+      nm "flo" r.flo; nm "fhi" r.fhi; nm "fv" r.fv0; nm "ctrl" r.ctrl; nm "rep" r.rep; nm "cnt" r.cnt; nm "fw" r.fw) arr.segs;
   let port_reset = mux2 (pulse r_port_reset) (select act_byte 3 0) (zero 4) in
   let holds =
     Array.init 4 (fun p ->
         let st = Variable.reg spec ~width:2 and w = Variable.reg spec ~width:16 in
+        ignore (st.value -- Printf.sprintf "hold%d_st" p); ignore (w.value -- Printf.sprintf "hold%d_w" p);
         let src = if is "tap_seg_miswire" then (p + 1) mod 4 else p in
         let pop = bit port_in_ready p in
         let hi = Variable.reg spec ~width:1 in
+        ignore (hi.value -- Printf.sprintf "send_hi%d" p);
         send_hi.(p) <== hi.value;
         compile
           [ when_ (thread_push &: (push_port ==:. p)) [ hi <-- ~:(hi.value) ]
@@ -238,17 +249,17 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   let hin_push = act_is t_hostin in
   let hin_head, hin_count, hin_accept, hin_full, hin_ne =
     if is "hostin_overwrite" then begin
-      let h, c, _, f, ne = fifo spec ~depth:Chip_spec.hostin_depth ~push:hin_push ~pop:host_in_ready ~data:act_byte in
+      let h, c, _, f, ne = fifo ~name:"hostin" spec ~depth:Chip_spec.hostin_depth ~push:hin_push ~pop:host_in_ready ~data:act_byte in
       (h, c, hin_push, f, ne)
     end
-    else fifo spec ~depth:Chip_spec.hostin_depth ~push:hin_push ~pop:host_in_ready ~data:act_byte
+    else fifo ~name:"hostin" spec ~depth:Chip_spec.hostin_depth ~push:hin_push ~pop:host_in_ready ~data:act_byte
   in
   hostin_head <== hin_head; hostin_nonempty <== hin_ne;
   let hout_lat = Variable.reg spec ~width:1 in
   let hout_pop = wire 1 in
   let hout_push = seq.host_out_valid in
   let hout_head, hout_count, hout_accept, _, hout_ne =
-    fifo spec ~depth:Chip_spec.hostout_depth ~push:hout_push ~pop:hout_pop ~data:(concat_msb [ seq.host_tag; seq.host_out ])
+    fifo ~name:"hostout" spec ~depth:Chip_spec.hostout_depth ~push:hout_push ~pop:hout_pop ~data:(concat_msb [ seq.host_tag; seq.host_out ])
   in
   (* ---- assists ---- *)
   let aclear = reset |: hold in
@@ -288,10 +299,12 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   let es_b, es_v, es_end, _es_over, es_in_burst =
     Eth10.Edge_sampler.create ~clock ~clear:aclear ~n:4 ~cfg:es_cfg ~samples:es_samples ~active:es_active
   in
+  let es_b = es_b -- "es_bit_raw" and es_v = es_v -- "es_valid" and es_end = es_end -- "es_burst_end" in
+  let es_in_burst = es_in_burst -- "es_in_burst" in
   (* the bit output is defined only while valid; hold the last one so that it is a level *)
   let es_last = wire 1 in
-  let es_lvl = mux2 es_v es_b es_last in
-  es_last <== reg (Reg_spec.override spec ~clear:aclear) es_lvl;
+  let es_lvl = mux2 es_v es_b es_last -- "es_level" in
+  es_last <== (reg (Reg_spec.override spec ~clear:aclear) es_lvl -- "es_last_reg");
   es_bit <== es_lvl; es_valid <== es_v;
   let match_y, match_hit =
     Eth10.Matcher_en.create ~clock ~clear:aclear ~enable:es_v ~x:es_b ~cfg_in:(bit act_byte 0)
@@ -385,7 +398,16 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   let waiting = act_is t_peseg &: ~:host_mbx_done in
   let a_valid = Variable.reg spec ~width:1 and a_tgt = Variable.reg spec ~width:4 in
   let a_addr = Variable.reg spec ~width:16 and a_byte = Variable.reg spec ~width:8 in
-  act_valid <== a_valid.value; act_tgt <== a_tgt.value; act_addr <== a_addr.value; act_byte <== a_byte.value;
+  act_valid <== (a_valid.value -- "act_valid"); act_tgt <== (a_tgt.value -- "act_tgt");
+  act_addr <== (a_addr.value -- "act_addr"); act_byte <== (a_byte.value -- "act_byte");
+  List.iter (fun (v, n) -> ignore (v -- n))
+    [ fetch_valid.value, "fetch_valid"; fetch_tgt.value, "fetch_tgt"; fetch_addr.value, "fetch_addr";
+      rbuf.value, "link_rbuf"; pst.value, "link_state"; addr.value, "link_addr"; remaining.value, "link_remaining";
+      tgt.value, "link_tgt"; hi_nib.value, "link_hi_nib"; prog_lo.value, "prog_lo"; hout_lat.value, "hout_lat";
+      smp_lat.value, "smp_lat"; sticky_err.value, "sticky_err"; seq.imem_addr, "seq_imem_addr";
+      seq.port_out_valid, "seq_port_out_valid"; seq.port_out_data, "seq_port_out_data"; seq.bank_addr, "seq_bank_addr";
+      seq.bank_we, "seq_bank_we"; seq.pin_sub, "seq_pin_sub"; seq.pin_oe, "seq_pin_oe"; flags, "flags";
+      prog_q, "prog_q"; bank_q, "bank_q"; nco, "nco"; crc_raw, "crc_raw" ];
   let clear_sticky = pulse r_status &: (if is "status_not_cleared" then gnd else vdd) in
   compile
     [ if_ na_valid.value
@@ -437,7 +459,7 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
       let sel = regs.(r_padsel p) in
       let n, oe = source (select sel 4 0) in
       let n = mux2 (bit sel 5) (~:n) n in
-      if p < 8 then pad_out.(p) <- mux2 oe n (rep4 (bit sel 6))
+      if p < 8 then pad_out.(p) <- (mux2 oe n (rep4 (bit sel 6)) -- Printf.sprintf "pad%d_nib" p)
       else (pad_out.(p) <- n; oes.(p - 8) <- oe))
     general_out_pads;
   for k = 0 to 3 do pad_out.(pad_hdata + k) <- rep4 (bit rnib k); oes.(k) <- prev_r done;

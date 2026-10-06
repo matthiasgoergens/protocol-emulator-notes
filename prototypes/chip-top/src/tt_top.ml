@@ -42,7 +42,7 @@ let create ?(cfg = Chip_spec.default_config) ~memories ~name () =
   let clk = input "clk" 1 and rst_n = input "rst_n" 1 in
   let clocks = [| clk; clk; ~:clk; ~:clk |] in
   let sync = Reg_spec.create ~clock:clk () in
-  let reset = reg sync (reg sync (~:rst_n)) in
+  let reset = reg sync (reg sync (~:rst_n) -- "reset_meta") -- "reset_sync" in
   let clocking = Mphase.Stage.Phases { clocks; clear = reset } in
   let pads = concat_lsb [ ui_in; uio_in ] in
   let smp = Mphase.Stage.input_stage clocking ~pads in
