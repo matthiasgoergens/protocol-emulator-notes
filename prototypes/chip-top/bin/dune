@@ -1,0 +1,4 @@
+(executable
+ (name lockstep)
+ (modules lockstep)
+ (libraries hardcaml chip unix))

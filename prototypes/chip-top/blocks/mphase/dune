@@ -1,0 +1,4 @@
+; ../../../multiphase: the four-phase pin stage and the pin NCO (symlinks).
+(library
+ (name mphase)
+ (libraries hardcaml))
