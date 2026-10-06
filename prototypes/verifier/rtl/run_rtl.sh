@@ -8,6 +8,9 @@
 #   rtl/run_rtl.sh             every job
 #   rtl/run_rtl.sh JOB...      those jobs (names below)
 # Output: ../results/rtl.txt (with RESULT=FILE, that file); work directories under $WORK.
+# PDR_TIMEOUT (default 1800 s) bounds each unbounded proof; where it runs out, the properties
+# are reported to the depth of the bounded run (slots), which checks every one of them.
+# REPORT_ONLY=1: write the report from the work directories, running nothing.
 set -o errexit -o nounset -o pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 VERIFIER=$(dirname "$HERE")
@@ -16,6 +19,8 @@ WORK=${WORK:-/var/tmp/verifier-rtl/rtl}
 Z3ENV=${Z3ENV:-/var/tmp/symbolic-bmc/z3env}
 JOBS=${JOBS:-2}
 MAXLOAD=${MAXLOAD:-18}
+PDR_TIMEOUT=${PDR_TIMEOUT:-1800}
+REPORT_ONLY=${REPORT_ONLY:-0}
 RESULT=${RESULT:-$VERIFIER/results/rtl.txt}
 IMAGE=ghcr.io/librelane/librelane:3.0.14
 export DOCKER_CONFIG=${DOCKER_CONFIG:-/var/tmp/claude-notes/dockercfg}
@@ -88,6 +93,7 @@ prepare() {
     # not found in design" for a port of the core); abc names the failing output and its frame,
     # and the model's design_aiger.ywa names the outputs
     echo "prove: aigsmt none"
+    echo "prove: timeout $PDR_TIMEOUT"
     if [ "$expect" = pass ]; then
       echo "slots: mode bmc"
       echo "slots: depth $sdepth"
@@ -128,11 +134,13 @@ run_task() {
 }
 
 pairs=()
-for j in $jobs_wanted; do
-  for t in $(prepare "$j"); do pairs+=("$j:$t"); done
-done
+if [ "$REPORT_ONLY" != 1 ]; then
+  for j in $jobs_wanted; do
+    for t in $(prepare "$j"); do pairs+=("$j:$t"); done
+  done
+fi
 running=0
-for pt in "${pairs[@]}"; do
+for pt in "${pairs[@]+"${pairs[@]}"}"; do
   run_task "${pt%%:*}" "${pt#*:}" &
   running=$((running + 1))
   sleep 20   # let the load average see the new run before the next one is started
@@ -140,10 +148,23 @@ for pt in "${pairs[@]}"; do
 done
 wait
 
-# the step at which a reach task's negated antecedent failed, or "" if it held to the depth
+# the name of the assertion abc reports failing in a task's log (its output index, named by the
+# model's design_aiger.ywa)
+failed_name() {
+  local dir=$1 task=$2 idx
+  idx=$(grep --only-matching --max-count=1 --extended-regexp 'Output [0-9]+ of miter' "$dir/$task.out" | sed 's/Output \([0-9]*\) .*/\1/')
+  [ -n "$idx" ] || { echo "?"; return; }
+  python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["asserts"][int(sys.argv[2])][0].lstrip("\\"))' \
+    "$dir/cert_$task/model/design_aiger.ywa" "$idx"
+}
+# the step at which a reach task's negated antecedent failed, "" if it held to the depth, and
+# "ERROR" if another assertion failed first
 reach_step() {
-  local f=$1
-  if grep --quiet 'DONE (FAIL' "$f"; then grep --only-matching --max-count=1 'asserted in frame [0-9]*' "$f" | sed 's/.* //'
+  local dir=$1 task=$2
+  if grep --quiet 'DONE (FAIL' "$dir/$task.out"; then
+    if [ "$(failed_name "$dir" "$task")" = reach ]; then
+      grep --only-matching --max-count=1 'asserted in frame [0-9]*' "$dir/$task.out" | sed 's/.* //'
+    else echo "ERROR"; fi
   else echo ""; fi
 }
 
@@ -162,8 +183,21 @@ reach_step() {
     grep --extended-regexp 'summary: engine|Assert failed|failed assertion|DONE|Elapsed clock' "$dir/prove.out" \
       | sed 's/^SBY [0-9:]* \[[^]]*\] //' || echo "no result (see $dir/prove.out)"
     labels=$(grep --only-matching --extended-regexp '[a-z_]+: assert' "$dir/cert_check.sv" | sed 's/: assert//' | grep --invert-match --extended-regexp '^(reach|slots)$')
-    if grep --quiet 'DONE (PASS' "$dir/prove.out"; then
-      if [ -f "$dir/reach_done.out" ]; then s=$(reach_step "$dir/reach_done.out"); else s=""; fi
+    if grep --quiet 'DONE (TIMEOUT' "$dir/prove.out" && [ -f "$dir/slots.out" ] && grep --quiet 'DONE (PASS' "$dir/slots.out"; then
+      # the unbounded proof ran out of time; the bounded run checked every assertion
+      s=$(reach_step "$dir" reach_done)
+      for l in $labels slots; do
+        if [ -n "$s" ] && [ "$s" != ERROR ]; then
+          echo "PROPERTY $j-$l: PROVED to $(cat "$dir/slots_depth") clocks (abc bmc3; abc pdr stopped at its ${PDR_TIMEOUT} s limit); antecedent ${l}_ante reachable (step $s)"
+        else echo "PROPERTY $j-$l: UNDECIDED (bounded run passed, antecedent not decided)"; fi
+      done
+      for f in $(cat "$dir/finals"); do
+        [ -f "$dir/reach_fin_$f.out" ] || continue
+        s2=$(reach_step "$dir" "reach_fin_$f")
+        if [ -n "$s2" ] && [ "$s2" != ERROR ]; then echo "COVER $j-final_$f: REACHABLE (step $s2)"; else echo "COVER $j-final_$f: UNDECIDED"; fi
+      done
+    elif grep --quiet 'DONE (PASS' "$dir/prove.out"; then
+      if [ -f "$dir/reach_done.out" ]; then s=$(reach_step "$dir" reach_done); else s=""; fi
       for l in $labels; do
         if [ -n "$s" ]; then echo "PROPERTY $j-$l: PROVED unbounded (abc pdr); antecedent ${l}_ante reachable (step $s)"
         elif [ -f "$dir/reach_done.out" ] && grep --quiet 'DONE (PASS' "$dir/reach_done.out"; then
@@ -175,22 +209,19 @@ reach_step() {
           if [ -n "$s" ]; then echo "PROPERTY $j-slots: PROVED to $(cat "$dir/slots_depth") clocks (abc bmc3), past every event's slot (rtl.ml); antecedent slots_ante reachable (step $s)"
           else echo "PROPERTY $j-slots: VACUOUS to $(cat "$dir/slots_depth") clocks; antecedent unreachable"; fi
         elif grep --quiet 'DONE (FAIL' "$dir/slots.out"; then
-          echo "PROPERTY $j-slots: FAILED at step $(grep --only-matching --max-count=1 'asserted in frame [0-9]*' "$dir/slots.out" | sed 's/.* //')"
+          echo "PROPERTY $j-$(failed_name "$dir" slots): FAILED at step $(grep --only-matching --max-count=1 'asserted in frame [0-9]*' "$dir/slots.out" | sed 's/.* //') (abc bmc3)"
         else echo "PROPERTY $j-slots: UNDECIDED (see $dir/slots.out)"; fi
       fi
       for f in $(cat "$dir/finals"); do
         [ -f "$dir/reach_fin_$f.out" ] || continue
-        s=$(reach_step "$dir/reach_fin_$f.out")
+        s=$(reach_step "$dir" "reach_fin_$f")
         if [ -n "$s" ]; then echo "COVER $j-final_$f: REACHABLE (step $s)"
         elif grep --quiet 'DONE (PASS' "$dir/reach_fin_$f.out"; then echo "COVER $j-final_$f: UNREACHABLE within $(cat "$dir/depth") clocks"
         else echo "COVER $j-final_$f: UNDECIDED"; fi
       done
     elif grep --quiet 'DONE (FAIL' "$dir/prove.out"; then
-      out=$(grep --only-matching --max-count=1 --extended-regexp 'Output [0-9]+ of miter .* asserted in frame [0-9]+' "$dir/prove.out")
-      idx=$(echo "$out" | sed 's/Output \([0-9]*\) .*/\1/'); step=$(echo "$out" | sed 's/.* //')
-      name=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["asserts"][int(sys.argv[2])][0].lstrip("\\"))' \
-        "$dir/cert_prove/model/design_aiger.ywa" "$idx")
-      echo "PROPERTY $j-$name: FAILED at step $step (abc pdr)"
+      step=$(grep --only-matching --max-count=1 'asserted in frame [0-9]*' "$dir/prove.out" | sed 's/.* //')
+      echo "PROPERTY $j-$(failed_name "$dir" prove): FAILED at step $step (abc pdr)"
     else
       echo "PROPERTY $j: UNDECIDED (see $dir/prove.out)"
     fi
