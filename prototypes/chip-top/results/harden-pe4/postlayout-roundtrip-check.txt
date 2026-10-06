@@ -1,0 +1,108 @@
+models: 84 cells read in 0.00 s; RTL ports: 42 bits
+  technology sg13cmos5l
+  2752843 conductor shapes, 27773 cell instances
+  126186 connected components; 98564 via-metal pairs touch without overlapping (not joined)
+extract: 13.15 s (2752843 shapes, 126186 components, 27773 instances, 27662 nets)
+check: 0.024 s
+  instances                    27773
+  nets                         27662
+  flip-flops                   2519
+  undriven nets                24
+  pins on undriven nets        56
+  multiply driven nets         0
+  driven nets nobody reads     287
+  unresolved labels            0
+  cell sg13cmos5l_a21o_1       217
+  cell sg13cmos5l_a21oi_1      2297
+  cell sg13cmos5l_a221oi_1     548
+  cell sg13cmos5l_a22oi_1      1611
+  cell sg13cmos5l_and2_1       373
+  cell sg13cmos5l_and3_1       79
+  cell sg13cmos5l_and4_1       31
+  cell sg13cmos5l_antennanp    156
+  cell sg13cmos5l_buf_1        2226
+  cell sg13cmos5l_buf_2        3
+  cell sg13cmos5l_buf_4        37
+  cell sg13cmos5l_buf_8        260
+  cell sg13cmos5l_dfrbpq_1     2519
+  cell sg13cmos5l_dlygate4sd3_1 3206
+  cell sg13cmos5l_inv_1        1071
+  cell sg13cmos5l_inv_2        38
+  cell sg13cmos5l_inv_4        25
+  cell sg13cmos5l_inv_8        7
+  cell sg13cmos5l_mux2_1       366
+  cell sg13cmos5l_mux4_1       19
+  cell sg13cmos5l_nand2_1      1559
+  cell sg13cmos5l_nand2b_1     425
+  cell sg13cmos5l_nand3_1      480
+  cell sg13cmos5l_nand3b_1     51
+  cell sg13cmos5l_nand4_1      303
+  cell sg13cmos5l_nor2_1       2270
+  cell sg13cmos5l_nor2b_1      501
+  cell sg13cmos5l_nor3_1       484
+  cell sg13cmos5l_nor4_1       182
+  cell sg13cmos5l_o21ai_1      3033
+  cell sg13cmos5l_or2_1        222
+  cell sg13cmos5l_or3_1        21
+  cell sg13cmos5l_or4_1        22
+  cell sg13cmos5l_tiehi        2549
+  cell sg13cmos5l_tielo        81
+  cell sg13cmos5l_xnor2_1      354
+  cell sg13cmos5l_xor2_1       147
+  errors: 2545, warnings: 0
+    ERROR port ena: labelled in the layout, not in the RTL
+    ERROR undriven net n5545, read by 5: u22494@951.36,359.10/sg13cmos5l_a22oi_1.A1, u21177@968.64,359.10/sg13cmos5l_a22oi_1.A1, u21077@1068.48,374.22/sg13cmos5l_a22oi_1.A1, u5905@971.04,351.54/sg13cmos5l_a22oi_1.A1
+    ERROR undriven net n6383, read by 5: u21073@1051.20,374.22/sg13cmos5l_a22oi_1.A1, u5959@1004.16,343.98/sg13cmos5l_a22oi_1.A1, u5947@1039.68,343.98/sg13cmos5l_a22oi_1.A1, u5946@1025.28,343.98/sg13cmos5l_a22oi_1.A1
+    ERROR undriven net n6384, read by 5: u21267@1004.16,359.10/sg13cmos5l_a22oi_1.A1, u21167@1024.32,359.10/sg13cmos5l_a22oi_1.A1, u21070@1055.52,374.22/sg13cmos5l_a22oi_1.A1, u5977@1003.20,351.54/sg13cmos5l_a22oi_1.A1
+    ERROR undriven net n8866, read by 1: u8479@196.80,245.70/sg13cmos5l_buf_4.A
+    ERROR undriven net n9129, read by 1: u8700@46.56,245.70/sg13cmos5l_buf_4.A
+    ERROR undriven net n9225, read by 1: u8787@90.24,245.70/sg13cmos5l_buf_4.A
+    ERROR undriven net n9245, read by 1: u8802@117.60,253.26/sg13cmos5l_buf_4.A
+    ERROR undriven net n10238, read by 1: u9664@164.16,283.50/sg13cmos5l_buf_4.A
+    ERROR undriven net n10249, read by 1: u9669@192.00,298.62/sg13cmos5l_buf_4.A
+    ERROR undriven net n10322, read by 1: u9755@198.24,291.06/sg13cmos5l_buf_4.A
+    ERROR undriven net n10498, read by 1: u9912@287.04,328.86/sg13cmos5l_buf_4.A
+    ERROR undriven net n10545, read by 1: u9959@276.48,336.42/sg13cmos5l_buf_1.A
+    ERROR undriven net n10656, read by 2: u11605@357.60,306.18/sg13cmos5l_buf_4.A, u10055@314.40,336.42/sg13cmos5l_buf_1.A
+    ERROR undriven net n10657, read by 2: u12114@509.28,275.94/sg13cmos5l_buf_4.A, u10056@312.48,336.42/sg13cmos5l_buf_1.A
+    ERROR undriven net n10718, read by 1: u10183@257.28,268.38/sg13cmos5l_buf_4.A
+    ERROR undriven net n12342, read by 2: u11777@354.72,336.42/sg13cmos5l_nor3_1.A, u11770@357.12,336.42/sg13cmos5l_buf_4.A
+    ERROR undriven net n12345, read by 2: u11798@444.48,328.86/sg13cmos5l_buf_4.A, u11777@354.72,336.42/sg13cmos5l_nor3_1.B
+    ERROR undriven net n12483, read by 1: u11930@334.08,313.74/sg13cmos5l_buf_4.A
+    ERROR undriven net n21195, read by 1: u20711@1234.08,389.34/sg13cmos5l_buf_4.A
+    ERROR undriven net n21625, read by 5: u21166@1025.28,366.66/sg13cmos5l_a22oi_1.A1, u21160@1028.16,366.66/sg13cmos5l_a22oi_1.A1, u21159@1011.84,366.66/sg13cmos5l_a22oi_1.A1, u21151@1008.96,374.22/sg13cmos5l_a22oi_1.A1
+    ERROR undriven net n21644, read by 5: u21264@1010.40,381.78/sg13cmos5l_a22oi_1.A1, u21163@1024.80,374.22/sg13cmos5l_a22oi_1.A1, u21162@1024.32,374.22/sg13cmos5l_a22oi_1.A1, u21150@1011.84,374.22/sg13cmos5l_a22oi_1.A1
+    ERROR undriven net n21657, read by 5: u21189@993.12,374.22/sg13cmos5l_a22oi_1.A1, u21187@989.76,374.22/sg13cmos5l_a22oi_1.A1, u21185@979.20,374.22/sg13cmos5l_a22oi_1.A1, u21176@980.64,366.66/sg13cmos5l_a22oi_1.A1
+    ERROR undriven net n21686, read by 5: u22512@951.84,374.22/sg13cmos5l_a22oi_1.A1, u22508@962.40,374.22/sg13cmos5l_a22oi_1.A1, u22506@959.04,374.22/sg13cmos5l_a22oi_1.A1, u22505@948.96,374.22/sg13cmos5l_a22oi_1.A1
+    ERROR undriven net n27630, read by 1: u27542@290.40,359.10/sg13cmos5l_buf_1.A
+    ERROR u306@1088.64,94.50: clock pin CLK: n42 is not driven
+    ERROR u308@1091.52,109.62: clock pin CLK: n42 is not driven
+    ERROR u311@1094.88,102.06: clock pin CLK: n42 is not driven
+    ERROR u312@1092.96,109.62: clock pin CLK: n42 is not driven
+    ERROR u344@1072.32,109.62: clock pin CLK: n42 is not driven
+    ERROR u354@1068.48,124.74: clock pin CLK: n42 is not driven
+    ERROR u373@1066.08,132.30: clock pin CLK: n42 is not driven
+    ERROR u381@1090.08,124.74: clock pin CLK: n42 is not driven
+    ERROR u395@1084.32,117.18: clock pin CLK: n42 is not driven
+    ERROR u403@1030.56,102.06: clock pin CLK: n42 is not driven
+    ERROR u428@1022.40,109.62: clock pin CLK: n42 is not driven
+    ERROR u493@976.80,124.74: clock pin CLK: n42 is not driven
+    ERROR u502@1027.20,124.74: clock pin CLK: n42 is not driven
+    ERROR u522@1014.72,124.74: clock pin CLK: n42 is not driven
+    ERROR u534@994.56,124.74: clock pin CLK: n42 is not driven
+    ERROR u563@1022.88,147.42: clock pin CLK: n42 is not driven
+    ERROR u568@1025.76,147.42: clock pin CLK: n42 is not driven
+    ERROR u577@967.20,154.98: clock pin CLK: n42 is not driven
+    ERROR u612@967.20,177.66: clock pin CLK: n42 is not driven
+    ERROR u616@986.40,170.10: clock pin CLK: n42 is not driven
+    ERROR u630@974.88,162.54: clock pin CLK: n42 is not driven
+    ERROR u653@1013.28,170.10: clock pin CLK: n42 is not driven
+    ERROR u656@1024.32,177.66: clock pin CLK: n42 is not driven
+    ERROR u663@1025.28,162.54: clock pin CLK: n42 is not driven
+    ERROR u665@1003.68,177.66: clock pin CLK: n42 is not driven
+simulator: 57595 primitive gates, 2519 flip-flops, built in 0.02 s
+STRUCTURE ERRORS
+
+real	0m13.310s
+user	0m12.266s
+sys	0m1.004s

@@ -313,3 +313,69 @@ are 48 % wrong. No underruns, no overflow. **PASS.**
 What the demos do not show: the UART/SPI/I2C pins run with q = 0 only (the base ISA), so the
 quarter grid is exercised by the lockstep alone; the DAC uses one channel (four PEs); S/PDIF
 was not run.
+
+## 4. Area, the harden, and G13 (milestone 4)
+
+**Synthesis** (`synth/synth.sh`, Yosys 0.66 of the pinned LibreLane image, sg13cmos5l typical,
+area-mode abc, flattened, the SRAM macros as black boxes; `synth/reports/`):
+
+| layout | standard-cell area, µm² | cells | flip-flops |
+|---|---|---|---|
+| 4 PEs (1\|1\|1\|1) | 274,741 | 18,833 | 2,519 |
+| 8 PEs (2\|2\|2\|2) | 333,783 | | 2,915 |
+| 16 PEs (2\|2\|4\|8) | 454,462 | | 3,707 |
+
+A PE costs 14,760-15,085 µm² (the step from 4 to 8 and from 8 to 16), as the block's own synthesis
+said (14,359 for upe_v1, plus the shift X1). **Everything else is about 215,700 µm²**, against
+126,603 in section 6 of the architecture note: the sequencer alone is 41k (its README), and the
+register file, host FIFOs, input and output pin selects, the stage's 192 input and 128 output
+flops and the assists are the rest. Macros: 45,309 µm² (512 x 16) and 49,419 µm² (1024 x 8).
+The 6x4 tile on sg13cmos5l has a 916,214 µm² die and a 902,417 µm² core (larger than the note's
+751,641 for sg13g2's tiles).
+
+**Hardens** (`tt/scripts/harden.sh`'s flow through `sram-macro/scripts/harden.sh`: LibreLane
+3.1.0.dev3, tt-support-tools d66cf17, 6x4, 20 ns, the macro recipe of `sram-macro/`):
+
+| run | result |
+|---|---|
+| 4 PEs, macros side by side at the lower left, placement density 60 % (TT default) | global routing overflows Metal3 (1,601); detailed routing stalls near 400 violations after 61 iterations; stopped (`results/harden-pe4-d60/`) |
+| the same at density 45 % and 75 % | overflow 3,898 and 2,418 at global routing; stopped (`results/harden-pe4-d45/`, `-d75/`) |
+| **4 PEs, the 1024 x 8 moved to the right end of the core**, density 60 % | **passes**: global routing without overflow; routing DRC 0, LVS 0 (netgen: circuits match uniquely), antenna 0; **Tiny Tapeout's precheck 9 of 9**, KLayout SG13CMOS5L DRC clean; Magic DRC 141,979, every one inside a macro (`results/harden-pe4/`) |
+| 16 PEs (2\|2\|4\|8), same floorplan | 610,596 µm² of standard cells before routing (76 % of the free core); global routing: Metal3 demand 105 % of capacity, overflow 22,240; stopped (`results/harden-pe16-attempt/`) |
+| 8 PEs (2\|2\|2\|2), same floorplan | PE8_RESULT |
+
+**Why routing, not area, is the limit.** sg13cmos5l's block routes on Metal2 to Metal4 only
+(TopMetal1 belongs to Tiny Tapeout's top level), so **Metal3 is the only horizontal routing
+layer**, and Metal4 also carries the power stripes. In every run Metal3 was the overflowing layer
+while Metal4 stayed at 8-30 % use. Lower placement density spreads the cells and lengthens the
+wires (2.44 M µm against 2.22 M at 60 %), which made it worse, not better. What cured the 4-PE
+run was floorplanning: the 1024 x 8 macro (336 µm tall) in the middle of a 710 µm die split the
+horizontal routing channel.
+
+**The 4-PE chip in numbers** (`results/harden-pe4/`): 27,773 standard cells, 374,588 µm² after
+place and route (1.36 times the synthesised area: 3,206 hold buffers and 5,453 timing-repair
+buffers), 46 % of the core, wire length 1.40 M µm. Timing at 20 ns: setup +4.06 ns typical
+(about 63 MHz), +4.62 ns fast, **-4.17 ns at the slow corner** (81 endpoints; about 41 MHz);
+hold positive at every corner (+0.095 ns fast). The flow fails only on the typical corner, so the
+harden passes, but **60 MHz is met only at the typical corner**. The worst path runs between two
+unnamed glue registers through about thirty gates; naming the glue's signals to locate it is an
+open issue.
+
+**The placement factor, measured** (section 6 of the note assumed 1.5, pessimistic 2.0):
+- the growth from synthesis to placed cells is **1.36** (the factor's lower bound, no white space);
+- the area the 4-PE logic was given and routed in, core minus macros and a 10 % halo, is **2.91**
+  times its synthesised area (an upper bound: the run met it with room for more);
+- the 16-PE run shows the other side: at 610,596 µm² of placed cells, 76 % of the free core and a
+  factor of 1.79 over its 454,462 µm² synthesised, it does not route.
+PE8_FACTOR
+
+**What fits.** PE8_FITS
+
+**Post-layout round trip** (`../postlayout-roundtrip`, its structural check on the 4-PE GDS,
+`results/harden-pe4/postlayout-roundtrip-check.txt`): the extractor finds 27,773 cells, 2,519
+flip-flops and 57,595 primitive gates, and reports 25 undriven nets, all inputs read next to the
+SRAM macros: the macros' outputs, which it cannot see because it knows only the standard cells'
+geometry. It also reports 25 flip-flops whose clock pin is on the top-level clock port with no
+clock buffer between, which its clock-tree rule does not accept. The lockstep and `compare_def`
+need macro support in the extractor first and were not run; netgen's LVS above is the
+connectivity check of record.
