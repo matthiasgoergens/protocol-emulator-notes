@@ -17,5 +17,5 @@ python3 -c "import json; m = json.load(open('$R/final/metrics.json')); print('de
 "$HERE/../../../tt/scripts/corner-report.py" "$R" > "$OUT/corners.txt" || true
 python3 "$HERE/summary.py" "$R" "$(python3 -c "import json;print(json.load(open('$R/resolved.json'))['CLOCK_PERIOD'])")" > "$OUT/summary.txt"
 if [ -n "$PRE" ]; then { head --lines=1 "$PRE/precheck.log" 2>/dev/null; cat "$PRE/results.md"; } > "$OUT/precheck.txt"; fi
-if [ -n "$STAT" ]; then python3 "$HERE/factor.py" "$R" "$STAT" > "$OUT/factor.txt"; fi
+if [ -n "$STAT" ]; then python3 "$HERE/factor.py" "$R" "$STAT" "$(basename "$OUT" | sed s/harden-//)" > "$OUT/factor.txt"; fi
 ls "$OUT"

@@ -1,0 +1,14 @@
+pe8: synthesised 333,783 um2; after PnR 451,806 um2 of standard cells (growth 1.35); core 902,417, macros 94,729 (+10 % halo); standard-cell utilisation 0.559
+  factor demonstrated: (core - macros - halo) / synthesised = 2.39 (an upper bound: the logic fitted in that area); growth alone = 1.35 (a lower bound)
+  route__drc_errors 0
+  magic__drc_error__count 141979
+  design__lvs_error__count 0
+  antenna__violating__nets 0
+  timing__setup__ws -9.20867141938354
+  timing__hold__ws 0.1053690498011646
+  timing__setup__ws__corner:nom_slow_1p08V_125C -9.20867141938354
+  timing__hold__ws__corner:nom_fast_1p32V_m40C 0.1053690498011646
+  design__instance__count__stdcell 33681
+  design__instance__count__hold_buffer 3696
+  design__instance__count__class:timing_repair_buffer 6632
+  route__wirelength 1844565
