@@ -130,6 +130,21 @@ let seg_start = [| 0; 2; 4; 8 |]
 let seg_end = [| 1; 3; 7; 15 |]
 let seg_of i = if i < 2 then 0 else if i < 4 then 1 else if i < 8 then 2 else 3
 
+(* The layout as a parameter (added for ../../chip-top, which starts with fewer PEs and grows):
+   always four segments, of [sizes] PEs each, at least one. The constants above are the default
+   layout, which every test here uses. *)
+type layout = { n : int; start : int array; end_ : int array }
+
+let layout_of_sizes sizes =
+  if Array.length sizes <> 4 || Array.exists (fun s -> s < 1) sizes then
+    invalid_arg "Spec.layout_of_sizes: four segments of at least one PE each";
+  let start = Array.make 4 0 in
+  for j = 1 to 3 do start.(j) <- start.(j - 1) + sizes.(j - 1) done;
+  { n = Array.fold_left ( + ) 0 sizes; start; end_ = Array.init 4 (fun j -> start.(j) + sizes.(j) - 1) }
+
+let default_layout = layout_of_sizes [| 2; 2; 4; 8 |]
+let seg_in l i = if i < l.start.(1) then 0 else if i < l.start.(2) then 1 else if i < l.start.(3) then 2 else 3
+
 type inputs = {
   mbx_wr : bool;
   mbx_seg : int;

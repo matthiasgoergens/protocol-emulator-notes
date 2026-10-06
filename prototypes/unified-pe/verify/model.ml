@@ -16,10 +16,10 @@ type pe = {
 
 type seg = { mutable flo : int; mutable fhi : int; mutable fv : bool; mutable ctrl : int;
              mutable rep : int; mutable cnt : int; mutable fw : int (* onebit-dac E2 *) }
-type t = { pe : pe array; seg : seg array; cov : (string, int) Hashtbl.t }
+type t = { lay : layout; pe : pe array; seg : seg array; cov : (string, int) Hashtbl.t }
 
-let create () =
-  { pe = Array.init n_pe (fun _ -> { s = 0; p = 0; pv = false; f = false; l = false; cfg = Array.make 8 0 });
+let create ?(layout = default_layout) () =
+  { lay = layout; pe = Array.init layout.n (fun _ -> { s = 0; p = 0; pv = false; f = false; l = false; cfg = Array.make 8 0 });
     seg = Array.init 4 (fun _ -> { flo = 0; fhi = 0; fv = false; ctrl = 0; rep = 0; cnt = 0; fw = 0 });
     cov = Hashtbl.create 64 }
 
@@ -138,10 +138,11 @@ let rec bcast_eff t sg =
   if sg > 0 && bit c 5 then bcast_eff t (sg - 1) else bcast_of c
 
 (* onebit-dac E1: the end PE of the joined run that starts at segment sg *)
-let rec run_end t sg = if sg < 3 && src_of t.seg.(sg + 1).ctrl = 0 then run_end t (sg + 1) else seg_end.(sg)
+let rec run_end t sg = if sg < 3 && src_of t.seg.(sg + 1).ctrl = 0 then run_end t (sg + 1) else t.lay.end_.(sg)
 
 let cycle t (inp : inputs) =
   let pe = t.pe in
+  let n_pe = t.lay.n and seg_start = t.lay.start and seg_end = t.lay.end_ and seg_of = seg_in t.lay in
   let g = Array.make n_pe false and step = Array.make n_pe false in
   let res = Array.make n_pe None in
   for i = 0 to n_pe - 1 do
@@ -228,4 +229,4 @@ let state t : state =
           let x = t.pe.(e) in
           let o = op_of_bytes x.cfg in
           { td = (if o.tap_p then x.p else x.s); tv = x.pv; tf = x.f })
-        seg_end }
+        t.lay.end_ }

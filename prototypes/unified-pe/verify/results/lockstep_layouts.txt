@@ -1,0 +1,24 @@
+layout 1|1|1|1    4 PEs: 13 generators x 100 trials, 577468 cycles compared, 0 generators with mismatches
+  planted sat_off_by_one     caught
+  planted join_lane_zero     caught
+  planted repeat_off_by_one  caught
+  planted lane_loop_own_end  caught
+  planted cfg_chain_order    caught
+layout 2|2|2|2    8 PEs: 13 generators x 100 trials, 629471 cycles compared, 0 generators with mismatches
+  planted sat_off_by_one     caught
+  planted join_lane_zero     caught
+  planted repeat_off_by_one  caught
+  planted lane_loop_own_end  caught
+  planted cfg_chain_order    caught
+layout 1|2|3|4   10 PEs: 13 generators x 100 trials, 655477 cycles compared, 0 generators with mismatches
+  planted sat_off_by_one     caught
+  planted join_lane_zero     caught
+  planted repeat_off_by_one  caught
+  planted lane_loop_own_end  caught
+  planted cfg_chain_order    caught
+layout 3|1|4|2   10 PEs: 13 generators x 100 trials, 655476 cycles compared, 0 generators with mismatches
+  planted sat_off_by_one     caught
+  planted join_lane_zero     caught
+  planted repeat_off_by_one  caught
+  planted lane_loop_own_end  caught
+  planted cfg_chain_order    caught

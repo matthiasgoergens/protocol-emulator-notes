@@ -88,7 +88,7 @@ type pe_out = {
   tap : t;
 }
 
-let pe ?(pe_index = 0) spec (i : pe_in) =
+let pe ?(pe_index = 0) ?(cut = 8) spec (i : pe_in) =
   (* configuration chain: b.(0) takes the input byte *)
   let b = Array.make 8 (zero 8) in
   let prev = ref i.cfg_in in
@@ -121,7 +121,7 @@ let pe ?(pe_index = 0) spec (i : pe_in) =
   let s15_x = (if is "s15_xor_uses_s14" then bit s 14 else s15) ^: lane_in in
   let result = wire 16 in
   let f_src = if is "g_from_F_inverted" then ~:f else f in
-  let g_in = if is "g_in_zero" && pe_index = 8 then gnd else i.g_in in
+  let g_in = if is "g_in_zero" && pe_index = cut then gnd else i.g_in in
   let g = mux gsel [ vdd; bit_a; lane_in; s15_x; crc_fb; f_src; window; g_in ] in
   let sin = mux sinsel [ g; lane_in; (if is "sin_s15_uses_own" then s15 else i.s15_in); lsb i.a ] in
   let shl = concat_msb [ select s 14 0; sin ] in
@@ -191,17 +191,25 @@ let pe_circuit () =
       output "s15" (msb o.s); output "cfg_out" o.cfg_out; output "init_out" o.init_out;
       output "tap" o.tap; output "f" o.f ]
 
-(* The array: 16 PEs, segments 2|2|4|8, feed and control registers, taps. *)
-let array_circuit ?(state_ports = true) () =
+(* The array: by default 16 PEs, segments 2|2|4|8 ([layout] changes the sizes), feed and
+   control registers, taps. [array_create] builds it from signals, so that a larger design can
+   embed it; [array_circuit] wraps it with ports for the tests here. *)
+type array_in = {
+  mbx_wr : t; mbx_seg : t; mbx_sel : t; mbx_byte : t;
+  acfg_wr : t; acfg_seg : t; acfg_byte : t;
+  ainit_wr : t; ainit_seg : t; ainit_byte : t;
+  fixed_d : t array; fixed_v : t array;
+}
+
+type seg_regs = { flo : t; fhi : t; fv : t; fv0 : t; ctrl : t; rep : t; cnt : t; fw : t; word : t }
+type array_out = { tap_d : t array; tap_v : t array; tap_f : t array; pes : pe_out array; segs : seg_regs array }
+
+let array_create ?(layout = Spec.default_layout) ~clock (inp : array_in) =
   let open Spec in
-  let clock = input "clock" 1 in
+  let n_pe = layout.n and seg_start = layout.start and seg_end = layout.end_ and seg_of = seg_in layout in
   let spec = Reg_spec.create ~clock () in
-  let mbx_wr = input "mbx_wr" 1 and mbx_seg = input "mbx_seg" 2 and mbx_sel = input "mbx_sel" 2 in
-  let mbx_byte = input "mbx_byte" 8 in
-  let cfg_wr = input "cfg_wr" 1 and cfg_seg = input "cfg_seg" 2 and cfg_byte = input "cfg_byte" 8 in
-  let init_wr = input "init_wr" 1 and init_seg = input "init_seg" 2 and init_byte = input "init_byte" 8 in
-  let fixed_d = Array.init 4 (fun j -> input (Printf.sprintf "fixed_d%d" j) 16) in
-  let fixed_v = Array.init 4 (fun j -> input (Printf.sprintf "fixed_v%d" j) 1) in
+  let { mbx_wr; mbx_seg; mbx_sel; mbx_byte; acfg_wr = cfg_wr; acfg_seg = cfg_seg; acfg_byte = cfg_byte;
+        ainit_wr = init_wr; ainit_seg = init_seg; ainit_byte = init_byte; fixed_d; fixed_v } = inp in
   let segregs =
     Array.init 4 (fun j ->
         let mine = mbx_wr &: (mbx_seg ==:. j) in
@@ -219,9 +227,9 @@ let array_circuit ?(state_ports = true) () =
         let fv = if is "feed_valid_sticky" then fv0 |: reg spec fv0 else fv0 in
         let ctrl = reg spec ~enable:(mine &: (mbx_sel ==:. 2)) (select mbx_byte 6 0) in
         let word = if is "repeat_not_atomic" then concat_msb [ fhi; flo ] else mux2 repon fw (concat_msb [ fhi; flo ]) in
-        (flo, fhi, fv, fv0, ctrl, rep, cnt, fw, word))
+        ({ flo; fhi; fv; fv0; ctrl; rep; cnt; fw; word } : seg_regs))
   in
-  let ctrl j = let _, _, _, _, c, _, _, _, _ = segregs.(j) in c in
+  let ctrl j = segregs.(j).ctrl in
   (* effective broadcast: control bit 5 (proposed) chains the previous segment's *)
   let bc = Array.make 4 gnd in
   for j = 0 to 3 do
@@ -241,7 +249,7 @@ let array_circuit ?(state_ports = true) () =
       if first then begin
         let e_prev = if sg = 0 then None else Some w.(seg_end.(sg - 1)) in
         let e_own = if is "loop_from_prev" && sg = 2 then w.(seg_end.(1)) else w.(seg_end.(sg)) in
-        let _, _, fv, _, _, _, _, _, word = segregs.(sg) in
+        let ({ fv; word; _ } : seg_regs) = segregs.(sg) in
         let fx = if is "fixed_swapped" && sg = 3 then 2 else sg in
         let jd, jv, jl =
           match e_prev with
@@ -269,7 +277,7 @@ let array_circuit ?(state_ports = true) () =
     in
     let bseg = if is "lane_bc_wrong_seg" && sg = 3 then 2 else sg in
     let o =
-      pe ~pe_index:i spec
+      pe ~pe_index:i ~cut:seg_start.(3) spec
         { run = bit c 4; a; av; alane; bcast = bc.(bseg);
           s15_in = (if i > 0 then msb w.(i - 1).s else gnd);
           cb_in = (if i < n_pe - 1 then msb w.(i + 1).s else gnd);
@@ -285,27 +293,40 @@ let array_circuit ?(state_ports = true) () =
     t.step <== o.step; t.cfg <== o.cfg; t.cfg_out <== o.cfg_out; t.init_out <== o.init_out;
     t.tap <== o.tap
   done;
+  { tap_d = Array.map (fun e -> w.(e).tap) seg_end; tap_v = Array.map (fun e -> w.(e).pv) seg_end;
+    tap_f = Array.map (fun e -> w.(e).f) seg_end; pes = w; segs = segregs }
+
+let array_circuit ?layout ?(state_ports = true) () =
+  let clock = input "clock" 1 in
+  let inp =
+    { mbx_wr = input "mbx_wr" 1; mbx_seg = input "mbx_seg" 2; mbx_sel = input "mbx_sel" 2;
+      mbx_byte = input "mbx_byte" 8; acfg_wr = input "cfg_wr" 1; acfg_seg = input "cfg_seg" 2;
+      acfg_byte = input "cfg_byte" 8; ainit_wr = input "init_wr" 1; ainit_seg = input "init_seg" 2;
+      ainit_byte = input "init_byte" 8;
+      fixed_d = Array.init 4 (fun j -> input (Printf.sprintf "fixed_d%d" j) 16);
+      fixed_v = Array.init 4 (fun j -> input (Printf.sprintf "fixed_v%d" j) 1) }
+  in
+  let o = array_create ?layout ~clock inp in
   let outs = ref [] in
   let add n x = outs := output n x :: !outs in
-  Array.iteri
-    (fun j e ->
-      add (Printf.sprintf "tap_d%d" j) w.(e).tap;
-      add (Printf.sprintf "tap_v%d" j) w.(e).pv;
-      add (Printf.sprintf "tap_f%d" j) w.(e).f)
-    seg_end;
+  for j = 0 to 3 do
+    add (Printf.sprintf "tap_d%d" j) o.tap_d.(j);
+    add (Printf.sprintf "tap_v%d" j) o.tap_v.(j);
+    add (Printf.sprintf "tap_f%d" j) o.tap_f.(j)
+  done;
   if state_ports then begin
     Array.iteri
       (fun i (t : pe_out) ->
         add (Printf.sprintf "s%d" i) t.s; add (Printf.sprintf "p%d" i) t.p;
         add (Printf.sprintf "pv%d" i) t.pv; add (Printf.sprintf "f%d" i) t.f;
         add (Printf.sprintf "l%d" i) t.l; add (Printf.sprintf "cfg%d" i) t.cfg)
-      w;
+      o.pes;
     Array.iteri
-      (fun j (flo, fhi, _fv, fv0, ctrl, rep, cnt, fw, _) ->
-        add (Printf.sprintf "rep%d" j) rep; add (Printf.sprintf "cnt%d" j) cnt; add (Printf.sprintf "fw%d" j) fw;
-        add (Printf.sprintf "flo%d" j) flo; add (Printf.sprintf "fhi%d" j) fhi;
+      (fun j (r : seg_regs) ->
+        add (Printf.sprintf "rep%d" j) r.rep; add (Printf.sprintf "cnt%d" j) r.cnt; add (Printf.sprintf "fw%d" j) r.fw;
+        add (Printf.sprintf "flo%d" j) r.flo; add (Printf.sprintf "fhi%d" j) r.fhi;
         (* the architectural feed valid is the register; the sticky bug shows through the PE *)
-        add (Printf.sprintf "fv%d" j) fv0; add (Printf.sprintf "ctrl%d" j) ctrl)
-      segregs
+        add (Printf.sprintf "fv%d" j) r.fv0; add (Printf.sprintf "ctrl%d" j) r.ctrl)
+      o.segs
   end;
   Circuit.create_exn ~name:"upe_array" (List.rev !outs)

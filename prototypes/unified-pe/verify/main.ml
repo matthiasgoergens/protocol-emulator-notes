@@ -16,6 +16,42 @@ let lockstep trials run_cycles =
     Lockstep.modes;
   pr "total %d cycles compared, %d generators with mismatches\n" !total !bad
 
+(* the same lockstep at other layouts than the default 2|2|4|8 (the layout is a parameter so
+   that ../../chip-top can start small) *)
+let lockstep_layouts trials run_cycles =
+  Upe_rtl.bug := "";
+  List.iter
+    (fun sizes ->
+      let layout = Spec.layout_of_sizes sizes in
+      let total = ref 0 and bad = ref 0 in
+      List.iteri
+        (fun mi mode ->
+          let r = Lockstep.campaign ~stop:false ~layout ~mode ~seed:(3000 + mi) ~trials ~run_cycles () in
+          total := !total + r.cycles;
+          match r.first_fail with
+          | None -> ()
+          | Some (t, c, d) ->
+            incr bad;
+            pr "%s %-9s MISMATCH in trial %d at cycle %d:\n  %s\n" (String.concat "|" (List.map string_of_int (Array.to_list sizes)))
+              mode t c (String.concat "\n  " d))
+        Lockstep.modes;
+      pr "layout %-9s %2d PEs: %d generators x %d trials, %d cycles compared, %d generators with mismatches\n"
+        (String.concat "|" (List.map string_of_int (Array.to_list sizes))) layout.n (List.length Lockstep.modes) trials !total !bad;
+      (* sensitivity at this layout: planted bugs that every layout can show *)
+      List.iter
+        (fun b ->
+          Upe_rtl.bug := b;
+          let hit =
+            List.exists
+              (fun mode -> (Lockstep.campaign ~layout ~mode ~seed:11 ~trials:20 ~run_cycles ()).first_fail <> None)
+              Lockstep.modes
+          in
+          pr "  planted %-18s %s\n" b (if hit then "caught" else "MISSED"))
+        [ "sat_off_by_one"; "join_lane_zero"; "repeat_off_by_one"; "lane_loop_own_end"; "cfg_chain_order" ];
+      Upe_rtl.bug := "";
+      flush stdout)
+    [ [| 1; 1; 1; 1 |]; [| 2; 2; 2; 2 |]; [| 1; 2; 3; 4 |]; [| 3; 1; 4; 2 |] ]
+
 let controls trials run_cycles =
   let caught = ref 0 in
   List.iter
@@ -66,6 +102,7 @@ let () =
   | [ _; "verilog-pe" ] -> Hardcaml.Rtl.print Verilog (Upe_rtl.pe_circuit ())
   | [ _; "verilog-array" ] -> Hardcaml.Rtl.print Verilog (Upe_rtl.array_circuit ~state_ports:false ())
   | [ _; "lockstep"; n; c ] -> lockstep (int_of_string n) (int_of_string c)
+  | [ _; "lockstep-layouts"; n; c ] -> lockstep_layouts (int_of_string n) (int_of_string c)
   | [ _; "controls"; n; c ] -> controls (int_of_string n) (int_of_string c)
   | [ _; "coverage"; n; c ] -> coverage (int_of_string n) (int_of_string c)
   | [ _; "cells" ] -> Cells.run_all ()

@@ -65,8 +65,9 @@ let interesting r ks =
   | _ -> if ks = [] then Random.State.int r 0x10000 else near (pick r ks)
 
 (* one trial's stimulus: setup (control, configuration, init), then running traffic *)
-let gen_trial mode r ~run_cycles =
-  let ops = Array.init n_pe (fun _ -> gen_op mode r) in
+let gen_trial ?(layout = default_layout) mode r ~run_cycles =
+  let seg_start = layout.start and seg_end = layout.end_ in
+  let ops = Array.init layout.n (fun _ -> gen_op mode r) in
   let ks = Array.to_list (Array.map (fun o -> o.k) ops) in
   let stim = ref [] in
   let push i = stim := i :: !stim in
@@ -124,8 +125,8 @@ let gen_trial mode r ~run_cycles =
   List.rev !stim
 
 (* run model and RTL side by side; return the first mismatching cycle *)
-let run_trial ?(model = Model.create ()) stim =
-  let rtl = Rtlsim.create () in
+let run_trial ?(layout = default_layout) ?(model = Model.create ~layout ()) stim =
+  let rtl = Rtlsim.create ~layout () in
   let rec go n = function
     | [] -> None
     | i :: rest ->
@@ -139,14 +140,14 @@ let run_trial ?(model = Model.create ()) stim =
 type result = { trials : int; cycles : int; first_fail : (int * int * string list) option }
 
 (* run up to [trials] trials; stop at the first mismatch *)
-let campaign ?(stop = true) ~mode ~seed ~trials ~run_cycles () =
+let campaign ?(stop = true) ?layout ~mode ~seed ~trials ~run_cycles () =
   let r = Random.State.make [| seed |] in
   let cycles = ref 0 and fail = ref None and n = ref 0 in
   (try
      for t = 1 to trials do
        n := t;
-       let stim = gen_trial mode r ~run_cycles in
-       match run_trial stim with
+       let stim = gen_trial ?layout mode r ~run_cycles in
+       match run_trial ?layout stim with
        | None -> cycles := !cycles + List.length stim
        | Some (c, d) ->
          cycles := !cycles + c + 1;

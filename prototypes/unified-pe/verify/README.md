@@ -20,6 +20,14 @@ shared-specification faults give the same results as before, line for line; the 
 is unchanged. Area of the additions, from `../../onebit-dac/README.md`: X1 +1,585 µm² per PE,
 E1 and E2 about 11,900 µm² for four segments.
 
+**Layout as a parameter (2026-10-06).** `Spec.layout_of_sizes` gives any four segment sizes;
+`Model.create`, `Upe_rtl.array_circuit` (now a wrapper of `array_create`, which builds the array
+from signals so that a larger design can embed it) and `Rtlsim.create` take `?layout`, and the
+default is the 2|2|4|8 above, so every result in this file is unchanged (rerun: identical files).
+`main.exe lockstep-layouts 100 400` runs the 13 generators at 1|1|1|1, 2|2|2|2, 1|2|3|4 and
+3|1|4|2: 0 mismatches in 2,517,892 clocks, and five planted bugs caught at every layout
+(`results/lockstep_layouts.txt`).
+
 ## Files and commands
 
 | file | what it is |

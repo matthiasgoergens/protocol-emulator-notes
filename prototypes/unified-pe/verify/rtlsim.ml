@@ -4,27 +4,29 @@ open Hardcaml
 open Spec
 
 type t = {
+  lay : layout;
   sim : Cyclesim.t_port_list;
   ins : (string, Bits.t ref) Hashtbl.t;
   outs : (string, Bits.t ref) Hashtbl.t;
 }
 
-let circuit_cache : (string, Circuit.t) Hashtbl.t = Hashtbl.create 8
+let circuit_cache : (string * int array, Circuit.t) Hashtbl.t = Hashtbl.create 8
 
-let create () =
+let create ?(layout = default_layout) () =
+  let key = (!Upe_rtl.bug, layout.start) in
   let c =
-    match Hashtbl.find_opt circuit_cache !Upe_rtl.bug with
+    match Hashtbl.find_opt circuit_cache key with
     | Some c -> c
     | None ->
-      let c = Upe_rtl.array_circuit () in
-      Hashtbl.replace circuit_cache !Upe_rtl.bug c;
+      let c = Upe_rtl.array_circuit ~layout () in
+      Hashtbl.replace circuit_cache key c;
       c
   in
   let sim = Cyclesim.create ~config:Cyclesim.Config.default c in
   let ins = Hashtbl.create 64 and outs = Hashtbl.create 256 in
   List.iter (fun (n, r) -> Hashtbl.replace ins n r) (Cyclesim.inputs sim);
   List.iter (fun (n, r) -> Hashtbl.replace outs n r) (Cyclesim.outputs sim);
-  { sim; ins; outs }
+  { lay = layout; sim; ins; outs }
 
 (* a planted bug can leave an input unused, and Hardcaml then drops the port *)
 let set t n w v = match Hashtbl.find_opt t.ins n with Some r -> r := Bits.of_int ~width:w v | None -> ()
@@ -60,4 +62,4 @@ let state t : state =
     { td = get t (Printf.sprintf "tap_d%d" j); tv = getb t (Printf.sprintf "tap_v%d" j);
       tf = getb t (Printf.sprintf "tap_f%d" j) }
   in
-  { pes = Array.init n_pe pe; segs = Array.init 4 seg; taps = Array.init 4 tap }
+  { pes = Array.init t.lay.n pe; segs = Array.init 4 seg; taps = Array.init 4 tap }
