@@ -38,7 +38,11 @@ rerun: lockstep, controls (`g_in_zero` is now planted in the prefix's input and 
 cells, shared faults, the four layouts, and the latency lint.
 The ALU's `x + yn + c` is now one adder, with c entering as the carry into bit 1 of
 `{x, c} + {yn, c}`, instead of an adder followed by a 17-bit incrementer; same results, rerun
-byte-identical.
+byte-identical. That adder, the two signed comparisons (max, min) and the window's 8-bit
+difference are now parallel-prefix (Kogge-Stone) adders (`prefix_add`, `signed_ge`), so that they
+are log2 n levels deep after area-mode synthesis instead of a ripple; a SAT proof against
+Hardcaml's operators is `../../chip-top/formal/arith_equiv` (with a failing control), and the
+block's results rerun byte-identical.
 
 ## Files and commands
 

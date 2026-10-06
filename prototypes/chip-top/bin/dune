@@ -37,3 +37,8 @@
  (name edge_step)
  (modules edge_step)
  (libraries hardcaml eth10))
+
+(executable
+ (name arith_equiv)
+ (modules arith_equiv)
+ (libraries hardcaml upe))

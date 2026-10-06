@@ -94,6 +94,31 @@ type pe_out = {
    both from [g_in] and [lstep_in] itself, as a single PE does. *)
 type link = { pass : t; local : t }
 
+(* a + b + cin as a parallel-prefix (Kogge-Stone) adder: carries in log2 (n + 1) levels instead of
+   a ripple through n bits, so that the PE's add and compare are not the length of its operands
+   in series. Returns the n-bit sum. Synthesis keeps the structure: area-mode mapping does not
+   turn it back into a ripple. *)
+let prefix_add a b cin =
+  let n = width a in
+  let g = Array.init n (fun i -> bit a i &: bit b i) and p = Array.init n (fun i -> bit a i ^: bit b i) in
+  (* element 0 is the carry-in, element i + 1 is bit i: (generate, propagate) *)
+  let cur = Array.init (n + 1) (fun i -> if i = 0 then (cin, gnd) else (g.(i - 1), p.(i - 1))) in
+  let d = ref 1 in
+  while !d <= n do
+    let prev = Array.copy cur in
+    for i = !d to n do
+      let gh, ph = prev.(i) and gl, pl = prev.(i - !d) in
+      cur.(i) <- (gh |: (ph &: gl), ph &: pl)
+    done;
+    d := 2 * !d
+  done;
+  concat_lsb (List.init n (fun i -> p.(i) ^: fst cur.(i)))
+
+(* signed a >= b, from the sign of the exact difference in n + 1 bits *)
+let signed_ge a b =
+  let n = width a in
+  ~:(msb (prefix_add (sresize a (n + 1)) (~:(sresize b (n + 1))) vdd))
+
 let pe ?(pe_index = 0) ?(cut = 8) ?g_resolved ?step_resolved spec (i : pe_in) =
   (* configuration chain: b.(0) takes the input byte *)
   let b = Array.make 8 (zero 8) in
@@ -118,7 +143,7 @@ let pe ?(pe_index = 0) ?(cut = 8) ?g_resolved ?step_resolved spec (i : pe_in) =
   let lane_in = mux2 lane_bc i.bcast i.alane in
   let s15 = msb s in
   (* window: A.hi - K.hi in 8 bits, then the bitmap read MSB first *)
-  let d = select i.a 15 8 -: select k 15 8 in
+  let d = prefix_add (select i.a 15 8) (~:(select k 15 8)) vdd in
   let in_win = if is "window_17" then d <=:. 16 else select d 7 4 ==:. 0 in
   let bitmap = if is "window_bit_order" then s else reverse s in
   let window = in_win &: mux (select d 3 0) (bits_lsb bitmap) in
@@ -146,15 +171,15 @@ let pe ?(pe_index = 0) ?(cut = 8) ?g_resolved ?step_resolved spec (i : pe_in) =
   let c = mux2 (if is "cin_ignored" then gnd else cin_lane) lane_in (if is "neg_no_plus1" then gnd else n) in
   (* x + yn + c as one adder: c enters as the carry into bit 1 of {x, c} + {yn, c}, instead of a
      second, 17-bit incrementer after the first adder *)
-  let sum = select (concat_msb [ uresize x 17; c ] +: concat_msb [ uresize yn 17; c ]) 17 1 in
+  let sum = prefix_add (uresize x 17) (uresize yn 17) c in
   let wsum = select sum 15 0 in
   let cout = if is "carry_bit15" then bit sum 15 else msb sum in
   let ovf = (msb x ==: msb yn) &: (msb wsum ^: msb x) in
   let ovf = if is "sat_as_wrap" then ovf &: ~:cin_lane else ovf in
   let smax = of_int ~width:16 (if is "sat_off_by_one" then 0x7ffe else 0x7fff) in
   let sat = mux2 ovf (mux2 (msb x) (of_int ~width:16 0x8000) smax) wsum in
-  let x_ge = if is "max_unsigned" then x >=: yn else x >=+ yn in
-  let x_le = x <=+ yn in
+  let x_ge = if is "max_unsigned" then x >=: yn else signed_ge x yn in
+  let x_le = signed_ge yn x in
   let x_le = if is "min_is_max" then x_ge else x_le in
   let mx = mux2 x_ge x yn and mx_l = if is "max_loser_x" then x else mux2 x_ge yn x in
   let mn = mux2 x_le x yn and mn_l = mux2 x_le yn x in

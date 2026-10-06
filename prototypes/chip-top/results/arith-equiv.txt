@@ -1,0 +1,8 @@
+# formal/arith_equiv/run.sh, commit 5003161; 2026-10-06T17:02:50+08:00
+== prefix against plain (must be PROVED)
+Solving problem with 3176 variables and 8366 clauses..
+SAT proof finished - no model found: SUCCESS!
+== control: plain with the carry-in tied to 0 against prefix (must FAIL)
+Solving problem with 3171 variables and 8351 clauses..
+SAT proof finished - model found: FAIL!
+ERROR: Called with -verify and proof did fail!
