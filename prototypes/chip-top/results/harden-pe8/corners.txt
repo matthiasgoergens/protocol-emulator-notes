@@ -1,0 +1,7 @@
+VIOLATION nom_slow_1p08V_125C: timing__setup_vio__count = 265
+VIOLATION nom_slow_1p08V_125C: timing__setup__ws = -9.20867141938354
+corner                   setup ws       hold ws     setup vio      hold vio  setup r2r ws   hold r2r ws
+nom_fast_1p32V_m40C         4.442         0.105             0             0         6.630         0.105
+nom_slow_1p08V_125C        -9.209         0.613           265             0        -9.209         0.613
+nom_typ_1p20V_25C           1.671         0.287             0             0         1.671         0.287
+slacks in ns; negative = violated; r2r inf = no register-to-register path

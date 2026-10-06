@@ -8,8 +8,8 @@ puts them behind one Hardcaml top level for Tiny Tapeout 6x4 (IHP sg13cmos5l), w
 - the existing demos, unchanged, driven through the host link;
 - a harden with the pinned flow, to measure the whole-chip placement factor (gap G13).
 
-Status: milestones 1-3 done (plan; top level, specification and lockstep; demos through the host
-link). Milestone 4 (area and G13) is below.
+Status: milestones 1-5 done: plan; top level, specification and lockstep; demos through the host
+link; area, hardens and G13; `tt/` points at this chip. Open issues are listed at the end.
 
 Build: `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17). Then
 `_build/default/bin/lockstep.exe run 400 12000`, `... controls 30 12000`, `... layouts 40 12000`,
@@ -342,7 +342,7 @@ The 6x4 tile on sg13cmos5l has a 916,214 µm² die and a 902,417 µm² core (lar
 | the same at density 45 % and 75 % | overflow 3,898 and 2,418 at global routing; stopped (`results/harden-pe4-d45/`, `-d75/`) |
 | **4 PEs, the 1024 x 8 moved to the right end of the core**, density 60 % | **passes**: global routing without overflow; routing DRC 0, LVS 0 (netgen: circuits match uniquely), antenna 0; **Tiny Tapeout's precheck 9 of 9**, KLayout SG13CMOS5L DRC clean; Magic DRC 141,979, every one inside a macro (`results/harden-pe4/`) |
 | 16 PEs (2\|2\|4\|8), same floorplan | 610,596 µm² of standard cells before routing (76 % of the free core); global routing: Metal3 demand 105 % of capacity, overflow 22,240; stopped (`results/harden-pe16-attempt/`) |
-| 8 PEs (2\|2\|2\|2), same floorplan | PE8_RESULT |
+| **8 PEs (2\|2\|2\|2)**, same floorplan | **passes**: global routing overflow 398 (Metal3 at 80 %), detailed routing to 0 in 15 iterations; LVS 0, antenna 0; **precheck 9 of 9**; Magic DRC all inside the macros (`results/harden-pe8/`) |
 
 **Why routing, not area, is the limit.** sg13cmos5l's block routes on Metal2 to Metal4 only
 (TopMetal1 belongs to Tiny Tapeout's top level), so **Metal3 is the only horizontal routing
@@ -366,10 +366,31 @@ open issue.
 - the area the 4-PE logic was given and routed in, core minus macros and a 10 % halo, is **2.91**
   times its synthesised area (an upper bound: the run met it with room for more);
 - the 16-PE run shows the other side: at 610,596 µm² of placed cells, 76 % of the free core and a
-  factor of 1.79 over its 454,462 µm² synthesised, it does not route.
-PE8_FACTOR
+  free core of 798,215 µm² against its 454,462 µm² synthesised (a factor of 1.76), it does not route;
+- the 8-PE run routes with 451,806 µm² of placed cells (growth 1.35) in the same free core, a
+  factor of **2.39**, with Metal3 at 80 % of its capacity at global routing.
 
-**What fits.** PE8_FITS
+So on sg13cmos5l, in Tiny Tapeout's 6x4 tile with its flow, the whole-chip factor that routes
+lies **between 1.76 (fails) and 2.39 (passes)**: the note's 1.5 does not hold, and its
+pessimistic 2.0 is about the boundary. The cause is the single horizontal routing layer, which a
+factor measured on a row of PEs (`../pe-synth`, on sg13g2's routing stack) could not show.
+
+**What fits.** **8 PEs** (segments 2|2|2|2) with both SRAM macros and everything in section 1:
+hardened, routed, LVS-clean, precheck-clean. **16 PEs do not route.** 12 PEs were not tried: at
+about 394,000 µm² synthesised (8 PEs plus four at 15,085) the free core is 2.03 times the
+logic, inside the uncertain band. The levers, before cutting PEs: the glue (215,700 µm²
+synthesised, more than 14 PEs) and its wide selects (every pin and sampler select reads all 16
+pads' four quarters), and the 3,200-3,700 hold buffers that Tiny Tapeout's 0.25 ns clock
+uncertainty forces onto short register-to-register paths.
+
+**Timing of the 8-PE chip** (`results/harden-pe8/corners.txt`): setup +1.67 ns typical at 20 ns
+(about 55 MHz), +4.44 ns fast, -9.21 ns at the slow corner (265 endpoints, about 34 MHz); hold
+positive everywhere. The longer critical path with more PEs points at the array's combinational
+chains (the step, g and lane-loop signals of a joined run ripple through every PE of the run in
+one clock); not confirmed. **Neither size meets 60 MHz at the slow corner**; the 4-PE chip meets
+it at the typical corner, the 8-PE chip does not.
+
+Tiny Tapeout's `tt/` now builds the 4-PE chip by default (`CHIP_SIZES=1,1,1,1`; section 5).
 
 **Post-layout round trip** (`../postlayout-roundtrip`, its structural check on the 4-PE GDS,
 `results/harden-pe4/postlayout-roundtrip-check.txt`): the extractor finds 27,773 cells, 2,519
@@ -379,3 +400,35 @@ geometry. It also reports 25 flip-flops whose clock pin is on the top-level cloc
 clock buffer between, which its clock-tree rule does not accept. The lockstep and `compare_def`
 need macro support in the extractor first and were not run; netgen's LVS above is the
 connectivity check of record.
+
+## 5. Tiny Tapeout's `tt/` now builds this chip
+
+`../../tt/info.yaml`, `src/config.json` (the template plus the macro recipe, with the 1024 x 8
+at the right end), `docs/info.md` and the wrapper `src/chip_project.v` are the combined chip's;
+`tt/scripts/regen_chip.sh` generates `chip_tt.v` (never committed) and `harden.sh` and
+`stage-for-action.sh` call it (`CHIP_SIZES` picks the layout; default 4 PEs). The cocotb test
+`tt/test/test_chip.py` (`make`, needs `PDK_ROOT` for the macro models) loads a programme through
+the host link on the real both-edges stage and passes. The earlier sequencer harness stays in
+`tt/variants/seqv2/` (`TT_VARIANT=seqv2`, `make CHIP=no`, and CI's `tt-harness.yaml`).
+
+## Open issues
+
+- **Timing.** 60 MHz is not met at the slow corner (4 PEs: -4.17 ns at 20 ns; 8 PEs: -9.21 ns).
+  Name the glue's and the array's signals so the worst paths can be read, then pipeline or cut
+  them (suspects: the array's per-run ripple chains, the register-file read mux).
+- **Routing.** The glue's area and wiring (215,700 µm² synthesised; full 16-pad selects) and the
+  hold buffers limit the PE count more than the PEs do; 12 PEs untried.
+- **The PE array has no reset** (`../unified-pe/verify/upe_rtl.ml`): its state and segment
+  control registers power up unknown. Every pin and flag defaults away from it, so nothing
+  observable depends on it until the host configures the array, but a configuration that reads a
+  held field (F with fwb = hold, P before the first step) sees the power-up value. In simulation
+  everything starts at 0. A clear on the segment controls and the PE state, in the block's own
+  commit with an X-propagation test, would close it.
+- **Post-layout round trip**: the extractor needs the SRAM macros as opaque cells with pins before
+  its lockstep and `compare_def` can run on this chip.
+- **Not in v0**: the stuff tracker and line coder (probes only), fine delay, the gain-cell banks,
+  the bank's fixed ports into the array, a second bit-path chain; the quarter-clock phases on
+  silicon (the hardened stage uses both clock edges).
+- **Contracts** the specification assumes (section 2) are not enforced by the hardware: assist
+  configuration changes only while held, legal widths and periods, a CRC mask of the form 2^w - 1.
+- The demos run q = 0 firmware only, one DAC channel, no S/PDIF.
