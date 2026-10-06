@@ -19,8 +19,10 @@
 
    Waits (WAITP, WAITD, IN, MBX, WAITC) take several slots. The query is an induction over the
    slot j of the wait: in slot j the pc is the wait's, dl is d - j (j <= d; for IN max(d - j, 0),
-   any j), and cnt, acc and the enables are those of the first issue. Each slot either stays
-   (pc unchanged, dl one less and j + 1 <= d, cnt, acc and the pins unchanged, no pin written),
+   any j), cnt, acc and the enables are those of the first issue, and for j > 0 a WAITC on acc or
+   cnt has its condition false. Each slot either stays
+   (pc unchanged, dl one less and j + 1 <= d, cnt, acc and the pins unchanged, no pin written,
+   and a WAITC whose condition is on acc or cnt still not holding),
    which is slot j + 1 of the same wait, or leaves, and then must match an outcome of the kernel
    with elapsed j + 1 and its event at slot j. Every other instruction takes one slot: j = 0.
 
@@ -115,12 +117,25 @@ let query w shape =
   let d16 = z16 d in
   let wait = is_wait op in
   let sat_minus x n = ite (ult x n) (c 16 0) (sub ~w:16 x n) in      (* max (x - n) 0 on 16 bits *)
+  (* a WAITC on a bit of acc or on cnt's low three bits waits on state that does not change while
+     it waits: in a slot j > 0 that condition was false at slot j - 1, so it is false now. The
+     hypothesis says so, and a stay must keep it (without it, the induction admits a slot j > 0
+     of a wait whose condition already holds, which no execution reaches: the first run of this
+     proof stopped there, 2026-10-06) *)
+  let static_cond =
+    if op <> Isa2.op_waitc then None
+    else let cond = (w lsr 8) land 15 in
+      if cond < 8 then Some (bit acc cond)
+      else if cond = 8 then Some (eq (extract cnt ~hi:2 ~lo:0) (c 3 0))
+      else None in
+  let still_waiting = match static_cond with Some h -> not_ h | None -> tt in
   let pre = conj [
       eq (logand st.pin_oe kn) (logand ko kn);
       ule dlo d16; (if shape.hi_given then and_ (ule d16 dhi) (ule dhi (c 16 Kernel.dl_max)) else tt);
       (if not wait then and_ (eq j (c 16 0)) (eq st.dls.(t) d)
        else if op = Isa2.op_in then and_ (ult j (c 16 0xFFFF)) (eq (z16 st.dls.(t)) (sat_minus d16 j))
-       else and_ (ule j d16) (eq (z16 st.dls.(t)) (sub ~w:16 d16 j))) ] in
+       else and_ (ule j d16) (eq (z16 st.dls.(t)) (sub ~w:16 d16 j)));
+      (if wait then or_ (eq j (c 16 0)) still_waiting else tt) ] in
   (* the pins this slot reads (Isa2: the round latch when cfg bit 7 is set) *)
   let pins = ite (bit st.cfgs.(t) 7) st.latch io.pin_in in
   let pre_out = st.pin_out and pre_oe = st.pin_oe in
@@ -130,7 +145,7 @@ let query w shape =
   let j1 = add ~w:16 j (c 16 1) in
   let stay =
     if not wait then ff
-    else conj [ eq pc' pc; eq cnt' cnt; eq acc' acc; eq st.pin_out pre_out; eq st.pin_oe pre_oe;
+    else conj [ eq pc' pc; eq cnt' cnt; eq acc' acc; eq st.pin_out pre_out; eq st.pin_oe pre_oe; still_waiting;
                 eq e.pins_written (c 8 0);
                 (if op = Isa2.op_in then eq dl' (sat_minus d16 j1) else and_ (ule j1 d16) (eq dl' (sub ~w:16 d16 j1))) ] in
   let level_ok p (l : Spec.level) =
