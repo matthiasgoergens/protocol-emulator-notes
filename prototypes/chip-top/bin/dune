@@ -32,3 +32,8 @@
  (name gate_lockstep)
  (modules gate_lockstep)
  (libraries hardcaml chip upe mphase roundtrip unix))
+
+(executable
+ (name edge_step)
+ (modules edge_step)
+ (libraries hardcaml eth10))

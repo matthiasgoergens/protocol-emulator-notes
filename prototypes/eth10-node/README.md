@@ -138,6 +138,13 @@ Frames were 46–245 random bytes plus FCS. The line was generated in continuous
 | CRC catalogue | the model reproduces the check value and residue of all 8 entries |
 | Controls | 4 of 4 caught: delay line 17, SFD template bit flipped, sampler holdoff 3, CRC polynomial bit flipped |
 
+**Timing change, 2026-10-06 (for `../chip-top`).** In `step_sub_rtl` the holdoff and timeout
+comparisons now read `since` itself (`since >= holdoff - 1`, and the saturated case spelled out)
+instead of waiting for `since + 1`; four of these steps run in series in one clock at n = 4, and
+this was one of the chip's critical paths. Same function: a SAT proof of the step against its
+plain form (`../chip-top/formal/edge_step_equiv`, `../chip-top/results/edge-step-equiv.txt`, with a
+holdoff + 1 control that fails), and `results/rx.txt` reruns byte-identical.
+
 **Jitter, stated plainly.** The sampler measures each mid-bit edge against the previous one, so
 the jitter of both edges adds. The ceiling is (75 − 50 − resolution) / 2. That is about ±10 ns
 with 4 samples per clock (4.2 ns resolution), and about ±8 ns with 1. I recall the 10BASE-T
