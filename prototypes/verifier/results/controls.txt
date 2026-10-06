@@ -1,10 +1,10 @@
 # command: main.exe controls
-# commit: 9c49ad6b1035187575a0218017b60510bdc5e859
+# commit: 4050c9ad0a119e0c742d0648e8a6d181115d7812 (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-05T20:34:22+08:00
-uart_b16_n2                    527 perturbed certificates or specifications, 0 not rejected
-spi_p16_n1                     479 perturbed certificates or specifications, 0 not rejected
+# date: 2026-10-06T09:28:56+08:00
+uart_b16_n2                    543 perturbed certificates or specifications, 0 not rejected
+spi_p16_n1                     487 perturbed certificates or specifications, 0 not rejected
 i2c_q4_n1_l4095                847 perturbed certificates or specifications, 0 not rejected
 deadline_ldd20                  45 perturbed certificates or specifications, 0 not rejected
-controls: 1898, not rejected 0
-# elapsed 0.09 s, max rss 7600 kB
+controls: 1922, not rejected 0
+# elapsed 0.09 s, max rss 15372 kB

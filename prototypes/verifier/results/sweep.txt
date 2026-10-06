@@ -1,7 +1,7 @@
 # command: main.exe sweep
-# commit: 9c49ad6b1035187575a0218017b60510bdc5e859
+# commit: 4050c9ad0a119e0c742d0648e8a6d181115d7812 (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-05T20:02:40+08:00
+# date: 2026-10-06T09:19:18+08:00
 uart_b5_n1                                   PROVED    entries    42  events    11  cross-check 1 runs covered
 uart_b5_n2                                   PROVED    entries    82  events    21  cross-check 1 runs covered
 uart_b5_n3                                   PROVED    entries   122  events    31  cross-check 1 runs covered
@@ -535,4 +535,4 @@ watchdog                                     PROVED    entries     6  events    
 
 sweep: 530 images; proved 530, rejected 0 (of which 0 with every interpreter run meeting the specification)
 interpreter cross-check: 9299 runs, 2674218 instruction entries and 441297 channel events measured; images with a measured state outside the certificate: 0; proved images with a failing run: 0
-# elapsed 5.56 s, max rss 29448 kB
+# elapsed 5.51 s, max rss 37080 kB

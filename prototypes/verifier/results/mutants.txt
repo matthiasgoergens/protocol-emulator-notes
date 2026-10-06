@@ -1,17 +1,15 @@
 # command: main.exe mutants
-# commit: 9c49ad6b1035187575a0218017b60510bdc5e859
+# commit: 4050c9ad0a119e0c742d0648e8a6d181115d7812 (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-05T20:02:46+08:00
-  rejected, no run fails (input-dependent): uart_b8_n1 pc 1 random word d063 (send ch0 fail=99)
-    pc 0: 159 slots may pass without an event in state idle high, whose deadline is 8
-uart_b8_n1                    303 mutants: rejected and a run fails   38; proved and every run meets  264; rejected, no run fails   1
-spi_p12_n1                    299 mutants: rejected and a run fails   48; proved and every run meets  251; rejected, no run fails   0
+# date: 2026-10-06T09:19:24+08:00
+uart_b8_n1                    303 mutants: rejected and a run fails   40; proved and every run meets  263; rejected, no run fails   0
+spi_p12_n1                    299 mutants: rejected and a run fails   50; proved and every run meets  249; rejected, no run fails   0
   rejected, no run fails (input-dependent): i2c_q4_n1_l7 pc 28 random word 5fe2 (waitp pin7==1 fail=226)
     pc 0: 32 slots may pass without an event in state byte 0 ack scl low, whose deadline is 2
 i2c_q4_n1_l7                  275 mutants: rejected and a run fails  139; proved and every run meets  135; rejected, no run fails   1
 deadline_ldd20                 28 mutants: rejected and a run fails   28; proved and every run meets    0; rejected, no run fails   0
 watchdog                      315 mutants: rejected and a run fails   22; proved and every run meets  293; rejected, no run fails   0
 
-mutants: 1220; rejected with a failing run 275; proved 943; proved but a run fails (UNSOUND) 0; rejected with no failing run 2 (deterministic programmes: 0 of 514 that meet the specification)
+mutants: 1220; rejected with a failing run 279; proved 940; proved but a run fails (UNSOUND) 0; rejected with no failing run 1 (deterministic programmes: 0 of 511 that meet the specification)
 measured states outside the certificate: 0 mutants
-# elapsed 149.05 s, max rss 392416 kB
+# elapsed 144.79 s, max rss 298676 kB

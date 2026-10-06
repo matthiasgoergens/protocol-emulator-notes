@@ -1,7 +1,7 @@
 # command: main.exe compose
-# commit: 9c49ad6b1035187575a0218017b60510bdc5e859
+# commit: 4050c9ad0a119e0c742d0648e8a6d181115d7812 (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-05T20:02:46+08:00
+# date: 2026-10-06T09:19:24+08:00
 demo composition:
   thread 0: uart_b16_n3                                  PROVED    entries   122  events    31; writes pins 0x01
   thread 1: spi_p16_n2                                   PROVED    entries   139  events    54; writes pins 0x0e
@@ -16,4 +16,4 @@ planted: the watchdog's timeout writes pin 0 (mask 0x01, the UART's pin):
   thread 3: watchdog mask=0x01                           REJECTED  entries     6  events     3; writes pins 0x81
   OWNERSHIP: thread 3 (watchdog mask=0x01) writes pins 0x01 of thread 0's channel (uart_b16_n3)
 composition: REJECTED
-# elapsed 0.00 s, max rss 7404 kB
+# elapsed 0.00 s, max rss 9884 kB
