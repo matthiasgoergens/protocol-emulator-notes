@@ -42,18 +42,20 @@ for i in 0 1 2; do "$EMIT" "$WORK/core-mutant$i.v" "mutant:$i"; done
 #   pass: every property PROVED and its antecedent reachable; fail: some property FAILED
 JOBLIST='
 deadline|deadline_ldd20||core|pass
-uart|uart_b16_n3||core|pass
-spi|spi_p16_n2||core|pass
+uart|uart_b5_n1||core|pass
+spi|spi_p10_n1||core|pass
 i2c|i2c_q4_n1_l7||core|pass
+uart-3bytes|uart_b16_n3||core|pass
+spi-2bytes|spi_p16_n2||core|pass
 deadline-gap-narrowed|deadline_ldd20|--gap 1 2..21|core|fail
 i2c-gap-narrowed|i2c_q4_n1_l7|--gap 4 1..6|core|fail
-uart-gap-shifted|uart_b16_n3|--gap 2 15|core|fail
-uart-data-shifted|uart_b16_n3|--data-shift|core|fail
-spi-data-shifted|spi_p16_n2|--data-shift|core|fail
-uart-mutant-waitd-early|uart_b16_n3||core-mutant0|fail
+uart-gap-shifted|uart_b5_n1|--gap 2 4|core|fail
+uart-data-shifted|uart_b5_n1|--data-shift|core|fail
+spi-data-shifted|spi_p10_n1|--data-shift|core|fail
+uart-mutant-waitd-early|uart_b5_n1||core-mutant0|fail
 deadline-mutant-wait-fail-early|deadline_ldd20||core-mutant1|fail
 i2c-mutant-wait-fail-early|i2c_q4_n1_l7||core-mutant1|fail
-spi-mutant-sho-lsb-first|spi_p16_n2||core-mutant2|fail
+spi-mutant-sho-lsb-first|spi_p10_n1||core-mutant2|fail
 '
 field() { echo "$1" | cut --delimiter='|' --fields="$2"; }
 all_jobs=$(echo "$JOBLIST" | sed '/^$/d' | cut --delimiter='|' --fields=1)
