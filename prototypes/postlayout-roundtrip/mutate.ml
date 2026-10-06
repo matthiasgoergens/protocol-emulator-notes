@@ -36,3 +36,22 @@ let add_rect ~src ~dst ~endstr ~layer ~datatype rect =
   let s = read_bytes src in
   write_bytes dst
     (String.sub s 0 endstr ^ boundary ~layer ~datatype rect ^ String.sub s endstr (String.length s - endstr))
+
+(* Exchange the positions (XY records) of two TEXT elements: two pin labels
+   trade places, which to an extractor that takes pins from labels is the
+   same as the wires to the two pins being crossed. *)
+let swap_text_xy ~src ~dst ~(a : Gds.elem) ~(b : Gds.elem) =
+  let s = Bytes.of_string (read_bytes src) in
+  let xy_payload (e : Gds.elem) =
+    if e.ekind <> `text then invalid_arg "swap_text_xy: not a TEXT element";
+    let rec scan off =
+      if off >= e.eend then failwith "swap_text_xy: no XY record"
+      else
+        let len = (Char.code (Bytes.get s off) lsl 8) lor Char.code (Bytes.get s (off + 1)) in
+        if Bytes.get s (off + 2) = '\x10' && len = 12 then off + 4 else scan (off + len) in
+    scan e.estart in
+  let pa = xy_payload a and pb = xy_payload b in
+  let ta = Bytes.sub s pa 8 in
+  Bytes.blit s pb s pa 8;
+  Bytes.blit ta 0 s pb 8;
+  write_bytes dst (Bytes.to_string s)

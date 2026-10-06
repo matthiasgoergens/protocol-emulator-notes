@@ -1,0 +1,15 @@
+baseline: 0 errors, 27662 nets (extract 12.77 s)
+cut_dout   cut next to 512x16.A_DOUT[3] (net n9225): removed a path on layer 10, 0.00 um from the pin: nets +1; structural check: 1 errors (1 undriven net)
+             undriven net n9225, read by 1: u8787@90.24,245.70/sg13cmos5l_buf_4.A
+cut_addr   cut next to 1024x8.A_ADDR[4] (net n21681): removed a path on layer 10, 0.00 um from the pin: nets +1; structural check: 1 errors (1 undriven net)
+             undriven net n27631, read by 1: u27541@1136.00,376.46/RM_IHPSG13_1P_1024x8_c2_bm_bist.A_ADDR[4]
+cut_din    cut next to 1024x8.A_DIN[2] (net n21624): removed a path on layer 10, 0.06 um from the pin: nets +1; structural check: 1 errors (1 undriven net)
+             undriven net n27631, read by 1: u27541@1136.00,376.46/RM_IHPSG13_1P_1024x8_c2_bm_bist.A_DIN[2]
+short_dout short 512x16.A_DOUT[5] (n10498) to A_BM[5] (n9165): Metal2 0.71 x 0.20 um at (78.75, 231.11): nets -1; structural check: 1 errors (1 multiply driven net)
+             net n9165 has 2 drivers: u12716@12.00,231.34/RM_IHPSG13_1P_512x16_c2_bm_bist.A_DOUT[5], u8728@79.20,253.26/sg13cmos5l_tiehi.L_HI
+short_addr short 1024x8.A_ADDR[1] (n21677) to A_ADDR[0] (n21612): Metal2 0.88 x 0.20 um at (1205.08, 376.23): nets -1; structural check: 1 errors (1 multiply driven net)
+             net n21612 has 2 drivers: u21124@1062.24,381.78/sg13cmos5l_dlygate4sd3_1.X, u21070@1055.52,374.22/sg13cmos5l_dlygate4sd3_1.X
+swap_dout  swap 512x16.A_DOUT[1] (n9129) and A_DOUT[2] (n9245): their labels trade places: nets +0; structural check: clean
+swap_din   swap 1024x8.A_DIN[0] (n21583) and A_DIN[7] (n21625): their labels trade places: nets +0; structural check: clean
+swap_addr  swap 1024x8.A_ADDR[0] (n21612) and A_ADDR[1] (n21677): their labels trade places: nets +0; structural check: clean
+macro controls: 5 of 8 caught by the structural check

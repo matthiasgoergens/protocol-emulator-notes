@@ -1,0 +1,107 @@
+models: 84 cells read in 0.00 s; RTL ports: 43 bits
+  technology sg13cmos5l
+  2752843 conductor shapes, 27775 cell instances
+  126186 connected components; 98564 via-metal pairs touch without overlapping (not joined)
+    touching via-metal pairs: 98564 in the same component anyway, 0 across components
+extract: 12.57 s (2752843 shapes, 126186 components, 27775 instances, 27662 nets)
+check: 0.026 s (clock port clk)
+macro RM_IHPSG13_1P_1024x8_c2_bm_bist: 70 LEF signal pins, 70 GDS pin labels, 0 disagreements (/var/tmp/roundtrip-cmos5l/pdk/ihp-sg13cmos5l/libs.ref/sg13cmos5l_sram/lef/RM_IHPSG13_1P_1024x8_c2_bm_bist.lef)
+macro RM_IHPSG13_1P_512x16_c2_bm_bist: 108 LEF signal pins, 108 GDS pin labels, 0 disagreements (/var/tmp/roundtrip-cmos5l/pdk/ihp-sg13cmos5l/libs.ref/sg13cmos5l_sram/lef/RM_IHPSG13_1P_512x16_c2_bm_bist.lef)
+  instances                    27775
+  nets                         27662
+  flip-flops                   2519
+  flip-flops on the falling edge 0
+  macros                       2
+  undriven nets                0
+  pins on undriven nets        0
+  multiply driven nets         0
+  driven nets nobody reads     147
+  unresolved labels            0
+  cell RM_IHPSG13_1P_1024x8_c2_bm_bist 1
+  cell RM_IHPSG13_1P_512x16_c2_bm_bist 1
+  cell sg13cmos5l_a21o_1       217
+  cell sg13cmos5l_a21oi_1      2297
+  cell sg13cmos5l_a221oi_1     548
+  cell sg13cmos5l_a22oi_1      1611
+  cell sg13cmos5l_and2_1       373
+  cell sg13cmos5l_and3_1       79
+  cell sg13cmos5l_and4_1       31
+  cell sg13cmos5l_antennanp    156
+  cell sg13cmos5l_buf_1        2226
+  cell sg13cmos5l_buf_2        3
+  cell sg13cmos5l_buf_4        37
+  cell sg13cmos5l_buf_8        260
+  cell sg13cmos5l_dfrbpq_1     2519
+  cell sg13cmos5l_dlygate4sd3_1 3206
+  cell sg13cmos5l_inv_1        1071
+  cell sg13cmos5l_inv_2        38
+  cell sg13cmos5l_inv_4        25
+  cell sg13cmos5l_inv_8        7
+  cell sg13cmos5l_mux2_1       366
+  cell sg13cmos5l_mux4_1       19
+  cell sg13cmos5l_nand2_1      1559
+  cell sg13cmos5l_nand2b_1     425
+  cell sg13cmos5l_nand3_1      480
+  cell sg13cmos5l_nand3b_1     51
+  cell sg13cmos5l_nand4_1      303
+  cell sg13cmos5l_nor2_1       2270
+  cell sg13cmos5l_nor2b_1      501
+  cell sg13cmos5l_nor3_1       484
+  cell sg13cmos5l_nor4_1       182
+  cell sg13cmos5l_o21ai_1      3033
+  cell sg13cmos5l_or2_1        222
+  cell sg13cmos5l_or3_1        21
+  cell sg13cmos5l_or4_1        22
+  cell sg13cmos5l_tiehi        2549
+  cell sg13cmos5l_tielo        81
+  cell sg13cmos5l_xnor2_1      354
+  cell sg13cmos5l_xor2_1       147
+  errors: 42, warnings: 0
+  errors of kind clock                42
+    ERROR u13393@333.60,374.22: clock arrives inverted
+    ERROR u13455@352.32,366.66: clock arrives inverted
+    ERROR u15506@111.36,427.14: clock arrives inverted
+    ERROR u16105@85.44,502.74: clock arrives inverted
+    ERROR u16206@79.20,464.94: clock arrives inverted
+    ERROR u16211@70.56,449.82: clock arrives inverted
+    ERROR u16212@72.00,487.62: clock arrives inverted
+    ERROR u16646@248.16,517.86: clock arrives inverted
+    ERROR u16789@42.24,442.26: clock arrives inverted
+    ERROR u17062@163.68,616.14: clock arrives inverted
+    ERROR u17802@145.44,616.14: clock arrives inverted
+    ERROR u17811@143.52,608.58: clock arrives inverted
+    ERROR u17892@148.32,638.82: clock arrives inverted
+    ERROR u17898@136.32,631.26: clock arrives inverted
+    ERROR u17948@144.00,646.38: clock arrives inverted
+    ERROR u17950@123.36,646.38: clock arrives inverted
+    ERROR u17963@140.64,661.50: clock arrives inverted
+    ERROR u18122@127.20,669.06: clock arrives inverted
+    ERROR u18179@246.72,653.94: clock arrives inverted
+    ERROR u18192@263.04,653.94: clock arrives inverted
+    ERROR u18229@283.20,646.38: clock arrives inverted
+    ERROR u18231@276.96,653.94: clock arrives inverted
+    ERROR u18232@295.20,646.38: clock arrives inverted
+    ERROR u18277@173.28,631.26: clock arrives inverted
+    ERROR u18287@184.80,646.38: clock arrives inverted
+    ERROR u18289@167.04,653.94: clock arrives inverted
+    ERROR u18300@170.88,661.50: clock arrives inverted
+    ERROR u18307@189.60,653.94: clock arrives inverted
+    ERROR u18329@217.92,661.50: clock arrives inverted
+    ERROR u18333@211.20,653.94: clock arrives inverted
+    ERROR u18369@187.68,669.06: clock arrives inverted
+    ERROR u18404@202.08,669.06: clock arrives inverted
+    ERROR u18430@302.88,669.06: clock arrives inverted
+    ERROR u18457@269.76,669.06: clock arrives inverted
+    ERROR u18459@253.92,669.06: clock arrives inverted
+    ERROR u18468@234.72,638.82: clock arrives inverted
+    ERROR u18478@231.36,669.06: clock arrives inverted
+    ERROR u18479@165.12,669.06: clock arrives inverted
+    ERROR u18531@158.88,646.38: clock arrives inverted
+    ERROR u18534@159.36,608.58: clock arrives inverted
+    ERROR u20660@320.16,669.06: clock arrives inverted
+    ERROR u20664@240.96,532.98: clock arrives inverted
+simulator: 57595 primitive gates, 2519 flip-flops, built in 0.02 s
+simulator clock edges: 2479 flip-flops and macros on the rising edge, 42 on the falling, 0 unresolved
+simulator macro u12716@12.00,231.34/RM_IHPSG13_1P_512x16_c2_bm_bist: 512 words x 16 bits
+simulator macro u27541@1136.00,376.46/RM_IHPSG13_1P_1024x8_c2_bm_bist: 1024 words x 8 bits
+STRUCTURE ERRORS

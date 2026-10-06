@@ -1,7 +1,7 @@
 (library
  (name roundtrip)
  (wrapped false)
- (modules gds extract cells sim sim3 check mutate)
+ (modules gds extract cells macros sim sim3 check mutate)
  (flags (:standard -w -69)))
 
 (executable
@@ -27,4 +27,9 @@
 (executable
  (name compare_def)
  (modules compare_def)
+ (libraries roundtrip))
+
+(executable
+ (name cellcheck)
+ (modules cellcheck)
  (libraries roundtrip))

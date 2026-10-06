@@ -1,0 +1,54 @@
+gates: 33683 instances, 33634 nets; structural check: 0 errors
+gates: 70576 primitive gates, 2915 flip-flops, 2 macros; clock edges: 2875 rising, 42 falling, 0 unresolved
+plant: u21389@130.08,684.18/sg13cmos5l_dfrbpq_1 now takes the rising edge
+mode two-edge, layout 2,2,2,2, 3 trials x 6000 clocks, seed 1; set up in 15.3 s
+trial 0: 0 mismatching half-clocks; 49 transactions; 18 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 1: 0 mismatching half-clocks; 58 transactions; 20 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 2: 0 mismatching half-clocks; 53 transactions; 24 read-back bytes checked, 0 wrong; toggle rate 0.01
+macro u15201@12.00,231.34/RM_IHPSG13_1P_512x16_c2_bm_bist: 68 writes, 17932 reads, 0 edges with BIST enabled
+macro u33263@1136.00,376.46/RM_IHPSG13_1P_1024x8_c2_bm_bist: 37 writes, 17963 reads, 0 edges with BIST enabled
+flip-flops whose output changed: 985 of 2874 on the rising edge, 40 of 41 on the falling edge
+  falling u18734@146.40,442.26/sg13cmos5l_dfrbpq_1: 0 changes
+  falling u19008@10.56,487.62/sg13cmos5l_dfrbpq_1: 5925 changes
+  falling u19629@204.96,525.42/sg13cmos5l_dfrbpq_1: 4526 changes
+  falling u20039@193.44,532.98/sg13cmos5l_dfrbpq_1: 1674 changes
+  falling u20476@51.36,540.54/sg13cmos5l_dfrbpq_1: 1990 changes
+  falling u20513@17.76,540.54/sg13cmos5l_dfrbpq_1: 5475 changes
+  falling u20572@52.32,555.66/sg13cmos5l_dfrbpq_1: 1354 changes
+  falling u20587@9.12,555.66/sg13cmos5l_dfrbpq_1: 308 changes
+  falling u21329@107.52,684.18/sg13cmos5l_dfrbpq_1: 102 changes
+  falling u21356@125.76,691.74/sg13cmos5l_dfrbpq_1: 878 changes
+  falling u21377@147.84,699.30/sg13cmos5l_dfrbpq_1: 1324 changes
+  falling u21391@143.52,684.18/sg13cmos5l_dfrbpq_1: 878 changes
+  falling u21394@119.52,676.62/sg13cmos5l_dfrbpq_1: 102 changes
+  falling u21631@184.80,646.38/sg13cmos5l_dfrbpq_1: 1096 changes
+  falling u21641@183.36,653.94/sg13cmos5l_dfrbpq_1: 3555 changes
+  falling u21661@204.96,653.94/sg13cmos5l_dfrbpq_1: 3555 changes
+  falling u21678@197.28,646.38/sg13cmos5l_dfrbpq_1: 1096 changes
+  falling u21711@180.48,684.18/sg13cmos5l_dfrbpq_1: 3076 changes
+  falling u21719@185.76,691.74/sg13cmos5l_dfrbpq_1: 1002 changes
+  falling u21721@163.68,691.74/sg13cmos5l_dfrbpq_1: 1324 changes
+  falling u21765@208.32,699.30/sg13cmos5l_dfrbpq_1: 3100 changes
+  falling u21779@222.24,699.30/sg13cmos5l_dfrbpq_1: 3100 changes
+  falling u21785@220.32,691.74/sg13cmos5l_dfrbpq_1: 3101 changes
+  falling u21788@208.32,684.18/sg13cmos5l_dfrbpq_1: 1002 changes
+  falling u21794@194.88,676.62/sg13cmos5l_dfrbpq_1: 3074 changes
+  falling u21822@266.40,684.18/sg13cmos5l_dfrbpq_1: 3167 changes
+  falling u21828@252.00,669.06/sg13cmos5l_dfrbpq_1: 3147 changes
+  falling u21859@309.12,691.74/sg13cmos5l_dfrbpq_1: 3112 changes
+  falling u21867@286.08,691.74/sg13cmos5l_dfrbpq_1: 3095 changes
+  falling u21899@251.52,684.18/sg13cmos5l_dfrbpq_1: 3169 changes
+  falling u21915@271.68,691.74/sg13cmos5l_dfrbpq_1: 3101 changes
+  falling u21918@220.80,661.50/sg13cmos5l_dfrbpq_1: 3083 changes
+  falling u21920@268.80,661.50/sg13cmos5l_dfrbpq_1: 3145 changes
+  falling u21965@240.48,691.74/sg13cmos5l_dfrbpq_1: 3097 changes
+  falling u21971@201.60,661.50/sg13cmos5l_dfrbpq_1: 3089 changes
+  falling u22046@159.36,676.62/sg13cmos5l_dfrbpq_1: 3084 changes
+  falling u23129@325.44,691.74/sg13cmos5l_dfrbpq_1: 3110 changes
+  falling u23149@338.88,691.74/sg13cmos5l_dfrbpq_1: 3110 changes
+  falling u24085@321.12,449.82/sg13cmos5l_dfrbpq_1: 5440 changes
+  falling u24086@63.36,532.98/sg13cmos5l_dfrbpq_1: 1848 changes
+  falling u24107@318.24,699.30/sg13cmos5l_dfrbpq_1: 3114 changes
+output pins that never toggled: 5 of 24 (uo_out[5] uio_out[4] uio_out[5] uio_oe[4] uio_oe[5])
+160 transactions; read-back through the pins: 62 bytes checked against what was written, 0 wrong
+two-edge: 3 trials x 6000 clocks, 36000 compared output words, 0 mismatching (53 s, 337 clocks/s)

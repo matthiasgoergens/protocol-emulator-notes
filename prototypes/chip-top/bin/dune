@@ -27,3 +27,8 @@
  (name emit_array)
  (modules emit_array)
  (libraries hardcaml upe))
+
+(executable
+ (name gate_lockstep)
+ (modules gate_lockstep)
+ (libraries hardcaml chip upe mphase roundtrip unix))

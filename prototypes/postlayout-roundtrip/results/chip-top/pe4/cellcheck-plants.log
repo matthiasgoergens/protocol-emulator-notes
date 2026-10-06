@@ -1,0 +1,11 @@
+plant cell_tamper: one polygon on layer 5/0 removed from sg13cmos5l_nand2_1
+/var/tmp/roundtrip-macros/pe4/cellcheck-plants/cell_tamper.gds: top cell tt_um_chip_top places 50 masters; 43 defined by a reference: 42 identical, 1 differ (324 cells compared, sub-cells included); 7 not in any reference (7 router via cells)
+  DIFFERS sg13cmos5l_nand2_1:
+    sg13cmos5l_nand2_1: 5/0 (0 only in the GDS, 1 only in the reference)
+CELLS DIFFER
+plant macro_tamper: one polygon on layer 10/2 removed from RM_IHPSG13_1P_BITKIT_CELL$1
+/var/tmp/roundtrip-macros/pe4/cellcheck-plants/macro_tamper.gds: top cell tt_um_chip_top places 50 masters; 43 defined by a reference: 42 identical, 1 differ (324 cells compared, sub-cells included); 7 not in any reference (7 router via cells)
+  DIFFERS RM_IHPSG13_1P_1024x8_c2_bm_bist:
+    RM_IHPSG13_1P_BITKIT_CELL$1: 10/2 (0 only in the GDS, 1 only in the reference)
+CELLS DIFFER
+cellcheck controls: 2 of 2 caught

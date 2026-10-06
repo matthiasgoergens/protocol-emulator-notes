@@ -1,0 +1,64 @@
+models: 84 cells read in 0.00 s; RTL ports: 43 bits
+  technology sg13cmos5l
+  3072227 conductor shapes, 33683 cell instances
+  143827 connected components; 98567 via-metal pairs touch without overlapping (not joined)
+    touching via-metal pairs: 98567 in the same component anyway, 0 across components
+extract: 14.06 s (3072227 shapes, 143827 components, 33683 instances, 33634 nets)
+check: 0.030 s (clock port clk, both edges allowed)
+macro RM_IHPSG13_1P_1024x8_c2_bm_bist: 70 LEF signal pins, 70 GDS pin labels, 0 disagreements (/var/tmp/roundtrip-cmos5l/pdk/ihp-sg13cmos5l/libs.ref/sg13cmos5l_sram/lef/RM_IHPSG13_1P_1024x8_c2_bm_bist.lef)
+macro RM_IHPSG13_1P_512x16_c2_bm_bist: 108 LEF signal pins, 108 GDS pin labels, 0 disagreements (/var/tmp/roundtrip-cmos5l/pdk/ihp-sg13cmos5l/libs.ref/sg13cmos5l_sram/lef/RM_IHPSG13_1P_512x16_c2_bm_bist.lef)
+  instances                    33683
+  nets                         33634
+  flip-flops                   2915
+  flip-flops on the falling edge 42
+  macros                       2
+  undriven nets                0
+  pins on undriven nets        0
+  multiply driven nets         0
+  driven nets nobody reads     175
+  unresolved labels            0
+  cell RM_IHPSG13_1P_1024x8_c2_bm_bist 1
+  cell RM_IHPSG13_1P_512x16_c2_bm_bist 1
+  cell sg13cmos5l_a21o_1       264
+  cell sg13cmos5l_a21oi_1      3273
+  cell sg13cmos5l_a221oi_1     849
+  cell sg13cmos5l_a22oi_1      2029
+  cell sg13cmos5l_and2_1       500
+  cell sg13cmos5l_and3_1       112
+  cell sg13cmos5l_and4_1       28
+  cell sg13cmos5l_antennanp    92
+  cell sg13cmos5l_buf_1        2909
+  cell sg13cmos5l_buf_2        2
+  cell sg13cmos5l_buf_4        45
+  cell sg13cmos5l_buf_8        308
+  cell sg13cmos5l_dfrbpq_1     2915
+  cell sg13cmos5l_dlygate4sd3_1 3696
+  cell sg13cmos5l_inv_1        1301
+  cell sg13cmos5l_inv_2        47
+  cell sg13cmos5l_inv_4        28
+  cell sg13cmos5l_inv_8        5
+  cell sg13cmos5l_mux2_1       690
+  cell sg13cmos5l_mux4_1       17
+  cell sg13cmos5l_nand2_1      1837
+  cell sg13cmos5l_nand2b_1     579
+  cell sg13cmos5l_nand3_1      558
+  cell sg13cmos5l_nand3b_1     55
+  cell sg13cmos5l_nand4_1      398
+  cell sg13cmos5l_nor2_1       2166
+  cell sg13cmos5l_nor2b_1      614
+  cell sg13cmos5l_nor3_1       657
+  cell sg13cmos5l_nor4_1       222
+  cell sg13cmos5l_o21ai_1      3500
+  cell sg13cmos5l_or2_1        301
+  cell sg13cmos5l_or3_1        27
+  cell sg13cmos5l_or4_1        29
+  cell sg13cmos5l_tiehi        2945
+  cell sg13cmos5l_tielo        81
+  cell sg13cmos5l_xnor2_1      379
+  cell sg13cmos5l_xor2_1       223
+  errors: 0, warnings: 0
+simulator: 70576 primitive gates, 2915 flip-flops, built in 0.02 s
+simulator clock edges: 2875 flip-flops and macros on the rising edge, 42 on the falling, 0 unresolved
+simulator macro u15201@12.00,231.34/RM_IHPSG13_1P_512x16_c2_bm_bist: 512 words x 16 bits
+simulator macro u33263@1136.00,376.46/RM_IHPSG13_1P_1024x8_c2_bm_bist: 1024 words x 8 bits
+STRUCTURE CLEAN

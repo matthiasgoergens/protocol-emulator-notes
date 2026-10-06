@@ -86,8 +86,17 @@ let metal_index tech layer =
 let via_metals tech layer =
   List.find_map (fun (l, _, lo, hi) -> if l = layer then Some (lo, hi) else None) tech.vias
 
-(* standard-cell supply pins, the same names in both variants *)
-let power_pins = [ "VDD"; "VSS" ]
+(* standard-cell supply pins, the same names in both variants, and the SRAM
+   macros' (periphery, ground, array) *)
+let power_pins = [ "VDD"; "VSS"; "VDD!"; "VSS!"; "VDDARRAY!" ]
+
+(* Hard macros, kept as instances with the pins their own labels name
+   (macros.ml has the model): IHP's SRAM macros, in either variant. *)
+let macro_prefixes = [ "RM_IHPSG13_" ]
+
+(* The macros label bus pins "A_DIN<3>"; their LEF, Verilog, the DEF and
+   nl.v say "A_DIN[3]".  One spelling, the latter. *)
+let bus_name s = String.map (function '<' -> '[' | '>' -> ']' | c -> c) s
 
 let starts_with s p =
   let n = String.length p in
@@ -349,13 +358,13 @@ let extract ?(log = fun _ -> ()) ?tech ~(gds_path : string) ~(top_name : string)
   in
   let flat = Gds.flatten_local lib in
   let dbu = lib.Gds.dbu_um in
-  (* instances: top-level references to standard cells *)
+  (* instances: top-level references to standard cells and macros *)
   let instances = ref [] in
   List.iter (fun (r0 : Gds.ref_) ->
     List.iter (fun (r : Gds.ref_) ->
       let cn = r.rcell in
-      if starts_with cn tech.cell_prefix
-         && not (List.exists (starts_with cn) tech.ignore_prefixes)
+      if ((starts_with cn tech.cell_prefix && not (List.exists (starts_with cn) tech.ignore_prefixes))
+          || List.exists (starts_with cn) macro_prefixes)
          && Hashtbl.mem lib.cells cn then begin
         let cell = Hashtbl.find lib.cells cn in
         let xf = Gds.ref_xform r in
@@ -364,8 +373,9 @@ let extract ?(log = fun _ -> ()) ?tech ~(gds_path : string) ~(top_name : string)
           if l.ltexttype = text_datatype && metal_index l.llayer <> None
              && not (List.mem l.ltext power_pins) then begin
             let p = Gds.xapply xf (l.lx, l.ly) in
-            let old = Option.value ~default:[] (Hashtbl.find_opt pins l.ltext) in
-            Hashtbl.replace pins l.ltext ((quant dbu p, l.llayer) :: old)
+            let name = bus_name l.ltext in
+            let old = Option.value ~default:[] (Hashtbl.find_opt pins name) in
+            Hashtbl.replace pins name ((quant dbu p, l.llayer) :: old)
           end) cell.labels;
         let ox, oy = r.rorigin in
         instances := (cn, (ox *. dbu, oy *. dbu), pins, r) :: !instances
@@ -448,14 +458,24 @@ let extract ?(log = fun _ -> ()) ?tech ~(gds_path : string) ~(top_name : string)
   let name_of = function
     | Metal m -> tech.metals.(m).mname
     | Via (lo, _) -> List.fold_left (fun acc (_, n, l, _) -> if l = lo then n else acc) "via" tech.vias in
+  (* listed one by one up to 20 (a chip with SRAM macros has about 100,000,
+     nearly all inside the macros), then only those across components *)
+  let ntouch = List.length !touch_pairs in
+  let across = ref 0 in
   List.iter (fun (i, j) ->
     let (x0, y0, x1, y1) = shapes.(i).bbox and (u0, v0, u1, v1) = shapes.(j).bbox in
     let um v = Int64.to_float v /. (dbu *. 1e5) *. dbu in
-    log (Printf.sprintf "  touch: %s (%.3f,%.3f)-(%.3f,%.3f) and %s (%.3f,%.3f)-(%.3f,%.3f): %s"
-           (name_of shapes.(i).kind) (um x0) (um y0) (um x1) (um y1)
-           (name_of shapes.(j).kind) (um u0) (um v0) (um u1) (um v1)
-           (if uf_find uf i = uf_find uf j then "same component anyway" else "different components")))
+    let same = uf_find uf i = uf_find uf j in
+    if not same then incr across;
+    if ntouch <= 20 || not same then
+      log (Printf.sprintf "  touch: %s (%.3f,%.3f)-(%.3f,%.3f) and %s (%.3f,%.3f)-(%.3f,%.3f): %s"
+             (name_of shapes.(i).kind) (um x0) (um y0) (um x1) (um y1)
+             (name_of shapes.(j).kind) (um u0) (um v0) (um u1) (um v1)
+             (if same then "same component anyway" else "different components")))
     (List.rev !touch_pairs);
+  if ntouch > 20 then
+    log (Printf.sprintf "  touching via-metal pairs: %d in the same component anyway, %d across components"
+           (ntouch - !across) !across);
   let point_net (p : pt) layer =
     match metal_index layer with
     | None -> None

@@ -22,6 +22,7 @@ let x = 2
 type t = { s : Sim.t; v : int array }
 
 let create (s : Sim.t) =
+  if s.mems <> [||] then failwith "Sim3: SRAM macros are not modelled with X (their outputs would read X for ever)";
   let v = Array.make (Array.length s.v) x in
   (* the two constants: Sim allocates 0 and 1 right after the nets *)
   v.(s.const1 - 1) <- 0;
