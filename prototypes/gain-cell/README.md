@@ -13,6 +13,14 @@ program in exchange for density.
 
 ## Status (2026-09-25)
 
+**2026-10-06: ported to sg13cmos5l and hardened as a macro in `../gain-cell-macro/`** (a
+32 × 32 bank with Berger check columns, DRC- and LVS-clean, placed in a LibreLane test top).
+Two findings there bear on this directory: the `lvs/` netlists were extraction only, and in
+them every GND bar floats, because the strap reaches it only through silicide, which the LVS
+deck does not see; and IHP-Open-PDK 2bbec755 ships PSP 103.8.2, which adds gmin across every
+junction, so retention runs on that revision need a lowered gmin (`../gain-cell-macro/README.md`,
+section 1).
+
 - **Layout:** 3T and 2T arrays, drawn by coordinates (`draw2.py`, gdstk). IHP's DRC deck is
   clean with substrate ties included. The netlist extracted by the PDK's LVS deck shows the
   intended devices and connectivity (`lvs/*/extracted.cir`).

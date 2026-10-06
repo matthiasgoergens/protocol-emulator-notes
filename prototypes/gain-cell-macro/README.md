@@ -139,10 +139,15 @@ array (estimated, 88 µm next to two bit lines). The NAND4 lowers the readable l
 at tt and ff and does nothing at ss/27 °C.
 
 **The slow cold corner sets the bank's limits.**
-- At 1.20 V it lives 6.9 ms, but its written 1 (0.383 V) is only 17 mV above the lowest
-  readable level (0.366 V). Any mismatch, which is not simulated for this cell, eats that.
-- **Below 1.20 V it does not work.** A thick-oxide write transistor passes VDD minus its
-  threshold: 0.327 V at 1.14 V and 0.266 V at 1.08 V, against 0.378 and 0.396 V needed. Neither
+- At 1.20 V it lives 6.9 ms (7.4 ms with a finer level grid, `m5-review-checks.txt`), but its
+  written 1 (0.383 V) is only 17 mV above the lowest readable level (0.366 V). Any mismatch,
+  which is not simulated for this cell, eats that. (The stored 0 is not the tight side: it sits
+  below 0.03 V for 10 ms, a third of a volt under the readable level; the "0 up to" column of
+  `m2-banklife.txt` is only the sweep step below the 1 threshold.)
+- **At 1.17 V and below it does not work** (tested at 1.17, 1.14 and 1.08 V; nothing between
+  1.17 and 1.20 V). A thick-oxide write transistor passes VDD minus its threshold: 0.356 V at
+  1.17 V, 0.327 V at 1.14 V and 0.266 V at 1.08 V, against 0.374, 0.378 and 0.396 V needed
+  (`m5-review-checks.txt`). Neither
   a 300 ns write (0.349 V at 1.08 V, `m2-ret-tw300-1v08-ss27.txt`) nor 4 cycles of evaluation
   (needs 0.345 V, `m2-bankread-nand4-1v08-eval4.txt`) closes it. The standard-cell libraries
   are characterised at 1.08 V, so a supply that may sag 10 % needs a boosted write word line
@@ -262,7 +267,8 @@ item below.
    needs checking), or a macro grid that connects through another layer. Inside the bank this
    was solved with Metal3 bars and Via3 (`bank/pdn_cfg.tcl`); the same idea at the top would
    need the bank to expose Metal3 power bars and leave Metal4 clear over part of itself.
-2. **Supply.** The bank needs VDD at 1.20 V at the slow cold corner (section 2). The chip
+2. **Supply.** The bank needs VDD at 1.20 V at the slow cold corner; it fails at 1.17 V
+   (section 2). The chip
    top must not assume the 1.08 V standard-cell corner for the bank.
 3. **Size.** 1 kbit costs 39,900 µm² of die here, more than architecture-v0's 26,618 µm² per
    4 kbit (2.6, an estimate). The periphery is 84 % of it: 152 flops (64 per-row word-line
@@ -291,6 +297,30 @@ item below.
 | behavioural model flags expired reads; RTL and model agree | simulated | `rtl/results/` |
 | 3.0 ms retention bound | chosen (factor 2.3 under the simulated 6.9 ms) | section 3 |
 | mismatch, coupling between cells, silicon | not done | — |
+
+## Review
+
+One adversarial review of the electrical claims by another model family (codex, model
+gpt-6-luna; its findings verbatim in `codex-review.txt`). What came of each:
+- *"Below 1.20 V it does not work" was broader than the tested voltages* (1.14 and 1.08 V).
+  Right; a run at 1.17 V also fails, and the text now names the tested points.
+- *The 6.9 ms rests on interpolation and a coarse time step.* Partly right: the retention run
+  reports no level between 0.383 and 0.350 V, and a finer grid gives 7.4 ms (computed by hand
+  in `m5-review-checks.txt`, because `run.py` prints 0.375 V as "0.38V" and `banklife.py` then
+  misreads it). A 10 ns maximum step and the exact 33.334 ns pulse move the 0.35 V crossing by
+  0.4 %. 6.9 ms stays as the conservative figure.
+- *Stored-0 margin of 3 mV.* Not so: that is the read sweep's step between the regions read as
+  0 and as 1. A stored 0 stays below 0.03 V (`m1-v5-3T-w0.15-l0.45.txt`), about 0.33 V under
+  the threshold. Upward disturbance of a stored 0 by reads and by the precharge returning at the
+  same clock edge as RWL falls is not simulated.
+- *gmin: three settings agreeing is not proof of convergence.* Fair; the 1e-15 / 1e-18 / 1e-21
+  agreement and the exact reproduction of old numbers with the old build are the evidence there
+  is, plus the time-step check above.
+- *The read sweep is not a worst case* (31 neighbours at 0.70 V, a lumped word line, SN imposed,
+  a VDD / 2 decision, no flop) and *the 3.0 ms bound is a policy, not a measurement.* Both
+  right and both stated above; the remedies (Monte Carlo of the full path, an extracted column,
+  the capture flop at transistor level) are not done.
+- The RTL protocol: no finding of a glitch or of WBL moving under WWL.
 
 ## Files
 
