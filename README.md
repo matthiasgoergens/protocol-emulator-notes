@@ -15,10 +15,10 @@ meets its deadlines.
 Everything here is design, simulation and measurement. Nothing has been fabricated, and the FPGA
 bring-up is prepared but not yet run on a board.
 
-## The intended chip
+## The chip
 
-This is the target design; the blocks exist as separate prototypes and are not yet integrated
-into one top level.
+The blocks below are integrated into one top level (`prototypes/chip-top`), with the PE array
+cut to 4 or 8 elements for now (see "Tiny Tapeout" below for why).
 
 ```
             host (the RP2040/RP2350 on Tiny Tapeout's demo board)
@@ -32,7 +32,7 @@ into one top level.
    | loop-backs and feeds   <------->  sampler, phase accumulator (pin NCO)        |
    |    ^                               ^  bit-path assists: edge-tracking sampler, |
    |    |                               |  bit-stuff tracker, line coder, CRC,      |
-   | gain-cell memory banks             |  sync-word matcher                        |
+   | data bank (SRAM)                   |  sync-word matcher                        |
    +--------------------------------------------------------------------------------+
           one 60 MHz clock, four phases derived on chip
 ```
@@ -47,14 +47,15 @@ into one top level.
 - **Pin stage helpers.** A streamer and a sampler move words between the host and the pins at a
   fixed rate without the sequencer; a phase accumulator (NCO) makes carriers and PWM; small assists
   handle bit recovery, bit stuffing, line coding, CRCs and sync-word matching.
-- **Processing-element array.** Sixteen identical elements in a line (a systolic array), which can
+- **Processing-element array.** Up to sixteen identical elements in a line (a systolic array), which can
   be split into independent segments, for the work a sequencer is too slow for: CRCs, correlation,
   phase accumulators, pixel generation, audio noise shaping (`prototypes/unified-pe`). Its RTL is
   checked in lockstep against a model (`prototypes/unified-pe/verify`).
-- **Gain-cell memory.** Dynamic memory cells denser than the process's SRAM, which forget within
-  microseconds to milliseconds; the compiler schedules every read before its value expires
-  (`prototypes/gain-cell`, `notes/gain-cell-compiler.md`). So far these are SPICE simulations on
-  the process models and drawn layouts with DRC and LVS runs, not part of any hardened design.
+- **Memory.** IHP's SRAM macros hold the programmes (512 × 16) and the data bank (1024 × 8).
+  Gain-cell memory, whose cells are denser than SRAM but forget within milliseconds and so rely
+  on the compiler to schedule every read in time, was built as a hardened 1 kbit bank on the
+  shuttle's process (`prototypes/gain-cell-macro`). Its read and write circuitry made it larger
+  per bit than the SRAM macro, so it is not in the chip for now.
 
 The design rationale, including how the blocks were chosen by counting the primitives the earlier
 special-purpose prototypes needed, is in `notes/architecture-v0.md`. Some earlier prototypes ran
@@ -108,10 +109,22 @@ shown to be able to fail.
 `tt/` is the submission harness, laid out as in Tiny Tapeout's IHP template. Its Verilog is
 generated from Hardcaml at build time and never committed. `tt/scripts/harden.sh` runs Tiny
 Tapeout's own hardening steps in a pinned copy of their LibreLane environment
-(`tools/librelane-tt`). The first run, on a 6x4-tile placeholder top level around the sequencer,
-finished with no DRC, LVS or antenna errors, setup slack +10.39 ns and hold slack +0.12 ns at a
-20 ns clock (`tools/librelane-tt/results/tt-harden/`). It has not been through Tiny Tapeout's
-precheck yet, and the real top level, with all the blocks above, is not integrated yet.
+(`tools/librelane-tt`), and `tt/scripts/precheck.sh` runs Tiny Tapeout's precheck, which has
+been shown to reject planted layout errors.
+
+The combined chip in 6x4 tiles, with both SRAM macros (`prototypes/chip-top/results/`):
+
+| PEs | routing DRC, LVS, antenna | precheck | setup slack at 20 ns, typical / slow corner |
+| --- | --- | --- | --- |
+| 4 | 0, 0, 0 | 9 of 9 checks pass | +4.06 / −4.17 ns |
+| 8 | 0, 0, 0 | 9 of 9 checks pass | +1.67 / −9.21 ns |
+| 16 | does not route | – | – |
+
+The process's tiles route on three metal layers only, which leaves one layer for horizontal wires,
+so routing rather than area limits the size. Neither size yet meets timing at the slow corner, so
+the 60 MHz target is not met there; closing timing is the current work. The combined RTL runs
+unchanged UART, SPI and I2C firmware and the one-bit audio DAC in lockstep with its specification,
+and catches 27 of 27 planted integration bugs.
 
 ## Repository map
 
