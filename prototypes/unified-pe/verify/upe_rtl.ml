@@ -144,7 +144,9 @@ let pe ?(pe_index = 0) ?(cut = 8) ?g_resolved ?step_resolved spec (i : pe_in) =
   let n = (ymod ==:. 3) |: ((ymod ==:. 2) &: (if is "gneg_always" then vdd else g)) in
   let yn = yv ^: repeat n 16 in
   let c = mux2 (if is "cin_ignored" then gnd else cin_lane) lane_in (if is "neg_no_plus1" then gnd else n) in
-  let sum = uresize x 17 +: uresize yn 17 +: uresize c 17 in
+  (* x + yn + c as one adder: c enters as the carry into bit 1 of {x, c} + {yn, c}, instead of a
+     second, 17-bit incrementer after the first adder *)
+  let sum = select (concat_msb [ uresize x 17; c ] +: concat_msb [ uresize yn 17; c ]) 17 1 in
   let wsum = select sum 15 0 in
   let cout = if is "carry_bit15" then bit sum 15 else msb sum in
   let ovf = (msb x ==: msb yn) &: (msb wsum ^: msb x) in

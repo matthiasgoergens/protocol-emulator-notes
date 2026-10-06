@@ -36,6 +36,9 @@ array now resolves both chains as a Kogge-Stone prefix over (passes on, own valu
 log2 n levels instead of n. The function is unchanged, so all results are byte-identical when
 rerun: lockstep, controls (`g_in_zero` is now planted in the prefix's input and still caught),
 cells, shared faults, the four layouts, and the latency lint.
+The ALU's `x + yn + c` is now one adder, with c entering as the carry into bit 1 of
+`{x, c} + {yn, c}`, instead of an adder followed by a 17-bit incrementer; same results, rerun
+byte-identical.
 
 ## Files and commands
 
