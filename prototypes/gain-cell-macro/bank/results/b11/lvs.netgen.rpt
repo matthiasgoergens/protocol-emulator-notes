@@ -1,17 +1,15 @@
 
-Cell sg13cmos5l_fill_2 (0) disconnected node: VDD
-Cell sg13cmos5l_fill_2 (0) disconnected node: VSS
-Cell sg13cmos5l_fill_2 (1) disconnected node: VDD
-Cell sg13cmos5l_fill_2 (1) disconnected node: VSS
+Cell sg13cmos5l_decap_8 (0) disconnected node: VDD
+Cell sg13cmos5l_decap_8 (0) disconnected node: VSS
 
 Subcircuit pins:
-Circuit 1: sg13cmos5l_fill_2               |Circuit 2: sg13cmos5l_fill_2               
+Circuit 1: sg13cmos5l_decap_8              |Circuit 2: sg13cmos5l_decap_8              
 -------------------------------------------|-------------------------------------------
 VDD                                        |VDD                                        
 VSS                                        |VSS                                        
 ---------------------------------------------------------------------------------------
 Cell pin lists are equivalent.
-Device classes sg13cmos5l_fill_2 and sg13cmos5l_fill_2 are equivalent.
+Device classes sg13cmos5l_decap_8 and sg13cmos5l_decap_8 are equivalent.
 
 Cell sg13cmos5l_dlygate4sd3_1 (0) disconnected node: X
 Cell sg13cmos5l_dlygate4sd3_1 (0) disconnected node: A
@@ -145,6 +143,20 @@ VSS                                        |VSS
 Cell pin lists are equivalent.
 Device classes sg13cmos5l_dfrbpq_1 and sg13cmos5l_dfrbpq_1 are equivalent.
 
+Cell sg13cmos5l_fill_2 (0) disconnected node: VDD
+Cell sg13cmos5l_fill_2 (0) disconnected node: VSS
+Cell sg13cmos5l_fill_2 (1) disconnected node: VDD
+Cell sg13cmos5l_fill_2 (1) disconnected node: VSS
+
+Subcircuit pins:
+Circuit 1: sg13cmos5l_fill_2               |Circuit 2: sg13cmos5l_fill_2               
+-------------------------------------------|-------------------------------------------
+VDD                                        |VDD                                        
+VSS                                        |VSS                                        
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes sg13cmos5l_fill_2 and sg13cmos5l_fill_2 are equivalent.
+
 Cell sg13cmos5l_mux2_1 (0) disconnected node: X
 Cell sg13cmos5l_mux2_1 (0) disconnected node: A0
 Cell sg13cmos5l_mux2_1 (0) disconnected node: A1
@@ -236,18 +248,6 @@ VSS                                        |VSS
 ---------------------------------------------------------------------------------------
 Cell pin lists are equivalent.
 Device classes sg13cmos5l_or2_1 and sg13cmos5l_or2_1 are equivalent.
-
-Cell sg13cmos5l_decap_8 (0) disconnected node: VDD
-Cell sg13cmos5l_decap_8 (0) disconnected node: VSS
-
-Subcircuit pins:
-Circuit 1: sg13cmos5l_decap_8              |Circuit 2: sg13cmos5l_decap_8              
--------------------------------------------|-------------------------------------------
-VDD                                        |VDD                                        
-VSS                                        |VSS                                        
----------------------------------------------------------------------------------------
-Cell pin lists are equivalent.
-Device classes sg13cmos5l_decap_8 and sg13cmos5l_decap_8 are equivalent.
 
 Cell sg13cmos5l_a21oi_1 (0) disconnected node: Y
 Cell sg13cmos5l_a21oi_1 (0) disconnected node: A1
@@ -849,26 +849,26 @@ GND                                        |GND
 Cell pin lists are equivalent.
 Device classes GC_ARRAY_32x38 and GC_ARRAY_32x38 are equivalent.
 
-Class gc_bank_32x32 (0):  Merged 860 parallel devices.
-Class gc_bank_32x32 (1):  Merged 860 parallel devices.
+Class gc_bank_32x32 (0):  Merged 877 parallel devices.
+Class gc_bank_32x32 (1):  Merged 877 parallel devices.
 Subcircuit summary:
 Circuit 1: gc_bank_32x32                   |Circuit 2: gc_bank_32x32                   
 -------------------------------------------|-------------------------------------------
-sg13cmos5l_fill_2 (270->1)                 |sg13cmos5l_fill_2 (270->1)                 
-sg13cmos5l_dlygate4sd3_1 (168)             |sg13cmos5l_dlygate4sd3_1 (168)             
-sg13cmos5l_fill_1 (299->1)                 |sg13cmos5l_fill_1 (299->1)                 
-sg13cmos5l_decap_4 (121->1)                |sg13cmos5l_decap_4 (121->1)                
+sg13cmos5l_decap_8 (169->1)                |sg13cmos5l_decap_8 (169->1)                
+sg13cmos5l_dlygate4sd3_1 (169)             |sg13cmos5l_dlygate4sd3_1 (169)             
+sg13cmos5l_fill_1 (327->1)                 |sg13cmos5l_fill_1 (327->1)                 
+sg13cmos5l_decap_4 (122->1)                |sg13cmos5l_decap_4 (122->1)                
 sg13cmos5l_xor2_1 (50)                     |sg13cmos5l_xor2_1 (50)                     
 sg13cmos5l_ebufn_2 (38)                    |sg13cmos5l_ebufn_2 (38)                    
 sg13cmos5l_nand2_1 (101)                   |sg13cmos5l_nand2_1 (101)                   
-sg13cmos5l_buf_1 (188)                     |sg13cmos5l_buf_1 (188)                     
+sg13cmos5l_buf_1 (190)                     |sg13cmos5l_buf_1 (190)                     
 sg13cmos5l_dfrbpq_1 (152)                  |sg13cmos5l_dfrbpq_1 (152)                  
+sg13cmos5l_fill_2 (263->1)                 |sg13cmos5l_fill_2 (263->1)                 
 sg13cmos5l_mux2_1 (66)                     |sg13cmos5l_mux2_1 (66)                     
 sg13cmos5l_xnor2_1 (75)                    |sg13cmos5l_xnor2_1 (75)                    
 sg13cmos5l_buf_8 (49)                      |sg13cmos5l_buf_8 (49)                      
 sg13cmos5l_o21ai_1 (102)                   |sg13cmos5l_o21ai_1 (102)                   
 sg13cmos5l_or2_1 (9)                       |sg13cmos5l_or2_1 (9)                       
-sg13cmos5l_decap_8 (174->1)                |sg13cmos5l_decap_8 (174->1)                
 sg13cmos5l_a21oi_1 (37)                    |sg13cmos5l_a21oi_1 (37)                    
 sg13cmos5l_nor2b_1 (13)                    |sg13cmos5l_nor2b_1 (13)                    
 sg13cmos5l_a21o_1 (14)                     |sg13cmos5l_a21o_1 (14)                     
@@ -886,8 +886,8 @@ sg13cmos5l_or3_1 (5)                       |sg13cmos5l_or3_1 (5)
 sg13cmos5l_nand3b_1 (2)                    |sg13cmos5l_nand3b_1 (2)                    
 sg13cmos5l_a221oi_1 (1)                    |sg13cmos5l_a221oi_1 (1)                    
 GC_ARRAY_32x38 (1)                         |GC_ARRAY_32x38 (1)                         
-Number of devices: 1346                    |Number of devices: 1346                    
-Number of nets: 1384                       |Number of nets: 1384                       
+Number of devices: 1349                    |Number of devices: 1349                    
+Number of nets: 1387                       |Number of nets: 1387                       
 ---------------------------------------------------------------------------------------
 Netlists match uniquely.
 
@@ -943,6 +943,7 @@ rdata[24]                                  |rdata[24]
 rdata[21]                                  |rdata[21]                                  
 rdata[30]                                  |rdata[30]                                  
 rdata[0]                                   |rdata[0]                                   
+rdata[16]                                  |rdata[16]                                  
 rdata[18]                                  |rdata[18]                                  
 rdata[1]                                   |rdata[1]                                   
 rdata[22]                                  |rdata[22]                                  
@@ -961,7 +962,6 @@ rdata[12]                                  |rdata[12]
 rdata[19]                                  |rdata[19]                                  
 rdata[7]                                   |rdata[7]                                   
 rdata[13]                                  |rdata[13]                                  
-rdata[16]                                  |rdata[16]                                  
 rdata[10]                                  |rdata[10]                                  
 rdata[17]                                  |rdata[17]                                  
 rdata[8]                                   |rdata[8]                                   

@@ -17,7 +17,7 @@
         "nom_typ_1p20V_25C"
     ],
     "RT_MIN_LAYER": "Metal2",
-    "RT_MAX_LAYER": "TopMetal1",
+    "RT_MAX_LAYER": "Metal4",
     "SCL_GROUND_PINS": [
         "VSS"
     ],
@@ -88,7 +88,7 @@
     "DIODE_CELL": "sg13cmos5l_antennanp",
     "WELLTAP_CELL": null,
     "ENDCAP_CELL": null,
-    "DESIGN_DIR": "/var/tmp/gc-macro/bank/b7",
+    "DESIGN_DIR": "/var/tmp/gc-macro/bank/b11",
     "PDK_ROOT": "/var/tmp/roundtrip-cmos5l/pdk",
     "DESIGN_NAME": "gc_bank_32x32",
     "PDK": "ihp-sg13cmos5l",
@@ -107,10 +107,10 @@
     "MACROS": {
         "GC_ARRAY_32x38": {
             "gds": [
-                "/var/tmp/gc-macro/bank/b7/macro/GC_ARRAY_32x38.gds"
+                "/var/tmp/gc-macro/bank/b11/macro/GC_ARRAY_32x38.gds"
             ],
             "lef": [
-                "/var/tmp/gc-macro/bank/b7/macro/GC_ARRAY_32x38.lef"
+                "/var/tmp/gc-macro/bank/b11/macro/GC_ARRAY_32x38.lef"
             ],
             "instances": {
                 "array_i": {
@@ -123,14 +123,14 @@
                 }
             },
             "vh": [
-                "/var/tmp/gc-macro/bank/b7/macro/GC_ARRAY_32x38.bb.v"
+                "/var/tmp/gc-macro/bank/b11/macro/GC_ARRAY_32x38.bb.v"
             ],
             "nl": [],
             "pnl": [],
             "spef": {},
             "lib": {
                 "*": [
-                    "/var/tmp/gc-macro/bank/b7/macro/GC_ARRAY_32x38.lib"
+                    "/var/tmp/gc-macro/bank/b11/macro/GC_ARRAY_32x38.lib"
                 ]
             },
             "spice": [],
@@ -212,7 +212,7 @@
     "RUN_EQY": false,
     "RUN_LINTER": true,
     "VERILOG_FILES": [
-        "/var/tmp/gc-macro/bank/b7/gc_bank.v"
+        "/var/tmp/gc-macro/bank/b11/gc_bank.v"
     ],
     "VERILOG_INCLUDE_DIRS": null,
     "VERILOG_POWER_DEFINE": "USE_POWER_PINS",
@@ -321,15 +321,15 @@
     "PDN_ENABLE_RAILS": true,
     "PDN_HORIZONTAL_HALO": 2,
     "PDN_VERTICAL_HALO": 2,
-    "PDN_MULTILAYER": true,
+    "PDN_MULTILAYER": false,
     "PDN_RAIL_OFFSET": 0,
     "PDN_VWIDTH": 1,
     "PDN_HWIDTH": 2,
-    "PDN_VSPACING": 2,
+    "PDN_VSPACING": 9,
     "PDN_HSPACING": 4,
-    "PDN_VPITCH": 50,
+    "PDN_VPITCH": 20.57,
     "PDN_HPITCH": 50,
-    "PDN_VOFFSET": 10,
+    "PDN_VOFFSET": 2.45,
     "PDN_HOFFSET": 10,
     "PDN_CORE_RING_VWIDTH": 2,
     "PDN_CORE_RING_HWIDTH": 2,
@@ -348,8 +348,16 @@
     "PDN_CORE_VERTICAL_LAYER": null,
     "PDN_EXTEND_TO": "core_ring",
     "PDN_ENABLE_PINS": true,
-    "PDN_CFG": null,
-    "ROUTING_OBSTRUCTIONS": null,
+    "PDN_CFG": "/var/tmp/gc-macro/bank/b11/pdn_cfg.tcl",
+    "ROUTING_OBSTRUCTIONS": [
+        [
+            "Metal4",
+            73,
+            60,
+            118,
+            150
+        ]
+    ],
     "RT_CLOCK_MIN_LAYER": null,
     "RT_CLOCK_MAX_LAYER": null,
     "GRT_ADJUSTMENT": 0.3,

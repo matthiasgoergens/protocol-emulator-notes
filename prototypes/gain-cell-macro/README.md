@@ -133,9 +133,9 @@ write (`spice/banklife.py`, `spice/results/m2-banklife.txt`). Lifetime of a writ
 | 1.14 V, NAND4, 30 fF (`m2-bankread-nand4-1v14.txt`) | 15.5 | 17.1 | 8.9 | 9.0 | unreadable | 19.0 |
 | 1.08 V, NAND4, 30 fF (`m2-bankread-nand4-1v08.txt`) | 9.4 | 13.9 | 7.5 | 7.8 | unreadable | 7.5 |
 
-35 fF is the bit line's load after place and route: 2.3–19.7 fF of routed wire on the 38 RBL
-nets (`bank/results/b7`, the bank's SPEF, nominal RC) plus about 13 fF of Metal2 inside the
-array (estimated, 88 µm next to two bit lines). The NAND4 lowers the readable level by 7–26 mV
+35 fF is the bit line's load after place and route: 2.5–20.8 fF of routed wire on the 38 RBL
+nets (the final bank run `b11`, its SPEF at nominal RC; 2.3–19.7 fF in the earlier run `b7`) plus about 13 fF of Metal2 inside the
+array (estimated, 88 µm next to two bit lines). The NAND4 lowers the readable level by 9–26 mV
 at tt and ff and does nothing at ss/27 °C.
 
 **The slow cold corner sets the bank's limits.**
@@ -150,8 +150,8 @@ at tt and ff and does nothing at ss/27 °C.
 - The read-path figures are nominal corners; the cell has no Monte Carlo.
 
 **Layout** (`bank/config.json`, `bank/harden.sh`: LibreLane 3.1.0.dev3, the pinned image, the
-array placed as a macro at (73, 60) in a 190 × 210 µm die). Run `b7`
-(`bank/results/b7/metrics.json`):
+array placed as a macro at (73, 60) in a 190 × 210 µm die). Final run `b11`
+(`bank/results/b11/metrics.json`), after the power-grid change of section 3:
 - Magic DRC 0, KLayout DRC 0, routing DRC 0, antenna 0, KLayout/Magic XOR 0;
 - netgen LVS: circuits match uniquely (the array as a black box, `lvs.netgen.rpt`);
 - **full KLayout LVS of the whole bank, the array's 3,648 transistors included:** match
@@ -159,10 +159,11 @@ array placed as a macro at (73, 60) in a 190 × 210 µm die). Run `b7`
   into the schematic). Two planted faults fail as they should: one sense gate's input moved to
   the neighbouring bit line (`lvs/m2-planted-bank-sense-input.log`) and one read transistor's
   gate moved to the next row's word line inside the array (`lvs/m2-planted-bank-array-cell.log`).
-  The flat mode reports a mismatch only because every standard cell's pin labels become
-  top-level pins (the cross-reference itself matches);
-- setup slack +7.17 ns (slow corner), hold +0.18 ns (fast), at 16.667 ns;
-- 1,341 standard cells, 21,134 µm², against 4,050 µm² of array: **the periphery is 84 % of
+  The deck's flat mode (on run `b7`) reported a mismatch only because every standard cell's
+  pin labels became top-level pins; its cross-reference matched;
+- setup slack +7.22 ns (slow corner), hold +0.16 ns (fast), at 16.667 ns; power-grid check 0
+  violations;
+- 1,344 standard cells, 21,165 µm², against 4,050 µm² of array: **the periphery is 84 % of
   the bank**, 152 of its cells flops (7,446 µm²). Bank die 39,900 µm², 39 µm² per payload bit;
   the array alone is 3.33 µm² per bit with its edges, 3.05 µm² in its core.
 
@@ -175,6 +176,58 @@ What it took (each a finding about the hand-drawn array, now fixed in `gc_array.
   the strap grew from 0.60 to 1.00 µm (the array from 43.8 to 45.0 µm wide);
 - read word-line pins only 0.51 µm apart left notches below M3.b next to the router's landings;
   the pins now sit at the row pitch (2.75 µm), jogged in Metal2, and are 0.30 µm tall.
+
+## 3. Macro views (`views/`)
+
+For a design that places the bank (`gc_bank_32x32`, 190 × 210 µm):
+- `gc_bank_32x32.gds`: the layout of run `b11`, array included. Layers used: Activ, GatPoly,
+  Cont, nSD/pSD, NWell, ThickGateOx, Metal1–Metal4 and their vias; no TopVia1 or TopMetal1
+  (checked on the GDS; the run before, `b10`, had let the router use TopMetal1, hence
+  `RT_MAX_LAYER Metal4`).
+- `gc_bank_32x32.lef`: abstract by Magic. **Pins only on Metal2 and Metal3 (signals) and
+  Metal4 (VPWR, VGND)**; obstructions on GatPoly, Metal1–Metal4, none on TopMetal1.
+- `gc_bank_32x32__nom_{typ_1p20V_25C,slow_1p08V_125C,fast_1p32V_m40C}.lib`: Liberty timing
+  models. **Method:** LibreLane's post-route STA writes them with OpenSTA's timing-model
+  extraction (`write_timing_model`) on the routed netlist with OpenRCX parasitics, one per
+  standard-cell library corner: setup and hold arcs from clk to all 40 inputs, clk-to-output
+  arcs to all 35 outputs. They are digital timing only. The analogue requirements are not in
+  them and are the user's: the clock period at least 10 ns (2 cycles of write and of evaluation
+  must reach 20 ns; 16.667 ns is what was simulated), VDD at 1.20 V (section 2: the slow cold
+  corner cannot read below it, so the 1.08 V model describes timing that the cell itself
+  would not deliver there), and every word rewritten within the retention bound.
+- `gc_bank_32x32.vh`: the black-box Verilog header.
+- `../rtl/gc_bank_beh.v`: **the behavioural model**, same ports and cycle-level protocol as
+  the RTL. A read whose capture edge comes more than `RETENTION_NS` after the row's last write,
+  or of a row never written, returns `rdata = X` and `rerr = X`, prints `GC_BANK EXPIRED`, and
+  counts in `expired_reads`. The whole word goes X even though only 1s decay, so a scheduling
+  bug cannot hide in a word of mostly 0s.
+- the array's own views, for whoever re-hardens the bank: `GC_ARRAY_32x38.{gds,lef,lib,cir,bb.v}`
+  from `gc_array.py`. The array's Liberty has pin capacitances only (estimates, see the
+  file) and no timing arcs.
+
+**What the model's bound is.** `RETENTION_NS` defaults to 3.0 ms. The shortest simulated
+lifetime of a 1 in the bank is 6.9 ms (ss/27 °C, 1.20 V, section 2), so the default leaves a
+factor 2.3 for what is not simulated: mismatch (no Monte Carlo of this cell; for the thin cell
+it cost a factor 10 at the 64 kbit worst cell, `../gain-cell/tricks-thin/`), coupling and
+silicon. The 3.0 ms is a choice, not a measurement; it is also architecture-v0's plan of
+record (≥ 3.1 ms, 2.6), slightly lowered.
+
+**Planted controls** (`rtl/sim.sh`, Icarus Verilog 13; outputs in `rtl/results/`):
+- the RTL bank (`gc_bank.v`, with `gc_array_beh.v`, the array's behavioural model, and the
+  PDK's models of the two hand-placed cells) and the bank model (`gc_bank_beh.v`) run one
+  testbench (`tb_bank.v`) with the bound lowered to 5 µs: all 32 rows written and read back,
+  2,000 random operations with a refresh pass every 16, a read 4 µs after its write (inside),
+  a read 6 µs after (outside) and a read of a row never written. Both print `PASS`; the
+  outside and never-written reads return X and are counted (2 each,
+  `sim-rtl.txt`, `sim-beh.txt`); the first 1,041 reads of the two traces are identical in time,
+  data and `rerr` (`sim-compare.txt`);
+- the RTL alone: one stored 1 of a live word forced to 0 inside the array model (a decay the
+  model's timing would not produce) makes the Berger check raise `rerr`;
+- a 7 ns clock gives 14 ns write pulses, below the 20 ns the cell needs: the array model
+  reports 5,028 short writes (`sim-rtl-7ns-clock.txt`);
+- the test top (section 4) with the bank model and a 20 µs bound: a pass with a 4.3 µs wait
+  reads 0 bad words, a pass with a 34 µs wait reads all 32 bad and Berger-failed
+  (`sim-top-rtl.txt`).
 
 ## Files
 

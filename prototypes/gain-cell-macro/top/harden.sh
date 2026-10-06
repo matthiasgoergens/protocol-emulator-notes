@@ -1,18 +1,16 @@
 #!/bin/sh
-# Harden the bank gc_bank_32x32 with the pinned LibreLane 3.1.0.dev3 image (tools/librelane-tt) on
-# sg13cmos5l. Usage: harden.sh TAG. Stages config.json, ../rtl/gc_bank.v and freshly generated
-# array views (../gc_array.py) in /var/tmp/gc-macro/bank/TAG and runs there; the PDK is mounted
-# read-only. Run only when no other place-and-route flow runs on this host.
+# Harden the test top gc_test_top around the bank macro, with the pinned LibreLane 3.1.0.dev3
+# image on sg13cmos5l. Usage: harden.sh TAG. Stages config.json, ../rtl/gc_test_top.v and the
+# bank views in ../views into /var/tmp/gc-macro/top/TAG. Run only when no other flow runs.
 set -e
 here=$(cd "$(dirname "$0")" && pwd)
 tag=$1
 pdk_root=/var/tmp/roundtrip-cmos5l/pdk
-stage=/var/tmp/gc-macro/bank/$tag
+stage=/var/tmp/gc-macro/top/$tag
 rm --recursive --force "$stage"
 mkdir --parents "$stage/macro"
-cp "$here/config.json" "$here/pdn_cfg.tcl" "$stage/"
-cp "$here/../rtl/gc_bank.v" "$stage/"
-(cd "$here/.." && uv run gc_array.py 32 38 "$stage/macro/GC_ARRAY_32x38") > "$stage/gc_array.txt"
+cp "$here/config.json" "$here/../rtl/gc_test_top.v" "$stage/"
+cp "$here"/../views/gc_bank_32x32* "$stage/macro/"
 start=$(date +%s)
 cd "$stage"
 nice ionice podman run --rm \

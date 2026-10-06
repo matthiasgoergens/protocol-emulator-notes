@@ -221,7 +221,15 @@ def build(rows, cols, lib):
             r("Via2", xm - 0.095, y - 0.095, xm + 0.095, y + 0.095)
             r("Metal3", xm - 0.195, y - 0.195, xm + 0.195, y + 0.195)   # area 0.152 >= 0.144 (M3.d)
             r("Via3", xm - 0.095, y - 0.095, xm + 0.095, y + 0.095)
-        addpin("GND", "Metal4", xm - 0.50, -EB, xm + 0.50, top + ET, "INOUT", "GROUND")
+        # an internal Metal4 stripe joins the pads and reaches the GND bars below and above
+        r("Metal4", xm - 0.50, -EB + 0.15, xm + 0.50, top + ET - 0.15)
+        for yb in (-EB + 0.45, top + ET - 0.45):
+            r("Via3", xm - 0.095, yb - 0.095, xm + 0.095, yb + 0.095)
+    # GND pins: a Metal3 bar along the bottom and one along the top margin, full width. A
+    # placing design's vertical Metal4 VGND straps cross the array (it has no other Metal4
+    # outside the stripes) and drop Via3 onto these bars; see bank/pdn_cfg.tcl.
+    for yb in (-EB + 0.45, top + ET - 0.45):
+        addpin("GND", "Metal3", -EL, yb - 0.30, width + ER, yb + 0.30, "INOUT", "GROUND")
     m.add(gdstk.rectangle((0, 0), (W_, H_), layer=189, datatype=4))   # prBoundary
     info = dict(name=name, rows=rows, cols=cols, W=W_, H=H_, pins=pins, ox=ox, oy=oy,
                 width=width, top=top, gnd_x=[g + ox for g in gnd_x], xs=[x0 + ox for x0 in xs])
@@ -250,12 +258,11 @@ def write_lef(info, path):
     # cells: a signal over a storage node couples into it.
     out += ["    LAYER Metal1 ;", f"      RECT 0.000 0.000 {W_:.3f} {H_:.3f} ;",
             "    LAYER Metal2 ;", f"      RECT 0.000 {PINLEN + 0.25:.3f} {W_:.3f} {H_ - PINLEN - 0.25:.3f} ;",
-            "    LAYER Metal3 ;", f"      RECT {PINLEN + 0.25:.3f} 0.000 {W_ - PINLEN - 0.25:.3f} {H_:.3f} ;",
-            "    LAYER Metal4 ;"]
-    edges = [0.0] + sum(([g - 0.5 - 0.25, g + 0.5 + 0.25] for g in info["gnd_x"]), []) + [W_]
-    for a, b in zip(edges[0::2], edges[1::2]):
-        if b - a > 0.2:
-            out.append(f"      RECT {max(a, 0):.3f} 0.000 {min(b, W_):.3f} {H_:.3f} ;")
+            "    LAYER Metal3 ;", f"      RECT {PINLEN + 0.25:.3f} 0.850 {W_ - PINLEN - 0.25:.3f} {H_ - 0.85:.3f} ;",
+            "    LAYER Metal4 ;"] + [f"      RECT {g - 0.5:.3f} 0.150 {g + 0.5:.3f} {H_ - 0.15:.3f} ;" for g in info["gnd_x"]]
+    # Metal4 is obstructed only over the internal GND stripes, so a placing design's power
+    # straps can cross the array; it keeps signal routing off Metal4 here itself
+    # (ROUTING_OBSTRUCTIONS in bank/config.json).
     out += ["  END", f"END {info['name']}", "END LIBRARY", ""]
     open(path, "w").write("\n".join(out))
 
