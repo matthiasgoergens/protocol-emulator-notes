@@ -1,0 +1,46 @@
+gates: 33683 instances, 33634 nets; structural check: 0 errors
+gates: 70576 primitive gates, 2915 flip-flops, 2 macros; clock edges: 2875 rising, 42 falling, 0 unresolved
+structure: 16 falling first-stage and 16 falling second-stage input flip-flops; the rule holds
+plant fall2rise:0 u18734@146.40,442.26/sg13cmos5l_dfrbpq_1: rule holds
+plant fall2rise:1 u19008@10.56,487.62/sg13cmos5l_dfrbpq_1: rule holds
+plant fall2rise:2 u19629@204.96,525.42/sg13cmos5l_dfrbpq_1: rule holds
+plant fall2rise:3 u20039@193.44,532.98/sg13cmos5l_dfrbpq_1: rule holds
+plant fall2rise:4 u20476@51.36,540.54/sg13cmos5l_dfrbpq_1: rule holds
+plant fall2rise:5 u20513@17.76,540.54/sg13cmos5l_dfrbpq_1: rule holds
+plant fall2rise:6 u20572@52.32,555.66/sg13cmos5l_dfrbpq_1: rule holds
+plant fall2rise:7 u20587@9.12,555.66/sg13cmos5l_dfrbpq_1: rule holds
+plant fall2rise:8 u21329@107.52,684.18/sg13cmos5l_dfrbpq_1: rule violated: pad 13: no falling-edge first-stage flip-flop; pad 13: second stage u21394@119.52,676.62/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21329@107.52,684.18/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:9 u21356@125.76,691.74/sg13cmos5l_dfrbpq_1: rule violated: pad 11: no falling-edge first-stage flip-flop; pad 11: second stage u21391@143.52,684.18/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21356@125.76,691.74/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:10 u21377@147.84,699.30/sg13cmos5l_dfrbpq_1: rule violated: pad 8: no falling-edge first-stage flip-flop; pad 8: second stage u21721@163.68,691.74/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21377@147.84,699.30/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:11 u21389@130.08,684.18/sg13cmos5l_dfrbpq_1: rule violated: pad 14: no falling-edge first-stage flip-flop; pad 14: second stage u22046@159.36,676.62/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21389@130.08,684.18/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:12 u21391@143.52,684.18/sg13cmos5l_dfrbpq_1: rule violated: pad 11: second stage u21391@143.52,684.18/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21356@125.76,691.74/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:13 u21394@119.52,676.62/sg13cmos5l_dfrbpq_1: rule violated: pad 13: second stage u21394@119.52,676.62/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21329@107.52,684.18/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:14 u21631@184.80,646.38/sg13cmos5l_dfrbpq_1: rule violated: pad 9: no falling-edge first-stage flip-flop; pad 9: second stage u21678@197.28,646.38/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21631@184.80,646.38/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:15 u21641@183.36,653.94/sg13cmos5l_dfrbpq_1: rule violated: pad 12: no falling-edge first-stage flip-flop; pad 12: second stage u21661@204.96,653.94/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21641@183.36,653.94/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:16 u21661@204.96,653.94/sg13cmos5l_dfrbpq_1: rule violated: pad 12: second stage u21661@204.96,653.94/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21641@183.36,653.94/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:17 u21678@197.28,646.38/sg13cmos5l_dfrbpq_1: rule violated: pad 9: second stage u21678@197.28,646.38/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21631@184.80,646.38/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:18 u21711@180.48,684.18/sg13cmos5l_dfrbpq_1: rule violated: pad 7: no falling-edge first-stage flip-flop; pad 7: second stage u21794@194.88,676.62/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21711@180.48,684.18/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:19 u21719@185.76,691.74/sg13cmos5l_dfrbpq_1: rule violated: pad 10: no falling-edge first-stage flip-flop; pad 10: second stage u21788@208.32,684.18/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21719@185.76,691.74/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:20 u21721@163.68,691.74/sg13cmos5l_dfrbpq_1: rule violated: pad 8: second stage u21721@163.68,691.74/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21377@147.84,699.30/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:21 u21765@208.32,699.30/sg13cmos5l_dfrbpq_1: rule violated: pad 2: no falling-edge first-stage flip-flop; pad 2: second stage u21779@222.24,699.30/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21765@208.32,699.30/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:22 u21779@222.24,699.30/sg13cmos5l_dfrbpq_1: rule violated: pad 2: second stage u21779@222.24,699.30/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21765@208.32,699.30/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:23 u21785@220.32,691.74/sg13cmos5l_dfrbpq_1: rule violated: pad 1: no falling-edge first-stage flip-flop; pad 1: second stage u21965@240.48,691.74/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21785@220.32,691.74/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:24 u21788@208.32,684.18/sg13cmos5l_dfrbpq_1: rule violated: pad 10: second stage u21788@208.32,684.18/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21719@185.76,691.74/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:25 u21794@194.88,676.62/sg13cmos5l_dfrbpq_1: rule violated: pad 7: second stage u21794@194.88,676.62/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21711@180.48,684.18/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:26 u21822@266.40,684.18/sg13cmos5l_dfrbpq_1: rule violated: pad 5: second stage u21822@266.40,684.18/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21899@251.52,684.18/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:27 u21828@252.00,669.06/sg13cmos5l_dfrbpq_1: rule violated: pad 3: no falling-edge first-stage flip-flop; pad 3: second stage u21920@268.80,661.50/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21828@252.00,669.06/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:28 u21859@309.12,691.74/sg13cmos5l_dfrbpq_1: rule violated: pad 15: no falling-edge first-stage flip-flop; pad 15: second stage u23129@325.44,691.74/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21859@309.12,691.74/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:29 u21867@286.08,691.74/sg13cmos5l_dfrbpq_1: rule violated: pad 0: second stage u21867@286.08,691.74/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21915@271.68,691.74/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:30 u21899@251.52,684.18/sg13cmos5l_dfrbpq_1: rule violated: pad 5: no falling-edge first-stage flip-flop; pad 5: second stage u21822@266.40,684.18/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21899@251.52,684.18/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:31 u21915@271.68,691.74/sg13cmos5l_dfrbpq_1: rule violated: pad 0: no falling-edge first-stage flip-flop; pad 0: second stage u21867@286.08,691.74/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21915@271.68,691.74/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:32 u21918@220.80,661.50/sg13cmos5l_dfrbpq_1: rule violated: pad 6: second stage u21918@220.80,661.50/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21971@201.60,661.50/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:33 u21920@268.80,661.50/sg13cmos5l_dfrbpq_1: rule violated: pad 3: second stage u21920@268.80,661.50/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21828@252.00,669.06/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:34 u21965@240.48,691.74/sg13cmos5l_dfrbpq_1: rule violated: pad 1: second stage u21965@240.48,691.74/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21785@220.32,691.74/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:35 u21971@201.60,661.50/sg13cmos5l_dfrbpq_1: rule violated: pad 6: no falling-edge first-stage flip-flop; pad 6: second stage u21918@220.80,661.50/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u21971@201.60,661.50/sg13cmos5l_dfrbpq_1 on the rising
+plant fall2rise:36 u22046@159.36,676.62/sg13cmos5l_dfrbpq_1: rule violated: pad 14: second stage u22046@159.36,676.62/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21389@130.08,684.18/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:37 u23129@325.44,691.74/sg13cmos5l_dfrbpq_1: rule violated: pad 15: second stage u23129@325.44,691.74/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u21859@309.12,691.74/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:38 u23149@338.88,691.74/sg13cmos5l_dfrbpq_1: rule violated: pad 4: second stage u23149@338.88,691.74/sg13cmos5l_dfrbpq_1 is on the rising edge, its first stage u24107@318.24,699.30/sg13cmos5l_dfrbpq_1 on the falling
+plant fall2rise:39 u24085@321.12,449.82/sg13cmos5l_dfrbpq_1: rule holds
+plant fall2rise:40 u24086@63.36,532.98/sg13cmos5l_dfrbpq_1: rule holds
+plant fall2rise:41 u24107@318.24,699.30/sg13cmos5l_dfrbpq_1: rule violated: pad 4: no falling-edge first-stage flip-flop; pad 4: second stage u23149@338.88,691.74/sg13cmos5l_dfrbpq_1 is on the falling edge, its first stage u24107@318.24,699.30/sg13cmos5l_dfrbpq_1 on the rising
+32 of 42 plants violate the structural rule

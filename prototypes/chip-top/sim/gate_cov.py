@@ -16,13 +16,15 @@ CHIP_TT the hardened RTL (chip_tt.v): Yosys may name a Q net after a wire that a
 The extracted reference's origin is the DEF placement for orientation N and the placement plus the
 cell height for FS (the only two the flip-flops use), which is how compare_def.exe matches them too.
 Prints per block: flip-flops, changed, never changed; NEVER_OUT gets one line per never-changed
-flip-flop with its register, bit, source line and label.
+flip-flop with its register, bit, source line and label (with GATE_COV_ALL=1 every flip-flop, the
+changed ones with their counts).
 
 RTL_NEVER (lockstep.exe coverage's never-changed list) classifies each never-changed flip-flop by
 its source line and bit: "rtl-never" if some register bit made at that line with that index never
 changed in the RTL lockstep either (see the classification there), else "rtl-changed": every such
 bit changed in the RTL lockstep, so this one is reachable and the gate run was too short to reach it.
 """
+import os
 import re
 import sys
 from collections import Counter, defaultdict
@@ -111,6 +113,8 @@ for (owner, edge), changes in sorted(merged.items()):
     per_block[block]['ffs'] += 1
     if int(changes) > 0:
         per_block[block]['changed'] += 1
+        if os.environ.get('GATE_COV_ALL'):
+            never.append((block, desc + ' changed %d' % int(changes)))
     else:
         never.append((block, desc))
 tot = Counter()

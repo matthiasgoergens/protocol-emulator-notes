@@ -1,0 +1,25 @@
+hwfuzz: 3115 executions, 20207 features, 102 queue entries (821 s)
+  operator i2s             224 uses   85 wins
+seeds: 16 inputs replayed against the specification, 0 with mismatches
+RTL register coverage of the seeds: 64207 clocks; register bits that changed 1755 of 2696 (65.1 %), rose and fell 1057; provably constant 152; changed of the rest 1755 of 2544 (69.0 %); constant yet changed (must be 0): 0
+  CRC               0 of    32 changed (  0.0 %),     0 rose and fell,    0 provably constant,   32 other never changed
+  NCO              32 of    32 changed (100.0 %),    32 rose and fell,    0 provably constant,    0 other never changed
+  PE array        502 of   620 changed ( 81.0 %),   360 rose and fell,    0 provably constant,  118 other never changed
+  edge sampler      6 of    24 changed ( 25.0 %),     6 rose and fell,    0 provably constant,   18 other never changed
+  glue            668 of  1181 changed ( 56.6 %),   200 rose and fell,  147 provably constant,  366 other never changed
+  matcher          69 of   149 changed ( 46.3 %),    68 rose and fell,    4 provably constant,   76 other never changed
+  sampler         107 of   142 changed ( 75.4 %),    88 rose and fell,    0 provably constant,   35 other never changed
+  sequencer       271 of   387 changed ( 70.0 %),   216 rose and fell,    0 provably constant,  116 other never changed
+  streamer        100 of   129 changed ( 77.5 %),    87 rose and fell,    1 provably constant,   28 other never changed
+queue: 102 inputs replayed against the specification, 0 with mismatches
+RTL register coverage of the seeds and the queue: 406322 clocks; register bits that changed 1970 of 2696 (73.1 %), rose and fell 1237; provably constant 152; changed of the rest 1970 of 2544 (77.4 %); constant yet changed (must be 0): 0
+  CRC               0 of    32 changed (  0.0 %),     0 rose and fell,    0 provably constant,   32 other never changed
+  NCO              32 of    32 changed (100.0 %),    32 rose and fell,    0 provably constant,    0 other never changed
+  PE array        549 of   620 changed ( 88.5 %),   431 rose and fell,    0 provably constant,   71 other never changed
+  edge sampler      8 of    24 changed ( 33.3 %),     8 rose and fell,    0 provably constant,   16 other never changed
+  glue            760 of  1181 changed ( 64.4 %),   221 rose and fell,  147 provably constant,  274 other never changed
+  matcher         100 of   149 changed ( 67.1 %),   100 rose and fell,    4 provably constant,   45 other never changed
+  sampler         118 of   142 changed ( 83.1 %),   116 rose and fell,    0 provably constant,   24 other never changed
+  sequencer       295 of   387 changed ( 76.2 %),   239 rose and fell,    0 provably constant,   92 other never changed
+  streamer        108 of   129 changed ( 83.7 %),    90 rose and fell,    1 provably constant,   20 other never changed
+queue and never-changed bits in /var/tmp/chip-coverage/fuzz/run1

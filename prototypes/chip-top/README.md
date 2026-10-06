@@ -8,8 +8,10 @@ puts them behind one Hardcaml top level for Tiny Tapeout 6x4 (IHP sg13cmos5l), w
 - the existing demos, unchanged, driven through the host link;
 - a harden with the pinned flow, to measure the whole-chip placement factor (gap G13).
 
-Status: milestones 1-5 done: plan; top level, specification and lockstep; demos through the host
-link; area, hardens and G13; `tt/` points at this chip. Open issues are listed at the end.
+Status: milestones 1-6 done: plan; top level, specification and lockstep; demos through the host
+link; area, hardens and G13; `tt/` points at this chip; the edge-phase test and coverage. Open
+issues are listed at the end. The suite: `./suite.sh quick` (CI, about a minute after the build) or
+`./suite.sh full`.
 
 Build: `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17). Then
 `_build/default/bin/lockstep.exe run 400 12000`, `... controls 30 12000`, `... layouts 40 12000`,
@@ -421,6 +423,192 @@ at the right end), `docs/info.md` and the wrapper `src/chip_project.v` are the c
 the host link on the real both-edges stage and passes. The earlier sequencer harness stays in
 `tt/variants/seqv2/` (`TT_VARIANT=seqv2`, `make CHIP=no`, and CI's `tt-harness.yaml`).
 
+## 6. Which half of the clock each pin is sampled in, and what the tests reach (milestone 6)
+
+Two gaps the post-layout round trip left (section 4): the 32 falling-edge input samplers of the
+both-edges stage were pinned to their edge only by the structural trace (moving one to the rising
+edge in the extracted netlist was caught by none of the 5 tried), and about a third of the
+rising-edge flip-flops never changed under the gate lockstep's stimulus. Logs: `results/edge-phase/`
+and `results/coverage/`.
+
+### The edge-phase test (`bin/edge_phase.ml`)
+
+Each input pad under test toggles at most once per clock, at random in the first half (+T/4,
+between the rising edge E and the falling edge F) or the second half (+3T/4, between F and the
+next E), or not at all. Four threads loop on `SHI quad`, which shifts a logical pin's four quarter
+samples into the accumulator, two pins per thread, and store a byte every 16 clocks in the data
+bank; the host stops the chip and reads the bank back. For every pad the test then asks which
+sample instants reproduce every stored nibble, for some alignment between the threads' clocks and
+the pad log: quarters 0-1 at E, at the previous F or at F; quarters 2-3 at E, at F or at the next E.
+The design must fit (q0 at E, q2 at F) and nothing else; a first-stage sampler moved to the rising
+edge samples quarter 2 at the next E instead, and the test names that pad and that instant. This
+check reads the stored bytes against the pad schedule, not against a reference. All 16 pads are
+tested, the host-link pads included: the data lines while the strobe is still, the strobe and read
+request with the data lines held at 0 (a strobe change then moves a 0 nibble, which the parser
+ignores, and a read-request change resets the nibble phase). Then every general output pad is put
+on the pin NCO's quarter or half grid, whose edges fall on quarter 2: lane 2 is the only output
+lane on the falling edge, so every pin must change after falling edges as well as rising ones.
+Every half clock the outputs are also compared with a second simulator.
+
+It runs on the two-part Hardcaml reference (`edge_phase.exe rtl`), on the gates extracted from a
+GDS (`edge_phase.exe gates`, compared with the reference), and in Icarus Verilog on the RTL or on
+the hardened netlist (`sim/edge_iverilog.sh`: the same stimulus replayed with the inputs changing
+at T/4 and 3T/4 of a 20 ns clock, the trace checked by `edge_phase.exe replay` and compared with
+the reference). 9,461 clocks; each run reproduces every stored nibble with exactly one alignment.
+A schedule too regular to tell the instants apart would make several hypotheses fit, which fails
+the check rather than passing it; `edge_phase.exe rtl-control` runs the test on the reference with
+the stage's own planted fault (a quarter-1 sampler on the falling edge), and it fails.
+
+| simulator | 4 PEs (233c71e, the GDS of record) | 8 PEs |
+|---|---|---|
+| Hardcaml reference | every pad (q0 at E, q2 at F) only; 10 of 10 pins change after falling edges | the same |
+| extracted gates, compared with the reference | the same; 0 of 18,922 half clocks differ | the same |
+| Icarus, RTL (`chip_tt.v`) | the same; 0 differ (unknown outputs only in the first 4 half clocks, inside the reset) | the same |
+| Icarus, P&R netlist with the cell and SRAM models | the same; 0 differ (4 s for the run) | the same |
+
+**Every falling-edge flip-flop moved to the rising edge, one at a time** (42 per harden; in the
+extracted gates by `edge_phase.exe gates ... all`, in Icarus by `sim/edge_plants.sh`, which marks each
+one's clock in a copy of the netlist so that `+plant=k` inverts it):
+
+| role (traced in the netlist) | count | caught by the test (both simulators, both hardens) | structural rule |
+|---|---|---|---|
+| lane-2 output toggle | 10 | 10: the pin has no falling-edge changes, and the outputs differ | not its job |
+| first-stage input sampler | 16 | 16: the test names the pad as fitting (q0 at E, q2 at E+1) only, and the outputs differ | 16 |
+| second-stage input sampler | 16 | **0** | 16 |
+
+The 16 misses are exactly the second-stage samplers on both hardens, and they are not a gap in
+the stimulus: **moving the second synchroniser stage to the rising edge is a functionally
+equivalent change.** `edge_phase.exe prove` explores the product of the quarter-2 path (s on F
+samples the pad, r on F samples s, the retiming flop t on E samples r, each with the synchronous
+clear) and each variant, from every common state under every input sequence: with r on the rising
+edge, t agrees in every reachable state (8 product states); with s on the rising edge it does not
+(36). r then captures s at the next E instead of the next F, and t still takes that value at the E
+after; only the time r gives s to resolve changes, from a full clock to half of one, which is a
+metastability margin, not a behaviour, so no simulation can see it. Those 16 flip-flops are pinned
+by **a structural rule** instead (`edge_phase.exe structure`, run before every gate test): for each
+input pad, the flip-flops whose D depends on the pad within 12 gates (the first stage) must include
+a rising-edge and a falling-edge one; every flip-flop a first stage feeds (its second stage) must
+take the same edge, as a phase's two synchroniser flops share the phase's clock in
+`../multiphase/stage.ml`; and the retiming flip-flops after them must be on the rising edge. It holds
+on both hardens and is violated by each of the 32 input-sampler plants and by none of the 10
+lane-2 plants, which the test catches by behaviour. (The structural check of section 4 only
+accepted an inverted clock as the falling edge; it did not say which flip-flops must have one. A
+first version of this rule asked only for some falling second stage per pad; a cross-model review
+pointed out that with two falling pairs per pad one could then move unnoticed, hence the pairing.) Of the five
+plants tried in section 4, four were first-stage samplers of pads the random traffic never read at
+clock resolution (the host's data lines `uio_in[0]` and `uio_in[3]`, whose two-clock margins absorb
+the shift, and `uio_in[6]`, `ui_in[4]`), now caught; the fifth was a second-stage sampler, which
+cannot be. The strobe's first-stage sampler, which none of them was, shifts the whole host link by
+a clock: in Icarus its outputs differ on 7,743 half clocks.
+
+### Register toggle coverage (`src/cov.ml`)
+
+`lockstep.exe coverage SIZES TRIALS CLOCKS SEED NEVER_FILE [wide]` runs the lockstep with every
+register bit of the core tapped, records which bits ever rise and fall, and groups them by block
+and source line through Hardcaml's Caller_id (the debug outputs and the register file's addresses
+name the bits). A three-valued fixpoint from reset (inputs, memory data and power-up states
+unknown) proves bits constant: zero-extended register-file bits, a word's top bit that a shift
+always clears, the first matcher cell's upper sum bits. The proof is checked against every run: a
+bit it calls constant must never change (0 so far). Coverage below is of the bits not proved
+constant.
+
+**Coverage-directed stimulus** (`src/gen.ml`, `Gen.wide`; without it the generator is the old one,
+draw for draw). The never-changed lists showed what the random traffic never did, and each
+addition targets one cause: the assists' configuration from the whole legal range (12-bit periods
+and offsets, 10-bit holdoff and timeout, any frame length); 16-bit host-link addresses and
+transfers up to 256 bytes (the link's address and count registers); bursts that fill the streamer,
+sampler and host FIFOs; a matcher configuration that a run of zeros matches in all 16 cells (its
+sum's top bit); a slow pad rate, for long constant runs; LDD immediates up to 4095 (the deadline
+counters' upper bits); 32-bit CRC register values (`Random.State.bits` gives 30); and in the ports
+mode, threads that SEND on every issue slot, so that a host feed write waits until the next host
+byte arrives and is dropped (the sticky bit). The lockstep still compares against the
+specification every clock, and the planted bugs are still all caught: 400 x 12,000 clocks at 4 and
+8 PEs, 0 mismatches; 27 of 27 planted bugs caught with the wide generator.
+
+| RTL lockstep, 400 x 12,000 clocks | bits | constant (proved) | changed, before | changed, wide |
+|---|---|---|---|---|
+| 4 PEs | 2,696 | 152 | 2,419 of 2,544 (95.1 %) | **2,519 of 2,544 (99.0 %)** |
+| 8 PEs | 3,092 | 152 | 2,816 of 2,940 (95.8 %) | **2,915 of 2,940 (99.1 %)** |
+
+The PE array and the sequencer were at 100 % in the RTL lockstep already; the gaps were in the glue
+(register file, link address and count), the assists' counters, the matcher and the streamer and
+sampler. **The 25 bits left at either size are unreachable by design**, each by a one-line
+invariant of its block (the sampler's and streamer's under the specification's contract that widths
+are 1, 2 or 4):
+
+| bits | where | why they never change |
+|---|---|---|
+| 22 | matcher partial sums, `matcher_en.ml:24` | cell k's sum counts k + 1 one-bit matches, so it never exceeds k + 1: bits 2-4 of cells 1-2, 3-4 of cells 3-6, 4 of cells 7-14 (cell 0's are proved constant; cell 15's top bit, a full 16-cell match, is reached) |
+| 1 | sampler word, `sampler.ml:43`, bit 15 | the sample that fills bit 15 (or bits 14-15, 12-15 at widths 2, 4) is the one that pushes the word, which clears the register in the same clock |
+| 1 | sampler vector count `n`, `sampler.ml:44`, bit 4 | n is reset when n + 1 reaches the 16 vectors a word holds, so it never exceeds 15 |
+| 1 | streamer `left`, `streamer.ml:36`, bit 4 | `left` takes the vectors left minus one, at most 15 |
+
+So every register bit of the core that can change, changes. The pin stage is outside the core and
+not in these counts; at the gates it is covered by the edge-phase test.
+
+**At the gates** (`gate_lockstep.exe ... stim=wide`: the lockstep's generators in the gate harness,
+the outside world as quarter nibbles, quarter 0 at the rising and quarter 2 at the falling edge;
+`ffs=FILE` lists each flip-flop's changes, and `sim/gate_cov.py` maps them through the DEF placement
+and the netlist's Q-net names, which Yosys keeps from the Hardcaml, to the RTL registers and blocks).
+Same budget as section 4, 8 x 25,000 clocks, 0 output words differ:
+
+| gate lockstep, 200,000 clocks per run, 0 output words differ in any | 4 PEs (233c71e) | 8 PEs |
+|---|---|---|
+| section 4's host traffic (`stim=host`), 8 x 25,000 clocks | 1,879 of 2,519 (74.6 %) | 1,994 of 2,915 (68.4 %) |
+| the lockstep's wide generator (`stim=wide`), 8 x 25,000 | 2,408 (95.6 %) | 2,772 (95.1 %) |
+| the same, 40 x 5,000 | 2,480 (98.5 %) | 2,851 (97.8 %) |
+| merged: both wide runs, another 40 x 5,000 (seed 3) and the edge-phase test | **2,500 (99.2 %)** | **2,896 (99.3 %)** |
+
+The same budget in many short trials beats few long ones: every trial draws a new configuration,
+and most never-changed flip-flops at the gates were configuration and pointer bits drawn too few
+times. By block (8 PEs, section 4's traffic against the merged runs; the 4-PE harden is alike):
+PE array 553 of 932 (59.3 %) to 932 of 932; glue 741 of 996 to 996; sequencer 231 of 317 to 317;
+CRC 3 of 32 to 32; edge sampler 11 of 24 to 24; streamer 80 of 127 to 126; sampler 123 of 142 to
+140; matcher 50 of 138 to 122; NCO and pin stage complete in both. **The 19 flip-flops that never
+change, at either size, are all bits the RTL classification found unreachable by design**: 16
+matcher partial-sum bits (synthesis removed six of the 22; of the 12 sum top bits left exactly one
+changes, the last cell's, the only one that can), the sampler's word bit 15 and count bit 4 and the
+streamer's `left` bit 4. So every reachable flip-flop of both GDS-extracted netlists changes.
+`sim/gate_cov.py` classifies by source line and label against the RTL list (`rtl-never` /
+`rtl-changed`); the matcher's cells share a line and have no label, hence the direct check above.
+Logs: `results/coverage/gates/`.
+
+**hwfuzz on the chip** (`lockstep.exe fuzz SIZES BUDGET SEED OUTDIR`, `results/coverage/hwfuzz-pe4.txt`).
+The fuzz input is a string of commands, each a code byte and its operands: register, programme,
+bank, PE-chain and segment writes, FIFO traffic, reads, run and stop, restarts, and per-pad toggle
+rates. The decoder keeps the specification's contracts (assist changes wrapped in a hold, legal
+widths, non-zero periods, CRC masks of the form 2^w - 1); the first run without that stopped on a
+streamer width of 0, which the specification divides by. A transducer turns the commands into the
+core's per-clock pad samples for hwfuzz's instrumented simulation, the commands are hwfuzz's
+mutation units, and every seed and every input hwfuzz keeps is replayed on the board against the
+specification, every pad and the architectural state compared every clock, with register coverage
+recorded. 16 seeds set the chip up as a host would, with random operands. At 4 PEs, 3,115
+executions in 821 s (one worker; about 2.3 executions a second at up to 6,000 clocks each, the
+core's simulator rebuilt per execution because the memories have no reset) kept 102 inputs, and
+coverage of the bits not proved constant went from 69.0 % (the seeds) to 77.4 % (seeds and queue);
+**0 of the 118 inputs disagree with the specification.** Every bit the queue reaches the wide
+generator reaches as well, since the wide generator leaves only the 25 unreachable bits. At this
+budget the coverage-guided search is far behind the directed generator, mostly because it is slow
+on a circuit of this size (every multiplexer select and register of the core is a probe, read every clock); a snapshot of the simulator
+after the seeds' common setup, which hwfuzz's README already names as its next speed step, would be
+the place to start.
+
+**Running it.** `./suite.sh quick` (CI: `.github/workflows/chip-top.yaml`; about 70 s after the
+build: 20 wide lockstep trials, the 27 planted bugs, coverage with a 95 % floor, the edge-phase test
+and its control and proof) or `./suite.sh full` (the recorded runs, floors at 99 %). At the gates,
+with a harden's `tt_submission/` and the PDK's cell models `M`:
+
+    _build/default/bin/edge_phase.exe gates GDS M 2,2,2,2 [all]       # the test, or every plant
+    _build/default/bin/edge_phase.exe structure GDS M all
+    sim/edge_iverilog.sh gates 2,2,2,2 OUT tt_um_chip_top.v            # Icarus, needs PDK_ROOT
+    sim/edge_plants.sh 2,2,2,2 OUT tt_um_chip_top.v
+    _build/default/bin/gate_lockstep.exe GDS M 2,2,2,2 40 5000 2 stim=wide ffs=FFS
+    _build/default/bin/lockstep.exe regmap 2,2,2,2 512 REGMAP
+    sim/gate_cov.py FFS[,FFS...] DEF tt_um_chip_top.v REGMAP chip_tt.v NEVER RTL_NEVER
+
+The 4-PE GDS needs the sources of 233c71e (section 4); the runs above used a scratch copy of that
+commit with this branch's tools (not the RTL) copied in.
+
 ## Open issues
 
 - **Timing.** 60 MHz is not met at the slow corner (4 PEs: -4.17 ns at 20 ns; 8 PEs: -9.21 ns).
@@ -434,11 +622,15 @@ the host link on the real both-edges stage and passes. The earlier sequencer har
   held field (F with fwb = hold, P before the first step) sees the power-up value. In simulation
   everything starts at 0. A clear on the segment controls and the PE state, in the block's own
   commit with an X-propagation test, would close it.
-- **Post-layout round trip**: done on both hardens (section 4). Gaps it reports: about a third of
-  the rising-edge flip-flops never change under its random host traffic (mostly the PE array), and
-  the stage's input samplers are pinned to the falling edge by the structural trace only; moving one
-  to the rising edge is not visible to that stimulus. The 4-PE GDS of record predates 9a50420, so
-  `tt/` today would build a slightly different 4-PE chip.
+- **Post-layout round trip**: done on both hardens (section 4); the two gaps it reported are closed
+  in section 6 (the input samplers' edges by the edge-phase test and, for the second synchroniser
+  stage, whose edge no simulation can see, a structural rule; the gate-level coverage with the
+  lockstep's generators). The 4-PE GDS of record predates 9a50420, so `tt/` today would build a
+  slightly different 4-PE chip.
+- **Gate-level runs are short.** At about 350 clocks a second the gate lockstep's 200,000 clocks are a
+  twenty-fourth of the RTL lockstep's 4,800,000; the flip-flops still unchanged at the gates are
+  reachable ones the RTL lockstep reaches (section 6). Icarus runs the hardened netlist about seven
+  times faster, which would be the way to longer gate-level runs.
 - **Not in v0**: the stuff tracker and line coder (probes only), fine delay, the gain-cell banks,
   the bank's fixed ports into the array, a second bit-path chain; the quarter-clock phases on
   silicon (the hardened stage uses both clock edges).

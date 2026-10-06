@@ -1,0 +1,41 @@
+gates: 27775 instances, 27662 nets; structural check: 0 errors
+gates: 57595 primitive gates, 2519 flip-flops, 2 macros; clock edges: 2479 rising, 42 falling, 0 unresolved
+structure: 16 falling first-stage and 16 falling second-stage input flip-flops; the rule holds
+9461 clocks; compared simulator: 0 half clocks differ
+inputs: for each pad and run, the sample instants that reproduce every stored nibble (alignments of the design's)
+  pad  0: (q0 at E, q2 at F)  [1]
+  pad  1: (q0 at E, q2 at F)  [1]
+  pad  2: (q0 at E, q2 at F)  [1]
+  pad  3: (q0 at E, q2 at F)  [1]
+  pad  4: (q0 at E, q2 at F)  [1]
+  pad  5: (q0 at E, q2 at F)  [1]
+  pad  6: (q0 at E, q2 at F)  [1]
+  pad  7: (q0 at E, q2 at F)  [1]
+  pad  8: (q0 at E, q2 at F)  [1]
+  pad  9: (q0 at E, q2 at F)  [1]
+  pad 10: (q0 at E, q2 at F)  [1]
+  pad 11: (q0 at E, q2 at F)  [1]
+  pad 14: (q0 at E, q2 at F)  [1]
+  pad 15: (q0 at E, q2 at F)  [1]
+  pad  0: (q0 at E, q2 at F)  [1]
+  pad  1: (q0 at E, q2 at F)  [1]
+  pad 12: (q0 at E, q2 at F)  [1]
+  pad 13: (q0 at E, q2 at F)  [1]
+  pad  2: (q0 at E, q2 at F)  [1]
+  pad  3: (q0 at E, q2 at F)  [1]
+  pad  4: (q0 at E, q2 at F)  [1]
+  pad  5: (q0 at E, q2 at F)  [1]
+  pad  6: (q0 at E, q2 at F)  [1]
+  pad  7: (q0 at E, q2 at F)  [1]
+outputs: pin changes after rising / falling edges with the NCO grids on every general pad
+  pad  0: 68 / 67
+  pad  1: 68 / 67
+  pad  2: 68 / 67
+  pad  3: 68 / 67
+  pad  4: 68 / 67
+  pad  5: 68 / 67
+  pad  6: 68 / 67
+  pad  7: 68 / 67
+  pad 14: 68 / 67
+  pad 15: 68 / 67
+inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges

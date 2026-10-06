@@ -1,0 +1,18 @@
+gates: 27775 instances, 27662 nets; structural check: 0 errors
+gates: 57595 primitive gates, 2519 flip-flops, 2 macros; clock edges: 2479 rising, 42 falling, 0 unresolved
+mode two-edge, stimulus wide, layout 1,1,1,1, 8 trials x 25000 clocks, seed 1; set up in 15.1 s
+trial 0: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 1: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 2: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 3: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 4: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 5: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 6: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 7: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+macro u12716@12.00,231.34/RM_IHPSG13_1P_512x16_c2_bm_bist: 594 writes, 199406 reads, 0 edges with BIST enabled
+macro u27541@1136.00,376.46/RM_IHPSG13_1P_1024x8_c2_bm_bist: 2518 writes, 197482 reads, 0 edges with BIST enabled
+flip-flops whose output changed: 2367 of 2477 on the rising edge, 41 of 42 on the falling edge
+every flip-flop with its number of output changes listed in ffs-pe4-wide.txt
+output pins that never toggled: 4 of 24 (uio_out[4] uio_out[5] uio_oe[4] uio_oe[5])
+0 transactions; read-back through the pins: 0 bytes checked against what was written, 0 wrong
+two-edge: 8 trials x 25000 clocks, 400000 compared output words, 0 mismatching (475 s, 421 clocks/s)

@@ -1,0 +1,13 @@
+layout 1|1|1|1, store 1024 words: 400 trials x 12000 clocks, 4800000 clocks compared, 0 trials with mismatches (293 s)
+  coverage (events counted on the specification): CRC check true 468938, HOSTIN push 7731, HOSTOUT entry arrived between tag and data 46, IN from host 4611, OUT to host 63851, RECV from a segment 8762, SEND to a segment 79128, STB 33535, a flag input set 1879995, host feed write 7068, host feed write waited for a SEND 369, matcher hit 281337, op 0 542083, op 1 73042, op 2 30339, op 3 31529, op 4 39770, op 5 32214, op 6 27504, op 7 48822, op 8 22231, op 9 94171, op A 47619, op B 63851, op C 537370, op D 460483, op E 139311, op F 172730, recovered bit 244138, restart 780, sampler word 2772, streamer busy 15657, tap captured 5683
+RTL register coverage, layout 1|1|1|1: 4800000 clocks; register bits that changed 2419 of 2696 (89.7 %), rose and fell 2418
+  CRC              32 of    32 changed (100.0 %),    32 rose and fell
+  NCO              32 of    32 changed (100.0 %),    32 rose and fell
+  PE array        620 of   620 changed (100.0 %),   620 rose and fell
+  edge sampler     19 of    24 changed ( 79.2 %),    19 rose and fell
+  glue            960 of  1181 changed ( 81.3 %),   960 rose and fell
+  matcher         122 of   149 changed ( 81.9 %),   122 rose and fell
+  sampler         131 of   142 changed ( 92.3 %),   131 rose and fell
+  sequencer       387 of   387 changed (100.0 %),   386 rose and fell
+  streamer        116 of   129 changed ( 89.9 %),   116 rose and fell
+never-changed bits listed in /var/tmp/chip-coverage/baseline/never-pe4.txt

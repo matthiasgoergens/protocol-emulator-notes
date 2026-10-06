@@ -414,6 +414,10 @@ byte for byte, so the 4-PE runs use a scratch checkout of 233c71e with this bran
 
 A third of the rising-edge flip-flops never change: random host traffic does not configure the PE
 array into much (the array's own lockstep and the core's lockstep in `../chip-top` cover it at RTL).
+With the core lockstep's generators in the gate harness (`stim=wide`, `../chip-top` README section
+6) the same budget changes 2,851 of 2,915 flip-flops at 8 PEs and 2,480 of 2,519 at 4 (in 40
+short trials), and three such runs with the edge-phase test change all but 19 at either size, each
+of them a bit that is unreachable by design in the RTL.
 
 **Controls.** Each must fail; the report says which check caught it.
 
@@ -429,6 +433,7 @@ array into much (the array's own lockstep and the core's lockstep in `../chip-to
 | swap 1024x8 `A_DIN[0]`, `A_DIN[7]` | clean | the same | 1,446 words, 43 bytes wrong |
 | swap 1024x8 `A_ADDR[0]`, `A_ADDR[1]` | clean | the same | **0**: not a behavioural fault |
 | one falling-edge flip-flop put on the rising edge (in the netlist), 3 x 6,000 clocks, 8 tried | | | caught for 2 of 3 lane-2 toggles (5,925 and 4,526 words; the third never toggled in these runs), 0 of 5 input samplers |
+| the same for all 42, with `../chip-top`'s edge-phase test (README section 6), both hardens, also in Icarus | 32 of 32 input samplers violate the structural rule of `edge_phase.exe structure` | | 26 of 42: all 10 lane-2 toggles and 16 first-stage samplers; the 16 second-stage samplers cannot be caught by any simulation (moving them is functionally equivalent, `edge_phase.exe prove`) |
 
 `roundtrip_check.exe macro-controls` writes the GDS copies and runs the structural check; the cut
 removes the top-level element on the pin's net nearest the pin, the short joins the pin's net to the
@@ -438,8 +443,9 @@ wires crossed. Two of these say something about the checks rather than the chip.
 address pins of a single-port RAM permutes the addresses, the same for writes and reads, so no
 stimulus through that port can see it; only the per-net comparison names it. And moving an input
 sampler from the falling to the rising edge shifts that sample by half a clock, which the host-link
-protocol's two-clock margins absorb and the random programmes do not observe; the structural trace
-above, not the lockstep, is what pins those 32 flip-flops to their edge.
+protocol's two-clock margins absorb and the random programmes do not observe. `../chip-top`'s
+edge-phase test now observes it for the 16 first-stage samplers; for the 16 second-stage ones the
+move is functionally equivalent, so a structural rule pins them (README section 6 there).
 
 ### Every master against the PDK's GDS (lesson P4)
 

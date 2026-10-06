@@ -1,0 +1,177 @@
+glue          reg00[2] (chip_rtl.ml:92, reg 341 bit 2 of 8) CONSTANT
+glue          reg00[3] (chip_rtl.ml:92, reg 341 bit 3 of 8) CONSTANT
+glue          reg00[4] (chip_rtl.ml:92, reg 341 bit 4 of 8) CONSTANT
+glue          reg00[5] (chip_rtl.ml:92, reg 341 bit 5 of 8) CONSTANT
+glue          reg00[6] (chip_rtl.ml:92, reg 341 bit 6 of 8) CONSTANT
+glue          reg00[7] (chip_rtl.ml:92, reg 341 bit 7 of 8) CONSTANT
+glue          reg4c[4] (chip_rtl.ml:92, reg 360 bit 4 of 8) CONSTANT
+glue          reg4c[5] (chip_rtl.ml:92, reg 360 bit 5 of 8) CONSTANT
+glue          reg4c[6] (chip_rtl.ml:92, reg 360 bit 6 of 8) CONSTANT
+glue          reg4c[7] (chip_rtl.ml:92, reg 360 bit 7 of 8) CONSTANT
+glue          reg4f[2] (chip_rtl.ml:92, reg 443 bit 2 of 8) CONSTANT
+glue          reg4f[3] (chip_rtl.ml:92, reg 443 bit 3 of 8) CONSTANT
+glue          reg4f[4] (chip_rtl.ml:92, reg 443 bit 4 of 8) CONSTANT
+glue          reg4f[5] (chip_rtl.ml:92, reg 443 bit 5 of 8) CONSTANT
+glue          reg4f[6] (chip_rtl.ml:92, reg 443 bit 6 of 8) CONSTANT
+glue          reg4f[7] (chip_rtl.ml:92, reg 443 bit 7 of 8) CONSTANT
+glue          reg51[2] (chip_rtl.ml:92, reg 482 bit 2 of 8) CONSTANT
+glue          reg51[3] (chip_rtl.ml:92, reg 482 bit 3 of 8) CONSTANT
+glue          reg51[4] (chip_rtl.ml:92, reg 482 bit 4 of 8) CONSTANT
+glue          reg51[5] (chip_rtl.ml:92, reg 482 bit 5 of 8) CONSTANT
+glue          reg51[6] (chip_rtl.ml:92, reg 482 bit 6 of 8) CONSTANT
+glue          reg51[7] (chip_rtl.ml:92, reg 482 bit 7 of 8) CONSTANT
+matcher       r733[1] (matcher_en.ml:24, reg 733 bit 1 of 5) CONSTANT
+matcher       r733[2] (matcher_en.ml:24, reg 733 bit 2 of 5) CONSTANT
+matcher       r733[3] (matcher_en.ml:24, reg 733 bit 3 of 5) CONSTANT
+matcher       r733[4] (matcher_en.ml:24, reg 733 bit 4 of 5) CONSTANT
+matcher       r753[2] (matcher_en.ml:24, reg 753 bit 2 of 5)
+matcher       r753[3] (matcher_en.ml:24, reg 753 bit 3 of 5)
+matcher       r753[4] (matcher_en.ml:24, reg 753 bit 4 of 5)
+matcher       r773[2] (matcher_en.ml:24, reg 773 bit 2 of 5)
+matcher       r773[3] (matcher_en.ml:24, reg 773 bit 3 of 5)
+matcher       r773[4] (matcher_en.ml:24, reg 773 bit 4 of 5)
+matcher       r793[3] (matcher_en.ml:24, reg 793 bit 3 of 5)
+matcher       r793[4] (matcher_en.ml:24, reg 793 bit 4 of 5)
+matcher       r813[3] (matcher_en.ml:24, reg 813 bit 3 of 5)
+matcher       r813[4] (matcher_en.ml:24, reg 813 bit 4 of 5)
+matcher       r833[3] (matcher_en.ml:24, reg 833 bit 3 of 5)
+matcher       r833[4] (matcher_en.ml:24, reg 833 bit 4 of 5)
+matcher       r853[3] (matcher_en.ml:24, reg 853 bit 3 of 5)
+matcher       r853[4] (matcher_en.ml:24, reg 853 bit 4 of 5)
+matcher       r873[4] (matcher_en.ml:24, reg 873 bit 4 of 5)
+matcher       r893[4] (matcher_en.ml:24, reg 893 bit 4 of 5)
+matcher       r913[4] (matcher_en.ml:24, reg 913 bit 4 of 5)
+matcher       r933[4] (matcher_en.ml:24, reg 933 bit 4 of 5)
+matcher       r953[4] (matcher_en.ml:24, reg 953 bit 4 of 5)
+matcher       r973[4] (matcher_en.ml:24, reg 973 bit 4 of 5)
+matcher       r993[4] (matcher_en.ml:24, reg 993 bit 4 of 5)
+matcher       r1013[4] (matcher_en.ml:24, reg 1013 bit 4 of 5)
+glue          reg43[4] (chip_rtl.ml:92, reg 1141 bit 4 of 8) CONSTANT
+glue          reg43[5] (chip_rtl.ml:92, reg 1141 bit 5 of 8) CONSTANT
+glue          reg43[6] (chip_rtl.ml:92, reg 1141 bit 6 of 8) CONSTANT
+glue          reg43[7] (chip_rtl.ml:92, reg 1141 bit 7 of 8) CONSTANT
+glue          reg2c[1] (chip_rtl.ml:92, reg 1221 bit 1 of 8) CONSTANT
+glue          reg2c[2] (chip_rtl.ml:92, reg 1221 bit 2 of 8) CONSTANT
+glue          reg2c[3] (chip_rtl.ml:92, reg 1221 bit 3 of 8) CONSTANT
+glue          reg2c[4] (chip_rtl.ml:92, reg 1221 bit 4 of 8) CONSTANT
+glue          reg2c[5] (chip_rtl.ml:92, reg 1221 bit 5 of 8) CONSTANT
+glue          reg2c[6] (chip_rtl.ml:92, reg 1221 bit 6 of 8) CONSTANT
+glue          reg2c[7] (chip_rtl.ml:92, reg 1221 bit 7 of 8) CONSTANT
+glue          reg2b[4] (chip_rtl.ml:92, reg 1236 bit 4 of 8) CONSTANT
+glue          reg2b[5] (chip_rtl.ml:92, reg 1236 bit 5 of 8) CONSTANT
+glue          reg2b[6] (chip_rtl.ml:92, reg 1236 bit 6 of 8) CONSTANT
+glue          reg2b[7] (chip_rtl.ml:92, reg 1236 bit 7 of 8) CONSTANT
+glue          reg2a[4] (chip_rtl.ml:92, reg 1269 bit 4 of 8) CONSTANT
+glue          reg2a[5] (chip_rtl.ml:92, reg 1269 bit 5 of 8) CONSTANT
+glue          reg2a[6] (chip_rtl.ml:92, reg 1269 bit 6 of 8) CONSTANT
+glue          reg2a[7] (chip_rtl.ml:92, reg 1269 bit 7 of 8) CONSTANT
+glue          reg29[4] (chip_rtl.ml:92, reg 1302 bit 4 of 8) CONSTANT
+glue          reg29[5] (chip_rtl.ml:92, reg 1302 bit 5 of 8) CONSTANT
+glue          reg29[6] (chip_rtl.ml:92, reg 1302 bit 6 of 8) CONSTANT
+glue          reg29[7] (chip_rtl.ml:92, reg 1302 bit 7 of 8) CONSTANT
+glue          reg28[4] (chip_rtl.ml:92, reg 1335 bit 4 of 8) CONSTANT
+glue          reg28[5] (chip_rtl.ml:92, reg 1335 bit 5 of 8) CONSTANT
+glue          reg28[6] (chip_rtl.ml:92, reg 1335 bit 6 of 8) CONSTANT
+glue          reg28[7] (chip_rtl.ml:92, reg 1335 bit 7 of 8) CONSTANT
+glue          reg47[7] (chip_rtl.ml:92, reg 1411 bit 7 of 8) CONSTANT
+glue          reg1f[7] (chip_rtl.ml:92, reg 2274 bit 7 of 8) CONSTANT
+glue          reg1e[7] (chip_rtl.ml:92, reg 2304 bit 7 of 8) CONSTANT
+glue          reg41[7] (chip_rtl.ml:92, reg 2398 bit 7 of 8) CONSTANT
+sampler       r2550[15] (sampler.ml:43, reg 2550 bit 15 of 16)
+glue          reg10[7] (chip_rtl.ml:92, reg 2814 bit 7 of 8) CONSTANT
+glue          reg11[7] (chip_rtl.ml:92, reg 2827 bit 7 of 8) CONSTANT
+glue          reg12[7] (chip_rtl.ml:92, reg 2840 bit 7 of 8) CONSTANT
+glue          reg13[7] (chip_rtl.ml:92, reg 2853 bit 7 of 8) CONSTANT
+glue          reg14[7] (chip_rtl.ml:92, reg 2866 bit 7 of 8) CONSTANT
+glue          reg15[7] (chip_rtl.ml:92, reg 2879 bit 7 of 8) CONSTANT
+glue          reg16[7] (chip_rtl.ml:92, reg 2892 bit 7 of 8) CONSTANT
+glue          reg17[7] (chip_rtl.ml:92, reg 2905 bit 7 of 8) CONSTANT
+glue          reg20[4] (chip_rtl.ml:92, reg 2925 bit 4 of 8) CONSTANT
+glue          reg20[5] (chip_rtl.ml:92, reg 2925 bit 5 of 8) CONSTANT
+glue          reg20[6] (chip_rtl.ml:92, reg 2925 bit 6 of 8) CONSTANT
+glue          reg20[7] (chip_rtl.ml:92, reg 2925 bit 7 of 8) CONSTANT
+glue          reg21[4] (chip_rtl.ml:92, reg 2939 bit 4 of 8) CONSTANT
+glue          reg21[5] (chip_rtl.ml:92, reg 2939 bit 5 of 8) CONSTANT
+glue          reg21[6] (chip_rtl.ml:92, reg 2939 bit 6 of 8) CONSTANT
+glue          reg21[7] (chip_rtl.ml:92, reg 2939 bit 7 of 8) CONSTANT
+glue          reg22[4] (chip_rtl.ml:92, reg 2953 bit 4 of 8) CONSTANT
+glue          reg22[5] (chip_rtl.ml:92, reg 2953 bit 5 of 8) CONSTANT
+glue          reg22[6] (chip_rtl.ml:92, reg 2953 bit 6 of 8) CONSTANT
+glue          reg22[7] (chip_rtl.ml:92, reg 2953 bit 7 of 8) CONSTANT
+glue          reg23[4] (chip_rtl.ml:92, reg 2967 bit 4 of 8) CONSTANT
+glue          reg23[5] (chip_rtl.ml:92, reg 2967 bit 5 of 8) CONSTANT
+glue          reg23[6] (chip_rtl.ml:92, reg 2967 bit 6 of 8) CONSTANT
+glue          reg23[7] (chip_rtl.ml:92, reg 2967 bit 7 of 8) CONSTANT
+glue          reg24[4] (chip_rtl.ml:92, reg 2981 bit 4 of 8) CONSTANT
+glue          reg24[5] (chip_rtl.ml:92, reg 2981 bit 5 of 8) CONSTANT
+glue          reg24[6] (chip_rtl.ml:92, reg 2981 bit 6 of 8) CONSTANT
+glue          reg24[7] (chip_rtl.ml:92, reg 2981 bit 7 of 8) CONSTANT
+glue          reg25[4] (chip_rtl.ml:92, reg 2995 bit 4 of 8) CONSTANT
+glue          reg25[5] (chip_rtl.ml:92, reg 2995 bit 5 of 8) CONSTANT
+glue          reg25[6] (chip_rtl.ml:92, reg 2995 bit 6 of 8) CONSTANT
+glue          reg25[7] (chip_rtl.ml:92, reg 2995 bit 7 of 8) CONSTANT
+glue          reg26[4] (chip_rtl.ml:92, reg 3009 bit 4 of 8) CONSTANT
+glue          reg26[5] (chip_rtl.ml:92, reg 3009 bit 5 of 8) CONSTANT
+glue          reg26[6] (chip_rtl.ml:92, reg 3009 bit 6 of 8) CONSTANT
+glue          reg26[7] (chip_rtl.ml:92, reg 3009 bit 7 of 8) CONSTANT
+glue          reg27[4] (chip_rtl.ml:92, reg 3023 bit 4 of 8) CONSTANT
+glue          reg27[5] (chip_rtl.ml:92, reg 3023 bit 5 of 8) CONSTANT
+glue          reg27[6] (chip_rtl.ml:92, reg 3023 bit 6 of 8) CONSTANT
+glue          reg27[7] (chip_rtl.ml:92, reg 3023 bit 7 of 8) CONSTANT
+glue          reg30[5] (chip_rtl.ml:92, reg 3040 bit 5 of 8) CONSTANT
+glue          reg30[6] (chip_rtl.ml:92, reg 3040 bit 6 of 8) CONSTANT
+glue          reg30[7] (chip_rtl.ml:92, reg 3040 bit 7 of 8) CONSTANT
+glue          reg31[5] (chip_rtl.ml:92, reg 3054 bit 5 of 8) CONSTANT
+glue          reg31[6] (chip_rtl.ml:92, reg 3054 bit 6 of 8) CONSTANT
+glue          reg31[7] (chip_rtl.ml:92, reg 3054 bit 7 of 8) CONSTANT
+glue          reg32[5] (chip_rtl.ml:92, reg 3068 bit 5 of 8) CONSTANT
+glue          reg32[6] (chip_rtl.ml:92, reg 3068 bit 6 of 8) CONSTANT
+glue          reg32[7] (chip_rtl.ml:92, reg 3068 bit 7 of 8) CONSTANT
+glue          reg33[5] (chip_rtl.ml:92, reg 3082 bit 5 of 8) CONSTANT
+glue          reg33[6] (chip_rtl.ml:92, reg 3082 bit 6 of 8) CONSTANT
+glue          reg33[7] (chip_rtl.ml:92, reg 3082 bit 7 of 8) CONSTANT
+glue          reg34[5] (chip_rtl.ml:92, reg 3096 bit 5 of 8) CONSTANT
+glue          reg34[6] (chip_rtl.ml:92, reg 3096 bit 6 of 8) CONSTANT
+glue          reg34[7] (chip_rtl.ml:92, reg 3096 bit 7 of 8) CONSTANT
+glue          reg35[5] (chip_rtl.ml:92, reg 3110 bit 5 of 8) CONSTANT
+glue          reg35[6] (chip_rtl.ml:92, reg 3110 bit 6 of 8) CONSTANT
+glue          reg35[7] (chip_rtl.ml:92, reg 3110 bit 7 of 8) CONSTANT
+glue          reg36[5] (chip_rtl.ml:92, reg 3124 bit 5 of 8) CONSTANT
+glue          reg36[6] (chip_rtl.ml:92, reg 3124 bit 6 of 8) CONSTANT
+glue          reg36[7] (chip_rtl.ml:92, reg 3124 bit 7 of 8) CONSTANT
+glue          reg37[5] (chip_rtl.ml:92, reg 3138 bit 5 of 8) CONSTANT
+glue          reg37[6] (chip_rtl.ml:92, reg 3138 bit 6 of 8) CONSTANT
+glue          reg37[7] (chip_rtl.ml:92, reg 3138 bit 7 of 8) CONSTANT
+glue          reg38[5] (chip_rtl.ml:92, reg 3152 bit 5 of 8) CONSTANT
+glue          reg38[6] (chip_rtl.ml:92, reg 3152 bit 6 of 8) CONSTANT
+glue          reg38[7] (chip_rtl.ml:92, reg 3152 bit 7 of 8) CONSTANT
+glue          reg39[5] (chip_rtl.ml:92, reg 3166 bit 5 of 8) CONSTANT
+glue          reg39[6] (chip_rtl.ml:92, reg 3166 bit 6 of 8) CONSTANT
+glue          reg39[7] (chip_rtl.ml:92, reg 3166 bit 7 of 8) CONSTANT
+glue          reg3a[5] (chip_rtl.ml:92, reg 3180 bit 5 of 8) CONSTANT
+glue          reg3a[6] (chip_rtl.ml:92, reg 3180 bit 6 of 8) CONSTANT
+glue          reg3a[7] (chip_rtl.ml:92, reg 3180 bit 7 of 8) CONSTANT
+glue          reg3b[5] (chip_rtl.ml:92, reg 3194 bit 5 of 8) CONSTANT
+glue          reg3b[6] (chip_rtl.ml:92, reg 3194 bit 6 of 8) CONSTANT
+glue          reg3b[7] (chip_rtl.ml:92, reg 3194 bit 7 of 8) CONSTANT
+glue          reg3c[5] (chip_rtl.ml:92, reg 3208 bit 5 of 8) CONSTANT
+glue          reg3c[6] (chip_rtl.ml:92, reg 3208 bit 6 of 8) CONSTANT
+glue          reg3c[7] (chip_rtl.ml:92, reg 3208 bit 7 of 8) CONSTANT
+glue          reg3d[5] (chip_rtl.ml:92, reg 3222 bit 5 of 8) CONSTANT
+glue          reg3d[6] (chip_rtl.ml:92, reg 3222 bit 6 of 8) CONSTANT
+glue          reg3d[7] (chip_rtl.ml:92, reg 3222 bit 7 of 8) CONSTANT
+glue          reg3e[5] (chip_rtl.ml:92, reg 3236 bit 5 of 8) CONSTANT
+glue          reg3e[6] (chip_rtl.ml:92, reg 3236 bit 6 of 8) CONSTANT
+glue          reg3e[7] (chip_rtl.ml:92, reg 3236 bit 7 of 8) CONSTANT
+glue          reg3f[5] (chip_rtl.ml:92, reg 3250 bit 5 of 8) CONSTANT
+glue          reg3f[6] (chip_rtl.ml:92, reg 3250 bit 6 of 8) CONSTANT
+glue          reg3f[7] (chip_rtl.ml:92, reg 3250 bit 7 of 8) CONSTANT
+glue          reg54[2] (chip_rtl.ml:92, reg 3300 bit 2 of 8) CONSTANT
+glue          reg54[3] (chip_rtl.ml:92, reg 3300 bit 3 of 8) CONSTANT
+glue          reg54[4] (chip_rtl.ml:92, reg 3300 bit 4 of 8) CONSTANT
+glue          reg54[5] (chip_rtl.ml:92, reg 3300 bit 5 of 8) CONSTANT
+glue          reg54[6] (chip_rtl.ml:92, reg 3300 bit 6 of 8) CONSTANT
+glue          reg54[7] (chip_rtl.ml:92, reg 3300 bit 7 of 8) CONSTANT
+streamer      r3632[15] (streamer.ml:35, reg 3632 bit 15 of 16) CONSTANT
+sampler       r3734[4] (sampler.ml:44, reg 3734 bit 4 of 5)
+streamer      r3813[4] (streamer.ml:36, reg 3813 bit 4 of 5)

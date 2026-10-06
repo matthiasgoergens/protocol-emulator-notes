@@ -1,0 +1,23 @@
+  (net renamed)     18 of    18 changed (100.0 %),    0 never
+  (unmatched)        2 of     2 changed (100.0 %),    0 never
+  CRC               32 of    32 changed (100.0 %),    0 never
+  NCO               32 of    32 changed (100.0 %),    0 never
+  PE array         535 of   541 changed ( 98.9 %),    6 never
+  TT top             2 of     2 changed (100.0 %),    0 never
+  edge sampler      23 of    24 changed ( 95.8 %),    1 never
+  glue             954 of   998 changed ( 95.6 %),   44 never
+  matcher          120 of   139 changed ( 86.3 %),   19 never
+  pin stage        142 of   142 changed (100.0 %),    0 never
+  sampler          119 of   142 changed ( 83.8 %),   23 never
+  sequencer        307 of   319 changed ( 96.2 %),   12 never
+  streamer         127 of   128 changed ( 99.2 %),    1 never
+  all             2413 of  2519 changed ( 95.8 %),  106 never; 2 flip-flops not matched to a DEF component
+never-changed flip-flops against the RTL lockstep (rtl-never: never changed there either; rtl-changed: reachable):
+  PE array       rtl-changed     6
+  edge sampler   rtl-changed     1
+  glue           rtl-changed    44
+  matcher        rtl-never      19
+  sampler        rtl-changed    21
+  sampler        rtl-never       2
+  sequencer      rtl-changed    12
+  streamer       rtl-never       1

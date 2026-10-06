@@ -1,0 +1,50 @@
+gates: 27775 instances, 27662 nets; structural check: 0 errors
+gates: 57595 primitive gates, 2519 flip-flops, 2 macros; clock edges: 2479 rising, 42 falling, 0 unresolved
+mode two-edge, stimulus wide, layout 1,1,1,1, 40 trials x 5000 clocks, seed 2; set up in 13.6 s
+trial 0: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 1: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 2: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 3: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 4: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 5: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 6: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 7: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 8: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 9: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 10: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 11: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 12: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 13: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 14: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 15: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 16: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 17: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 18: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 19: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 20: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 21: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 22: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 23: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 24: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 25: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 26: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 27: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 28: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 29: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 30: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 31: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 32: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 33: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 34: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 35: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 36: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 37: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 38: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 39: 0 mismatching half-clocks; 0 transactions; 0 read-back bytes checked, 0 wrong; toggle rate 0.00
+macro u12716@12.00,231.34/RM_IHPSG13_1P_512x16_c2_bm_bist: 3279 writes, 196721 reads, 0 edges with BIST enabled
+macro u27541@1136.00,376.46/RM_IHPSG13_1P_1024x8_c2_bm_bist: 1282 writes, 198718 reads, 0 edges with BIST enabled
+flip-flops whose output changed: 2438 of 2477 on the rising edge, 42 of 42 on the falling edge
+every flip-flop with its number of output changes listed in ffs-pe4-wide-short.txt
+output pins that never toggled: 4 of 24 (uio_out[4] uio_out[5] uio_oe[4] uio_oe[5])
+0 transactions; read-back through the pins: 0 bytes checked against what was written, 0 wrong
+two-edge: 40 trials x 5000 clocks, 400000 compared output words, 0 mismatching (444 s, 451 clocks/s)

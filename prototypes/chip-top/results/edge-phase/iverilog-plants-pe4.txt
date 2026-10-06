@@ -1,0 +1,45 @@
+# 42 falling-edge flip-flops
+no plant: passes
+plant 0 _36116_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38338_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 1 _36120_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38334_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 2 _36124_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38332_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 3 _36128_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38330_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 4 _36132_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38328_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 5 _36136_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38326_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 6 _36140_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38324_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 7 _36144_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38322_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 8 _36148_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38320_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 9 _36152_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38318_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 10 _36156_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38316_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 11 _36160_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38314_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 12 _36164_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38312_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 13 _36168_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38310_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 14 _36172_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38308_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 15 _36176_ (second-stage sampler, after dfrbpq_1:_38337_ dfrbpq_1:_38306_): MISSED; compared simulator: 0 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: every general pin changes after falling edges
+plant 16 _38231_ (lane-2 toggle): caught; compared simulator: 76 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: FAIL
+plant 17 _38235_ (lane-2 toggle): caught; compared simulator: 80 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: FAIL
+plant 18 _38247_ (lane-2 toggle): caught; compared simulator: 89 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: FAIL
+plant 19 _38251_ (lane-2 toggle): caught; compared simulator: 95 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: FAIL
+plant 20 _38255_ (lane-2 toggle): caught; compared simulator: 102 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: FAIL
+plant 21 _38259_ (lane-2 toggle): caught; compared simulator: 109 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: FAIL
+plant 22 _38263_ (lane-2 toggle): caught; compared simulator: 114 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: FAIL
+plant 23 _38267_ (lane-2 toggle): caught; compared simulator: 123 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: FAIL
+plant 24 _38271_ (lane-2 toggle): caught; compared simulator: 127 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: FAIL
+plant 25 _38275_ (lane-2 toggle): caught; compared simulator: 138 half clocks differ; inputs: every pad sampled at (E, F) and only there; outputs: FAIL
+plant 26 _38306_ (first-stage sampler of ui_in[0]): caught; compared simulator: 322 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 27 _38308_ (first-stage sampler of ui_in[1]): caught; compared simulator: 288 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 28 _38310_ (first-stage sampler of ui_in[2]): caught; compared simulator: 308 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 29 _38312_ (first-stage sampler of ui_in[3]): caught; compared simulator: 288 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 30 _38314_ (first-stage sampler of ui_in[4]): caught; compared simulator: 260 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 31 _38316_ (first-stage sampler of ui_in[5]): caught; compared simulator: 320 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 32 _38318_ (first-stage sampler of ui_in[6]): caught; compared simulator: 306 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 33 _38320_ (first-stage sampler of ui_in[7]): caught; compared simulator: 160 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 34 _38322_ (first-stage sampler of uio_in[0]): caught; compared simulator: 128 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 35 _38324_ (first-stage sampler of uio_in[1]): caught; compared simulator: 96 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 36 _38326_ (first-stage sampler of uio_in[2]): caught; compared simulator: 48 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 37 _38328_ (first-stage sampler of uio_in[3]): caught; compared simulator: 144 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 38 _38330_ (first-stage sampler of uio_in[4]): caught; compared simulator: 7743 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 39 _38332_ (first-stage sampler of uio_in[5]): caught; compared simulator: 458 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 40 _38334_ (first-stage sampler of uio_in[6]): caught; compared simulator: 64 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+plant 41 _38338_ (first-stage sampler of uio_in[7]): caught; compared simulator: 80 half clocks differ; inputs: FAIL; outputs: every general pin changes after falling edges
+26 of 42 plants caught

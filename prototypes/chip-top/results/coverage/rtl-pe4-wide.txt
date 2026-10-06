@@ -1,0 +1,14 @@
+layout 1|1|1|1, store 1024 words: 400 trials x 12000 clocks, 4800000 clocks compared, 0 trials with mismatches (289 s)
+  coverage (events counted on the specification): CRC check true 687055, HOSTIN push 20173, HOSTOUT entry arrived between tag and data 27, IN from host 7572, OUT to host 68660, RECV from a segment 6267, SEND to a segment 335173, STB 32526, a flag input set 1942320, host feed write 4972, host feed write waited for a SEND 3816, matcher hit 151195, op 0 455324, op 1 70269, op 2 31747, op 3 34189, op 4 39139, op 5 37104, op 6 39639, op 7 56526, op 8 19593, op 9 109339, op A 48366, op B 68660, op C 553120, op D 690957, op E 155842, op F 145779, recovered bit 134648, restart 476, sampler word 1688, streamer busy 342005, tap captured 4313
+three-valued fixpoint from reset: 39 rounds
+RTL register coverage, layout 1|1|1|1: 4800000 clocks; register bits that changed 2519 of 2696 (93.4 %), rose and fell 2519; provably constant 152; changed of the rest 2519 of 2544 (99.0 %); constant yet changed (must be 0): 0
+  CRC              32 of    32 changed (100.0 %),    32 rose and fell,    0 provably constant,    0 other never changed
+  NCO              32 of    32 changed (100.0 %),    32 rose and fell,    0 provably constant,    0 other never changed
+  PE array        620 of   620 changed (100.0 %),   620 rose and fell,    0 provably constant,    0 other never changed
+  edge sampler     24 of    24 changed (100.0 %),    24 rose and fell,    0 provably constant,    0 other never changed
+  glue           1034 of  1181 changed ( 87.6 %),  1034 rose and fell,  147 provably constant,    0 other never changed
+  matcher         123 of   149 changed ( 82.6 %),   123 rose and fell,    4 provably constant,   22 other never changed
+  sampler         140 of   142 changed ( 98.6 %),   140 rose and fell,    0 provably constant,    2 other never changed
+  sequencer       387 of   387 changed (100.0 %),   387 rose and fell,    0 provably constant,    0 other never changed
+  streamer        127 of   129 changed ( 98.4 %),   127 rose and fell,    1 provably constant,    1 other never changed
+never-changed bits listed in never-pe4.txt
