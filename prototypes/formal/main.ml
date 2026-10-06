@@ -103,13 +103,23 @@ let a_vacuous ~name =
                    slots = 21; kind = Waitp (1, 1) } in
   deadline ~name ~store ~code:[| Havoc; Fixed; Havoc; Havoc |] ~contracts:[ contract ] ~depth:160 ()
 
-let a_protocols ?(cut = false) ~spi_period ~name () =
+(* [watch]: the threads whose contracts are checked (all three by default); [i2c_limit]: the I2C
+   master's stretch limit (the compiler's default, 4095, by default); [waitp]: also a contract for
+   every WAITP of the watched threads (Programmes.waitp_contracts). Every thread runs its
+   programme whichever threads are watched, and every input is free on every clock. *)
+let a_protocols ?(cut = false) ?(watch = [ 0; 1; 2 ]) ?i2c_limit ?(waitp = false) ?(depth = 720) ~spi_period ~name () =
   let u = Programmes.uart ~bit_slots:5 [ 0x4F ] and spi = Programmes.spi_with ~period:spi_period in
-  let store = Programmes.store_of [| u; spi; Programmes.i2c; Programmes.idle |] in
-  let contracts = Programmes.waitd_contracts ~thread:0 u @ Programmes.waitd_contracts ~thread:1 spi
-                  @ Programmes.waitd_contracts ~thread:2 Programmes.i2c in
-  pr "(a) %d WAITD contracts across the three programmes (SPI period %d slots)\n" (List.length contracts) spi_period;
-  deadline ~cut ~name ~store ~code:[| Fixed; Fixed; Fixed; Fixed |] ~contracts ~depth:720 ()
+  let i2c = Programmes.i2c_with ?stretch_limit:i2c_limit () in
+  let store = Programmes.store_of [| u; spi; i2c; Programmes.idle |] in
+  let progs = [| u; spi; i2c |] in
+  let contracts = List.concat_map (fun t ->
+      Programmes.waitd_contracts ~thread:t progs.(t)
+      @ (if waitp then Programmes.waitp_contracts ~thread:t progs.(t) else [])) watch in
+  let nwaitp = List.length (List.filter (fun (c : Props.contract) -> c.kind <> Props.Waitd) contracts) in
+  pr "(a) %d WAITD and %d WAITP contracts of threads %s (UART, SPI period %d slots, I2C stretch limit %d), all three running, %d clocks\n"
+    (List.length contracts - nwaitp) nwaitp (String.concat "," (List.map string_of_int watch)) spi_period
+    (Option.value i2c_limit ~default:4095) depth;
+  deadline ~cut ~name ~store ~code:[| Fixed; Fixed; Fixed; Fixed |] ~contracts ~depth ()
 
 (* ---- (b) pin ownership ---- *)
 
@@ -586,6 +596,17 @@ let scenarios = [
   "a-protocols", (fun () -> ignore (a_protocols ~spi_period:10 ~name:"a-waitd-uart-spi-i2c" ()));
   "a-protocols-cut", (fun () -> ignore (a_protocols ~cut:true ~spi_period:10 ~name:"a-waitd-uart-spi-i2c-cut" ()));
   "a-spi8", (fun () -> ignore (a_protocols ~spi_period:8 ~name:"a-waitd-uart-spi8-i2c" ()));
+  (* a-protocols split (README.md, Findings 4): the UART's and SPI's contracts beside the real I2C
+     master (stretch limit 4095), and the I2C master's own WAITD and WAITP contracts with a short
+     stretch limit *)
+  "a-protocols-uart-spi", (fun () ->
+      ignore (a_protocols ~watch:[ 0; 1 ] ~spi_period:10 ~name:"a-waitd-uart-spi-beside-i2c-l4095" ()));
+  "a-protocols-i2c-l1", (fun () ->
+      ignore (a_protocols ~watch:[ 2 ] ~i2c_limit:1 ~waitp:true ~spi_period:10 ~name:"a-waitd-waitp-i2c-l1" ()));
+  "a-protocols-i2c-l2", (fun () ->
+      ignore (a_protocols ~watch:[ 2 ] ~i2c_limit:2 ~waitp:true ~spi_period:10 ~name:"a-waitd-waitp-i2c-l2" ()));
+  "a-protocols-i2c-l2-cut", (fun () ->
+      ignore (a_protocols ~cut:true ~watch:[ 2 ] ~i2c_limit:2 ~waitp:true ~spi_period:10 ~name:"a-waitd-waitp-i2c-l2-cut" ()));
   "b", (fun () -> ignore (ownership ~name:"b-ownership" ~timeout_mask:0x80 ~depth:720));
   "b-planted", (fun () -> ignore (ownership ~name:"b-ownership-planted-mask01" ~timeout_mask:0x01 ~depth:720));
   "c", (fun () -> ignore (isolation ~name:"c-isolation-uart" ~ldb:false ~depth:36 ()));
