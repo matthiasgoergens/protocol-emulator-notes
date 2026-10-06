@@ -1,4 +1,7 @@
-(* Executable specification of upe_v1 and its segmented array (spec.ml), in plain integer
+(* The additions X1, E1 and E2 that ../../onebit-dac/sim proposed (spec.ml) are marked
+   "onebit-dac"; adopted here 2026-10-06.
+
+   Executable specification of upe_v1 and its segmented array (spec.ml), in plain integer
    arithmetic. It shares no code with rtl.ml beyond the encoding. *)
 open Spec
 
@@ -11,12 +14,13 @@ type pe = {
   cfg : int array;
 }
 
-type seg = { mutable flo : int; mutable fhi : int; mutable fv : bool; mutable ctrl : int }
+type seg = { mutable flo : int; mutable fhi : int; mutable fv : bool; mutable ctrl : int;
+             mutable rep : int; mutable cnt : int; mutable fw : int (* onebit-dac E2 *) }
 type t = { pe : pe array; seg : seg array; cov : (string, int) Hashtbl.t }
 
 let create () =
   { pe = Array.init n_pe (fun _ -> { s = 0; p = 0; pv = false; f = false; l = false; cfg = Array.make 8 0 });
-    seg = Array.init 4 (fun _ -> { flo = 0; fhi = 0; fv = false; ctrl = 0 });
+    seg = Array.init 4 (fun _ -> { flo = 0; fhi = 0; fv = false; ctrl = 0; rep = 0; cnt = 0; fw = 0 });
     cov = Hashtbl.create 64 }
 
 (* shared-specification faults: set together with the same-named Upe_rtl.bug, lockstep cannot
@@ -63,7 +67,7 @@ let pe_comb t (e : pe) ~run ~a ~av ~alane ~bcast ~s15_in ~cb_in ~g_in ~lstep_in 
   let x =
     match o.xsel with
     | 0 -> e.s
-    | 1 -> a
+    | 1 -> if o.ashr = 0 then a else u16 (signed a asr o.ashr) (* onebit-dac X1 *)
     | 2 -> u16 ((e.s lsl 1) lor sinv)
     | _ -> (e.s lsr 1) lor (sinv lsl 15)
   in
@@ -133,6 +137,9 @@ let rec bcast_eff t sg =
   let c = t.seg.(sg).ctrl in
   if sg > 0 && bit c 5 then bcast_eff t (sg - 1) else bcast_of c
 
+(* onebit-dac E1: the end PE of the joined run that starts at segment sg *)
+let rec run_end t sg = if sg < 3 && src_of t.seg.(sg + 1).ctrl = 0 then run_end t (sg + 1) else seg_end.(sg)
+
 let cycle t (inp : inputs) =
   let pe = t.pe in
   let g = Array.make n_pe false and step = Array.make n_pe false in
@@ -149,11 +156,14 @@ let cycle t (inp : inputs) =
         | 2 ->
           let s = t.seg.(sg) in
           if s.fv then hit t "feed_valid";
-          ((s.fhi lsl 8) lor s.flo, s.fv, bcast_eff t sg)
+          ((if s.rep <> 0 then s.fw else (s.fhi lsl 8) lor s.flo), s.fv, bcast_eff t sg)
         | 3 -> hit t "fixed"; (inp.fixed_d.(sg), inp.fixed_v.(sg), false)
         | _ -> (0, false, false)
       end
       else (pe.(i - 1).p, pe.(i - 1).pv, pe.(i - 1).l)
+    in
+    let alane =
+      if i = seg_start.(sg) && bit ctrl 6 then (hit t "lane_loop"; pe.(run_end t sg).l) else alane
     in
     let c =
       pe_comb t pe.(i) ~run:(run_of ctrl) ~a ~av ~alane ~bcast:(bcast_eff t sg)
@@ -193,18 +203,25 @@ let cycle t (inp : inputs) =
   Array.iteri
     (fun j s ->
       let mine = inp.mbx_wr && inp.mbx_seg = j in
-      s.fv <- mine && inp.mbx_sel = 1;
+      (* onebit-dac E2: with a repeat period the valid comes from the divider only *)
+      if s.rep <> 0 then begin
+        let tick = s.cnt = s.rep - 1 in
+        if tick then hit t "repeat_tick";
+        s.fv <- tick;
+        s.cnt <- (if tick then 0 else s.cnt + 1)
+      end
+      else s.fv <- mine && inp.mbx_sel = 1;
       if mine then
         match inp.mbx_sel with
         | 0 -> s.flo <- inp.mbx_byte
-        | 1 -> s.fhi <- inp.mbx_byte
-        | 2 -> s.ctrl <- inp.mbx_byte land 0x3f
-        | _ -> ())
+        | 1 -> s.fhi <- inp.mbx_byte; s.fw <- (inp.mbx_byte lsl 8) lor s.flo
+        | 2 -> s.ctrl <- inp.mbx_byte land 0x7f
+        | _ -> s.rep <- inp.mbx_byte; s.cnt <- 0)
     t.seg
 
 let state t : state =
   { pes = Array.map (fun (e : pe) -> ({ s = e.s; p = e.p; pv = e.pv; f = e.f; l = e.l; cfg = Array.copy e.cfg } : pe_state)) t.pe;
-    segs = Array.map (fun (s : seg) -> ({ flo = s.flo; fhi = s.fhi; fv = s.fv; ctrl = s.ctrl } : seg_state)) t.seg;
+    segs = Array.map (fun (s : seg) -> ({ flo = s.flo; fhi = s.fhi; fv = s.fv; ctrl = s.ctrl; rep = s.rep; cnt = s.cnt; fw = s.fw } : seg_state)) t.seg;
     taps =
       Array.map
         (fun e ->

@@ -1,11 +1,14 @@
-(* Lockstep: the model and the Hardcaml array on the same random stimulus, every state bit
+(* With the "dac" generator for the onebit-dac additions (short repeat periods, lane loops,
+   shifts), from ../../onebit-dac/sim.
+
+   Lockstep: the model and the Hardcaml array on the same random stimulus, every state bit
    compared every clock. Generators are biased per mode, since uniform configurations rarely
    reach some of them (see the coverage table this prints). *)
 open Spec
 
 let modes =
   [ "uniform"; "arith"; "maxmin"; "logic"; "gsrc"; "window"; "gf2"; "pair"; "stream"; "lane";
-    "segments"; "chains" ]
+    "segments"; "chains"; "dac" ]
 
 type rng = Random.State.t
 
@@ -17,7 +20,7 @@ let random_op r =
   let i n = Random.State.int r n in
   { xsel = i 4; sinsel = i 4; ysel = i 4; ymod = i 4; gsel = i 8; bitsel = i 16; pairlo = rbool r;
     alu = i 8; cin_lane = rbool r; swb = i 4; pwb = i 4; fwb = i 4; lout = i 4; lane_bc = rbool r;
-    del = rbool r; stream = rbool r; tap_p = rbool r; follow = rbool r; k = i 0x10000 }
+    del = rbool r; stream = rbool r; tap_p = rbool r; follow = rbool r; ashr = (if rbool r then 0 else i 16); k = i 0x10000 }
 
 (* uniform, except that follow is rarer (with follow everywhere, most PEs never step) *)
 let gen_op mode r =
@@ -43,6 +46,11 @@ let gen_op mode r =
       { o with gsel = pick r [ 4; 7 ]; pairlo = rbool r; sinsel = pick r [ 0; 2 ]; xsel = 2; alu = 4; ymod = 1;
                swb = 1; follow = chance r 0.5 }
     | "stream" -> { o with stream = true; del = chance r 0.6; follow = chance r 0.2 }
+    | "dac" ->
+      { o with stream = chance r 0.8; follow = false; xsel = pick r [ 1; 1; 0 ]; ashr = Random.State.int r 4;
+               gsel = pick r [ 2; 2; 7; 3 ]; lout = pick r [ 0; 0; 1; 3 ]; ymod = pick r [ 2; 0 ];
+               alu = pick r [ 0; 0; 1 ]; swb = pick r [ 0; 1 ]; pwb = pick r [ 1; 0 ]; fwb = pick r [ 1; 0 ];
+               k = k_int () }
     | "lane" ->
       { o with lout = Random.State.int r 4; gsel = pick r [ 2; 3; 3; 7 ]; cin_lane = chance r 0.5; alu = pick r [ 1; 1; 0; 4 ];
                lane_bc = chance r 0.4; ysel = 0; swb = 1 }
@@ -66,12 +74,18 @@ let gen_trial mode r ~run_cycles =
     { idle with fixed_d = Array.init 4 (fun _ -> interesting r ks); fixed_v = Array.init 4 (fun _ -> chance r 0.6) }
   in
   let ctrl_byte () =
-    let src = if mode = "segments" then pick r [ 0; 0; 1; 1; 2; 3; 5 ] else pick r [ 0; 1; 2; 2; 3; 3; 4 ] in
+    let src = if mode = "segments" || mode = "dac" then pick r [ 0; 0; 1; 1; 2; 3; 5 ] else pick r [ 0; 1; 2; 2; 3; 3; 4 ] in
     src lor (if rbool r then 8 else 0) lor (if chance r 0.8 then 16 else 0) lor (Random.State.int r 8 lsl 5)
+    lor (if mode = "dac" && chance r 0.6 then 64 else 0)
   in
   for sg = 0 to 3 do
     push { (fixed ()) with mbx_wr = true; mbx_seg = sg; mbx_sel = 2; mbx_byte = ctrl_byte () }
   done;
+  if mode = "dac" then
+    for sg = 0 to 3 do
+      if chance r 0.7 then
+        push { (fixed ()) with mbx_wr = true; mbx_seg = sg; mbx_sel = 3; mbx_byte = pick r [ 1; 2; 3; 5; 8; 10; 13 ] }
+    done;
   for sg = 0 to 3 do
     for i = seg_end.(sg) downto seg_start.(sg) do
       let b = bytes_of_op ops.(i) in
@@ -91,7 +105,9 @@ let gen_trial mode r ~run_cycles =
         let sel = if chance r 0.15 then 2 else pick r [ 0; 1; 1 ] in
         let v = interesting r ks in
         let byte = if sel = 2 then ctrl_byte () else if sel = 0 then v land 0xff else v lsr 8 in
-        { i with mbx_wr = true; mbx_seg = sg; mbx_sel = (if chance r 0.02 then 3 else sel); mbx_byte = byte }
+        let sel3 = chance r (if mode = "dac" then 0.04 else 0.02) in
+        let byte = if sel3 && mode = "dac" then pick r [ 0; 1; 2; 4; 7; 10 ] else byte in
+        { i with mbx_wr = true; mbx_seg = sg; mbx_sel = (if sel3 then 3 else sel); mbx_byte = byte }
       end
       else i
     in

@@ -1,4 +1,5 @@
-(* The Hardcaml array under Cyclesim, behind the same interface as the model. *)
+(* With the E2 registers of the onebit-dac additions (spec.ml).
+   The Hardcaml array under Cyclesim, behind the same interface as the model. *)
 open Hardcaml
 open Spec
 
@@ -52,7 +53,8 @@ let state t : state =
   in
   let seg j : seg_state =
     { flo = get t (Printf.sprintf "flo%d" j); fhi = get t (Printf.sprintf "fhi%d" j);
-      fv = getb t (Printf.sprintf "fv%d" j); ctrl = get t (Printf.sprintf "ctrl%d" j) }
+      fv = getb t (Printf.sprintf "fv%d" j); ctrl = get t (Printf.sprintf "ctrl%d" j);
+      rep = get t (Printf.sprintf "rep%d" j); cnt = get t (Printf.sprintf "cnt%d" j); fw = get t (Printf.sprintf "fw%d" j) }
   in
   let tap j =
     { td = get t (Printf.sprintf "tap_d%d" j); tv = getb t (Printf.sprintf "tap_v%d" j);

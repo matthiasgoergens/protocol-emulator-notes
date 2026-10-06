@@ -8,6 +8,18 @@ configuration library in which every cell the architecture requires is run throu
 and RTL and judged by an independent reference. Every number below points to a file in
 `results/` (or `../reports/`, `../results/`).
 
+**Extended 2026-10-06 for `../../chip-top`.** The three generic additions that
+`../../onebit-dac` proposed, built and verified on a copy of these files are now part of the
+block: X1 (op bits 36:33, `A >>> ashr` when X = A), E1 (control bit 6, the lane loop from the
+end of a joined run) and E2 (mailbox sel 3, a feed that repeats its committed word every R
+clocks). With every new field zero the block behaves exactly as before. The files are
+`../../onebit-dac/sim`'s, with their headers rewritten; `../../onebit-dac` itself is untouched.
+Rerun here: lockstep with the extra `dac` generator, 1,466,960 clocks, 0 mismatches; **46 of
+46** planted bugs caught (the 41 below and 5 for the additions); the 17 cells and the six
+shared-specification faults give the same results as before, line for line; the latency lint
+is unchanged. Area of the additions, from `../../onebit-dac/README.md`: X1 +1,585 µm² per PE,
+E1 and E2 about 11,900 µm² for four segments.
+
 ## Files and commands
 
 | file | what it is |
