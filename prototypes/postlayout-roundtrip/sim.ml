@@ -155,24 +155,27 @@ let reset t =
    Cells.eval_prim is the reference it must agree with (test_cells.ml). *)
 let settle t =
   let v = t.v in
-  Array.iter (fun g ->
+  let gates = t.gates in
+  for gi = 0 to Array.length gates - 1 do
+    let g = Array.unsafe_get gates gi in
     let ins = g.ins in
     let n = Array.length ins in
-    let all x = let r = ref true in for k = 0 to n - 1 do if v.(ins.(k)) <> x then r := false done; !r in
-    let parity () = let r = ref 0 in for k = 0 to n - 1 do r := !r lxor v.(ins.(k)) done; !r in
+    (* no closures here: they were allocated per gate, which was most of the time *)
+    let rec all x k = k >= n || (v.(ins.(k)) = x && all x (k + 1)) in
+    let rec parity acc k = if k >= n then acc else parity (acc lxor v.(ins.(k))) (k + 1) in
     v.(g.out) <-
       (match g.prim with
-       | Cells.And -> if all 1 then 1 else 0
-       | Or -> if all 0 then 0 else 1
-       | Nand -> if all 1 then 0 else 1
-       | Nor -> if all 0 then 1 else 0
-       | Xor -> parity ()
-       | Xnor -> 1 - parity ()
+       | Cells.And -> if all 1 0 then 1 else 0
+       | Or -> if all 0 0 then 0 else 1
+       | Nand -> if all 1 0 then 0 else 1
+       | Nor -> if all 0 0 then 1 else 0
+       | Xor -> parity 0 0
+       | Xnor -> 1 - parity 0 0
        | Not -> 1 - v.(ins.(0))
        | Buf -> v.(ins.(0))
        | Mux2 -> if v.(ins.(2)) = 1 then v.(ins.(1)) else v.(ins.(0))
-       | Mux4 -> v.(ins.(v.(ins.(5)) * 2 + v.(ins.(4))))))
-    t.gates
+       | Mux4 -> v.(ins.(v.(ins.(5)) * 2 + v.(ins.(4)))))
+  done
 
 (* asynchronous set and reset, then settle again until nothing changes *)
 let apply_async t =

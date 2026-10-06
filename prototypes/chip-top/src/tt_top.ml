@@ -37,19 +37,30 @@ let fold_half n = concat_lsb [ bit n 0; bit n 0; bit n 2; bit n 2 ]
 (* Tiny Tapeout's [ena] is not used, and Hardcaml leaves unused inputs out of a module, so the
    tt_um_ wrapper with Tiny Tapeout's exact port list is a few lines of hand-written Verilog
    (../../tt/src/chip_project.v) around this module. *)
+(* The parts of the top that run on the rising edge only: the reset synchroniser, and the core
+   with its folded nibbles and registered output enables. [create] joins them to the stage;
+   ../postlayout-roundtrip's gate-level lockstep (bin/gate_lockstep.ml) joins the same parts to
+   the stage clocked edge by edge. *)
+let reset_sync ~clk ~rst_n =
+  let sync = Reg_spec.create ~clock:clk () in
+  reg sync (reg sync (~:rst_n))
+
+let core_side ?(cfg = Chip_spec.default_config) ~memories ~clk ~reset ~smp () =
+  let mems = match memories with `Behavioural -> Chip_rtl.behavioural | `Macros -> { Chip_rtl.prog_mem = macro_mem; bank_mem = macro_mem } in
+  let core = Chip_rtl.create ~cfg ~mems ~clock:clk ~reset ~smp () in
+  let folded = concat_lsb (List.init Regs.n_pads (fun i -> fold_half (select core.pad_nib (4 * i + 3) (4 * i)))) in
+  let oe = reg (Reg_spec.create ~clock:clk ~clear:reset ()) core.uio_oe in
+  (folded, oe)
+
 let create ?(cfg = Chip_spec.default_config) ~memories ~name () =
   let ui_in = input "ui_in" 8 and uio_in = input "uio_in" 8 in
   let clk = input "clk" 1 and rst_n = input "rst_n" 1 in
   let clocks = [| clk; clk; ~:clk; ~:clk |] in
-  let sync = Reg_spec.create ~clock:clk () in
-  let reset = reg sync (reg sync (~:rst_n)) in
+  let reset = reset_sync ~clk ~rst_n in
   let clocking = Mphase.Stage.Phases { clocks; clear = reset } in
   let pads = concat_lsb [ ui_in; uio_in ] in
   let smp = Mphase.Stage.input_stage clocking ~pads in
-  let mems = match memories with `Behavioural -> Chip_rtl.behavioural | `Macros -> { Chip_rtl.prog_mem = macro_mem; bank_mem = macro_mem } in
-  let core = Chip_rtl.create ~cfg ~mems ~clock:clk ~reset ~smp () in
-  let folded = concat_lsb (List.init Regs.n_pads (fun i -> fold_half (select core.pad_nib (4 * i + 3) (4 * i)))) in
+  let folded, oe = core_side ~cfg ~memories ~clk ~reset ~smp () in
   let pins = Mphase.Stage.output_stage clocking ~sub:folded in
-  let oe = reg (Reg_spec.create ~clock:clk ~clear:reset ()) core.uio_oe in
   Circuit.create_exn ~name
     [ output "uo_out" (select pins 7 0); output "uio_out" (select pins 15 8); output "uio_oe" oe ]

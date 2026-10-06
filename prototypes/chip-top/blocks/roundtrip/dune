@@ -1,0 +1,7 @@
+; ../../../postlayout-roundtrip: the GDS extractor, the cell and SRAM macro models, the gate-level
+; simulator and the structural check (symlinks), for the gate-level lockstep of the hardened chip
+; (bin/gate_lockstep.ml).
+(library
+ (name roundtrip)
+ (wrapped false)
+ (flags (:standard -w -69)))
