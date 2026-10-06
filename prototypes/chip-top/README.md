@@ -22,8 +22,8 @@ Build: `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17). Then
 | block | source | in v0? | notes |
 |---|---|---|---|
 | sequencer, ISA v2 | `../sequencer-v2/sequencer2.ml`, `isa2.ml` | **in**, unchanged | reset fetch fix (ec1650d) included. FINE's `fine_out` and `cfg_out[6:0]` are left unconnected (no fine delay; see D5 below) |
-| programme store, 1024 × 16 address space | new glue | **in** | behavioural synchronous RAM in simulation. Hardened: the IHP `RM_IHPSG13_1P_512x16` macro if the pinned flow takes it (trial in `sram-macro/`, see below), else a register array, clearly marked, of the size that fits |
-| data bank, 1024 × 8 | new glue | **in** | the ISA's LDB/STB port. Simulation: behavioural RAM. Hardened: `RM_IHPSG13_1P_1024x8` if the macro works, else a small register array. **The gain-cell banks are deferred**: they are drawn custom cells with no flow integration yet |
+| programme store, 1024 × 16 address space | new glue | **in** | behavioural synchronous RAM in simulation; hardened: the IHP `RM_IHPSG13_1P_512x16` macro (see "The memories") |
+| data bank, 1024 × 8 | new glue | **in** | the ISA's LDB/STB port; hardened: `RM_IHPSG13_1P_1024x8`. **The gain-cell banks are deferred** (see "The memories") |
 | host link | new, designed here (section 3) | **in** | the architecture note sketches it only (section 2.7) |
 | four-phase pin stage, out and in | `../multiphase/stage.ml` | **in**, unchanged, at the TT boundary | see "Phases" below |
 | pin map and per-pad source select | new glue | **in** | replaces the note's per-thread pin window with one host-configured map |
@@ -38,6 +38,33 @@ Build: `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17). Then
 | fine delay (DTC/TDC on two pins) | `../multiphase` (behavioural) | **deferred** | needs a placed delay-line macro; FINE does nothing on this chip |
 | bank fixed ports into segments | note section 2.6 | **stubbed** | the bank is single-ported and serves LDB/STB. Segment 0's fixed port carries the recovered-bit stream instead; segments 1-3's fixed ports read zero |
 | second bit-path chain, SJW (G6), TRNG | note sections 2.3, 7 | **deferred** | |
+
+### The memories: SRAM macros, not gain cells (decided 2026-10-06)
+
+Both memories are IHP's SRAM macros in the hardened chip: `RM_IHPSG13_1P_512x16` for the
+programme store (pages 0 and 1) and `RM_IHPSG13_1P_1024x8` for the data bank (the ISA's whole
+1,024-byte bank pointer range). Why:
+- **The pinned flow takes them on sg13cmos5l.** `sram-macro/` hardened both side by side in a
+  6x4 tile: routing DRC, LVS and antenna 0, positive slack at all three corners, and Tiny
+  Tapeout's precheck passes, with the KLayout SG13CMOS5L deck at 0 violations over the merged GDS
+  (the PDK at 2bbec755 ships the sg13g2 macros through a symlink, so the "no SRAM macro on cmos5l"
+  claim does not hold there). Magic DRC reports errors inside the macros only, which the cmos5l
+  precheck does not run; that and Magic's stripe "illegal overlaps" are documented exceptions
+  (`sram-macro/README.md`).
+- **Gain cells are not used for the bank in this first top**, on the measurements of
+  `../gain-cell-macro/README.md`: a 1 kbit bank (32 x 32 plus Berger bits) hardens DRC- and
+  LVS-clean on sg13cmos5l but its die is 39,900 µm², against 45,309 µm² for the whole 8 kbit
+  512 x 16 SRAM macro; it needs VDD at 1.20 V (at the slow, cold corner a written 1 is
+  unreadable at 1.17 V); and its power pins are Metal4 stripes that need a custom power-grid
+  script in a Tiny Tapeout tile, where TopMetal1 is not allowed. The gain-cell bank stays a
+  separate experiment.
+- **Flip-flop arrays are too large**: 512 x 16 plus 1024 x 8 bits is 16,384 flip-flops, about
+  800,000 µm² at 49 µm² each, more than the whole tile.
+
+The macros' functional models equal the core's behavioural memory read for read
+(`sim/macro_check.sh`, `results/macro-check.txt`: 200,000 random reads each, 0 differences; a
+read-first control differs on about a quarter of them), so the lockstep's memory model is the
+hardened one.
 
 ### Port map onto Tiny Tapeout's pins
 
