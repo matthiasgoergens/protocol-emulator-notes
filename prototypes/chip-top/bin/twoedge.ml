@@ -26,9 +26,10 @@ module Ref2 = struct
     let folded, oe = Tt_top.core_side ~cfg ~memories:`Behavioural ~clk ~reset ~smp () in
     Circuit.create_exn ~name:"core_side" [ output "folded" folded; output "uio_oe" oe; output "reset" reset ]
 
-  let create cfg =
+  (* [fault]: one of the stage's own planted faults (../multiphase/stage.ml), for controls *)
+  let create ?fault cfg =
     let a = Cyclesim.create (core_circuit cfg) in
-    let b = Cyclesim.create (Mphase.Stage.circuit_substep ~n_out:n_pads ~n_in:n_pads ()) in
+    let b = Cyclesim.create (Mphase.Stage.circuit_substep ?fault ~n_out:n_pads ~n_in:n_pads ()) in
     let ia = Cyclesim.in_port a and ib = Cyclesim.in_port b in
     let oa ?clock_edge n = Cyclesim.out_port ?clock_edge a n and ob n = Cyclesim.out_port b n in
     { a; b; a_smp = ia "smp"; a_rst = ia "rst_n"; b_sub = ib "sub"; b_clear = ib "clear";

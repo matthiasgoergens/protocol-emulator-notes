@@ -53,6 +53,8 @@ case $mode in
     run coverage-pe4 "$exe/lockstep.exe" coverage 1,1,1,1 20 12000 1 "$out/never-pe4.txt" wide
     floor coverage-pe4 95
     run edge-rtl "$exe/edge_phase.exe" rtl 1,1,1,1
+    run edge-rtl-control "$exe/edge_phase.exe" rtl-control 1,1,1,1
+    grep 'control caught' "$out/edge-rtl-control.txt"
     run edge-prove "$exe/edge_phase.exe" prove
     ;;
   full)
@@ -67,6 +69,7 @@ case $mode in
     floor coverage-pe8 99
     run edge-rtl-pe4 "$exe/edge_phase.exe" rtl 1,1,1,1
     run edge-rtl-pe8 "$exe/edge_phase.exe" rtl 2,2,2,2
+    run edge-rtl-control "$exe/edge_phase.exe" rtl-control 1,1,1,1
     run edge-prove "$exe/edge_phase.exe" prove
     if [ -n "${PDK_ROOT:-}" ]; then
       wait_load

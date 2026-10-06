@@ -37,6 +37,8 @@
 
      edge_phase.exe rtl SIZES [STIM]          the two-part Hardcaml reference (Twoedge.Ref2); STIM:
                                               also write the per-half-clock stimulus for iverilog
+     edge_phase.exe rtl-control SIZES         the same with the stage's planted fault
+                                              Sampler_wrong_phase: must be caught
      edge_phase.exe replay SIZES STIM TRACE   the outputs of an iverilog run of STIM (TRACE), with
                                               the reference compared
      edge_phase.exe gates GDS MODELS SIZES [fall2rise:K ...|all]
@@ -65,8 +67,8 @@ type dut = {
   outputs : unit -> int;   (* uo_out | uio_out << 8 | uio_oe << 16 *)
 }
 
-let ref2_dut cfg =
-  let rf = Ref2.create cfg in
+let ref2_dut ?fault cfg =
+  let rf = Ref2.create ?fault cfg in
   { name = "RTL"; rise = (fun ~rst_n ~pads -> Ref2.rise rf ~rst_n ~pads ~en:0b0011);
     fall = (fun ~pads -> Ref2.fall rf ~pads); outputs = (fun () -> Ref2.outputs rf) }
 
@@ -423,6 +425,12 @@ let () =
   let seed = 11 in
   match List.tl (Array.to_list Sys.argv) with
   | [ "prove" ] -> prove ()
+  | [ "rtl-control"; sizes ] ->
+    (* a control: the reference with the stage's planted fault Sampler_wrong_phase (quarter 1 sampled
+       on the falling edge); the input check must fail, or the test cannot see sampling instants *)
+    let res = run_test ~seed (ref2_dut ~fault:Mphase.Stage.Sampler_wrong_phase (cfg_of sizes)) [] in
+    print_result ~verbose:false res;
+    if (fst res).input_ok then (print_endline "control NOT caught"; exit 1) else print_endline "control caught"
   | "rtl" :: sizes :: stim ->
     let cfg = cfg_of sizes in
     let res = run_test ?stim:(match stim with [ f ] -> Some f | _ -> None) ~seed (ref2_dut cfg) [] in
