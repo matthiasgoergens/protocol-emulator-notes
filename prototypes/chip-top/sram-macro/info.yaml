@@ -1,0 +1,52 @@
+# Tiny Tapeout project information.
+# Layout from TinyTapeout/ttihp-verilog-template (Apache-2.0), cmos5l branch, yaml_version 6.
+project:
+  title:        "SRAM macro probe (sg13cmos5l)"
+  author:       "Matthias Goergens"
+  discord:      ""
+  description:  "Carries IHP's 512x16 and 1024x8 SRAM macros through the cmos5l flow; host-written registers drive every functional macro pin"
+  language:     "Verilog"
+  clock_hz:     50000000
+
+  tiles: "6x4"
+
+  top_module:  "tt_um_chip_sram_probe"
+
+  # The macros' port-only blackboxes (src/RM_IHPSG13_*.v) are not listed: config.json brings each
+  # macro in through MACROS, whose "nl" entry names its blackbox.
+  source_files:
+    - "project.v"
+
+pinout:
+  # Inputs
+  ui[0]: "data[0]"
+  ui[1]: "data[1]"
+  ui[2]: "data[2]"
+  ui[3]: "data[3]"
+  ui[4]: "data[4]"
+  ui[5]: "data[5]"
+  ui[6]: "data[6]"
+  ui[7]: "data[7]"
+
+  # Outputs
+  uo[0]: "read[0]"
+  uo[1]: "read[1]"
+  uo[2]: "read[2]"
+  uo[3]: "read[3]"
+  uo[4]: "read[4]"
+  uo[5]: "read[5]"
+  uo[6]: "read[6]"
+  uo[7]: "read[7]"
+
+  # Bidirectional pins (all inputs)
+  uio[0]: "reg_index[0]"
+  uio[1]: "reg_index[1]"
+  uio[2]: "reg_index[2]"
+  uio[3]: "reg_index[3]"
+  uio[4]: "write"
+  uio[5]: "go"
+  uio[6]: "read_select[0]"
+  uio[7]: "read_select[1]"
+
+# Do not change!
+yaml_version: 6

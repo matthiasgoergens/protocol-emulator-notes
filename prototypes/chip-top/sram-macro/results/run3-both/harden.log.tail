@@ -1,0 +1,60 @@
+                    nom_typ_1p20V_25C. The netlist cannot be used               
+                    for timing on this module. (and 2 similar                   
+                    warnings)                                                   
+[01:26:48] WARNING  Netlists found for macro                         flow.py:701
+                    RM_IHPSG13_1P_1024x8_c2_bm_bist, but no                     
+                    parasitics extraction found at corner                       
+                    nom_typ_1p20V_25C. The netlist cannot be used               
+                    for timing on this module. (and 2 similar                   
+                    warnings)                                                   
+[01:26:48] WARNING  Netlists found for macro                         flow.py:701
+                    RM_IHPSG13_1P_512x16_c2_bm_bist, but no                     
+                    parasitics extraction found at corner                       
+                    nom_fast_1p32V_m40C. The netlist cannot be used             
+                    for timing on this module. (and 1 similar                   
+                    warnings)                                                   
+[01:26:48] WARNING  Netlists found for macro                         flow.py:701
+                    RM_IHPSG13_1P_1024x8_c2_bm_bist, but no                     
+                    parasitics extraction found at corner                       
+                    nom_fast_1p32V_m40C. The netlist cannot be used             
+                    for timing on this module. (and 1 similar                   
+                    warnings)                                                   
+[01:26:48] WARNING  Netlists found for macro                         flow.py:701
+                    RM_IHPSG13_1P_512x16_c2_bm_bist, but no                     
+                    parasitics extraction found at corner                       
+                    nom_slow_1p08V_125C. The netlist cannot be used             
+                    for timing on this module. (and 1 similar                   
+                    warnings)                                                   
+[01:26:48] WARNING  Netlists found for macro                         flow.py:701
+                    RM_IHPSG13_1P_1024x8_c2_bm_bist, but no                     
+                    parasitics extraction found at corner                       
+                    nom_slow_1p08V_125C. The netlist cannot be used             
+                    for timing on this module. (and 1 similar                   
+                    warnings)                                                   
+[01:26:48] WARNING  [Odb.ApplyDEFTemplate] Bterm VPWR is declared as flow.py:701
+                    a 'POWER' pin. It will be ignored. (and 2                   
+                    similar warnings)                                           
+[01:26:48] WARNING  [OpenROAD.DetailedRouting] [DRT-0349]            flow.py:701
+                    LEF58_ENCLOSURE with no CUTCLASS is not                     
+                    supported. Skipping for layer Cont (and 6                   
+                    similar warnings)                                           
+[01:26:48] WARNING  [OpenROAD.DetailedRouting] [DRT-0418] Term       flow.py:701
+                    sram512/A_DIN[8] has no pins on routing grid                
+                    (and 46 similar warnings)                                   
+[01:26:48] WARNING  [Checker.WireLength] Threshold for               flow.py:701
+                    Threshold-surpassing long wires is not set. The             
+                    checker will be skipped.                                    
+[01:26:48] WARNING  [OpenROAD.IRDropReport] 'VSRC_LOC_FILES' was not flow.py:701
+                    given a value, which may make the results of IR             
+                    drop analysis inaccurate. If you are not                    
+                    integrating a top-level chip for manufacture,               
+                    you may ignore this warning, otherwise, see the             
+                    documentation for 'VSRC_LOC_FILES'.                         
+[01:26:48] WARNING  [Checker.MagicDRC] 116032 Magic DRC errors       flow.py:701
+                    found.                                                      
+[01:26:48] WARNING  [Checker.IllegalOverlap] 11 Magic Illegal        flow.py:701
+                    Overlap errors found.                                       
+[01:26:48] WARNING  [Misc.ReportManufacturability]                   flow.py:701
+                    klayout__drc_error__count not reported.                     
+                    KLayout.DRC may have been skipped.                          
+harden exit 0 after 1073 s

@@ -1,0 +1,24 @@
+INFO: PDK_ROOT: /var/tmp/roundtrip-cmos5l/pdk
+INFO: Tech: ihp-sg13cmos5l
+INFO: using def template ../tech/ihp-sg13cmos5l/def/tt_block_6x4_pgvdd.def
+INFO: Running klayout pin_label_purposes_overlapping_drawing on /var/tmp/chip-top-sram/run3-both/tt_submission/tt_um_chip_sram_probe.gds
+  deep:true tiled:false threads:4
+INFO: Running klayout sg13cmos5l on /var/tmp/chip-top-sram/run3-both/tt_submission/tt_um_chip_sram_probe.gds
+2026-10-06 01:26:53 +0000: Memory Usage (427832K) : tables selected: main
+2026-10-06 01:26:53 +0000: Memory Usage (427832K) : KLayout will use 4 thread(s) in tiled mode.
+2026-10-06 01:27:02 +0000: Memory Usage (780188K) : Total no. of polygons in the design is 3154484
+INFO: Running klayout zero_area on /var/tmp/chip-top-sram/run3-both/tt_submission/tt_um_chip_sram_probe.gds
+INFO: Running top macro name check...
+INFO: Running forbidden layer check...
+INFO: * Checking TopMetal1.drawing
+INFO: * Checking TopMetal1.pin
+INFO: * Checking TopMetal1.label
+INFO: Running prBoundary check...
+INFO: Running pin check...
+INFO: * gds: /var/tmp/chip-top-sram/run3-both/tt_submission/tt_um_chip_sram_probe.gds
+INFO: * lef: /var/tmp/chip-top-sram/run3-both/tt_submission/tt_um_chip_sram_probe.lef
+INFO: * template_def: ../tech/ihp-sg13cmos5l/def/tt_block_6x4_pgvdd.def
+INFO: * toplevel: tt_um_chip_sram_probe
+INFO: * uses_3v3: False
+INFO: Precheck passed for /var/tmp/chip-top-sram/run3-both/tt_submission/tt_um_chip_sram_probe.gds! 🎉
+precheck exit 0 after 106 s

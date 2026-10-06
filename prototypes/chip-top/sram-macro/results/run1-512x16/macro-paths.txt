@@ -1,0 +1,24 @@
+== nom_fast_1p32V_m40C max (slack, start -> end)
+18.729513 _470_ -> sram512
+18.775047 _474_ -> sram512
+18.830292 _428_ -> sram512
+== nom_fast_1p32V_m40C min (slack, start -> end)
+0.203491 _474_ -> sram512
+0.242878 _471_ -> sram512
+0.248165 _470_ -> sram512
+== nom_slow_1p08V_125C max (slack, start -> end)
+12.790551 sram512 -> _485_
+12.793187 sram512 -> _488_
+12.798172 sram512 -> _487_
+== nom_slow_1p08V_125C min (slack, start -> end)
+0.852864 _474_ -> sram512
+0.899043 _430_ -> sram512
+0.924767 _431_ -> sram512
+== nom_typ_1p20V_25C max (slack, start -> end)
+18.253349 _470_ -> sram512
+18.315325 _474_ -> sram512
+18.435343 _471_ -> sram512
+== nom_typ_1p20V_25C min (slack, start -> end)
+0.429757 _474_ -> sram512
+0.484864 _430_ -> sram512
+0.494999 _471_ -> sram512
