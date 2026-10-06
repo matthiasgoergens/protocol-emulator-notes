@@ -1,0 +1,12 @@
+mode harness, layout 2,2,2,2, 8 trials x 25000 clocks, seed 1; set up in 0.0 s
+trial 0: 0 mismatching half-clocks; 192 transactions; 207 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 1: 0 mismatching half-clocks; 250 transactions; 116 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 2: 0 mismatching half-clocks; 218 transactions; 43 read-back bytes checked, 0 wrong; toggle rate 0.01
+trial 3: 0 mismatching half-clocks; 218 transactions; 108 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 4: 0 mismatching half-clocks; 202 transactions; 143 read-back bytes checked, 0 wrong; toggle rate 0.50
+trial 5: 0 mismatching half-clocks; 212 transactions; 78 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 6: 0 mismatching half-clocks; 216 transactions; 147 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 7: 0 mismatching half-clocks; 218 transactions; 152 read-back bytes checked, 0 wrong; toggle rate 0.01
+output pins that never toggled: 4 of 24 (uio_out[4] uio_out[5] uio_oe[4] uio_oe[5])
+1726 transactions; read-back through the pins: 994 bytes checked against what was written, 0 wrong
+harness: 8 trials x 25000 clocks, 200000 compared output words, 0 mismatching (11 s, 18871 clocks/s)

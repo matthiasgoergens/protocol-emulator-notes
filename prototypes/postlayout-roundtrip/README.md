@@ -40,7 +40,9 @@ reads as 0, so both kinds of tool agree with the broken chip unless the structur
 | `gds.ml` | GDSII parser and hierarchy flattening (from the puzzle solution) |
 | `extract.ml` | SG13G2 and SG13CMOS5L layer maps, connectivity, pins and ports, routing on unknown layers |
 | `cells.ml` | reads the PDK Verilog models into gates and flip-flops |
-| `sim.ml` | two-valued cycle simulator of the extracted netlist |
+| `macros.ml` | the SRAM macros as black boxes: pins from their GDS labels checked against their LEF, ports from IHP's functional model |
+| `cellcheck.ml` | every placed master and its sub-cells against the PDK's own GDS, layer by layer |
+| `sim.ml` | two-valued cycle simulator of the extracted netlist, with the macros' memories and per-edge clocking |
 | `sim3.ml` | the same netlist with X, for power-up states |
 | `check.ml` | structural checks |
 | `mutate.ml` | writes GDS copies with an element removed or a rectangle added |
@@ -315,9 +317,150 @@ one state from every power-up state, and from there it agrees with the RTL. Beca
 there is nothing left to enumerate. The X evaluation is checked against the two-valued one
 implicitly: with no X present it computed every output bit of 600,000 cycles and all equal the RTL's.
 
+## The combined chip, with its SRAM macros
+
+`../chip-top` hardens the whole programmable chip for Tiny Tapeout (6x4 tiles, `sg13cmos5l`) with
+IHP's SRAM macros `RM_IHPSG13_1P_512x16_c2_bm_bist` (programme store) and
+`RM_IHPSG13_1P_1024x8_c2_bm_bist` (data bank). The extractor knew only standard cells, so its first
+structural check of that GDS reported the macros' outputs as undriven, and neither `compare_def` nor
+a lockstep could run. Logs: `results/chip-top/`; the hardens in `/var/tmp/chip-top-harden/pe4-apart`
+(4 PEs) and `pe8-apart` (8 PEs).
+
+**Macros as black boxes with known pins** (`macros.ml`). A reference to an `RM_IHPSG13_*` cell is
+kept as an instance. Its pins are the macro's own GDS labels (Metal2, text type 25, bus bits written
+`A_DIN<3>`, read as `A_DIN[3]`), checked against the LEF: on both macros every LEF signal pin has
+exactly one label inside one of its rectangles (108 and 70 pins, 0 disagreements). Its geometry is
+still flattened with everything else, so a top-level shape touching a macro pin, or two pins joined
+by the macro's own metal, shows up in the connectivity. Its cell (inputs, outputs) comes from IHP's
+functional Verilog model, and `Sim` models that model (`SRAM_1P_behavioral_bm_bist`): on the rising
+edge, with MEN, a write merges DIN under the bit mask and, with REN, puts the new word on DOUT
+(write-through); a read puts the stored word on DOUT; the BIST port takes over when BIST_EN is 1.
+This is the model `../chip-top/sim/macro_check.sh` found equal to the core's behavioural memory read
+for read (write-through: the read-first control there differs on a quarter of the reads). The
+structural check additionally traces each macro's A_CLK to the clock port and requires A_BIST_EN
+and A_BIST_CLK on tie-low cells and A_DLY on a tie-high cell (the model stops a simulation
+otherwise).
+
+**The structural check on the hardened chip** (`roundtrip_check.exe --both-edges check`, RTL ports
+from `tt/src/chip_project.v`, the `tt_um_` wrapper with `ena`):
+
+| | 4 PEs | 8 PEs |
+| --- | --- | --- |
+| extraction | 2,752,843 shapes, 126,186 components, 27,775 instances (2 macros), 27,662 nets, 12.6 s | 3,072,227 shapes, 143,827 components, 33,683 instances, 33,634 nets, 14.1 s |
+| undriven / multiply driven nets | 0 / 0 (was 24 undriven, 56 pins) | 0 / 0 |
+| flip-flops; on the falling edge | 2,519; 42 | 2,915; 42 |
+| macro pin labels against LEF | 178 pins, 0 disagreements | the same |
+| errors | 0 | 0 |
+
+About 98,600 via-metal pairs touch without overlapping, nearly all inside the macros, every one in
+a single component anyway; the log now lists such pairs only when they would have joined two
+components (none) and counts the rest.
+
+**The "25 flip-flops clocked directly from the clock port" were a printout artefact.** The check
+looked for a clock port named `clock`; the Tiny Tapeout top's is `clk`. So no clock trace could
+end: every one of the 2,519 flip-flops was reported with "clock pin CLK: n42 is not driven" (n42 is
+the `clk` net, which no cell drives), and the 2,545th error was "no clock port clock". The report
+printed its first 50 errors, 1 port error and 24 undriven nets, and 25 of the clock errors, which
+read as 25 flip-flops (`results/chip-top/pe4/check-original-code-all-errors.log`, the old code with
+the limit raised). No flip-flop's clock pin is on the `clk` net itself; all go through the clock
+tree. The check now picks `clock` or `clk` from the RTL's inputs, and counts every error under a
+kind, so a cut printout cannot pass for the whole list. With the port found, exactly 42 flip-flops
+get their clock through an odd number of inverters: the four-phase stage's phases 2 and 3, which
+`Tt_top` clocks on `~clk` (the both-edges stage). Traced in the extracted netlist
+(`results/chip-top/falling2.py`): 10 are lane-2 toggles whose output goes through the lane XOR to
+`uo_out[0-7]`, `uio_out[6]`, `uio_out[7]` (the ten general output pads), 16 sample a pad directly
+(`ui_in[0-7]`, `uio_in[0-7]`) and 16 take the first stage's output; all are cleared by the reset
+synchroniser. That is what synthesis leaves of the RTL's 96 phase-2/3 flip-flops: the folded
+nibbles (`n0 n0 n2 n2`) make lanes 1 and 3 constant, the host-data pads have no lane 2 and
+phase 3's samplers duplicate phase 2's (same pad, same edge), so synthesis merged them. They are expected, so `--both-edges` accepts an inverted
+clock as the falling edge; without it they stay errors (42, `check-single-edge.log`).
+
+**Per placement and per net** (`compare_def.exe`, with the two macro LEFs after the cell LEF; nl.v's
+`{msb, ..., lsb}` bus connections on macro pins read bit by bit):
+
+| | 4 PEs | 8 PEs |
+| --- | --- | --- |
+| placements matched (master, x, y, orientation), macros included | 73,133 of 73,133 (2 macros, FS) | 75,061 of 75,061 |
+| nets identical as endpoint sets, vs DEF and vs nl.v | 27,514 of 27,514 (86,514 endpoints, all 178 macro pins among them) | 33,458 of 33,458 (106,591 endpoints) |
+| pins on no wire set aside | 146 (clock-tree dummy loads) | 174 |
+
+**Lockstep, edge by edge** (`../chip-top/bin/gate_lockstep.exe`, which links this directory's
+library): the gates clocked as the silicon is, each flip-flop on the edge its clock pin is wired to,
+compared after both edges, every output pin, with the Hardcaml of `Tt_top`: its rising-edge part
+(`Tt_top.reset_sync`, `Tt_top.core_side`) and the stage's substep circuit with phases 0-1 enabled on
+the rise and 2-3 on the fall. The memories are the IHP model above in the gates and
+`Chip_rtl.behavioural_mem` in Hardcaml. Stimulus: `../chip-top/src/host.ml` on the host link
+(programme and bank writes and read-backs while stopped, register writes over the whole map, FIFO
+and PE configuration traffic, NCO and edge-sampler set-ups on random pads, run phases), random
+`ui_in` and `uio[7:6]` changing also between the edges, occasional resets. The read-backs are also
+checked against what was written, which tests the macros end to end through the pins.
+
+The reference must be the RTL that was hardened. The 8-PE harden's `chip_tt.v` is what this branch's
+sources emit, byte for byte. The 4-PE harden's is not: it was made from 233c71e, before 9a50420
+gave the pad selects their reset values (and before a sequencer2 change); 233c71e's sources emit it
+byte for byte, so the 4-PE runs use a scratch checkout of 233c71e with this branch's tools copied in
+(`/var/tmp/roundtrip-macros/src-233c71e`).
+
+| | 4 PEs (233c71e) | 8 PEs (this branch) |
+| --- | --- | --- |
+| two edges, 8 x 25,000 clocks | 400,000 output words compared, 0 differ | 400,000, 0 differ |
+| read-backs through the pins | 915 bytes, 0 wrong | 915 bytes, 0 wrong |
+| macro operations (512x16; 1024x8) | 970 writes, 199,030 reads; 1,369 writes, 198,631 reads | the same |
+| flip-flops whose output changed, rising / falling edge | 1,837 of 2,477 / 42 of 42 | 1,952 of 2,873 / 42 of 42 |
+| output pins never changed | 4 of 24: `uio_out[4,5]`, `uio_oe[4,5]` (the host's strobe and read-request pins, inputs only) | the same |
+| single edge (every flip-flop at once) against `Tt_top.create` in Cyclesim, 4 x 10,000 | 40,000, 0 differ | 40,000, 0 differ |
+| harness: the two-part reference, all phases on one edge, against `Tt_top.create`, 8 x 25,000 | 200,000, 0 differ | 200,000, 0 differ |
+| speed | 432 clocks/s | 350 clocks/s |
+
+A third of the rising-edge flip-flops never change: random host traffic does not configure the PE
+array into much (the array's own lockstep and the core's lockstep in `../chip-top` cover it at RTL).
+
+**Controls.** Each must fail; the report says which check caught it.
+
+| control | structural check | `compare_def` | lockstep (two edges) |
+| --- | --- | --- | --- |
+| 4-PE GDS against this branch's sources (stale RTL) | | | 32 of 80,000 words differ (`uio_out[1:0]`, from clock 3,330) |
+| cut next to 512x16 `A_DOUT[3]` (the Metal2 path on the pin) | undriven net | 1 net split | 256 words, 16 read-back bytes wrong |
+| cut next to 1024x8 `A_ADDR[4]` | undriven net (the macro pin) | 1 net split | 194 words |
+| cut next to 1024x8 `A_DIN[2]` | undriven net (the macro pin) | 1 net split | 576 words, 36 bytes wrong |
+| short 512x16 `A_DOUT[5]` to its neighbour `A_BM[5]` (Metal2, 0.71 x 0.20 um) | 2 drivers (macro output and tie-high) | 2 nets merged | 568 words, 13 bytes wrong |
+| short 1024x8 `A_ADDR[1]` to `A_ADDR[0]` | 2 drivers | 2 nets merged | 1,020 words, 31 bytes wrong |
+| swap 512x16 `A_DOUT[1]`, `A_DOUT[2]` (the two labels trade places) | clean | 2 nets split, 2 merged, naming both pins | 192 words, 12 bytes wrong |
+| swap 1024x8 `A_DIN[0]`, `A_DIN[7]` | clean | the same | 1,446 words, 43 bytes wrong |
+| swap 1024x8 `A_ADDR[0]`, `A_ADDR[1]` | clean | the same | **0**: not a behavioural fault |
+| one falling-edge flip-flop put on the rising edge (in the netlist), 3 x 6,000 clocks, 8 tried | | | caught for 2 of 3 lane-2 toggles (5,925 and 4,526 words; the third never toggled in these runs), 0 of 5 input samplers |
+
+`roundtrip_check.exe macro-controls` writes the GDS copies and runs the structural check; the cut
+removes the top-level element on the pin's net nearest the pin, the short joins the pin's net to the
+nearest pin of the same macro on another net, the swap exchanges the XY records of two pin labels
+in the macro cell (`Mutate.swap_text_xy`), which to an extractor that takes pins from labels is the
+wires crossed. Two of these say something about the checks rather than the chip. A swap of two
+address pins of a single-port RAM permutes the addresses, the same for writes and reads, so no
+stimulus through that port can see it; only the per-net comparison names it. And moving an input
+sampler from the falling to the rising edge shifts that sample by half a clock, which the host-link
+protocol's two-clock margins absorb and the random programmes do not observe; the structural trace
+above, not the lockstep, is what pins those 32 flip-flops to their edge.
+
+### Every master against the PDK's GDS (lesson P4)
+
+`cellcheck.exe GDS TOP REFERENCE.gds...` compares every master the top cell places, and every
+sub-cell below it, with the reference library's cell of the same name, layer by layer, as multisets
+of normalised polygons, paths, references and labels. It is our implementation of the idea of
+retrace's cellcheck (elementalcollision/retrace, `tools/retrace/cellcheck.py`, Apache-2.0; no code
+read or copied), which killed retrace's cell-internal tampering mutants. Merging the two macros'
+GDS files renames the sub-cells they share (`RM_IHPSG13_1P_BITKIT_CELL$1`); those are compared with
+the unrenamed cell of the second macro's own GDS. On both hardens: 43 of 43 masters identical (41
+standard cells, fill and decap included, and the 2 macros), 324 cells compared with sub-cells, 7
+router via cells not in any reference. Controls (`--plants`): one GatPoly polygon removed from
+`sg13cmos5l_nand2_1`, and one polygon removed from the 1024x8 macro's `RM_IHPSG13_1P_BITKIT_CELL$1`;
+both reported, each naming its cell and layer.
+
 ## What it does not check
 
-- Anything below Metal1: the cells' transistors, contacts and poly are trusted as the PDK's.
+- Anything below Metal1: the cells' transistors, contacts and poly are trusted as the PDK's
+  (`cellcheck` now checks that each master in the GDS is the PDK's, layer by layer; what the PDK's
+  cells do is still trusted). The same holds for the SRAM macros: their pins and the IHP functional
+  model are trusted, their internals are not extracted.
 - Timing, skew, antenna and electrical rules: this is connectivity and logic only (STA and DRC are
   LibreLane's and the precheck's).
 - Faults that do not change behaviour on the programmes run; the structural check has no such gap
@@ -352,6 +495,6 @@ memory) reaches states random inputs do not.
 For the whole chip later, the same extraction should scale linearly (a spatial hash, no all-pairs
 step): 24 tiles of about 1,000 cells is about twelve times this block, so seconds to extract and
 roughly ten minutes for the same 600,000 cycles at this simulator's speed (about 13,000 cycles per
-second here for 3,756 gates, both simulators included), or bit-parallel lanes if that becomes the bottleneck. Two additions are needed first: macros
-(the SRAM) need their pin labels mapped and a behavioural model on the simulator side, and the Tiny
-Tapeout wrapper's port names must be mapped to the RTL's.
+second here for 3,756 gates, both simulators included), or bit-parallel lanes if that becomes the bottleneck.
+The combined chip (section above) measured: 13-14 s to extract 2.8-3.1 million shapes, and 350-430
+clocks per second for 57,600-70,600 gates clocked on both edges.

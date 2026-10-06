@@ -1,0 +1,57 @@
+ 14:48:34 up 10 days, 23:43,  7 users,  load average: 12.51, 13.44, 13.67
+gates: 27775 instances, 27662 nets; structural check: 0 errors
+gates: 57595 primitive gates, 2519 flip-flops, 2 macros; clock edges: 2479 rising, 42 falling, 0 unresolved
+mode single-edge, layout 1,1,1,1, 4 trials x 10000 clocks, seed 2; set up in 13.0 s
+trial 0: 0 mismatching half-clocks; 88 transactions; 27 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 1: 0 mismatching half-clocks; 103 transactions; 8 read-back bytes checked, 0 wrong; toggle rate 0.00
+trial 2: 0 mismatching half-clocks; 90 transactions; 64 read-back bytes checked, 0 wrong; toggle rate 0.10
+trial 3: 0 mismatching half-clocks; 96 transactions; 4 read-back bytes checked, 0 wrong; toggle rate 0.50
+macro u12716@12.00,231.34/RM_IHPSG13_1P_512x16_c2_bm_bist: 179 writes, 39821 reads, 0 edges with BIST enabled
+macro u27541@1136.00,376.46/RM_IHPSG13_1P_1024x8_c2_bm_bist: 273 writes, 39727 reads, 0 edges with BIST enabled
+flip-flops whose output changed: 1096 of 2477 on the rising edge, 42 of 42 on the falling edge
+  falling u13393@333.60,374.22/sg13cmos5l_dfrbpq_1: 1770 changes
+  falling u13455@352.32,366.66/sg13cmos5l_dfrbpq_1: 4410 changes
+  falling u15506@111.36,427.14/sg13cmos5l_dfrbpq_1: 3501 changes
+  falling u16105@85.44,502.74/sg13cmos5l_dfrbpq_1: 3687 changes
+  falling u16206@79.20,464.94/sg13cmos5l_dfrbpq_1: 10939 changes
+  falling u16211@70.56,449.82/sg13cmos5l_dfrbpq_1: 6790 changes
+  falling u16212@72.00,487.62/sg13cmos5l_dfrbpq_1: 4002 changes
+  falling u16646@248.16,517.86/sg13cmos5l_dfrbpq_1: 8670 changes
+  falling u16789@42.24,442.26/sg13cmos5l_dfrbpq_1: 4276 changes
+  falling u17062@163.68,616.14/sg13cmos5l_dfrbpq_1: 6987 changes
+  falling u17802@145.44,616.14/sg13cmos5l_dfrbpq_1: 6990 changes
+  falling u17811@143.52,608.58/sg13cmos5l_dfrbpq_1: 7853 changes
+  falling u17892@148.32,638.82/sg13cmos5l_dfrbpq_1: 3053 changes
+  falling u17898@136.32,631.26/sg13cmos5l_dfrbpq_1: 240 changes
+  falling u17948@144.00,646.38/sg13cmos5l_dfrbpq_1: 2738 changes
+  falling u17950@123.36,646.38/sg13cmos5l_dfrbpq_1: 240 changes
+  falling u17963@140.64,661.50/sg13cmos5l_dfrbpq_1: 2284 changes
+  falling u18122@127.20,669.06/sg13cmos5l_dfrbpq_1: 2284 changes
+  falling u18179@246.72,653.94/sg13cmos5l_dfrbpq_1: 6968 changes
+  falling u18192@263.04,653.94/sg13cmos5l_dfrbpq_1: 6939 changes
+  falling u18229@283.20,646.38/sg13cmos5l_dfrbpq_1: 6965 changes
+  falling u18231@276.96,653.94/sg13cmos5l_dfrbpq_1: 6975 changes
+  falling u18232@295.20,646.38/sg13cmos5l_dfrbpq_1: 6975 changes
+  falling u18277@173.28,631.26/sg13cmos5l_dfrbpq_1: 3053 changes
+  falling u18287@184.80,646.38/sg13cmos5l_dfrbpq_1: 6929 changes
+  falling u18289@167.04,653.94/sg13cmos5l_dfrbpq_1: 6927 changes
+  falling u18300@170.88,661.50/sg13cmos5l_dfrbpq_1: 6948 changes
+  falling u18307@189.60,653.94/sg13cmos5l_dfrbpq_1: 6945 changes
+  falling u18329@217.92,661.50/sg13cmos5l_dfrbpq_1: 7069 changes
+  falling u18333@211.20,653.94/sg13cmos5l_dfrbpq_1: 7009 changes
+  falling u18369@187.68,669.06/sg13cmos5l_dfrbpq_1: 2386 changes
+  falling u18404@202.08,669.06/sg13cmos5l_dfrbpq_1: 7070 changes
+  falling u18430@302.88,669.06/sg13cmos5l_dfrbpq_1: 6967 changes
+  falling u18457@269.76,669.06/sg13cmos5l_dfrbpq_1: 6963 changes
+  falling u18459@253.92,669.06/sg13cmos5l_dfrbpq_1: 6939 changes
+  falling u18468@234.72,638.82/sg13cmos5l_dfrbpq_1: 7007 changes
+  falling u18478@231.36,669.06/sg13cmos5l_dfrbpq_1: 6970 changes
+  falling u18479@165.12,669.06/sg13cmos5l_dfrbpq_1: 2386 changes
+  falling u18531@158.88,646.38/sg13cmos5l_dfrbpq_1: 2738 changes
+  falling u18534@159.36,608.58/sg13cmos5l_dfrbpq_1: 7853 changes
+  falling u20660@320.16,669.06/sg13cmos5l_dfrbpq_1: 6967 changes
+  falling u20664@240.96,532.98/sg13cmos5l_dfrbpq_1: 2800 changes
+output pins that never toggled: 4 of 24 (uio_out[4] uio_out[5] uio_oe[4] uio_oe[5])
+377 transactions; read-back through the pins: 103 bytes checked against what was written, 0 wrong
+single-edge: 4 trials x 10000 clocks, 40000 compared output words, 0 mismatching (44 s, 907 clocks/s)
+exit 0

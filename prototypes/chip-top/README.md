@@ -392,14 +392,24 @@ it at the typical corner, the 8-PE chip does not.
 
 Tiny Tapeout's `tt/` now builds the 4-PE chip by default (`CHIP_SIZES=1,1,1,1`; section 5).
 
-**Post-layout round trip** (`../postlayout-roundtrip`, its structural check on the 4-PE GDS,
-`results/harden-pe4/postlayout-roundtrip-check.txt`): the extractor finds 27,773 cells, 2,519
-flip-flops and 57,595 primitive gates, and reports 25 undriven nets, all inputs read next to the
-SRAM macros: the macros' outputs, which it cannot see because it knows only the standard cells'
-geometry. It also reports 25 flip-flops whose clock pin is on the top-level clock port with no
-clock buffer between, which its clock-tree rule does not accept. The lockstep and `compare_def`
-need macro support in the extractor first and were not run; netgen's LVS above is the
-connectivity check of record.
+**Post-layout round trip** (`../postlayout-roundtrip`, section "The combined chip, with its SRAM
+macros"; logs in `../postlayout-roundtrip/results/chip-top/`). The extractor now keeps the SRAM
+macros as black boxes with their pins (from their GDS labels, checked against their LEFs) and
+simulates them with IHP's functional model. On both hardens: the structural check is clean (0
+undriven, 0 multiply driven nets); `compare_def` matches every placement (73,133 at 4 PEs, 75,061 at
+8) and every net as an endpoint set against the DEF and nl.v (27,514 and 33,458, all 178 macro pins
+included); every placed master equals the PDK's GDS, sub-cells included. `bin/gate_lockstep.exe`
+runs the extracted gates edge by edge against this Hardcaml (`Tt_top.reset_sync`, `Tt_top.core_side`
+and the stage with phases 2-3 on the falling edge): 8 x 25,000 clocks each, 400,000 output words, 0
+differ, and 915 bytes written to the two memories read back through the pins correctly. The 4-PE
+harden was made from 233c71e (before the pad selects got reset values), so its lockstep uses those
+sources; against this branch's sources it differs, as it should (32 words). Planted cuts and shorts
+at macro pins are caught by the structural check, `compare_def` and the lockstep; swapped macro pins
+by `compare_def` and, except for two address pins (a permutation of a single-port RAM's addresses,
+invisible through that port), by the lockstep. The 25 flip-flops "clocked directly from the clock
+port" in the first check were a printout artefact (the check looked for a port named `clock`, and
+all 2,519 flip-flops failed; 25 fitted in the printout); 42 flip-flops take the falling edge, which
+are the both-edges stage's phase-2/3 flip-flops left after synthesis.
 
 ## 5. Tiny Tapeout's `tt/` now builds this chip
 
@@ -424,8 +434,11 @@ the host link on the real both-edges stage and passes. The earlier sequencer har
   held field (F with fwb = hold, P before the first step) sees the power-up value. In simulation
   everything starts at 0. A clear on the segment controls and the PE state, in the block's own
   commit with an X-propagation test, would close it.
-- **Post-layout round trip**: the extractor needs the SRAM macros as opaque cells with pins before
-  its lockstep and `compare_def` can run on this chip.
+- **Post-layout round trip**: done on both hardens (section 4). Gaps it reports: about a third of
+  the rising-edge flip-flops never change under its random host traffic (mostly the PE array), and
+  the stage's input samplers are pinned to the falling edge by the structural trace only; moving one
+  to the rising edge is not visible to that stimulus. The 4-PE GDS of record predates 9a50420, so
+  `tt/` today would build a slightly different 4-PE chip.
 - **Not in v0**: the stuff tracker and line coder (probes only), fine delay, the gain-cell banks,
   the bank's fixed ports into the array, a second bit-path chain; the quarter-clock phases on
   silicon (the hardened stage uses both clock edges).
