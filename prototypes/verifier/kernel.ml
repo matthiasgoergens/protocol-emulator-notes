@@ -23,7 +23,8 @@
    - the start state (pc 0, cnt = acc = dl = 0, time 0) lies in some entry;
    - every successor of every entry, by [transfer], lies in some entry (the table is closed);
    - every channel event a step makes is one the specification's current state accepts, with
-     its gap inside the declared interval;
+     its gap inside the declared interval, and, where the transition declares the data it
+     writes (Spec [data]), with exactly the declared level, known;
    - no entry's [since] can exceed its specification state's deadline.
    A closed table that contains the start contains every reachable state, so the four checks
    together prove the specification for every input. The analyser (analyser.ml) only finds a
@@ -214,6 +215,7 @@ let transfer w (k : key) (dl : Interval.t) : raw list =
 type violation =
   | Unexpected of { from : key; value : value; event : Spec.event; gap : Interval.t }
   | Bad_gap of { from : key; value : value; event : Spec.event; gap : Interval.t; tr : Spec.transition }
+  | Bad_data of { from : key; event : Spec.event; tr : Spec.transition; expected : Spec.level }
   | Deadline of { at : key; value : value; deadline : int }
   | Not_closed of { from : key; reached : key; value : value }
   | No_start
@@ -223,6 +225,7 @@ type prediction = {
   p_pc : int; p_word : int; p_from : int; p_to : int option;
   p_ev : (int * Spec.kind) list; p_time : Interval.t; p_gap : Interval.t option; p_q : int;
   p_allowed : Interval.t option;
+  p_data : (int * int) option;     (* the transition's declared data (Spec [data]) *)
 }
 
 type succ = { s_key : key; s_value : value; s_event : bool }
@@ -252,10 +255,10 @@ let step spec (words : int array) (k, v) =
           Option.map (fun due -> { dl = r.dl'; since; time = Interval.plus v.time r.elapsed; due }) due) since'
                   |> Option.join in
       let key' astate = { pc = r.next_pc; astate; cnt = r.cnt'; acc = r.acc'; oe_known = r.oe_known'; oe = r.oe' } in
-      let pred ?to_ ?gap ?allowed () =
+      let pred ?to_ ?gap ?allowed ?data () =
         if r.ev = [] then [] else
           [ { p_pc = k.pc; p_word = words.(k.pc); p_from = k.astate; p_to = to_; p_ev = r.ev; p_time = time_ev;
-              p_gap = gap; p_q = r.q; p_allowed = allowed } ] in
+              p_gap = gap; p_q = r.q; p_allowed = allowed; p_data = data } ] in
       match channel_event spec r.ev, after with
       | [], None -> (succs, viols, pred () @ preds)
       | [], Some after -> ({ s_key = key' k.astate; s_value = after; s_event = false } :: succs, viols, pred () @ preds)
@@ -270,8 +273,16 @@ let step spec (words : int array) (k, v) =
          | Some tr ->
            let viols = if bug 10 || Interval.leq gap tr.gap then viols
              else Bad_gap { from = k; value = v; event = ev; gap; tr } :: viols in
+           (* the declared data: the one data pin's level must be the declared one, and known *)
+           let viols = match Spec.data_level spec tr with
+             | Some expected when not (bug 11) ->
+               let pin = fst (List.find (fun (_, pat) -> pat = Spec.Data_pp || pat = Spec.Data_od) tr.pats) in
+               let ok = List.exists (fun (p, kd) -> p = pin && match kd with
+                   | Spec.Write { level; data = true } -> level = expected | _ -> false) ev in
+               if ok then viols else Bad_data { from = k; event = ev; tr; expected } :: viols
+             | _ -> viols in
            ({ s_key = key' tr.dst; s_value = after; s_event = true } :: succs,
-            viols, pred ~to_:tr.dst ~gap ~allowed:tr.gap () @ preds)))
+            viols, pred ~to_:tr.dst ~gap ~allowed:tr.gap ?data:tr.data () @ preds)))
     ([], [], []) raws
 
 let deadline_violation spec (k, v) =
@@ -330,6 +341,10 @@ let violation_to_string spec = function
   | Bad_gap { from; event; gap; tr; _ } ->
     Printf.sprintf "pc %d: event %s (%s) has gap %s slots, declared %s" from.pc (Spec.event_to_string event)
       tr.label (Interval.to_string gap) (Interval.to_string tr.gap)
+  | Bad_data { from; event; tr; expected } ->
+    Printf.sprintf "pc %d: event %s (%s) does not leave the declared data %s = %s"
+      from.pc (Spec.event_to_string event) tr.label
+      (match tr.data with Some d -> Spec.data_to_string d | None -> "?") (Spec.level_to_string expected)
   | Deadline { at; value; deadline } ->
     Printf.sprintf "pc %d: %s slots may pass without an event in state %s, whose deadline is %d"
       at.pc (Interval.to_string value.since) (spec.Spec.state_name at.astate) deadline
@@ -339,6 +354,6 @@ let violation_to_string spec = function
   | No_start -> "certificate does not contain the start state"
 
 let violation_key = function
-  | Unexpected { from; _ } | Bad_gap { from; _ } | Not_closed { from; _ } -> Some from
+  | Unexpected { from; _ } | Bad_gap { from; _ } | Bad_data { from; _ } | Not_closed { from; _ } -> Some from
   | Deadline { at; _ } -> Some at
   | No_start -> None

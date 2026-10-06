@@ -177,6 +177,14 @@ let run ?(slots = 60_000) ?(stretch_max = 20_000) ~seed (cert : Kernel.certifica
           | Some tr ->
             if not (Interval.contains tr.gap gap) then
               note_spec (Printf.sprintf "slot %d pc %d: %s gap %d, declared %s" s pc tr.label gap (Interval.to_string tr.gap));
+            (match Spec.data_level spec tr with
+             | Some expected ->
+               let pin = fst (List.find (fun (_, pat) -> pat = Spec.Data_pp || pat = Spec.Data_od) tr.pats) in
+               if lvl pin <> expected then
+                 note_spec (Printf.sprintf "slot %d pc %d: %s leaves %s, declared %s = %s" s pc tr.label
+                              (Spec.level_to_string (lvl pin)) (match tr.data with Some d -> Spec.data_to_string d | None -> "?")
+                              (Spec.level_to_string expected))
+             | None -> ());
             astate := tr.dst);
          last_ev := s);
       prev := Some (pc, w, dl);
