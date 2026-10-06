@@ -1,7 +1,12 @@
 (* Compare the extraction with the place-and-route run's own record, per
    placement and per net, not by cell-type counts.
 
-   compare_def.exe GDS TOP DEF NL.V CELL.LEF
+   compare_def.exe GDS TOP DEF NL.V CELL.LEF [MACRO.LEF ...]
+
+   SRAM macros (macros.ml) are compared like standard cells: their
+   placements by (master, x, y, orientation) from their LEF's SIZE, their
+   pins as endpoints; nl.v connects a macro's bus pins by concatenation,
+   "{msb, ..., lsb}", which is read bit by bit.
 
    (a) Placements.  Every standard-cell reference in the GDS is turned into
        the DEF's form, (master, x, y, orientation), and the two multisets are
@@ -147,7 +152,7 @@ let verilog_tokens s =
 
 (* Returns the endpoint sets of nl.v's nets, and the number of assign
    statements and constant connections seen. *)
-let parse_nl ~prefix ~ports path =
+let parse_nl ~is_cell ~ports path =
   let t = verilog_tokens (read_file path) in
   let n = Array.length t in
   let members : (string, (string * string) list) Hashtbl.t = Hashtbl.create 4096 in
@@ -155,19 +160,29 @@ let parse_nl ~prefix ~ports path =
   let assigns = ref [] and consts = ref 0 and insts = ref 0 in
   let i = ref 0 in
   while !i < n do
-    if starts_with t.(!i) prefix && !i + 2 < n && t.(!i + 2) = "(" then begin
+    if is_cell t.(!i) && !i + 2 < n && t.(!i + 2) = "(" then begin
       let inst = t.(!i + 1) in
       incr insts;
       let j = ref (!i + 3) in
+      let connect pin net = if String.contains net '\'' then incr consts else add net (inst, pin) in
       while t.(!j) <> ";" do
         if t.(!j) = "." then begin
           let pin = t.(!j + 1) in
-          (* .PIN ( net ) or .PIN ( ) *)
-          if t.(!j + 3) <> ")" then begin
-            let net = t.(!j + 3) in
-            if String.contains net '\'' then incr consts else add net (inst, pin)
-          end;
-          j := !j + 4
+          (* .PIN ( net ), .PIN ( ), or a macro's bus .PIN ( { msb , ... , lsb } ) *)
+          if t.(!j + 3) = "{" then begin
+            let k = ref (!j + 4) and bits = ref [] in
+            while t.(!k) <> "}" do
+              if t.(!k) <> "," then bits := t.(!k) :: !bits;
+              incr k
+            done;
+            (* !bits is LSB first *)
+            List.iteri (fun b net -> connect (Printf.sprintf "%s[%d]" pin b) net) !bits;
+            j := !k + 2
+          end
+          else begin
+            if t.(!j + 3) <> ")" then connect pin t.(!j + 3);
+            j := !j + 4
+          end
         end else incr j
       done;
       i := !j
@@ -276,13 +291,17 @@ let compare_partitions ~label ~(ours : (string * string) list list) ~(theirs : (
   only_ours = [] && only_theirs = []
 
 let () =
-  let gds, top, def_path, nl_path, lef_path =
+  let gds, top, def_path, nl_path, lef_paths =
     match Array.to_list Sys.argv |> List.tl with
-    | [ g; t; d; n; l ] -> (g, t, d, n, l)
-    | _ -> prerr_endline "usage: compare_def.exe GDS TOP DEF NL.V CELL.LEF"; exit 2 in
+    | g :: t :: d :: n :: (_ :: _ as l) -> (g, t, d, n, l)
+    | _ -> prerr_endline "usage: compare_def.exe GDS TOP DEF NL.V CELL.LEF [MACRO.LEF ...]"; exit 2 in
   let nl, _ = Extract.extract ~gds_path:gds ~top_name:top () in
   let tech = nl.tech in
-  let lef = parse_lef lef_path in
+  (* the placements and nets compared: the library's standard cells and the
+     SRAM macros (macros.ml) *)
+  let is_cell m = starts_with m tech.cell_prefix || Macros.is_macro m in
+  let lef = Hashtbl.create 128 in
+  List.iter (fun p -> Hashtbl.iter (Hashtbl.replace lef) (parse_lef p)) lef_paths;
   let def = parse_def def_path in
   let lib = Gds.parse gds in
   if Float.abs (lib.Gds.dbu_um *. Float.of_int def.units -. 1.0) > 1e-9 then
@@ -307,27 +326,29 @@ let () =
   (* (a) placements *)
   let top_cell = Hashtbl.find lib.cells top in
   let refs = List.concat_map Gds.expand_array top_cell.refs
-             |> List.filter (fun (r : Gds.ref_) -> starts_with r.rcell tech.cell_prefix) in
+             |> List.filter (fun (r : Gds.ref_) -> is_cell r.rcell) in
   let key_of r = let x, y = def_position ~units:def.units ~lef r in (r.Gds.rcell, x, y, orient_of_ref r) in
   let naive_key_of (r : Gds.ref_) =
     let x, y = r.rorigin in (r.rcell, int_of_float x, int_of_float y, orient_of_ref r) in
   let def_keys = Hashtbl.create 4096 in
   List.iter (fun (name, m, x, y, o) ->
-    if starts_with m tech.cell_prefix then
+    if is_cell m then
       Hashtbl.replace def_keys (m, x, y, o) (name :: Option.value ~default:[] (Hashtbl.find_opt def_keys (m, x, y, o))))
     def.comps;
-  let ndef = List.length (List.filter (fun (_, m, _, _, _) -> starts_with m tech.cell_prefix) def.comps) in
+  let ndef = List.length (List.filter (fun (_, m, _, _, _) -> is_cell m) def.comps) in
+  let nmacro_refs = List.length (List.filter (fun (r : Gds.ref_) -> Macros.is_macro r.rcell) refs) in
+  let nmacro_def = List.length (List.filter (fun (_, m, _, _, _) -> Macros.is_macro m) def.comps) in
   let count f = List.length (List.filter f refs) in
   let matched = count (fun r -> Hashtbl.mem def_keys (key_of r)) in
   let naive = count (fun r -> Hashtbl.mem def_keys (naive_key_of r)) in
   let orients = Hashtbl.create 8 in
   List.iter (fun r -> let o = orient_of_ref r in
               Hashtbl.replace orients o (1 + Option.value ~default:0 (Hashtbl.find_opt orients o))) refs;
-  Printf.printf "placements: GDS %d standard-cell references (orientations%s), DEF %d components of the library\n"
-    (List.length refs)
+  Printf.printf "placements: GDS %d standard-cell and macro references (%d macros; orientations%s), DEF %d components of the library and macros (%d macros)\n"
+    (List.length refs) nmacro_refs
     (String.concat "" (List.map (fun (o, _) ->
        match Hashtbl.find_opt orients o with Some c -> Printf.sprintf " %s %d" o c | None -> "") orientations))
-    ndef;
+    ndef nmacro_def;
   Printf.printf "placements: %d of %d match a DEF component by (master, x, y, orientation); with the GDS origin taken as the DEF position, %d would\n"
     matched (List.length refs) naive;
   let ambiguous = Hashtbl.fold (fun _ ns acc -> if List.length ns > 1 then acc + 1 else acc) def_keys 0 in
@@ -370,7 +391,7 @@ let () =
   let ok_def = compare_partitions ~label:"nets vs DEF" ~ours ~theirs:def_nets in
   (* (c) against nl.v *)
   let ports = List.filter_map (fun (p, _) -> if List.mem p Check.power_ports then None else Some p) nl.ports in
-  let nl_nets, nassign, nconst, ninst = parse_nl ~prefix:tech.cell_prefix ~ports nl_path in
+  let nl_nets, nassign, nconst, ninst = parse_nl ~is_cell ~ports nl_path in
   Printf.printf "nl.v: %d instances, %d assign statements, %d constant connections\n" ninst nassign nconst;
   let ok_nl = compare_partitions ~label:"nets vs nl.v" ~ours ~theirs:nl_nets in
   let ok = placements_ok && !unnamed = 0 && ok_def && ok_nl in
