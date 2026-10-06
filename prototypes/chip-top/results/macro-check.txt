@@ -1,0 +1,5 @@
+512 x 16 macro: 200000 reads compared with the behavioural memory, 0 differ
+1024 x 8 macro: 200000 reads compared with the behavioural memory, 0 differ
+control (expect differences): the same reads against a read-first memory
+512 x 16 macro: 200000 reads compared with the behavioural memory, 49795 differ
+1024 x 8 macro: 200000 reads compared with the behavioural memory, 49881 differ

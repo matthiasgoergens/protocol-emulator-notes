@@ -461,7 +461,8 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
               arr.segs))
     @ [ "send_hi", concat_lsb (Array.to_list send_hi);
         "holds", concat_lsb (Array.to_list (Array.map (fun (st, w) -> concat_msb [ w; st ]) holds));
-        "hin_count", hin_count; "hout_count", hout_count; "crc", crc_raw; "nco", nco; "match_y", match_y;
+        "hin_count", hin_count; "hin_head", hin_head; "hout_head", hout_head;
+        "smp_head", concat_msb [ smp_valid; smp_count; smp_data ]; "str_out", concat_msb [ str_full; str_oe; str_out ]; "hout_count", hout_count; "crc", crc_raw; "nco", nco; "match_y", match_y;
         "rbuf", rbuf.value; "es", concat_msb [ es_b &: es_v; es_v; es_end; es_in_burst ]; "es_last", es_last ]
   in
   { pad_nib = concat_lsb (Array.to_list pad_out); uio_oe = concat_lsb (Array.to_list oes); dbg }

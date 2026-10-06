@@ -1,9 +1,9 @@
 # command: judge.py --traces /var/tmp/chip-top-traces --only uart,spi,i2c
-# commit: ee0bbcdd9cef30f63a86874ed02f841ab11d702e
+# commit: a84e2d3bc34288480dc8e2c7f6676384459b4bb7
 # sigrok-cli 0.7.2
 # - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
 # image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
-# date: 2026-10-06T08:46:47+08:00
+# date: 2026-10-06T09:10:35+08:00
 # analyser rate: as simulated
 uart: PASS: decoded 4F 4B 21
   tooth uart: bit 3 of byte 0 inverted for half a bit: CAUGHT

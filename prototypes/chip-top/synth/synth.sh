@@ -14,7 +14,17 @@ WORK=/var/tmp/chip-top-synth/$TAG
 mkdir --parents "$HERE/logs" "$HERE/reports" "$WORK"
 (cd "$HERE/.." && nice ionice opam exec --switch=5.3.0 -- dune build --root . ./bin/emit.exe 2>&1)
 "$HERE/../_build/default/bin/emit.exe" "$WORK/chip_tt.v" "$MEM" "$SIZES" "$WORDS"
-S="read_verilog -lib $SRAMV/RM_IHPSG13_1P_512x16_c2_bm_bist.v $SRAMV/RM_IHPSG13_1P_1024x8_c2_bm_bist.v; \
+# black-box stubs of the macros: their own Verilog has specify blocks Yosys does not parse
+stub() { # name abits width
+  cat <<V
+(* blackbox *) module $1 (input A_CLK, A_MEN, A_WEN, A_REN, A_DLY, input [$(($2-1)):0] A_ADDR,
+  input [$(($3-1)):0] A_DIN, A_BM, output [$(($3-1)):0] A_DOUT, input A_BIST_CLK, A_BIST_EN, A_BIST_MEN,
+  A_BIST_WEN, A_BIST_REN, input [$(($2-1)):0] A_BIST_ADDR, input [$(($3-1)):0] A_BIST_DIN, A_BIST_BM);
+endmodule
+V
+}
+{ stub RM_IHPSG13_1P_512x16_c2_bm_bist 9 16; stub RM_IHPSG13_1P_1024x8_c2_bm_bist 10 8; } > "$WORK/macros_bb.v"
+S="read_verilog -lib $WORK/macros_bb.v; \
 read_verilog -sv $WORK/chip_tt.v; hierarchy -check -top chip_tt; synth -top chip_tt -flatten; \
 dfflibmap -liberty $LIB; abc -liberty $LIB; opt_clean; tee -o $HERE/reports/$TAG.stat.txt stat -liberty $LIB"
 until awk '{exit !($1 < 16)}' /proc/loadavg; do sleep 30; done

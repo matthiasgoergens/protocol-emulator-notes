@@ -204,7 +204,12 @@ Compared every clock: every output pad's four-quarter nibble and the uio enables
 architectural state of the sequencer (every thread's registers, inboxes, latch), every PE (S,
 P, valid, F, lane, 64 configuration bits), every segment register (feed, control, repeat,
 committed word), the port SEND order and RECV holds, the host FIFO counts, the CRC register,
-the NCO register, the matcher sum, the edge sampler's outputs and the link's read buffer.
+the NCO register, the matcher sum, the edge sampler's outputs, the link's read buffer, the heads
+of the host FIFOs and of the sampler FIFO, and the streamer's pins. Not compared directly: FIFO
+entries behind the head (they are compared when they reach it), the register file and the
+memories (compared when read, by the host or the core), the NCO accumulator and the matcher's
+configuration chain (compared through their outputs). The random pad inputs drive pads 0-7, 14
+and 15; pads 8-13 carry only host-link traffic, which the pin maps can also select.
 - 400 trials × 12,000 clocks at 4 PEs (1|1|1|1), 1024-word store: **4,800,000 clocks, 0
   mismatches**; coverage counts every opcode, 79,128 SENDs to segments, 8,762 RECVs, 63,851
   OUTs, 369 host feed writes held back by a SEND, 46 HOSTOUT entries arriving between a read's
@@ -252,23 +257,30 @@ timing of section 1; after resetting the chip mid-transaction the host starts ag
 `bin/demos.exe`. Each demo runs the specification and the RTL together on the board and compares
 every pad every clock; both agree throughout in every run below.
 
-**UART, SPI and I2C** (`results/demo-ds.txt`). The firmware is `../deadline-sequencer`'s
+Each demo is run twice, once with the board (host, outside world, I2C slave) seeing the
+specification's pads and once seeing the RTL's (`results/demo-*-spec.txt`, `results/demo-*-rtl.txt`),
+so each is an end-to-end run of the RTL as well. "Unchanged" means the firmware, the I2C slave,
+the payloads and the decoders are the original files; the bench around them is new (the host
+loads the firmware through the link, and the stage's pad latency is in the loop).
+
+**UART, SPI and I2C** (`results/demo-ds-*.txt`). The firmware is `../deadline-sequencer`'s
 compiler output, unchanged; the host's loader translates it to ISA v2 (`compat.ml`), relocates
 thread t to offset 64 t and loads it through PROG. UART, SCLK, MOSI and CS on `uo_out[3:0]`;
 SDA and SCL on `uio[6]`, `uio[7]`, the open-drain pins, with the demo's own I2C slave model on
 the bus. The demo's own decoders: UART "OK!" (0x4f 0x4b 0x21), SPI 0xa5 0x3c, I2C 0xa0+ack
 0x5a+ack and STOP, the host reads the two ACK bytes 0x00 0x00 from HOSTOUT; edge timing as the
 original checks it (UART edges at multiples of 64 clocks, SPI SCLK period 64, SCL high 32).
-**PASS.** The chip's trace through `tools/sigrok-judge` (`results/sigrok-judge.txt`): UART, SPI
-and I2C decoded by sigrok's decoders, and all six teeth caught.
+**PASS** both ways. The RTL-driven run's trace through `tools/sigrok-judge`, run separately
+(`results/sigrok-judge.txt`): UART, SPI and I2C decoded by sigrok's decoders, all six teeth caught.
 
-**One-bit DAC** (`results/demo-dac.txt`). `../onebit-dac`'s pump firmware and order-2 PE
+**One-bit DAC** (`results/demo-dac-*.txt`). `../onebit-dac`'s pump firmware and order-2 PE
 configuration (FB1, I1, FB2, I2, without the pass-through PEs) on the 4-PE chip as one run over
 the four segments; the host streams a 997 Hz tone at -6 dB through HOSTIN, polling the FIFO
 count and HOSTOUT for underrun reports. The pin is segment 3's flag through the pad select,
 inverted. Judged against `../onebit-dac`'s bit-exact fast model: **54,349 steps (400 samples), 0
 wrong bits**; the start of the modulator is placed exactly, and the lead-in on the feed's
-initial word 0 is the one fitted parameter. Control: the same bits against the order-3 model
+initial word 0 is the one fitted parameter: of the 2,001 lead-ins tried exactly one gives 0
+wrong bits, the next best 19,654. Control: the same bits against the order-3 model
 are 48 % wrong. No underruns, no overflow. **PASS.**
 
 What the demos do not show: the UART/SPI/I2C pins run with q = 0 only (the base ISA), so the

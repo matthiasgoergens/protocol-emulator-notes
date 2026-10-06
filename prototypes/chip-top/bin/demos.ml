@@ -20,9 +20,18 @@ type world = clock:int -> S.outputs -> int array
 
 (* Run spec and RTL together for [clocks]; [world] gives the outside world's levels each clock,
    [on_clock] sees each clock's pad outputs after it. Returns whether they agreed throughout. *)
+(* Which core's pads the board, the host and the outside world see: the other core runs on the
+   same samples and is compared. DEMO_DRIVER=rtl runs the demo end to end on the RTL. *)
+let driver = match Sys.getenv_opt "DEMO_DRIVER" with Some "rtl" -> `Rtl | _ -> `Spec
+
 let run_board ?(cfg = S.default_config) (b : Board.t) ~(world : world) ~clocks ~on_clock =
   let spec = S.create ~cfg () and rtl = Chip_sim.create ~cfg () in
-  let cores = [ Board.spec_core spec; Board.rtl_core rtl ] in
+  let cores =
+    match driver with
+    | `Spec -> [ Board.spec_core spec; Board.rtl_core rtl ]
+    | `Rtl -> [ Board.rtl_core rtl; Board.spec_core spec ]
+  in
+  pr "  the board is driven by the %s's pads\n" (match driver with `Spec -> "specification" | `Rtl -> "RTL");
   let agree = ref true and first = ref None in
   for c = 0 to clocks - 1 do
     let smp = Board.samples b ~ext:(world ~clock:c b.out) in
@@ -244,12 +253,14 @@ let dac ~samples =
           if Dacdemo.Dac.fast_step f w then 1 else 0)
   in
   let judged = start + ((samples - 1) * steps) in
-  let best = ref (-1, max_int) in
+  let best = ref (-1, max_int) and zero_leads = ref 0 and second = ref max_int in
   for lead = 0 to 2000 do
     let r = reference lead in
     let wrong = ref 0 in
     for j = from to min (Array.length bits) (lead + judged) - 1 do if r.(j) <> bits.(j) then incr wrong done;
-    if !wrong < snd !best then best := (lead, !wrong)
+    if !wrong = 0 then incr zero_leads;
+    if !wrong < snd !best then (second := min !second (snd !best); best := (lead, !wrong))
+    else second := min !second !wrong
   done;
   let lead, wrong = !best in
   let n = min (Array.length bits) (lead + judged) in
@@ -261,6 +272,7 @@ let dac ~samples =
   end;
   pr "  bitstream: %d steps compared with ../onebit-dac's fast model (pin configured by step %d, modulator started at step %d; lead-in of %d steps on word 0 fitted): %d wrong\n"
     (n - from) from start lead wrong;
+  pr "  the fit: %d of the 2,001 lead-ins tried give 0 wrong bits; the next best gives %d wrong\n" !zero_leads !second;
   (* a second fit as a control: the same comparison against the wrong order must fail *)
   let ctrl =
     let f = Dacdemo.Dac.fast_create (Dacdemo.Dac.design_of "o3") in
@@ -273,7 +285,7 @@ let dac ~samples =
     !wrong
   in
   pr "  control: the same bits against the order-3 model: %d of %d wrong\n" ctrl n;
-  let ok = agree && start > from && wrong = 0 && n > (samples - 2) * steps && !underruns = 0 && not !overflow && ctrl > n / 10 in
+  let ok = agree && !zero_leads = 1 && start > from && wrong = 0 && n > (samples - 2) * steps && !underruns = 0 && not !overflow && ctrl > n / 10 in
   pr "one-bit DAC on the combined chip: %s\n%!" (if ok then "PASS" else "FAIL");
   ok
 

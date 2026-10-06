@@ -126,6 +126,14 @@ let state_diffs (s : S.t) (r : Chip_sim.t) =
     if s.hold_st.(p) <> 0 then cmp (Printf.sprintf "port %d hold word" p) s.hold_w.(p) (h lsr 2)
   done;
   cmp "hostin count" (Queue.length s.hostin) (Chip_sim.get r "hin_count");
+  (* the heads of the FIFOs every clock: with the counts, a wrong entry or order shows when it
+     reaches the head *)
+  (match Queue.peek_opt s.hostin with Some v -> cmp "hostin head" v (Chip_sim.get r "hin_head") | None -> ());
+  (match Queue.peek_opt s.hostout with Some (tag, v) -> cmp "hostout head" ((tag lsl 8) lor v) (Chip_sim.get r "hout_head") | None -> ());
+  (match Queue.peek_opt s.smp.fifo with
+   | Some (w, n) -> cmp "sampler head" ((1 lsl 20) lor (n lsl 16) lor w) (Chip_sim.get r "smp_head")
+   | None -> cmp "sampler empty" 0 (Chip_sim.get r "smp_head" lsr 20));
+  cmp "streamer pins and full" ((Bool.to_int (Pstream.Model.full s.str) lsl 8) lor (s.str.oe lsl 4) lor s.str.out) (Chip_sim.get r "str_out");
   cmp "hostout count" (Queue.length s.hostout) (Chip_sim.get r "hout_count");
   cmp "crc" s.crc (Chip_sim.get r "crc");
   cmp "nco" s.nco_out (Chip_sim.get r "nco");

@@ -2,6 +2,7 @@
   uart_tx: 38 words
   spi_master: 27 words
   i2c_write: 64 words
+  the board is driven by the RTL's pads
   host link: 10720 clocks busy loading and draining (of 14500)
   RTL and specification agree on every pad, every clock: true
   uart decoded: 0x4f@42 0x4b@682 0x21@1322
