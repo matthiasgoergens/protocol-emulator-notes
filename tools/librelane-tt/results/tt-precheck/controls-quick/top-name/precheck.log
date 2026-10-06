@@ -1,0 +1,64 @@
+INFO: PDK_ROOT: /var/tmp/roundtrip-cmos5l/pdk
+INFO: Tech: ihp-sg13cmos5l
+INFO: using def template ../tech/ihp-sg13cmos5l/def/tt_block_6x4_pgvdd.def
+INFO: Running klayout pin_label_purposes_overlapping_drawing on /var/tmp/librelane-tt/controls-quick-1/top-name/tt_submission/tt_um_seqv2.gds
+Running pin_label_purposes_overlapping_drawing.rb.drc on file=/var/tmp/librelane-tt/controls-quick-1/top-name/tt_submission/tt_um_seqv2.gds, topcell=, output to /var/tmp/librelane-tt/controls-quick-1/stage/tt/precheck/reports/drc_pin_label_purposes_overlapping_drawing.xml
+  deep:true tiled:false threads:32
+--- #err|description, table for cell: 
+NO-Check ----        pwell:64/44/EMP   122/16/EMP    64/59/EMP    44/16/EMP     44/5/EMP
+         ----        nwell:64/20/EMP    64/16/EMP     64/5/EMP
+         ----         diff:65/20/EMP    65/16/EMP     65/6/EMP
+         ----          tap:65/44/EMP    65/48/EMP     65/5/EMP
+         ----         poly:66/20/EMP    66/16/EMP     66/5/EMP
+         ----       licon1:66/44/EMP    66/58/EMP
+         ----          li1:67/20/EMP    67/16/EMP     67/5/EMP
+         ----         mcon:67/44/EMP    67/48/EMP
+         ----         met1:68/20/EMP    68/16/EMP     68/5/EMP
+         ----          via:68/44/EMP    68/58/EMP
+         ----         met2:69/20/EMP    69/16/EMP     69/5/EMP
+         ----         via2:69/44/EMP    69/58/EMP
+         ----         met3:70/20/EMP    70/16/EMP     70/5/EMP
+         ----         via3:70/44/EMP    70/48/EMP
+         ----         met4:71/20/EMP    71/16/EMP     71/5/EMP
+         ----         via4:71/44/EMP    71/48/EMP
+         ----         met5:72/20/EMP    72/16/EMP     72/5/EMP
+         ----          pad:76/20/EMP     76/5/EMP    76/16/EMP
+         ----          pnp:82/44/EMP    82/59/EMP
+         ----          npn:82/20/EMP     82/5/EMP
+         ----          rdl:74/20/EMP    74/16/EMP     74/5/EMP
+         ----     inductor:82/24/EMP    82/25/EMP
+       0 total error(s) among 0 error type(s), 33 checks, cell: 
+Writing report...
+VmPeak:	 1013352 kB
+VmHWM:	  435368 kB
+INFO: Running klayout zero_area on /var/tmp/librelane-tt/controls-quick-1/top-name/tt_submission/tt_um_seqv2.gds
+0 zero-area shapes
+0 zero-length paths,  0 zero-length paths deleted.
+0 total zero-area objects,  0 total objects deleted.
+VmPeak:	 1041316 kB
+VmHWM:	  461936 kB
+INFO: Running top macro name check...
+INFO: Running pin check...
+INFO: * gds: /var/tmp/librelane-tt/controls-quick-1/top-name/tt_submission/tt_um_seqv2.gds
+INFO: * lef: /var/tmp/librelane-tt/controls-quick-1/top-name/tt_submission/tt_um_seqv2.lef
+INFO: * template_def: ../tech/ihp-sg13cmos5l/def/tt_block_6x4_pgvdd.def
+INFO: * toplevel: tt_um_seqv2
+INFO: * uses_3v3: False
+ERROR: Precheck failed for /var/tmp/librelane-tt/controls-quick-1/top-name/tt_submission/tt_um_seqv2.gds! 😭
+ERROR: See /var/tmp/librelane-tt/controls-quick-1/stage/tt/precheck/reports for more details
+ERROR: Markdown report:
+# Tiny Tapeout Precheck Results
+
+| Check | Result |
+|-----------|--------|
+| KLayout pin label overlapping drawing | ✅ |
+| KLayout zero area | ✅ |
+| KLayout Checks | ❌ Fail: Top macro name mismatch: expected tt_um_seqv2, got tt_um_wrong |
+| Pin check | ❌ Fail: Wrong cell at GDS top-level |
+| Boundary check | ✅ |
+| Layer check | ✅ |
+| Cell name check | ✅ |
+| Analog pin check | ✅ |
+
+In case of failure, please reach out on [discord](https://tinytapeout.com/discord) for assistance.
+precheck exit 1, 2026-10-06T08:19:34+08:00

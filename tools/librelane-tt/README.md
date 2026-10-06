@@ -82,7 +82,13 @@ slack +10.39 ns and hold +0.12 ns at 20 ns; Magic DRC took 17 minutes and detail
 - **Flow configuration.** `run_pnr.sh` runs our block's own `librelane.json` (no Tiny Tapeout
   tile, DEF template or pin order, and KLayout XOR, DRC and LVS switched off); only `harden.sh`
   uses the Tiny Tapeout configuration (`tt_tool.py --create-user-config`).
+- **Precheck.** `tt/scripts/precheck.sh` runs tt-support-tools' `precheck/precheck.py` (d66cf17) as the
+  action's precheck step does, but in a project-local uv venv (Python 3.11, `precheck/requirements.txt`)
+  with a `klayout` shim that runs the image's KLayout 0.30.9 under podman. The action takes KLayout
+  and Magic from a pinned nixpkgs (`precheck/default.nix`; `tool-versions.json` says KLayout 0.30.4,
+  Magic 8.3.568), through `nix-shell`; on the sg13cmos5l path only KLayout is used. Results:
+  `results/tt-precheck/`.
 - **Not reproduced:** the action's apt packages (`librsvg2-bin`, `pngquant`, `ghdl-llvm`; PNG
-  render and VHDL only), the precheck, and the GitHub artefact uploads.
+  render and VHDL only), the precheck's Nix environment, and the GitHub artefact uploads.
 - **Moving targets.** The action's branch and tt-support-tools' branch are not pinned upstream;
   the commits above are what they were on 2026-10-05. The PDK revision is pinned by the action.

@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: Apache-2.0
+# Tiny Tapeout's own GDS, precheck and gate-level test actions on tt/ (ihp-sg13cmos5l), manually
+# started.  The actions need info.yaml and src/ at the workspace root and put tt-support-tools in
+# ./tt, so tt/scripts/stage-for-action.sh lays the project out there (tt/README.md, "Does the GDS
+# action need its own repository?").  Read-only token, no secrets.  Heavy: the GDS step took 29
+# minutes and the precheck's KLayout DRC 19 on a 32-thread machine, so expect hours on a runner.
+# Not yet run on GitHub: the same steps were run locally by tt/scripts/{harden,precheck}.sh.
+name: tt-gds
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  # The three `uses:` below are tt-gds-action, branch ihp-cmos5l, commit 3412659 (2026-10-05); a `uses:`
+  # cannot take a variable.  TOOLS_REF is the tt-support-tools commit that tt/scripts/harden.sh pins;
+  # the actions' own default for it is a moving branch.
+  TOOLS_REF: d66cf179e7bc4d296362ab7e2e3b344dc3c4f665
+  REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+jobs:
+  gds:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.3"
+      - run: opam install --yes dune hardcaml.v0.17.0
+      - name: lay out tt/ as the action expects, generating the core's Verilog first
+        env:
+          OPAM_SWITCH: ""
+        run: repo/tt/scripts/stage-for-action.sh repo
+      - uses: TinyTapeout/tt-gds-action@3412659307918422f3f0727917cf9b499aaca588
+        with:
+          pdk: ihp-sg13cmos5l
+          tools-ref: ${{ env.TOOLS_REF }}
+  precheck:
+    needs: gds
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@3412659307918422f3f0727917cf9b499aaca588
+        with:
+          tools-ref: ${{ env.TOOLS_REF }}
+  gl_test:
+    needs: gds
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+      # The gate-level test needs test/ and src/ at the root; the generated core is not used by it
+      # (the netlist replaces it), so no OCaml here.
+      - name: lay out test/ and src/
+        run: cp --recursive repo/tt/test repo/tt/src .
+      - uses: TinyTapeout/tt-gds-action/gl_test@3412659307918422f3f0727917cf9b499aaca588
