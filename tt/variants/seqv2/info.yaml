@@ -1,0 +1,53 @@
+# Tiny Tapeout project information.
+# Layout from TinyTapeout/ttihp-verilog-template (Apache-2.0), cmos5l branch, yaml_version 6.
+project:
+  title:        "Deadline sequencer ISA v2 (harness)"
+  author:       "Matthias Goergens"
+  discord:      ""
+  description:  "Four-thread deadline sequencer for serial-protocol emulation, generated from Hardcaml; harness placeholder wrapper"
+  language:     "Verilog" # the core is generated from Hardcaml; the wrapper is hand-written Verilog
+  clock_hz:     0         # not set: no timing run has been done
+
+  # 6x4 tiles, the size the competition brief names (notes/asic-puzzle-results-hints.md).
+  tiles: "6x4"
+
+  top_module:  "tt_um_seqv2"
+
+  # Keep in sync with PROJECT_SOURCES in test/Makefile.
+  source_files:
+    - "project.v"
+    - "deadline_sequencer_v2.v"
+
+pinout:
+  # Inputs
+  ui[0]: "pin_in0"
+  ui[1]: "pin_in1"
+  ui[2]: "pin_in2"
+  ui[3]: "pin_in3"
+  ui[4]: "pin_in4"
+  ui[5]: "pin_in5"
+  ui[6]: "pin_in6"
+  ui[7]: "pin_in7"
+
+  # Outputs
+  uo[0]: "pin_out0"
+  uo[1]: "pin_out1"
+  uo[2]: "pin_out2"
+  uo[3]: "pin_out3"
+  uo[4]: "pin_out4"
+  uo[5]: "pin_out5"
+  uo[6]: "pin_out6"
+  uo[7]: "pin_out7"
+
+  # Bidirectional pins (all inputs)
+  uio[0]: "load_data"
+  uio[1]: "load_strobe"
+  uio[2]: "run"
+  uio[3]: ""
+  uio[4]: ""
+  uio[5]: ""
+  uio[6]: ""
+  uio[7]: ""
+
+# Do not change!
+yaml_version: 6

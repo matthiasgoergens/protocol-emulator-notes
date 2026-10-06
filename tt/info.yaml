@@ -1,53 +1,54 @@
-# Tiny Tapeout project information.
+# Tiny Tapeout project information: the combined chip (prototypes/chip-top). The earlier
+# sequencer-only harness is variants/seqv2/ (harden with TT_VARIANT=seqv2).
 # Layout from TinyTapeout/ttihp-verilog-template (Apache-2.0), cmos5l branch, yaml_version 6.
 project:
-  title:        "Deadline sequencer ISA v2 (harness)"
+  title:        "Programmable protocol chip, combined prototype v0"
   author:       "Matthias Goergens"
   discord:      ""
-  description:  "Four-thread deadline sequencer for serial-protocol emulation, generated from Hardcaml; harness placeholder wrapper"
-  language:     "Verilog" # the core is generated from Hardcaml; the wrapper is hand-written Verilog
-  clock_hz:     0         # not set: no timing run has been done
+  description:  "Four-thread deadline sequencer, PE array, pin stage, streamer, sampler, edge sampler, CRC unit, matcher and pin NCO behind a 4-bit host link; generated from Hardcaml"
+  language:     "Verilog"
+  clock_hz:     50000000
 
-  # 6x4 tiles, the size the competition brief names (notes/asic-puzzle-results-hints.md).
   tiles: "6x4"
 
-  top_module:  "tt_um_seqv2"
+  top_module:  "tt_um_chip_top"
 
-  # Keep in sync with PROJECT_SOURCES in test/Makefile.
+  # chip_tt.v is generated (tt/scripts/regen_chip.sh); the SRAM macros come in through MACROS in
+  # src/config.json, whose "nl" entries name their port-only blackboxes.
   source_files:
-    - "project.v"
-    - "deadline_sequencer_v2.v"
+    - "chip_project.v"
+    - "chip_tt.v"
 
 pinout:
   # Inputs
-  ui[0]: "pin_in0"
-  ui[1]: "pin_in1"
-  ui[2]: "pin_in2"
-  ui[3]: "pin_in3"
-  ui[4]: "pin_in4"
-  ui[5]: "pin_in5"
-  ui[6]: "pin_in6"
-  ui[7]: "pin_in7"
+  ui[0]: "in0"
+  ui[1]: "in1"
+  ui[2]: "in2"
+  ui[3]: "in3"
+  ui[4]: "in4"
+  ui[5]: "in5"
+  ui[6]: "in6"
+  ui[7]: "in7"
 
   # Outputs
-  uo[0]: "pin_out0"
-  uo[1]: "pin_out1"
-  uo[2]: "pin_out2"
-  uo[3]: "pin_out3"
-  uo[4]: "pin_out4"
-  uo[5]: "pin_out5"
-  uo[6]: "pin_out6"
-  uo[7]: "pin_out7"
+  uo[0]: "out0"
+  uo[1]: "out1"
+  uo[2]: "out2"
+  uo[3]: "out3"
+  uo[4]: "out4"
+  uo[5]: "out5"
+  uo[6]: "out6"
+  uo[7]: "out7"
 
-  # Bidirectional pins (all inputs)
-  uio[0]: "load_data"
-  uio[1]: "load_strobe"
-  uio[2]: "run"
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  # Bidirectional pins
+  uio[0]: "host_d0"
+  uio[1]: "host_d1"
+  uio[2]: "host_d2"
+  uio[3]: "host_d3"
+  uio[4]: "host_strobe"
+  uio[5]: "host_read"
+  uio[6]: "io14"
+  uio[7]: "io15"
 
 # Do not change!
 yaml_version: 6

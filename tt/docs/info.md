@@ -1,24 +1,19 @@
 <!---
-SPDX-License-Identifier: Apache-2.0
-Section headings follow TinyTapeout/ttihp-verilog-template docs/info.md.
+This file is used to generate your project datasheet.
 -->
 
 ## How it works
 
-The core is the ISA v2 deadline sequencer of `prototypes/sequencer-v2`: four threads sharing eight
-pins, executing 16-bit instructions on a fixed round-robin schedule. Its Verilog is generated from
-the Hardcaml source (`tt/scripts/regen.sh`) and is not edited by hand.
-
-This wrapper is a harness placeholder. It holds a 64-word programme store in registers and loads
-it serially; the final design is meant to use the SRAM macro instead. The data bank, mailbox
-ports and flag inputs are tied off.
+The combined prototype of a programmable chip for protocol emulation: a four-thread deadline
+sequencer (ISA v2), a partitionable array of processing elements, a four-phase pin stage (here on
+both clock edges), a pin streamer and sampler, an edge-tracking sampler with a CRC unit and a
+matcher, and a pin NCO. Everything is configured and loaded through a 4-bit host link on
+uio[5:0]. See prototypes/chip-top/README.md in the repository.
 
 ## How to test
 
-Hold `run` (uio[2]) low. Shift each 16-bit instruction word in, MSB first, on `load_data` (uio[0])
-with `load_strobe` (uio[1]) high for 16 clocks; the load address advances after every word.
-Raise `run`. All four threads start at address 0.
+Hold run clear, load a programme through the host link, configure the pin map, set run.
 
 ## External hardware
 
-None.
+The demo board's RP2040/RP2350 as host, driving the clock and the host link.

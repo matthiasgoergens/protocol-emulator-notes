@@ -22,11 +22,11 @@ jobs:
       # Same Hardcaml as the local switch, so CI generates the same Verilog.
       - run: opam install --yes dune hardcaml.v0.17.0
       - uses: astral-sh/setup-uv@v5
-      - name: generate Verilog and run the cocotb RTL test
+      - name: generate Verilog and run the cocotb RTL test of the sequencer harness (the combined chip's test needs the IHP PDK's SRAM models)
         working-directory: tt/test
         env:
           OPAM_SWITCH: ""
-        run: uv run --no-project --python 3.12 --with-requirements requirements.txt make
+        run: uv run --no-project --python 3.12 --with-requirements requirements.txt make CHIP=no
       - name: the generated file exists and is not a stub
         run: test "$(wc --lines < tt/src/deadline_sequencer_v2.v)" -ge 1000
       - name: no failing test in the cocotb results

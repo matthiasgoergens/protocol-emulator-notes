@@ -14,7 +14,13 @@ URL=${REPO_URL:?set REPO_URL}
 [ "$PWD" != "$CHECKOUT" ] || { echo "CHECKOUT must not be the current directory"; exit 2; }
 [ ! -e info.yaml ] || { echo "info.yaml exists here already"; exit 2; }
 cp --recursive "$CHECKOUT/tt/info.yaml" "$CHECKOUT/tt/src" "$CHECKOUT/tt/docs" "$CHECKOUT/tt/test" .
-"$CHECKOUT/tt/scripts/regen.sh" "$PWD/src/deadline_sequencer_v2.v"
+if [ "${TT_VARIANT:-chip}" = seqv2 ]; then
+  cp "$CHECKOUT/tt/variants/seqv2/info.yaml" info.yaml; cp "$CHECKOUT/tt/variants/seqv2/config.json" src/config.json
+  cp "$CHECKOUT/tt/variants/seqv2/info.md" docs/info.md
+  "$CHECKOUT/tt/scripts/regen.sh" "$PWD/src/deadline_sequencer_v2.v"
+else
+  "$CHECKOUT/tt/scripts/regen_chip.sh" "$PWD/src/chip_tt.v" macros "${CHIP_SIZES:-1,1,1,1}" 512
+fi
 git init --quiet
 git remote add origin "$URL.git"
 git add info.yaml src docs test

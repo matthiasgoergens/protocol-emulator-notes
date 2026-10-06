@@ -10,11 +10,26 @@ and the gate-level test. The precheck passing says nothing about the design: it 
 shuttle's geometry and pin rules, and the wrapper is still a placeholder. The timing
 script has only been run on a metrics file from another project.
 
+**Since 2026-10-06 the project is the combined chip** (`../prototypes/chip-top`): top
+`tt_um_chip_top` in `src/chip_project.v` around the generated `chip_tt` (sequencer, PE array,
+pin stage on both clock edges, streamer, sampler, edge sampler, CRC unit, matcher, pin NCO, host
+link) with IHP's 512x16 and 1024x8 SRAM macros. `src/config.json` is the template plus the macro
+recipe of `../prototypes/chip-top/sram-macro` with the 1024x8 at the right end of the core
+(routing congestion otherwise). Hardened at 4 PEs (`CHIP_SIZES=1,1,1,1`, the default): routing
+DRC 0, LVS 0, precheck 9 of 9 (`../prototypes/chip-top/results/harden-pe4/`). `make` in `test/`
+runs the chip's test (needs `PDK_ROOT` for the macro models). **The earlier sequencer-only
+harness stays available**: `variants/seqv2/` (its `info.yaml`, `config.json`, `info.md`; wrapper
+`src/project.v`), hardened with `TT_VARIANT=seqv2 scripts/harden.sh STAGE` and tested with
+`make CHIP=no`, which is what `tt-harness.yaml` runs in CI. The history below is that harness's.
+
 ## Contents
 
 | path | what |
 |---|---|
-| `info.yaml`, `src/config.json`, `docs/info.md` | project description, flow configuration and datasheet text; layout and `config.json` from the template |
+| `info.yaml`, `src/config.json`, `docs/info.md` | the combined chip's project description, flow configuration (template plus the SRAM macros) and datasheet text |
+| `src/chip_project.v`, `src/chip_tt.v` | wrapper `tt_um_chip_top`; `chip_tt.v` is build output from `scripts/regen_chip.sh` |
+| `src/pdn_cfg.tcl`, `src/RM_IHPSG13_1P_*.v` | the macros' power-grid script (tt_um_loom's) and port-only blackboxes |
+| `variants/seqv2/` | the earlier sequencer harness's `info.yaml`, `config.json` and `info.md` |
 | `src/project.v` | hand-written wrapper `tt_um_seqv2` (placeholder: 64-word register programme store loaded serially) |
 | `src/deadline_sequencer_v2.v` | build output, not committed: generated from `prototypes/sequencer-v2/emit2.ml` by `scripts/regen.sh`, which `test/Makefile` runs on every `make` |
 | `scripts/regen.sh` | generates the core's Verilog; rewrites it only when its contents change |
