@@ -107,108 +107,226 @@ let bug n = !planted_bug = n
 
 let level_of ~od v = if od then (if v = 1 then Spec.Z else Spec.L) else (if v = 1 then Spec.H else Spec.L)
 
+(* The step is written once over a domain of values (as Isa2's interpreter is), so that the same
+   code is the trusted kernel on integers and, on SMT terms, is proved against Isa2's interpreter
+   by z3 (kernel_proof.ml, README.md section 4). The instruction word is always a constant; the
+   key's pc, its known cnt and acc, its enables and the deadline register's bounds are values.
+   Where the step branches on a value it returns each branch under a guard; on integers the
+   guards are decided and [transfer] keeps the outcomes whose guard holds. *)
+module type DOM = sig
+  type v                                       (* a bit vector; every value has a fixed width *)
+  type b                                       (* a truth value *)
+  val k : w:int -> int -> v
+  val add : w:int -> v -> v -> v               (* modulo 2^w *)
+  val sub : w:int -> v -> v -> v
+  val logand : v -> v -> v
+  val logor : v -> v -> v
+  val lognot : w:int -> v -> v
+  val shl : w:int -> v -> int -> v
+  val lshr : v -> int -> v
+  val zext : w:int -> v -> v                   (* zero-extended to w bits *)
+  val bit : v -> int -> b
+  val eq : v -> v -> b
+  val ite : b -> v -> v -> v
+  val tt : b
+  val not_ : b -> b
+  val and_ : b -> b -> b
+  val or_ : b -> b -> b
+end
+
+type 'v gknown = GKnown of 'v | GAny
+type 'v ginterval = { glo : 'v; ghi : 'v option }   (* bounds on 16 bits; None: no upper bound *)
+type ('v, 'b) gkey = { gpc : 'v; gcnt : 'v gknown; gacc : 'v gknown; goe_known : 'v; goe : 'v }
+type ('v, 'b) graw = {
+  guard : 'b;
+  gtiming : timing;
+  gnext_pc : 'v; gcnt' : 'v gknown; gacc' : 'v gknown; gdl' : 'v ginterval; goe_known' : 'v; goe' : 'v;
+  gelapsed : 'v ginterval; gat : 'v ginterval;
+  gev : (int * Spec.kind) list; gq : int;
+}
+
+module Step (D : DOM) = struct
+  open D
+  let c16 n = k ~w:16 n
+  let exactly n = { glo = n; ghi = Some n }
+  let range lo hi = { glo = lo; ghi = Some hi }
+  let max0_minus1 x = ite (eq x (c16 0)) (c16 0) (sub ~w:16 x (c16 1))   (* max (x - 1) 0 *)
+
+  (* [transfer w k dl]: as [transfer] below, each outcome under its guard *)
+  let transfer w (k : (v, b) gkey) (dl : v ginterval) : (v, b) graw list =
+    let op = (w lsr 12) land 15 in
+    let imm12 = w land 0xFFF and imm8 = w land 0xFF in
+    let pin = (w lsr 9) land 7 and b8 = (w lsr 8) land 1 in
+    let bit_w i = (w lsr i) land 1 = 1 in
+    let pc1 = add ~w:8 k.gpc (D.k ~w:8 1) in
+    let dec = { glo = max0_minus1 dl.glo; ghi = Option.map max0_minus1 dl.ghi } in
+    let dec_cnt = match k.gcnt with GKnown c -> GKnown (sub ~w:12 c (D.k ~w:12 1)) | GAny -> GAny in
+    let one ?(guard = tt) ?(ev = []) ?(q = 0) ?(cnt = k.gcnt) ?(acc = k.gacc) ?(dl' = dec) ?(oe = (k.goe_known, k.goe))
+        ?(timing = Plain) next_pc =
+      { guard; gtiming = timing; gnext_pc = next_pc; gcnt' = cnt; gacc' = acc; gdl' = dl'; gelapsed = exactly (c16 1);
+        gat = exactly (c16 0); gev = ev; gq = q; goe_known' = fst oe; goe' = snd oe } in
+    let same_oe = (k.goe_known, k.goe) in
+    let dlo = dl.glo and dhi = match dl.ghi with Some h -> h | None -> c16 dl_max in
+    (* A1: a wait that may proceed on any slot 0..d, or fail after slot d *)
+    let proceed ?(ev = []) ?(acc = k.gacc) () =
+      { guard = tt; gtiming = By_due; gnext_pc = pc1; gcnt' = k.gcnt; gacc' = acc; gdl' = range (c16 0) (max0_minus1 dhi);
+        gelapsed = range (c16 1) (if bug 1 then dhi else add ~w:16 dhi (c16 1)); gat = range (c16 0) dhi; gev = ev; gq = 0;
+        goe_known' = k.goe_known; goe' = k.goe } in
+    let fail ?(guard = tt) ?(ev = []) () =
+      { guard; gtiming = Until_due; gnext_pc = D.k ~w:8 imm8; gcnt' = k.gcnt; gacc' = k.gacc; gdl' = exactly (c16 0);
+        gelapsed = (if bug 2 then range dlo dhi else range (add ~w:16 dlo (c16 1)) (add ~w:16 dhi (c16 1)));
+        gat = range dlo dhi; gev = ev; gq = 0; goe_known' = k.goe_known; goe' = k.goe } in
+    (* a wait whose condition is known: it holds on its first slot or never (nothing it reads
+       changes while it waits) *)
+    let decided holds = [ one ~guard:holds pc1; fail ~guard:(not_ holds) () ] in
+    match op with
+    | 0 -> [ one pc1 ]                                            (* NOP *)
+    | 1 ->                                                       (* SETP *)
+      let mask = (w lsr 4) land 0xFF in
+      let level = if bit_w 2 then (if bit_w 3 then Spec.H else Spec.L) else Spec.Z in
+      let ev = List.filter_map (fun p -> if (mask lsr p) land 1 = 1 then Some (p, Spec.Write { level; data = false }) else None)
+          [ 0; 1; 2; 3; 4; 5; 6; 7 ] in
+      let kmask = D.k ~w:8 mask in
+      let oe' = logor (logand k.goe (lognot ~w:8 kmask)) (if bit_w 2 then kmask else D.k ~w:8 0) in
+      [ one ~ev ~q:(w land 3) ~oe:(logor k.goe_known kmask, oe') pc1 ]
+    | 2 -> [ one ~cnt:(GKnown (D.k ~w:12 imm12)) pc1 ]           (* LDC *)
+    | 3 ->                                                       (* LDD: no decrement this slot *)
+      let n = if bug 3 then max 0 (imm12 - 1) else imm12 in
+      [ one ~dl':(exactly (c16 n)) ~timing:(Load n) pc1 ]
+    | 4 -> [ one ~acc:(GKnown (D.k ~w:8 imm8)) pc1 ]             (* LDA *)
+    | 5 ->                                                       (* WAITP *)
+      [ proceed ~ev:[ (pin, Spec.Observe b8) ] (); fail ~ev:[ (pin, Spec.Expire b8) ] () ]
+    | 6 ->                                                       (* WAITD: stays until dl = 0 *)
+      [ { guard = tt; gtiming = Until_due; gnext_pc = pc1; gcnt' = k.gcnt; gacc' = k.gacc; gdl' = exactly (c16 0);
+          gelapsed = (if bug 7 then range dlo dhi else range (add ~w:16 dlo (c16 1)) (add ~w:16 dhi (c16 1)));
+          gat = exactly (c16 0); gev = []; gq = 0; goe_known' = k.goe_known; goe' = k.goe } ]
+    | 7 ->                                                       (* SHO *)
+      let msb = b8 = 1 and od = bit_w 7 and pair = bit_w 6 and psel = bit_w 5 and cap = bit_w 4 in
+      let p2 = (pin + 1) land 7 in
+      let written_pins = pin :: (if pair then [ p2 ] else []) in
+      (* the data bits: with acc known, each value of b0 (and b1) under its guard *)
+      let data_cases = match k.gacc with
+        | GKnown a ->
+          let i0 = if msb then 7 else 0 and i1 = if msb then 6 else 1 in
+          List.concat_map (fun v0 ->
+              let g0 = if v0 = 1 then bit a i0 else not_ (bit a i0) in
+              if not psel then [ (g0, Some v0, Some (1 - v0)) ]
+              else List.map (fun v1 -> (and_ g0 (if v1 = 1 then bit a i1 else not_ (bit a i1)), Some v0, Some v1)) [ 0; 1 ])
+            [ 0; 1 ]
+        | GAny -> [ (tt, None, None) ] in
+      let acc = match k.gacc with
+        | GKnown a ->
+          let sh = if pair && psel then 2 else 1 in
+          if cap then GAny else GKnown (if msb then shl ~w:8 a sh else lshr a sh)
+        | GAny -> GAny in
+      (* push-pull: the level is the data where the enable is known 1, released where it is known
+         0, unknown otherwise (A5); each case of the written pins' enables under its guard *)
+      let enable_cases =
+        if od || bug 6 then [ (tt, List.map (fun p -> (p, `Driven)) written_pins) ]
+        else
+          List.fold_left (fun acc p ->
+              let known = bit k.goe_known p and on = bit k.goe p in
+              List.concat_map (fun (g, l) ->
+                  [ (and_ g (not_ known), l @ [ (p, `Unknown) ]);
+                    (and_ g (and_ known (not_ on)), l @ [ (p, `Released) ]);
+                    (and_ g (and_ known on), l @ [ (p, `Driven) ]) ]) acc)
+            [ (tt, []) ] written_pins in
+      List.concat_map (fun (gd, b0, b1) ->
+          List.map (fun (ge, en) ->
+              let written = (pin, b0) :: (if pair then [ (p2, b1) ] else []) in
+              let pp_level p v = match List.assoc p en with
+                | `Unknown -> Spec.X
+                | `Released -> Spec.Z
+                | `Driven -> (match v with Some v -> level_of ~od:false v | None -> Spec.LH) in
+              let od_level v = match v with Some v -> level_of ~od:true v | None -> Spec.LZ in
+              let ev = List.map (fun (p, v) -> (p, Spec.Write { level = (if od then od_level v else pp_level p v); data = true })) written in
+              let oe = if not od then same_oe else
+                  List.fold_left (fun (kn, o) (p, v) ->
+                      let m = D.k ~w:8 (1 lsl p) in
+                      match v with
+                      | Some v -> (logor kn m, if v = 0 then logor o m else logand o (lognot ~w:8 m))
+                      | None -> (logand kn (lognot ~w:8 m), logand o (lognot ~w:8 m))) same_oe written in
+              one ~guard:(and_ gd ge) ~ev:(List.sort compare ev) ~q:(if od then 0 else w land 3) ~cnt:dec_cnt ~acc ~oe pc1)
+            enable_cases) data_cases
+    | 8 -> [ one ~ev:[ (pin, Spec.Sample) ] ~cnt:dec_cnt ~acc:GAny pc1 ]   (* SHI *)
+    | 9 -> [ one (D.k ~w:8 imm8) ]                                (* JMP; HALT is JMP self *)
+    | 10 ->                                                      (* JNZ *)
+      (match k.gcnt with
+       | GKnown c ->
+         let zero = eq c (D.k ~w:12 0) in
+         let falls = if bug 4 then or_ zero (eq c (D.k ~w:12 1)) else zero in
+         [ one ~guard:falls pc1; one ~guard:(not_ falls) (D.k ~w:8 imm8) ]
+       | GAny -> [ one (D.k ~w:8 imm8); one ~cnt:(GKnown (D.k ~w:12 0)) pc1 ])
+    | 11 -> [ one pc1 ]                                           (* OUT *)
+    | 12 ->                                                      (* IN: A1, no bound *)
+      [ { guard = tt; gtiming = Unbounded; gnext_pc = pc1; gcnt' = k.gcnt; gacc' = GAny; gdl' = range (c16 0) (max0_minus1 dhi);
+          gelapsed = { glo = c16 1; ghi = None }; gat = exactly (c16 0); gev = []; gq = 0;
+          goe_known' = k.goe_known; goe' = k.goe } ]
+    | 13 ->                                                      (* MBX: A1 *)
+      let recv = bit_w 11 in
+      [ proceed ~acc:(if recv then GAny else k.gacc) (); fail () ]
+    | 14 ->                                                      (* WAITC *)
+      let cond = (w lsr 8) land 15 in
+      (match cond, k.gacc, k.gcnt with
+       | c, GKnown a, _ when c < 8 -> decided (bit a c)
+       | 8, _, GKnown n -> decided (eq (logand n (D.k ~w:12 7)) (D.k ~w:12 0))
+       | _ -> [ proceed (); fail () ])
+    | _ ->                                                       (* EXT *)
+      (match (w lsr 8) land 15 with
+       | 0 | 1 as sub ->                                         (* SKNE, SKEQ *)
+         let skip_if_equal = sub = 1 in
+         let pc2 = add ~w:8 k.gpc (D.k ~w:8 2) in
+         (match k.gacc with
+          | GKnown a ->
+            let equal = eq a (D.k ~w:8 imm8) in
+            let skips = if skip_if_equal <> bug 5 then equal else not_ equal in
+            [ one ~guard:skips pc2; one ~guard:(not_ skips) pc1 ]
+          | GAny -> [ one pc1; one pc2 ])
+       | 3 -> [ one ~cnt:(match k.gacc with GKnown a -> GKnown (zext ~w:12 a) | GAny -> GAny) pc1 ]   (* CNTA *)
+       | 4 -> [ one ~acc:GAny pc1 ]                              (* LDB: A1 *)
+       | _ -> [ one pc1 ])                                       (* FINE STB BANK CFG reserved *)
+end
+
+(* the integer domain: values are OCaml integers kept inside their width *)
+module Int_dom = struct
+  type v = int
+  type b = bool
+  let mask w = (1 lsl w) - 1
+  let k ~w n = n land mask w
+  let add ~w x y = (x + y) land mask w
+  let sub ~w x y = (x - y) land mask w
+  let logand = ( land )
+  let logor = ( lor )
+  let lognot ~w x = lnot x land mask w
+  let shl ~w x s = (x lsl s) land mask w
+  let lshr x s = x lsr s
+  let zext ~w:_ x = x
+  let bit x i = (x lsr i) land 1 = 1
+  let eq = ( = )
+  let ite s x y = if s then x else y
+  let tt = true
+  let not_ = not
+  let and_ = ( && )
+  let or_ = ( || )
+end
+
+module Int_step = Step (Int_dom)
+
+let interval_of_g (g : int ginterval) = { Interval.lo = g.glo; hi = g.ghi }
+let known_of_g = function GKnown v -> Known v | GAny -> Any
+
 (* [transfer w k dl] lists every outcome of the instruction word [w] at [k] whose deadline
    register is in [dl]. Each outcome's event, if any, happens in the last slot the instruction
    takes, so the next instruction issues one slot after it. *)
 let transfer w (k : key) (dl : Interval.t) : raw list =
-  let op = (w lsr 12) land 15 in
-  let imm12 = w land 0xFFF and imm8 = w land 0xFF in
-  let pin = (w lsr 9) land 7 and b8 = (w lsr 8) land 1 in
-  let bit i = (w lsr i) land 1 = 1 in
-  let pc1 = (k.pc + 1) land 0xFF in
-  let dec = Interval.sub_sat dl 1 in
-  let dec_cnt = match k.cnt with Known c -> Known ((c - 1) land 0xFFF) | Any -> Any in
-  let one ?(ev = []) ?(q = 0) ?(cnt = k.cnt) ?(acc = k.acc) ?(dl' = dec) ?(oe = (k.oe_known, k.oe)) ?(timing = Plain) next_pc =
-    { timing; next_pc; cnt' = cnt; acc' = acc; dl'; elapsed = Interval.exactly 1; at = Interval.exactly 0; ev; q;
-      oe_known' = fst oe; oe' = snd oe } in
-  let same_oe = (k.oe_known, k.oe) in
-  let oe_known' = k.oe_known and oe' = k.oe in
-  let dlo = dl.Interval.lo and dhi = match dl.hi with Some h -> h | None -> dl_max in
-  (* A1: a wait that may proceed on any slot 0..d, or fail after slot d *)
-  let proceed ?(ev = []) ?(acc = k.acc) () =
-    { timing = By_due; next_pc = pc1; cnt' = k.cnt; acc' = acc; dl' = Interval.range 0 (max (dhi - 1) 0);
-      elapsed = Interval.range 1 (if bug 1 then dhi else dhi + 1); at = Interval.range 0 dhi; ev; q = 0; oe_known'; oe' } in
-  let fail ?(ev = []) () =
-    { timing = Until_due; next_pc = imm8; cnt' = k.cnt; acc' = k.acc; dl' = Interval.exactly 0;
-      elapsed = (if bug 2 then Interval.range dlo dhi else Interval.range (dlo + 1) (dhi + 1)); at = Interval.range dlo dhi; ev; q = 0; oe_known'; oe' } in
-  (* a wait whose condition is known: it holds on its first slot or never (nothing it reads
-     changes while it waits) *)
-  let decided holds = if holds then [ one pc1 ] else [ fail () ] in
-  match op with
-  | 0 -> [ one pc1 ]                                            (* NOP *)
-  | 1 ->                                                       (* SETP *)
-    let mask = (w lsr 4) land 0xFF in
-    let level = if bit 2 then (if bit 3 then Spec.H else Spec.L) else Spec.Z in
-    let ev = List.filter_map (fun p -> if (mask lsr p) land 1 = 1 then Some (p, Spec.Write { level; data = false }) else None)
-        [ 0; 1; 2; 3; 4; 5; 6; 7 ] in
-    [ one ~ev ~q:(w land 3) ~oe:(k.oe_known lor mask, (k.oe land lnot mask) lor (if bit 2 then mask else 0)) pc1 ]
-  | 2 -> [ one ~cnt:(Known imm12) pc1 ]                         (* LDC *)
-  | 3 -> let n = if bug 3 then max 0 (imm12 - 1) else imm12 in [ one ~dl':(Interval.exactly n) ~timing:(Load n) pc1 ]              (* LDD: no decrement this slot *)
-  | 4 -> [ one ~acc:(Known imm8) pc1 ]                          (* LDA *)
-  | 5 ->                                                       (* WAITP *)
-    [ proceed ~ev:[ (pin, Spec.Observe b8) ] (); fail ~ev:[ (pin, Spec.Expire b8) ] () ]
-  | 6 ->                                                       (* WAITD: stays until dl = 0 *)
-    [ { timing = Until_due; next_pc = pc1; cnt' = k.cnt; acc' = k.acc; dl' = Interval.exactly 0;
-        elapsed = (if bug 7 then Interval.range dlo dhi else Interval.range (dlo + 1) (dhi + 1)); at = Interval.exactly 0;
-        ev = []; q = 0; oe_known'; oe' } ]
-  | 7 ->                                                       (* SHO *)
-    let msb = b8 = 1 and od = bit 7 and pair = bit 6 and psel = bit 5 and cap = bit 4 in
-    let p2 = (pin + 1) land 7 in
-    (* push-pull: the level is the data where the enable is known 1, released where it is known
-       0, unknown otherwise (A5); open drain: the enable is the inverted data *)
-    let pp_level p v =
-      if bug 6 then (match v with Some v -> level_of ~od:false v | None -> Spec.LH)
-      else if (k.oe_known lsr p) land 1 = 0 then Spec.X
-      else if (k.oe lsr p) land 1 = 0 then Spec.Z
-      else match v with Some v -> level_of ~od:false v | None -> Spec.LH in
-    let od_level v = match v with Some v -> level_of ~od:true v | None -> Spec.LZ in
-    let b0, b1, acc =
-      match k.acc with
-      | Known a ->
-        let b0 = if msb then (a lsr 7) land 1 else a land 1 in
-        let b1 = if psel then (if msb then (a lsr 6) land 1 else (a lsr 1) land 1) else 1 - b0 in
-        let sh = if pair && psel then 2 else 1 in
-        Some b0, Some b1, (if cap then Any else Known (if msb then (a lsl sh) land 0xFF else a lsr sh))
-      | Any -> None, None, Any in
-    let written = (pin, b0) :: (if pair then [ (p2, b1) ] else []) in
-    let ev = List.map (fun (p, v) -> (p, Spec.Write { level = (if od then od_level v else pp_level p v); data = true })) written in
-    let oe = if not od then same_oe else
-        List.fold_left (fun (kn, o) (p, v) -> match v with
-            | Some v -> (kn lor (1 lsl p), if v = 0 then o lor (1 lsl p) else o land lnot (1 lsl p))
-            | None -> (kn land lnot (1 lsl p), o land lnot (1 lsl p))) same_oe written in
-    [ one ~ev:(List.sort compare ev) ~q:(if od then 0 else w land 3) ~cnt:dec_cnt ~acc ~oe pc1 ]
-  | 8 -> [ one ~ev:[ (pin, Spec.Sample) ] ~cnt:dec_cnt ~acc:Any pc1 ]   (* SHI *)
-  | 9 -> [ one imm8 ]                                           (* JMP; HALT is JMP self *)
-  | 10 ->                                                      (* JNZ *)
-    (match k.cnt with
-     | Known 0 -> [ one pc1 ]
-     | Known c when bug 4 && c = 1 -> [ one pc1 ]
-     | Known _ -> [ one imm8 ]
-     | Any -> [ one imm8; one ~cnt:(Known 0) pc1 ])
-  | 11 -> [ one pc1 ]                                           (* OUT *)
-  | 12 ->                                                      (* IN: A1, no bound *)
-    [ { timing = Unbounded; next_pc = pc1; cnt' = k.cnt; acc' = Any; dl' = Interval.range 0 (max (dhi - 1) 0);
-        elapsed = Interval.at_least 1; at = Interval.exactly 0; ev = []; q = 0; oe_known'; oe' } ]
-  | 13 ->                                                      (* MBX: A1 *)
-    let recv = bit 11 in
-    [ proceed ~acc:(if recv then Any else k.acc) (); fail () ]
-  | 14 ->                                                      (* WAITC *)
-    let cond = (w lsr 8) land 15 in
-    (match cond, k.acc, k.cnt with
-     | c, Known a, _ when c < 8 -> decided ((a lsr c) land 1 = 1)
-     | 8, _, Known n -> decided (n land 7 = 0)
-     | _ -> [ proceed (); fail () ])
-  | _ ->                                                       (* EXT *)
-    (match (w lsr 8) land 15 with
-     | 0 | 1 as sub ->                                         (* SKNE, SKEQ *)
-       let skip_if_equal = sub = 1 in
-       let pc2 = (k.pc + 2) land 0xFF in
-       (match k.acc with
-        | Known a -> [ one (if ((a = imm8) = skip_if_equal) <> bug 5 then pc2 else pc1) ]
-        | Any -> [ one pc1; one pc2 ])
-     | 3 -> [ one ~cnt:(match k.acc with Known a -> Known a | Any -> Any) pc1 ]   (* CNTA *)
-     | 4 -> [ one ~acc:Any pc1 ]                                (* LDB: A1 *)
-     | _ -> [ one pc1 ])                                        (* FINE STB BANK CFG reserved *)
+  let gk = { gpc = k.pc; gcnt = (match k.cnt with Known c -> GKnown c | Any -> GAny);
+             gacc = (match k.acc with Known a -> GKnown a | Any -> GAny); goe_known = k.oe_known; goe = k.oe } in
+  List.filter_map (fun (r : (int, bool) graw) ->
+      if not r.guard then None
+      else Some { timing = r.gtiming; next_pc = r.gnext_pc; cnt' = known_of_g r.gcnt'; acc' = known_of_g r.gacc';
+                  dl' = interval_of_g r.gdl'; oe_known' = r.goe_known'; oe' = r.goe'; elapsed = interval_of_g r.gelapsed;
+                  at = interval_of_g r.gat; ev = r.gev; q = r.gq })
+    (Int_step.transfer w gk { glo = dl.Interval.lo; ghi = dl.hi })
 
 (* ---- one step against the specification ---- *)
 

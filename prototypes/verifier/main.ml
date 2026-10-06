@@ -513,5 +513,8 @@ let () =
   | [ "certs"; dir ] -> cmd_certs dir
   | [ "ledger-check"; file ] -> cmd_ledger_check file
   | "rtl" :: name :: dir :: opts -> cmd_rtl name dir opts
+  | [ "kernel-z3"; first; last ] ->
+    (* the kernel's step against Isa2 by z3, for every word in [FIRST, LAST] (hex) *)
+    Kernel_proof.run ~first:(int_of_string ("0x" ^ first)) ~last:(int_of_string ("0x" ^ last))
   | [ "list" ] -> List.iter (fun i -> print_endline i.name) (all_images ())
   | _ -> prerr_endline "usage: main.exe [--bug N] selftest|verify NAME|sweep|planted|compose|mutants|random N|controls|certs DIR|ledger-check FILE|list|kernel-bugs"; exit 2
