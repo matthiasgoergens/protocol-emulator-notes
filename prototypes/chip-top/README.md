@@ -511,6 +511,7 @@ of synthesis at 4 PEs together with the prefix adders (274,741 to 277,535).
 |---|---|---|---|---|---|---|---|
 | 4 (1\|1\|1\|1), `results/harden-pe4/` | **+0.255** / +0.253 | +3.095 / +0.114 | +3.619 / +0.031 | 16.42 ns, 60.9 MHz | 78 | 26,004 | 0, match, 0, 9 of 9 |
 | 8 (2\|2\|2\|2), `results/harden-pe8/` | **-1.333** / +0.234 | +2.827 / +0.106 | +3.420 / +0.025 | 18.00 ns, 55.5 MHz | 121 | 32,822 | 0, match, 0, 9 of 9 |
+| 12 (3\|3\|3\|3), `results/harden-pe12-attempt/` | -0.789 / +0.226 | +2.717 / +0.039 | +3.288 / **-0.070** | (17.46 ns) | | 39,402 | **508 routing DRC violations**: does not route; stopped before sign-off |
 
 Magic DRC reports errors only inside the macros, as before (`magic-drc-by-region.txt`). The
 4-PE harden is the refresh of section 4's: it includes 9a50420's pad-select reset defaults and
@@ -526,6 +527,13 @@ now with the chains in log depth. Their worst cells are drivers of long wires (0
 corner): global routing put Metal3, the only horizontal layer, at 81 % with an overflow of 1,049,
 and detailed routing's detours are longer than the parasitics the repairs sized for. The 4-PE
 chip has the same logic and meets 60 MHz with 0.26 ns to spare; at 8 PEs it is wire, not depth.
+
+**12 PEs do not route.** Global routing put Metal3 at 88 % with an overflow of 4,096 (8 PEs: 81 %,
+1,049); detailed routing went from 38,908 violations to about 500 and stayed there through its
+iterations and the antenna repairs, ending at 508. The timing of that unfinished routing
+(-0.79 ns slow, a fast-corner hold violation of 0.07 ns on 11 endpoints) is indicative only. So,
+in this tile and floorplan: **8 PEs is the largest chip that routes**, as before; 12 would need
+the routing lever (a floorplan or fewer horizontal wires), not a timing one.
 
 ## Open issues
 
