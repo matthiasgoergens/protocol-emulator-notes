@@ -363,11 +363,14 @@ let prove () =
 
    The second synchroniser stage's edge cannot be observed (see [prove]): moving it is a
    functionally equivalent change. So this rule pins it from the netlist: for every input pad,
-   the flip-flops whose D depends on the pad within 12 gates (buffers and hold-fixing delay cells included; the first stage) include a
-   rising-edge one (quarters 0-1) and a falling-edge one (quarters 2-3); every flip-flop fed by a
-   falling first-stage flop is on the falling edge (the second stage), and every flip-flop fed by
-   one of those, or by a rising first-stage flop, is on the rising edge (the retiming flop and
-   the rising path's second stage). Returns the violations and the counts. *)
+   the flip-flops whose D depends on the pad within 12 gates (buffers and hold-fixing delay cells
+   included; the first stage) include a rising-edge one (quarters 0-1) and a falling-edge one
+   (quarters 2-3); every flip-flop a first-stage flop feeds (its second stage) takes the same edge
+   as it, as a phase's two synchroniser flops share the phase's clock in stage.ml; and every
+   flip-flop a second stage feeds (the retiming flop) is on the rising edge. A first or second
+   stage moved alone breaks the pairing; a falling pair moved together leaves the pad without a
+   falling first stage, here where synthesis merged phases 2 and 3 into one pair per pad (with two
+   pairs it would not, but the edge-phase test sees a moved first stage). *)
 let structure (g : Gates.t) =
   let sim = g.sim in
   let driver = Hashtbl.create 65536 in
@@ -398,15 +401,18 @@ let structure (g : Gates.t) =
     n1 := !n1 + List.length f1;
     if f1 = [] then bad := Printf.sprintf "pad %d: no falling-edge first-stage flip-flop" p :: !bad;
     if r1 = [] then bad := Printf.sprintf "pad %d: no rising-edge first-stage flip-flop" p :: !bad;
+    (* stage.ml: a phase's two synchroniser flops share its clock; the retiming flop is on ph0 *)
+    let edge i = if fall i then "falling" else "rising" in
     List.iter (fun i ->
         let second = fed_by i in
         if second = [] then bad := Printf.sprintf "pad %d: %s feeds no flip-flop" p (name i) :: !bad;
         List.iter (fun j ->
-            if fall j then incr n2 else bad := Printf.sprintf "pad %d: second stage %s (after %s) is on the rising edge" p (name j) (name i) :: !bad;
+            if fall j <> fall i then
+              bad := Printf.sprintf "pad %d: second stage %s is on the %s edge, its first stage %s on the %s" p (name j) (edge j) (name i) (edge i) :: !bad
+            else if fall j then incr n2;
             List.iter (fun k -> if fall k then bad := Printf.sprintf "pad %d: retiming %s is on the falling edge" p (name k) :: !bad) (fed_by j))
           second)
-      f1;
-    List.iter (fun i -> List.iter (fun j -> if fall j then bad := Printf.sprintf "pad %d: %s, after the rising first stage, is on the falling edge" p (name j) :: !bad) (fed_by i)) r1
+      first
   done;
   (List.rev !bad, !n1, !n2)
 
