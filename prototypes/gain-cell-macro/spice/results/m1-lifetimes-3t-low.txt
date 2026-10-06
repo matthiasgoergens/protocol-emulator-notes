@@ -1,0 +1,13 @@
+# analyse.py results/m1-sweep-3t-merged.txt results/m1-v5-3T-w0.15-l0.45-lowlevels.txt (cmos5l PDK 2bbec755, PSP 103.8.2, gmin 1e-18; levels extended to 0.10 V for the corners whose readable level lies below 0.25 V)
+lowest readable 1 (RBL < 0.5 V) and highest readable 0 (RBL > 0.7 V), by sense time
+  mos_ff   27C  1 needs >= 0.211 V at 10 ns, 0.165 V at 20 ns; 0 reads up to 0.150 V at 10 ns (sweep floor 0.07)
+  mos_ff   85C  1 needs >= 0.166 V at 10 ns, 0.117 V at 20 ns; 0 reads up to 0.100 V at 10 ns (sweep floor 0.07)
+  mos_ss   27C  1 needs >= 0.393 V at 10 ns, 0.344 V at 20 ns; 0 reads up to 0.350 V at 10 ns (sweep floor 0.07)
+  mos_ss   85C  1 needs >= 0.349 V at 10 ns, 0.297 V at 20 ns; 0 reads up to 0.300 V at 10 ns (sweep floor 0.07)
+  mos_tt   27C  1 needs >= 0.301 V at 10 ns, 0.252 V at 20 ns; 0 reads up to 0.250 V at 10 ns (sweep floor 0.07)
+  mos_tt   85C  1 needs >= 0.257 V at 10 ns, 0.204 V at 20 ns; 0 reads up to 0.200 V at 10 ns (sweep floor 0.07)
+
+results/m1-v5-3T-w0.15-l0.45-lowlevels.txt
+  mos_tt   85C  written 0.551 V   lifetime of a 1 read at 10 ns: 12.64 ms (to 0.257 V);  20 ns: 19.38 ms (to 0.204 V)
+  mos_ff   27C  written 0.554 V   lifetime of a 1 read at 10 ns: 7.02 ms (to 0.211 V);  20 ns: 9.91 ms (to 0.165 V)
+  mos_ff   85C  written 0.632 V   lifetime of a 1 read at 10 ns: 5.94 ms (to 0.166 V);  20 ns: 8.88 ms (to 0.117 V)
