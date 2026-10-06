@@ -112,19 +112,20 @@ Tapeout's own hardening steps in a pinned copy of their LibreLane environment
 (`tools/librelane-tt`), and `tt/scripts/precheck.sh` runs Tiny Tapeout's precheck, which has
 been shown to reject planted layout errors.
 
-The combined chip in 6x4 tiles, with both SRAM macros (`prototypes/chip-top/results/`):
+The combined chip in 6x4 tiles, with both SRAM macros, at the 60 MHz target (16.67 ns;
+`prototypes/chip-top/results/`):
 
-| PEs | routing DRC, LVS, antenna | precheck | setup slack at 20 ns, typical / slow corner |
+| PEs | routing DRC, LVS, antenna | precheck | setup slack, slow / typical / fast corner |
 | --- | --- | --- | --- |
-| 4 | 0, 0, 0 | 9 of 9 checks pass | +4.06 / −4.17 ns |
-| 8 | 0, 0, 0 | 9 of 9 checks pass | +1.67 / −9.21 ns |
-| 16 | does not route | – | – |
+| 4 | 0, 0, 0 | 9 of 9 checks pass | +0.26 / +3.10 / +3.62 ns |
+| 8 | 0, 0, 0 | 9 of 9 checks pass | −1.33 / +2.83 / +3.42 ns (about 55 MHz at the slow corner) |
+| 12 | does not route | – | – |
 
 The process's tiles route on three metal layers only, which leaves one layer for horizontal wires,
-so routing rather than area limits the size. Neither size yet meets timing at the slow corner, so
-the 60 MHz target is not met there; closing timing is the current work. The combined RTL runs
-unchanged UART, SPI and I2C firmware and the one-bit audio DAC in lockstep with its specification,
-and catches 27 of 27 planted integration bugs.
+so routing rather than area limits the size; `tt/` builds the 4-PE chip. A netlist extracted from
+each hardened layout runs in lockstep with the RTL, and every flip-flop that can change does change
+under the tests. The combined RTL runs unchanged UART, SPI and I2C firmware and the one-bit audio
+DAC in lockstep with its specification, and catches 28 of 28 planted integration bugs.
 
 ## Repository map
 
