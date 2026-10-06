@@ -147,6 +147,14 @@ generic blocks, and the prototypes are the evidence for which blocks to have.
   `dune test` on a latency regression. The small 5-frame Cyclesim test
   now detects the end-to-end latency mutant too (555 of 1,375 cycles differ against the good design; `small-fixes`, 2026-10-05). Fourteen improvement proposals for hardcaml-latency are in
   `notes/latency-adoption.md`.
+- **Gain-cell bank hardened on sg13cmos5l (`gain-cell-macro`, merged 2026-10-06):** a 1 kbit bank
+  (32x32 + Berger) is DRC- and LVS-clean with standard-cell periphery, but its die is 39,900 µm²
+  (array 4,050, periphery 84 % of the cells), against 45,309 µm² budgeted for the whole 8 kbit
+  programme SRAM. It needs VDD at 1.20 V (at ss/27 °C a written 1 is unreadable at 1.17 V; margin
+  17 mV at 1.20 V, no Monte Carlo) and a custom power grid in a Metal4-only tile. **Decision for
+  now:** the combined chip top uses the SRAM macro or a flop/latch array, not gain cells; gain cells
+  pay only if the periphery shrinks a lot (bigger banks, cheaper word-line drive) and the read
+  margin survives mismatch.
 - **Layout round trip ported to sg13cmos5l (`roundtrip-cmos5l`, merged 2026-10-05):** via joins now
   need real overlap (4 of 11 synthetic cases were wrong before); placements and nets match the
   place-and-route record exactly (2,983 of 2,983, and 2,080 of 2,080 nets as endpoint sets); X
