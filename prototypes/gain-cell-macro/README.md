@@ -1,6 +1,6 @@
 # Gain-cell memory bank as a macro for sg13cmos5l (2026-10-06)
 
-Work in progress; one section per milestone. The cell is the thick-oxide 3T cell of
+One section per milestone; section 5 sorts what is measured from what is estimated. The cell is the thick-oxide 3T cell of
 `../gain-cell/` (write transistor W 0.15 / L 0.45 dogbone, thin storage and read transistors
 W 0.30 / L 0.13). Target: IHP sg13cmos5l (Metal1–Metal4 and TopMetal1 only), IHP-Open-PDK
 2bbec755 at `/var/tmp/roundtrip-cmos5l/pdk`, the revision Tiny Tapeout pins. Every DRC and LVS
@@ -229,6 +229,69 @@ record (≥ 3.1 ms, 2.6), slightly lowered.
   reads 0 bad words, a pass with a 34 µs wait reads all 32 bad and Berger-failed
   (`sim-top-rtl.txt`).
 
+## 4. Placed in a test top
+
+`top/config.json`, `top/harden.sh`, `rtl/gc_test_top.v`: the bank macro (from `views/`) at
+(40, 40) in a 280 × 280 µm die, driven by 808 standard cells (12,213 µm²): a retention
+tester that writes all 32 rows with an LFSR pattern, waits 2^`wait_log2` cycles, reads every
+row back and counts words that differ (`bad_words`) and words whose Berger check fails
+(`err_words`). It is also a silicon experiment: sweeping `wait_log2` from 17 (2.2 ms) to 20
+(17 ms) brackets the simulated lifetimes.
+
+Pinned LibreLane 3.1.0.dev3, run `t1` to `final/` (`top/results/t1/metrics.json`):
+- Magic DRC 0, KLayout DRC 0, routing DRC 0, antenna 0, XOR 0, power-grid check 0;
+- netgen LVS: circuits match uniquely (bank as a black box, `lvs.netgen.rpt`). The bank's
+  inside is covered by its own full LVS (section 2). A flat-through-the-hierarchy KLayout LVS
+  of the top did not complete: the comparer skipped the bank circuit (its layout copy showed
+  only the array as a subcircuit), and I did not pursue it;
+- setup slack +8.12 ns (slow corner), hold +0.10 ns (fast), at 16.667 ns, with the bank's
+  extracted timing models.
+
+**What differs from a Tiny Tapeout tile.** Signals are capped at Metal4 as in the tile, but
+the power grid is LibreLane's default: Metal4 straps, TopMetal1 straps (the GDS contains
+TopVia1 and TopMetal1), and the default macro grid joining the bank's Metal4 VPWR/VGND pins to
+the TopMetal1 straps. Tiny Tapeout's flow for this shuttle runs `FP_PDN_MULTILAYER 0` and
+`RT_MAX_LAYER Metal4` (`/var/tmp/librelane-tt/tt-harden-1/runs/wokwi/resolved.json`), so its
+tile has no TopMetal1 and its default macro grid would connect nothing. That is the first
+item below.
+
+**What blocks integration into the chip top (branch chip-top):**
+1. **Power to the macro in a Metal4-only tile.** The bank's power pins are Metal4 stripes
+   (20.57 µm pitch). The chip top needs its own PDN script: either straps aligned onto those
+   stripes (pdngen kept a 0.48 µm gap between a strap and a same-net pin it ran into, so this
+   needs checking), or a macro grid that connects through another layer. Inside the bank this
+   was solved with Metal3 bars and Via3 (`bank/pdn_cfg.tcl`); the same idea at the top would
+   need the bank to expose Metal3 power bars and leave Metal4 clear over part of itself.
+2. **Supply.** The bank needs VDD at 1.20 V at the slow cold corner (section 2). The chip
+   top must not assume the 1.08 V standard-cell corner for the bank.
+3. **Size.** 1 kbit costs 39,900 µm² of die here, more than architecture-v0's 26,618 µm² per
+   4 kbit (2.6, an estimate). The periphery is 84 % of it: 152 flops (64 per-row word-line
+   flops, 38 + 38 bit-line flops). Two 4 kbit banks need a 128-row column, whose read was never
+   simulated (32 cells only), and a cheaper word-line drive (a registered decoder with a
+   glitch-free enable instead of a flop per row).
+4. **Clock.** At least 10 ns; designed and simulated at 16.667 ns (60 MHz).
+5. **The compiler contract.** Every word must be rewritten within 3.0 ms (the model's bound),
+   and `rerr` must stop or trap the program (`notes/gain-cell-compiler.md`).
+
+## 5. Measured against estimated
+
+| claim | status | where |
+|---|---|---|
+| cell layers all exist in sg13cmos5l; none in its forbidden list | measured (rule deck read) | section 1 |
+| array (32 × 38) DRC-clean, KLayout and Magic decks | measured | `drc/m3-GC_ARRAY_32x38.log`, `drc/m3-GC_ARRAY_32x38.magic.log` |
+| array LVS-clean against its schematic | measured | `lvs/m3-GC_ARRAY_32x38.log` |
+| model cards identical; PSP 103.6 → 103.8.2; gmin artefact | measured | `spice/results/m1-*` |
+| retention lifetimes, nominal corners (no mismatch) | simulated | `spice/results/m1-lifetimes-3t*.txt` |
+| read path with real standard cells; lifetimes at 1.20/1.14/1.08 V | simulated | `spice/results/m2-banklife.txt` |
+| RBL load 35 fF | partly extracted (routed part from SPEF) and partly estimated (Metal2 in the array, 13 fF) | section 2 |
+| bank DRC 0 (Magic, KLayout), LVS match (netgen; full KLayout incl. array) | measured | `bank/results/b11/`, `lvs/m2-*` |
+| bank timing models | extracted by OpenSTA from the routed design | `views/*.lib` |
+| array Liberty pin capacitances | estimated | `views/GC_ARRAY_32x38.lib`, `gc_array.py` `pin_caps` |
+| test top DRC 0, LVS match | measured | `top/results/t1/` |
+| behavioural model flags expired reads; RTL and model agree | simulated | `rtl/results/` |
+| 3.0 ms retention bound | chosen (factor 2.3 under the simulated 6.9 ms) | section 3 |
+| mismatch, coupling between cells, silicon | not done | — |
+
 ## Files
 
 - `gc_array.py`: the macro array generator (GDS, LEF, LVS schematic).
@@ -240,3 +303,7 @@ record (≥ 3.1 ms, 2.6), slightly lowered.
 - `rtl/`: the bank (`gc_bank.v`), its behavioural models, testbenches and `sim.sh`.
 - `bank/`: the bank's LibreLane configuration, `harden.sh` and results.
 - `pnl2spice.py`: powered netlist to SPICE for a full KLayout LVS.
+- `views/`: the macro views (section 3).
+- `top/`: the test top's configuration, `harden.sh` and results.
+
+Scratch runs live in `/var/tmp/gc-macro/` (not in the repository).
