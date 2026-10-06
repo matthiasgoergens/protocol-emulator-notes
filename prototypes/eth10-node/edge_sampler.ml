@@ -133,7 +133,15 @@ let step_sub_rtl (c : cfg_signals) (r : rst) ~active s =
       until = mux2 in_b (mux2 is_nrz nrz_until r.until) (mux2 edge c.s_offset r.until) } in
   nr, in_b &: emit_b, bit_b, in_b &: ended
 
-let create ~clock ~clear ~n ~(cfg : cfg_signals) ~samples ~active =
+(* [create_with_level] also returns [level]: the last emitted bit, held while no bit is emitted
+   (0 after clear), as a register of its own. It equals [mux2 valid bit last] where [last] is that
+   mux registered, the hold a consumer would otherwise build after the outputs; one multiplexer
+   and the valid register's fan-out shorter. *)
+let rec create ~clock ~clear ~n ~cfg ~samples ~active =
+  let bit, valid, burst_end, overrun, in_burst, _ = create_with_level ~clock ~clear ~n ~cfg ~samples ~active in
+  bit, valid, burst_end, overrun, in_burst
+
+and create_with_level ~clock ~clear ~n ~(cfg : cfg_signals) ~samples ~active =
   let spec = Reg_spec.create ~clock ~clear () in
   let w_prev = wire 1 and w_in = wire 1 and w_since = wire 10 and w_unq = wire 1 and w_until = wire 8 in
   let r0 = { prev = reg spec w_prev; in_burst = reg spec w_in; since = reg spec w_since; unq = reg spec w_unq; until = reg spec w_until } in
@@ -149,7 +157,9 @@ let create ~clock ~clear ~n ~(cfg : cfg_signals) ~samples ~active =
   w_prev <== !r.prev; w_in <== !r.in_burst; w_since <== !r.since; w_unq <== !r.unq; w_until <== !r.until;
   (* outputs registered: they describe the clock just sampled *)
   let bit = reg spec !first_b and valid = reg spec !first_v and burst_end = reg spec !ended and overrun = reg spec !over in
-  bit, valid, burst_end, overrun, r0.in_burst
+  let level = wire 1 in
+  level <== reg spec (mux2 !first_v !first_b level);
+  bit, valid, burst_end, overrun, r0.in_burst, level
 
 let circuit ~n =
   let clock = input "clock" 1 and clear = input "clear" 1 in

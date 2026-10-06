@@ -297,15 +297,16 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   let es_pad = sel_pad (select regs.(r_es_pads) 3 0) in
   let es_samples = if is "es_quarter_rev" then reverse es_pad else es_pad in
   let es_active = ~:(bit regs.(r_es_mode) 3) |: bit (sel_pad (select regs.(r_es_pads) 7 4)) 3 in
-  let es_b, es_v, es_end, _es_over, es_in_burst =
-    Eth10.Edge_sampler.create ~clock ~clear:aclear ~n:4 ~cfg:es_cfg ~samples:es_samples ~active:es_active
+  let es_b, es_v, es_end, _es_over, es_in_burst, es_held =
+    Eth10.Edge_sampler.create_with_level ~clock ~clear:aclear ~n:4 ~cfg:es_cfg ~samples:es_samples ~active:es_active
   in
   let es_b = es_b -- "es_bit_raw" and es_v = es_v -- "es_valid" and es_end = es_end -- "es_burst_end" in
   let es_in_burst = es_in_burst -- "es_in_burst" in
-  (* the bit output is defined only while valid; hold the last one so that it is a level *)
-  let es_last = wire 1 in
-  let es_lvl = mux2 es_v es_b es_last -- "es_level" in
-  es_last <== (reg (Reg_spec.override spec ~clear:aclear) es_lvl -- "es_last_reg");
+  (* the bit output is defined only while valid; hold the last one so that it is a level. The
+     block's own held-level register is that level (mux2 es_v es_b es_last, with es_last the level
+     a clock ago), without the multiplexer after the valid register's fan-out (README section 6) *)
+  let es_lvl = es_held -- "es_level" in
+  let es_last = reg (Reg_spec.override spec ~clear:aclear) es_lvl -- "es_last_reg" in
   es_bit <== es_lvl; es_valid <== es_v;
   let match_y, match_hit =
     Eth10.Matcher_en.create ~clock ~clear:aclear ~enable:es_v ~x:es_b ~cfg_in:(bit act_byte 0)
