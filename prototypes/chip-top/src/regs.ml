@@ -53,7 +53,8 @@ let r_port_reset = 0x0B      (* w: bit j empties port j's RECV holding register 
                                 SEND byte order to "low byte next" *)
 let r_crc_start = 0x0C       (* w: loads the CRC register with its init value *)
 let r_padsel p = 0x10 + p    (* rw, pads 0..15 (only the general output pads are implemented):
-                                bits 4:0 source, bit 5 invert, bit 6 level when not driven *)
+                                bits 4:0 source, bit 5 invert, bit 6 level when not driven.
+                                reset: pad k shows sequencer pin k; uio[6], uio[7] pins 6, 7 *)
 let r_pinin k = 0x20 + k     (* rw, logical pin k = 0..7: bits 3:0 input pad. reset: k *)
 let r_smp_pin j = 0x28 + j   (* rw, sampler pin j = 0..3: bits 3:0 input pad *)
 let r_smp_src = 0x2C         (* rw: bit 0: the sampler's pins are the recovered-bit stream
@@ -91,6 +92,8 @@ let reset_value a =
   if a = r_ctrl then 2                         (* stopped, the assists held until configured *)
   else if a = r_str_per || a = r_smp_per then 1          (* period 1 *)
   else if a = r_str_per + 1 || a = r_smp_per + 1 then 0x10   (* width 1: the models need 1, 2 or 4 *)
+  else if a >= r_padsel 0 && a <= r_padsel 7 then a - r_padsel 0     (* pad k shows sequencer pin k *)
+  else if a = r_padsel 14 || a = r_padsel 15 then a - r_padsel 8      (* uio[6], uio[7]: pins 6, 7 *)
   else if a >= r_pinin 0 && a <= r_pinin 7 then a - r_pinin 0
   else if a >= r_flagsel 0 && a <= r_flagsel 15 then 31
   else 0
