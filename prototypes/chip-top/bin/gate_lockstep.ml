@@ -39,7 +39,7 @@ open Twoedge
 
 type stim = {
   rng : Random.State.t;
-  host : Host.t;
+  mutable host : Host.t;
   mutable running : bool;
   prog : int option array;   (* programme store bytes as written, None = unknown *)
   bank : int option array;
@@ -146,7 +146,15 @@ let new_txn st =
 let () =
   let args = Array.to_list Sys.argv |> List.tl in
   let plants = List.filter (fun a -> String.contains a ':') args in
-  let args = List.filter (fun a -> not (String.contains a ':')) args in
+  (* stim=host (default: the transactions of new_txn), stim=lockstep or stim=wide (Gen, the
+     generators of lockstep.ml, with Gen.wide for "wide"); ffs=FILE lists every flip-flop with
+     the number of times its output changed (sim/gate_cov.py maps them to the Hardcaml's blocks) *)
+  let opts = List.filter_map (fun a -> match String.index_opt a '=' with
+      | Some i -> Some (String.sub a 0 i, String.sub a (i + 1) (String.length a - i - 1)) | None -> None) args in
+  let args = List.filter (fun a -> not (String.contains a ':' || String.contains a '=')) args in
+  let stim = Option.value (List.assoc_opt "stim" opts) ~default:"host" in
+  if not (List.mem stim [ "host"; "lockstep"; "wide" ]) then failwith ("stim: " ^ stim);
+  Gen.wide := (stim = "wide");
   let gds, models, sizes, trials, cycles, seed, mode =
     match args with
     | [ g; m; s; t; c; sd ] -> (g, m, s, int_of_string t, int_of_string c, int_of_string sd, "two-edge")
@@ -165,7 +173,7 @@ let () =
       g.sim.ff_fall.(i) <- false;
       Printf.printf "plant: %s now takes the rising edge\n" g.sim.ffs.(i).owner
     | _ -> failwith ("plant: " ^ p)) plants;
-  Printf.printf "mode %s, layout %s, %d trials x %d clocks, seed %d; set up in %.1f s\n%!" mode
+  Printf.printf "mode %s, stimulus %s, layout %s, %d trials x %d clocks, seed %d; set up in %.1f s\n%!" mode stim
     (String.concat "," (Array.to_list (Array.map string_of_int sizes))) trials cycles seed (Unix.gettimeofday () -. t0);
   let total_mism = ref 0 and total_halves = ref 0 and first = ref [] in
   let toggles = Array.make 24 0 in
@@ -194,17 +202,43 @@ let () =
     let rate = [| 0.0; 0.01; 0.1; 0.5 |].(Random.State.int rng 4) in
     let rst_low = ref 4 in
     let prev_out = ref 0 and mism = ref 0 in
+    (* the lockstep's generators: a setup, transactions while running, the outside world as
+       quarter nibbles per pad (the rising edge sees quarter 0, the falling edge quarter 2) *)
+    let gmode = Gen.modes.(trial mod Array.length Gen.modes) in
+    let gen = stim <> "host" in
+    let world = if gen then Some (Gen.ext_world rng ~rates:(Gen.pad_rates rng)) else None in
+    if gen then Gen.setup_traffic ~mode:gmode rng st.host ~cfg;
+    let wn = ref (Array.make n_pads 0) in
+    let from_world q = (* ui_in and uio[7:6] at quarter q *)
+      let b p = (!wn.(p) lsr q) land 1 in
+      (List.fold_left (fun a p -> a lor (b p lsl p)) 0 [ 0; 1; 2; 3; 4; 5; 6; 7 ], b 14 lor (b 15 lsl 1)) in
     for clock = 0 to cycles - 1 do
       (* a reset pulse now and then, only between transactions (the host's S line low) *)
       if !rst_low = 0 && Random.State.int rng 20000 = 0 && Host.idle st.host && st.host.s = 0 then begin
-        rst_low := 3; st.running <- false
+        rst_low := 3; st.running <- false;
+        if gen then begin
+          (* as lockstep.ml: the host starts again after the reset *)
+          st.host <- Host.create ();
+          Host.submit st.host (Host.Idle 16);
+          Gen.setup_traffic ~mode:gmode rng st.host ~cfg
+        end
       end;
       let rst_n = if !rst_low > 0 then (decr rst_low; 0) else 1 in
       let s, r, d = if rst_n = 0 then (st.host.s, st.host.r, st.host.d) else Host.clock st.host ~d_in:((!prev_out lsr 8) land 15) in
-      if rst_n = 1 && Host.idle st.host then new_txn st;
+      if rst_n = 1 && Host.idle st.host then (if gen then Gen.running_traffic ~mode:gmode rng st.host else new_txn st);
       let toggle v w = let x = ref v in for b = 0 to w - 1 do if Random.State.float rng 1.0 < rate then x := !x lxor (1 lsl b) done; !x in
-      ui := toggle !ui 8;
-      uio_hi := toggle !uio_hi 2;
+      (match world with
+       | Some w ->
+         (* a driven uio[7:6] reads back what the chip drives *)
+         let o = !prev_out in
+         let out : Chip_spec.outputs =
+           { pad_nib = Array.init n_pads (fun p -> if p = 14 || p = 15 then (if (o lsr p) land 1 = 1 then 15 else 0) else 0);
+             uio_oe = (o lsr 16) land 0xFF } in
+         wn := w out;
+         let u, h = from_world 0 in ui := u; uio_hi := h
+       | None ->
+         ui := toggle !ui 8;
+         uio_hi := toggle !uio_hi 2);
       let dval = match d with Some v -> v | None -> (!prev_out lsr 8) land 15 in
       let pads () = !ui lor ((dval lor (s lsl 4) lor (r lsl 5) lor (!uio_hi lsl 6)) lsl 8) in
       let compare half got want =
@@ -225,7 +259,7 @@ let () =
          Sim.edge g.sim ~fall:false;
          Ref2.rise rf ~rst_n ~pads:p ~en:0b0011;
          compare "rise" (Gates.outputs g) (Ref2.outputs rf);
-         ui := toggle !ui 8;
+         if gen then (let u, h = from_world 2 in ui := u; uio_hi := h) else ui := toggle !ui 8;
          let p = pads () in
          Gates.set g ~rst_n ~pads:p;
          Sim.edge g.sim ~fall:true;
@@ -260,7 +294,13 @@ let () =
     Printf.printf "flip-flops whose output changed: %d of %d on the rising edge, %d of %d on the falling edge\n"
       (toggled false) (count false) (toggled true) (count true);
     Array.iteri (fun i (f : Sim.ff) -> if g.sim.ff_fall.(i) then
-                    Printf.printf "  falling %s: %d changes\n" f.owner ff_toggles.(i)) g.sim.ffs) gates;
+                    Printf.printf "  falling %s: %d changes\n" f.owner ff_toggles.(i)) g.sim.ffs;
+    Option.iter (fun file ->
+        let oc = open_out file in
+        Array.iteri (fun i (f : Sim.ff) -> Printf.fprintf oc "%s %s %d\n" f.owner (if g.sim.ff_fall.(i) then "falling" else "rising") ff_toggles.(i)) g.sim.ffs;
+        close_out oc;
+        Printf.printf "every flip-flop with its number of output changes listed in %s\n" file)
+      (List.assoc_opt "ffs" opts)) gates;
   let never = List.filter (fun b -> toggles.(b) = 0) (List.init 24 Fun.id) in
   Printf.printf "output pins that never toggled: %d of 24 (%s)\n" (List.length never)
     (String.concat " " (List.map (fun b -> Printf.sprintf "%s[%d]" [| "uo_out"; "uio_out"; "uio_oe" |].(b / 8) (b mod 8)) never));
