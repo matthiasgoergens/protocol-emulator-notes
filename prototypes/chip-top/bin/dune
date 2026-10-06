@@ -2,3 +2,8 @@
  (name lockstep)
  (modules lockstep)
  (libraries hardcaml chip unix))
+
+(executable
+ (name demos)
+ (modules demos)
+ (libraries hardcaml chip seqv2 upe ds dacdemo unix))

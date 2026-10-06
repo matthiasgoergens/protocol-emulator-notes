@@ -183,8 +183,8 @@ let setup_traffic ?(mode = "mixed") r (h : Host.t) ~(cfg : S.config) =
   for sg = 0 to 3 do
     let n = l.end_.(sg) - l.start.(sg) + 1 in
     let bytes = List.concat (List.init n (fun _ -> List.rev (Array.to_list (Upe.Spec.bytes_of_op (rand_op r))))) in
-    Host.submit h (Host.Write { tgt = t_pecfg; addr = sg; data = bytes });
-    Host.submit h (Host.Write { tgt = t_peinit; addr = sg; data = List.init (2 * n) (fun _ -> i 256) });
+    Host.submit h (Host.Write { tgt = t_pecfg; addr = sg lsl 8; data = bytes });
+    Host.submit h (Host.Write { tgt = t_peinit; addr = sg lsl 8; data = List.init (2 * n) (fun _ -> i 256) });
     let src = if mode = "ports" then List.nth [ 2; 2; 2; 0 ] (i 4) else List.nth [ 0; 0; 1; 2; 2; 3; 5 ] (i 7) in
     let ctrl = src lor (i 2 lsl 3) lor (if chance 0.85 then 16 else 0) lor (i 2 lsl 5) lor (i 2 lsl 6) in
     Host.submit h (Host.Write { tgt = t_peseg; addr = (sg lsl 2) lor 2; data = [ ctrl ] });
@@ -214,7 +214,7 @@ let running_traffic ?(mode = "mixed") r (h : Host.t) =
   | 7 -> Host.submit h (Host.Write { tgt = t_stream; addr = 0; data = [ i 256; i 256; i 16 ] })
   | 8 -> Host.submit h (Host.Read { tgt = t_sample; addr = 0; n = 4; k = ignore_k })
   | 9 | 10 -> Host.submit h (Host.Write { tgt = t_peseg; addr = (i 4 lsl 2) lor (List.nth [ 0; 1; 1; 2; 3 ] (i 5)); data = [ i 256 ] })
-  | 11 -> Host.submit h (Host.Write { tgt = (if i 2 = 0 then t_pecfg else t_peinit); addr = i 4; data = [ i 256 ] })
+  | 11 -> Host.submit h (Host.Write { tgt = (if i 2 = 0 then t_pecfg else t_peinit); addr = i 4 lsl 8; data = [ i 256 ] })
   | 12 -> w r_restart (i 16); w r_restart_pc (i 256)
   | 13 -> w r_port_reset (i 16)
   | 14 -> w r_crc_start 0

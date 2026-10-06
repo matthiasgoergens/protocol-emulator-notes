@@ -39,7 +39,7 @@ let bugs =
     "es_quarter_rev", "the edge sampler sees the quarters in reverse order";
     "nco_inc_bytes", "the NCO increment's two low bytes swapped";
     "prog_byte_order", "a programme word's bytes swapped";
-    "pecfg_seg", "PECFG selects the segment from address bits 2:1";
+    "pecfg_seg", "PECFG selects the segment from address bits 10:9";
     "status_not_cleared", "writing STATUS does not clear the sticky bits";
     "hostin_overwrite", "a push into a full HOSTIN FIFO is accepted" ]
 
@@ -200,13 +200,14 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   let mbx_sel = mux2 use_thread (uresize send_first_hi 2) (select act_addr 1 0) in
   let mbx_byte = mux2 use_thread push_d act_byte in
   let host_mbx_done = host_seg &: ~:use_thread in
-  let cfg_seg = if is "pecfg_seg" then select act_addr 2 1 else select act_addr 1 0 in
+  (* the chains' segment is address bits 9:8, so that a multi-byte write stays in its segment *)
+  let cfg_seg = if is "pecfg_seg" then select act_addr 10 9 else select act_addr 9 8 in
   let fixed_seg = if is "fixed_port_seg1" then 1 else 0 in
   let arr =
     Upe.Upe_rtl.array_create ~layout:cfg.layout ~clock
       { mbx_wr; mbx_seg; mbx_sel; mbx_byte;
         acfg_wr = act_is t_pecfg; acfg_seg = cfg_seg; acfg_byte = act_byte;
-        ainit_wr = act_is t_peinit; ainit_seg = select act_addr 1 0; ainit_byte = act_byte;
+        ainit_wr = act_is t_peinit; ainit_seg = select act_addr 9 8; ainit_byte = act_byte;
         fixed_d = Array.init 4 (fun j -> if j = fixed_seg then uresize es_bit 16 else zero 16);
         fixed_v = Array.init 4 (fun j -> if j = fixed_seg then es_valid else gnd) }
   in

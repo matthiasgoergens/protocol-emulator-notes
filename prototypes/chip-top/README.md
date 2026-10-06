@@ -108,8 +108,8 @@ clocks.
 | 2 BANK | data bank, while stopped | the same |
 | 3 HOSTIN | push the byte into the 16-byte FIFO that the threads' IN reads (dropped, with a sticky bit, when full) | |
 | 4 HOSTOUT | | pops the 8-entry FIFO filled by OUT: two bytes per entry, `{valid, tag}` then the byte |
-| 5 PECFG | one byte into segment (address mod 4)'s configuration chain | |
-| 6 PEINIT | one byte into segment (address mod 4)'s init chain | |
+| 5 PECFG | one byte into the configuration chain of segment (address bits 9:8) | |
+| 6 PEINIT | one byte into the init chain of segment (address bits 9:8) | |
 | 7 PESEG | segment (address / 4 mod 4) register (address mod 4): feed low, feed high, control, repeat | |
 | 8 STREAM | three bytes per word: low, high, vector count; the word is pushed with its count byte | |
 | 9 SAMPLE | | pops the sampler FIFO: three bytes per entry, `{valid, count}`, low, high |
