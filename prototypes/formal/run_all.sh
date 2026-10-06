@@ -30,9 +30,11 @@ what=${1:-all}
 if [ "$what" = all ] || [ "$what" = bmc ]; then
   { header "main.exe (every scenario)"
     # a-protocols and a-spi8 no longer finish since the I2C clock-stretching fix (README.md,
-    # Findings 4); they run only with SLOW_A_PROTOCOLS=1
+    # Findings 4); they run only with SLOW_A_PROTOCOLS=1. a-protocols-uart-spi and the
+    # a-protocols-i2c-local scenarios replace a-protocols
     slow=""; [ "${SLOW_A_PROTOCOLS:-0}" = 1 ] && slow="a-protocols a-spi8"
-    for s in a a-planted a-vacuous-planted $slow b b-planted c-planted c-induction c-induction-planted \
+    for s in a a-planted a-vacuous-planted a-protocols-uart-spi a-protocols-i2c-local a-protocols-i2c-local-l7 \
+             a-protocols-i2c-local-planted $slow b b-planted c-planted c-induction c-induction-planted \
              c-induction-no-ownership c-induction-ldb-owned c-induction-ldb-owned-overlap \
              e-declarations e e-bank e-bank-planted e-planted-steal d d-planted d-anytime c; do
       wait_load

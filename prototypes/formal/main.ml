@@ -28,8 +28,11 @@ let check_replay ~expected ~fired =
 
 (* [cut]: Machine.cut after every clock, and the monitors' counters with it (for programmes whose
    control flow follows their inputs, such as the I2C master since it honours clock stretching) *)
-let deadline ?(cut = false) ~name ~store ~code ~(contracts : Props.contract list) ~depth () =
+(* [init]: start from the state it makes of the reset state (a-protocols-i2c-local); a
+   counterexample is then not replayed, the replay starting from reset *)
+let deadline ?(cut = false) ?init ~name ~store ~code ~(contracts : Props.contract list) ~depth () =
   let m = Machine.create ~store ~code () in
+  Option.iter (fun f -> f m) init;
   let mons = List.map P.deadline contracts in
   let by_event = Array.make (List.length contracts) Smt.ff and by_deadline = Array.make (List.length contracts) Smt.ff in
   let executed = Array.make (List.length contracts) Smt.ff in
@@ -67,6 +70,7 @@ let deadline ?(cut = false) ~name ~store ~code ~(contracts : Props.contract list
   Bmc.report r;
   (match r.violation with
    | None -> ()
+   | Some _ when init <> None -> pr "  (not replayed: the run starts from an arbitrary state)\n"
    | Some (kbad, model) ->
      let mons = List.map PC.deadline contracts in
      let fired = ref None in
@@ -120,6 +124,82 @@ let a_protocols ?(cut = false) ?(watch = [ 0; 1; 2 ]) ?i2c_limit ?(waitp = false
     (List.length contracts - nwaitp) nwaitp (String.concat "," (List.map string_of_int watch)) spi_period
     (Option.value i2c_limit ~default:4095) depth;
   deadline ~cut ~name ~store ~code:[| Fixed; Fixed; Fixed; Fixed |] ~contracts ~depth ()
+
+(* ---- (a) on the I2C master, locally: every contract from every state at its anchor ----
+
+   Since the I2C master waits on SCL (clock stretching), its control flow follows its input and
+   a-protocols' goals no longer fold (README.md, Findings 4). A contract is local, though: it
+   speaks of the slots from its anchor (the LDD) to the wait's exit. So each contract is checked
+   from an arbitrary state in which the thread is about to execute its anchor: every register of
+   every thread, the pins, the latch and the bank are free variables, every input is free, the
+   other threads execute unconstrained words (Havoc), and the run lasts the window plus two
+   slots. With [entered_only_at_anchor] (no path reaches the wait without passing the anchor in
+   the window's straight line), this covers every execution of the wait, at every depth: it
+   implies a-protocols' bounded result for this thread, for any number of clocks. One
+   constraint on the free state: the thread's cfg is 0 (bit 7, the round latch, would make the
+   wait read the latch where the monitor reads the pin; cfg is 0 at reset and the programme has
+   no CFG instruction, which [entered_only_at_anchor]'s caller checks). *)
+
+(* the predecessors of each address of a thread's page in the store: the address before (unless
+   it holds a JMP), and every instruction whose target (JMP, JNZ, WAITP, MBX, WAITC) or skip
+   (SKNE, SKEQ: pc + 2) it is *)
+let predecessors (page : int array) x =
+  let op w = (w lsr 12) land 15 in
+  List.filter (fun y ->
+      let w = page.(y) in
+      ((y + 1) land 0xFF = x && op w <> Isa2.op_jmp)
+      || (List.mem (op w) [ Isa2.op_jmp; Isa2.op_jnz; Isa2.op_waitp; Isa2.op_mbx; Isa2.op_waitc ] && w land 0xFF = x)
+      || (op w = Isa2.op_ext && (w lsr 8) land 15 <= 1 && (y + 2) land 0xFF = x)) (List.init Isa2.page_len Fun.id)
+
+let entered_only_at_anchor (page : int array) (c : Props.contract) =
+  let a = c.anchor land 0xFF and w = c.wait land 0xFF in
+  a < w && List.for_all (fun x -> predecessors page x = [ x - 1 ]) (List.init (w - a) (fun i -> a + 1 + i))
+
+let a_local ~name ~thread ~(prog : int array) ~waitp () =
+  let progs = Array.make Isa2.n_threads Programmes.idle in
+  progs.(thread) <- prog;
+  let store = Programmes.store_of progs in
+  let page = Array.sub store (thread lsl Isa2.pc_bits) Isa2.page_len in
+  let no_cfg = Array.for_all (fun w -> not ((w lsr 12) land 15 = Isa2.op_ext && (w lsr 8) land 15 = Isa2.x_cfg)) page in
+  let contracts = Programmes.waitd_contracts ~thread prog @ (if waitp then Programmes.waitp_contracts ~thread prog else []) in
+  pr "(a) locally: %d contracts of thread %d, each from every state at its anchor; no CFG in the programme: %b\n"
+    (List.length contracts) thread no_cfg;
+  let code = Array.init Isa2.n_threads (fun t -> if t = thread then Fixed else Havoc) in
+  List.map (fun (c : Props.contract) ->
+      let entered = entered_only_at_anchor page c in
+      let init (m : Machine.t) =
+        let st = m.st in
+        let fv n w = Smt.var (Printf.sprintf "init.%s" n) (Smt.Bv w) in
+        let fill arr n w = Array.iteri (fun i _ -> arr.(i) <- fv (Printf.sprintf "%s%d" n i) w) arr in
+        fill st.pcs "pc" 8; fill st.pages "page" 2; fill st.accs "acc" 8; fill st.cnts "cnt" 12; fill st.dls "dl" 12;
+        fill st.bps "bp" 10; fill st.fines "fine" 8; fill st.armed "armed" 1; fill st.cfgs "cfg" 8;
+        fill st.lsend "lsend" 3; fill st.inbox "inbox" 8; fill st.full "full" 1;
+        st.pcs.(thread) <- Smt.k ~w:8 (c.anchor land 0xFF); st.pages.(thread) <- Smt.k ~w:2 thread;
+        st.cfgs.(thread) <- Smt.k ~w:8 0;
+        st.pin_out <- fv "pin_out" 8; st.pin_oe <- fv "pin_oe" 8; st.pin_sub <- fv "pin_sub" 32; st.latch <- fv "latch" 8;
+        st.bankmem <- Smt.mem_var "init.bank"; st.thread <- thread in
+      let wname = Printf.sprintf "%s-%d.%d-window" name thread (c.wait land 0xFF) in
+      let r = deadline ~init ~name:wname ~store ~code ~contracts:[ c ] ~depth:(4 * (c.slots + 2)) () in
+      pr "  the wait at %d.%d is entered only through its anchor at %d.%d: %s\n" thread (c.wait land 0xFF) thread
+        (c.anchor land 0xFF) (if entered then "yes" else "NO");
+      (r, entered && no_cfg)) contracts
+
+(* from reset, on Isa2.Spec: the clock at which each contract's wait first executes, with every
+   pin read high (SCL never stretched) and, for the timeouts, low (SCL held low) *)
+let a_local_reach ~thread ~(prog : int array) ~waitp ~pin_in ~clocks =
+  let progs = Array.make Isa2.n_threads Programmes.idle in
+  progs.(thread) <- prog;
+  let store = Programmes.store_of progs in
+  let st = Isa2.init ~boot:Compat.boot_by_thread () in
+  let first = Hashtbl.create 16 in
+  for k = 0 to clocks - 1 do
+    let t = st.thread in
+    let a = Isa2.fetch_addr st t in
+    if t = thread && not (Hashtbl.mem first a) then Hashtbl.replace first a k;
+    ignore (Isa2.step st ~mem:store (Isa2.io pin_in))
+  done;
+  List.map (fun (c : Props.contract) -> (c, Hashtbl.find_opt first c.wait))
+    (Programmes.waitd_contracts ~thread prog @ (if waitp then Programmes.waitp_contracts ~thread prog else []))
 
 (* ---- (b) pin ownership ---- *)
 
@@ -588,6 +668,46 @@ let declarations () =
     (let o = with_ 0 (fun th -> { th with Ownership.bank_write = [ (0, 15) ] }) in
      o.(3) <- { (o.(3)) with Ownership.bank_write = [ (8, 23) ] }; o)
 
+let a_protocols_i2c_local ~lm ~waitp () =
+  let prog = Programmes.i2c_with ~stretch_limit:lm () in
+  let name = Printf.sprintf "a-local-i2c-l%d" lm in
+  let results = a_local ~name ~thread:2 ~prog ~waitp () in
+  let high = a_local_reach ~thread:2 ~prog ~waitp ~pin_in:0xFF ~clocks:2000 in
+  let low = a_local_reach ~thread:2 ~prog ~waitp ~pin_in:0x00 ~clocks:(4 * (lm + 40)) in
+  List.iter (fun ((r : Bmc.result), sound) ->
+      let c = List.find (fun (c : Props.contract) -> Printf.sprintf "%s-2.%d-window" name (c.wait land 0xFF) = r.name) (List.map fst high) in
+      let from_reset = List.assoc c high in
+      let ok = Bmc.verdict r = Bmc.Proved && sound && from_reset <> None in
+      pr "PROPERTY %s: %s; antecedent 'the wait executes' reachable from reset at clock %s (Isa2.Spec, every pin high)\n" (Filename.chop_suffix r.name "-window")
+        (if ok then "PROVED for every state at its anchor (unbounded)"
+         else match Bmc.verdict r with Bmc.Failed k -> Printf.sprintf "FAILED at clock %d of the local run" k
+                                      | _ -> "UNDECIDED (see above)")
+        (match from_reset with Some k -> string_of_int k | None -> "never")) results;
+  List.iter (fun ((c : Props.contract), k) ->
+      if c.kind <> Props.Waitd then
+        pr "COVER %s-2.%d timeout from reset: %s\n" name (c.wait land 0xFF)
+          (match k with Some k -> Printf.sprintf "REACHABLE (the wait executes at clock %d with every pin low)" k
+                      | None -> "not reached with every pin low (only the first release's wait is)")) low
+
+(* the planted bug: an LDD of a WAITD one larger, as a-planted's off-by-one *)
+let a_protocols_i2c_local_planted () =
+  let prog = Array.copy (Programmes.i2c_with ()) in
+  let i = List.find (fun pc -> (prog.(pc) lsr 12) land 15 = 6 && (prog.(pc - 1) lsr 12) land 15 = 3)
+      (List.init (Array.length prog - 1) (fun i -> i + 1)) - 1 in
+  let contract = List.hd (Programmes.waitd_contracts ~thread:2 (Programmes.i2c_with ())) in
+  prog.(i) <- prog.(i) + 1;
+  let progs = [| Programmes.idle; Programmes.idle; prog; Programmes.idle |] in
+  let store = Programmes.store_of progs in
+  pr "(a) locally, planted: the I2C master's first WAITD's LDD one larger (%d), against the contract of the original\n" (prog.(i) land 0xFFF);
+  let init (m : Machine.t) =
+    let st = m.st in
+    let fv n w = Smt.var (Printf.sprintf "init.%s" n) (Smt.Bv w) in
+    Array.iteri (fun t _ -> if t <> 2 then st.pcs.(t) <- fv (Printf.sprintf "pc%d" t) 8) st.pcs;
+    st.dls.(2) <- fv "dl2" 12; st.cnts.(2) <- fv "cnt2" 12; st.accs.(2) <- fv "acc2" 8;
+    st.pcs.(2) <- Smt.k ~w:8 (contract.anchor land 0xFF); st.thread <- 2 in
+  ignore (deadline ~init ~name:"a-local-i2c-planted-ldd-plus-1" ~store ~code:[| Havoc; Havoc; Fixed; Havoc |]
+            ~contracts:[ contract ] ~depth:(4 * (contract.slots + 3)) ())
+
 let scenarios = [
   "e-declarations", declarations;
   "a", (fun () -> ignore (a_main ~ldd:20 ~name:"a-deadline-main.ml-programme"));
@@ -601,8 +721,11 @@ let scenarios = [
      stretch limit *)
   "a-protocols-uart-spi", (fun () ->
       ignore (a_protocols ~watch:[ 0; 1 ] ~spi_period:10 ~name:"a-waitd-uart-spi-beside-i2c-l4095" ()));
-  "a-protocols-i2c-l1", (fun () ->
-      ignore (a_protocols ~watch:[ 2 ] ~i2c_limit:1 ~waitp:true ~spi_period:10 ~name:"a-waitd-waitp-i2c-l1" ()));
+  "a-protocols-i2c-local", (fun () -> a_protocols_i2c_local ~lm:4095 ~waitp:false ());
+  "a-protocols-i2c-local-l7", (fun () -> a_protocols_i2c_local ~lm:7 ~waitp:true ());
+  "a-protocols-i2c-local-planted", (fun () -> a_protocols_i2c_local_planted ());
+  (* the I2C master's contracts from reset with stretch limit 2: did not finish in 30 minutes,
+     with or without the cut (README.md, Findings 4); kept for the record, not in run_all.sh *)
   "a-protocols-i2c-l2", (fun () ->
       ignore (a_protocols ~watch:[ 2 ] ~i2c_limit:2 ~waitp:true ~spi_period:10 ~name:"a-waitd-waitp-i2c-l2" ()));
   "a-protocols-i2c-l2-cut", (fun () ->
