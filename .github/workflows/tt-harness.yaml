@@ -21,7 +21,7 @@ jobs:
           ocaml-compiler: "5.3"
       # Same Hardcaml as the local switch, so CI generates the same Verilog.
       - run: opam install --yes dune hardcaml.v0.17.0
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.3.0
       - name: generate Verilog and run the cocotb RTL test of the sequencer harness (the combined chip's test needs the IHP PDK's SRAM models)
         working-directory: tt/test
         env:
