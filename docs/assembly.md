@@ -177,8 +177,8 @@ specifications of the compiler's UART, SPI and I2C (equal, as automata, to the v
 
 The verifier analyses a thread from pc 0 of its page (its assumption A3), so a thread with a
 `.timing` block must start at pc 0; `--verify` refuses one that does not. It also checks that no
-other thread that starts at pc 0 writes the channel's pins, and says when another thread could
-not be checked.
+other thread writes the channel's pins; since it can analyse a thread only from pc 0, a proof is
+refused while any other thread starts elsewhere (park idle threads at pc 0 of a page).
 
 ## Errors
 

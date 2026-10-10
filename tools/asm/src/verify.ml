@@ -92,7 +92,9 @@ let verify ~name (r : Assembler.result) =
             | _ -> None) others in
         let unchecked = List.filter_map (fun (th', w) -> if w = None then Some th' else None) others in
         let b = Buffer.create 1024 in
-        let ok = accepted && clashes = [] in
+        (* A5 must be checked for every other thread: one the analyser cannot start (pc <> 0)
+           could write the channel, so its presence refuses the proof *)
+        let ok = accepted && clashes = [] && unchecked = [] in
         Printf.bprintf b "thread %d (page %d): %s  table entries %d, channel events checked %d\n" th page
           (if ok then "PROVED" else "REJECTED") rep.entries rep.events_checked;
         if vacuous then Printf.bprintf b "    no channel event was checked: the specification is vacuous here\n";
@@ -104,7 +106,7 @@ let verify ~name (r : Assembler.result) =
         if List.length rep.violations > 3 then Printf.bprintf b "    ... %d violations in all\n" (List.length rep.violations);
         List.iter (fun s -> Printf.bprintf b "    OWNERSHIP: %s\n" s) clashes;
         if unchecked <> [] then
-          Printf.bprintf b "    note: thread%s %s start%s at a pc other than 0; %s writes to the channel are not checked (assumption A5)\n"
+          Printf.bprintf b "    NOT PROVED: thread%s %s start%s at a pc other than 0, so the verifier cannot check that %s code leaves the channel's pins alone (assumption A5)\n"
             (if List.length unchecked > 1 then "s" else "") (String.concat ", " (List.map string_of_int unchecked))
             (if List.length unchecked > 1 then "" else "s") (if List.length unchecked > 1 then "their" else "its");
         { name = vname; thread = th; ok; text = Buffer.contents b;

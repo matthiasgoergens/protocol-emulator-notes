@@ -41,7 +41,11 @@ let parse loc text =
     match rest with
     | [] -> Empty
     | Ident n :: Op "=" :: v when n.[0] <> '.' -> Assign (n, v)
-    | Ident n :: args -> Call (n, List.map (arg_of loc) (split_commas args))
+    | Ident n :: args ->
+      let args = List.map (arg_of loc) (split_commas args) in
+      let keys = List.filter_map (function Kw (k, _) -> Some k | Pos _ -> None) args in
+      List.iter (fun k -> if List.length (List.filter (( = ) k) keys) > 1 then Loc.error loc "%s= given twice" k) keys;
+      Call (n, args)
     | t :: _ -> Loc.error loc "a line starts with a label, a name or a directive, not %s" (Lexer.to_string t)
   in
   { labels = ls; stmt }

@@ -126,7 +126,19 @@ let uart_tx () =
   let rec spacing = function (a, _) :: ((b, _) :: _ as r) -> (b - a) mod 64 = 0 && spacing r | _ -> true in
   check (Printf.sprintf "uart_tx: all %d edges a multiple of 64 clocks apart" (List.length edges)) (spacing edges);
   write_trace "uart_tx" c [ ("uart_pin", "0"); ("uart_bit_cycles", "64"); ("uart_bytes", bytes_csv [ 0x4F; 0x4B; 0x21 ]) ];
-  control_rtl "uart_tx" r.image ~clocks:2500 ~peers:(fun () -> []) "pin_lane_swap"
+  control_rtl "uart_tx" r.image ~clocks:2500 ~peers:(fun () -> []) "pin_lane_swap";
+  (* controls of the ownership check: another thread that writes pin 0 is caught; one the
+     verifier cannot analyse (it starts at pc 1) refuses the proof *)
+  let src = read_file "examples/uart_tx.s" in
+  let clash = Str.replace_first (Str.regexp_string "idle:\n    halt") "idle:\n    setp 0x01, 0, 1\n    halt" src in
+  let rc = Assembler.assemble_string ~include_dirs:[ "lib"; "examples" ] ~name:"uart_tx (thread 1 writes pin 0)" clash in
+  check "uart_tx: control, another thread writing pin 0 is rejected"
+    (List.for_all (fun (v : Verify.verdict) -> not v.ok) (Verify.verify ~name:"clash" rc));
+  let off = Str.replace_first (Str.regexp_string ".thread 1, idle") ".thread 1, page=1, pc=1" src in
+  let off = Str.replace_first (Str.regexp_string "idle:\n    halt") "idle:\n    halt\n    halt" off in
+  let ro = Assembler.assemble_string ~include_dirs:[ "lib"; "examples" ] ~name:"uart_tx (thread 1 at pc 1)" off in
+  check "uart_tx: control, a thread the verifier cannot analyse refuses the proof"
+    (List.for_all (fun (v : Verify.verdict) -> not v.ok) (Verify.verify ~name:"off" ro))
 
 let spi () =
   print_endline "== spi: SPI controller, mode 0, period 64 clocks, A5 3C";
