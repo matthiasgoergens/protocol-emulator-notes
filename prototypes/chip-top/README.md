@@ -11,7 +11,8 @@ puts them behind one Hardcaml top level for Tiny Tapeout 6x4 (IHP sg13cmos5l), w
 Status: milestones 1-6 done: plan; top level, specification and lockstep; demos through the host
 link; area, hardens and G13; `tt/` points at this chip; the edge-phase test and coverage. Section 7:
 60 MHz is met at every corner with 4 PEs, the hold buffers fell from 3,206 to 78, the array has a
-reset. Open issues are listed at the end. The suite: `./suite.sh quick` (CI, about a minute after
+reset. Section 8: the stuff tracker and the line coder on the bit path (a transmit serialiser and a
+receive framer), used by a low-speed USB device and a 10BASE-T node. Open issues are listed at the end. The suite: `./suite.sh quick` (CI, about a minute after
 the build) or `./suite.sh full`.
 
 Build: `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17). Then
@@ -37,7 +38,7 @@ Build: `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17). Then
 | CRC unit | `../eth10-node/crc_unit.ml` | **in**, unchanged | on the recovered bits; "CRC good" is a flag source |
 | matcher with enable | `../eth10-node/matcher_en.ml` | **in**, unchanged | on the recovered bits; "hit" is a flag source and can start the CRC |
 | flag-input selects | new glue | **in** | 16 flags (4 per thread), each a host-configured 5-bit select; this resolves the ISA's open D5 as "host configuration" |
-| stuff tracker, line coder | `../unified-pe/rtl/assists.v` | **deferred** | area probes only: no model, no verified RTL. The bit path therefore has no destuffer or line decoder yet |
+| stuff tracker, line coder | `../bit-assists` (`../unified-pe/rtl/assists.v` were the area probes) | **in since section 8** | specified and verified blocks, on the bit path as a transmit serialiser and a receive framer (section 8) |
 | fine delay (DTC/TDC on two pins) | `../multiphase` (behavioural) | **deferred** | needs a placed delay-line macro; FINE does nothing on this chip |
 | bank fixed ports into segments | note section 2.6 | **stubbed** | the bank is single-ported and serves LDB/STB. Segment 0's fixed port carries the recovered-bit stream instead; segments 1-3's fixed ports read zero |
 | second bit-path chain, SJW (G6), TRNG | note sections 2.3, 7 | **deferred** | |
@@ -723,6 +724,71 @@ iterations and the antenna repairs, ending at 508. The timing of that unfinished
 in this tile and floorplan: **8 PEs is the largest chip that routes**, as before; 12 would need
 the routing lever (a floorplan or fewer horizontal wires), not a timing one.
 
+## 8. The bit-path assists: stuffing and line coding on the chip (2026-10-10)
+
+Jane Street's organisers say that for USB and Ethernet, the more of the protocol work (line
+coding, CRC, clock recovery) the chip does itself, the better. Sections 1-7 had clock recovery
+(the edge sampler) and the CRC unit; the stuff tracker and the line coder were area probes. They
+are now specified and verified blocks (`../bit-assists`: model, Hardcaml RTL, lockstep, independent
+references, planted faults) and sit on the chip's bit path, together with the two byte-level
+blocks built from them.
+
+### What was added
+
+| block | from | what the chip gets |
+|---|---|---|
+| receive framer (`Rxpath`) | `../bit-assists/rxpath.ml` | behind the edge sampler: the line decoder (pass, NRZI, Manchester), the destuffer (inside a frame only), a start pattern on the last 8 chain bits (USB's sync, Ethernet's SFD), a byte packer with a two-byte FIFO, the end of a frame when the line goes inactive, at the sampler's burst end or by the host; a sticky stuff/code error; the CRC unit's feed after a skip count |
+| transmit serialiser (`Txpath`) | `../bit-assists/txpath.ml` | a two-byte FIFO, a symbol timer, the stuffer, the encoder and a two-phase tail (USB's SE0, SE0, J; 10BASE-T's TP_IDL), as pad sources 25 and 26 (lines a and b); while idle they show two sequencer pins (`r_tx_idle`), so the threads keep the line between frames (link pulses, the released USB bus) |
+| the bit path's port | glue | `r_bp_ctrl` names one MBX port: a SEND on it fills the serialiser (ready while the FIFO has room for it, counting a SEND still on its way out of the core), a RECV reads the framer; the segment behind that port keeps its feed from the host only |
+| CRC source | glue | the CRC unit takes the framer's feed (and starts with each frame) or, as before, the edge sampler's bits |
+| line activity | glue | `r_es_mode` bit 4: the line is active while the data pad or the active pad is high (a pair's common mode: USB's SE0 is inactive); flags for it and its inverse |
+| flags 17-23, status 0x8E | glue | frame ended and read, frame error, byte waiting, serialiser active, line active, line inactive, in a frame |
+
+Registers 0x80-0x8E (`regs.ml`; the register space grows to 0x90). At reset everything is off and
+the CRC unit takes the edge sampler's bits, so the chip behaves as before until the host turns the
+bit path on. The two new blocks read their configuration live: unlike the streamer and sampler,
+they need no "change only while held" contract.
+
+### Specification, lockstep, controls, coverage
+
+`chip_spec.ml` steps the blocks' models (`Txpath.step`, `Rxpath.step`), `chip_rtl.ml` instantiates
+their RTL; the lockstep compares the serialiser (lines, busy, FIFO) and the framer (chain bit,
+history, byte, frame bits, FIFO head, flags) every clock. The generator (`gen.ml`) draws the bit
+path's configuration from a stream of its own, seeded from the trial's, so every earlier draw is
+unchanged: a quarter of the trials keep it off; USB-like and Ethernet-like loopbacks put the
+serialiser on uio 6 and 7 and the edge sampler on the same pads (they read back what the chip
+drives), with directed sender and receiver threads now and then; the rest is random. 9 new planted
+integration bugs: the bit path on port p + 1, SEND readiness ignoring a SEND in flight, pad sources
+25 and 26 swapped, the idle pin ignored, a RECV popping the segment's holding register too, the
+line-active OR ignored, the CRC source ignored, the hold not clearing the paths, the host's frame
+pulses swapped.
+
+**Results** (`./suite.sh full`, all passed; `results/lockstep.txt`, `controls.txt`,
+`lockstep_layouts.txt`, `coverage/`): lockstep 400 x 12,000 clocks at 4 PEs with the earlier
+generator and again with the wide one, 4,800,000 clocks each, **0 mismatches**; 40 x 12,000 at
+1|1|1|1, 2|2|2|2, 3|3|3|3, 2|2|4|8 and a 256-word store, 0 mismatches; **37 of 37 planted bugs
+caught** with either generator (one, the RECV that also pops the segment, needed the ports mode
+biased towards a loopback before the earlier generator caught it in 30 trials); register coverage
+99.1 % at 4 PEs (2,733 of 2,759 bits not provably constant) and 99.2 % at 8 PEs. At 4 PEs the
+framer (60 of 60 bits), the stuff trackers (10 of 10) and the line coders (6 of 6) are complete and
+the serialiser has 51 of 52: its symbol timer's bit 11, which only a period above 2,047 clocks
+reaches; it is reachable (an earlier 400-trial run of the same generator reached it, and at 8 PEs
+it changes), the random draw of a large period simply came too rarely. The other 25 never-changed
+bits are the unreachable ones of section 6; the edge-phase test, its control and its proof as
+before. Synthesis (`synth/reports/pe4-assists.stat.txt`): **300,567 µm² at 4 PEs, +23,032 µm²
+(+8.3 %)** over section 7's 277,535; the area probes' 813 + 477 µm² were the bare stuffer and coder,
+without the FIFOs, the symbol timer, the start pattern, the 14 configuration registers, the read
+multiplexer's growth and the pad and flag selects.
+
+**Found by integration, fixed in `../bit-assists` with a failing test first** (each its own
+commit): the destuffer took the sync's first 0 for a stuff bit after six idle J (decoded 1s), so
+the first SETUP's data packet was framed from its 0x80 byte (chip-top's USB device found it; 65 of
+75 packets after idle gaps of 0 to 14 bits before, 75 of 75 after: the destuffer now drops only in a
+frame); and the frame's end overtook its last bit at 4 clocks per bit and less (the loopback sweep
+below found it; 30 of 60 before, 60 of 60 after: the end conditions now wait for the sampler's
+two-clock latency). The block's references also found that a cleared start-pattern history looked
+like received zeros.
+
 ## Open issues
 
 
@@ -745,7 +811,7 @@ the routing lever (a floorplan or fewer horizontal wires), not a timing one.
   twenty-fourth of the RTL lockstep's 4,800,000; the flip-flops still unchanged at the gates are
   reachable ones the RTL lockstep reaches (section 6). Icarus runs the hardened netlist about seven
   times faster, which would be the way to longer gate-level runs.
-- **Not in v0**: the stuff tracker and line coder (probes only), fine delay, the gain-cell banks,
+- **Not in v0**: fine delay, the gain-cell banks,
   the bank's fixed ports into the array, a second bit-path chain; the quarter-clock phases on
   silicon (the hardened stage uses both clock edges).
 - **Contracts** the specification assumes (section 2) are not enforced by the hardware: assist

@@ -84,6 +84,20 @@ let state_diffs (s : S.t) (r : Chip_sim.t) =
   cmp "edge sampler" (((if e.valid then e.bit else 0) lsl 3) lor (Bool.to_int e.valid lsl 2) lor (Bool.to_int e.burst_end lsl 1) lor Bool.to_int s.es.in_burst)
     (Chip_sim.get r "es");
   cmp "edge sampler last bit" s.es_last (Chip_sim.get r "es_last");
+  (* the bit-path assists: the serialiser's lines, busy, active and FIFO count; the framer's
+     state, chain and FIFO head *)
+  let tx = s.tx in
+  cmp "serialiser" ((Queue.length tx.fifo lsl 4) lor (Bool.to_int tx.busy lsl 3) lor (Bool.to_int (Txpath.active tx) lsl 2) lor (tx.b lsl 1) lor tx.a)
+    (Chip_sim.get r "tx");
+  let rx = s.rx in
+  cmp "framer" ((Queue.length rx.fifo lsl 3) lor (Bool.to_int rx.ovf lsl 2) lor (Bool.to_int rx.err lsl 1) lor Bool.to_int rx.in_frame)
+    (Chip_sim.get r "rx");
+  (match Queue.peek_opt rx.fifo with Some h -> cmp "framer head" h (Chip_sim.get r "rx_head") | None -> ());
+  let g n = Chip_sim.get r ("bp_rx_" ^ n) in
+  cmp "framer chain" ((Bool.to_int rx.cv lsl 1) lor Bool.to_int rx.ce) ((g "cv" lsl 1) lor g "ce");
+  if rx.cv then cmp "framer chain bit" rx.cb (g "cb");
+  cmp "framer history" rx.hist (g "hist"); cmp "framer history count" rx.hcount (g "hcount");
+  cmp "framer byte" ((rx.nbits lsl 8) lor rx.sh) ((g "nbits" lsl 8) lor g "sh"); cmp "framer frame bits" rx.fbits (g "fbits");
   List.rev !d
 
 let out_diffs (a : S.outputs) (b : S.outputs) =
@@ -136,6 +150,11 @@ let run_trial ?(compare_state = true) { cfg; clocks; seed } =
          if d <> [] then raise (Mismatch (c, d))
        | _ -> assert false)
     done;
+    if Sys.getenv_opt "CHIP_BP_DEBUG" <> None then
+      Printf.printf "seed %d profile %d: tx busy %b fifo %d; rx in frame %b fbits %d hcount %d; frames %d sends %d recvs %d; ctrl %02x\n%!" seed !Gen.bp_profile spec.tx.busy
+        (Queue.length spec.tx.fifo) spec.rx.in_frame spec.rx.fbits spec.rx.hcount
+        (Option.value ~default:0 (Hashtbl.find_opt S.cov "frame start")) (Option.value ~default:0 (Hashtbl.find_opt S.cov "SEND to the serialiser"))
+        (Option.value ~default:0 (Hashtbl.find_opt S.cov "RECV from the framer")) spec.regs.(Regs.r_bp_ctrl);
     None
   with Mismatch (c, d) -> Some (c, d)
 
@@ -428,9 +447,33 @@ let coverage ~cfg ~trials ~clocks ~seed0 ~never_file =
    | None -> pr "no coverage recorded\n");
   ok
 
+(* A trace of the bit path on one trial (the specification only): pads 14 and 15, the edge
+   sampler's bits, the framer's chain, frame starts and ends. For looking at a loopback. *)
+let bp_trace ~seed ~clocks =
+  let cfg = S.default_config in
+  let r = Random.State.make [| seed |] in
+  let mode = modes.(seed mod Array.length modes) in
+  let spec = S.create ~cfg () in
+  let b = Board.create () in
+  let rates = pad_rates r in
+  let world = ext_world r ~rates in
+  setup_traffic ~mode r b.host ~cfg;
+  Printf.printf "profile %d\n" !Gen.bp_profile;
+  for c = 0 to clocks - 1 do
+    if Host.idle b.host then running_traffic ~mode r b.host;
+    let smp = Board.samples b ~ext:(world b.out) in
+    let inf = spec.rx.in_frame in
+    ignore (Board.advance b [ Board.spec_core spec ] ~smp ~reset:(c < 2));
+    if spec.es_out.valid || spec.rx.in_frame <> inf || spec.rx.cv then
+      Printf.printf "%6d pads %x %x tx busy %b a %d b %d | es %d | chain %s hist %02x n %d | frame %b fbits %d fifo %d ctrl %02x\n" c
+        smp.(14) smp.(15) spec.tx.busy spec.tx.a spec.tx.b spec.es_out.bit (if spec.rx.cv then string_of_int spec.rx.cb else "-") spec.rx.hist spec.rx.hcount
+        spec.rx.in_frame spec.rx.fbits (Queue.length spec.rx.fifo) spec.regs.(Regs.r_bp_ctrl)
+  done
+
 let () =
   let cfg = S.default_config in
   match Array.to_list Sys.argv with
+  | [ _; "bp-trace"; seed; clocks ] -> Gen.wide := true; bp_trace ~seed:(int_of_string seed) ~clocks:(int_of_string clocks)
   | [ _; "fuzz"; sizes; budget; seed; outdir ] ->
     let sizes = Array.of_list (List.map int_of_string (String.split_on_char ',' sizes)) in
     fuzz ~cfg:{ cfg with layout = Upe.Spec.layout_of_sizes sizes } ~budget:(int_of_string budget) ~seed:(int_of_string seed) ~outdir

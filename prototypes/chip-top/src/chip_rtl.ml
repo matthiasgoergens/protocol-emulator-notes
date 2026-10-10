@@ -3,7 +3,8 @@
 
    Blocks: Sequencer2 (../sequencer-v2), Upe_rtl.array_create (../unified-pe/verify),
    Streamer and Sampler (../pin-streamer, ../pin-sampler), Edge_sampler, Crc_unit and Matcher_en
-   (../eth10-node), Nco (../multiphase). The four-phase stage is outside the core (tt_top.ml).
+   (../eth10-node), Nco (../multiphase), Txpath and Rxpath (../bit-assists). The four-phase stage
+   is outside the core (tt_top.ml).
 
    [bug] plants one integration fault by name (see [bugs]); "" is the design. Memories are
    behavioural by default; [mems] replaces them for hardening. *)
@@ -42,7 +43,16 @@ let bugs =
     "pecfg_seg", "PECFG selects the segment from address bits 10:9";
     "status_not_cleared", "writing STATUS does not clear the sticky bits";
     "hostin_overwrite", "a push into a full HOSTIN FIFO is accepted";
-    "array_unreset", "the PE array is not cleared by the reset" ]
+    "array_unreset", "the PE array is not cleared by the reset";
+    "bp_port_next", "the bit path takes MBX port p + 1 instead of the configured port p";
+    "tx_ready_no_pending", "the bit path's SEND readiness ignores a SEND on its way";
+    "tx_pads_swapped", "pad sources 25 and 26 (the serialiser's lines a and b) swapped";
+    "tx_idle_pin0", "an idle serialiser's pad sources show sequencer pin 0 whatever is configured";
+    "rx_pop_hold_too", "a RECV on the bit path's port also pops that segment's holding register";
+    "line_or_ignored", "the line-active OR of the data pad (r_es_mode bit 4) is ignored";
+    "crc_frame_ignored", "the CRC unit takes the edge sampler's bits even when told to take the frame's";
+    "bp_unheld", "holding the assists does not clear the serialiser and the framer";
+    "frame_pulse_swap", "the host's frame start and end pulses swapped" ]
 
 let config = Chip_spec.default_config
 
@@ -114,14 +124,14 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   let pin_in4 = concat_lsb (List.init 8 (fun k -> pin_k k)) in
   let imem_data = wire 16 and bank_rdata = wire 8 in
   let hostin_head = wire 8 and hostin_nonempty = wire 1 in
-  let port_in = Array.init 4 (fun _ -> wire 8) and port_in_valid = wire 4 in
+  let port_in = Array.init 4 (fun _ -> wire 8) and port_in_valid = wire 4 and port_out_ready = wire 4 in
   let flags = wire 16 in
   let boot_pcs = List.init 4 (fun t -> regs.(r_boot_pc t)) in
   let boot_pcs = if is "boot_pc_swap" then (match boot_pcs with [ a; b; c; d ] -> [ a; c; b; d ] | l -> l) else boot_pcs in
   let restart = pulse r_restart in
   let seq =
     Sequencer2.create ~clock ~clear:(reset |: ~:run) ~imem_data ~pin_in ~pin_in4 ~host_in:hostin_head
-      ~host_in_valid:hostin_nonempty ~port_in ~port_in_valid ~port_out_ready:(ones 4) ~flags
+      ~host_in_valid:hostin_nonempty ~port_in ~port_in_valid ~port_out_ready ~flags
       ~ctl_valid:restart ~ctl_thread:(select act_byte 1 0)
       ~ctl_page:(if is "restart_page" then zero 2 else select act_byte 3 2) ~ctl_pc:regs.(r_restart_pc)
       ~boot_page:regs.(r_boot_page) ~boot_pc:(concat_lsb boot_pcs) ~bank_rdata ()
@@ -195,6 +205,13 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   let send_hi_sel = mux push_port (Array.to_list send_hi) in
   let host_seg = act_is t_peseg in
   let host_wins = if is "host_mbx_priority" then host_seg else gnd in
+  (* the bit path's port (r_bp_ctrl): its SENDs fill the serialiser, its RECVs read the framer *)
+  let bp_en = bit regs.(r_bp_ctrl) 0 and bp_port = select regs.(r_bp_ctrl) 2 1 in
+  let bp_port = if is "bp_port_next" then bp_port +:. 1 else bp_port in
+  let routed p = bp_en &: (bp_port ==:. p) in
+  let push_routed = mux push_port (List.init 4 routed) in
+  let tx_push = thread_push &: push_routed in
+  let thread_push = thread_push &: ~:push_routed in
   let use_thread = thread_push &: ~:host_wins in
   let mbx_wr = use_thread |: host_seg in
   let mbx_seg = mux2 use_thread push_seg (select act_addr 3 2) in
@@ -227,7 +244,7 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
         let st = Variable.reg spec ~width:2 and w = Variable.reg spec ~width:16 in
         ignore (st.value -- Printf.sprintf "hold%d_st" p); ignore (w.value -- Printf.sprintf "hold%d_w" p);
         let src = if is "tap_seg_miswire" then (p + 1) mod 4 else p in
-        let pop = bit port_in_ready p in
+        let pop = bit port_in_ready p &: (if is "rx_pop_hold_too" then vdd else ~:(routed p)) in
         let hi = Variable.reg spec ~width:1 in
         ignore (hi.value -- Printf.sprintf "send_hi%d" p);
         send_hi.(p) <== hi.value;
@@ -242,10 +259,12 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
         (st.value, w.value))
   in
   let holds = if is "recv_port_swap" then Array.init 4 (fun p -> holds.(if p = 2 then 3 else p)) else holds in
+  let rx_head = wire 8 and rx_nonempty = wire 1 in
   Array.iteri
-    (fun p (st, w) -> port_in.(p) <== mux2 (st ==:. 2) (select w 15 8) (select w 7 0))
+    (fun p (st, w) -> port_in.(p) <== mux2 (routed p) rx_head (mux2 (st ==:. 2) (select w 15 8) (select w 7 0)))
     holds;
-  port_in_valid <== concat_lsb (Array.to_list (Array.map (fun (st, _) -> st <>:. 0) holds));
+  port_in_valid <== concat_lsb (List.init 4 (fun p -> mux2 (routed p) rx_nonempty (fst holds.(p) <>:. 0)));
+  let rx_pop = (port_in_ready &: concat_lsb (List.init 4 routed)) <>:. 0 in
   (* ---- host FIFOs ---- *)
   let hin_push = act_is t_hostin in
   let hin_head, hin_count, hin_accept, hin_full, hin_ne =
@@ -296,7 +315,8 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   in
   let es_pad = sel_pad (select regs.(r_es_pads) 3 0) in
   let es_samples = if is "es_quarter_rev" then reverse es_pad else es_pad in
-  let es_active = ~:(bit regs.(r_es_mode) 3) |: bit (sel_pad (select regs.(r_es_pads) 7 4)) 3 in
+  let es_or = if is "line_or_ignored" then gnd else bit regs.(r_es_mode) 4 &: bit es_pad 3 in
+  let es_active = ~:(bit regs.(r_es_mode) 3) |: bit (sel_pad (select regs.(r_es_pads) 7 4)) 3 |: es_or in
   let es_b, es_v, es_end, _es_over, es_in_burst, es_held =
     Eth10.Edge_sampler.create_with_level ~clock ~clear:aclear ~n:4 ~cfg:es_cfg ~samples:es_samples ~active:es_active
   in
@@ -316,9 +336,36 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
     { s_poly = reg32 r_crc_poly; s_init = reg32 r_crc_init; s_mask = reg32 r_crc_mask;
       s_refl = bit regs.(r_crc_ctrl) 0; s_xorout = reg32 r_crc_xorout; s_residue = reg32 r_crc_residue }
   in
-  let crc_start = pulse r_crc_start |: (bit regs.(r_crc_ctrl) 1 &: match_hit) in
+  (* ---- the bit-path assists: the transmit serialiser and the receive framer ---- *)
+  let bp_clear = if is "bp_unheld" then reset else aclear in
+  let code_sig v : Linecode.cfg_signals = { s_mode = select v 1 0; s_invert = bit v 2; s_toggle_on = bit v 3 } in
+  let stuff_sig v : Stuff.cfg_signals = { s_run = select v 3 0; s_either = bit v 4; s_value = bit v 5 } in
+  let tail_sig v : Txpath.tail_signals = { s_len = select v 3 0; s_la = bit v 4; s_lb = bit v 5 } in
+  let tx_cfg : Txpath.cfg_signals =
+    { s_period = concat_msb [ select regs.(r_tx_per + 1) 3 0; regs.(r_tx_per) ]; s_msb = bit regs.(r_tx_code) 4;
+      s_stuff = stuff_sig regs.(r_tx_stuff); s_code = code_sig regs.(r_tx_code);
+      s_tail1 = tail_sig regs.(r_tx_tail1); s_tail2 = tail_sig regs.(r_tx_tail2) } in
+  let txp = Txpath.create ~clock ~clear:bp_clear ~cfg:tx_cfg ~push:tx_push ~push_data:push_d in
+  (* a SEND to the bit path is ready when the FIFO will have room for it, counting one on its way *)
+  let pend = if is "tx_ready_no_pending" then gnd else tx_push in
+  let tx_ready = ~:hold &: ((uresize txp.count 3 +: uresize pend 3) <:. Txpath.depth) in
+  port_out_ready <== concat_lsb (List.init 4 (fun p -> mux2 (routed p) tx_ready vdd));
+  let ctrl = regs.(r_bp_ctrl) in
+  let rx_cfg : Rxpath.cfg_signals =
+    { s_code = code_sig regs.(r_rx_code); s_stuff = stuff_sig regs.(r_rx_stuff); s_msb = bit regs.(r_rx_code) 4;
+      s_pattern = regs.(r_rx_pattern); s_pmask = regs.(r_rx_pmask); s_start_on_pattern = bit ctrl 7;
+      s_half_duplex = bit ctrl 4; s_end_inactive = bit ctrl 5; s_end_burst = bit ctrl 6; s_skip = regs.(r_rx_skip) } in
+  let pulse_bits = mux2 (pulse r_bp_pulse) (select act_byte 1 0) (zero 2) in
+  let start_b, stop_b = if is "frame_pulse_swap" then (bit pulse_bits 1, bit pulse_bits 0) else (bit pulse_bits 0, bit pulse_bits 1) in
+  let rxp =
+    Rxpath.create ~clock ~clear:bp_clear ~cfg:rx_cfg ~bit:es_b ~valid:es_v ~active:es_active ~burst_end:es_end
+      ~start:start_b ~stop:stop_b ~tx_active:txp.active ~pop:rx_pop in
+  rx_head <== rxp.head; rx_nonempty <== rxp.nonempty;
+  let crc_frame = if is "crc_frame_ignored" then gnd else bit ctrl 3 in
+  let crc_bit = mux2 crc_frame rxp.crc_bit es_b and crc_valid = mux2 crc_frame rxp.crc_valid es_v in
+  let crc_start = pulse r_crc_start |: (bit regs.(r_crc_ctrl) 1 &: match_hit) |: (crc_frame &: rxp.frame_start) in
   let crc_raw, _crc_value, crc_check =
-    Eth10.Crc_unit.create ~clock ~clear:aclear ~cfg:crc_cfg ~start:crc_start ~bit:es_b ~valid:es_v
+    Eth10.Crc_unit.create ~clock ~clear:aclear ~cfg:crc_cfg ~start:crc_start ~bit:crc_bit ~valid:crc_valid
   in
   let inc = reg32 r_nco_inc in
   let inc = if is "nco_inc_bytes" then concat_msb [ select inc 31 16; select inc 7 0; select inc 15 8 ] else inc in
@@ -327,6 +374,7 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
   let fsrc =
     Array.to_list arr.tap_f @ Array.to_list arr.tap_v
     @ [ es_v; es_lvl; es_in_burst; es_end; crc_check; match_hit; str_full; smp_valid; bit nco 0 ]
+    @ [ rxp.done_; rxp.err; rxp.nonempty; txp.active |: tx_push; es_active; ~:es_active; rxp.in_frame ]
   in
   let fsrc = fsrc @ List.init (32 - List.length fsrc) (fun _ -> gnd) in
   let flag f = mux (select regs.(r_flagsel (if is "flag_off_by_one" then (f + 1) mod 16 else f)) 4 0) fsrc in
@@ -351,13 +399,15 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
             else if x >= r_crc_raw && x < r_crc_raw + 4 then Some (select crc_raw (8 * (x - r_crc_raw) + 7) (8 * (x - r_crc_raw)))
             else if x = r_match then Some (concat_msb [ match_hit; zero 2; match_y ])
             else if x = r_smp_overflows then Some smp_overflows
+            else if x = r_bp_status then
+              Some (concat_lsb [ rxp.in_frame; rxp.err; rxp.ovf; rxp.count; txp.busy; txp.count ])
             else None
           in
           Option.map (fun v -> (x, v)) v)
         (List.init reg_space Fun.id)
     in
-    let in_space = select a 15 7 ==:. 0 in
-    mux2 in_space (mux (select a 6 0) (List.init reg_space (fun x -> match List.assoc_opt x cases with Some v -> v | None -> zero 8))) (zero 8)
+    let in_space = (select a 15 8 ==:. 0) &: (select a 7 0 <:. reg_space) in
+    mux2 in_space (mux (select a 7 0) (List.init reg_space (fun x -> match List.assoc_opt x cases with Some v -> v | None -> zero 8))) (zero 8)
   in
   let prog_q = wire 16 and bank_q = wire 8 in
   let fbyte =
@@ -447,6 +497,12 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
       @ List.init 4 (fun j -> (rep4 taps_f.(j), vdd))
       @ List.init 4 (fun j -> (rep4 (lsb taps_d.(j)), vdd))
       @ [ (rep4 es_lvl, vdd) ]
+      @ (let idle k =
+           let sel = if is "tx_idle_pin0" then zero 3 else select regs.(r_tx_idle) (4 * k + 2) (4 * k) in
+           let pins = List.init 8 seq_pin in
+           (mux sel (List.map fst pins), mux sel (List.map snd pins)) in
+         let line k l = (mux2 txp.busy (rep4 l) (fst (idle k)), mux2 txp.busy vdd (snd (idle k))) in
+         if is "tx_pads_swapped" then [ line 1 txp.b; line 0 txp.a ] else [ line 0 txp.a; line 1 txp.b ])
     in
     let srcs = srcs @ List.init (32 - List.length srcs) (fun _ -> (zero 4, vdd)) in
     (mux sel (List.map fst srcs), mux sel (List.map snd srcs))
@@ -487,7 +543,10 @@ let create ?(cfg = config) ?(mems = behavioural) ~clock ~reset ~smp () =
         "holds", concat_lsb (Array.to_list (Array.map (fun (st, w) -> concat_msb [ w; st ]) holds));
         "hin_count", hin_count; "hin_head", hin_head; "hout_head", hout_head;
         "smp_head", concat_msb [ smp_valid; smp_count; smp_data ]; "str_out", concat_msb [ str_full; str_oe; str_out ]; "hout_count", hout_count; "crc", crc_raw; "nco", nco; "match_y", match_y;
-        "rbuf", rbuf.value; "es", concat_msb [ es_b &: es_v; es_v; es_end; es_in_burst ]; "es_last", es_last ]
+        "rbuf", rbuf.value; "es", concat_msb [ es_b &: es_v; es_v; es_end; es_in_burst ]; "es_last", es_last;
+        "tx", concat_msb [ txp.count; txp.busy; txp.active; txp.b; txp.a ]; "rx_head", rxp.head;
+        "rx", concat_msb [ rxp.count; rxp.ovf; rxp.err; rxp.in_frame ] ]
+    @ List.map (fun (n, s) -> ("bp_" ^ n, s)) rxp.dbg
   in
   { pad_nib = concat_lsb (Array.to_list pad_out); uio_oe = concat_lsb (Array.to_list oes); dbg }
 
