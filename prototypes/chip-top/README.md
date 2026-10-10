@@ -846,11 +846,44 @@ far as moving bits and bytes goes. Not measured: full-speed turnaround (the host
 low-speed only; T0's token check takes about 20 slots, more than full speed's 7.5-bit window at 5
 clocks per bit, so a full-speed device would need the IN reply decided before the token ends).
 
+### The harden with the assists (4 PEs, 16.67 ns)
+
+`../../tt/scripts/harden.sh` (the pinned flow of section 7: LibreLane 3.1.0.dev3, tt-support-tools
+d66cf17, 6x4, `CLOCK_PERIOD` 16.67, `chip.sdc`, the 1024 x 8 at the right end), then
+`tt/scripts/precheck.sh`; record in `results/harden-pe4-assists/` (setup / hold worst slack in ns):
+
+| | slow 1.08 V 125 C | typical | fast | slowest corner's period | cells | hold buffers | flip-flops | placed area | wire | routing DRC, LVS, antenna, precheck |
+|---|---|---|---|---|---|---|---|---|---|---|
+| section 7, `results/harden-pe4/` | +0.255 / +0.253 | +3.095 / +0.114 | +3.619 / +0.031 | 16.42 ns, 60.9 MHz | 25,931 | 78 | 2,519 | 335,998 µm² | 1.44 M µm | 0, match, 0, 9 of 9 |
+| **with the assists**, `results/harden-pe4-assists/` | **-0.224** / +0.256 (2 endpoints) | +2.609 / +0.124 | +3.209 / +0.047 | **16.89 ns, 59.2 MHz** | 28,227 | 85 | 2,735 | 366,498 µm² | 1.71 M µm | **0, match, 0, 9 of 9** |
+
+Area: 300,567 µm² synthesised, 366,498 placed (growth 1.22, as before); 45 % of the core. By RTL
+origin (`synth/area_by_origin.py`), the serialiser, the framer, the stuff trackers and the line
+coders are about 9,400 µm² of the placed logic; the rest of the growth is glue: the 14
+configuration registers, the register read multiplexer, the pad and flag selects, the port routing.
+Routing: global routing put Metal3, the one horizontal layer, at 70.9 % with an overflow of 633; detailed routing went from 23,008
+violations to 0, then after the post-route repairs from 706 to 0. Magic DRC reports errors inside
+the macros only, as before.
+
+**What it costs: 60 MHz at the slow corner.** Typical and fast keep 2.6 and 3.2 ns; the slow corner
+misses by 0.22 ns on 2 endpoints (`critical-paths.txt`). Both failing paths, and every path within
+0.3 ns, are the PE array's: from segment 0's control register (its source select,
+`upe_rtl.ml:308`) through the PE's operand and result multiplexers (`upe_rtl.ml:142`, `341`), the
+family that limits 8 PEs in section 7. None starts or ends in the assists. With 9 % more cells and
+18 % more wire in the same floorplan the array's wires got longer: section 7 measured this path
+at about 31 cells and its worst cells as drivers of long Metal3 wires. Options, cheapest first:
+accept 59.2 MHz at the slow corner (the RP2040 host can make 57.6 or 58.0 MHz as easily as 60);
+a floorplan that keeps the array together, away from the assists' glue; a register stage at each
+segment's input (a change of the array's specification, one more clock of latency per segment);
+fewer configuration bits for the assists (the 14 registers are most of their glue). The 8-PE chip
+was not hardened again (it missed 60 MHz before).
+
 ## Open issues
 
 
-- **Timing at 8 PEs and more.** 60 MHz is met at every corner with 4 PEs (+0.26 ns at the slow
-  corner). 8 PEs miss it at the slow corner only (-1.33 ns, about 55.5 MHz), on long Metal3 wires
+- **Timing at 8 PEs and more.** 60 MHz was met at every corner with 4 PEs (+0.26 ns at the slow
+  corner); with the assists of section 8 the 4-PE chip misses it at the slow corner by 0.22 ns
+  (59.2 MHz), on the same array paths. 8 PEs miss it at the slow corner only (-1.33 ns, about 55.5 MHz), on long Metal3 wires
   around a congested horizontal layer (section 7); typical and fast have about 3 ns to spare.
   Levers not tried: a floorplan with the PE rows nearer to each other, a register stage at each
   segment's input (a change of the array's specification), a lower placement density only around
@@ -874,3 +907,18 @@ clocks per bit, so a full-speed device would need the IN reply decided before th
 - **Contracts** the specification assumes (section 2) are not enforced by the hardware: assist
   configuration changes only while held, legal widths and periods, a CRC mask of the form 2^w - 1.
 - The demos run q = 0 firmware only, one DAC channel, no S/PDIF.
+- **Bit-path assists (section 8), from one cross-model review (`results/assists/codex-review.txt`,
+  codex, read-only) and checked at the source:** (a) the framer ends a USB frame at any SE0; it
+  does not check the EOP's length or the J after it, so a short SE0 ends a frame that may still have
+  a good CRC (the tests use conforming EOPs only); (b) in the USB firmware, T1 reads the flush byte
+  once per staged write and then writes all its bytes, so a stale write being applied in the ~12
+  slots in which T0 sets flush still lands; (c) a report staged for endpoint 1 stays answerable
+  between a SETUP and the controller's restaging (correctly: the reference device answers it too),
+  but if the host ACKs it in that window the controller, which has already dropped it, does not pop
+  it and sends it again later. None of the three occurred in the 11 USB sessions; (b) and (c) need a
+  SETUP, an OUT or a reset to land inside a window of a few slots, which the scenarios do not aim
+  at. The review's fourth point, that the specification starts the CRC on every frame start whatever
+  `r_bp_ctrl` bit 3 says, does not hold: both `chip_spec.ml` and `chip_rtl.ml` gate it on that bit.
+- The USB device answers full speed's bit rate in loopback but not its turnaround (section 8); the
+  10BASE-T node's replies are computed by the host, and its firmware takes frames of up to 255
+  bytes (the bank holds 1,024).

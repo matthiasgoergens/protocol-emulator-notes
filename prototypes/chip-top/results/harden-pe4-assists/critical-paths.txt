@@ -1,0 +1,48 @@
+# /var/tmp/tt-harden/assists-pe4/runs/wokwi nom_slow_1p08V_125C: 1000 paths
+
+## the 6 worst (start origin, end origin) pairs: worst slack, number of reported paths, logic cells
+ 1.  -0.224 ns    16 paths  31 cells
+      from comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+      to   wire/16 @ upe/upe_rtl.ml:142 < upe/upe_rtl.ml:341 < src/chip_rtl.ml:226
+ 2.  -0.098 ns     4 paths  32 cells
+      from comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+      to   wire/1 @ upe/upe_rtl.ml:142 < upe/upe_rtl.ml:341 < src/chip_rtl.ml:226
+ 3.  +0.065 ns    52 paths  32 cells
+      from comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+      to   comb/1 @ upe/upe_rtl.ml:341 < src/chip_rtl.ml:226
+ 4.  +0.382 ns    32 paths  12 cells
+      from sram_512x16(?)
+      to   reg/8 @ seqv2/sequencer2.ml:81 < src/chip_rtl.ml:133
+ 5.  +0.747 ns    48 paths  30 cells
+      from comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+      to   reg/16 @ upe/upe_rtl.ml:209 < upe/upe_rtl.ml:341 < src/chip_rtl.ml:226
+ 6.  +0.845 ns    32 paths  13 cells
+      from sram_512x16(?)
+      to   reg/8 @ seqv2/sequencer2.ml:83 < src/chip_rtl.ml:133
+
+## the 5 worst paths in full
+
+slack -0.224 ns  logic cells 31, all cells 51
+  start _39855_: _7679[2] comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+  end   _40439_: _212[12] wire/16 @ upe/upe_rtl.ml:142 < upe/upe_rtl.ml:341 < src/chip_rtl.ml:226
+    via _7679[2] comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+
+slack -0.098 ns  logic cells 32, all cells 52
+  start _39855_: _7679[2] comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+  end   _40443_: _210 wire/1 @ upe/upe_rtl.ml:142 < upe/upe_rtl.ml:341 < src/chip_rtl.ml:226
+    via _7679[2] comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+
+slack +0.065 ns  logic cells 32, all cells 51
+  start _39855_: _7679[2] comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+  end   _40291_: _7878 comb/1 @ upe/upe_rtl.ml:341 < src/chip_rtl.ml:226
+    via _7679[2] comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+
+slack +0.261 ns  logic cells 33, all cells 46
+  start _39855_: _7679[2] comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+  end   _40108_: _8498 comb/1 @ upe/upe_rtl.ml:341 < src/chip_rtl.ml:226
+    via _7679[2] comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+
+slack +0.333 ns  logic cells 32, all cells 52
+  start _39855_: _7679[2] comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
+  end   _40294_: _7881 comb/1 @ upe/upe_rtl.ml:341 < src/chip_rtl.ml:226
+    via _7679[2] comb/3 @ upe/upe_rtl.ml:308 < src/chip_rtl.ml:226
