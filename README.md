@@ -118,11 +118,14 @@ The combined chip in 6x4 tiles, with both SRAM macros, at the 60 MHz target (16.
 | PEs | routing DRC, LVS, antenna | precheck | setup slack, slow / typical / fast corner |
 | --- | --- | --- | --- |
 | 4 | 0, 0, 0 | 9 of 9 checks pass | +0.26 / +3.10 / +3.62 ns |
+| 4, with the bit-stuffing and line-coding assists | 0, 0, 0 | 9 of 9 checks pass | −0.22 / +2.61 / +3.21 ns (59.2 MHz at the slow corner) |
 | 8 | 0, 0, 0 | 9 of 9 checks pass | −1.33 / +2.83 / +3.42 ns (about 55 MHz at the slow corner) |
 | 12 | does not route | – | – |
 
 The process's tiles route on three metal layers only, which leaves one layer for horizontal wires,
-so routing rather than area limits the size; `tt/` builds the 4-PE chip. A netlist extracted from
+so routing rather than area limits the size; `tt/` builds the 4-PE chip, which now includes the
+bit-stuffing and line-coding assists and misses 60 MHz at the slow corner by 0.22 ns, on paths in the
+PE array. A netlist extracted from
 each hardened layout runs in lockstep with the RTL, and every flip-flop that can change does change
 under the tests. The combined RTL runs unchanged UART, SPI and I2C firmware and the one-bit audio
 DAC in lockstep with its specification, and catches 28 of 28 planted integration bugs.
