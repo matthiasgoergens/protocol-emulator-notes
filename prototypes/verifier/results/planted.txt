@@ -1,7 +1,7 @@
 # command: main.exe planted
-# commit: fb021f28c4c3fb25b07f85587386cc93ae103443 (with uncommitted changes)
+# commit: 2f04fcf533fb98c32191a608e9861f126d7f610e (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-10T11:23:54+08:00
+# date: 2026-10-10T11:43:50+08:00
 PLANTED spi_p8 (LDD a wraps to 4095)         REJECTED  entries    71  events    28
     pc 8: 4098 slots may pass without an event in state byte 0 bit 1 mosi, whose deadline is 2
     path (9 instructions from pc 0):
@@ -351,5 +351,69 @@ PLANTED spi2 mode 1 firmware against the mode 0 specification REJECTED  entries 
     pc 10: event p1:set=1 (gap 8) is not one the specification accepts in state cs low
     interpreter (3 runs): fails: slot 16 pc 9: 5 slots without an event in state cs low (deadline 4)
 
-planted: 19 bugs, 0 not rejected
-# elapsed 0.65 s, max rss 24088 kB
+PLANTED i2c2 fast, the ACK read while SCL is low REJECTED  entries  1191  events   347
+    pc 41: event p4:seen=0 (gap 3) is not one the specification accepts in state write ACK clock: SDA released
+    path (116 instructions from pc 0, last 14 shown):
+       28  waitd                        state write bit 8: SDA                   dl=16 since=2 due=18 time=292..?
+       29  ldd 4095                     state write bit 8: SDA                   dl=0 since=19 due=19 time=309..?
+       30  setp mask=20 val=0 oe=0 q=0  state write bit 8: SDA                   dl=4095 since=20 due=4115 time=310..?
+       31  waitp pin5==1 fail=142       state write bit 8: SCL released          dl=4094 since=1 due=4095 time=311..?
+       32  ldd 8                        state write bit 8: SCL seen high         dl=0..4093 since=1 due=1..4094 time=312..?
+       33  waitd                        state write bit 8: SCL seen high         dl=8 since=2 due=10 time=313..?
+       34  jnz 23                       state write bit 8: SCL seen high         dl=0 since=11 due=11 time=322..?
+       35  setp mask=20 val=0 oe=1 q=0  state write bit 8: SCL seen high         dl=0 since=12 due=12 time=323..?
+       36  ldd 2                        state write ACK clock: SCL low           dl=0 since=1 due=1 time=324..?
+       37  waitd                        state write ACK clock: SCL low           dl=2 since=2 due=4 time=325..?
+       38  setp mask=10 val=0 oe=0 q=0  state write ACK clock: SCL low           dl=0 since=5 due=5 time=328..?
+       39  ldd 0                        state write ACK clock: SDA released      dl=0 since=1 due=1 time=329..?
+       40  waitd                        state write ACK clock: SDA released      dl=0 since=2 due=2 time=330..?
+       41  waitp pin4==0 fail=51        state write ACK clock: SDA released      dl=0 since=3 due=3 time=331..?
+    pc 41: event p4:timeout(0) (gap 3) is not one the specification accepts in state write ACK clock: SDA released
+    interpreter (6 runs): fails: slot 4824 pc 41: event p4:timeout(0) not accepted in state write ACK clock: SDA released
+
+PLANTED i2c2 fast, no wait for SCL high      REJECTED  entries    82  events    17
+    pc 23: event p5:set=0 (gap 12) is not one the specification accepts in state write bit 1: SCL released
+    path (25 instructions from pc 0, last 14 shown):
+       21  in                           state START: SDA low                     dl=0 since=13..? due=13..? time=17..?
+       22  ldc 8                        state START: SDA low                     dl=0 since=14..? due=14..? time=18..?
+       23  setp mask=20 val=0 oe=1 q=0  state START: SDA low                     dl=0 since=15..? due=15..? time=19..?
+       24  ldd 2                        state a command's SCL low                dl=0 since=1 due=1 time=20..?
+       25  waitd                        state a command's SCL low                dl=2 since=2 due=4 time=21..?
+       26  sho pin4 msb od q=0          state a command's SCL low                dl=0 since=5 due=5 time=24..?
+       27  ldd 16                       state write bit 1: SDA                   dl=0 since=1 due=1 time=25..?
+       28  waitd                        state write bit 1: SDA                   dl=16 since=2 due=18 time=26..?
+       29  ldd 4095                     state write bit 1: SDA                   dl=0 since=19 due=19 time=43..?
+       30  setp mask=20 val=0 oe=0 q=0  state write bit 1: SDA                   dl=4095 since=20 due=4115 time=44..?
+       31  ldd 8                        state write bit 1: SCL released          dl=4094 since=1 due=4095 time=45..?
+       32  waitd                        state write bit 1: SCL released          dl=8 since=2 due=10 time=46..?
+       33  jnz 23                       state write bit 1: SCL released          dl=0 since=11 due=11 time=55..?
+       23  setp mask=20 val=0 oe=1 q=0  state write bit 1: SCL released          dl=0 since=12 due=12 time=56..?
+    pc 60: event p4:sample (gap 6) is not one the specification accepts in state read bit 1 or repeated START: SCL released
+    pc 87: event p4:sample (gap 6) is not one the specification accepts in state read bit 1 or repeated START: SCL released
+    ... 5 violations in all
+    interpreter (6 runs): fails: slot 144 pc 60: event p4:sample not accepted in state read bit 1 or repeated START: SCL released
+
+PLANTED i2c2 fast, SCL low 19 slots against 25 REJECTED  entries  1222  events   358
+    pc 30: event p5:set=z (write bit 1: SCL released) has gap 14 slots, declared 20
+    path (21 instructions from pc 0, last 14 shown):
+        8  jmp 9                        state START: SDA low                     dl=0 since=9 due=9 time=13..?
+        9  in                           state START: SDA low                     dl=0 since=10..? due=10..? time=14..?
+       10  skne 0x57                    state START: SDA low                     dl=0 since=11..? due=11..? time=15..?
+       11  jmp 21                       state START: SDA low                     dl=0 since=12..? due=12..? time=16..?
+       21  in                           state START: SDA low                     dl=0 since=13..? due=13..? time=17..?
+       22  ldc 8                        state START: SDA low                     dl=0 since=14..? due=14..? time=18..?
+       23  setp mask=20 val=0 oe=1 q=0  state START: SDA low                     dl=0 since=15..? due=15..? time=19..?
+       24  ldd 2                        state a command's SCL low                dl=0 since=1 due=1 time=20..?
+       25  waitd                        state a command's SCL low                dl=2 since=2 due=4 time=21..?
+       26  sho pin4 msb od q=0          state a command's SCL low                dl=0 since=5 due=5 time=24..?
+       27  ldd 10                       state write bit 1: SDA                   dl=0 since=1 due=1 time=25..?
+       28  waitd                        state write bit 1: SDA                   dl=10 since=2 due=12 time=26..?
+       29  ldd 4095                     state write bit 1: SDA                   dl=0 since=13 due=13 time=37..?
+       30  setp mask=20 val=0 oe=0 q=0  state write bit 1: SDA                   dl=4095 since=14 due=4109 time=38..?
+    pc 30: event p5:set=z (write bit 2: SCL released) has gap 14 slots, declared 20
+    pc 30: event p5:set=z (write bit 3: SCL released) has gap 14 slots, declared 20
+    ... 45 violations in all
+    interpreter (6 runs): fails: slot 132 pc 59: read bit 1 or repeated START: SCL released gap 14, declared 20
+
+planted: 22 bugs, 0 not rejected
+# elapsed 1.73 s, max rss 29324 kB

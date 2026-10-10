@@ -99,7 +99,7 @@ let uart_tx ?(thread = 0) ~baud src =
 let uart_rx ?(thread = 1) ~baud () =
   let s = Fw.slots_of_hz (float baud) in
   { name = Printf.sprintf "uart2_rx_%d" baud; words = page (Fw.uart_rx ~pin:1 ~s ()); spec = uart_rx_spec ~r:1 ~s; thread;
-    env = Peer { seeds = [ 1; 2; 3; 4; 5 ]; host = false; world = (fun ~seed -> uart_line ~pin:1 ~baud ~seed) } }
+    env = Peer { seeds = [ 1; 2; 3; 4; 5 ]; host = None; world = (fun ~seed -> uart_line ~pin:1 ~baud ~seed) } }
 
 let uart_images () =
   List.concat_map (fun baud ->
@@ -186,7 +186,7 @@ let spi_ctl ?fault ?(thread = 1) ?image ~(mode : Fw.spi_mode) ~period bytes =
   let words = page (Fw.spi_ctl ?fault ~sclk ~mosi ~miso ~cs ~mode:(Option.value image ~default:mode) ~period bytes) in
   { name = Printf.sprintf "spi2_ctl_m%d%s_p%d_n%d" (2 * mode.cpol + mode.cpha) (if mode.msb then "msb" else "lsb") period (List.length bytes);
     words; spec = spi_ctl_spec ~sclk ~mosi ~miso ~cs ~mode ~period ~nbytes:(List.length bytes); thread;
-    env = Peer { seeds = [ 1; 2; 3 ]; host = false; world = (fun ~seed -> spi_target_world ~sclk ~mosi ~miso ~cs ~mode ~seed) } }
+    env = Peer { seeds = [ 1; 2; 3 ]; host = None; world = (fun ~seed -> spi_target_world ~sclk ~mosi ~miso ~cs ~mode ~seed) } }
 
 let spi_images () =
   List.concat_map (fun (mode : Fw.spi_mode) ->
@@ -199,5 +199,127 @@ let spi_planted () =
     { (spi_ctl ~fault:Fw.No_branch_balance ~mode:m0 ~period:15 [ 0xA5 ]) with name = "PLANTED spi2 mode 0, the MOSI = 0 path a slot short" };
     { (spi_ctl ~image:m1 ~mode:m0 ~period:15 [ 0xA5 ]) with name = "PLANTED spi2 mode 1 firmware against the mode 0 specification" } ]
 
-let sweep () = uart_images () @ spi_images ()
-let planted () = uart_planted () @ spi_planted ()
+(* ---- I2C controller (host commands) ---- *)
+
+(* fw.ml, i2c_ctl, with t the timing and L the stretch limit. Events on SDA and SCL:
+   - slot 0: both released. On an idle bus the START (SDA low) comes at least 4 slots after the
+     start, buf + 3 after a STOP's SDA release, 6 after a timeout's release (IN, SKNE, JMP).
+   - Every command's first event is SCL low: at least hd_sta after a START's or repeated START's
+     SDA low, at least max(high - smp, 8) after a write's ACK sample, at least max(high, 8) after
+     the slot SCL is seen high in a read's ACK clock (the command fetch's IN has no bound).
+   - A pulse from SCL low at a: its SDA action at a + hd_dat, SCL released low - hd_dat later,
+     SCL seen high within [1, L] slots, or a timeout at exactly L after which both lines are
+     released 1 slot later and the bus is idle. Within a byte the next SCL low is [high] after SCL
+     is seen high, or [high - smp] after the sample.
+   - write: 8 pulses whose SDA action is SHO od (data from the host, not declared), then a pulse
+     releasing SDA with the ACK sampled smp after SCL seen high (seen 0: ACK; timeout 0: NACK).
+   - read: 8 pulses releasing SDA, sampled smp after SCL is seen high; then a pulse driving SDA
+     low (ACK) or releasing it (NACK).
+   - repeated START: a pulse releasing SDA, SDA low su_sta after SCL is seen high.
+   - STOP: a pulse driving SDA low, SDA released su_sto after SCL is seen high. *)
+let i2c_ctl_spec ~sda ~scl ~(t : Fw.i2c_timing) ~lm =
+  let bl = builder () in
+  let state name = fresh bl name in
+  let tr ?(gap = ex 0) src pats dst label = add bl ~src pats gap ~dst label in
+  let idle_init = state "idle (after reset)" and post_stop = state "idle (after STOP)" and post_to = state "idle (after a timeout)" in
+  let started = state "START: SDA low" and oplow = state "a command's SCL low" in
+  tr 0 [ (sda, Set Z); (scl, Set Z) ] idle_init "both released" ~gap:(ex 0);
+  List.iter (fun (src, g) -> tr src [ (sda, Set L) ] started "START" ~gap:(at_least g))
+    [ (idle_init, 4); (post_stop, t.buf + 3); (post_to, 6) ];
+  tr started [ (scl, Set L) ] oplow "first SCL low after START" ~gap:(at_least t.hd_sta);
+  (* the rest of a pulse after its SDA action: SCL released, seen high or a timeout; returns the
+     state after SCL is seen high *)
+  let rest_of_pulse after_action label =
+    let rel = state (label ^ ": SCL released") and seen = state (label ^ ": SCL seen high") and tout = state (label ^ ": timed out") in
+    tr after_action [ (scl, Set Z) ] rel (label ^ ": SCL released") ~gap:(ex (t.low - t.hd_dat));
+    tr rel [ (scl, Seen 1) ] seen (label ^ ": SCL seen high") ~gap:(Interval.range 1 lm);
+    tr rel [ (scl, Timeout 1) ] tout (label ^ ": timeout") ~gap:(ex lm);
+    tr tout [ (sda, Set Z); (scl, Set Z) ] post_to (label ^ ": released after the timeout") ~gap:(ex 1);
+    seen in
+  (* write *)
+  let w_act = state "write bit 1: SDA" in
+  tr oplow [ (sda, Data_od) ] w_act "write bit 1: SDA" ~gap:(ex t.hd_dat);
+  let cur = ref (rest_of_pulse w_act "write bit 1") in
+  for k = 2 to 8 do
+    let low = state (Printf.sprintf "write bit %d: SCL low" k) and act = state (Printf.sprintf "write bit %d: SDA" k) in
+    tr !cur [ (scl, Set L) ] low (Printf.sprintf "write bit %d: SCL low" k) ~gap:(ex t.high);
+    tr low [ (sda, Data_od) ] act (Printf.sprintf "write bit %d: SDA" k) ~gap:(ex t.hd_dat);
+    cur := rest_of_pulse act (Printf.sprintf "write bit %d" k)
+  done;
+  let alow = state "write ACK clock: SCL low" and aact = state "write ACK clock: SDA released" and wdone = state "write: ACK sampled" in
+  tr !cur [ (scl, Set L) ] alow "write ACK clock: SCL low" ~gap:(ex t.high);
+  tr alow [ (sda, Set Z) ] aact "write ACK clock: SDA released" ~gap:(ex t.hd_dat);
+  let aseen = rest_of_pulse aact "write ACK clock" in
+  tr aseen [ (sda, Seen 0) ] wdone "ACK" ~gap:(ex t.smp);
+  tr aseen [ (sda, Timeout 0) ] wdone "NACK" ~gap:(ex t.smp);
+  tr wdone [ (scl, Set L) ] oplow "next command's SCL low after a write" ~gap:(at_least (max (t.high - t.smp) 8));
+  (* read, and the repeated START, which share their first pulse's SDA release *)
+  let rel1 = state "read bit 1 or repeated START: SDA released" in
+  tr oplow [ (sda, Set Z) ] rel1 "read bit 1 or repeated START: SDA released" ~gap:(ex t.hd_dat);
+  let seen1 = rest_of_pulse rel1 "read bit 1 or repeated START" in
+  let sr = state "repeated START: SDA low" in
+  tr seen1 [ (sda, Set L) ] sr "repeated START" ~gap:(ex t.su_sta);
+  tr sr [ (scl, Set L) ] oplow "first SCL low after a repeated START" ~gap:(at_least t.hd_sta);
+  let smp1 = state "read bit 1 sampled" in
+  tr seen1 [ (sda, Smp) ] smp1 "read bit 1 sampled" ~gap:(ex t.smp);
+  let cur = ref smp1 in
+  for k = 2 to 8 do
+    let low = state (Printf.sprintf "read bit %d: SCL low" k) and act = state (Printf.sprintf "read bit %d: SDA released" k)
+    and sm = state (Printf.sprintf "read bit %d sampled" k) in
+    tr !cur [ (scl, Set L) ] low (Printf.sprintf "read bit %d: SCL low" k) ~gap:(ex (t.high - t.smp));
+    tr low [ (sda, Set Z) ] act (Printf.sprintf "read bit %d: SDA released" k) ~gap:(ex t.hd_dat);
+    let seen = rest_of_pulse act (Printf.sprintf "read bit %d" k) in
+    tr seen [ (sda, Smp) ] sm (Printf.sprintf "read bit %d sampled" k) ~gap:(ex t.smp);
+    cur := sm
+  done;
+  let rlow = state "read ACK clock: SCL low" and ract = state "read ACK clock: SDA set" in
+  tr !cur [ (scl, Set L) ] rlow "read ACK clock: SCL low" ~gap:(ex (t.high - t.smp));
+  tr rlow [ (sda, Set L) ] ract "read ACK clock: ACK" ~gap:(ex t.hd_dat);
+  tr rlow [ (sda, Set Z) ] ract "read ACK clock: NACK" ~gap:(ex t.hd_dat);
+  let rseen = rest_of_pulse ract "read ACK clock" in
+  tr rseen [ (scl, Set L) ] oplow "next command's SCL low after a read" ~gap:(at_least (max t.high 8));
+  (* STOP *)
+  let slow = state "STOP: SDA low" in
+  tr oplow [ (sda, Set L) ] slow "STOP: SDA low" ~gap:(ex t.hd_dat);
+  let sseen = rest_of_pulse slow "STOP" in
+  tr sseen [ (sda, Set Z) ] post_stop "STOP" ~gap:(ex t.su_sto);
+  finish bl ~name:(Printf.sprintf "i2c controller low=%d high=%d limit=%d" t.low t.high lm) ~pins:[ sda; scl ]
+
+(* the register-file target of peers.ml on the bus, stretching at random; the host's commands
+   are mostly commands (i2c_host_byte) *)
+let i2c_target_world ~sda ~scl ~seed =
+  let rng = Random.State.make [| seed; 99 |] in
+  let tgt = Peers.I2c.target ~t_vd:(Random.State.int rng 20) ~addr:0x50
+      ~stretch:(fun () -> match Random.State.int rng 8 with 0 -> Random.State.int rng 300 | 1 -> Random.State.int rng 5000 | _ -> 0) () in
+  let pull = ref (false, false) in
+  fun ~clock:_ ~pin_out ~pin_oe ->
+    let pulls p = (pin_oe lsr p) land 1 = 1 && (pin_out lsr p) land 1 = 0 in
+    let s = if pulls sda || fst !pull then 0 else 1 and c = if pulls scl || snd !pull then 0 else 1 in
+    pull := Peers.I2c.step tgt ~sda:s ~scl:c;
+    0xFF land lnot ((1 - s) lsl sda) land lnot ((1 - c) lsl scl)
+
+(* host bytes for the controller: mostly commands, START and writes to the target's address
+   more often, so that runs get past the address *)
+let i2c_host_byte rng =
+  match Random.State.int rng 12 with
+  | 0 | 1 -> Fw.cmd_start | 2 -> Fw.cmd_stop | 3 | 4 | 5 -> Fw.cmd_write | 6 -> 0xA0 | 7 -> 0xA1
+  | 8 -> Fw.cmd_read_ack | 9 -> Fw.cmd_read_nack | _ -> Random.State.int rng 256
+
+let i2c_ctl ?fault ?(thread = 2) ?(lm = 4095) ~name (t : Fw.i2c_timing) =
+  let sda = 4 and scl = 5 in
+  { name = Printf.sprintf "i2c2_ctl_%s_l%d" name lm; words = page (Fw.i2c_ctl ?fault ~stretch_limit:lm ~sda ~scl ~timing:t ());
+    spec = i2c_ctl_spec ~sda ~scl ~t ~lm; thread;
+    env = Peer { seeds = [ 1; 2; 3; 4; 5; 6 ]; host = Some i2c_host_byte; world = (fun ~seed -> i2c_target_world ~sda ~scl ~seed) } }
+
+let i2c_images () =
+  List.concat_map (fun lm -> [ i2c_ctl ~lm ~name:"standard" Fw.standard_timing; i2c_ctl ~lm ~name:"fast" Fw.fast_timing ])
+    [ 7; 200; 4095 ]
+
+let i2c_planted () =
+  [ { (i2c_ctl ~fault:Fw.Ack_in_low_phase ~name:"fast" Fw.fast_timing) with name = "PLANTED i2c2 fast, the ACK read while SCL is low" };
+    { (i2c_ctl ~fault:Fw.No_stretch_wait ~name:"fast" Fw.fast_timing) with name = "PLANTED i2c2 fast, no wait for SCL high" };
+    { (i2c_ctl ~name:"fast" { Fw.fast_timing with low = 19 }) with name = "PLANTED i2c2 fast, SCL low 19 slots against 25";
+                                                                spec = i2c_ctl_spec ~sda:4 ~scl:5 ~t:Fw.fast_timing ~lm:4095 } ]
+
+let sweep () = uart_images () @ spi_images () @ i2c_images ()
+let planted () = uart_planted () @ spi_planted () @ i2c_planted ()

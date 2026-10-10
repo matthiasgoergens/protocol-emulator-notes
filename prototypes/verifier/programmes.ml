@@ -27,9 +27,10 @@ and env =
   | I2c_slave of { sda : int; scl : int }     (* an acking slave that stretches SCL at random *)
   | Random_inputs                              (* every input random on every clock *)
   (* a peer device on the pins (../protocol-roles/peers.ml): [world ~seed] gives, each clock, the
-     pins the thread reads from its own outputs; with [host], the host offers a random byte now
-     and then, as with Random_inputs *)
-  | Peer of { seeds : int list; host : bool; world : seed:int -> clock:int -> pin_out:int -> pin_oe:int -> int }
+     pins the thread reads from its own outputs; with [host = Some f], the host offers a byte
+     drawn by [f] on one clock in four *)
+  | Peer of { seeds : int list; host : (Random.State.t -> int) option;
+              world : seed:int -> clock:int -> pin_out:int -> pin_oe:int -> int }
 
 let v2_of_base (p : int array) =
   Array.init Isa2.page_len (fun pc ->

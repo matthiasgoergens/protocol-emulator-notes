@@ -472,11 +472,38 @@ def spi_role_teeth(t, exp):
             ("MOSI half a period plus 2 samples late against SCLK", delay(t, mosi, half + 2))]
 
 
+def judge_i2c_role(samples, rate, exp):
+    """I2C with repeated STARTs, reads and NACKs: every annotation of the i2c decoder (start,
+    repeated start, stop, ACK, NACK, address, data) in order, against i2c_expect."""
+    d = "i2c:scl=%s:sda=%s" % (exp["i2c_scl"], exp["i2c_sda"])
+    cls = "start:repeat-start:stop:ack:nack:address-read:address-write:data-read:data-write"
+    got = [g for g in sigrok(samples, 8, rate, d, ["i2c=" + cls]) if g not in ("Write", "Read")]
+    warn = sigrok(samples, 8, rate, d, ["i2c=warnings"])
+    want = exp["i2c_expect"].split(";")
+    problems = []
+    if got != want:
+        problems.append("decoded [%s], expected [%s]" % ("; ".join(got), "; ".join(want)))
+    problems += ["decoder warning: " + w for w in warn]
+    return Verdict(problems, "decoded [%s]" % "; ".join(got))
+
+
+def i2c_role_teeth(t, exp):
+    scl, sda = int(exp["i2c_scl"]), int(exp["i2c_sda"])
+    r = edges(t, scl, "r")
+    f = edges(t, scl, "f")
+    k = 2
+    end = next(x for x in f if x > r[k])
+    period = int(statistics.median([b - a for a, b in zip(r, r[1:])]))
+    return [("SDA inverted over the high phase of the third SCL pulse", invert(t, [sda], r[k] - 2, end)),
+            ("SDA %d samples (0.6 of an SCL period) late against SCL" % (period * 6 // 10), delay(t, sda, period * 6 // 10))]
+
+
 # Traces of ../../prototypes/protocol-roles (main.exe dump): one case per .expected file in
 # traces/roles, whose "judge" line names the judge and teeth to apply.
 ROLE_JUDGES = {
     "uart": (judge_uart, uart_teeth),
     "spi": (judge_spi_role, spi_role_teeth),
+    "i2c": (judge_i2c_role, i2c_role_teeth),
 }
 
 

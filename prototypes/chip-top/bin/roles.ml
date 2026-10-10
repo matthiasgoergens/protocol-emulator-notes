@@ -179,7 +179,86 @@ let spi () =
   pr "SPI controller on the combined chip: %s\n%!" (if ok then "PASS" else "FAIL");
   ok
 
-let demos = [ ("uart", uart); ("spi", spi) ]
+(* keep HOSTIN topped up from [bytes] (it holds 16): read the count, write what fits, repeat *)
+let rec feed (b : Board.t) (h : Host.t) bytes ~every =
+  match !bytes with
+  | [] -> ()
+  | _ ->
+    Host.submit h (Host.Read { tgt = t_reg; addr = r_hostin_count; n = 1; k = (fun l ->
+        let free = 16 - List.hd l in
+        let now = List.filteri (fun i _ -> i < free) !bytes in
+        bytes := List.filteri (fun i _ -> i >= free) !bytes;
+        if now <> [] then Host.submit h (Host.Write { tgt = t_hostin; addr = 0; data = now });
+        Host.submit h (Host.Idle every);
+        Host.submit h (Host.Call (fun () -> feed b h bytes ~every))) })
+
+(* ---- I2C controller ---- *)
+
+(* the open-drain pins uio[6] (SDA, logical pin 4) and uio[7] (SCL, pin 5) with the target of
+   peers.ml on the bus and rise and fall times; returns the world and the bus levels seen *)
+let i2c_bus ~tr ~tf (pull_target : sda:int -> scl:int -> bool * bool) ~ready =
+  let sl = Peers.I2c.line ~tr ~tf and cl = Peers.I2c.line ~tr ~tf in
+  let t_pull = ref (false, false) in
+  let trace = ref [] in
+  let world ~clock (o : S.outputs) =
+    let chip_pulls pad = (o.uio_oe lsr (pad - 8)) land 1 = 1 && level o pad = 0 in
+    let s = Peers.I2c.line_step sl ~pulled:(chip_pulls 14 || fst !t_pull)
+    and c = Peers.I2c.line_step cl ~pulled:(chip_pulls 15 || snd !t_pull) in
+    if !ready then (t_pull := pull_target ~sda:s ~scl:c; trace := (clock, s, c) :: !trace);
+    let smp = Array.make n_pads 0 in
+    smp.(14) <- Board.rep4 s;
+    smp.(15) <- Board.rep4 c;
+    smp in
+  world, trace
+
+let i2c_pins h =
+  Host.submit h (Host.Write { tgt = t_reg; addr = r_padsel 14; data = [ sel (src_seq 4) 0; sel (src_seq 5) 0 ] });
+  Host.submit h (Host.Write { tgt = t_reg; addr = r_pinin 4; data = [ 14; 15 ] })
+
+let i2c () =
+  pr "== I2C controller in Fast-mode on the combined chip: thread 0 on uio[6] (SDA) and uio[7] (SCL),\n";
+  pr "   the host's commands through HOSTIN, results through HOSTOUT; the register-file target of\n";
+  pr "   peers.ml at 0x50 on the bus, stretching the clock at random; rise and fall 300 ns\n";
+  let prog = Fw.i2c_ctl ~sda:4 ~scl:5 ~timing:Fw.fast_timing () in
+  pr "  programme: %d words\n" (snd prog);
+  let b = Board.create () in
+  let h = b.host in
+  let words = load h [ (0, prog) ] in
+  i2c_pins h;
+  let rng = Random.State.make [| 3 |] in
+  let tgt = Peers.I2c.target ~t_vd:10 ~addr:0x50 ~stretch:(fun () -> if Random.State.int rng 4 = 0 then Random.State.int rng 300 else 0) () in
+  let ready = ref false in
+  let world, trace = i2c_bus ~tr:18 ~tf:18 (fun ~sda ~scl -> Peers.I2c.step tgt ~sda ~scl) ~ready in
+  Host.submit h (Host.Call (fun () -> ready := true));
+  Host.wreg h r_ctrl 3;
+  let ops = Fw.[ Start; Write [ 0xA0; 0x10; 0x55; 0xAA ]; Stop; Start; Write [ 0xA0; 0x10 ]; Start; Write [ 0xA1 ]; Read 3; Stop ] in
+  feed b h (ref (Fw.i2c_commands ops)) ~every:400;
+  let got = ref [] in
+  let clocks = 40_000 in
+  drain b h got ~every:300 ~until:(clocks - 1500);
+  let agree = run_board b ~world ~clocks ~on_clock:(fun _ _ -> ()) in
+  let evs = List.rev tgt.events in
+  let r12 = tgt.regs.(0x12) in
+  let want_evs = Peers.I2c.[ Ev_start; Ev_addr (0x50, 0, true); Ev_write (0x10, true); Ev_write (0x55, true); Ev_write (0xAA, true); Ev_stop;
+                             Ev_start; Ev_addr (0x50, 0, true); Ev_write (0x10, true); Ev_restart; Ev_addr (0x50, 1, true);
+                             Ev_read (0x55, true); Ev_read (0xAA, true); Ev_read (r12, false); Ev_stop ] in
+  let want_out = [ (1, 0); (1, 0); (1, 0); (1, 0); (3, 0); (1, 0); (1, 0); (1, 0); (0, 0x55); (0, 0xAA); (0, r12); (3, 0) ] in
+  (* the SCL period on the bus: the shortest rise to rise *)
+  let rises = List.filter_map (fun ((c, _, s1), (_, _, s0)) -> if s1 = 1 && s0 = 0 then Some c else None)
+      (let l = List.rev !trace in List.combine (List.tl l) (List.filteri (fun i _ -> i < List.length l - 1) l)) in
+  let rec gaps = function a :: (b :: _ as r) -> (b - a) :: gaps r | _ -> [] in
+  let shortest = List.fold_left min max_int (gaps rises) in
+  pr "  %d words loaded through the link\n" words;
+  pr "  target saw: %s\n" (String.concat " " (List.map Peers.I2c.event_to_string evs));
+  pr "  host read: %s\n" (String.concat " " (List.map (fun (t, v) -> Printf.sprintf "tag%d:%02x" t v) !got));
+  pr "  shortest SCL period on the bus: %d clocks (%.1f kHz)\n" shortest (Fw.clock_hz /. float shortest /. 1000.);
+  pr "  RTL and specification agree on every pad, every clock: %b\n" agree;
+  pr "  HOSTOUT overflow seen: %b\n" !overflow;
+  let ok = agree && evs = want_evs && !got = want_out && not !overflow && Fw.clock_hz /. float shortest <= 400e3 in
+  pr "I2C controller on the combined chip: %s\n%!" (if ok then "PASS" else "FAIL");
+  ok
+
+let demos = [ ("uart", uart); ("spi", spi); ("i2c", i2c) ]
 
 let () =
   let ok = match Array.to_list Sys.argv with

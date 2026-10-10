@@ -1,0 +1,350 @@
+# timing certificate
+# image i2c2_ctl_standard_l4095 sha256 8a99d1e724414539ee605668b33b2e1457a0625f5af0f0f9d77a756c49a8ec20 (256 words, high byte first)
+# specification: i2c controller low=76 high=74 limit=4095, channel pins 4,5
+# verdict: PROVED; 1226 table entries, 358 channel events checked
+# assumptions: kernel.ml A1-A5. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot
+# columns: pc, instruction, pins touched, specification state from -> to, slot of the event,
+#          gap since the previous channel event, declared gap, declared data (the level is that
+#          bit of that input byte: driven for a push-pull write, driven 0 or released for open drain)
+# deadlines: 0:0 5:5 6:71 7:4095 8:74 9:1 10:5 11:71 12:4095 13:74 14:1 15:5 16:71 17:4095 18:74 19:1 20:5 21:71 22:4095 23:74 24:1 25:5 26:71 27:4095 28:74 29:1 30:5 31:71 32:4095 33:74 34:1 35:5 36:71 37:4095 38:74 39:1 40:5 41:71 42:4095 43:74 44:1 45:5 46:71 48:4095 49:37 50:1 51:71 52:4095 53:71 54:1 56:37 57:5 58:71 59:37 60:4095 61:37 62:1 63:5 64:71 65:37 66:4095 67:37 68:1 69:5 70:71 71:37 72:4095 73:37 74:1 75:5 76:71 77:37 78:4095 79:37 80:1 81:5 82:71 83:37 84:4095 85:37 86:1 87:5 88:71 89:37 90:4095 91:37 92:1 93:5 94:71 95:37 96:4095 97:37 98:1 99:5 100:71 101:4095 103:1 104:71 105:4095 106:61 107:1
+  0  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z            0 -> 1   slot 0          gap 0         declared 0
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     1 -> 4   slot 4..?       gap 4..?      declared 4..?
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 70..?      gap 66..?     declared 66..?
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 70..?      gap 66..?     declared 66..?
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 71..?      gap 67..?     declared 66..?
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 71..?      gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 72..?      gap 68..?     declared 66..?
+ 26  sho pin4 msb od q=0        p4:sho=dz                    5 -> 6   slot 75..?      gap 5         declared 5
+ 59  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 75..?      gap 5         declared 5
+ 88  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 76..?      gap 5         declared 5
+116  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 76..?      gap 5         declared 5
+131  setp mask=10 val=0 oe=1 q=0 p4:set=0                     5 -> 104 slot 77..?      gap 5         declared 5
+ 30  setp mask=20 val=0 oe=0 q=0 p5:set=z                     6 -> 7   slot 146..?     gap 71        declared 71
+ 63  setp mask=20 val=0 oe=0 q=0 p5:set=z                    51 -> 52  slot 146..?     gap 71        declared 71
+ 31  waitp pin5==1 fail=144     p5:seen=1                    7 -> 8   slot 147..?     gap 1..4095   declared 1..4095
+ 64  waitp pin5==1 fail=144     p5:seen=1                   52 -> 53  slot 147..?     gap 1..4095   declared 1..4095
+ 92  setp mask=20 val=0 oe=0 q=0 p5:set=z                    51 -> 52  slot 147..?     gap 71        declared 71
+120  setp mask=20 val=0 oe=0 q=0 p5:set=z                    51 -> 52  slot 147..?     gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:seen=1                   52 -> 53  slot 148..?     gap 1..4095   declared 1..4095
+121  waitp pin5==1 fail=144     p5:seen=1                   52 -> 53  slot 148..?     gap 1..4095   declared 1..4095
+135  setp mask=20 val=0 oe=0 q=0 p5:set=z                   104 -> 105 slot 148..?     gap 71        declared 71
+136  waitp pin5==1 fail=144     p5:seen=1                  105 -> 106 slot 149..?     gap 1..4095   declared 1..4095
+ 67  shi pin4 msb               p4:sample                   53 -> 56  slot 184..?     gap 37        declared 37
+ 96  shi pin4 msb               p4:sample                   53 -> 56  slot 185..?     gap 37        declared 37
+139  setp mask=10 val=0 oe=0 q=0 p4:set=z                   106 -> 2   slot 210..?     gap 61        declared 61
+124  setp mask=10 val=0 oe=1 q=0 p4:set=0                    53 -> 55  slot 219..?     gap 71        declared 71
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                     8 -> 10  slot 221..?     gap 74        declared 74
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                    56 -> 57  slot 221..?     gap 37        declared 37
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                    56 -> 57  slot 222..?     gap 37        declared 37
+ 26  sho pin4 msb od q=0        p4:sho=dz                   10 -> 11  slot 226..?     gap 5         declared 5
+ 59  setp mask=10 val=0 oe=0 q=0 p4:set=z                    57 -> 58  slot 226..?     gap 5         declared 5
+ 88  setp mask=10 val=0 oe=0 q=0 p4:set=z                    57 -> 58  slot 227..?     gap 5         declared 5
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 285..?     gap 66..?     declared 66..?
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 285..?     gap 66..?     declared 66..?
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 286..?     gap 67..?     declared 66..?
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 286..?     gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 287..?     gap 68..?     declared 66..?
+ 30  setp mask=20 val=0 oe=0 q=0 p5:set=z                    11 -> 12  slot 297..?     gap 71        declared 71
+ 63  setp mask=20 val=0 oe=0 q=0 p5:set=z                    58 -> 60  slot 297..?     gap 71        declared 71
+ 31  waitp pin5==1 fail=144     p5:seen=1                   12 -> 13  slot 298..?     gap 1..4095   declared 1..4095
+ 64  waitp pin5==1 fail=144     p5:seen=1                   60 -> 61  slot 298..?     gap 1..4095   declared 1..4095
+ 92  setp mask=20 val=0 oe=0 q=0 p5:set=z                    58 -> 60  slot 298..?     gap 71        declared 71
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     2 -> 4   slot 299..?     gap 89..?     declared 89..?
+ 93  waitp pin5==1 fail=144     p5:seen=1                   60 -> 61  slot 299..?     gap 1..4095   declared 1..4095
+ 67  shi pin4 msb               p4:sample                   61 -> 59  slot 335..?     gap 37        declared 37
+ 96  shi pin4 msb               p4:sample                   61 -> 59  slot 336..?     gap 37        declared 37
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                    13 -> 15  slot 372..?     gap 74        declared 74
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                    59 -> 63  slot 372..?     gap 37        declared 37
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                    59 -> 63  slot 373..?     gap 37        declared 37
+ 26  sho pin4 msb od q=0        p4:sho=dz                   15 -> 16  slot 377..?     gap 5         declared 5
+ 59  setp mask=10 val=0 oe=0 q=0 p4:set=z                    63 -> 64  slot 377..?     gap 5         declared 5
+ 88  setp mask=10 val=0 oe=0 q=0 p4:set=z                    63 -> 64  slot 378..?     gap 5         declared 5
+ 30  setp mask=20 val=0 oe=0 q=0 p5:set=z                    16 -> 17  slot 448..?     gap 71        declared 71
+ 63  setp mask=20 val=0 oe=0 q=0 p5:set=z                    64 -> 66  slot 448..?     gap 71        declared 71
+ 31  waitp pin5==1 fail=144     p5:seen=1                   17 -> 18  slot 449..?     gap 1..4095   declared 1..4095
+ 64  waitp pin5==1 fail=144     p5:seen=1                   66 -> 67  slot 449..?     gap 1..4095   declared 1..4095
+ 92  setp mask=20 val=0 oe=0 q=0 p5:set=z                    64 -> 66  slot 449..?     gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:seen=1                   66 -> 67  slot 450..?     gap 1..4095   declared 1..4095
+ 67  shi pin4 msb               p4:sample                   67 -> 65  slot 486..?     gap 37        declared 37
+ 96  shi pin4 msb               p4:sample                   67 -> 65  slot 487..?     gap 37        declared 37
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                    18 -> 20  slot 523..?     gap 74        declared 74
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                    65 -> 69  slot 523..?     gap 37        declared 37
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                    65 -> 69  slot 524..?     gap 37        declared 37
+ 26  sho pin4 msb od q=0        p4:sho=dz                   20 -> 21  slot 528..?     gap 5         declared 5
+ 59  setp mask=10 val=0 oe=0 q=0 p4:set=z                    69 -> 70  slot 528..?     gap 5         declared 5
+ 88  setp mask=10 val=0 oe=0 q=0 p4:set=z                    69 -> 70  slot 529..?     gap 5         declared 5
+ 30  setp mask=20 val=0 oe=0 q=0 p5:set=z                    21 -> 22  slot 599..?     gap 71        declared 71
+ 63  setp mask=20 val=0 oe=0 q=0 p5:set=z                    70 -> 72  slot 599..?     gap 71        declared 71
+ 31  waitp pin5==1 fail=144     p5:seen=1                   22 -> 23  slot 600..?     gap 1..4095   declared 1..4095
+ 64  waitp pin5==1 fail=144     p5:seen=1                   72 -> 73  slot 600..?     gap 1..4095   declared 1..4095
+ 92  setp mask=20 val=0 oe=0 q=0 p5:set=z                    70 -> 72  slot 600..?     gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:seen=1                   72 -> 73  slot 601..?     gap 1..4095   declared 1..4095
+ 67  shi pin4 msb               p4:sample                   73 -> 71  slot 637..?     gap 37        declared 37
+ 96  shi pin4 msb               p4:sample                   73 -> 71  slot 638..?     gap 37        declared 37
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                    23 -> 25  slot 674..?     gap 74        declared 74
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                    71 -> 75  slot 674..?     gap 37        declared 37
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                    71 -> 75  slot 675..?     gap 37        declared 37
+ 26  sho pin4 msb od q=0        p4:sho=dz                   25 -> 26  slot 679..?     gap 5         declared 5
+ 59  setp mask=10 val=0 oe=0 q=0 p4:set=z                    75 -> 76  slot 679..?     gap 5         declared 5
+ 88  setp mask=10 val=0 oe=0 q=0 p4:set=z                    75 -> 76  slot 680..?     gap 5         declared 5
+ 30  setp mask=20 val=0 oe=0 q=0 p5:set=z                    26 -> 27  slot 750..?     gap 71        declared 71
+ 63  setp mask=20 val=0 oe=0 q=0 p5:set=z                    76 -> 78  slot 750..?     gap 71        declared 71
+ 31  waitp pin5==1 fail=144     p5:seen=1                   27 -> 28  slot 751..?     gap 1..4095   declared 1..4095
+ 64  waitp pin5==1 fail=144     p5:seen=1                   78 -> 79  slot 751..?     gap 1..4095   declared 1..4095
+ 92  setp mask=20 val=0 oe=0 q=0 p5:set=z                    76 -> 78  slot 751..?     gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:seen=1                   78 -> 79  slot 752..?     gap 1..4095   declared 1..4095
+ 67  shi pin4 msb               p4:sample                   79 -> 77  slot 788..?     gap 37        declared 37
+ 96  shi pin4 msb               p4:sample                   79 -> 77  slot 789..?     gap 37        declared 37
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                    28 -> 30  slot 825..?     gap 74        declared 74
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                    77 -> 81  slot 825..?     gap 37        declared 37
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                    77 -> 81  slot 826..?     gap 37        declared 37
+ 26  sho pin4 msb od q=0        p4:sho=dz                   30 -> 31  slot 830..?     gap 5         declared 5
+ 59  setp mask=10 val=0 oe=0 q=0 p4:set=z                    81 -> 82  slot 830..?     gap 5         declared 5
+ 88  setp mask=10 val=0 oe=0 q=0 p4:set=z                    81 -> 82  slot 831..?     gap 5         declared 5
+ 30  setp mask=20 val=0 oe=0 q=0 p5:set=z                    31 -> 32  slot 901..?     gap 71        declared 71
+ 63  setp mask=20 val=0 oe=0 q=0 p5:set=z                    82 -> 84  slot 901..?     gap 71        declared 71
+ 31  waitp pin5==1 fail=144     p5:seen=1                   32 -> 33  slot 902..?     gap 1..4095   declared 1..4095
+ 64  waitp pin5==1 fail=144     p5:seen=1                   84 -> 85  slot 902..?     gap 1..4095   declared 1..4095
+ 92  setp mask=20 val=0 oe=0 q=0 p5:set=z                    82 -> 84  slot 902..?     gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:seen=1                   84 -> 85  slot 903..?     gap 1..4095   declared 1..4095
+ 67  shi pin4 msb               p4:sample                   85 -> 83  slot 939..?     gap 37        declared 37
+ 96  shi pin4 msb               p4:sample                   85 -> 83  slot 940..?     gap 37        declared 37
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                    33 -> 35  slot 976..?     gap 74        declared 74
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                    83 -> 87  slot 976..?     gap 37        declared 37
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                    83 -> 87  slot 977..?     gap 37        declared 37
+ 26  sho pin4 msb od q=0        p4:sho=dz                   35 -> 36  slot 981..?     gap 5         declared 5
+ 59  setp mask=10 val=0 oe=0 q=0 p4:set=z                    87 -> 88  slot 981..?     gap 5         declared 5
+ 88  setp mask=10 val=0 oe=0 q=0 p4:set=z                    87 -> 88  slot 982..?     gap 5         declared 5
+ 30  setp mask=20 val=0 oe=0 q=0 p5:set=z                    36 -> 37  slot 1052..?    gap 71        declared 71
+ 63  setp mask=20 val=0 oe=0 q=0 p5:set=z                    88 -> 90  slot 1052..?    gap 71        declared 71
+ 31  waitp pin5==1 fail=144     p5:seen=1                   37 -> 38  slot 1053..?    gap 1..4095   declared 1..4095
+ 64  waitp pin5==1 fail=144     p5:seen=1                   90 -> 91  slot 1053..?    gap 1..4095   declared 1..4095
+ 92  setp mask=20 val=0 oe=0 q=0 p5:set=z                    88 -> 90  slot 1053..?    gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:seen=1                   90 -> 91  slot 1054..?    gap 1..4095   declared 1..4095
+ 67  shi pin4 msb               p4:sample                   91 -> 89  slot 1090..?    gap 37        declared 37
+ 96  shi pin4 msb               p4:sample                   91 -> 89  slot 1091..?    gap 37        declared 37
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                    38 -> 40  slot 1127..?    gap 74        declared 74
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                    89 -> 93  slot 1127..?    gap 37        declared 37
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                    89 -> 93  slot 1128..?    gap 37        declared 37
+ 26  sho pin4 msb od q=0        p4:sho=dz                   40 -> 41  slot 1132..?    gap 5         declared 5
+ 59  setp mask=10 val=0 oe=0 q=0 p4:set=z                    93 -> 94  slot 1132..?    gap 5         declared 5
+ 88  setp mask=10 val=0 oe=0 q=0 p4:set=z                    93 -> 94  slot 1133..?    gap 5         declared 5
+ 30  setp mask=20 val=0 oe=0 q=0 p5:set=z                    41 -> 42  slot 1203..?    gap 71        declared 71
+ 63  setp mask=20 val=0 oe=0 q=0 p5:set=z                    94 -> 96  slot 1203..?    gap 71        declared 71
+ 31  waitp pin5==1 fail=144     p5:seen=1                   42 -> 43  slot 1204..?    gap 1..4095   declared 1..4095
+ 64  waitp pin5==1 fail=144     p5:seen=1                   96 -> 97  slot 1204..?    gap 1..4095   declared 1..4095
+ 92  setp mask=20 val=0 oe=0 q=0 p5:set=z                    94 -> 96  slot 1204..?    gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:seen=1                   96 -> 97  slot 1205..?    gap 1..4095   declared 1..4095
+ 67  shi pin4 msb               p4:sample                   97 -> 95  slot 1241..?    gap 37        declared 37
+ 96  shi pin4 msb               p4:sample                   97 -> 95  slot 1242..?    gap 37        declared 37
+ 35  setp mask=20 val=0 oe=1 q=0 p5:set=0                    43 -> 45  slot 1278..?    gap 74        declared 74
+ 71  setp mask=20 val=0 oe=1 q=0 p5:set=0                    95 -> 99  slot 1278..?    gap 37        declared 37
+100  setp mask=20 val=0 oe=1 q=0 p5:set=0                    95 -> 99  slot 1279..?    gap 37        declared 37
+ 38  setp mask=10 val=0 oe=0 q=0 p4:set=z                    45 -> 46  slot 1283..?    gap 5         declared 5
+ 74  setp mask=10 val=0 oe=1 q=0 p4:set=0                    99 -> 100 slot 1283..?    gap 5         declared 5
+103  setp mask=10 val=0 oe=0 q=0 p4:set=z                    99 -> 100 slot 1284..?    gap 5         declared 5
+ 42  setp mask=20 val=0 oe=0 q=0 p5:set=z                    46 -> 48  slot 1354..?    gap 71        declared 71
+ 78  setp mask=20 val=0 oe=0 q=0 p5:set=z                   100 -> 101 slot 1354..?    gap 71        declared 71
+ 43  waitp pin5==1 fail=144     p5:seen=1                   48 -> 49  slot 1355..?    gap 1..4095   declared 1..4095
+ 79  waitp pin5==1 fail=144     p5:seen=1                  101 -> 102 slot 1355..?    gap 1..4095   declared 1..4095
+107  setp mask=20 val=0 oe=0 q=0 p5:set=z                   100 -> 101 slot 1355..?    gap 71        declared 71
+108  waitp pin5==1 fail=144     p5:seen=1                  101 -> 102 slot 1356..?    gap 1..4095   declared 1..4095
+ 46  waitp pin4==0 fail=51      p4:seen=0                   49 -> 47  slot 1392..?    gap 37        declared 37
+ 46  waitp pin4==0 fail=51      p4:timeout(0)               49 -> 47  slot 1392..?    gap 37        declared 37
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                    47 -> 5   slot 1429..?    gap 37..?     declared 37..?
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                   102 -> 5   slot 1429..?    gap 74..?     declared 74..?
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                    47 -> 5   slot 1429..?    gap 37..?     declared 37..?
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                   102 -> 5   slot 1429..?    gap 74..?     declared 74..?
+ 23  setp mask=20 val=0 oe=1 q=0 p5:set=0                   102 -> 5   slot 1430..?    gap 74..?     declared 74..?
+ 56  setp mask=20 val=0 oe=1 q=0 p5:set=0                   102 -> 5   slot 1430..?    gap 74..?     declared 74..?
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                    47 -> 5   slot 1430..?    gap 38..?     declared 37..?
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                   102 -> 5   slot 1430..?    gap 75..?     declared 74..?
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                    47 -> 5   slot 1430..?    gap 38..?     declared 37..?
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                   102 -> 5   slot 1430..?    gap 75..?     declared 74..?
+ 85  setp mask=20 val=0 oe=1 q=0 p5:set=0                   102 -> 5   slot 1431..?    gap 75..?     declared 74..?
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                   102 -> 5   slot 1431..?    gap 75..?     declared 74..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                    47 -> 5   slot 1431..?    gap 39..?     declared 37..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                   102 -> 5   slot 1431..?    gap 76..?     declared 74..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                   102 -> 5   slot 1432..?    gap 76..?     declared 74..?
+ 26  sho pin4 msb od q=0        p4:sho=dz                    5 -> 6   slot 1434..?    gap 5         declared 5
+ 59  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 1434..?    gap 5         declared 5
+ 88  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 1435..?    gap 5         declared 5
+116  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 1435..?    gap 5         declared 5
+131  setp mask=10 val=0 oe=1 q=0 p4:set=0                     5 -> 104 slot 1436..?    gap 5         declared 5
+ 31  waitp pin5==1 fail=144     p5:timeout(1)                7 -> 9   slot 4241..?    gap 4095      declared 4095
+ 64  waitp pin5==1 fail=144     p5:timeout(1)               52 -> 54  slot 4241..?    gap 4095      declared 4095
+ 93  waitp pin5==1 fail=144     p5:timeout(1)               52 -> 54  slot 4242..?    gap 4095      declared 4095
+121  waitp pin5==1 fail=144     p5:timeout(1)               52 -> 54  slot 4242..?    gap 4095      declared 4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z            9 -> 3   slot 4242..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           54 -> 3   slot 4242..?    gap 1         declared 1
+136  waitp pin5==1 fail=144     p5:timeout(1)              105 -> 107 slot 4243..?    gap 4095      declared 4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           54 -> 3   slot 4243..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z          107 -> 3   slot 4244..?    gap 1         declared 1
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     3 -> 4   slot 4248..?    gap 6..?      declared 6..?
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     3 -> 4   slot 4249..?    gap 6..?      declared 6..?
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 4315..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 4316..?    gap 68..?     declared 66..?
+116  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 4320..?    gap 5         declared 5
+131  setp mask=10 val=0 oe=1 q=0 p4:set=0                     5 -> 104 slot 4321..?    gap 5         declared 5
+120  setp mask=20 val=0 oe=0 q=0 p5:set=z                    51 -> 52  slot 4391..?    gap 71        declared 71
+ 31  waitp pin5==1 fail=144     p5:timeout(1)               12 -> 14  slot 4392..?    gap 4095      declared 4095
+ 64  waitp pin5==1 fail=144     p5:timeout(1)               60 -> 62  slot 4392..?    gap 4095      declared 4095
+121  waitp pin5==1 fail=144     p5:seen=1                   52 -> 53  slot 4392..?    gap 1..4095   declared 1..4095
+135  setp mask=20 val=0 oe=0 q=0 p5:set=z                   104 -> 105 slot 4392..?    gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:timeout(1)               60 -> 62  slot 4393..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:seen=1                  105 -> 106 slot 4393..?    gap 1..4095   declared 1..4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           14 -> 3   slot 4393..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           62 -> 3   slot 4393..?    gap 1         declared 1
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     3 -> 4   slot 4399..?    gap 6..?      declared 6..?
+139  setp mask=10 val=0 oe=0 q=0 p4:set=z                   106 -> 2   slot 4454..?    gap 61        declared 61
+124  setp mask=10 val=0 oe=1 q=0 p4:set=0                    53 -> 55  slot 4463..?    gap 71        declared 71
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 4466..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 4467..?    gap 68..?     declared 66..?
+116  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 4471..?    gap 5         declared 5
+131  setp mask=10 val=0 oe=1 q=0 p4:set=0                     5 -> 104 slot 4472..?    gap 5         declared 5
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 4530..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 4531..?    gap 68..?     declared 66..?
+120  setp mask=20 val=0 oe=0 q=0 p5:set=z                    51 -> 52  slot 4542..?    gap 71        declared 71
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     2 -> 4   slot 4543..?    gap 89..?     declared 89..?
+ 31  waitp pin5==1 fail=144     p5:timeout(1)               17 -> 19  slot 4543..?    gap 4095      declared 4095
+ 64  waitp pin5==1 fail=144     p5:timeout(1)               66 -> 68  slot 4543..?    gap 4095      declared 4095
+121  waitp pin5==1 fail=144     p5:seen=1                   52 -> 53  slot 4543..?    gap 1..4095   declared 1..4095
+135  setp mask=20 val=0 oe=0 q=0 p5:set=z                   104 -> 105 slot 4543..?    gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:timeout(1)               66 -> 68  slot 4544..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:seen=1                  105 -> 106 slot 4544..?    gap 1..4095   declared 1..4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           19 -> 3   slot 4544..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           68 -> 3   slot 4544..?    gap 1         declared 1
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     3 -> 4   slot 4550..?    gap 6..?      declared 6..?
+139  setp mask=10 val=0 oe=0 q=0 p4:set=z                   106 -> 2   slot 4605..?    gap 61        declared 61
+124  setp mask=10 val=0 oe=1 q=0 p4:set=0                    53 -> 55  slot 4614..?    gap 71        declared 71
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 4617..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 4618..?    gap 68..?     declared 66..?
+116  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 4622..?    gap 5         declared 5
+131  setp mask=10 val=0 oe=1 q=0 p4:set=0                     5 -> 104 slot 4623..?    gap 5         declared 5
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 4681..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 4682..?    gap 68..?     declared 66..?
+120  setp mask=20 val=0 oe=0 q=0 p5:set=z                    51 -> 52  slot 4693..?    gap 71        declared 71
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     2 -> 4   slot 4694..?    gap 89..?     declared 89..?
+ 31  waitp pin5==1 fail=144     p5:timeout(1)               22 -> 24  slot 4694..?    gap 4095      declared 4095
+ 64  waitp pin5==1 fail=144     p5:timeout(1)               72 -> 74  slot 4694..?    gap 4095      declared 4095
+121  waitp pin5==1 fail=144     p5:seen=1                   52 -> 53  slot 4694..?    gap 1..4095   declared 1..4095
+135  setp mask=20 val=0 oe=0 q=0 p5:set=z                   104 -> 105 slot 4694..?    gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:timeout(1)               72 -> 74  slot 4695..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:seen=1                  105 -> 106 slot 4695..?    gap 1..4095   declared 1..4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           24 -> 3   slot 4695..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           74 -> 3   slot 4695..?    gap 1         declared 1
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     3 -> 4   slot 4701..?    gap 6..?      declared 6..?
+139  setp mask=10 val=0 oe=0 q=0 p4:set=z                   106 -> 2   slot 4756..?    gap 61        declared 61
+124  setp mask=10 val=0 oe=1 q=0 p4:set=0                    53 -> 55  slot 4765..?    gap 71        declared 71
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 4768..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 4769..?    gap 68..?     declared 66..?
+116  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 4773..?    gap 5         declared 5
+131  setp mask=10 val=0 oe=1 q=0 p4:set=0                     5 -> 104 slot 4774..?    gap 5         declared 5
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 4832..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 4833..?    gap 68..?     declared 66..?
+120  setp mask=20 val=0 oe=0 q=0 p5:set=z                    51 -> 52  slot 4844..?    gap 71        declared 71
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     2 -> 4   slot 4845..?    gap 89..?     declared 89..?
+ 31  waitp pin5==1 fail=144     p5:timeout(1)               27 -> 29  slot 4845..?    gap 4095      declared 4095
+ 64  waitp pin5==1 fail=144     p5:timeout(1)               78 -> 80  slot 4845..?    gap 4095      declared 4095
+121  waitp pin5==1 fail=144     p5:seen=1                   52 -> 53  slot 4845..?    gap 1..4095   declared 1..4095
+135  setp mask=20 val=0 oe=0 q=0 p5:set=z                   104 -> 105 slot 4845..?    gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:timeout(1)               78 -> 80  slot 4846..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:seen=1                  105 -> 106 slot 4846..?    gap 1..4095   declared 1..4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           29 -> 3   slot 4846..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           80 -> 3   slot 4846..?    gap 1         declared 1
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     3 -> 4   slot 4852..?    gap 6..?      declared 6..?
+139  setp mask=10 val=0 oe=0 q=0 p4:set=z                   106 -> 2   slot 4907..?    gap 61        declared 61
+124  setp mask=10 val=0 oe=1 q=0 p4:set=0                    53 -> 55  slot 4916..?    gap 71        declared 71
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 4919..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 4920..?    gap 68..?     declared 66..?
+116  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 4924..?    gap 5         declared 5
+131  setp mask=10 val=0 oe=1 q=0 p4:set=0                     5 -> 104 slot 4925..?    gap 5         declared 5
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 4983..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 4984..?    gap 68..?     declared 66..?
+120  setp mask=20 val=0 oe=0 q=0 p5:set=z                    51 -> 52  slot 4995..?    gap 71        declared 71
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     2 -> 4   slot 4996..?    gap 89..?     declared 89..?
+ 31  waitp pin5==1 fail=144     p5:timeout(1)               32 -> 34  slot 4996..?    gap 4095      declared 4095
+ 64  waitp pin5==1 fail=144     p5:timeout(1)               84 -> 86  slot 4996..?    gap 4095      declared 4095
+121  waitp pin5==1 fail=144     p5:seen=1                   52 -> 53  slot 4996..?    gap 1..4095   declared 1..4095
+135  setp mask=20 val=0 oe=0 q=0 p5:set=z                   104 -> 105 slot 4996..?    gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:timeout(1)               84 -> 86  slot 4997..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:seen=1                  105 -> 106 slot 4997..?    gap 1..4095   declared 1..4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           34 -> 3   slot 4997..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           86 -> 3   slot 4997..?    gap 1         declared 1
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     3 -> 4   slot 5003..?    gap 6..?      declared 6..?
+139  setp mask=10 val=0 oe=0 q=0 p4:set=z                   106 -> 2   slot 5058..?    gap 61        declared 61
+124  setp mask=10 val=0 oe=1 q=0 p4:set=0                    53 -> 55  slot 5067..?    gap 71        declared 71
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 5070..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 5071..?    gap 68..?     declared 66..?
+116  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 5075..?    gap 5         declared 5
+131  setp mask=10 val=0 oe=1 q=0 p4:set=0                     5 -> 104 slot 5076..?    gap 5         declared 5
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 5134..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 5135..?    gap 68..?     declared 66..?
+120  setp mask=20 val=0 oe=0 q=0 p5:set=z                    51 -> 52  slot 5146..?    gap 71        declared 71
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     2 -> 4   slot 5147..?    gap 89..?     declared 89..?
+ 31  waitp pin5==1 fail=144     p5:timeout(1)               37 -> 39  slot 5147..?    gap 4095      declared 4095
+ 64  waitp pin5==1 fail=144     p5:timeout(1)               90 -> 92  slot 5147..?    gap 4095      declared 4095
+121  waitp pin5==1 fail=144     p5:seen=1                   52 -> 53  slot 5147..?    gap 1..4095   declared 1..4095
+135  setp mask=20 val=0 oe=0 q=0 p5:set=z                   104 -> 105 slot 5147..?    gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:timeout(1)               90 -> 92  slot 5148..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:seen=1                  105 -> 106 slot 5148..?    gap 1..4095   declared 1..4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           39 -> 3   slot 5148..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           92 -> 3   slot 5148..?    gap 1         declared 1
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     3 -> 4   slot 5154..?    gap 6..?      declared 6..?
+139  setp mask=10 val=0 oe=0 q=0 p4:set=z                   106 -> 2   slot 5209..?    gap 61        declared 61
+124  setp mask=10 val=0 oe=1 q=0 p4:set=0                    53 -> 55  slot 5218..?    gap 71        declared 71
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 5221..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                     4 -> 5   slot 5222..?    gap 68..?     declared 66..?
+116  setp mask=10 val=0 oe=0 q=0 p4:set=z                     5 -> 51  slot 5226..?    gap 5         declared 5
+131  setp mask=10 val=0 oe=1 q=0 p4:set=0                     5 -> 104 slot 5227..?    gap 5         declared 5
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 5285..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 5286..?    gap 68..?     declared 66..?
+120  setp mask=20 val=0 oe=0 q=0 p5:set=z                    51 -> 52  slot 5297..?    gap 71        declared 71
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     2 -> 4   slot 5298..?    gap 89..?     declared 89..?
+ 31  waitp pin5==1 fail=144     p5:timeout(1)               42 -> 44  slot 5298..?    gap 4095      declared 4095
+ 64  waitp pin5==1 fail=144     p5:timeout(1)               96 -> 98  slot 5298..?    gap 4095      declared 4095
+121  waitp pin5==1 fail=144     p5:seen=1                   52 -> 53  slot 5298..?    gap 1..4095   declared 1..4095
+135  setp mask=20 val=0 oe=0 q=0 p5:set=z                   104 -> 105 slot 5298..?    gap 71        declared 71
+ 93  waitp pin5==1 fail=144     p5:timeout(1)               96 -> 98  slot 5299..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:seen=1                  105 -> 106 slot 5299..?    gap 1..4095   declared 1..4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           44 -> 3   slot 5299..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           98 -> 3   slot 5299..?    gap 1         declared 1
+139  setp mask=10 val=0 oe=0 q=0 p4:set=z                   106 -> 2   slot 5360..?    gap 61        declared 61
+124  setp mask=10 val=0 oe=1 q=0 p4:set=0                    53 -> 55  slot 5369..?    gap 71        declared 71
+113  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 5436..?    gap 67..?     declared 66..?
+128  setp mask=20 val=0 oe=1 q=0 p5:set=0                    55 -> 5   slot 5437..?    gap 68..?     declared 66..?
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     2 -> 4   slot 5449..?    gap 89..?     declared 89..?
+ 43  waitp pin5==1 fail=144     p5:timeout(1)               48 -> 50  slot 5449..?    gap 4095      declared 4095
+ 79  waitp pin5==1 fail=144     p5:timeout(1)              101 -> 103 slot 5449..?    gap 4095      declared 4095
+108  waitp pin5==1 fail=144     p5:timeout(1)              101 -> 103 slot 5450..?    gap 4095      declared 4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           50 -> 3   slot 5450..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z          103 -> 3   slot 5450..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z          103 -> 3   slot 5451..?    gap 1         declared 1
+121  waitp pin5==1 fail=144     p5:timeout(1)               52 -> 54  slot 8486..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:timeout(1)              105 -> 107 slot 8487..?    gap 4095      declared 4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           54 -> 3   slot 8487..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z          107 -> 3   slot 8488..?    gap 1         declared 1
+121  waitp pin5==1 fail=144     p5:timeout(1)               52 -> 54  slot 8637..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:timeout(1)              105 -> 107 slot 8638..?    gap 4095      declared 4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           54 -> 3   slot 8638..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z          107 -> 3   slot 8639..?    gap 1         declared 1
+121  waitp pin5==1 fail=144     p5:timeout(1)               52 -> 54  slot 8788..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:timeout(1)              105 -> 107 slot 8789..?    gap 4095      declared 4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           54 -> 3   slot 8789..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z          107 -> 3   slot 8790..?    gap 1         declared 1
+121  waitp pin5==1 fail=144     p5:timeout(1)               52 -> 54  slot 8939..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:timeout(1)              105 -> 107 slot 8940..?    gap 4095      declared 4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           54 -> 3   slot 8940..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z          107 -> 3   slot 8941..?    gap 1         declared 1
+121  waitp pin5==1 fail=144     p5:timeout(1)               52 -> 54  slot 9090..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:timeout(1)              105 -> 107 slot 9091..?    gap 4095      declared 4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           54 -> 3   slot 9091..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z          107 -> 3   slot 9092..?    gap 1         declared 1
+121  waitp pin5==1 fail=144     p5:timeout(1)               52 -> 54  slot 9241..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:timeout(1)              105 -> 107 slot 9242..?    gap 4095      declared 4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           54 -> 3   slot 9242..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z          107 -> 3   slot 9243..?    gap 1         declared 1
+121  waitp pin5==1 fail=144     p5:timeout(1)               52 -> 54  slot 9392..?    gap 4095      declared 4095
+136  waitp pin5==1 fail=144     p5:timeout(1)              105 -> 107 slot 9393..?    gap 4095      declared 4095
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z           54 -> 3   slot 9393..?    gap 1         declared 1
+144  setp mask=30 val=0 oe=0 q=0 p4:set=z p5:set=z          107 -> 3   slot 9394..?    gap 1         declared 1

@@ -166,3 +166,149 @@ let spi_ctl ?fault ?(tag = 0) ~sclk ~mosi ~miso ~cs ~mode ~period bytes =
         @ bit_loop () @ [ W (Isa2.out ~tag ()) ]) bytes)
     @ [ Wait (if mode.cpha = 0 then idl - 3 else 0); drive cs 1; Halt ] in
   assemble items
+
+(* ------------------------------------------------------------------------------------------ *)
+(* I2C controller, driven by the host: START, repeated START, STOP, write, read with ACK or NACK,
+   clock stretching; Standard-mode and Fast-mode timing
+
+   Both lines are open drain: drive low with SETP oe=1 value=0, release with oe=0.
+
+   The programme is a fixed command loop, so its size does not grow with the transaction: the
+   host sends commands (IN) and reads results (OUT):
+     'S' (0x53) START, or a repeated START if the bus is ours; 'P' (0x50) STOP;
+     'W' (0x57) then a data byte: write it, report the target's ACK (OUT tag 1: 0 ACK, 1 NACK);
+     'R' (0x52) read a byte and ACK it; 'N' (0x4E) read a byte and NACK it (the last of a read);
+       the byte goes to the host with tag 0.
+   After a STOP the controller reports tag 3; when a target holds SCL low past the stretch limit
+   it releases both lines, reports tag 2 and returns to the idle bus. Other commands are ignored.
+
+   Schedule, in slots. One SCL clock ("pulse") from the slot a at which the controller drives SCL
+   low:
+     a              SETP scl low
+     a + hd_dat     the SDA action of the bit: SHO od (write, msb first), release (read, ACK
+                    clock of a write, repeated START), drive low (ACK of a read, STOP)
+     a + low - 1    LDD [stretch limit]
+     a + low        SCL released
+     s              WAITP scl = 1 sees SCL high (s >= a + low + 1; later while a target
+                    stretches the clock or the line rises slowly)
+     s + smp        a read bit: SHI sda; a write's ACK: WAITP sda = 0 at dl = 0 (ACK proceeds,
+                    NACK branches), then OUT tag 1 (0 ACK, 1 NACK) at s + smp + 1
+     s + high       within a byte: SCL low again (JNZ at s + high - 1)
+   so SCL is low for [low] slots as driven, and SDA changes exactly hd_dat slots after SCL is
+   driven low, in every pulse; SCL is high for at least [high] slots from the slot it is seen
+   high: the rise time and any stretching are never taken from it.
+   Commands are fetched in a high phase: after a byte's ACK clock (once its ACK is sampled, or
+   its OUT done), after a START or repeated START's SDA fall. From the JMP to the fetch, the next
+   SCL low comes 6 slots later for a write or a read with ACK, 7 for a read with NACK or a
+   repeated START, 8 for a STOP (the JMP, IN, the SKNE chain, the JMP to the command, IN and LDC);
+   the wait before the JMP makes the fastest of them reach SCL low at s + high (or hd_sta after
+   the START's SDA fall). So a later command, or a host that has no command ready, makes the high
+   phase (or tHD;STA) longer, which the specification allows: it sets no maximum there.
+     START (idle bus):  SDA low; the first command's SCL low at least hd_sta later.
+     repeated START:    a pulse releasing SDA; SDA low at s + su_sta; SCL low >= hd_sta later.
+     STOP:              a pulse driving SDA low; SDA released at s + su_sto; OUT tag 3; the
+                        next START comes at least [buf] slots after the release.
+     read:              8 pulses releasing SDA and sampling it, then the ACK clock with SDA
+                        driven low (R) or released (N); OUT tag 0 of the byte at s + 1 of it. *)
+
+type i2c_timing = {
+  low : int; high : int;       (* SCL low as driven; SCL high from the slot it is seen high *)
+  hd_dat : int;                (* SDA changes this long after SCL is driven low *)
+  hd_sta : int;                (* START / repeated START: SDA low to SCL low *)
+  su_sta : int;                (* repeated START: SCL seen high to SDA low *)
+  su_sto : int;                (* STOP: SCL seen high to SDA released *)
+  buf : int;                   (* STOP to the next START, at the least *)
+  smp : int;                   (* a read bit or an ACK sampled this long after SCL is seen high *)
+}
+
+(* The limits of the I2C specification (NXP UM10204, rev. 7.0, table 10), in ns. *)
+type i2c_limits = {
+  name : string; f_max_hz : float; t_low : float; t_high : float; t_hd_sta : float; t_su_sta : float;
+  t_su_dat : float; t_hd_dat : float; t_su_sto : float; t_buf : float; t_vd_dat : float; t_vd_ack : float;
+  t_r : float; t_f : float;
+}
+
+let standard_mode = { name = "Standard-mode"; f_max_hz = 100e3; t_low = 4700.; t_high = 4000.; t_hd_sta = 4000.;
+                      t_su_sta = 4700.; t_su_dat = 250.; t_hd_dat = 0.; t_su_sto = 4000.; t_buf = 4700.;
+                      t_vd_dat = 3450.; t_vd_ack = 3450.; t_r = 1000.; t_f = 300. }
+let fast_mode = { name = "Fast-mode"; f_max_hz = 400e3; t_low = 1300.; t_high = 600.; t_hd_sta = 600.;
+                  t_su_sta = 600.; t_su_dat = 100.; t_hd_dat = 0.; t_su_sto = 600.; t_buf = 1300.;
+                  t_vd_dat = 900.; t_vd_ack = 900.; t_r = 300.; t_f = 300. }
+
+(* The slot counts, from the limits at 66.67 ns a slot. Where a phase starts at a falling edge
+   the controller makes and ends at a rising one (tLOW, tHD;STA, tBUF) the count adds the largest
+   fall time (300 ns) and a slot; SDA changes 5 slots (333 ns) after SCL is driven low, more than
+   the largest fall time, so it never changes while SCL may still be falling. Phases counted from
+   SCL seen high (tHIGH, tSU;STA, tSU;STO) need no margin for the rise.
+   Standard: SCL 76 low + 74 high + at least 1 slot to see the rise = 151 slots, 99.3 kHz at the
+   most. Fast: 25 + 12 + 1 = 38 slots, 394.7 kHz at the most. *)
+let standard_timing = { low = 76; high = 74; hd_dat = 5; hd_sta = 66; su_sta = 71; su_sto = 61; buf = 86; smp = 37 }
+let fast_timing = { low = 25; high = 12; hd_dat = 5; hd_sta = 15; su_sta = 10; su_sto = 10; buf = 25; smp = 6 }
+
+let cmd_start = 0x53 and cmd_stop = 0x50 and cmd_write = 0x57 and cmd_read_ack = 0x52 and cmd_read_nack = 0x4E
+
+type i2c_op =
+  | Start                      (* START, or a repeated START when the bus is ours *)
+  | Write of int list          (* bytes, each acknowledged by the target *)
+  | Read of int                (* n bytes, ACK for all but the last, NACK for the last *)
+  | Stop
+
+(* the host's command bytes for a list of operations *)
+let i2c_commands ops =
+  List.concat_map (function
+      | Start -> [ cmd_start ] | Stop -> [ cmd_stop ]
+      | Write l -> List.concat_map (fun b -> [ cmd_write; b ]) l
+      | Read n -> List.init n (fun i -> if i = n - 1 then cmd_read_nack else cmd_read_ack)) ops
+
+(* [fault] is for the controls only *)
+type i2c_fault = Ack_in_low_phase | No_stretch_wait
+
+let i2c_ctl ?fault ?(stretch_limit = 4095) ~sda ~scl ~(timing : i2c_timing) () =
+  let t = timing in
+  if t.smp < 3 || t.high - t.smp < 2 || t.low - t.hd_dat < 3 || t.hd_dat < 2 || t.su_sta < 2 || t.hd_sta < 7
+     || t.su_sto < 1 || t.buf < 4 || stretch_limit < 1 then invalid_arg "i2c_ctl: timing too tight";
+  let scl_up =
+    [ W (Isa2.ldd stretch_limit); release scl ]
+    @ (if fault = Some No_stretch_wait then [] else [ Waitp { pin = scl; value = 1; fail = "timeout" } ]) in
+  (* a pulse up to SCL seen high: SCL low at a, [action] at a + hd_dat, SCL released at a + low *)
+  let pulse action = [ drive_low scl; Wait (t.hd_dat - 1); action; Wait (t.low - t.hd_dat - 2) ] @ scl_up in
+  (* the end of a high phase whose slots s + 1 .. s + used are taken: the command fetch, timed
+     so that the fastest command (write, or read with ACK) drives SCL low at s + high: the JMP is
+     at s + used + w + 1 and that SCL low 6 slots after it *)
+  let to_fetch ~used = [ Wait (max 0 (t.high - used - 7)); Jmp "fetch" ] in
+  let items =
+    [ setp ~pins:(bit sda lor bit scl) ~value:0 ~oe:0;
+      (* idle bus: wait for 'S' *)
+      Label "idle"; W Isa2.in_; W (Isa2.skne cmd_start); Jmp "start"; Jmp "idle";
+      Label "start"; drive_low sda; Wait (t.hd_sta - 7); Jmp "fetch";
+      (* the next command, with SCL high (or, after a START, SDA just pulled low) *)
+      Label "fetch"; W Isa2.in_;
+      W (Isa2.skne cmd_write); Jmp "write"; W (Isa2.skne cmd_read_ack); Jmp "read_ack";
+      W (Isa2.skne cmd_read_nack); Jmp "read_nack"; W (Isa2.skne cmd_start); Jmp "restart";
+      W (Isa2.skne cmd_stop); Jmp "stop"; Jmp "fetch";
+      (* write: the data byte, eight bits, the target's ACK *)
+      Label "write"; W Isa2.in_; W (Isa2.ldc 8);
+      Label "wbit" ] @ pulse (W (Isa2.sho ~od:1 ~pin:sda ~msb:1 ())) @ [ Wait (t.high - 2); Jnz "wbit" ]
+    @ (if fault = Some Ack_in_low_phase then
+         (* the control: the ACK read 3 slots after SDA is released, while SCL is still low *)
+         [ drive_low scl; Wait (t.hd_dat - 1); release sda; Wait 2; Waitp { pin = sda; value = 0; fail = "nack" };
+           Wait (t.low - t.hd_dat - 6) ] @ scl_up @ [ Wait t.smp; W (Isa2.outi ~tag:1 0) ]
+       else
+         pulse (release sda) @ [ Wait (t.smp - 1); Waitp { pin = sda; value = 0; fail = "nack" }; W (Isa2.outi ~tag:1 0) ])
+    @ to_fetch ~used:(t.smp + 1)
+    @ [ Label "nack"; W (Isa2.outi ~tag:1 1) ] @ to_fetch ~used:(t.smp + 1)
+    (* read with ACK and read with NACK: the same eight bits, then the ACK clock *)
+    @ List.concat_map (fun (name, ack) ->
+        [ Label name; W (Isa2.ldc 8); Label (name ^ "_bit") ] @ pulse (release sda)
+        @ [ Wait (t.smp - 1); W (Isa2.shi ~pin:sda ~msb:1 ()); Wait (t.high - t.smp - 2); Jnz (name ^ "_bit") ]
+        @ pulse ack @ [ W (Isa2.out ~tag:0 ()) ] @ to_fetch ~used:1)
+      [ ("read_ack", drive_low sda); ("read_nack", release sda) ]
+    (* repeated START *)
+    @ [ Label "restart" ] @ pulse (release sda)
+    @ [ Wait (t.su_sta - 1); drive_low sda; Wait (t.hd_sta - 7); Jmp "fetch" ]
+    (* STOP *)
+    @ [ Label "stop" ] @ pulse (drive_low sda)
+    @ [ Wait (t.su_sto - 1); release sda; W (Isa2.outi ~tag:3 0); Wait (t.buf - 3); Jmp "idle" ]
+    (* a target held SCL past the stretch limit *)
+    @ [ Label "timeout"; setp ~pins:(bit sda lor bit scl) ~value:0 ~oe:0; W (Isa2.outi ~tag:2 0); Jmp "idle" ] in
+  assemble items

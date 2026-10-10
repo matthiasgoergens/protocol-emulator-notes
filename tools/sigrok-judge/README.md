@@ -50,6 +50,7 @@ A trace is one byte per sample (bit p is channel p) with a `.expected` file of `
 | S/PDIF | `prototypes/spdif` chip transmitter (`main.exe tx`) | `spdif` | preamble, 24-bit audio, V, U, C, P of every subframe |
 | 10BASE-T | n/a | none | no sigrok decoder exists, see below |
 | SPI, modes 0-3 | `prototypes/protocol-roles`: the SPI controller in all 8 configurations (mode, bit order) at 1 MHz, modes 0 and 3 at 1.5 MHz, against the peer target | `spi` with cpol, cpha, bitorder | MOSI: the bytes sent; MISO: the bytes the controller reported to the host |
+| I2C, Standard and Fast | `prototypes/protocol-roles`: the I2C controller against the peer target, slowest rise and fall, random clock stretching | `i2c` | every annotation in order (START, repeated START, address, data, ACK, NACK, STOP) against the intended transaction |
 | UART, standard rates | `prototypes/protocol-roles` (`main.exe dump`), interpreter and RTL in lockstep: the transmitter's pin, and the line the receiver read, at 12 rates from 9600 baud to 3 Mbaud, sampled at 60 MHz | `uart` | the bytes sent; for the receiver, the bytes it reported to the host |
 
 The dumpers are read-only taps on the existing benches (a `tap` argument in `ps2_bench.ml`, a `Bench.tap`
@@ -65,6 +66,8 @@ Each protocol has two planted faults, applied to the clean trace before the deco
 - UART: data bit 3 of byte 0 inverted for half a bit; bit time 10 % long with the receiver fixed.
 - SPI of `protocol-roles` (any mode): MOSI inverted around the third sampling edge; MISO inverted
   around the fifth; MOSI half a period and 2 samples late.
+- I2C of `protocol-roles`: SDA inverted over the third SCL high phase; SDA 0.6 of an SCL period
+  late (the existing 24-sample delay is inside one low phase at 60 MHz and would not bite).
 - SPI: MOSI inverted around the third clock edge; MOSI 40 samples late against a 64-sample clock.
 - I2C: SDA inverted over the third SCL pulse; SDA 24 samples late.
 - PS/2: DATA inverted over the fifth falling clock edge; DATA 45 samples late (half a period is 40).

@@ -119,3 +119,128 @@ module Spi = struct
       Queue.pop t.pipe
     end
 end
+
+(* ------------------------------------------------------------------------------------------ *)
+(* I2C (NXP UM10204). Open-drain lines: a line is low when any device pulls it low and high
+   otherwise. [Line] adds edge times: a line that starts to fall reads low [tf] clocks later and
+   one released reads high [tr] clocks later (one threshold, at the end of the edge). *)
+module I2c = struct
+  type line = { mutable lvl : int; mutable want : int; mutable since : int; tr : int; tf : int }
+
+  let line ~tr ~tf = { lvl = 1; want = 1; since = 0; tr; tf }
+
+  (* this clock's level of a line that [pulled] devices pull low *)
+  let line_step l ~pulled =
+    let w = if pulled then 0 else 1 in
+    if w <> l.want then (l.want <- w; l.since <- 0) else l.since <- l.since + 1;
+    if l.lvl <> l.want && l.since >= (if l.want = 0 then l.tf else l.tr) then l.lvl <- l.want;
+    l.lvl
+
+  (* What a target saw and did, in order. *)
+  type event =
+    | Ev_start | Ev_restart | Ev_stop
+    | Ev_addr of int * int * bool          (* 7-bit address, R/W bit, acknowledged *)
+    | Ev_write of int * bool               (* a byte written to it, acknowledged *)
+    | Ev_read of int * bool                (* a byte it sent, acknowledged by the controller *)
+
+  let event_to_string = function
+    | Ev_start -> "S" | Ev_restart -> "Sr" | Ev_stop -> "P"
+    | Ev_addr (a, rw, ack) -> Printf.sprintf "A%02x%s%s" a (if rw = 1 then "r" else "w") (if ack then "+" else "-")
+    | Ev_write (b, ack) -> Printf.sprintf "W%02x%s" b (if ack then "+" else "-")
+    | Ev_read (b, ack) -> Printf.sprintf "R%02x%s" b (if ack then "+" else "-")
+
+  (* A target with a 7-bit address and 256 byte registers: a write's first data byte sets the
+     register pointer, later ones are stored at it (incrementing); a read returns the register
+     at the pointer (incrementing). It acknowledges its address and every byte written, except
+     after [nack_after] written bytes of a transaction. It drives SDA [t_vd] clocks after SCL
+     falls (its data valid time) and, after a falling SCL edge, may hold SCL low for
+     [stretch ()] clocks. It reads SDA when SCL rises. *)
+  type target = {
+    addr : int;
+    regs : int array;
+    t_vd : int;
+    stretch : unit -> int;
+    nack_after : int option;
+    mutable events : event list;          (* newest first *)
+    mutable p_sda : int; mutable p_scl : int;
+    mutable phase : [ `Idle | `Addr | `Wr | `Rd | `Rd_ack | `Ignore ];
+    mutable bits : int; mutable sh : int;
+    mutable ptr : int; mutable nwr : int;
+    mutable ack_clock : bool;             (* in the ninth clock of a byte it acknowledges *)
+    mutable sda_low : bool; mutable sda_at : int; mutable sda_next : bool;   (* SDA drive, pending change *)
+    mutable hold : int;                   (* clocks left of SCL held low *)
+    mutable clock : int;
+    mutable started : bool;
+  }
+
+  let target ?(t_vd = 4) ?(stretch = fun () -> 0) ?nack_after ~addr () =
+    { addr; regs = Array.init 256 (fun i -> (i * 37 + 11) land 0xFF); t_vd; stretch; nack_after; events = [];
+      p_sda = 1; p_scl = 1; phase = `Idle; bits = 0; sh = 0; ptr = 0; nwr = 0; ack_clock = false;
+      sda_low = false; sda_at = max_int; sda_next = false; hold = 0; clock = 0; started = false }
+
+  let ev t e = t.events <- e :: t.events
+  let set_sda t low = t.sda_next <- low; t.sda_at <- t.clock + t.t_vd
+
+  (* one clock on the bus levels [sda] and [scl]; returns (pull SDA low, pull SCL low) for the
+     next clock *)
+  let step t ~sda ~scl =
+    t.clock <- t.clock + 1;
+    if t.clock >= t.sda_at then (t.sda_low <- t.sda_next; t.sda_at <- max_int);
+    let scl_rise = t.p_scl = 0 && scl = 1 and scl_fall = t.p_scl = 1 && scl = 0 in
+    if t.p_scl = 1 && scl = 1 && t.p_sda = 1 && sda = 0 then begin
+      (* START or repeated START *)
+      ev t (if t.started then Ev_restart else Ev_start);
+      t.started <- true; t.phase <- `Addr; t.bits <- 0; t.sh <- 0; t.nwr <- 0; t.ack_clock <- false;
+      t.sda_low <- false; t.sda_at <- max_int
+    end else if t.p_scl = 1 && scl = 1 && t.p_sda = 0 && sda = 1 && t.started then begin
+      ev t Ev_stop; t.started <- false; t.phase <- `Idle; t.sda_low <- false; t.sda_at <- max_int
+    end else if scl_rise then begin
+      match t.phase with
+      | `Addr | `Wr when not t.ack_clock -> t.sh <- ((t.sh lsl 1) lor sda) land 0xFF; t.bits <- t.bits + 1
+      | `Rd_ack ->
+        (* the controller's ACK (0) or NACK (1) to the byte just sent *)
+        let acked = sda = 0 in
+        (match t.events with Ev_read (b, _) :: r -> t.events <- Ev_read (b, acked) :: r | _ -> ());
+        t.phase <- (if acked then `Rd else `Ignore); t.bits <- 0
+      | _ -> ()
+    end else if scl_fall then begin
+      let h = t.stretch () in
+      if h > 0 then t.hold <- h;
+      (match t.phase with
+       | (`Addr | `Wr) when t.ack_clock ->
+         (* the end of our acknowledge clock *)
+         t.ack_clock <- false; set_sda t false;
+         if t.phase = `Rd then ()
+       | `Addr when t.bits = 8 ->
+         let a = t.sh lsr 1 and rw = t.sh land 1 in
+         let ok = a = t.addr in
+         ev t (Ev_addr (a, rw, ok));
+         if ok then (set_sda t true; t.ack_clock <- true; t.bits <- 0;
+                     if rw = 1 then t.phase <- `Rd else t.phase <- `Wr)
+         else t.phase <- `Ignore
+       | `Wr when t.bits = 8 ->
+         let ok = match t.nack_after with Some n -> t.nwr < n | None -> true in
+         ev t (Ev_write (t.sh, ok));
+         if t.nwr = 0 then t.ptr <- t.sh else (t.regs.(t.ptr) <- t.sh; t.ptr <- (t.ptr + 1) land 0xFF);
+         t.nwr <- t.nwr + 1; t.bits <- 0;
+         if ok then (set_sda t true; t.ack_clock <- true) else t.phase <- `Ignore
+       | `Rd ->
+         if t.bits = 0 then begin
+           (* the first falling edge after our ACK (or the controller's ACK): the next byte *)
+           t.sh <- t.regs.(t.ptr); t.ptr <- (t.ptr + 1) land 0xFF;
+           ev t (Ev_read (t.sh, false))
+         end;
+         if t.bits < 8 then begin
+           set_sda t ((t.sh lsr (7 - t.bits)) land 1 = 0); t.bits <- t.bits + 1
+         end else begin
+           set_sda t false; t.phase <- `Rd_ack
+         end
+       | _ -> ());
+      (* after our ACK clock in a read the first data bit goes out on this same edge *)
+      ()
+    end;
+    (* in a read, the edge that ends our address ACK clock starts the first data bit *)
+    t.p_sda <- sda; t.p_scl <- scl;
+    if t.hold > 0 then t.hold <- t.hold - 1;
+    (t.sda_low, t.hold > 0)
+end

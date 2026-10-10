@@ -92,7 +92,9 @@ let run ?(slots = 60_000) ?(stretch_max = 20_000) ~seed (cert : Kernel.certifica
       base lor (sda_v lsl sda) lor (scl_v lsl scl) in
   let random_io pin_in =
     match img.env with
-    | Random_inputs | Peer { host = true; _ } ->
+    | Peer { host = Some f; _ } ->
+      Isa2.io ~host_in:(f rng) ~host_in_valid:(Random.State.int rng 4 = 0) pin_in
+    | Random_inputs ->
       Isa2.io ~host_in:(Random.State.int rng 256) ~host_in_valid:(Random.State.int rng 8 = 0)
         ~port_in:(Array.init 4 (fun _ -> Random.State.int rng 256))
         ~port_in_valid:(Array.init 4 (fun _ -> Random.State.bool rng))

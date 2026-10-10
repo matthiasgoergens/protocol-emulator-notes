@@ -8,7 +8,7 @@ programmes (`../sequencer-v2/isa2.ml`) for the chip's 60 MHz clock:
 
 1. UART transmit and receive at the common baud rates, with the bit-time error of each;
 2. SPI controller in modes 0-3, msb or lsb first, full duplex, from 100 kHz to 1.5 MHz (1.875 MHz in modes 1 and 3);
-3. (to come) I2C controller at 100 and 400 kHz, with read, repeated start and clock stretching;
+3. I2C controller at Standard-mode (100 kHz) and Fast-mode (400 kHz), with reads, repeated START and clock stretching, against the specification's timing parameters;
 4. (to come) I2C target;
 5. (to come) SPI target in modes 0-3.
 
@@ -23,7 +23,7 @@ regenerates every result file (niced, one job at a time, waiting while the load 
 | `fw.ml` | the firmware generators; each states its schedule in slots in its comment |
 | `peers.ml` | the devices at the other end, written from the protocols' definitions, in real time at 60 MHz: they know nothing of slots or threads |
 | `bench.ml` | interpreter (`isa2.ml`) and RTL (`sequencer2.ml` through `harness2.ml`) in lockstep, every clock: effects and all architectural state of all four threads |
-| `t_uart.ml`, `t_spi.ml` | tasks 1 and 2 |
+| `t_uart.ml`, `t_spi.ml`, `t_i2c.ml` | tasks 1, 2 and 3 |
 | `isa2.ml`, `sequencer2.ml`, `harness2.ml` | links to `../sequencer-v2`, unchanged |
 
 Every programme here is checked six ways:
@@ -197,3 +197,95 @@ and RTL agree on every pad. The host has to drain HOSTOUT often: it holds 8 entr
 threads produce 9 within 2,000 clocks; the first version lost one, which the status register's
 sticky overflow bit (now checked) reports. The peers are held in reset until the host has set
 the pads' undriven level high, since CS shows the reset level 0 before that.
+
+## 3. I2C controller at 100 and 400 kHz (`results/i2c.txt`)
+
+**A command loop, not a compiled transaction.** The first version compiled each transaction
+into a programme, as `../deadline-sequencer/compiler.ml` does; the test transactions (seven
+bytes written, three read) came to 373 words, more than a page. The controller is now a fixed
+programme of 143 words driven by host commands through IN: `S` START (or repeated START), `P`
+STOP, `W` and a byte (write; the target's ACK goes to the host, tag 1), `R` and `N` (read a
+byte and ACK or NACK it; the byte goes to the host, tag 0). The size no longer depends on the
+transaction, and on the chip the host feeds the commands through HOSTIN.
+
+**Schedule** (`fw.ml`, `i2c_ctl`). Each SCL clock: SCL driven low at slot a; SDA changes at
+exactly a + 5 (333 ns, more than the largest fall time); SCL released at a + low; WAITP sees SCL
+high at s, a slot or more later (later while a target stretches the clock or the line rises
+slowly), bounded by a stretch limit after which the controller releases both lines and reports
+a timeout; a read bit or an ACK is sampled at s + smp; SCL low again at s + high. So the high
+phase is counted from SCL seen high: rise time and stretching never shorten it. The next command
+is fetched in the high phase of a byte's ACK clock, so a slow host lengthens tHIGH (for which
+the specification sets no maximum) and every SDA change stays 5 slots after SCL falls.
+
+| slots | low | high | SDA after SCL low | tHD;STA | tSU;STA | tSU;STO | tBUF | sample |
+|---|---|---|---|---|---|---|---|---|
+| Standard-mode | 76 | 74 | 5 | 66 | 71 | 61 | 86 | 37 |
+| Fast-mode | 25 | 12 | 5 | 15 | 10 | 10 | 25 | 6 |
+
+**Measured against the specification** (NXP UM10204 rev. 7.0, table 10). The bus model gives
+each line a fall time tf and a rise time tr (a line reads low tf clocks after it starts to fall,
+high tr after release), and every run is made at the four corners tr, tf in {0, the maximum}
+(Standard 1,000 / 300 ns, Fast 300 / 300 ns). Each parameter is measured on the trace
+conservatively: an interval ending at an edge is taken to the edge's start, one starting at an
+edge from its end, so the value is at most the true one for any threshold; the worst over the
+corners is then a bound for every edge time up to the maximum. The transaction: write 0x55 0xAA
+to registers 0x10 and 0x11 of the peer target at 0x50, STOP; set the pointer, repeated START,
+read 3 bytes (ACK, ACK, NACK), STOP. Worst over the corners, ns:
+
+| parameter | Standard limit | Standard measured | Fast limit | Fast measured |
+|---|---|---|---|---|
+| fSCL | <= 100 kHz | 99.3 kHz | <= 400 kHz | 394.7 kHz |
+| tLOW | >= 4,700 | 4,767 | >= 1,300 | 1,367 |
+| tHIGH | >= 4,000 | 5,000 | >= 600 | 833 |
+| tHD;STA | >= 4,000 | 4,100 | >= 600 | 700 |
+| tSU;STA | >= 4,700 | 4,800 | >= 600 | 700 |
+| tSU;DAT | >= 250 | 3,733 | >= 100 | 1,033 |
+| tHD;DAT | >= 0 | 33 | >= 0 | 33 |
+| tVD;DAT, tVD;ACK | <= 3,450 | 1,333 | <= 900 | 633 |
+| tSU;STO | >= 4,000 | 4,133 | >= 600 | 700 |
+| tBUF | >= 4,700 | 4,933 | >= 1,300 | 1,567 |
+
+At every corner the target sees exactly the intended transaction (3 STARTs, one of them
+repeated, 2 STOPs, every ACK and NACK) and the host gets the ACK reports, the three bytes read
+and the two ends; interpreter and RTL agree on every clock. A second run at each corner has the
+target stretch one SCL low phase in three by up to 400 clocks: same result, tHIGH still at
+least 817 ns (Fast). With the slowest rise the clock is 357 kHz (Fast) and 90.4 kHz (Standard),
+because the high phase is counted from the rise. A host sending a command every 2,000 clocks is
+handled too (the high phases get longer; data correct).
+
+**A finding on the way.** The first command loop fetched the next command after driving SCL low,
+which made the first bit of each byte change SDA up to 1,100 ns after SCL fell, beyond Fast-mode's
+tVD;DAT of 900 ns. UM10204 lifts tVD for a device that stretches its low period, which a
+controller fetching a command arguably does, but moving the fetch into the high phase removes
+the question: tVD is now 633 ns at worst.
+
+**Controls**, each of which must fail and does: SCL low 19 slots in Fast-mode (tLOW 967 ns);
+high 8 slots (441 kHz); tSU;STO 5 slots (400 ns); tHD;STA 7 slots (467 ns); SDA changed 22 slots
+after SCL low (tSU;DAT 200 ns is still legal, but tVD 1,767 ns is not); no target at the address
+(two NACKs reported, STOP sent); the target NACKing from its third data byte (reported); the
+target holding SCL for ever with a stretch limit of 200 slots (timeout reported, SDA released);
+the ACK read while SCL is still low, against a target whose ACK comes 833 ns after SCL falls
+(legal: within tVD;ACK): every ACK read as a NACK; no wait for SCL high, against a target that
+stretches 150 clocks (tHIGH 100 ns); the RTL mutant "a wait times out at dl = 1" under the
+lockstep in the timeout run (2,080 clocks differ).
+
+**sigrok**: sigrok's `i2c` decoder on both modes at the slowest corner with random stretching:
+every annotation in order (Start, Address write: 50, ACK, Data write: 10, ..., Start repeat,
+Address read: 50, ..., Data read: A5, NACK, Stop), against the intended transaction; both teeth
+caught (SDA inverted over the third SCL high phase; SDA 0.6 of an SCL period late).
+
+**Verifier**: one specification for the command loop, written from the schedule: a
+deterministic automaton over SDA and SCL events whose states are the protocol's (idle, START,
+a command's SCL low, write bit k, write ACK clock, read bit k, repeated START, STOP, timeout),
+with exact gaps within a pulse and lower bounds where the host's IN may wait (the next
+command's SCL low, the START). Read and repeated START share their first pulse, so they share
+its states until the sample (read) or SDA's fall (repeated START) tells them apart. Six images
+(two modes, stretch limits 7, 200 and 4,095), cross-checked against the peer target stretching
+at random and a host sending mostly commands: **6 of 6 proved**. Planted: the ACK read while
+SCL is low, no wait for SCL high, SCL low 19 slots against the declared 25: 3 of 3 rejected.
+
+**Combined chip**: Fast-mode on `uio[6]` (SDA) and `uio[7]` (SCL), the chip's open-drain pins,
+rise and fall 300 ns, the target stretching at random; the host keeps HOSTIN topped up with the
+22 command bytes (it holds 16) and drains HOSTOUT: the target sees the whole transaction, the
+host reads every result, the shortest SCL period is 170 clocks (352.9 kHz; the chip's pads add
+3 clocks to every rise seen), and specification and RTL agree on every pad.
