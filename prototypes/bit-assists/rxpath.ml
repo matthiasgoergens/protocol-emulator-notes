@@ -21,7 +21,13 @@
       towards the first run of the frame, as USB requires.
    2. The framer, on this clock's chain bit. In a frame: an end condition ([end_inactive] and the
       line not active, [end_burst] and the sampler's burst end, or the host's [stop]) ends it, and
-      this clock's chain bit is not part of it; otherwise a chain bit is shifted into the byte
+      this clock's chain bit is not part of it. [active] is the line's state in the clock whose
+      samples the edge sampler is taking, and its bits reach the framer two clocks later (its
+      output register, then the chain register), [burst_end] one clock later (it is the sampler's
+      registered output): so the framer uses [active] two clocks late and [burst_end] one clock
+      late, and a bit sampled while the line was active is part of the frame however soon after
+      it the line goes idle (USB at 4 clocks per bit ends the line half a bit, 2 clocks, after
+      the last bit's sample); otherwise a chain bit is shifted into the byte
       (LSB first unless [msb_first]), every eighth completes a byte into the FIFO (a full FIFO
       drops it and sets [ovf]), and [ce] sets [err]. Every chain bit enters the 8-bit history
       (newest in bit 7); out of a frame, a frame starts when [start_on_pattern] and the history,
@@ -75,11 +81,13 @@ type st = {
   fifo : int Queue.t;
   mutable err : bool;
   mutable ovf : bool;
+  mutable inact1 : bool; mutable inact2 : bool; mutable be1 : bool;   (* active and burst_end, delayed *)
 }
 
 let init () =
   { dec = Linecode.dec_init (); dst = Stuff.init (); cv = false; cb = 0; ce = false; hist = 0; hcount = 0; in_frame = false; nbits = 0;
-    sh = 0; fbits = 0; fifo = Queue.create (); err = false; ovf = false }
+    sh = 0; fbits = 0; fifo = Queue.create (); err = false; ovf = false;
+    inact1 = false; inact2 = false; be1 = false }
 
 type inputs = { bit : int; valid : bool; active : bool; burst_end : bool; start : bool; stop : bool; tx_active : bool; pop : bool }
 
@@ -92,7 +100,8 @@ let matches c hist = (hist lxor c.pattern) land c.pmask = 0
 let step c st (i : inputs) =
   let in_frame0 = st.in_frame in
   (* 2. the framer on this clock's chain bit, and 3. the CRC feed *)
-  let ending = st.in_frame && ((c.end_inactive && not i.active) || (c.end_burst && i.burst_end) || i.stop) in
+  let ending = st.in_frame && ((c.end_inactive && st.inact2) || (c.end_burst && st.be1) || i.stop) in
+  st.inact2 <- st.inact1; st.inact1 <- not i.active; st.be1 <- i.burst_end;
   let crc_valid = st.in_frame && (not ending) && st.cv && st.fbits >= c.skip in
   let hist' = if st.cv then (st.hist lsr 1) lor (st.cb lsl 7) else st.hist in
   let hcount' = if st.cv then min 8 (st.hcount + 1) else st.hcount in
@@ -166,7 +175,8 @@ let bugs =
     "rx_err_not_sticky", "the error flag shows only the last chain bit's error";
     "rx_msb_ignored", "bytes are packed LSB first even when MSB first is configured";
     "rx_history_kept_at_end", "the end of a frame does not restart the history count";
-    "rx_destuff_outside_frame", "the destuffer drops bits outside a frame too" ]
+    "rx_destuff_outside_frame", "the destuffer drops bits outside a frame too";
+    "rx_end_undelayed", "the end conditions are not delayed to the sampler's bits" ]
 
 type out = {
   head : Signal.t; nonempty : Signal.t; count : Signal.t;
@@ -188,7 +198,11 @@ let create ~clock ~clear ~(cfg : cfg_signals) ~bit ~valid ~active ~burst_end ~st
   (* 2. the framer *)
   let nbits = wire 3 and sh = wire 8 and fbits = wire 8 and hist = wire 8 in
   let err = wire 1 and ovf = wire 1 in
-  let ending = in_frame &: ((cfg.s_end_inactive &: ~:active) |: (cfg.s_end_burst &: burst_end) |: stop) in
+  let inact1 = reg spec (~:active) in
+  let inact2 = reg spec inact1 and be1 = reg spec burst_end in
+  let inactive, burst_end =
+    if is "rx_end_undelayed" then (~:active, burst_end) else (inact2, be1) in
+  let ending = in_frame &: ((cfg.s_end_inactive &: inactive) |: (cfg.s_end_burst &: burst_end) |: stop) in
   let skip = if is "rx_skip_off_by_one" then cfg.s_skip +:. 1 else cfg.s_skip in
   let crc_valid = in_frame &: ~:ending &: cv &: (uresize fbits 9 >=: uresize skip 9) in
   let hist' = mux2 cv (concat_msb [ cb; select hist 7 1 ]) hist in

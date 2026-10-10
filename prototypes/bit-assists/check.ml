@@ -478,32 +478,65 @@ let rtl_tx_frame (c : Txpath.cfg) bytes =
   done;
   List.rev !line
 
-(* The receive path's RTL on a symbol stream, one symbol every [per] clocks, sampled as an edge
-   sampler would hand them over (valid for one clock); [active] per symbol. Returns the frames
-   (bytes, err, crc bits fed). *)
-let rtl_rx_frames (c : Rxpath.cfg) ?(per = 4) (syms : (int * bool) list) =
+(* The transmit path's RTL on a frame, every clock from the first push: (a, b, busy) *)
+let rtl_tx_clocks (c : Txpath.cfg) bytes =
+  let open Signal in
+  let clock = input "clock" 1 and clear = input "clear" 1 in
+  let t = Txpath.create ~clock ~clear ~cfg:(Txpath.cfg_const c) ~push:(input "push" 1) ~push_data:(input "push_data" 8) in
+  let sim, set = make_sim (Circuit.create_exn ~name:"txc" [ output "a" t.a; output "b" t.b; output "busy" t.busy; output "accept" t.accept ]) in
+  let o n = Bits.to_int !(Cyclesim.out_port ~clock_edge:Before sim n) in
+  set "clear" 1; Cyclesim.cycle sim; set "clear" 0;
+  let rest = ref bytes and out = ref [] and started = ref false and fin = ref false and k = ref 0 in
+  while not !fin && !k < 200_000 do
+    incr k;
+    (match !rest with x :: _ -> set "push" 1; set "push_data" x | [] -> set "push" 0);
+    Cyclesim.cycle_check sim; Cyclesim.cycle_before_clock_edge sim;
+    let busy = o "busy" = 1 in
+    if busy then started := true;
+    if !started then (out := (o "a", o "b", busy) :: !out; if not busy then fin := true);
+    if o "accept" = 1 then rest := List.tl !rest;
+    Cyclesim.cycle_at_clock_edge sim; Cyclesim.cycle_after_clock_edge sim
+  done;
+  List.rev !out
+
+(* The receive path's RTL behind an edge sampler's timing: the line clock by clock as (bit, active),
+   sampled in the middle of each [per]-clock symbol; the sampler's bit is valid the clock after its
+   sample (its outputs are registered), while the line's activity is that of the clock itself, as
+   on the chip. Returns the frames (bytes, error flag, CRC feed bits). *)
+let rtl_rx_clocks (c : Rxpath.cfg) ~per (line : (int * bool) list) =
   let open Signal in
   let clock = input "clock" 1 and clear = input "clear" 1 in
   let r = Rxpath.create ~clock ~clear ~cfg:(Rxpath.cfg_const c) ~bit:(input "bit" 1) ~valid:(input "valid" 1) ~active:(input "active" 1)
       ~burst_end:gnd ~start:gnd ~stop:gnd ~tx_active:gnd ~pop:(input "pop" 1) in
-  let sim, set = make_sim (Circuit.create_exn ~name:"rxf"
+  let sim, set = make_sim (Circuit.create_exn ~name:"rxs"
       [ output "head" r.head; output "ne" r.nonempty; output "in_frame" r.in_frame; output "err" r.err; output "cv" r.crc_valid; output "cb" r.crc_bit ]) in
   let o n = Bits.to_int !(Cyclesim.out_port ~clock_edge:Before sim n) in
   set "clear" 1; Cyclesim.cycle sim; set "clear" 0;
   let frames = ref [] and cur = ref [] and crc = ref [] and was_in = ref false and err = ref false in
-  let clk sym valid active =
-    set "bit" sym; set "valid" (Bool.to_int valid); set "active" (Bool.to_int active); set "pop" 1;
-    Cyclesim.cycle_check sim; Cyclesim.cycle_before_clock_edge sim;
-    if o "ne" = 1 then cur := o "head" :: !cur;
-    if o "cv" = 1 then crc := o "cb" :: !crc;
-    let inf = o "in_frame" = 1 in
-    if inf then err := o "err" = 1;
-    if !was_in && not inf then (frames := (List.rev !cur, !err, List.rev !crc) :: !frames; cur := []; crc := []);
-    was_in := inf;
-    Cyclesim.cycle_at_clock_edge sim; Cyclesim.cycle_after_clock_edge sim in
-  List.iter (fun (s, act) -> clk s true act; for _ = 2 to per do clk s false act done) syms;
-  for _ = 1 to 4 do clk 0 false false done;
+  let pending = ref None in
+  List.iteri (fun k (bit, act) ->
+      (match !pending with Some x -> set "valid" 1; set "bit" x | None -> set "valid" 0);
+      set "active" (Bool.to_int act); set "pop" 1;
+      pending := (if k mod per = per / 2 then Some bit else None);
+      Cyclesim.cycle_check sim; Cyclesim.cycle_before_clock_edge sim;
+      if o "ne" = 1 then cur := o "head" :: !cur;
+      if o "cv" = 1 then crc := o "cb" :: !crc;
+      let inf = o "in_frame" = 1 in
+      if inf then err := o "err" = 1;
+      if !was_in && not inf then (frames := (List.rev !cur, !err, List.rev !crc) :: !frames; cur := []; crc := []);
+      was_in := inf;
+      Cyclesim.cycle_at_clock_edge sim; Cyclesim.cycle_after_clock_edge sim)
+    (line @ List.init (4 * per) (fun _ -> (0, false)));
   List.rev !frames
+
+(* a symbol stream, [per] clocks per symbol, as (symbol, line active) *)
+let rtl_rx_frames (c : Rxpath.cfg) ?(per = 4) (syms : (int * bool) list) =
+  rtl_rx_clocks c ~per (List.concat_map (fun (x, act) -> List.init per (fun _ -> (x, act))) syms)
+
+(* USB: the sampler reads D+ (b); the line is active unless SE0; idle J around the packet *)
+let rtl_rx_sampled (c : Rxpath.cfg) ~per (line : (int * int * bool) list) =
+  let idle = List.init (12 * per) (fun _ -> (0, true)) in
+  rtl_rx_clocks c ~per (idle @ List.map (fun (a, b, _) -> (b, a = 1 || b = 1)) line @ idle)
 
 let paths_references ~seed =
   let r = Random.State.make [| seed |] in
@@ -544,6 +577,23 @@ let paths_references ~seed =
     done
   done;
   report "USB: a packet after 0 to 14 bit times of idle J (decoded 1s) is received whole" !good !tried;
+  (* the end of a frame against the sampler's latency: the line goes idle (SE0) half a symbol
+     after the last bit's sample, which then still has the sampler's output register and the
+     chain register to pass; at short symbols the end must not overtake it *)
+  let good = ref 0 and tried = ref 0 in
+  List.iter (fun per ->
+      for _ = 1 to 10 do
+        incr tried;
+        let bytes = random_bytes r (1 + Random.State.int r 8) in
+        let pkt = Fw_codec.data_bytes 0xC3 bytes in
+        let line = rtl_tx_clocks { Txpath.usb_ls with period = per } (0x80 :: pkt) in
+        match rtl_rx_sampled Rxpath.usb_ls ~per line with
+        | [ (got, false, crcbits) ] when got = pkt ->
+          let crc = List.fold_left (fun c b -> if (c land 1) lxor b = 1 then (c lsr 1) lxor 0xA001 else c lsr 1) 0xFFFF crcbits in
+          if crc = 0xB001 then incr good
+        | _ -> ()
+      done) [ 2; 3; 4; 5; 8; 40 ];
+  report "USB at 2 to 40 clocks per bit behind a sampler's timing: whole packets, CRC residue" !good !tried;
   (* the CRC residue over a real USB data packet: the framer's CRC feed through CRC-16/USB *)
   let good = ref 0 in
   for _ = 1 to n do

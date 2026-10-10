@@ -77,7 +77,14 @@ seven 0s followed by the EOP's decoded 1s completed a sync: 21 of 100 USB packet
 second, empty frame before this), and the destuffer drops and flags bits only inside a frame,
 counting the run outside one (the idle J before a packet decodes as 1s, and after six of them the
 sync's first 0 was dropped as a stuff bit: 10 of 75 packets after idle gaps of 0 to 14 bits were
-lost, found by chip-top's USB device and then by a new reference test, `results/paths.txt`).
+lost, found by chip-top's USB device and then by a new reference test, `results/paths.txt`), and
+its end conditions are delayed to the edge sampler's latency: the line's activity is that of the
+clock being sampled, whose bits reach the framer two clocks later, so the framer ends a frame
+two clocks after the line goes idle (one after the sampler's burst end). Before, at 4 clocks per
+bit and less, the line went idle (USB's EOP, half a bit after the last bit's sample) before the
+last bit reached the framer, and the frame lost its last byte (chip-top's rate sweep found it; the
+reference test at 2 to 40 clocks per bit behind a sampler's timing: 30 of 60 before, 60 of 60
+after). The symbol-level reference tests now present the sampler's timing too.
 
 | check (`check.exe paths 1000000`, `results/paths.txt`, 43 s) | result |
 |---|---|
@@ -86,7 +93,8 @@ lost, found by chip-top's USB device and then by a new reference test, `results/
 | USB: the framer on that line returns the bytes after the sync, with the CRC fed after the PID; CRC-16 over the feed of a data packet leaves 0xB001; a missing stuff bit sets the error flag | 100 of 100 each |
 | 10BASE-T: the serialiser against `eth_model`'s Manchester, the pair complementary, then 6 symbols of TP_IDL; the framer after the SFD returns frame and FCS, CRC-32 over its feed leaves 0xDEBB20E3 | 100 of 100 each |
 | USB: a packet after 0 to 14 bit times of idle J is received whole | 75 of 75 |
-| planted faults (6 in the serialiser, 9 in the framer) | **15 of 15 caught** by the lockstep; 11 of 15 also fail the references |
+| USB at 2, 3, 4, 5, 8 and 40 clocks per bit behind a sampler's timing: whole packets and the CRC residue | 60 of 60 |
+| planted faults (6 in the serialiser, 10 in the framer) | **16 of 16 caught** by the lockstep; 12 of 16 also fail the references |
 
 ## On the chip
 
