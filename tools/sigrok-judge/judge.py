@@ -435,10 +435,48 @@ CASES = [
          expected="spdif/control-44k1-60000"),
 ]
 
+def spi_role_decoder(exp):
+    return ("spi:clk=%s:mosi=%s:miso=%s:cs=%s:cpol=%s:cpha=%s:bitorder=%s:wordsize=8:cs_polarity=active-low"
+            % (exp["spi_sclk"], exp["spi_mosi"], exp["spi_miso"], exp["spi_cs"], exp["spi_cpol"], exp["spi_cpha"],
+               exp["spi_bitorder"]))
+
+
+def judge_spi_role(samples, rate, exp):
+    """SPI in any mode and bit order, both directions: MOSI against the bytes the controller sent,
+    MISO against the bytes the MISO side sent (expected file: spi_bytes, spi_miso_bytes)."""
+    d = spi_role_decoder(exp)
+    mosi = sigrok(samples, 8, rate, d, ["spi=mosi-data"])
+    miso = sigrok(samples, 8, rate, d, ["spi=miso-data"])
+    warn = sigrok(samples, 8, rate, d, ["spi=warnings"])
+    want_mosi = ["%02X" % b for b in ints(exp["spi_bytes"])]
+    want_miso = ["%02X" % b for b in ints(exp["spi_miso_bytes"])]
+    problems = []
+    if mosi != want_mosi:
+        problems.append("MOSI decoded %s, sent %s" % (" ".join(mosi) or "nothing", " ".join(want_mosi)))
+    if miso != want_miso:
+        problems.append("MISO decoded %s, sent %s" % (" ".join(miso) or "nothing", " ".join(want_miso)))
+    problems += ["decoder warning: " + w for w in warn]
+    return Verdict(problems, "MOSI %s, MISO %s" % (" ".join(mosi) or "nothing", " ".join(miso) or "nothing"))
+
+
+def spi_role_teeth(t, exp):
+    clk, mosi, miso = int(exp["spi_sclk"]), int(exp["spi_mosi"]), int(exp["spi_miso"])
+    cpol, cpha = int(exp["spi_cpol"]), int(exp["spi_cpha"])
+    # the sampling edges: leaving the idle level (CPHA 0) or returning to it (CPHA 1)
+    to_active = "r" if cpol == 0 else "f"
+    to_idle = "f" if cpol == 0 else "r"
+    e = edges(t, clk, to_active if cpha == 0 else to_idle)
+    half = int(exp["spi_period_cycles"]) // 2
+    return [("MOSI inverted around the third sampling edge", invert(t, [mosi], e[2] - 3, e[2] + 3)),
+            ("MISO inverted around the fifth sampling edge", invert(t, [miso], e[4] - 3, e[4] + 3)),
+            ("MOSI half a period plus 2 samples late against SCLK", delay(t, mosi, half + 2))]
+
+
 # Traces of ../../prototypes/protocol-roles (main.exe dump): one case per .expected file in
 # traces/roles, whose "judge" line names the judge and teeth to apply.
 ROLE_JUDGES = {
     "uart": (judge_uart, uart_teeth),
+    "spi": (judge_spi_role, spi_role_teeth),
 }
 
 

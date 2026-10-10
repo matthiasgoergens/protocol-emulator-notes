@@ -2,6 +2,7 @@
 let () =
   let ok = match Array.to_list Sys.argv |> List.tl with
     | [ "uart" ] -> T_uart.run ()
-    | [ "dump"; dir ] -> T_uart.dump dir
-    | _ -> prerr_endline "usage: main.exe uart"; exit 2 in
+    | [ "spi" ] -> T_spi.run_all ()
+    | [ "dump"; dir ] -> T_uart.dump dir && T_spi.dump dir
+    | _ -> prerr_endline "usage: main.exe uart | spi | dump DIR"; exit 2 in
   exit (if ok then 0 else 1)

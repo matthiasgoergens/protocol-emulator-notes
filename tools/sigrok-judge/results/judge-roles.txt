@@ -1,10 +1,80 @@
 # command: judge.py --only roles
-# commit: 9b80de7b37f9ac1a55a983f5efe355b5ce2d0120
+# commit: fb021f28c4c3fb25b07f85587386cc93ae103443
 # sigrok-cli 0.7.2
 # - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
 # image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
-# date: 2026-10-10T11:07:35+08:00
+# date: 2026-10-10T11:22:16+08:00
 # analyser rate: as simulated
+roles/spi-ctl-m0lsb-p15: PASS: MOSI 37 38 6C 1C, MISO 73 80 CB 9B
+  tooth roles/spi-ctl-m0lsb-p15: MOSI inverted around the third sampling edge: CAUGHT
+      MOSI decoded 33 38 6C 1C, sent 37 38 6C 1C
+  tooth roles/spi-ctl-m0lsb-p15: MISO inverted around the fifth sampling edge: CAUGHT
+      MISO decoded 63 80 CB 9B, sent 73 80 CB 9B
+  tooth roles/spi-ctl-m0lsb-p15: MOSI half a period plus 2 samples late against SCLK: CAUGHT
+      MOSI decoded 6E 70 D8 38, sent 37 38 6C 1C
+roles/spi-ctl-m0msb-p10: PASS: MOSI 7F 26 8E 21, MISO C9 9C 5D E4
+  tooth roles/spi-ctl-m0msb-p10: MOSI inverted around the third sampling edge: CAUGHT
+      MOSI decoded 5F 26 8E 21, sent 7F 26 8E 21
+  tooth roles/spi-ctl-m0msb-p10: MISO inverted around the fifth sampling edge: CAUGHT
+      MISO decoded C1 9C 5D E4, sent C9 9C 5D E4
+  tooth roles/spi-ctl-m0msb-p10: MOSI half a period plus 2 samples late against SCLK: CAUGHT
+      MOSI decoded 3F 93 47 10, sent 7F 26 8E 21
+roles/spi-ctl-m0msb-p15: PASS: MOSI 37 38 6C 1C, MISO 73 80 CB 9B
+  tooth roles/spi-ctl-m0msb-p15: MOSI inverted around the third sampling edge: CAUGHT
+      MOSI decoded 17 38 6C 1C, sent 37 38 6C 1C
+  tooth roles/spi-ctl-m0msb-p15: MISO inverted around the fifth sampling edge: CAUGHT
+      MISO decoded 7B 80 CB 9B, sent 73 80 CB 9B
+  tooth roles/spi-ctl-m0msb-p15: MOSI half a period plus 2 samples late against SCLK: CAUGHT
+      MOSI decoded 1B 9C 36 0E, sent 37 38 6C 1C
+roles/spi-ctl-m1lsb-p15: PASS: MOSI 37 38 6C 1C, MISO 73 80 CB 9B
+  tooth roles/spi-ctl-m1lsb-p15: MOSI inverted around the third sampling edge: CAUGHT
+      MOSI decoded 35 38 6C 1C, sent 37 38 6C 1C
+  tooth roles/spi-ctl-m1lsb-p15: MISO inverted around the fifth sampling edge: CAUGHT
+      MISO decoded 7B 80 CB 9B, sent 73 80 CB 9B
+  tooth roles/spi-ctl-m1lsb-p15: MOSI half a period plus 2 samples late against SCLK: CAUGHT
+      MOSI decoded 6E 70 D8 38, sent 37 38 6C 1C
+roles/spi-ctl-m1msb-p15: PASS: MOSI 37 38 6C 1C, MISO 73 80 CB 9B
+  tooth roles/spi-ctl-m1msb-p15: MOSI inverted around the third sampling edge: CAUGHT
+      MOSI decoded 77 38 6C 1C, sent 37 38 6C 1C
+  tooth roles/spi-ctl-m1msb-p15: MISO inverted around the fifth sampling edge: CAUGHT
+      MISO decoded 63 80 CB 9B, sent 73 80 CB 9B
+  tooth roles/spi-ctl-m1msb-p15: MOSI half a period plus 2 samples late against SCLK: CAUGHT
+      MOSI decoded 1B 9C 36 0E, sent 37 38 6C 1C
+roles/spi-ctl-m2lsb-p15: PASS: MOSI 37 38 6C 1C, MISO 73 80 CB 9B
+  tooth roles/spi-ctl-m2lsb-p15: MOSI inverted around the third sampling edge: CAUGHT
+      MOSI decoded 33 38 6C 1C, sent 37 38 6C 1C
+  tooth roles/spi-ctl-m2lsb-p15: MISO inverted around the fifth sampling edge: CAUGHT
+      MISO decoded 63 80 CB 9B, sent 73 80 CB 9B
+  tooth roles/spi-ctl-m2lsb-p15: MOSI half a period plus 2 samples late against SCLK: CAUGHT
+      MOSI decoded 6E 70 D8 38, sent 37 38 6C 1C
+roles/spi-ctl-m2msb-p15: PASS: MOSI 37 38 6C 1C, MISO 73 80 CB 9B
+  tooth roles/spi-ctl-m2msb-p15: MOSI inverted around the third sampling edge: CAUGHT
+      MOSI decoded 17 38 6C 1C, sent 37 38 6C 1C
+  tooth roles/spi-ctl-m2msb-p15: MISO inverted around the fifth sampling edge: CAUGHT
+      MISO decoded 7B 80 CB 9B, sent 73 80 CB 9B
+  tooth roles/spi-ctl-m2msb-p15: MOSI half a period plus 2 samples late against SCLK: CAUGHT
+      MOSI decoded 1B 9C 36 0E, sent 37 38 6C 1C
+roles/spi-ctl-m3lsb-p15: PASS: MOSI 37 38 6C 1C, MISO 73 80 CB 9B
+  tooth roles/spi-ctl-m3lsb-p15: MOSI inverted around the third sampling edge: CAUGHT
+      MOSI decoded 33 38 6C 1C, sent 37 38 6C 1C
+  tooth roles/spi-ctl-m3lsb-p15: MISO inverted around the fifth sampling edge: CAUGHT
+      MISO decoded 63 80 CB 9B, sent 73 80 CB 9B
+  tooth roles/spi-ctl-m3lsb-p15: MOSI half a period plus 2 samples late against SCLK: CAUGHT
+      MOSI decoded 6E 70 D8 38, sent 37 38 6C 1C
+roles/spi-ctl-m3msb-p10: PASS: MOSI 7F 26 8E 21, MISO C9 9C 5D E4
+  tooth roles/spi-ctl-m3msb-p10: MOSI inverted around the third sampling edge: CAUGHT
+      MOSI decoded 5F 26 8E 21, sent 7F 26 8E 21
+  tooth roles/spi-ctl-m3msb-p10: MISO inverted around the fifth sampling edge: CAUGHT
+      MISO decoded C1 9C 5D E4, sent C9 9C 5D E4
+  tooth roles/spi-ctl-m3msb-p10: MOSI half a period plus 2 samples late against SCLK: CAUGHT
+      MOSI decoded 3F 93 47 10, sent 7F 26 8E 21
+roles/spi-ctl-m3msb-p15: PASS: MOSI 37 38 6C 1C, MISO 73 80 CB 9B
+  tooth roles/spi-ctl-m3msb-p15: MOSI inverted around the third sampling edge: CAUGHT
+      MOSI decoded 17 38 6C 1C, sent 37 38 6C 1C
+  tooth roles/spi-ctl-m3msb-p15: MISO inverted around the fifth sampling edge: CAUGHT
+      MISO decoded 7B 80 CB 9B, sent 73 80 CB 9B
+  tooth roles/spi-ctl-m3msb-p15: MOSI half a period plus 2 samples late against SCLK: CAUGHT
+      MOSI decoded 1B 9C 36 0E, sent 37 38 6C 1C
 roles/uart-rx-1000000: PASS: decoded D7 3C 77 7A 80 B1 24 7B
   tooth roles/uart-rx-1000000: bit 3 of byte 0 inverted for half a bit: CAUGHT
       decoded DF 3C 77 7A 80 B1 24 7B, sent D7 3C 77 7A 80 B1 24 7B

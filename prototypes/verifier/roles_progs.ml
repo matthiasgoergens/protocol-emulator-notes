@@ -119,5 +119,85 @@ let uart_planted () =
     with_words rx ~name:"PLANTED uart2 rx 115200, the fourth sample one slot late" (fun w ->
         let i = nth w Isa2.op_ldd 4 in w.(i) <- w.(i) + 1; w) ]
 
-let sweep () = uart_images ()
-let planted () = uart_planted ()
+(* ---- SPI controller ---- *)
+
+(* fw.ml, spi_ctl: [act] = P/2 slots SCLK active, [idl] = P - act idle. Set-up: CS high, SCLK at
+   CPOL, MOSI low on slots 0, 1, 2; CS low idl + 1 slots later. CPHA 0, per bit: MOSI written
+   (1 or 0, from the data: two transitions) 3 slots after the previous trailing edge, 6 for the
+   first bit of a later byte, 4 after CS for the very first; the leading edge idl - 3 slots
+   later; MISO sampled 1 slot after it; the trailing edge act - 1 slots after the sample; CS high
+   idl slots after the last trailing edge. CPHA 1, per bit: the leading edge idl after CS for the
+   very first bit, idl + 2 after the previous sample for the first bit of a later byte, idl - 1
+   after it otherwise; MOSI written 2 slots after the leading edge; the trailing edge act - 2
+   later; MISO sampled 1 slot after it; CS high idl slots after the last sample. MOSI's value
+   is not declared: it is written by SETP after a branch on the accumulator, and the analysis
+   does not keep the accumulator once SHI has shifted an input into it. *)
+let spi_ctl_spec ~sclk ~mosi ~miso ~cs ~(mode : Fw.spi_mode) ~period ~nbytes =
+  let act = period / 2 in
+  let idl = period - act in
+  let active = if mode.cpol = 0 then H else L and idle = if mode.cpol = 0 then L else H in
+  let bl = builder () in
+  (* MOSI written with either level: two transitions to one state *)
+  let mosi_write gap label =
+    let src = bl.cur in
+    step bl [ (mosi, Set H) ] (ex gap) label;
+    add bl ~src [ (mosi, Set L) ] (ex gap) ~dst:bl.cur label in
+  step bl [ (cs, Set H) ] (ex 0) "cs high";
+  step bl [ (sclk, Set idle) ] (ex 1) "sclk idle";
+  step bl [ (mosi, Set L) ] (ex 1) "mosi low";
+  step bl [ (cs, Set L) ] (ex (idl + 1)) "cs low";
+  for i = 0 to nbytes - 1 do
+    for j = 1 to 8 do
+      let l = Printf.sprintf "byte %d bit %d" i j in
+      if mode.cpha = 0 then begin
+        mosi_write (if j > 1 then 3 else if i = 0 then 4 else 6) (l ^ " mosi");
+        step bl [ (sclk, Set active) ] (ex (idl - 3)) (l ^ " leading edge");
+        step bl [ (miso, Smp) ] (ex 1) (l ^ " miso sampled");
+        step bl [ (sclk, Set idle) ] (ex (act - 1)) (l ^ " trailing edge")
+      end else begin
+        step bl [ (sclk, Set active) ] (ex (if j > 1 then idl - 1 else if i = 0 then idl else idl + 2)) (l ^ " leading edge");
+        mosi_write 2 (l ^ " mosi");
+        step bl [ (sclk, Set idle) ] (ex (act - 2)) (l ^ " trailing edge");
+        step bl [ (miso, Smp) ] (ex 1) (l ^ " miso sampled")
+      end
+    done
+  done;
+  step bl [ (cs, Set H) ] (ex idl) "cs high again";
+  finish bl ~name:(Printf.sprintf "spi controller %s P=%d bytes=%d" (Fw.spi_mode_name mode) period nbytes)
+    ~pins:[ sclk; mosi; miso; cs ]
+
+let spi_modes = List.concat_map (fun (cpol, cpha) -> List.map (fun msb -> { Fw.cpol; cpha; msb }) [ true; false ])
+    [ (0, 0); (0, 1); (1, 0); (1, 1) ]
+
+(* the SPI target of peers.ml on the bus, in the controller's mode, with random replies and a
+   random MISO delay; MISO is pin [miso] *)
+let spi_target_world ~sclk ~mosi ~miso ~cs ~(mode : Fw.spi_mode) ~seed =
+  let rng = Random.State.make [| seed; 77 |] in
+  let t = Peers.Spi.target ~delay:(Random.State.int rng 12) ~mode:{ Peers.Spi.cpol = mode.cpol; cpha = mode.cpha; msb = mode.msb }
+      (List.init 64 (fun _ -> Random.State.int rng 256)) in
+  fun ~clock:_ ~pin_out ~pin_oe ->
+    let lv p = if (pin_oe lsr p) land 1 = 1 then (pin_out lsr p) land 1 else 1 in
+    let m = Peers.Spi.step t ~sclk:(lv sclk) ~mosi:(lv mosi) ~cs:(lv cs) in
+    let bus = List.fold_left (fun a p -> a lor (lv p lsl p)) 0 [ 0; 1; 2; 3; 4; 5; 6; 7 ] in
+    (bus land lnot (1 lsl miso)) lor ((match m with Some v -> v | None -> 1) lsl miso)
+
+let spi_ctl ?fault ?(thread = 1) ?image ~(mode : Fw.spi_mode) ~period bytes =
+  let sclk = 1 and mosi = 2 and miso = 3 and cs = 4 in
+  let words = page (Fw.spi_ctl ?fault ~sclk ~mosi ~miso ~cs ~mode:(Option.value image ~default:mode) ~period bytes) in
+  { name = Printf.sprintf "spi2_ctl_m%d%s_p%d_n%d" (2 * mode.cpol + mode.cpha) (if mode.msb then "msb" else "lsb") period (List.length bytes);
+    words; spec = spi_ctl_spec ~sclk ~mosi ~miso ~cs ~mode ~period ~nbytes:(List.length bytes); thread;
+    env = Peer { seeds = [ 1; 2; 3 ]; host = false; world = (fun ~seed -> spi_target_world ~sclk ~mosi ~miso ~cs ~mode ~seed) } }
+
+let spi_images () =
+  List.concat_map (fun (mode : Fw.spi_mode) ->
+      List.concat_map (fun period -> [ spi_ctl ~mode ~period [ 0xA5 ]; spi_ctl ~mode ~period [ 0x00; 0xFF; 0x3C ] ])
+        [ (if mode.cpha = 1 then 8 else 10); 15; 150 ]) spi_modes
+
+let spi_planted () =
+  let m0 = List.hd spi_modes and m1 = List.nth spi_modes 2 in
+  [ { (spi_ctl ~fault:Fw.Sample_on_shift_edge ~mode:m0 ~period:15 [ 0xA5 ]) with name = "PLANTED spi2 mode 0, MISO sampled after the trailing edge" };
+    { (spi_ctl ~fault:Fw.No_branch_balance ~mode:m0 ~period:15 [ 0xA5 ]) with name = "PLANTED spi2 mode 0, the MOSI = 0 path a slot short" };
+    { (spi_ctl ~image:m1 ~mode:m0 ~period:15 [ 0xA5 ]) with name = "PLANTED spi2 mode 1 firmware against the mode 0 specification" } ]
+
+let sweep () = uart_images () @ spi_images ()
+let planted () = uart_planted () @ spi_planted ()

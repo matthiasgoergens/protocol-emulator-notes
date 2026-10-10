@@ -14,9 +14,9 @@ and the certificates on the RTL (section 8).
 
 | check | what | result |
 |---|---|---|
-| sweep | every programme the compiler emits in the sweep's parameter ranges (UART, SPI, I2C, UART from the host), plus the formal suite's deadline and watchdog programmes; and the ISA v2 programmes of `../protocol-roles` (section 9) | **578 of 578 proved** (530 + 48) |
+| sweep | every programme the compiler emits in the sweep's parameter ranges (UART, SPI, I2C, UART from the host), plus the formal suite's deadline and watchdog programmes; and the ISA v2 programmes of `../protocol-roles` (section 9) | **626 of 626 proved** (530 + 96) |
 | interpreter cross-check | each image run on `Isa2.Spec`; every measured state and event must lie in the certificate | 9,299 runs, 2,674,218 instruction entries and 441,297 channel events measured: **none outside the certificate**, no proved image with a failing run |
-| planted | 13 planted bugs, including SPI at period 8 (LDD wraps to 4095), I2C without WAITP, and two with the right timing and the wrong data; 3 more in `../protocol-roles`'s programmes (section 9) | **16 of 16 rejected**, each with a path |
+| planted | 13 planted bugs, including SPI at period 8 (LDD wraps to 4095), I2C without WAITP, and two with the right timing and the wrong data; 6 more in `../protocol-roles`'s programmes (section 9) | **19 of 19 rejected**, each with a path |
 | mutants | every single-word mutant of five programmes, judged against interpreter runs | 1,220 mutants: 279 rejected with a failing run, 940 proved with every run meeting the specification, **0 proved with a failing run**, 1 rejected with no failing run (genuine, section 5) |
 | precision | correct programmes rejected | **0** of 1,042 correct programmes (530 sweep, 511 deterministic mutants, the balanced branch); 1 before the relational `due` (the balanced branch) |
 | random | random programmes against `Isa2.Spec` with random inputs | 3,000 programmes, 9,000 runs, 22,676,780 instruction entries: **0 outside the certificate** |
@@ -25,7 +25,7 @@ and the certificates on the RTL (section 8).
 | kernel proof | the kernel's one-instruction step against `Isa2`'s interpreter, by z3, for every instruction word (section 4) | **65,536 words x 8 key shapes: 524,288 queries, all unsatisfiable**; 8 of 8 planted step bugs give a counterexample |
 | RTL | certificates as SymbiYosys properties on the v2 core, every input free (section 8) | deadline programme, UART, SPI: **every property PROVED unbounded** (abc pdr); I2C with WAITP, a 3-byte UART, a 2-byte SPI: PROVED to a bound past every event's slot; every antecedent and final state reachable; **8 of 8 controls FAILED** |
 | compose | demo composition (UART, SPI, I2C, watchdog on four threads) and pin ownership | proved; planted pin clash rejected |
-| certificates | per-image certificates, ledger with SHA-256 of image and certificate | 578 images; `ledger-check` finds a matching certificate for every one |
+| certificates | per-image certificates, ledger with SHA-256 of image and certificate | 626 images; `ledger-check` finds a matching certificate for every one |
 
 ## 1. What it proves
 
@@ -420,11 +420,12 @@ ISA v2, no translation). `roles_progs.ml` writes each specification from the clo
 `../protocol-roles/fw.ml` states in its comments, restated there rather than imported, and
 adds the images to the sweep (so to the certificates and the ledger) and to the planted bugs.
 The cross-check gained one environment, `Peer`: a device model of `../protocol-roles/peers.ml`
-on the pins (a UART transmitter at the nominal rate, at random phases, or noise).
+on the pins (a UART transmitter at the nominal rate, at random phases, or noise; an SPI target).
 
 | programmes | images | result | planted |
 |---|---|---|---|
 | UART transmit (five bytes, one byte, from the host) and receive, at 12 rates from 9600 baud to 3 Mbaud | 48 | **48 proved**; data levels declared for the constant bytes | one bit's wait a slot short; msb first; one receive sample a slot late: **3 rejected** |
+| SPI controller, modes 0-3, msb and lsb first, P = 8 or 10, 15, 150 slots, 1 and 3 bytes; cross-checked against the peer target with random MISO delays | 48 | **48 proved**; every edge, MOSI write, MISO sample and CS edge at its slot; MOSI's value not declared (SETP after a branch on an accumulator the analysis has lost) | MISO sampled after the trailing edge; the MOSI = 0 path a slot short; mode 1 firmware against the mode 0 specification: **3 rejected** |
 
 The UART receiver's specification is the first here with cycles and unbounded waits: polling
 the line is an expiry event each slot, accepted in a state with no deadline; the samples then

@@ -7,7 +7,7 @@ checked against 100 and 400 kHz, and no target firmware. This directory adds, as
 programmes (`../sequencer-v2/isa2.ml`) for the chip's 60 MHz clock:
 
 1. UART transmit and receive at the common baud rates, with the bit-time error of each;
-2. (to come) SPI controller in modes 0-3, msb or lsb first, full duplex;
+2. SPI controller in modes 0-3, msb or lsb first, full duplex, from 100 kHz to 1.5 MHz (1.875 MHz in modes 1 and 3);
 3. (to come) I2C controller at 100 and 400 kHz, with read, repeated start and clock stretching;
 4. (to come) I2C target;
 5. (to come) SPI target in modes 0-3.
@@ -23,7 +23,7 @@ regenerates every result file (niced, one job at a time, waiting while the load 
 | `fw.ml` | the firmware generators; each states its schedule in slots in its comment |
 | `peers.ml` | the devices at the other end, written from the protocols' definitions, in real time at 60 MHz: they know nothing of slots or threads |
 | `bench.ml` | interpreter (`isa2.ml`) and RTL (`sequencer2.ml` through `harness2.ml`) in lockstep, every clock: effects and all architectural state of all four threads |
-| `t_uart.ml` | task 1 |
+| `t_uart.ml`, `t_spi.ml` | tasks 1 and 2 |
 | `isa2.ml`, `sequencer2.ml`, `harness2.ml` | links to `../sequencer-v2`, unchanged |
 
 Every programme here is checked six ways:
@@ -118,3 +118,82 @@ rejected.
 host's bytes on `uo_out[0]`, thread 1 receives on `ui_in[0]` and reports to the host: the peer
 receiver decodes "Hi!\n" and the host reads back the 5 bytes the peer sent; specification and
 RTL agree on every pad, every clock, driven either way.
+
+## 2. SPI controller, modes 0-3, msb and lsb first, full duplex (`results/spi.txt`)
+
+**How full duplex works with one accumulator.** The bit going out and the bit coming in cannot
+share one shift: SHO with capture would sample MISO at the instant MOSI changes, which is the
+shift edge, not the sampling edge. So MOSI is written by SETP after a branch on the outgoing
+accumulator bit (WAITC on acc bit 7, or bit 0 for lsb first, at dl = 0; both paths three slots),
+which does not shift, and MISO is sampled by SHI one slot after the sampling edge, which does: the
+bit just sent leaves at the top and the received bit enters at the bottom. After eight bits the
+accumulator holds the received byte, which goes to the host (OUT).
+
+**Schedule** (`fw.ml`, `spi_ctl`, slots; act = idle = half the period P):
+- CPHA 0 (modes 0, 2): MOSI written 3 slots after the trailing edge, so idle - 3 slots before
+  the leading edge; MISO sampled 1 slot after the leading edge. Needs P >= 10 slots: 1.5 MHz.
+- CPHA 1 (modes 1, 3): MOSI written 2 slots after the leading edge, act - 2 before the trailing
+  edge; MISO sampled 1 slot after the trailing edge. Needs P >= 8 slots: 1.875 MHz.
+- Between bytes SCLK idles 3 slots longer (OUT, LDA, LDC). CS falls idle + 1 slots before the
+  first edge and rises idle slots after the last.
+
+**Measured** on the bus trace at clock resolution, interpreter and RTL in lockstep, against a
+peer target in the same mode answering 4 random bytes to 4 random bytes, two runs a row, for
+all 8 configurations (4 modes x 2 bit orders) at P = 10, 15, 30 and 150 slots (1.5 MHz, 1 MHz,
+500 kHz, 100 kHz; and P = 8, 1.875 MHz, in modes 1 and 3): 36 rows, every one correct both ways
+with 0 lockstep mismatches. Each row checks that the sampling-edge period is exactly 4P clocks
+within a byte, both phases are P/2 slots, MOSI changes only in the phase where the mode does
+not sample, and MISO is sampled 3 clocks after the sampling edge appears on the bus (the bench
+reads the bus one clock after driving it). A sample of the table (clocks; 16.67 ns each):
+
+| mode | SCLK | MOSI set-up / hold around the sampling edge | MISO margin | CS set-up / hold |
+|---|---|---|---|---|
+| 0, 2 | 1.5 MHz (P 10) | 8 / 32 | 23 (58 % of the period) | 24 / 20 |
+| 0, 2 | 1 MHz (P 15) | 20 / 40 | 35 | 36 / 32 |
+| 0, 2 | 100 kHz (P 150) | 288 / 312 | 303 | 304 / 300 |
+| 1, 3 | 1.875 MHz (P 8) | 8 / 24 | 19 (59 %) | 16 / 20 |
+| 1, 3 | 1 MHz (P 15) | 20 / 40 | 31 | 32 / 36 |
+| 1, 3 | 100 kHz (P 150) | 292 / 308 | 303 | 300 / 304 |
+
+The bit order changes no timing. "MISO margin" is the longest delay of the peer's MISO after its
+own shift edge that the controller still reads correctly (bisection on the interpreter): about
+half a period plus 3 clocks, since the sample is 3 clocks after the sampling edge. Page sizes,
+4 constant bytes: 66 words (CPHA 0), 70 (CPHA 1).
+
+**Controls**, each of which must fail and does:
+- In every mode, the firmware sampling MISO one slot after the *shift* edge instead of the
+  sampling edge. This is a race with the target's output: it reads the next bit against a target
+  without output delay in CPHA 0, and the previous bit against one 8 clocks late in CPHA 1 (a
+  CPHA 1 target without delay holds each bit from leading edge to leading edge, so there the
+  wrong edge reads the right bit). Each is caught by wrong bytes and by the sample's position,
+  while the correct firmware reads right at the same delays.
+- The MOSI = 0 path a slot shorter than the MOSI = 1 path (the sampling period varies, 56 and
+  60 clocks).
+- Firmware built for mode 1 judged as mode 0, and the reverse: 13 MOSI changes in the sampling
+  phase. This check is needed because the data alone does not tell CPHA apart: a mode 0
+  controller and a mode 1 target without output delay exchange the right bytes (MOSI is held
+  past the trailing edge, MISO sampled just after the leading one).
+- Mode 2 firmware against a mode 0 peer, and msb first against an lsb-first peer: wrong bytes.
+- The peer's MISO one clock past the margin: read wrongly.
+- The RTL mutant "WAITD leaves at dl = 1" under the lockstep: 3,364 clocks differ.
+
+**sigrok**: sigrok's `spi` decoder, configured with the mode, bit order and active-low CS,
+decodes MOSI and MISO of all 8 configurations at 1 MHz and of modes 0 and 3 (msb, lsb) at
+1.5 MHz: 10 traces, both directions correct, and 30 of 30 teeth caught (MOSI inverted around
+the third sampling edge, MISO inverted around the fifth, MOSI half a period late).
+
+**Verifier**: specifications with every SCLK edge, MOSI write, MISO sample and CS edge at its
+exact slot, per mode. MOSI's value is not declared (it is a SETP after a branch on the
+accumulator, which the analysis loses once SHI has shifted an input into it); the peer and
+sigrok check the data. 48 images (8 configurations x 3 periods x 1 or 3 bytes), cross-checked
+against the peer target with random MISO delays: **48 of 48 proved**. Planted: MISO sampled
+after the trailing edge, the MOSI = 0 path a slot short, mode 1 firmware against the mode 0
+specification: 3 of 3 rejected.
+
+**Combined chip**: thread 0 in mode 0, msb first, at 1 MHz and thread 1 in mode 3, lsb first,
+at 1.5 MHz, at the same time, each against a peer target on the pads (MISO from `ui_in`): both
+peers receive the bytes sent, the host reads both peers' replies from HOSTOUT, and specification
+and RTL agree on every pad. The host has to drain HOSTOUT often: it holds 8 entries and the two
+threads produce 9 within 2,000 clocks; the first version lost one, which the status register's
+sticky overflow bit (now checked) reports. The peers are held in reset until the host has set
+the pads' undriven level high, since CS shows the reset level 0 before that.

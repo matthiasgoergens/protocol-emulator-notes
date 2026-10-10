@@ -1,0 +1,80 @@
+# command: ./_build/default/main.exe spi
+# commit: fb021f28c4c3fb25b07f85587386cc93ae103443 (with uncommitted changes)
+# date: 2026-10-10T11:21:47+08:00
+== Task 2: SPI controller, modes 0-3, msb and lsb first, full duplex, 60 MHz core clock
+Peer: an SPI target in the same mode (peers.ml) answering 4 random bytes to the 4 sent.
+All times in clocks (16.67 ns); the period P is in slots (4 clocks).
+
+mode            P      SCLK | period act/idle  MOSI    | MISO sample | MISO margin  | CS        | lockstep, data
+                            |                  su/hold | after edge  | (valid after | su/hold   | 
+                            |                          |             | shift edge)  |           | 
+mode 0 msb     10   1500 kHz | 40      20/20      8/32  | 3           |   23 ( 58%) |  24/20    | 0, ok
+mode 0 msb     15   1000 kHz | 60      28/32     20/40  | 3           |   35 ( 58%) |  36/32    | 0, ok
+mode 0 msb     30    500 kHz | 120     60/60     48/72  | 3           |   63 ( 52%) |  64/60    | 0, ok
+mode 0 msb    150    100 kHz | 600    300/300   288/312 | 3           |  303 ( 50%) | 304/300   | 0, ok
+mode 0 lsb     10   1500 kHz | 40      20/20      8/32  | 3           |   23 ( 58%) |  24/20    | 0, ok
+mode 0 lsb     15   1000 kHz | 60      28/32     20/40  | 3           |   35 ( 58%) |  36/32    | 0, ok
+mode 0 lsb     30    500 kHz | 120     60/60     48/72  | 3           |   63 ( 52%) |  64/60    | 0, ok
+mode 0 lsb    150    100 kHz | 600    300/300   288/312 | 3           |  303 ( 50%) | 304/300   | 0, ok
+mode 1 msb      8   1875 kHz | 32      16/16      8/24  | 3           |   19 ( 59%) |  16/20    | 0, ok
+mode 1 msb     10   1500 kHz | 40      20/20     12/28  | 3           |   23 ( 58%) |  20/24    | 0, ok
+mode 1 msb     15   1000 kHz | 60      28/32     20/40  | 3           |   31 ( 52%) |  32/36    | 0, ok
+mode 1 msb     30    500 kHz | 120     60/60     52/68  | 3           |   63 ( 52%) |  60/64    | 0, ok
+mode 1 msb    150    100 kHz | 600    300/300   292/308 | 3           |  303 ( 50%) | 300/304   | 0, ok
+mode 1 lsb      8   1875 kHz | 32      16/16      8/24  | 3           |   19 ( 59%) |  16/20    | 0, ok
+mode 1 lsb     10   1500 kHz | 40      20/20     12/28  | 3           |   23 ( 58%) |  20/24    | 0, ok
+mode 1 lsb     15   1000 kHz | 60      28/32     20/40  | 3           |   31 ( 52%) |  32/36    | 0, ok
+mode 1 lsb     30    500 kHz | 120     60/60     52/68  | 3           |   63 ( 52%) |  60/64    | 0, ok
+mode 1 lsb    150    100 kHz | 600    300/300   292/308 | 3           |  303 ( 50%) | 300/304   | 0, ok
+mode 2 msb     10   1500 kHz | 40      20/20      8/32  | 3           |   23 ( 58%) |  24/20    | 0, ok
+mode 2 msb     15   1000 kHz | 60      28/32     20/40  | 3           |   35 ( 58%) |  36/32    | 0, ok
+mode 2 msb     30    500 kHz | 120     60/60     48/72  | 3           |   63 ( 52%) |  64/60    | 0, ok
+mode 2 msb    150    100 kHz | 600    300/300   288/312 | 3           |  303 ( 50%) | 304/300   | 0, ok
+mode 2 lsb     10   1500 kHz | 40      20/20      8/32  | 3           |   23 ( 58%) |  24/20    | 0, ok
+mode 2 lsb     15   1000 kHz | 60      28/32     20/40  | 3           |   35 ( 58%) |  36/32    | 0, ok
+mode 2 lsb     30    500 kHz | 120     60/60     48/72  | 3           |   63 ( 52%) |  64/60    | 0, ok
+mode 2 lsb    150    100 kHz | 600    300/300   288/312 | 3           |  303 ( 50%) | 304/300   | 0, ok
+mode 3 msb      8   1875 kHz | 32      16/16      8/24  | 3           |   19 ( 59%) |  16/20    | 0, ok
+mode 3 msb     10   1500 kHz | 40      20/20     12/28  | 3           |   23 ( 58%) |  20/24    | 0, ok
+mode 3 msb     15   1000 kHz | 60      28/32     20/40  | 3           |   31 ( 52%) |  32/36    | 0, ok
+mode 3 msb     30    500 kHz | 120     60/60     52/68  | 3           |   63 ( 52%) |  60/64    | 0, ok
+mode 3 msb    150    100 kHz | 600    300/300   292/308 | 3           |  303 ( 50%) | 300/304   | 0, ok
+mode 3 lsb      8   1875 kHz | 32      16/16      8/24  | 3           |   19 ( 59%) |  16/20    | 0, ok
+mode 3 lsb     10   1500 kHz | 40      20/20     12/28  | 3           |   23 ( 58%) |  20/24    | 0, ok
+mode 3 lsb     15   1000 kHz | 60      28/32     20/40  | 3           |   31 ( 52%) |  32/36    | 0, ok
+mode 3 lsb     30    500 kHz | 120     60/60     52/68  | 3           |   63 ( 52%) |  60/64    | 0, ok
+mode 3 lsb    150    100 kHz | 600    300/300   292/308 | 3           |  303 ( 50%) | 300/304   | 0, ok
+
+Columns: SCLK = the clock rate (60 MHz / 4P); period = sampling edge to sampling edge within
+a byte (between bytes SCLK idles 3 slots longer); act/idle = the shortest active and idle phase;
+MOSI su/hold = the least time MOSI is stable before and after a sampling edge, on the trace;
+MISO sample after edge = clocks from the sampling edge appearing on the bus to the SHI that
+samples MISO; MISO margin = the longest delay of the peer's MISO after its shift edge that the
+controller still reads correctly, clocks and % of the period; CS su/hold = CS fall to the first
+edge, last edge to CS rise; lockstep = clocks where interpreter and RTL differ (2 runs, 4 bytes
+each way); data ok = the peer received the bytes sent and the controller reported the peer's.
+Bench timing: the core reads the bus one clock after it drives it. Every row also checks
+that MOSI changes only in the phase where the mode does not sample (CPHA 0: SCLK idle,
+CPHA 1: SCLK active) and that MISO is sampled 3 clocks after the sampling edge.
+
+Page sizes (4 bytes, constant): mode 0 msb 66, mode 0 lsb 66, mode 1 msb 70, mode 1 lsb 70, mode 2 msb 66, mode 2 lsb 66, mode 3 msb 70, mode 3 lsb 70
+
+Controls (each must fail the check named):
+  mode 0 msb: MISO sampled after the shift edge, peer 0 clocks (wrong bytes; 31 clocks after edge) CAUGHT
+  mode 0 lsb: MISO sampled after the shift edge, peer 0 clocks (wrong bytes; 31 clocks after edge) CAUGHT
+  mode 1 msb: MISO sampled after the shift edge, peer 8 clocks (wrong bytes; -25 clocks after edge) CAUGHT
+  mode 1 lsb: MISO sampled after the shift edge, peer 8 clocks (wrong bytes; -25 clocks after edge) CAUGHT
+  mode 2 msb: MISO sampled after the shift edge, peer 0 clocks (wrong bytes; 31 clocks after edge) CAUGHT
+  mode 2 lsb: MISO sampled after the shift edge, peer 0 clocks (wrong bytes; 31 clocks after edge) CAUGHT
+  mode 3 msb: MISO sampled after the shift edge, peer 8 clocks (wrong bytes; -25 clocks after edge) CAUGHT
+  mode 3 lsb: MISO sampled after the shift edge, peer 8 clocks (wrong bytes; -25 clocks after edge) CAUGHT
+  mode 0: the MOSI = 0 path one slot short (sampling period varies: 56,60)       CAUGHT
+  mode 1 firmware judged as mode 0 (13 MOSI changes in the sampling phase)       CAUGHT
+  mode 0 firmware judged as mode 1 (13 MOSI changes in the sampling phase)       CAUGHT
+  mode 2 firmware against a mode 0 peer (data wrong)                             CAUGHT
+  msb-first controller against an lsb-first peer (data wrong)                    CAUGHT
+  mode 0, P 15: the peer's MISO 36 clocks late, one past the margin (read wrongly) CAUGHT
+  lockstep: RTL mutant "WAITD leaves at dl = 1" (3364 clocks differ)             CAUGHT
+
+SPI controller: PASS
+# elapsed 7.68 s, max rss 29932 kB

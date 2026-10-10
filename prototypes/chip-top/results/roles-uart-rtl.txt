@@ -1,6 +1,6 @@
 # command: env DEMO_DRIVER=rtl ./_build/default/bin/roles.exe uart
-# commit: 9b80de7b37f9ac1a55a983f5efe355b5ce2d0120 (with uncommitted changes)
-# date: 2026-10-10T11:07:16+08:00
+# commit: fb021f28c4c3fb25b07f85587386cc93ae103443 (with uncommitted changes)
+# date: 2026-10-10T11:21:56+08:00
 == UART at 115200 baud on the combined chip: thread 0 transmits the host's bytes (uo_out[0]),
    thread 1 receives from ui_in[0] and reports to the host
   programmes: transmit 33 words, receive 36 words (of 256 a page)
@@ -9,5 +9,6 @@
   transmitted (peer receiver on uo_out[0]): 48 69 21 0a (sent by the host 48 69 21 0a)
   received (HOSTOUT): c3 00 ff 5a 81 (peer sent c3 00 ff 5a 81)
   RTL and specification agree on every pad, every clock: true
+  HOSTOUT overflow seen: false
 UART on the combined chip: PASS
-# elapsed 1.45 s, max rss 22180 kB
+# elapsed 1.43 s, max rss 22884 kB

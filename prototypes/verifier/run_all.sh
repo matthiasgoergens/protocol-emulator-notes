@@ -41,7 +41,7 @@ for job in selftest planted precision sweep compose mutants random controls kern
       rm --recursive --force /var/tmp/verifier-certs
       run ledger certs /var/tmp/verifier-certs || status=1
       mkdir --parents results/certs
-      for n in uart_b16_n3 spi_p16_n2 i2c_q4_n2_l4095 deadline_ldd20 watchdog uart2_tx_115200_n5 uart2_rx_115200; do
+      for n in uart_b16_n3 spi_p16_n2 i2c_q4_n2_l4095 deadline_ldd20 watchdog uart2_tx_115200_n5 uart2_rx_115200 spi2_ctl_m0msb_p15_n3 spi2_ctl_m3lsb_p8_n3; do
         cp /var/tmp/verifier-certs/$n.cert results/certs/ 2>/dev/null || true
       done
       run ledger-check ledger-check results/ledger.txt || status=1 ;;

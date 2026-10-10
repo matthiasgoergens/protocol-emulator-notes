@@ -70,9 +70,13 @@ let hostout_pairs l =
   let rec go = function t :: d :: r -> (if t land 0x80 <> 0 then [ (t land 7, d) ] else []) @ go r | _ -> [] in
   go l
 
-(* drain HOSTOUT into [acc], every [every] clocks until [until] *)
+(* drain HOSTOUT into [acc], every [every] clocks until [until]; [overflow] is set when the
+   status register's sticky HOSTOUT overflow bit is seen (the FIFO holds 8 entries) *)
+let overflow = ref false
+
 let rec drain (b : Board.t) (h : Host.t) acc ~every ~until =
   Host.submit h (Host.Read { tgt = t_hostout; addr = 0; n = 16; k = (fun l -> acc := !acc @ hostout_pairs l) });
+  Host.submit h (Host.Read { tgt = t_reg; addr = r_status; n = 1; k = (fun l -> if List.hd l land 4 <> 0 then overflow := true) });
   Host.submit h (Host.Idle every);
   Host.submit h (Host.Call (fun () -> if b.clock < until then drain b h acc ~every ~until))
 
@@ -121,11 +125,61 @@ let uart () =
   pr "  received (HOSTOUT): %s (peer sent %s)\n"
     (String.concat " " (List.map (Printf.sprintf "%02x") received)) (String.concat " " (List.map (Printf.sprintf "%02x") rx_bytes));
   pr "  RTL and specification agree on every pad, every clock: %b\n" agree;
-  let ok = agree && decoded = sent && received = rx_bytes in
+  pr "  HOSTOUT overflow seen: %b\n" !overflow;
+  let ok = agree && decoded = sent && received = rx_bytes && not !overflow in
   pr "UART on the combined chip: %s\n%!" (if ok then "PASS" else "FAIL");
   ok
 
-let demos = [ ("uart", uart) ]
+(* ---- SPI controller ---- *)
+
+let spi () =
+  pr "== SPI controller on the combined chip: thread 0 in mode 0 msb first at 1 MHz (SCLK, MOSI, CS on\n";
+  pr "   uo_out[0,1,3], MISO from ui_in[2]), thread 1 in mode 3 lsb first at 1.5 MHz (uo_out[4,5,7],\n";
+  pr "   ui_in[6]), each against a peer target in its mode; received bytes to the host\n";
+  let m0 = { Fw.cpol = 0; cpha = 0; msb = true } and m3 = { Fw.cpol = 1; cpha = 1; msb = false } in
+  let tx0 = [ 0x9F; 0x00; 0x00; 0x00 ] and tx1 = [ 0x0B; 0x12; 0x34; 0xA5; 0x5A ] in
+  let rp0 = [ 0xFF; 0xEF; 0x40; 0x18 ] and rp1 = [ 0x3C; 0xC3; 0x01; 0x80; 0x7E ] in
+  let p0 = Fw.spi_ctl ~tag:1 ~sclk:0 ~mosi:1 ~miso:2 ~cs:3 ~mode:m0 ~period:15 tx0 in
+  let p1 = Fw.spi_ctl ~tag:2 ~sclk:4 ~mosi:5 ~miso:6 ~cs:7 ~mode:m3 ~period:10 tx1 in
+  pr "  programmes: %d and %d words\n" (snd p0) (snd p1);
+  let b = Board.create () in
+  let h = b.host in
+  let words = load h [ (0, p0); (1, p1) ] in
+  Host.submit h (Host.Write { tgt = t_reg; addr = r_padsel 0; data = List.init 8 (fun k -> sel (src_seq k) 1) });
+  Host.submit h (Host.Write { tgt = t_reg; addr = r_pinin 2; data = [ 2 ] });
+  Host.submit h (Host.Write { tgt = t_reg; addr = r_pinin 6; data = [ 6 ] });
+  let pm (m : Fw.spi_mode) = { Peers.Spi.cpol = m.cpol; cpha = m.cpha; msb = m.msb } in
+  let t0 = Peers.Spi.target ~delay:3 ~mode:(pm m0) rp0 and t1 = Peers.Spi.target ~delay:3 ~mode:(pm m3) rp1 in
+  (* the targets are held in reset until the host has set the pads' undriven level high: before
+     that, CS shows the reset level 0 *)
+  let ready = ref false in
+  Host.submit h (Host.Call (fun () -> ready := true));
+  Host.wreg h r_ctrl 3;
+  let got = ref [] in
+  let clocks = 12000 in
+  drain b h got ~every:300 ~until:(clocks - 1500);
+  let world ~clock:_ (o : S.outputs) =
+    let smp = Array.make n_pads 0 in
+    let l p = if !ready then level o p else 1 in
+    let m0v = Peers.Spi.step t0 ~sclk:(l 0) ~mosi:(l 1) ~cs:(l 3) in
+    let m1v = Peers.Spi.step t1 ~sclk:(l 4) ~mosi:(l 5) ~cs:(l 7) in
+    smp.(2) <- Board.rep4 (Option.value m0v ~default:1);
+    smp.(6) <- Board.rep4 (Option.value m1v ~default:1);
+    smp in
+  let agree = run_board b ~world ~clocks ~on_clock:(fun _ _ -> ()) in
+  let by tag = List.filter_map (fun (t, v) -> if t = tag then Some v else None) !got in
+  let hex l = String.concat " " (List.map (Printf.sprintf "%02x") l) in
+  let g0 = List.map fst (List.rev t0.got) and g1 = List.map fst (List.rev t1.got) in
+  pr "  %d words loaded through the link\n" words;
+  pr "  thread 0: peer received %s (sent %s); host read %s (peer replied %s)\n" (hex g0) (hex tx0) (hex (by 1)) (hex rp0);
+  pr "  thread 1: peer received %s (sent %s); host read %s (peer replied %s)\n" (hex g1) (hex tx1) (hex (by 2)) (hex rp1);
+  pr "  RTL and specification agree on every pad, every clock: %b\n" agree;
+  pr "  HOSTOUT overflow seen: %b\n" !overflow;
+  let ok = agree && g0 = tx0 && g1 = tx1 && by 1 = rp0 && by 2 = rp1 && not !overflow in
+  pr "SPI controller on the combined chip: %s\n%!" (if ok then "PASS" else "FAIL");
+  ok
+
+let demos = [ ("uart", uart); ("spi", spi) ]
 
 let () =
   let ok = match Array.to_list Sys.argv with

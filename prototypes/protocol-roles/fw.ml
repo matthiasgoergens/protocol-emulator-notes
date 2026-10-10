@@ -90,3 +90,79 @@ let uart_rx ~pin ~s () =
         W (Isa2.out ~tag:0 ()); Jmp "wait";
         Label "ferr"; W (Isa2.out ~tag:1 ()); Jmp "idle" ] in
   assemble items
+
+(* ------------------------------------------------------------------------------------------ *)
+(* SPI controller, modes 0-3, msb or lsb first, full duplex
+
+   Mode = (CPOL, CPHA). SCLK idles at CPOL; the leading edge of a bit leaves the idle level, the
+   trailing edge returns to it. CPHA 0: data is sampled on the leading edge and changed after the
+   trailing one (the first bit is set before the first leading edge); CPHA 1: changed after the
+   leading edge, sampled on the trailing one.
+
+   Full duplex with one accumulator. The bit going out and the bit coming in cannot share a
+   shift (SHO with capture would sample MISO at the moment MOSI changes, i.e. on the shift edge,
+   not on the sampling edge). So MOSI is written without shifting, by a branch on the outgoing
+   accumulator bit (WAITC on acc bit 7, or bit 0 lsb first, at dl = 0, then SETP mosi = 1 or 0,
+   both paths three slots), and MISO is sampled by SHI one slot after the sampling edge, which
+   shifts the accumulator by one: the bit just sent leaves at the top (msb first) and the bit
+   received enters at the bottom. After eight bits the accumulator is the received byte.
+
+   Schedule of one bit, [act] slots SCLK active and [idl] slots idle (period act + idl):
+   CPHA 0, from the slot B of the WAITC:
+     B+1 MOSI written; B+3+w1 leading edge L (w1 = idl - 5); L+1 SHI (sample);
+     L+act trailing edge T (w2 = act - 2 slots after the SHI); T+1 JNZ; T+2 the next WAITC.
+     So MOSI changes 3 slots after the trailing edge, idl - 3 slots before the next leading edge.
+   CPHA 1, from the leading edge L:
+     L+1 WAITC; L+2 MOSI written; L+act trailing edge T (w2 = act - 4); T+1 SHI (sample);
+     T+2+w1 JNZ (w1 = idl - 3); T+idl the next leading edge.
+     So MOSI changes 2 slots after the leading edge, act - 2 slots before the trailing edge.
+   CPHA 0 needs idl >= 5 and act >= 2, CPHA 1 act >= 4 and idl >= 3: a period of at least 10
+   slots (1.5 MHz at 60 MHz) for mode 0 and 2 with the duty kept at half, 8 (1.875 MHz) for 1 and 3.
+
+   A transaction: SETP cs=1, sclk=CPOL, mosi=0 (slots 0..2), Wait [idl], CS low at slot c; per
+   byte LDA, LDC 8, the eight bits, OUT of the received byte (with [tag], 0 by default).
+   CPHA 0: the first MOSI write at c+4, the first leading edge at c+idl+1. CPHA 1: a Wait after the
+   first LDA/LDC so that the first leading edge is at c+idl. Between bytes SCLK idles 3 slots
+   longer than [idl] (OUT, LDA, LDC). CS rises [idl] slots after the last trailing edge (CPHA 0)
+   or after the last sample, one slot after that edge (CPHA 1). Then the thread halts.
+
+   [fault] is for the controls only: [Sample_on_shift_edge] samples one slot after the other
+   edge (the wrong one), [No_branch_balance] makes the MOSI = 0 path one slot shorter. *)
+type spi_mode = { cpol : int; cpha : int; msb : bool }
+type spi_fault = Sample_on_shift_edge | No_branch_balance
+
+let spi_mode_name m = Printf.sprintf "mode %d %s" (2 * m.cpol + m.cpha) (if m.msb then "msb" else "lsb")
+
+let spi_ctl ?fault ?(tag = 0) ~sclk ~mosi ~miso ~cs ~mode ~period bytes =
+  let act = period / 2 in
+  let idl = period - act in
+  let active = 1 - mode.cpol in
+  let accbit = if mode.msb then 7 else 0 in
+  if mode.cpha = 0 && (idl < 5 || act < 2) then invalid_arg "spi_ctl: CPHA 0 needs a period of at least 10 slots";
+  if mode.cpha = 1 && (act < 4 || idl < 3) then invalid_arg "spi_ctl: CPHA 1 needs a period of at least 8 slots";
+  let n = ref 0 in
+  let lbl s = incr n; Printf.sprintf "%s%d" s !n in
+  (* MOSI <- the outgoing accumulator bit, three slots, the write in the second *)
+  let mosi_out () =
+    let z = lbl "z" and j = lbl "j" in
+    [ Waitc { cond = Isa2.c_acc accbit; fail = z }; drive mosi 1; Jmp j;
+      Label z; drive mosi 0 ] @ (if fault = Some No_branch_balance then [] else [ W Isa2.nop ]) @ [ Label j ] in
+  let sample = W (Isa2.shi ~pin:miso ~msb:(if mode.msb then 1 else 0) ()) in
+  let lead = drive sclk active and trail = drive sclk mode.cpol in
+  let bit_loop () =
+    let b = lbl "bit" in
+    let wrong = fault = Some Sample_on_shift_edge in
+    match mode.cpha, wrong with
+    | 0, false -> [ Label b ] @ mosi_out () @ [ Wait (idl - 5); lead; sample; Wait (act - 2); trail; Jnz b ]
+    | 0, true -> [ Label b ] @ mosi_out () @ [ Wait (idl - 5); lead; Wait (act - 1); trail; sample; Jnz b ]
+    | _, false -> [ Label b; lead ] @ mosi_out () @ [ Wait (act - 4); trail; sample; Wait (idl - 3); Jnz b ]
+    | _, true -> [ Label b; lead; sample ] @ mosi_out () @ [ Wait (act - 5); trail; Wait (idl - 2); Jnz b ] in
+  let items =
+    [ setp ~pins:(bit cs) ~value:1 ~oe:1; setp ~pins:(bit sclk) ~value:mode.cpol ~oe:1;
+      setp ~pins:(bit mosi) ~value:0 ~oe:1; Wait idl; drive cs 0 ]
+    @ List.concat (List.mapi (fun i b ->
+        [ W (Isa2.lda b); W (Isa2.ldc 8) ]
+        @ (if mode.cpha = 1 && i = 0 then [ Wait (idl - 3) ] else [])
+        @ bit_loop () @ [ W (Isa2.out ~tag ()) ]) bytes)
+    @ [ Wait (if mode.cpha = 0 then idl - 3 else 0); drive cs 1; Halt ] in
+  assemble items

@@ -321,8 +321,11 @@ was not run.
 `results/roles-*.txt`): `../protocol-roles`'s ISA v2 firmware, loaded through PROG at page
 boundaries with its peer models on the pads; specification and RTL compared on every pad every
 clock, run with the board following either. UART at 115200 baud: thread 0 sends the host's bytes
-(HOSTIN) on `uo_out[0]`, thread 1 receives on `ui_in[0]` and reports to HOSTOUT; **PASS** both
-ways.
+(HOSTIN) on `uo_out[0]`, thread 1 receives on `ui_in[0]` and reports to HOSTOUT. SPI controller:
+thread 0 in mode 0 at 1 MHz and thread 1 in mode 3, lsb first, at 1.5 MHz, each against a peer
+target, replies to HOSTOUT. **PASS** both ways for each. The host must drain HOSTOUT often (8
+entries; the two SPI threads make 9 within 2,000 clocks), and the run checks the sticky
+overflow bit.
 
 ## 4. Area, the harden, and G13 (milestone 4)
 

@@ -1,7 +1,7 @@
 # command: main.exe planted
-# commit: 9b80de7b37f9ac1a55a983f5efe355b5ce2d0120 (with uncommitted changes)
+# commit: fb021f28c4c3fb25b07f85587386cc93ae103443 (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-10T11:08:33+08:00
+# date: 2026-10-10T11:23:54+08:00
 PLANTED spi_p8 (LDD a wraps to 4095)         REJECTED  entries    71  events    28
     pc 8: 4098 slots may pass without an event in state byte 0 bit 1 mosi, whose deadline is 2
     path (9 instructions from pc 0):
@@ -291,5 +291,65 @@ PLANTED uart2 rx 115200, the fourth sample one slot late REJECTED  entries 18468
     ... 1026 violations in all
     interpreter (5 runs): fails: slot 636 pc 16: 131 slots without an event in state data bit 3 sampled at d + m 3 (deadline 130)
 
-planted: 16 bugs, 0 not rejected
-# elapsed 0.65 s, max rss 23804 kB
+PLANTED spi2 mode 0, MISO sampled after the trailing edge REJECTED  entries    17  events     6
+    pc 17: 2 slots may pass without an event in state byte 0 bit 1 leading edge, whose deadline is 1
+    path (16 instructions from pc 0, last 14 shown):
+        2  setp mask=04 val=0 oe=1 q=0  state sclk idle                          dl=0 since=1 due=1 time=2
+        3  ldd 6                        state mosi low                           dl=0 since=1 due=1 time=3
+        4  waitd                        state mosi low                           dl=6 since=2 due=8 time=4
+        5  setp mask=10 val=0 oe=1 q=0  state mosi low                           dl=0 since=9 due=9 time=11
+        6  lda 0xa5                     state cs low                             dl=0 since=1 due=1 time=12
+        7  ldc 8                        state cs low                             dl=0 since=2 due=2 time=13
+        8  waitc cond=7 fail=11         state cs low                             dl=0 since=3 due=3 time=14
+        9  setp mask=04 val=1 oe=1 q=0  state cs low                             dl=0 since=4 due=4 time=15
+       10  jmp 13                       state byte 0 bit 1 mosi                  dl=0 since=1 due=1 time=16
+       13  ldd 1                        state byte 0 bit 1 mosi                  dl=0 since=2 due=2 time=17
+       14  waitd                        state byte 0 bit 1 mosi                  dl=1 since=3 due=4 time=18
+       15  setp mask=02 val=1 oe=1 q=0  state byte 0 bit 1 mosi                  dl=0 since=5 due=5 time=20
+       16  ldd 4                        state byte 0 bit 1 leading edge          dl=0 since=1 due=1 time=21
+       17  waitd                        state byte 0 bit 1 leading edge          dl=4 since=2 due=6 time=22
+    pc 18: 7 slots may pass without an event in state byte 0 bit 1 leading edge, whose deadline is 1
+    pc 18: event p1:set=0 (gap 7) is not one the specification accepts in state byte 0 bit 1 leading edge
+    interpreter (3 runs): fails: slot 22 pc 17: 2 slots without an event in state byte 0 bit 1 leading edge (deadline 1)
+
+PLANTED spi2 mode 0, the MOSI = 0 path a slot short REJECTED  entries   108  events    44
+    pc 14: event p1:set=1 (byte 0 bit 2 leading edge) has gap 4..5 slots, declared 5
+    path (24 instructions from pc 0, last 14 shown):
+       10  jmp 12                       state byte 0 bit 1 mosi                  dl=0 since=1 due=1 time=16
+       12  ldd 1                        state byte 0 bit 1 mosi                  dl=0 since=2 due=2 time=17
+       13  waitd                        state byte 0 bit 1 mosi                  dl=1 since=3 due=4 time=18
+       14  setp mask=02 val=1 oe=1 q=0  state byte 0 bit 1 mosi                  dl=0 since=5 due=5 time=20
+       15  shi pin3 msb                 state byte 0 bit 1 leading edge          dl=0 since=1 due=1 time=21
+       16  ldd 3                        state byte 0 bit 1 miso sampled          dl=0 since=1 due=1 time=22
+       17  waitd                        state byte 0 bit 1 miso sampled          dl=3 since=2 due=5 time=23
+       18  setp mask=02 val=0 oe=1 q=0  state byte 0 bit 1 miso sampled          dl=0 since=6 due=6 time=27
+       19  jnz 8                        state byte 0 bit 1 trailing edge         dl=0 since=1 due=1 time=28
+        8  waitc cond=7 fail=11         state byte 0 bit 1 trailing edge         dl=0 since=2 due=2 time=29
+       11  setp mask=04 val=0 oe=1 q=0  state byte 0 bit 1 trailing edge         dl=0 since=3 due=3 time=30
+       12  ldd 1                        state byte 0 bit 2 mosi                  dl=0 since=1..2 due=1..2 time=31..32
+       13  waitd                        state byte 0 bit 2 mosi                  dl=1 since=2..3 due=3..4 time=32..33
+       14  setp mask=02 val=1 oe=1 q=0  state byte 0 bit 2 mosi                  dl=0 since=4..5 due=4..5 time=34..35
+    pc 14: event p1:set=1 (byte 0 bit 3 leading edge) has gap 4..5 slots, declared 5
+    pc 14: event p1:set=1 (byte 0 bit 4 leading edge) has gap 4..5 slots, declared 5
+    ... 7 violations in all
+    interpreter (3 runs): fails: slot 34 pc 14: byte 0 bit 2 leading edge gap 4, declared 5
+
+PLANTED spi2 mode 1 firmware against the mode 0 specification REJECTED  entries    11  events     4
+    pc 10: 8 slots may pass without an event in state cs low, whose deadline is 4
+    path (11 instructions from pc 0):
+        0  setp mask=10 val=1 oe=1 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  setp mask=02 val=0 oe=1 q=0  state cs high                            dl=0 since=1 due=1 time=1
+        2  setp mask=04 val=0 oe=1 q=0  state sclk idle                          dl=0 since=1 due=1 time=2
+        3  ldd 6                        state mosi low                           dl=0 since=1 due=1 time=3
+        4  waitd                        state mosi low                           dl=6 since=2 due=8 time=4
+        5  setp mask=10 val=0 oe=1 q=0  state mosi low                           dl=0 since=9 due=9 time=11
+        6  lda 0xa5                     state cs low                             dl=0 since=1 due=1 time=12
+        7  ldc 8                        state cs low                             dl=0 since=2 due=2 time=13
+        8  ldd 3                        state cs low                             dl=0 since=3 due=3 time=14
+        9  waitd                        state cs low                             dl=3 since=4 due=7 time=15
+       10  setp mask=02 val=1 oe=1 q=0  state cs low                             dl=0 since=8 due=8 time=19
+    pc 10: event p1:set=1 (gap 8) is not one the specification accepts in state cs low
+    interpreter (3 runs): fails: slot 16 pc 9: 5 slots without an event in state cs low (deadline 4)
+
+planted: 19 bugs, 0 not rejected
+# elapsed 0.65 s, max rss 24088 kB
