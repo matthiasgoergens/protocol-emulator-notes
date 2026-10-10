@@ -1,0 +1,6 @@
+; The toolchain: assembler, disassembler, verifier driver and runner (README.md).
+(library
+ (name seqasm)
+ (wrapped false)
+ (flags (:standard -w -9))
+ (libraries unix hardcaml seqv2 chip upe eth10 verif ds))

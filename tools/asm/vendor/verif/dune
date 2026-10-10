@@ -1,0 +1,8 @@
+; prototypes/verifier (symlinks): the timing verifier's trusted kernel, its analyser and the
+; specification automata, plus programmes.ml (the compiler sweep, used by the round-trip test)
+; with the base ISA and the compiler it needs. Isa2 and Compat come from seqv2.
+(library
+ (name verif)
+ (modules interval spec kernel analyser sha256 programmes compiler isa)
+ (flags (:standard -w -32-27-26-69-37))
+ (libraries seqv2))

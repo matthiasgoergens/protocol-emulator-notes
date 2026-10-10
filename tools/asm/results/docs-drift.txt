@@ -1,0 +1,26 @@
+# command: _build/default/test/docs_drift.exe
+# commit: be931896434c36b31e9bd3ebedd44a8f6d9349ff (with uncommitted changes)
+# date: 2026-10-10T12:24:57+08:00
+encoding table: 26 rows (26 forms) compared with isa2.ml
+WAITC table: names, numbers and meanings compared with isa2.ml
+channel table: names and meanings compared with isa2.ml
+register table: 42 rows compared with regs.ml
+pad source table: 25 codes compared
+flag source table: 18 codes compared
+PE op table: 20 fields compared with unified-pe/verify/spec.ml
+segment control table compared
+host-link tables compared with regs.ml and host.ml
+checked code blocks: 19 run on the interpreter
+control caught (2 failures): SETP's val and oe swapped in the encoding table
+control caught (1 failure): SHI's quad bit listed as ignored
+control caught (1 failure): BANK's reserved bits claimed as a field
+control caught (2 failures): WAITC 8 and 9 named the wrong way round
+control caught (1 failure): an example's expected edge one slot late
+control caught (1 failure): an example's expected accumulator wrong
+control caught (1 failure): the control register's reset value wrong
+control caught (2 failures): a PE field one bit off
+control caught (2 failures): a pad source code wrong
+control caught (1 failure): a host-link target number wrong
+1105 checks
+DOCS DRIFT: NONE
+exit 0

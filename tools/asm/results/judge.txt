@@ -1,0 +1,31 @@
+# command: ./test/judge_examples.py
+# commit: be931896434c36b31e9bd3ebedd44a8f6d9349ff (with uncommitted changes)
+# date: 2026-10-10T12:25:27+08:00
+# command: test/judge_examples.py
+# commit: be931896434c36b31e9bd3ebedd44a8f6d9349ff
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# date: 2026-10-10T12:25:28+08:00
+uart_tx: PASS: decoded 4F 4B 21
+  tooth uart_tx: bit 3 of byte 0 inverted for half a bit: CAUGHT
+  tooth uart_tx: bit time 10 % long (receiver fixed): CAUGHT
+spi: PASS: decoded A5 3C
+  tooth spi: MOSI inverted around the third clock rising edge: CAUGHT
+  tooth spi: MOSI 40 samples late against SCLK (period 64): CAUGHT
+i2c_write: PASS: decoded [Start; Address write: 50; ACK; Data write: 5A; ACK; Stop]
+  tooth i2c_write: SDA inverted over the high phase of the third SCL pulse: CAUGHT
+  tooth i2c_write: SDA 24 samples late against SCL: CAUGHT
+i2c_read: PASS: decoded [Start; Address write: 50; ACK; Data write: 10; ACK; Start repeat; Address read: 50; ACK; Data read: 12; ACK; Data read: 7A; NACK; Stop]
+  tooth i2c_read: SDA inverted over the high phase of the third SCL pulse: CAUGHT
+  tooth i2c_read: SDA 24 samples late against SCL: CAUGHT
+bridge: PASS: decoded 48 69 21 0A 00 FF 55 A5
+  tooth bridge: MOSI inverted around the third clock rising edge: CAUGHT
+  tooth bridge: MOSI 40 samples late against SCLK (period 64): CAUGHT
+ws2812: PASS: decoded [#341256; #bc9ade; RESET]
+  tooth ws2812: the data part of bit 3 inverted: CAUGHT
+  tooth ws2812: the trace twice as slow (an analyser at the wrong rate): CAUGHT
+uart_tx into verilog-uart uart_rx: PASS: received 4f 4b 21
+  tooth uart_tx into uart_rx: data bit 3 of byte 0 inverted: CAUGHT
+
+ALL CHECKS PASS
+exit 0

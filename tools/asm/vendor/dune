@@ -1,0 +1,3 @@
+; The toolchain builds on the repository's own executable specifications, never on copies: every
+; .ml file below vendor/ is a symlink to its prototype (as prototypes/chip-top/blocks does), and
+; each subdirectory's dune file is chip-top's for the same block.

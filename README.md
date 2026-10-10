@@ -132,7 +132,8 @@ DAC in lockstep with its specification, and catches 28 of 28 planted integration
 | Path | Contents |
 | --- | --- |
 | `prototypes/` | one directory per block, protocol, demo or study, each with a README and a `results/` directory |
-| `tools/` | the sigrok judge, third-party peers, the pinned LibreLane environment, latency checks |
+| `docs/` | the architecture, ISA v2 reference, configuration and host-link references, the assembly manual and a tutorial, checked against the code |
+| `tools/` | the toolchain (`tools/asm`: assembler, disassembler, verifier driver, runner, example programmes), the sigrok judge, third-party peers, the pinned LibreLane environment, latency checks |
 | `tt/` | the Tiny Tapeout harness |
 | `notes/` | architecture, backlog, prior-art surveys, and what we learnt from other entrants and from the solvers of Jane Street's earlier [ASIC puzzle](https://blog.janestreet.com/asic-puzzle-results/) |
 | `measurements/` | early area studies: an RP2040 PIO clone and a FABulous embedded-FPGA tile on the same process |

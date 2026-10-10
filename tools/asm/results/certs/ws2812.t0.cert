@@ -1,0 +1,154 @@
+# timing certificate
+# image ws2812.t0 sha256 132a133dfc44b690bf4c1c481972da27c7b8168824b9f86d38893b4253691c01 (256 words, high byte first)
+# specification: thread 0 (examples/ws2812.s:74), channel pins 0
+# verdict: PROVED; 638 table entries, 145 channel events checked
+# assumptions: kernel.ml A1-A5. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot
+# columns: pc, instruction, pins touched, specification state from -> to, slot of the event,
+#          gap since the previous channel event, declared gap, declared data (the level is that
+#          bit of that input byte: driven for a push-pull write, driven 0 or released for open drain)
+# deadlines: 0:0 1:4505 2:6 3:6 4:7 5:6 6:6 7:7 8:6 9:6 10:7 11:6 12:6 13:7 14:6 15:6 16:7 17:6 18:6 19:7 20:6 21:6 22:7 23:6 24:6 25:7 26:6 27:6 28:7 29:6 30:6 31:7 32:6 33:6 34:7 35:6 36:6 37:7 38:6 39:6 40:7 41:6 42:6 43:7 44:6 45:6 46:7 47:6 48:6 49:7 50:6 51:6 52:7 53:6 54:6 55:7 56:6 57:6 58:7 59:6 60:6 61:7 62:6 63:6 64:7 65:6 66:6 67:7 68:6 69:6 70:7 71:6 72:6 73:7 74:6 75:6 76:7 77:6 78:6 79:7 80:6 81:6 82:7 83:6 84:6 85:7 86:6 87:6 88:7 89:6 90:6 91:7 92:6 93:6 94:7 95:6 96:6 97:7 98:6 99:6 100:7 101:6 102:6 103:7 104:6 105:6 106:7 107:6 108:6 109:7 110:6 111:6 112:7 113:6 114:6 115:7 116:6 117:6 118:7 119:6 120:6 121:7 122:6 123:6 124:7 125:6 126:6 127:7 128:6 129:6 130:7 131:6 132:6 133:7 134:6 135:6 136:7 137:6 138:6 139:7 140:6 141:6 142:7 143:6 144:6
+  0  setp mask=01 val=0 oe=1 q=0 p0:set=0                     0 -> 1   slot 0          gap 0         declared 0
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                     1 -> 2   slot 4505       gap 4505      declared 4505
+ 12  sho pin0 msb q=0           p0:sho=d                     2 -> 3   slot 4511       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                     3 -> 4   slot 4517       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                     4 -> 5   slot 4524       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                     5 -> 6   slot 4530       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                     6 -> 7   slot 4536       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                     7 -> 8   slot 4543       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                     8 -> 9   slot 4549       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                     9 -> 10  slot 4555       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    10 -> 11  slot 4562       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    11 -> 12  slot 4568       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    12 -> 13  slot 4574       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    13 -> 14  slot 4581       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    14 -> 15  slot 4587       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    15 -> 16  slot 4593       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    16 -> 17  slot 4600       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    17 -> 18  slot 4606       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    18 -> 19  slot 4612       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    19 -> 20  slot 4619       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    20 -> 21  slot 4625       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    21 -> 22  slot 4631       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    22 -> 23  slot 4638       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    23 -> 24  slot 4644       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    24 -> 25  slot 4650       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    25 -> 26  slot 4657       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    26 -> 27  slot 4663       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    27 -> 28  slot 4669       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    28 -> 29  slot 4676       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    29 -> 30  slot 4682       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    30 -> 31  slot 4688       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    31 -> 32  slot 4695       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    32 -> 33  slot 4701       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    33 -> 34  slot 4707       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    34 -> 35  slot 4714       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    35 -> 36  slot 4720       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    36 -> 37  slot 4726       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    37 -> 38  slot 4733       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    38 -> 39  slot 4739       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    39 -> 40  slot 4745       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    40 -> 41  slot 4752       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    41 -> 42  slot 4758       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    42 -> 43  slot 4764       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    43 -> 44  slot 4771       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    44 -> 45  slot 4777       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    45 -> 46  slot 4783       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    46 -> 47  slot 4790       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    47 -> 48  slot 4796       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    48 -> 49  slot 4802       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    49 -> 50  slot 4809       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    50 -> 51  slot 4815       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    51 -> 52  slot 4821       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    52 -> 53  slot 4828       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    53 -> 54  slot 4834       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    54 -> 55  slot 4840       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    55 -> 56  slot 4847       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    56 -> 57  slot 4853       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    57 -> 58  slot 4859       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    58 -> 59  slot 4866       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    59 -> 60  slot 4872       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    60 -> 61  slot 4878       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    61 -> 62  slot 4885       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    62 -> 63  slot 4891       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    63 -> 64  slot 4897       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    64 -> 65  slot 4904       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    65 -> 66  slot 4910       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    66 -> 67  slot 4916       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    67 -> 68  slot 4923       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    68 -> 69  slot 4929       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    69 -> 70  slot 4935       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    70 -> 71  slot 4942       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    71 -> 72  slot 4948       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    72 -> 73  slot 4954       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    73 -> 74  slot 4961       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    74 -> 75  slot 4967       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    75 -> 76  slot 4973       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    76 -> 77  slot 4980       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    77 -> 78  slot 4986       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    78 -> 79  slot 4992       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    79 -> 80  slot 4999       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    80 -> 81  slot 5005       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    81 -> 82  slot 5011       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    82 -> 83  slot 5018       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    83 -> 84  slot 5024       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    84 -> 85  slot 5030       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    85 -> 86  slot 5037       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    86 -> 87  slot 5043       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    87 -> 88  slot 5049       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    88 -> 89  slot 5056       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    89 -> 90  slot 5062       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    90 -> 91  slot 5068       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    91 -> 92  slot 5075       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    92 -> 93  slot 5081       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    93 -> 94  slot 5087       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    94 -> 95  slot 5094       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    95 -> 96  slot 5100       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    96 -> 97  slot 5106       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                    97 -> 98  slot 5113       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                    98 -> 99  slot 5119       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                    99 -> 100 slot 5125       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   100 -> 101 slot 5132       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   101 -> 102 slot 5138       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   102 -> 103 slot 5144       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   103 -> 104 slot 5151       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   104 -> 105 slot 5157       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   105 -> 106 slot 5163       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   106 -> 107 slot 5170       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   107 -> 108 slot 5176       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   108 -> 109 slot 5182       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   109 -> 110 slot 5189       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   110 -> 111 slot 5195       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   111 -> 112 slot 5201       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   112 -> 113 slot 5208       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   113 -> 114 slot 5214       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   114 -> 115 slot 5220       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   115 -> 116 slot 5227       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   116 -> 117 slot 5233       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   117 -> 118 slot 5239       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   118 -> 119 slot 5246       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   119 -> 120 slot 5252       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   120 -> 121 slot 5258       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   121 -> 122 slot 5265       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   122 -> 123 slot 5271       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   123 -> 124 slot 5277       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   124 -> 125 slot 5284       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   125 -> 126 slot 5290       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   126 -> 127 slot 5296       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   127 -> 128 slot 5303       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   128 -> 129 slot 5309       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   129 -> 130 slot 5315       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   130 -> 131 slot 5322       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   131 -> 132 slot 5328       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   132 -> 133 slot 5334       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   133 -> 134 slot 5341       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   134 -> 135 slot 5347       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   135 -> 136 slot 5353       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   136 -> 137 slot 5360       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   137 -> 138 slot 5366       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   138 -> 139 slot 5372       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   139 -> 140 slot 5379       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   140 -> 141 slot 5385       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   141 -> 142 slot 5391       gap 6         declared 6
+  9  setp mask=01 val=1 oe=1 q=0 p0:set=1                   142 -> 143 slot 5398       gap 7         declared 7
+ 12  sho pin0 msb q=0           p0:sho=d                   143 -> 144 slot 5404       gap 6         declared 6
+ 15  setp mask=01 val=0 oe=1 q=0 p0:set=0                   144 -> 145 slot 5410       gap 6         declared 6

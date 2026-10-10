@@ -1,0 +1,9 @@
+(executable
+ (name asm)
+ (modules asm)
+ (libraries unix seqasm))
+
+(executable
+ (name run)
+ (modules run)
+ (libraries unix seqasm))

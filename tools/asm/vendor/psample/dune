@@ -1,0 +1,4 @@
+; ../../../pin-sampler: model and RTL (symlinks).
+(library
+ (name psample)
+ (libraries hardcaml))

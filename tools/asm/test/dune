@@ -1,0 +1,5 @@
+; Tests (README.md): run from tools/asm, e.g. _build/default/test/roundtrip.exe
+(executables
+ (names roundtrip examples docs_drift)
+ (modules roundtrip examples docs_drift)
+ (libraries str unix seqasm verif dacdemo upe eth10 ds chip seqv2))

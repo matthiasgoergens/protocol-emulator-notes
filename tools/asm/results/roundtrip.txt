@@ -1,0 +1,37 @@
+# command: _build/default/test/roundtrip.exe 2000
+# commit: be931896434c36b31e9bd3ebedd44a8f6d9349ff (with uncommitted changes)
+# date: 2026-10-10T12:24:54+08:00
+all 65,536 words: round trip checked in 64 images of 1,024 words
+  canonical words per opcode (the rest have ignored bits set and print as .word):
+    0 NOP        1 of 4096
+    1 SETP    4096 of 4096
+    2 LDC     4096 of 4096
+    3 LDD     4096 of 4096
+    4 LDA      256 of 4096
+    5 WAITP   4096 of 4096
+    6 WAITD      1 of 4096
+    7 SHO     1024 of 4096
+    8 SHI       32 of 4096
+    9 JMP      256 of 4096
+    A JNZ      256 of 4096
+    B OUT     2056 of 4096
+    C IN         1 of 4096
+    D MBX     4096 of 4096
+    E WAITC   4096 of 4096
+    F EXT     4096 of 4096
+compiler sweep and planted programmes: 543 of 543 round trip identical (0 non-canonical words among them)
+one-bit DAC pump programme (1,024 words): round trip identical
+random images: 2000 of 2000 round trip identical; 2000 of 2000 parse back to their state
+example bridge.s: round trip identical
+example dac.s: round trip identical
+example i2c_read.s: round trip identical
+example i2c_write.s: round trip identical
+example spi.s: round trip identical
+example uart_rx.s: round trip identical
+example uart_tx.s: round trip identical
+example ws2812.s: round trip identical
+control: planted disassembler bug drop_q caught in 195 of 200 random images
+control: planted disassembler bug peinit_order caught in 132 of 200 random images
+control: planted disassembler bug skip_reg caught in 133 of 200 random images
+ROUND TRIP: ALL IDENTICAL
+exit 0
