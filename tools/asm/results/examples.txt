@@ -1,0 +1,157 @@
+# command: _build/default/test/examples.exe
+# commit: 2722cf58a62e01341c229955b1832cdf7b405611
+# date: 2026-10-10T11:37:53+08:00
+== uart_tx: UART transmitter, 8N1, 64 clocks a bit, "OK!"
+  uart_tx: the 38 words equal the compiler's, translated to ISA v2   ok
+  uart_tx: nothing else on the page (the compiler pads its 64 words with HALT) ok
+  uart_tx: its .timing is the verifier's uart_spec                   ok
+  thread 0 (page 0): PROVED  table entries 122, channel events checked 31
+  uart_tx: thread 0's .timing PROVED by the verifier                 ok
+  uart_tx: chip specification and RTL equal on every pad, every clock ok
+  uart_tx: interpreter and chip: equal nets on every clock           ok
+  uart_tx: interpreter and chip: the same OUTs at the same clocks    ok
+  uart_tx: the host link delivered every OUT, in order               ok
+  decoded: 4f@10 4b@650 21@1290
+  uart_tx: decoder reads 4f 4b 21 with good stop bits                ok
+  uart_tx: all 20 edges a multiple of 64 clocks apart                ok
+  uart_tx: control, RTL bug pin_lane_swap caught by the lockstep     ok
+== spi: SPI controller, mode 0, period 64 clocks, A5 3C
+  spi: the 27 words equal the compiler's, translated to ISA v2       ok
+  spi: nothing else on the page (the compiler pads its 64 words with HALT) ok
+  spi: its .timing is the verifier's spi_spec                        ok
+  thread 1 (page 0): PROVED  table entries 139, channel events checked 54
+  spi: thread 1's .timing PROVED by the verifier                     ok
+  spi: chip specification and RTL equal on every pad, every clock    ok
+  spi: interpreter and chip: equal nets on every clock               ok
+  spi: interpreter and chip: the same OUTs at the same clocks        ok
+  spi: the host link delivered every OUT, in order                   ok
+  decoded: a5 3c
+  spi: decoder reads a5 3c                                           ok
+  spi: SCLK rises 64 clocks apart within a byte (14 spacings)        ok
+  spi: control, RTL bug pin_lane_swap caught by the lockstep         ok
+== i2c_write: I2C controller, write A0 5A, SCL period 64 clocks, clock stretching
+  i2c_write: the 64 words equal the compiler's, translated to ISA v2 ok
+  i2c_write: nothing else on the page (the compiler pads its 64 words with HALT) ok
+  i2c_write: its .timing is the verifier's i2c_spec                  ok
+  thread 2 (page 0): PROVED  table entries 242, channel events checked 118
+  i2c_write: thread 2's .timing PROVED by the verifier               ok
+  i2c_write (target stretches SCL by 0 clocks): chip specification and RTL equal on every pad, every clock ok
+  i2c_write (target stretches SCL by 0 clocks): interpreter and chip: equal nets on every clock ok
+  i2c_write (target stretches SCL by 0 clocks): interpreter and chip: the same OUTs at the same clocks ok
+  i2c_write (target stretches SCL by 0 clocks): the host link delivered every OUT, in order ok
+  decoded: a0+ack 5a+ack stop=true; host received 00 00
+    target: 4: START
+    target: 536: address 0x50 write, ack
+    target: 1120: pointer 0x5a
+    target: 1236: STOP
+  i2c_write (target stretches SCL by 0 clocks): decoder reads a0+ack 5a+ack, then STOP ok
+  i2c_write (target stretches SCL by 0 clocks): the host received the two acknowledge bits, 00 00 ok
+  i2c_write (target stretches SCL by 7 clocks): chip specification and RTL equal on every pad, every clock ok
+  i2c_write (target stretches SCL by 7 clocks): interpreter and chip: equal nets on every clock ok
+  i2c_write (target stretches SCL by 7 clocks): interpreter and chip: the same OUTs at the same clocks ok
+  i2c_write (target stretches SCL by 7 clocks): the host link delivered every OUT, in order ok
+  decoded: a0+ack 5a+ack stop=true; host received 00 00
+    target: 4: START
+    target: 536: address 0x50 write, ack
+    target: 1120: pointer 0x5a
+    target: 1236: STOP
+  i2c_write (target stretches SCL by 7 clocks): decoder reads a0+ack 5a+ack, then STOP ok
+  i2c_write (target stretches SCL by 7 clocks): the host received the two acknowledge bits, 00 00 ok
+  i2c_write (control: no target): chip specification and RTL equal on every pad, every clock ok
+  i2c_write (control: no target): interpreter and chip: equal nets on every clock ok
+  i2c_write (control: no target): interpreter and chip: the same OUTs at the same clocks ok
+  i2c_write (control: no target): the host link delivered every OUT, in order ok
+  i2c_write: control, without a target the decoder sees no acknowledge ok
+  i2c_write: control, RTL bug uio_oe_swap caught by the lockstep     ok
+== i2c_read: I2C controller, write pointer 0x10, repeated START, read two bytes
+  i2c_read (target stretches SCL by 0 clocks): chip specification and RTL equal on every pad, every clock ok
+  i2c_read (target stretches SCL by 0 clocks): interpreter and chip: equal nets on every clock ok
+  i2c_read (target stretches SCL by 0 clocks): interpreter and chip: the same OUTs at the same clocks ok
+  i2c_read (target stretches SCL by 0 clocks): the host link delivered every OUT, in order ok
+  decoded: a0+ack 10+ack a1+ack 12+ack 7a-nak stop=true; host received 00/0 00/0 00/0 12/1 7a/1
+    target: 4: START
+    target: 536: address 0x50 write, ack
+    target: 1120: pointer 0x10
+    target: 1232: repeated START
+    target: 1764: address 0x50 read, ack
+    target: 2348: read 0x12 from 0x10
+    target: 2936: read 0x7a from 0x11
+    target: 3000: controller did not acknowledge: end of read
+    target: 3056: STOP
+  i2c_read (target stretches SCL by 0 clocks): decoder reads a0+ack 10+ack a1+ack 12+ack 7a-nak, STOP ok
+  i2c_read (target stretches SCL by 0 clocks): the host received acks 00 00 00 and bytes 12 7a (tag 1) ok
+  i2c_read (target stretches SCL by 5 clocks): chip specification and RTL equal on every pad, every clock ok
+  i2c_read (target stretches SCL by 5 clocks): interpreter and chip: equal nets on every clock ok
+  i2c_read (target stretches SCL by 5 clocks): interpreter and chip: the same OUTs at the same clocks ok
+  i2c_read (target stretches SCL by 5 clocks): the host link delivered every OUT, in order ok
+  decoded: a0+ack 10+ack a1+ack 12+ack 7a-nak stop=true; host received 00/0 00/0 00/0 12/1 7a/1
+    target: 4: START
+    target: 536: address 0x50 write, ack
+    target: 1120: pointer 0x10
+    target: 1232: repeated START
+    target: 1764: address 0x50 read, ack
+    target: 2348: read 0x12 from 0x10
+    target: 2936: read 0x7a from 0x11
+    target: 3000: controller did not acknowledge: end of read
+    target: 3056: STOP
+  i2c_read (target stretches SCL by 5 clocks): decoder reads a0+ack 10+ack a1+ack 12+ack 7a-nak, STOP ok
+  i2c_read (target stretches SCL by 5 clocks): the host received acks 00 00 00 and bytes 12 7a (tag 1) ok
+  i2c_read (control: other data): chip specification and RTL equal on every pad, every clock ok
+  i2c_read (control: other data): interpreter and chip: equal nets on every clock ok
+  i2c_read (control: other data): interpreter and chip: the same OUTs at the same clocks ok
+  i2c_read (control: other data): the host link delivered every OUT, in order ok
+  i2c_read: control, other data in the target gives other bytes      ok
+  i2c_read: control, RTL bug uio_oe_swap caught by the lockstep      ok
+== uart_rx: UART receiver, 64 clocks a bit, from Forencich's uart_tx and from the runner's peer
+  uart_rx (stimulus: Forencich uart_tx): chip specification and RTL equal on every pad, every clock ok
+  uart_rx (stimulus: Forencich uart_tx): interpreter and chip: equal nets on every clock ok
+  uart_rx (stimulus: Forencich uart_tx): interpreter and chip: the same OUTs at the same clocks ok
+  uart_rx (stimulus: Forencich uart_tx): the host link delivered every OUT, in order ok
+  host received: 48 69 21 0a 00 ff 55 a5
+  uart_rx: the host received 48 69 21 0a 00 ff 55 a5, all tag 0      ok
+  uart_rx: runner's UART peer, 16 start phases x 6 random bytes, all received ok
+  uart_rx: control, a transmitter at 72 clocks a bit is not received correctly ok
+  uart_rx: control, RTL bug prog_byte_order caught by the lockstep   ok
+== bridge: UART in (thread 0) -> mailbox -> SPI out (thread 1)
+  bridge: chip specification and RTL equal on every pad, every clock ok
+  bridge: interpreter and chip: equal nets on every clock            ok
+  bridge: interpreter and chip: the same OUTs at the same clocks     ok
+  bridge: the host link delivered every OUT, in order                ok
+  SPI decoded: 48 69 21 0a 00 ff 55 a5
+  bridge: the SPI decoder reads the 8 bytes the UART received        ok
+  bridge: control, other UART bytes give the same other SPI bytes    ok
+  bridge: control, RTL bug pin_lane_swap caught by the lockstep      ok
+== ws2812: WS2812 LED string, two LEDs (docs/tutorial.md)
+  thread 0 (page 0): PROVED  table entries 638, channel events checked 145
+  ws2812: thread 0's .timing PROVED by the verifier                  ok
+  ws2812: chip specification and RTL equal on every pad, every clock ok
+  ws2812: interpreter and chip: equal nets on every clock            ok
+  ws2812: interpreter and chip: the same OUTs at the same clocks     ok
+  ws2812: the host link delivered every OUT, in order                ok
+  decoded: 12 34 56 9a bc de; timing violations: 0
+  ws2812: datasheet decoder reads one frame 12 34 56 9a bc de, every pulse in tolerance ok
+  ws2812: control, high part one slot short: the verifier rejects it ok
+  ws2812: control, a 133 ns high part: the decoder reports timing violations ok
+  ws2812: control, another colour in the bank is decoded as that colour ok
+  ws2812: control, RTL bug pin_lane_swap caught by the lockstep      ok
+== dac: one-bit DAC, order 2, on 4 PEs, a 997 Hz tone from the host
+  dac: pump words 0-42 and the idle word equal onebit-dac's pump_programme ok
+  dac: nothing else in the store (pump_programme fills it with jmp 0, which demos.ml does not load either) ok
+  dac: each segment's configuration chain equals Upe.Spec.bytes_of_op of run_ops (FB1 I1 FB2 I2) ok
+  dac: segment registers as chip-top's demo writes them (feed with lane loop and repeat 10; joins) ok
+  dac: the image's four HOSTIN frames are the tone's first four      ok
+  dac: chip specification and RTL equal on every pad, every clock    ok
+  underrun reports at run clocks: 272016(byte 0) 273376(byte 0) 274736(byte 0) (the stream ends near 272000)
+  dac: no underrun while the host has samples                        ok
+  dac: no HOSTIN or HOSTOUT overflow                                 ok
+  bit stream: 26656 steps judged; 1 (pre-run zero steps, lead-in) pairs of the 486000 tried give 0 wrong bits, e.g. (18, 10)
+  dac: the pin's bits equal the modulator's bit-exact model (0 wrong bits, one lead-in fits) ok
+  control: the order-3 model gets 12926 of 26656 bits wrong
+  dac: control, the order-3 model does not fit (over 10 % wrong)     ok
+  low-pass decode: correlation with the input 0.9987 (lag 0), 0.9889 (lag 1); gain 6.37e-05 per LSB
+  dac: low-passed pin correlates with the input tone (r > 0.99)      ok
+  control: correlation with a 1500 Hz tone 0.0591
+  dac: control, a 1500 Hz tone does not correlate (|r| < 0.5)        ok
+  dac: control, RTL bug pecfg_seg caught by the lockstep             ok
+EXAMPLES: ALL PASS
+exit 0
