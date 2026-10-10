@@ -4,6 +4,8 @@
                                   lockstep, every clock, with random configurations, restarts and
                                   traffic; then the RTL against independent references (USB,
                                   CAN, 10BASE-T); round trips; the planted faults
+     check.exe paths CLOCKS       the transmit serialiser and the receive framer built from them:
+                                  the same, with whole frames
 *)
 open Hardcaml
 
@@ -320,7 +322,316 @@ let run_blocks clocks =
   pr "blocks: %s (%.0f s)\n" (if !ok_all then "PASS" else "FAIL") (Unix.gettimeofday () -. t0);
   !ok_all
 
+(* ---------------- the transmit serialiser and the receive framer ---------------- *)
+
+let tx_cfg_inputs prefix : Txpath.cfg_signals =
+  let open Signal in
+  let i n w = input (prefix ^ n) w in
+  let tail k : Txpath.tail_signals = { s_len = i (Printf.sprintf "t%dlen" k) 4; s_la = i (Printf.sprintf "t%da" k) 1; s_lb = i (Printf.sprintf "t%db" k) 1 } in
+  { s_period = i "period" 12; s_msb = i "msb" 1;
+    s_stuff = { s_run = i "run" 4; s_either = i "either" 1; s_value = i "value" 1 };
+    s_code = { s_mode = i "mode" 2; s_invert = i "invert" 1; s_toggle_on = i "toggle_on" 1 };
+    s_tail1 = tail 1; s_tail2 = tail 2 }
+
+let rx_cfg_inputs prefix : Rxpath.cfg_signals =
+  let open Signal in
+  let i n w = input (prefix ^ n) w in
+  { s_code = { s_mode = i "mode" 2; s_invert = i "invert" 1; s_toggle_on = i "toggle_on" 1 };
+    s_stuff = { s_run = i "run" 4; s_either = i "either" 1; s_value = i "value" 1 };
+    s_msb = i "msb" 1; s_pattern = i "pattern" 8; s_pmask = i "pmask" 8; s_start_on_pattern = i "sop" 1;
+    s_half_duplex = i "hd" 1; s_end_inactive = i "ei" 1; s_end_burst = i "eb" 1; s_skip = i "skip" 8 }
+
+let paths_circuit () =
+  let open Signal in
+  let clock = input "clock" 1 and clear = input "clear" 1 in
+  let t = Txpath.create ~clock ~clear ~cfg:(tx_cfg_inputs "tx_") ~push:(input "push" 1) ~push_data:(input "push_data" 8) in
+  let r =
+    Rxpath.create ~clock ~clear ~cfg:(rx_cfg_inputs "rx_") ~bit:(input "bit" 1) ~valid:(input "valid" 1) ~active:(input "active" 1)
+      ~burst_end:(input "burst_end" 1) ~start:(input "start" 1) ~stop:(input "stop" 1) ~tx_active:t.active ~pop:(input "pop" 1) in
+  Circuit.create_exn ~name:"bit_paths"
+    ([ output "tx_a" t.a; output "tx_b" t.b; output "tx_busy" t.busy; output "tx_active" t.active; output "tx_count" t.count;
+       output "tx_accept" t.accept;
+       output "rx_head" r.head; output "rx_nonempty" r.nonempty; output "rx_count" r.count; output "rx_in_frame" r.in_frame;
+       output "rx_done" r.done_; output "rx_err" r.err; output "rx_ovf" r.ovf; output "crc_bit" r.crc_bit;
+       output "crc_valid" r.crc_valid; output "frame_start" r.frame_start ]
+     @ List.map (fun (n, s) -> output n s) r.dbg)
+
+let random_tail r : Txpath.tail = { len = (if Random.State.int r 3 = 0 then 0 else Random.State.int r 16); la = Random.State.int r 2; lb = Random.State.int r 2 }
+
+let random_tx_cfg r : Txpath.cfg =
+  match Random.State.int r 4 with
+  | 0 -> { Txpath.usb_ls with period = 1 + Random.State.int r 6 }
+  | 1 -> Txpath.eth10
+  | _ ->
+    { period = (match Random.State.int r 4 with 0 -> 0 | 1 -> 1 | 2 -> 2 + Random.State.int r 6 | _ -> Random.State.int r 4096);
+      msb_first = Random.State.bool r; stuff = random_stuff_cfg r; code = random_lc_cfg r; tail1 = random_tail r; tail2 = random_tail r }
+
+let random_rx_cfg r : Rxpath.cfg =
+  match Random.State.int r 4 with
+  | 0 -> Rxpath.usb_ls
+  | 1 -> Rxpath.eth10
+  | _ ->
+    { code = random_lc_cfg r; stuff = random_stuff_cfg r; msb_first = Random.State.bool r;
+      pattern = Random.State.int r 256; pmask = (match Random.State.int r 3 with 0 -> 0xFF | 1 -> 0x0F | _ -> Random.State.int r 256);
+      start_on_pattern = Random.State.int r 4 > 0; half_duplex = Random.State.bool r; end_inactive = Random.State.bool r;
+      end_burst = Random.State.bool r; skip = (if Random.State.bool r then Random.State.int r 16 else Random.State.int r 256) }
+
+let set_tx_cfg set (c : Txpath.cfg) =
+  set "tx_period" c.period; set "tx_msb" (Bool.to_int c.msb_first);
+  set "tx_run" c.stuff.run; set "tx_either" (Bool.to_int c.stuff.either); set "tx_value" c.stuff.value;
+  set "tx_mode" (Linecode.mode_code c.code.mode); set "tx_invert" (Bool.to_int c.code.invert); set "tx_toggle_on" c.code.toggle_on;
+  List.iter (fun (k, (t : Txpath.tail)) ->
+      set (Printf.sprintf "tx_t%dlen" k) t.len; set (Printf.sprintf "tx_t%da" k) t.la; set (Printf.sprintf "tx_t%db" k) t.lb)
+    [ (1, c.tail1); (2, c.tail2) ]
+
+let set_rx_cfg set (c : Rxpath.cfg) =
+  set "rx_mode" (Linecode.mode_code c.code.mode); set "rx_invert" (Bool.to_int c.code.invert); set "rx_toggle_on" c.code.toggle_on;
+  set "rx_run" c.stuff.run; set "rx_either" (Bool.to_int c.stuff.either); set "rx_value" c.stuff.value;
+  set "rx_msb" (Bool.to_int c.msb_first); set "rx_pattern" c.pattern; set "rx_pmask" c.pmask;
+  set "rx_sop" (Bool.to_int c.start_on_pattern); set "rx_hd" (Bool.to_int c.half_duplex);
+  set "rx_ei" (Bool.to_int c.end_inactive); set "rx_eb" (Bool.to_int c.end_burst); set "rx_skip" c.skip
+
+let make_sim c =
+  let sim = Cyclesim.create c in
+  let dummy = ref Bits.gnd in
+  let i n = try Cyclesim.in_port sim n with _ -> dummy in
+  let set n v = let p = i n in p := Bits.of_int ~width:(max 1 (Bits.width !p)) v in
+  (sim, set)
+
+(* Random lockstep of both paths against their models. The receive path's input is either the
+   transmit path's own line (a loop, so that frames really start) or random bits. *)
+let paths_lockstep ~clocks ~seed =
+  let sim, set = make_sim (paths_circuit ()) in
+  let o n = Cyclesim.out_port ~clock_edge:Before sim n in
+  let get n = Bits.to_int !(o n) in
+  let r = Random.State.make [| seed |] in
+  let tc = ref (random_tx_cfg r) and rc = ref (random_rx_cfg r) in
+  let tx = Txpath.init () and rx = Rxpath.init () in
+  let loop = ref (Random.State.bool r) in
+  set "clear" 1; Cyclesim.cycle sim; set "clear" 0;
+  let bad = ref 0 and diffs = ref [] in
+  let src = biased_bits r in
+  for c = 0 to clocks - 1 do
+    if Random.State.int r 3000 = 0 then tc := random_tx_cfg r;
+    if Random.State.int r 3000 = 0 then (rc := random_rx_cfg r; loop := Random.State.bool r);
+    let t = !tc and rcf = !rc in
+    let push = Random.State.int r 6 = 0 in
+    let pdata = match Random.State.int r 4 with 0 -> 0x80 | 1 -> 0xFF | 2 -> rcf.pattern | _ -> Random.State.int r 256 in
+    let valid, bit, active =
+      if !loop then (Random.State.int r (max 1 (min 8 t.period)) = 0, (if tx.busy then tx.b else 0), tx.busy || Random.State.int r 50 > 0)
+      else (Random.State.int r 3 = 0, src (), Random.State.int r 40 > 0) in
+    let inp : Rxpath.inputs =
+      { bit; valid; active; burst_end = Random.State.int r 200 = 0; start = Random.State.int r 2000 = 0;
+        stop = Random.State.int r 2000 = 0; tx_active = Txpath.active tx; pop = Random.State.int r 4 = 0 } in
+    set_tx_cfg set t; set_rx_cfg set rcf;
+    set "push" (Bool.to_int push); set "push_data" pdata;
+    set "bit" bit; set "valid" (Bool.to_int valid); set "active" (Bool.to_int active); set "burst_end" (Bool.to_int inp.burst_end);
+    set "start" (Bool.to_int inp.start); set "stop" (Bool.to_int inp.stop); set "pop" (Bool.to_int inp.pop);
+    Cyclesim.cycle_check sim; Cyclesim.cycle_before_clock_edge sim;
+    let d = ref [] in
+    let cmp name a b = if a <> b then d := Printf.sprintf "%s: model %d rtl %d" name a b :: !d in
+    (* outputs from the state at the start of the clock *)
+    cmp "tx a" tx.a (get "tx_a"); cmp "tx b" tx.b (get "tx_b"); cmp "tx busy" (Bool.to_int tx.busy) (get "tx_busy");
+    cmp "tx active" (Bool.to_int (Txpath.active tx)) (get "tx_active"); cmp "tx count" (Queue.length tx.fifo) (get "tx_count");
+    cmp "rx count" (Queue.length rx.fifo) (get "rx_count");
+    (match Queue.peek_opt rx.fifo with Some h -> cmp "rx head" h (get "rx_head") | None -> ());
+    cmp "rx in frame" (Bool.to_int rx.in_frame) (get "rx_in_frame"); cmp "rx done" (Bool.to_int (Rxpath.done_ rx)) (get "rx_done");
+    cmp "rx err" (Bool.to_int rx.err) (get "rx_err"); cmp "rx ovf" (Bool.to_int rx.ovf) (get "rx_ovf");
+    cmp "rx chain valid" (Bool.to_int rx.cv) (get "rx_cv"); cmp "rx chain error" (Bool.to_int rx.ce) (get "rx_ce");
+    if rx.cv then cmp "rx chain bit" rx.cb (get "rx_cb");
+    cmp "rx history" rx.hist (get "rx_hist"); cmp "rx history count" rx.hcount (get "rx_hcount"); cmp "rx bits" (rx.nbits) (get "rx_nbits"); cmp "rx shift" rx.sh (get "rx_sh");
+    cmp "rx frame bits" rx.fbits (get "rx_fbits");
+    let o = Rxpath.step rcf rx inp in
+    cmp "crc valid" (Bool.to_int o.crc_valid) (get "crc_valid"); if o.crc_valid then cmp "crc bit" o.crc_bit (get "crc_bit");
+    cmp "frame start" (Bool.to_int o.frame_start) (get "frame_start");
+    let took = Txpath.step t tx ~push:(if push then Some pdata else None) in
+    cmp "tx accept" (Bool.to_int took) (get "tx_accept");
+    Cyclesim.cycle_at_clock_edge sim; Cyclesim.cycle_after_clock_edge sim;
+    if !d <> [] then begin
+      incr bad;
+      if List.length !diffs < 3 then diffs := Printf.sprintf "clock %d: %s" c (String.concat "; " (List.rev !d)) :: !diffs
+    end
+  done;
+  (!bad, List.rev !diffs)
+
+(* The transmit path's RTL on a frame: push the bytes as the FIFO takes them; returns the line pair
+   sampled once per symbol (in the middle of each), from the first symbol to idle, as (a, b) *)
+let rtl_tx_frame (c : Txpath.cfg) bytes =
+  let open Signal in
+  let clock = input "clock" 1 and clear = input "clear" 1 in
+  let t = Txpath.create ~clock ~clear ~cfg:(Txpath.cfg_const c) ~push:(input "push" 1) ~push_data:(input "push_data" 8) in
+  let sim, set = make_sim (Circuit.create_exn ~name:"txf" [ output "a" t.a; output "b" t.b; output "busy" t.busy; output "accept" t.accept ]) in
+  let o n = Bits.to_int !(Cyclesim.out_port ~clock_edge:Before sim n) in
+  set "clear" 1; Cyclesim.cycle sim; set "clear" 0;
+  let rest = ref bytes and line = ref [] and started = ref false and fin = ref false and k = ref 0 and since = ref 0 in
+  while not !fin && !k < 200_000 do
+    incr k;
+    (match !rest with x :: _ -> set "push" 1; set "push_data" x | [] -> set "push" 0);
+    Cyclesim.cycle_check sim; Cyclesim.cycle_before_clock_edge sim;
+    let busy = o "busy" = 1 in
+    if busy && not !started then (started := true; since := 0);
+    if !started then begin
+      if busy then (if !since mod c.period = c.period / 2 then line := (o "a", o "b") :: !line; incr since) else fin := true
+    end;
+    if o "accept" = 1 then rest := List.tl !rest;
+    Cyclesim.cycle_at_clock_edge sim; Cyclesim.cycle_after_clock_edge sim
+  done;
+  List.rev !line
+
+(* The receive path's RTL on a symbol stream, one symbol every [per] clocks, sampled as an edge
+   sampler would hand them over (valid for one clock); [active] per symbol. Returns the frames
+   (bytes, err, crc bits fed). *)
+let rtl_rx_frames (c : Rxpath.cfg) ?(per = 4) (syms : (int * bool) list) =
+  let open Signal in
+  let clock = input "clock" 1 and clear = input "clear" 1 in
+  let r = Rxpath.create ~clock ~clear ~cfg:(Rxpath.cfg_const c) ~bit:(input "bit" 1) ~valid:(input "valid" 1) ~active:(input "active" 1)
+      ~burst_end:gnd ~start:gnd ~stop:gnd ~tx_active:gnd ~pop:(input "pop" 1) in
+  let sim, set = make_sim (Circuit.create_exn ~name:"rxf"
+      [ output "head" r.head; output "ne" r.nonempty; output "in_frame" r.in_frame; output "err" r.err; output "cv" r.crc_valid; output "cb" r.crc_bit ]) in
+  let o n = Bits.to_int !(Cyclesim.out_port ~clock_edge:Before sim n) in
+  set "clear" 1; Cyclesim.cycle sim; set "clear" 0;
+  let frames = ref [] and cur = ref [] and crc = ref [] and was_in = ref false and err = ref false in
+  let clk sym valid active =
+    set "bit" sym; set "valid" (Bool.to_int valid); set "active" (Bool.to_int active); set "pop" 1;
+    Cyclesim.cycle_check sim; Cyclesim.cycle_before_clock_edge sim;
+    if o "ne" = 1 then cur := o "head" :: !cur;
+    if o "cv" = 1 then crc := o "cb" :: !crc;
+    let inf = o "in_frame" = 1 in
+    if inf then err := o "err" = 1;
+    if !was_in && not inf then (frames := (List.rev !cur, !err, List.rev !crc) :: !frames; cur := []; crc := []);
+    was_in := inf;
+    Cyclesim.cycle_at_clock_edge sim; Cyclesim.cycle_after_clock_edge sim in
+  List.iter (fun (s, act) -> clk s true act; for _ = 2 to per do clk s false act done) syms;
+  for _ = 1 to 4 do clk 0 false false done;
+  List.rev !frames
+
+let paths_references ~seed =
+  let r = Random.State.make [| seed |] in
+  let all_ok = ref true in
+  let report name good total = if good <> total then all_ok := false; pr "  %-78s %d of %d %s\n" name good total (ok (good = total)) in
+  let n = 100 in
+  (* USB low speed: the serialiser's whole frame (sync, stuffing, NRZI, EOP) against fw_codec,
+     one symbol per 40 clocks; a = D-, b = D+, so the symbol is 2a + b (J 2, K 1, SE0 0) *)
+  let good = ref 0 and good_rx = ref 0 in
+  for _ = 1 to n do
+    let bytes = random_bytes r (1 + Random.State.int r 10) in
+    let refsyms = Fw_codec.symbols bytes in
+    let line = rtl_tx_frame Txpath.usb_ls (0x80 :: bytes) in
+    if List.map (fun (a, b) -> (2 * a) + b) line = refsyms then incr good;
+    (* back through the receive path: D+ is the line the edge sampler reads, active = not SE0;
+       idle J before and after *)
+    let syms = List.init 4 (fun _ -> (0, true)) @ List.map (fun (a, b) -> (b, a = 1 || b = 1)) line @ List.init 4 (fun _ -> (0, true)) in
+    (match rtl_rx_frames Rxpath.usb_ls syms with
+     | [ (got, false, crcbits) ] when got = bytes && List.length crcbits = 8 * (List.length bytes - 1) -> incr good_rx
+     | _ -> ())
+  done;
+  report "USB low speed: serialiser frame (sync to EOP, 40 clocks per symbol) = usb-ls fw_codec" !good n;
+  report "USB low speed: framer on that line gives the bytes after the sync; CRC fed after the PID" !good_rx n;
+  (* the CRC residue over a real USB data packet: the framer's CRC feed through CRC-16/USB *)
+  let good = ref 0 in
+  for _ = 1 to n do
+    let payload = random_bytes r (Random.State.int r 9) in
+    let pkt = Fw_codec.data_bytes 0xC3 payload in
+    let line = rtl_tx_frame Txpath.usb_ls (0x80 :: pkt) in
+    let syms = List.init 4 (fun _ -> (0, true)) @ List.map (fun (a, b) -> (b, a = 1 || b = 1)) line @ List.init 4 (fun _ -> (0, true)) in
+    match rtl_rx_frames Rxpath.usb_ls syms with
+    | [ (_, false, crcbits) ] ->
+      let crc = List.fold_left (fun c b -> if (c land 1) lxor b = 1 then (c lsr 1) lxor 0xA001 else c lsr 1) 0xFFFF crcbits in
+      if crc = 0xB001 then incr good
+    | _ -> ()
+  done;
+  report "USB: CRC-16 over the framer's CRC feed of a data packet leaves the residue 0xB001" !good n;
+  (* 10BASE-T: Manchester at 3 clocks per half-bit against eth_model, then TP_IDL 6 symbols *)
+  let good = ref 0 in
+  for _ = 1 to n do
+    let bytes = random_bytes r (1 + Random.State.int r 20) in
+    let refsyms = Eth_model.manchester ~h:1 bytes |> List.filteri (fun i _ -> i < 16 * List.length bytes) |> List.map (fun v -> if v > 0 then 1 else 0) in
+    let line = rtl_tx_frame Txpath.eth10 bytes in
+    let data = List.filteri (fun i _ -> i < 16 * List.length bytes) line and tail = List.filteri (fun i _ -> i >= 16 * List.length bytes) line in
+    if List.map fst data = refsyms && List.for_all (fun (a, b) -> a = 1 - b) data && tail = List.init 6 (fun _ -> (1, 0)) then incr good
+  done;
+  report "10BASE-T: serialiser = eth_model Manchester, pair complementary, then 6 symbols TD+ high" !good n;
+  (* stuffing violations are flagged: a USB frame with a stuff bit removed from the line *)
+  let caught = ref 0 in
+  for _ = 1 to n do
+    let bytes = 0xFF :: random_bytes r (Random.State.int r 6) in
+    let line = rtl_tx_frame Txpath.usb_ls (0x80 :: bytes) in
+    (* the first stuff symbol: after the sync (8) and the first six 1s... find by decoding *)
+    let bits = Stuff.stuff_list Stuff.usb (bits_of_bytes (0x80 :: bytes)) in
+    let rec first_diff k a b = match a, b with x :: a', y :: b' when x = y -> first_diff (k + 1) a' b' | _ -> k in
+    let k = first_diff 0 bits (bits_of_bytes (0x80 :: bytes)) in
+    (* removing a symbol from an NRZI line removes that bit and inverts the rest's levels:
+       re-encode the stream without it instead *)
+    let dropped = List.filteri (fun i _ -> i <> k) bits in
+    let lv = Linecode.encode_list { Linecode.usb with invert = false } dropped in
+    let syms = List.init 4 (fun _ -> (0, true)) @ List.map (fun v -> (v, true)) lv @ [ (0, false); (0, false); (0, true) ] in
+    ignore line;
+    match rtl_rx_frames Rxpath.usb_ls syms with
+    | [ (_, true, _) ] -> incr caught
+    | _ -> ()
+  done;
+  report "USB: a frame missing a stuff bit ends with the framer's error flag set" !caught n;
+  (* 10BASE-T receive behind the edge sampler (which decodes Manchester): preamble, SFD, frame and
+     FCS as bits; the framer starts after the SFD, and CRC-32 over its feed leaves the residue *)
+  let good = ref 0 in
+  for _ = 1 to n do
+    let frame = random_bytes r (14 + Random.State.int r 50) in
+    let wire = List.init 7 (fun _ -> 0x55) @ [ 0xD5 ] @ frame @ Eth_model.fcs_bytes frame in
+    let syms = List.init 3 (fun _ -> (0, false)) @ List.map (fun b -> (b, true)) (bits_of_bytes wire) @ [ (1, false) ] in
+    match rtl_rx_frames { Rxpath.eth10 with end_inactive = true } ~per:6 syms with
+    | [ (got, false, crcbits) ] ->
+      let crc = List.fold_left (fun c b -> if (c land 1) lxor b = 1 then (c lsr 1) lxor 0xEDB88320 else c lsr 1) 0xFFFFFFFF crcbits in
+      if got = frame @ Eth_model.fcs_bytes frame && crc = 0xDEBB20E3 then incr good
+    | _ -> ()
+  done;
+  report "10BASE-T: framer after the SFD gives the frame and FCS; CRC-32 residue 0xDEBB20E3" !good n;
+  !all_ok
+
+let run_paths clocks =
+  let t0 = Unix.gettimeofday () in
+  let ok_all = ref true in
+  pr "== transmit serialiser and receive framer: RTL against model, every clock\n";
+  for seed = 1 to 4 do
+    let bad, diffs = paths_lockstep ~clocks ~seed in
+    pr "  seed %d: %d clocks, %d mismatching %s\n" seed clocks bad (ok (bad = 0));
+    List.iter (pr "    %s\n") diffs;
+    if bad > 0 then ok_all := false
+  done;
+  pr "== against independent references, through the RTL\n";
+  if not (paths_references ~seed:9) then ok_all := false;
+  pr "== planted faults in the two paths: each must be caught by the lockstep\n";
+  let caught = ref 0 and total = ref 0 in
+  let try_bug set name what =
+    incr total;
+    set name;
+    let rec go seed = if seed > 8 then None else (let bad, d = paths_lockstep ~clocks:(min clocks 100000) ~seed in if bad > 0 then Some (seed, d) else go (seed + 1)) in
+    (match go 1 with
+     | Some (seed, d) -> incr caught; pr "  %-26s caught (seed %d; %s)  %s\n" name seed (List.hd d) what
+     | None -> pr "  %-26s MISSED  %s\n" name what);
+    set "" in
+  List.iter (fun (b, w) -> try_bug (fun n -> Txpath.bug := n) b w) Txpath.bugs;
+  List.iter (fun (b, w) -> try_bug (fun n -> Rxpath.bug := n) b w) Rxpath.bugs;
+  pr "%d of %d planted faults caught\n" !caught !total;
+  let noticed = ref [] in
+  let quiet f = let saved = Unix.dup Unix.stdout in let null = Unix.openfile "/dev/null" [ Unix.O_WRONLY ] 0 in
+    flush stdout; Unix.dup2 null Unix.stdout; let v = f () in flush stdout; Unix.dup2 saved Unix.stdout; Unix.close null; v in
+  List.iter (fun (set, (b, _)) -> set b; if not (quiet (fun () -> paths_references ~seed:9)) then noticed := b :: !noticed; set "")
+    (List.map (fun x -> ((fun n -> Txpath.bug := n), x)) Txpath.bugs @ List.map (fun x -> ((fun n -> Rxpath.bug := n), x)) Rxpath.bugs);
+  pr "the independent references alone fail with %d of the %d faults: %s\n" (List.length !noticed) !total
+    (String.concat ", " (List.rev !noticed));
+  if !caught < !total then ok_all := false;
+  pr "paths: %s (%.0f s)\n" (if !ok_all then "PASS" else "FAIL") (Unix.gettimeofday () -. t0);
+  !ok_all
+
 let () =
   match Array.to_list Sys.argv with
   | [ _; "blocks"; clocks ] -> exit (if run_blocks (int_of_string clocks) then 0 else 1)
-  | _ -> prerr_endline "usage: check.exe blocks CLOCKS"; exit 2
+  | [ _; "paths"; clocks ] -> exit (if run_paths (int_of_string clocks) then 0 else 1)
+  | _ :: "usb-frame" :: l ->   (* one USB frame through the serialiser and back through the framer *)
+    let bytes = List.map int_of_string l in
+    let line = rtl_tx_frame Txpath.usb_ls (0x80 :: bytes) in
+    pr "line: %s\n" (String.concat "" (List.map (fun (a, b) -> string_of_int ((2 * a) + b)) line));
+    let syms = List.init 4 (fun _ -> (0, true)) @ List.map (fun (a, b) -> (b, a = 1 || b = 1)) line @ List.init 4 (fun _ -> (0, true)) in
+    List.iter (fun (g, e, c) -> pr "frame: %s err %b crc bits %d\n" (String.concat " " (List.map (Printf.sprintf "%02x") g)) e (List.length c))
+      (rtl_rx_frames Rxpath.usb_ls syms)
+  | _ -> prerr_endline "usage: check.exe blocks CLOCKS | paths CLOCKS | usb-frame BYTE..."; exit 2

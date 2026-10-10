@@ -107,8 +107,9 @@ let bugs =
     "enc_restart_ignored", "restart does not reset the encoder (NRZI level, Manchester phase)" ]
 
 (* Encoder: on [tick], emits a symbol into the registered [line] (visible from the next clock).
-   [need_bit] is combinational: a new bit is taken at this tick. *)
-type enc_out = { need_bit : Signal.t; line : Signal.t }
+   [need_bit] is combinational: a new bit is taken at this tick; [sym] is the symbol this tick
+   emits (combinational), for a user that registers it with other state. *)
+type enc_out = { need_bit : Signal.t; line : Signal.t; sym : Signal.t }
 
 let encoder ~clock ~clear ~restart ~(cfg : cfg_signals) ~tick ~bit =
   let spec = Reg_spec.create ~clock ~clear () in
@@ -126,7 +127,7 @@ let encoder ~clock ~clear ~restart ~(cfg : cfg_signals) ~tick ~bit =
   level <== reg spec (mux2 clr gnd (mux2 (tick &: is_nrzi) lvl_next level));
   half <== reg spec (mux2 clr gnd (mux2 (tick &: is_man) (if is "manchester_need_every_tick" then gnd else ~:half) half));
   cur <== reg spec (mux2 clr gnd (mux2 (tick &: is_man &: ~:half) bit cur));
-  { need_bit = need; line }
+  { need_bit = need; line; sym }
 
 (* Decoder: with [valid], one symbol [sym]; [out_valid], [out_bit], [err] are combinational. *)
 type dec_out = { out_valid : Signal.t; out_bit : Signal.t; err : Signal.t }

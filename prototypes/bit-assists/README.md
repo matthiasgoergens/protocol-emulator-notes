@@ -8,7 +8,8 @@ verified RTL), so `../chip-top` left them out. This directory specifies both, bu
 Hardcaml and checks them.
 
 Build: `opam exec --switch=5.3.0 -- dune build` (Hardcaml v0.17). Run:
-`_build/default/check.exe blocks 1000000` (results in `results/blocks.txt`, about 12 s).
+`_build/default/check.exe blocks 1000000` (`results/blocks.txt`, about 12 s) and
+`_build/default/check.exe paths 1000000` (`results/paths.txt`, about 45 s).
 
 ## What they do
 
@@ -49,8 +50,40 @@ The references are other prototypes' encoders, so they are independent of these 
 where the standards are: they settle the polarity conventions (J as level 0 for USB, 802.3's
 Manchester), the stuffing rules across stuff bits, and the stuff bit after the last data bit.
 
+## The two paths built from them (`txpath.ml`, `rxpath.ml`)
+
+On the chip the assists need a byte interface to the threads, so this directory also specifies the
+two composite blocks that `../chip-top` integrates. Both read their configuration live (no
+"change only while held" contract) and are specified, built and checked like the assists.
+
+**Transmit serialiser.** A two-byte FIFO (a thread's SEND), a symbol timer (`period` clocks, 12
+bits), the stuff tracker and the encoder, LSB or MSB first, and a two-phase tail of 0 to 15 symbols
+each with a level per line. A frame starts one clock after a byte reaches the idle serialiser;
+an underrun at a bit boundary ends the data (a stuff bit due after the last data bit still goes
+out), then the tail, then idle. Line b is the complement of line a during data (a differential
+pair). USB low speed: 40 clocks per symbol, run 6, NRZI with J as the idle level, tail SE0 × 2
+then J × 1. 10BASE-T: 3 clocks per half-bit, Manchester, tail TD+ high for 6 symbols (TP_IDL).
+
+**Receive framer.** The decoder and the destuffer on every recovered bit, one registered chain
+bit with an error flag; an 8-bit history of the chain (newest bit in bit 7) and a pattern with a
+mask start a frame (USB's sync 0x80, Ethernet's SFD 0xD5), or the host does; half duplex stops a
+start while the transmitter is active (so a device does not receive itself). In a frame, bytes go
+into a two-byte FIFO; the frame ends when the line goes inactive (USB's SE0), at the edge
+sampler's burst end (Ethernet), or by the host. Stuff and code violations in the frame set a
+sticky error. The chip's CRC unit can take the frame's bits after a `skip` count (USB: the 8-bit
+PID). Two decisions found by the references: the history counts only bits received since the
+last clear or frame end (a cleared history looked like received zeros, and a packet ending in
+seven 0s followed by the EOP's decoded 1s completed a sync: 21 of 100 USB packets started a
+second, empty frame before this).
+
+| check (`check.exe paths 1000000`, `results/paths.txt`, 43 s) | result |
+|---|---|
+| RTL against model, both paths in one circuit, the receiver fed from the transmitter's own line or from random bits, random configurations (USB, Ethernet, random), pushes, pops, host starts and stops, burst ends | 4 seeds × 1,000,000 clocks, **0 mismatching clocks** |
+| USB: the serialiser's whole frame (sync to EOP) at 40 clocks per symbol against `fw_codec.symbols` | 100 of 100 |
+| USB: the framer on that line returns the bytes after the sync, with the CRC fed after the PID; CRC-16 over the feed of a data packet leaves 0xB001; a missing stuff bit sets the error flag | 100 of 100 each |
+| 10BASE-T: the serialiser against `eth_model`'s Manchester, the pair complementary, then 6 symbols of TP_IDL; the framer after the SFD returns frame and FCS, CRC-32 over its feed leaves 0xDEBB20E3 | 100 of 100 each |
+| planted faults (6 in the serialiser, 8 in the framer) | **14 of 14 caught** by the lockstep; 10 of 14 also fail the references |
+
 ## On the chip
 
-`../chip-top` puts them on the bit path (README section 8): a transmit serialiser (byte FIFO from a
-thread, bit timer, stuffer, encoder, a two-phase tail such as USB's EOP) and a receive framer
-(decoder, destuffer, start pattern, byte packer, end on line idle).
+`../chip-top` puts both paths on its bit path (its README, section 8).
