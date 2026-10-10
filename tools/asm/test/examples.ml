@@ -201,7 +201,8 @@ let i2c_read () =
   let m = mem () in
   m.(0x10) <- 0x99;
   let _, c = both "i2c_read (control: other data)" r.image ~clocks:4000 ~peers:(fun () -> [ i2c_peer ~mem:m () ]) () in
-  check "i2c_read: control, other data in the target gives other bytes" (List.mem (1, 0x99) c.received)
+  check "i2c_read: control, other data in the target gives other bytes" (List.mem (1, 0x99) c.received);
+  control_rtl "i2c_read" r.image ~clocks:4000 ~peers:(fun () -> [ i2c_peer ~mem:(mem ()) () ]) "uio_oe_swap"
 
 let uart_rx () =
   print_endline "== uart_rx: UART receiver, 64 clocks a bit, from Forencich's uart_tx and from the runner's peer";
@@ -241,7 +242,8 @@ let bridge () =
   (* control: the UART bytes from the runner's peer instead: the SPI must follow them *)
   let other = [ 0x01; 0x80; 0x7E ] in
   let c = Runner.run (Runner.Chip { rtl = false }) r.image (opts 4000 [ Peers.uart_tx ~net:0 ~bit:64 ~start:200 other ]) in
-  check "bridge: control, other UART bytes give the same other SPI bytes" (D.spi (Runner.samples c) ~sclk:1 ~mosi:2 ~cs:3 = other)
+  check "bridge: control, other UART bytes give the same other SPI bytes" (D.spi (Runner.samples c) ~sclk:1 ~mosi:2 ~cs:3 = other);
+  control_rtl "bridge" r.image ~clocks:7000 ~peers:(fun () -> [ Peers.stimulus_file "examples/uart_rx.stim" ]) "pin_lane_swap"
 
 (* ---- the one-bit DAC ---- *)
 
@@ -475,7 +477,8 @@ let ws2812 () =
   let ro = Assembler.assemble_string ~include_dirs:[ "lib"; "examples" ] ~name:"ws2812 (other colour)" other in
   let co = Runner.run (Runner.Chip { rtl = false }) ro.image (opts clocks []) in
   check "ws2812: control, another colour in the bank is decoded as that colour"
-    (fst (ws2812_decode (Runner.samples co) ~pin:0) = [ [ 0x13; 0x34; 0x56; 0x9A; 0xBC; 0xDE ] ])
+    (fst (ws2812_decode (Runner.samples co) ~pin:0) = [ [ 0x13; 0x34; 0x56; 0x9A; 0xBC; 0xDE ] ]);
+  control_rtl "ws2812" r.image ~clocks ~peers:(fun () -> []) "pin_lane_swap"
 
 let all = [ ("uart_tx", uart_tx); ("spi", spi); ("i2c_write", i2c_write); ("i2c_read", i2c_read); ("uart_rx", uart_rx);
             ("bridge", bridge); ("ws2812", ws2812); ("dac", dac) ]

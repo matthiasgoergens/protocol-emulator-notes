@@ -22,7 +22,7 @@ run() {   # result file, command...
   local out=$1; shift
   wait_load
   { header "$*"; nice ionice "$@" 2>&1; echo "exit $?"; } > "results/$out" || true
-  echo "$out: $(grep --extended-regexp 'ALL|FAIL' "results/$out" | tail --lines=1)"
+  echo "$out: $(grep --extended-regexp 'ALL|FAIL|DRIFT' "results/$out" | tail --lines=1)"
 }
 mkdir --parents results
 wait_load

@@ -357,7 +357,7 @@ let run_block (b : block) =
               | [ "host"; v ] -> List.iter (fun x -> Queue.push x host) (ints_of v)
               | _ -> fail "%s: bad input %s" where kv) (String.split_on_char ' ' (after "; input:" l))) b.text;
     let expects = List.filter_map (fun l -> if String.starts_with ~prefix:"; expect:" (trim l) then Some (after "; expect:" l) else None) b.text in
-    let slots = 120 in
+    let slots = 250 in
     let bank = Array.make Isa2.bank_len 0 in
     let st = Isa2.init ~boot:(Image.boot r.image) ~bank () in
     let mem = Image.store r.image in
