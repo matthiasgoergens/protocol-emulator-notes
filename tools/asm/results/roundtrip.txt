@@ -1,6 +1,6 @@
 # command: _build/default/test/roundtrip.exe 2000
-# commit: 2722cf58a62e01341c229955b1832cdf7b405611
-# date: 2026-10-10T11:37:39+08:00
+# commit: be931896434c36b31e9bd3ebedd44a8f6d9349ff (with uncommitted changes)
+# date: 2026-10-10T12:24:54+08:00
 all 65,536 words: round trip checked in 64 images of 1,024 words
   canonical words per opcode (the rest have ignored bits set and print as .word):
     0 NOP        1 of 4096
@@ -30,5 +30,8 @@ example spi.s: round trip identical
 example uart_rx.s: round trip identical
 example uart_tx.s: round trip identical
 example ws2812.s: round trip identical
+control: planted disassembler bug drop_q caught in 195 of 200 random images
+control: planted disassembler bug peinit_order caught in 132 of 200 random images
+control: planted disassembler bug skip_reg caught in 133 of 200 random images
 ROUND TRIP: ALL IDENTICAL
 exit 0
