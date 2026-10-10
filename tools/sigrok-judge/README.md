@@ -49,6 +49,7 @@ A trace is one byte per sample (bit p is channel p) with a `.expected` file of `
 | USB low speed | `prototypes/usb-ls` hardened device RTL answering GET_DESCRIPTOR (`usb_dump.exe`) | `usb_signalling` + `usb_packet` | the SETUP data and the 18 descriptor bytes; no CRC or sync error |
 | S/PDIF | `prototypes/spdif` chip transmitter (`main.exe tx`) | `spdif` | preamble, 24-bit audio, V, U, C, P of every subframe |
 | 10BASE-T | n/a | none | no sigrok decoder exists, see below |
+| UART, standard rates | `prototypes/protocol-roles` (`main.exe dump`), interpreter and RTL in lockstep: the transmitter's pin, and the line the receiver read, at 12 rates from 9600 baud to 3 Mbaud, sampled at 60 MHz | `uart` | the bytes sent; for the receiver, the bytes it reported to the host |
 
 The dumpers are read-only taps on the existing benches (a `tap` argument in `ps2_bench.ml`, a `Bench.tap`
 hook in `usb-ls/bench.ml`, a `dump` mode in `deadline-sequencer/demo.ml`, two new small executables);
@@ -56,7 +57,9 @@ they change no behaviour.
 
 ## Teeth
 
-Each protocol has two planted faults, applied to the clean trace before the decoder sees it:
+Each protocol has two planted faults, applied to the clean trace before the decoder sees it
+(the traces of `prototypes/protocol-roles`, in `traces/roles/`, get the teeth of their protocol;
+`judge.py --only roles` judges them alone, into `results/judge-roles.txt`):
 
 - UART: data bit 3 of byte 0 inverted for half a bit; bit time 10 % long with the receiver fixed.
 - SPI: MOSI inverted around the third clock edge; MOSI 40 samples late against a 64-sample clock.

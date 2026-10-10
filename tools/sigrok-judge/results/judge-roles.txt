@@ -1,0 +1,179 @@
+# command: judge.py --only roles
+# commit: 9b80de7b37f9ac1a55a983f5efe355b5ce2d0120
+# sigrok-cli 0.7.2
+# - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
+# image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
+# date: 2026-10-10T11:07:35+08:00
+# analyser rate: as simulated
+roles/uart-rx-1000000: PASS: decoded D7 3C 77 7A 80 B1 24 7B
+  tooth roles/uart-rx-1000000: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded DF 3C 77 7A 80 B1 24 7B, sent D7 3C 77 7A 80 B1 24 7B
+  tooth roles/uart-rx-1000000: bit time 10 % long (receiver fixed): CAUGHT
+      decoded B7 7C F7 FA 00 71 44 FB, sent D7 3C 77 7A 80 B1 24 7B
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-rx-115200: PASS: decoded 25 74 06 86 9E 5A 45 58
+  tooth roles/uart-rx-115200: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 2D 74 06 86 9E 5A 45 58, sent 25 74 06 86 9E 5A 45 58
+  tooth roles/uart-rx-115200: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 45 F4 06 06 3E BA 85 B8, sent 25 74 06 86 9E 5A 45 58
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-rx-1500000: PASS: decoded F9 08 A0 13 66 C1 FE EB
+  tooth roles/uart-rx-1500000: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded F1 08 A0 13 66 C1 FE EB, sent F9 08 A0 13 66 C1 FE EB
+  tooth roles/uart-rx-1500000: bit time 10 % long (receiver fixed): CAUGHT
+      decoded F9 08 40 33 C6 81 FE CB, sent F9 08 A0 13 66 C1 FE EB
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-rx-19200: PASS: decoded 6C 8C 7D 02 70 48 A5 00
+  tooth roles/uart-rx-19200: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 64 8C 7D 02 70 48 A5 00, sent 6C 8C 7D 02 70 48 A5 00
+  tooth roles/uart-rx-19200: bit time 10 % long (receiver fixed): CAUGHT
+      decoded CC 0C FD 02 F0 88 45 00, sent 6C 8C 7D 02 70 48 A5 00
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-rx-2000000: PASS: decoded C1 76 42 FB 2B 7A 75 B1
+  tooth roles/uart-rx-2000000: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded C9 76 42 FB 2B 7A 75 B1, sent C1 76 42 FB 2B 7A 75 B1
+  tooth roles/uart-rx-2000000: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 81 F6 82 FB 4B FA F5 71, sent C1 76 42 FB 2B 7A 75 B1
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-rx-230400: PASS: decoded 09 FB EC DA 6C F2 4D 7E
+  tooth roles/uart-rx-230400: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 01 FB EC DA 6C F2 4D 7E, sent 09 FB EC DA 6C F2 4D 7E
+  tooth roles/uart-rx-230400: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 19 FB CC BA CC E2 8D FE, sent 09 FB EC DA 6C F2 4D 7E
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-rx-3000000: PASS: decoded 25 22 0F DA 27 DC 84 6A
+  tooth roles/uart-rx-3000000: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 2D 22 0F DA 27 DC 84 6A, sent 25 22 0F DA 27 DC 84 6A
+  tooth roles/uart-rx-3000000: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 45 42 0F BA 47 BC 04 CA, sent 25 22 0F DA 27 DC 84 6A
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-rx-38400: PASS: decoded 8F 88 BB D6 DD 9A 60 D6
+  tooth roles/uart-rx-38400: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 87 88 BB D6 DD 9A 60 D6, sent 8F 88 BB D6 DD 9A 60 D6
+  tooth roles/uart-rx-38400: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 0F 08 7B B6 BD 3A C0 B6, sent 8F 88 BB D6 DD 9A 60 D6
+      decoder warning: Frame error
+roles/uart-rx-460800: PASS: decoded D5 9B 69 B5 F5 DD 3A 2C
+  tooth roles/uart-rx-460800: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded DD 9B 69 B5 F5 DD 3A 2C, sent D5 9B 69 B5 F5 DD 3A 2C
+  tooth roles/uart-rx-460800: bit time 10 % long (receiver fixed): CAUGHT
+      decoded B5 3B C9 75 F5 BD 7A 4C, sent D5 9B 69 B5 F5 DD 3A 2C
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-rx-57600: PASS: decoded 75 0A BA E5 91 82 D2 4D
+  tooth roles/uart-rx-57600: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 7D 0A BA E5 91 82 D2 4D, sent 75 0A BA E5 91 82 D2 4D
+  tooth roles/uart-rx-57600: bit time 10 % long (receiver fixed): CAUGHT
+      decoded F5 1A 7A C5 31 02 B2 9D, sent 75 0A BA E5 91 82 D2 4D
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-rx-921600: PASS: decoded 3F 4B DD 4C 27 4F 15 50
+  tooth roles/uart-rx-921600: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 37 4B DD 4C 27 4F 15 50, sent 3F 4B DD 4C 27 4F 15 50
+  tooth roles/uart-rx-921600: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 7F 9B BD 9C 47 8F 35 B0, sent 3F 4B DD 4C 27 4F 15 50
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-rx-9600: PASS: decoded 3A 7D 89 A7 60 18 F4 CA
+  tooth roles/uart-rx-9600: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 32 7D 89 A7 60 18 F4 CA, sent 3A 7D 89 A7 60 18 F4 CA
+  tooth roles/uart-rx-9600: bit time 10 % long (receiver fixed): CAUGHT
+      decoded 7A FD 09 47 C0 38 F4 8A, sent 3A 7D 89 A7 60 18 F4 CA
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-1000000: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-1000000: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-1000000: bit time 10 % long (receiver fixed): CAUGHT
+      decoded B5 00 FF 8F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-115200: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-115200: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-115200: bit time 10 % long (receiver fixed): CAUGHT
+      decoded B5 00 FF 8F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-1500000: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-1500000: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-1500000: bit time 10 % long (receiver fixed): CAUGHT
+      decoded B5 00 FF 8F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-19200: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-19200: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-19200: bit time 10 % long (receiver fixed): CAUGHT
+      decoded B5 00 FF 8F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-2000000: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-2000000: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-2000000: bit time 10 % long (receiver fixed): CAUGHT
+      decoded A5 00 FF 9F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-230400: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-230400: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-230400: bit time 10 % long (receiver fixed): CAUGHT
+      decoded A5 00 FF 9F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-3000000: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-3000000: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-3000000: bit time 10 % long (receiver fixed): CAUGHT
+      decoded B5 00 FF 8F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-38400: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-38400: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-38400: bit time 10 % long (receiver fixed): CAUGHT
+      decoded B5 00 FF 8F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-460800: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-460800: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-460800: bit time 10 % long (receiver fixed): CAUGHT
+      decoded A5 00 FF 9F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-57600: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-57600: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-57600: bit time 10 % long (receiver fixed): CAUGHT
+      decoded B5 00 FF 8F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-921600: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-921600: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-921600: bit time 10 % long (receiver fixed): CAUGHT
+      decoded B5 00 FF 8F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+roles/uart-tx-9600: PASS: decoded 55 00 FF 4F A5
+  tooth roles/uart-tx-9600: bit 3 of byte 0 inverted for half a bit: CAUGHT
+      decoded 5D 00 FF 4F A5, sent 55 00 FF 4F A5
+  tooth roles/uart-tx-9600: bit time 10 % long (receiver fixed): CAUGHT
+      decoded A5 00 FF 9F 45, sent 55 00 FF 4F A5
+      decoder warning: Frame error
+      decoder warning: Frame error
+
+protocols with no sigrok decoder:
+  10BASE-T (ethernet-10base-t, eth10-node, pin-sampler, sequencer-ethernet, multi-proto Ethernet): libsigrokdecode 0.5.3 has no decoder for Manchester-coded 10BASE-T or an Ethernet MAC frame (see results/sigrok-decoders.txt); the Ethernet prototypes keep their scapy-based oracles.
+
+ALL CHECKS PASS

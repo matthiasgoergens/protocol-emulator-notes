@@ -23,6 +23,8 @@ build_and_dump() {   # prototype directory, executable, arguments...
      && nice ionice "./_build/default/$exe.exe" "$@")
 }
 build_and_dump deadline-sequencer demo dump "$TRACES"
+rm --recursive --force "$TRACES/roles" && mkdir --parents "$TRACES/roles"
+build_and_dump protocol-roles main dump "$TRACES/roles"
 build_and_dump sequencer-ps2-can ps2_dump "$TRACES"
 build_and_dump sequencer-ps2-can can_dump "$TRACES"
 build_and_dump usb-ls usb_dump "$TRACES"

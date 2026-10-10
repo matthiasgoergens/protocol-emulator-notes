@@ -1,7 +1,7 @@
 # command: main.exe sweep
-# commit: 4050c9ad0a119e0c742d0648e8a6d181115d7812 (with uncommitted changes)
+# commit: 9b80de7b37f9ac1a55a983f5efe355b5ce2d0120 (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-06T09:19:18+08:00
+# date: 2026-10-10T11:08:34+08:00
 uart_b5_n1                                   PROVED    entries    42  events    11  cross-check 1 runs covered
 uart_b5_n2                                   PROVED    entries    82  events    21  cross-check 1 runs covered
 uart_b5_n3                                   PROVED    entries   122  events    31  cross-check 1 runs covered
@@ -532,7 +532,55 @@ deadline_ldd20                               PROVED    entries     7  events    
 deadline_ldd0                                PROVED    entries     7  events     5  cross-check 12 runs covered
 deadline_ldd4095                             PROVED    entries     7  events     5  cross-check 12 runs covered
 watchdog                                     PROVED    entries     6  events     4  cross-check 12 runs covered
+uart2_tx_9600_n5                             PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_9600_n1                             PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_9600_host                           PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_9600                                PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_19200_n5                            PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_19200_n1                            PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_19200_host                          PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_19200                               PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_38400_n5                            PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_38400_n1                            PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_38400_host                          PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_38400                               PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_57600_n5                            PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_57600_n1                            PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_57600_host                          PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_57600                               PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_115200_n5                           PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_115200_n1                           PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_115200_host                         PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_115200                              PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_230400_n5                           PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_230400_n1                           PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_230400_host                         PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_230400                              PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_460800_n5                           PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_460800_n1                           PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_460800_host                         PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_460800                              PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_921600_n5                           PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_921600_n1                           PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_921600_host                         PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_921600                              PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_1000000_n5                          PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_1000000_n1                          PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_1000000_host                        PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_1000000                             PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_1500000_n5                          PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_1500000_n1                          PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_1500000_host                        PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_1500000                             PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_2000000_n5                          PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_2000000_n1                          PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_2000000_host                        PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_2000000                             PROVED    entries 18468  events  8208  cross-check 5 runs covered
+uart2_tx_3000000_n5                          PROVED    entries   155  events    51  cross-check 1 runs covered
+uart2_tx_3000000_n1                          PROVED    entries    31  events    11  cross-check 1 runs covered
+uart2_tx_3000000_host                        PROVED    entries 16414  events  5131  cross-check 12 runs covered
+uart2_rx_3000000                             PROVED    entries 17955  events  8208  cross-check 5 runs covered
 
-sweep: 530 images; proved 530, rejected 0 (of which 0 with every interpreter run meeting the specification)
-interpreter cross-check: 9299 runs, 2674218 instruction entries and 441297 channel events measured; images with a measured state outside the certificate: 0; proved images with a failing run: 0
-# elapsed 5.51 s, max rss 37080 kB
+sweep: 578 images; proved 578, rejected 0 (of which 0 with every interpreter run meeting the specification)
+interpreter cross-check: 9527 runs, 5823873 instruction entries and 2561335 channel events measured; images with a measured state outside the certificate: 0; proved images with a failing run: 0
+# elapsed 18.79 s, max rss 45736 kB

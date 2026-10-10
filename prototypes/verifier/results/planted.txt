@@ -1,7 +1,7 @@
 # command: main.exe planted
-# commit: 4050c9ad0a119e0c742d0648e8a6d181115d7812 (with uncommitted changes)
+# commit: 9b80de7b37f9ac1a55a983f5efe355b5ce2d0120 (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-06T09:19:18+08:00
+# date: 2026-10-10T11:08:33+08:00
 PLANTED spi_p8 (LDD a wraps to 4095)         REJECTED  entries    71  events    28
     pc 8: 4098 slots may pass without an event in state byte 0 bit 1 mosi, whose deadline is 2
     path (9 instructions from pc 0):
@@ -238,5 +238,58 @@ PLANTED spi, SHO lsb first (its msb flag cleared) REJECTED  entries    71  event
     ... 6 violations in all
     interpreter (1 run): fails: slot 5 pc 5: byte 0 bit 1 mosi leaves 1, declared byte0.bit7 = 0
 
-planted: 13 bugs, 0 not rejected
-# elapsed 0.34 s, max rss 12284 kB
+PLANTED uart2 tx 115200, the third bit's wait one slot short REJECTED  entries    62  events    21
+    pc 11: event p0:sho=1 (byte 0 data bit 3) has gap 130 slots, declared 131
+    path (12 instructions from pc 0):
+        0  setp mask=01 val=1 oe=1 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  lda 0x55                     state idle high                          dl=0 since=1 due=1 time=1
+        2  setp mask=01 val=0 oe=1 q=0  state idle high                          dl=0 since=2 due=2 time=2
+        3  ldd 127                      state byte 0 start bit                   dl=0 since=1 due=1 time=3
+        4  waitd                        state byte 0 start bit                   dl=127 since=2 due=129 time=4
+        5  sho pin0 lsb q=0             state byte 0 start bit                   dl=0 since=130 due=130 time=132
+        6  ldd 127                      state byte 0 data bit 1                  dl=0 since=1 due=1 time=133
+        7  waitd                        state byte 0 data bit 1                  dl=127 since=2 due=129 time=134
+        8  sho pin0 lsb q=0             state byte 0 data bit 1                  dl=0 since=130 due=130 time=262
+        9  ldd 127                      state byte 0 data bit 2                  dl=0 since=1 due=1 time=263
+       10  waitd                        state byte 0 data bit 2                  dl=127 since=2 due=129 time=264
+       11  sho pin0 lsb q=0             state byte 0 data bit 2                  dl=0 since=130 due=130 time=392
+    interpreter (1 run): fails: slot 392 pc 11: byte 0 data bit 3 gap 130, declared 131
+
+PLANTED uart2 tx 115200, sent msb first      REJECTED  entries    62  events    21
+    pc 5: event p0:sho=0 (byte 0 data bit 1) does not leave the declared data byte0.bit0 = 1
+    path (6 instructions from pc 0):
+        0  setp mask=01 val=1 oe=1 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  lda 0x55                     state idle high                          dl=0 since=1 due=1 time=1
+        2  setp mask=01 val=0 oe=1 q=0  state idle high                          dl=0 since=2 due=2 time=2
+        3  ldd 127                      state byte 0 start bit                   dl=0 since=1 due=1 time=3
+        4  waitd                        state byte 0 start bit                   dl=127 since=2 due=129 time=4
+        5  sho pin0 msb q=0             state byte 0 start bit                   dl=0 since=130 due=130 time=132
+    pc 8: event p0:sho=1 (byte 0 data bit 2) does not leave the declared data byte0.bit1 = 0
+    pc 11: event p0:sho=0 (byte 0 data bit 3) does not leave the declared data byte0.bit2 = 1
+    ... 14 violations in all
+    interpreter (1 run): fails: slot 132 pc 5: byte 0 data bit 1 leaves 0, declared byte0.bit0 = 1
+
+PLANTED uart2 rx 115200, the fourth sample one slot late REJECTED  entries 18468  events  8208
+    pc 16: 131 slots may pass without an event in state data bit 3 sampled at d + m 3, whose deadline is 130
+    path (16913 instructions from pc 0, last 14 shown):
+        3  waitd                        state start edge seen (slot d)           dl=62 since=2 due=64 time=634883..?
+        4  waitp pin1==0 fail=1         state start edge seen (slot d)           dl=0 since=65 due=65 time=634946..?
+        5  ldd 127                      state start check at d + m 0             dl=0 since=1 due=1 time=634947..?
+        6  waitd                        state start check at d + m 0             dl=127 since=2 due=129 time=634948..?
+        7  shi pin1 lsb                 state start check at d + m 0             dl=0 since=130 due=130 time=635076..?
+        8  ldd 127                      state data bit 1 sampled at d + m 1      dl=0 since=1 due=1 time=635077..?
+        9  waitd                        state data bit 1 sampled at d + m 1      dl=127 since=2 due=129 time=635078..?
+       10  shi pin1 lsb                 state data bit 1 sampled at d + m 1      dl=0 since=130 due=130 time=635206..?
+       11  ldd 127                      state data bit 2 sampled at d + m 2      dl=0 since=1 due=1 time=635207..?
+       12  waitd                        state data bit 2 sampled at d + m 2      dl=127 since=2 due=129 time=635208..?
+       13  shi pin1 lsb                 state data bit 2 sampled at d + m 2      dl=0 since=130 due=130 time=635336..?
+       14  ldd 128                      state data bit 3 sampled at d + m 3      dl=0 since=1 due=1 time=635337..?
+       15  waitd                        state data bit 3 sampled at d + m 3      dl=128 since=2 due=130 time=635338..?
+       16  shi pin1 lsb                 state data bit 3 sampled at d + m 3      dl=0 since=131 due=131 time=635467..?
+    pc 16: event p1:sample (data bit 4 sampled at d + m 4) has gap 131 slots, declared 130
+    pc 16: 131 slots may pass without an event in state data bit 3 sampled at d + m 3, whose deadline is 130
+    ... 1026 violations in all
+    interpreter (5 runs): fails: slot 636 pc 16: 131 slots without an event in state data bit 3 sampled at d + m 3 (deadline 130)
+
+planted: 16 bugs, 0 not rejected
+# elapsed 0.65 s, max rss 23804 kB

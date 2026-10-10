@@ -317,6 +317,13 @@ What the demos do not show: the UART/SPI/I2C pins run with q = 0 only (the base 
 quarter grid is exercised by the lockstep alone; the DAC uses one channel (four PEs); S/PDIF
 was not run.
 
+**The standard protocol settings and the target roles** (`bin/roles.exe`,
+`results/roles-*.txt`): `../protocol-roles`'s ISA v2 firmware, loaded through PROG at page
+boundaries with its peer models on the pads; specification and RTL compared on every pad every
+clock, run with the board following either. UART at 115200 baud: thread 0 sends the host's bytes
+(HOSTIN) on `uo_out[0]`, thread 1 receives on `ui_in[0]` and reports to HOSTOUT; **PASS** both
+ways.
+
 ## 4. Area, the harden, and G13 (milestone 4)
 
 **Synthesis** (`synth/synth.sh`, Yosys 0.66 of the pinned LibreLane image, sg13cmos5l typical,

@@ -1,0 +1,61 @@
+# timing certificate
+# image uart2_tx_115200_n5 sha256 b37d0454f3d99442cf3282a9150a07016c2bac93b34974405b9b9c6e5e733f8a (256 words, high byte first)
+# specification: uart tx s=130.208 bytes=5, channel pins 0
+# verdict: PROVED; 155 table entries, 51 channel events checked
+# assumptions: kernel.ml A1-A5. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot
+# columns: pc, instruction, pins touched, specification state from -> to, slot of the event,
+#          gap since the previous channel event, declared gap, declared data (the level is that
+#          bit of that input byte: driven for a push-pull write, driven 0 or released for open drain)
+# input bytes: byte0=0x55 byte1=0x00 byte2=0xff byte3=0x4f byte4=0xa5
+# deadlines: 0:0 1:2 2:130 3:130 4:131 5:130 6:130 7:130 8:130 9:131 10:130 11:130 12:130 13:130 14:131 15:130 16:130 17:130 18:130 19:131 20:130 21:130 22:130 23:130 24:131 25:130 26:130 27:130 28:130 29:131 30:130 31:130 32:130 33:130 34:131 35:130 36:130 37:130 38:130 39:131 40:130 41:130 42:130 43:130 44:131 45:130 46:130 47:130 48:130 49:131 50:130
+  0  setp mask=01 val=1 oe=1 q=0 p0:set=1                     0 -> 1   slot 0          gap 0         declared 0
+  2  setp mask=01 val=0 oe=1 q=0 p0:set=0                     1 -> 2   slot 2          gap 2         declared 2
+  5  sho pin0 lsb q=0           p0:sho=1                     2 -> 3   slot 132        gap 130       declared 130 data byte0.bit0
+  8  sho pin0 lsb q=0           p0:sho=0                     3 -> 4   slot 262        gap 130       declared 130 data byte0.bit1
+ 11  sho pin0 lsb q=0           p0:sho=1                     4 -> 5   slot 393        gap 131       declared 131 data byte0.bit2
+ 14  sho pin0 lsb q=0           p0:sho=0                     5 -> 6   slot 523        gap 130       declared 130 data byte0.bit3
+ 17  sho pin0 lsb q=0           p0:sho=1                     6 -> 7   slot 653        gap 130       declared 130 data byte0.bit4
+ 20  sho pin0 lsb q=0           p0:sho=0                     7 -> 8   slot 783        gap 130       declared 130 data byte0.bit5
+ 23  sho pin0 lsb q=0           p0:sho=1                     8 -> 9   slot 913        gap 130       declared 130 data byte0.bit6
+ 26  sho pin0 lsb q=0           p0:sho=0                     9 -> 10  slot 1044       gap 131       declared 131 data byte0.bit7
+ 29  setp mask=01 val=1 oe=1 q=0 p0:set=1                    10 -> 11  slot 1174       gap 130       declared 130
+ 33  setp mask=01 val=0 oe=1 q=0 p0:set=0                    11 -> 12  slot 1304       gap 130       declared 130
+ 36  sho pin0 lsb q=0           p0:sho=0                    12 -> 13  slot 1434       gap 130       declared 130 data byte1.bit0
+ 39  sho pin0 lsb q=0           p0:sho=0                    13 -> 14  slot 1564       gap 130       declared 130 data byte1.bit1
+ 42  sho pin0 lsb q=0           p0:sho=0                    14 -> 15  slot 1695       gap 131       declared 131 data byte1.bit2
+ 45  sho pin0 lsb q=0           p0:sho=0                    15 -> 16  slot 1825       gap 130       declared 130 data byte1.bit3
+ 48  sho pin0 lsb q=0           p0:sho=0                    16 -> 17  slot 1955       gap 130       declared 130 data byte1.bit4
+ 51  sho pin0 lsb q=0           p0:sho=0                    17 -> 18  slot 2085       gap 130       declared 130 data byte1.bit5
+ 54  sho pin0 lsb q=0           p0:sho=0                    18 -> 19  slot 2215       gap 130       declared 130 data byte1.bit6
+ 57  sho pin0 lsb q=0           p0:sho=0                    19 -> 20  slot 2346       gap 131       declared 131 data byte1.bit7
+ 60  setp mask=01 val=1 oe=1 q=0 p0:set=1                    20 -> 21  slot 2476       gap 130       declared 130
+ 64  setp mask=01 val=0 oe=1 q=0 p0:set=0                    21 -> 22  slot 2606       gap 130       declared 130
+ 67  sho pin0 lsb q=0           p0:sho=1                    22 -> 23  slot 2736       gap 130       declared 130 data byte2.bit0
+ 70  sho pin0 lsb q=0           p0:sho=1                    23 -> 24  slot 2866       gap 130       declared 130 data byte2.bit1
+ 73  sho pin0 lsb q=0           p0:sho=1                    24 -> 25  slot 2997       gap 131       declared 131 data byte2.bit2
+ 76  sho pin0 lsb q=0           p0:sho=1                    25 -> 26  slot 3127       gap 130       declared 130 data byte2.bit3
+ 79  sho pin0 lsb q=0           p0:sho=1                    26 -> 27  slot 3257       gap 130       declared 130 data byte2.bit4
+ 82  sho pin0 lsb q=0           p0:sho=1                    27 -> 28  slot 3387       gap 130       declared 130 data byte2.bit5
+ 85  sho pin0 lsb q=0           p0:sho=1                    28 -> 29  slot 3517       gap 130       declared 130 data byte2.bit6
+ 88  sho pin0 lsb q=0           p0:sho=1                    29 -> 30  slot 3648       gap 131       declared 131 data byte2.bit7
+ 91  setp mask=01 val=1 oe=1 q=0 p0:set=1                    30 -> 31  slot 3778       gap 130       declared 130
+ 95  setp mask=01 val=0 oe=1 q=0 p0:set=0                    31 -> 32  slot 3908       gap 130       declared 130
+ 98  sho pin0 lsb q=0           p0:sho=1                    32 -> 33  slot 4038       gap 130       declared 130 data byte3.bit0
+101  sho pin0 lsb q=0           p0:sho=1                    33 -> 34  slot 4168       gap 130       declared 130 data byte3.bit1
+104  sho pin0 lsb q=0           p0:sho=1                    34 -> 35  slot 4299       gap 131       declared 131 data byte3.bit2
+107  sho pin0 lsb q=0           p0:sho=1                    35 -> 36  slot 4429       gap 130       declared 130 data byte3.bit3
+110  sho pin0 lsb q=0           p0:sho=0                    36 -> 37  slot 4559       gap 130       declared 130 data byte3.bit4
+113  sho pin0 lsb q=0           p0:sho=0                    37 -> 38  slot 4689       gap 130       declared 130 data byte3.bit5
+116  sho pin0 lsb q=0           p0:sho=1                    38 -> 39  slot 4819       gap 130       declared 130 data byte3.bit6
+119  sho pin0 lsb q=0           p0:sho=0                    39 -> 40  slot 4950       gap 131       declared 131 data byte3.bit7
+122  setp mask=01 val=1 oe=1 q=0 p0:set=1                    40 -> 41  slot 5080       gap 130       declared 130
+126  setp mask=01 val=0 oe=1 q=0 p0:set=0                    41 -> 42  slot 5210       gap 130       declared 130
+129  sho pin0 lsb q=0           p0:sho=1                    42 -> 43  slot 5340       gap 130       declared 130 data byte4.bit0
+132  sho pin0 lsb q=0           p0:sho=0                    43 -> 44  slot 5470       gap 130       declared 130 data byte4.bit1
+135  sho pin0 lsb q=0           p0:sho=1                    44 -> 45  slot 5601       gap 131       declared 131 data byte4.bit2
+138  sho pin0 lsb q=0           p0:sho=0                    45 -> 46  slot 5731       gap 130       declared 130 data byte4.bit3
+141  sho pin0 lsb q=0           p0:sho=0                    46 -> 47  slot 5861       gap 130       declared 130 data byte4.bit4
+144  sho pin0 lsb q=0           p0:sho=1                    47 -> 48  slot 5991       gap 130       declared 130 data byte4.bit5
+147  sho pin0 lsb q=0           p0:sho=0                    48 -> 49  slot 6121       gap 130       declared 130 data byte4.bit6
+150  sho pin0 lsb q=0           p0:sho=1                    49 -> 50  slot 6252       gap 131       declared 131 data byte4.bit7
+153  setp mask=01 val=1 oe=1 q=0 p0:set=1                    50 -> 51  slot 6382       gap 130       declared 130

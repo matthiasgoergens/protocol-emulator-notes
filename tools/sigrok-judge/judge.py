@@ -139,7 +139,8 @@ class Verdict:
 
 def judge_uart(samples, rate, exp):
     pin, bit = int(exp["uart_pin"]), int(exp["uart_bit_cycles"])
-    baud = int(exp["samplerate"]) / bit   # the baud rate is the transmitter's, whatever the analyser rate
+    # the baud rate is the transmitter's, whatever the analyser rate
+    baud = int(exp["uart_baud"]) if "uart_baud" in exp else int(exp["samplerate"]) / bit
     base = ["rx=%d" % pin, "baudrate=%d" % round(baud)]
     got = sigrok(samples, 8, rate, "uart:" + ":".join(base), ["uart=rx-data"])
     warn = sigrok(samples, 8, rate, "uart:" + ":".join(base), ["uart=rx-warnings:rx-break"])
@@ -434,6 +435,25 @@ CASES = [
          expected="spdif/control-44k1-60000"),
 ]
 
+# Traces of ../../prototypes/protocol-roles (main.exe dump): one case per .expected file in
+# traces/roles, whose "judge" line names the judge and teeth to apply.
+ROLE_JUDGES = {
+    "uart": (judge_uart, uart_teeth),
+}
+
+
+def role_cases(tr):
+    d = tr / "roles"
+    if not d.is_dir():
+        return [dict(name="roles", stem="roles/MISSING", judge=judge_uart, teeth=None)]
+    out = []
+    for e in sorted(d.glob("*.expected")):
+        kind = read_expected(e)["judge"]
+        j, t = ROLE_JUDGES[kind]
+        out.append(dict(name="roles/" + e.stem, stem="roles/" + e.stem, judge=j, teeth=t))
+    return out
+
+
 NO_DECODER = [
     ("10BASE-T (ethernet-10base-t, eth10-node, pin-sampler, sequencer-ethernet, multi-proto Ethernet)",
      "libsigrokdecode 0.5.3 has no decoder for Manchester-coded 10BASE-T or an Ethernet MAC frame "
@@ -482,8 +502,8 @@ def main():
     print("# analyser rate: " + (f"{a.rate:g} Hz (resampled)" if a.rate else "as simulated"))
     failed = 0
     rows = []
-    for c in CASES:
-        if only and c["name"] not in only:
+    for c in CASES + role_cases(tr):
+        if only and c["name"] not in only and not (c["name"].startswith("roles/") and "roles" in only):
             continue
         stem = c["stem"]
         binf, expf = tr / (stem + ".bin"), tr / ((c.get("expected") or stem) + ".expected")

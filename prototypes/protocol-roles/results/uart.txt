@@ -1,0 +1,45 @@
+# command: ./_build/default/main.exe uart
+# commit: 9b80de7b37f9ac1a55a983f5efe355b5ce2d0120 (with uncommitted changes)
+# date: 2026-10-10T11:12:41+08:00
+== Task 1: UART 8N1 at the common baud rates, 60 MHz core clock (1 slot = 4 clocks = 66.67 ns)
+Each edge of a transmitted frame is placed on the slot nearest its ideal time (Fw.uart_tx);
+the receiver samples at the slot nearest each bit's middle (Fw.uart_rx).
+
+baud      slots/bit  | transmit                            | receive                  | lockstep | words
+          (ideal)    | bit (clocks) worst-edge whole-slots | worst-sample tolerance   | mism    | tx/rx
+9600      1562.500   | 6248..6252  0.03%      +0.03%     |   0.0%  -4.75/+5.50% | 0       | 33/36 
+19200     781.250    | 3124..3128  0.06%      -0.03%     |   0.1%  -4.75/+5.50% | 0       | 33/36 
+38400     390.625    | 1560..1564  0.13%      +0.10%     |   0.2%  -4.75/+5.50% | 0       | 33/36 
+57600     260.417    | 1040..1044  0.19%      -0.16%     |   0.4%  -4.75/+5.50% | 0       | 33/36 
+115200    130.208    |  520..524   0.35%      -0.16%     |   0.7%  -4.75/+5.25% | 0       | 33/36 
+230400    65.104     |  260..264   0.74%      -0.16%     |   1.5%  -4.75/+5.25% | 0       | 33/36 
+460800    32.552     |  128..132   1.47%      +1.38%     |   2.8%  -4.50/+5.25% | 0       | 33/36 
+921600    16.276     |   64..68    2.98%      -1.70%     |   5.8%  -4.00/+5.00% | 0       | 33/36 
+1000000   15.000     |   60..60    0.00%      +0.00%     |   3.0%  -4.00/+5.00% | 0       | 33/36 
+1500000   10.000     |   40..40    0.00%      +0.00%     |   9.7%  -3.25/+5.50% | 0       | 33/36 
+2000000   7.500      |   28..32    6.67%      +6.67%     |   9.8%  -2.75/+5.00% | 0       | 33/36 
+3000000   5.000      |   20..20    0.00%      +0.00%     |   8.3%  -2.25/+4.50% | 0       | 33/35 
+
+Columns: bit = shortest..longest transmitted bit in clocks (ideal 60e6/baud); worst-edge = largest
+distance of an edge from the ideal grid, in % of a bit (every edge of every frame, start to the
+next start); whole-slots = the bit-time error if every bit were round(slots/bit) slots, which
+the firmware avoids by placing each edge on its nearest slot (an error that accumulates over a
+frame: at 9.5 bits, 16 % of a bit at 921600); worst-sample = largest distance of a receive
+sample from the ideal mid-bit instant,
+in % of a bit, over 3 runs of 8 random bytes at random phases; tolerance = the peer's bit-time
+error the receiver accepts (4 runs of 6 bytes, every byte correct), short bits / long bits;
+mism = clocks where interpreter and RTL differ (all runs of the row; the host-fed transmitter
+included); words = the host-fed transmitter (the test image with five constant bytes
+unrolled is 155 words) and the receiver.
+
+Controls (each must fail the check named):
+  tx: the third bit's wait one slot short (worst edge 5.8 clocks > 2)    CAUGHT
+  tx: shifted msb first (peer decodes other bytes)                       CAUGHT
+  rx: samples half a bit late (bytes received differ)                    CAUGHT
+  rx: a frame with its stop bit low is reported as a framing error (tag 1) CAUGHT
+  rx: the peer 8 % slow is not received                                  CAUGHT
+  lockstep: RTL mutant "WAITD leaves at dl = 1" under tx (25008 clocks differ) CAUGHT
+  lockstep: RTL mutant "WAITD leaves at dl = 1" under rx (37600 clocks differ) CAUGHT
+
+UART: PASS
+# elapsed 72.79 s, max rss 435300 kB
