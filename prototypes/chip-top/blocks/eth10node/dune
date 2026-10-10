@@ -1,0 +1,8 @@
+; ../../../eth10-node: the ARP/ping reply engine's model (engine.ml, with the receive path it is
+; built on), the clause-14 judge of a 10BASE-T transmitter, the line generator and the Ethernet
+; model (symlinks, unwrapped; blocks/eth10 is the same sampler, CRC unit and matcher, wrapped).
+; bin/eth_chip.ml runs the chip-top node against them and against host_stack.py.
+(library
+ (name eth10node)
+ (wrapped false)
+ (libraries hardcaml))

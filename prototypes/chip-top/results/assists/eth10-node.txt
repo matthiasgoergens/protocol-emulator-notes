@@ -1,0 +1,42 @@
+# 2026-10-10T12:43:00+08:00; base commit 19acb29 with the uncommitted chip-top changes of this commit; ocaml 5.3.0, hardcaml v0.17
+# _build/default/bin/eth_chip.exe node ../eth10-node/results/demo/requests-1.txt replies-1.txt
+== 10BASE-T ARP/ping on the combined chip (receive T0 16 words, transmit T2 53 words)
+  39 requests; the chip forwarded 38 good frames and reported 1 bad; 29 replies sent (0 too long for this firmware)
+  transmit line: 1 link pulses (133.3..133.3 ns), 29 frames, TP_IDL 300.0..350.0 ns, 0 clause-14 violations
+  replies equal to the engine model's, request by request: true
+  specification and RTL: 0 mismatching clocks in 2140902; HOSTOUT overflowed: false; framer FIFO overflowed: false
+  latency from the end of a request to the start of its reply: 22.4..76.3 us
+  thread time (slots in which the pc moved on, of all slots):
+    T0: 55769 of 535227 (10.42 %)
+    T1: 0 of 535225 (0.00 %)
+    T2: 34767 of 535225 (6.50 %)
+    T3: 0 of 535225 (0.00 %)
+node: PASS
+# host_stack.py check requests-1.txt replies-1.txt
+29 of 29 expected replies correct; 10 requests correctly unanswered: 10
+host stack verdict: PASS
+# _build/default/bin/eth_chip.exe node ../eth10-node/results/demo/requests-2.txt replies-2.txt
+== 10BASE-T ARP/ping on the combined chip (receive T0 16 words, transmit T2 53 words)
+  119 requests; the chip forwarded 118 good frames and reported 1 bad; 109 replies sent (0 too long for this firmware)
+  transmit line: 1 link pulses (133.3..133.3 ns), 109 frames, TP_IDL 300.0..350.0 ns, 0 clause-14 violations
+  replies equal to the engine model's, request by request: true
+  specification and RTL: 0 mismatching clocks in 4117638; HOSTOUT overflowed: false; framer FIFO overflowed: false
+  latency from the end of a request to the start of its reply: 22.0..75.8 us
+  thread time (slots in which the pc moved on, of all slots):
+    T0: 181900 of 1029411 (17.67 %)
+    T1: 0 of 1029409 (0.00 %)
+    T2: 125027 of 1029409 (12.15 %)
+    T3: 0 of 1029409 (0.00 %)
+node: PASS
+# host_stack.py check requests-2.txt replies-2.txt
+109 of 109 expected replies correct; 10 requests correctly unanswered: 10
+host stack verdict: PASS
+# _build/default/bin/eth_chip.exe controls ../eth10-node/results/demo/requests-1.txt DIR, each judged by host_stack.py check
+control 0: TP_IDL of 4 half-bits                    chip-side checks FAIL; replies in /var/tmp/chip-assists/eth2/replies-chip-control0.txt
+control 1: preamble of 6 bytes                      chip-side checks FAIL; replies in /var/tmp/chip-assists/eth2/replies-chip-control1.txt
+control 2: Manchester inverted (G. E. Thomas)       chip-side checks FAIL; replies in /var/tmp/chip-assists/eth2/replies-chip-control2.txt
+control 3: receive CRC not checked                  chip-side checks FAIL; replies in /var/tmp/chip-assists/eth2/replies-chip-control3.txt
+-- control 0: host stack verdict: PASS; 
+-- control 1: host stack verdict: PASS; 
+-- control 2: host stack verdict: FAIL;   FAIL arp-bcast: FCS wrong, MACs ff:ff:ff:ff:ff:7e->ff:ff:ff:ff:ef:df, not ARP
+-- control 3: host stack verdict: FAIL;   FAIL ping-bad-fcs: replied although it must not

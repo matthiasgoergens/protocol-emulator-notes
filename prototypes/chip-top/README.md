@@ -789,6 +789,63 @@ below found it; 30 of 60 before, 60 of 60 after: the end conditions now wait for
 two-clock latency). The block's references also found that a cleared start-pattern history looked
 like received zeros.
 
+### Using them: low-speed USB and 10BASE-T end to end
+
+**Low-speed USB device** (`src/usb_dev.ml`, `bin/usb_chip.exe`, `results/assists/usb-ls.txt`). The
+HID boot keyboard of `../usb-ls`, run against that prototype's independent host model, reference
+device, bench and scenarios, unchanged (`blocks/usbls`, symlinks), with the specification and the
+RTL in lockstep on the board. The bit layer is the hardware: edge sampler (NRZ on D+, 160
+sub-samples per bit, SE0 as the line's inactive state), NRZI decoder, destuffer, framer (sync
+0x80, end at SE0), CRC-16 after the PID; serialiser (40 clocks per bit, NRZI, stuffing, EOP as
+the tail) on uio 6 and 7. The firmware sees bytes: T0 checks tokens by table lookup in the data
+bank, forwards SETUP and OUT data, answers NAK, STALL, ACK or the staged data packet; T1 applies the
+controller's messages from HOSTIN to the bank (the chip's store and bank cannot be written while it
+runs, so `../usb-ls`'s programme patches became messages, with a flush byte that drops replies
+staged before a SETUP, an OUT to endpoint 0 or a reset); T2 detects bus resets; T3 is free.
+
+| | `../usb-ls` firmware device | chip-top with the assists |
+|---|---|---|
+| directed enumeration and reports, host clock -1.5 %, 0, +1.5 % | 3 of 3 | **3 of 3**, 0 NAKs while preparing, the same replies byte for byte |
+| constrained random sessions (8 seeds, 120 transactions, seeds 1 and 2 at -1.5 % and +1.5 %) | 8 of 8 | **8 of 8**, 2,690 host packets, 1,320 replies, 202 required silences, 0 errors |
+| specification against RTL, every pad every clock | (interpreter against RTL) | 0 mismatching clocks in 12.0 million (the 11 sessions) |
+| turnaround | 2.51 to 6.07 bits (replies front-padded) | 2.93 to 3.68 bits |
+| beyond the specification (directed) | -4 % fails, -3 % to +3 % pass | the same; +4 % fails too |
+| controls: J and K swapped, reply 4 bits late, reply early, CRC not checked | 4 of 4 caught | **4 of 4 caught** (the early reply is 1.5 bits early here: the replies start at about 3 bits, so 1 bit early is 2.0 bits, the bound itself) |
+| programme words | T0 63 (bit layer), T1 180, T2 186: 429 | T0 244, T1 47, T2 17: **308**, none for the bit layer |
+| the bit layer's thread time | all of T0: a software DPLL that polls the line in every slot (10 slots per bit) | none; over the directed session T0 moved on in 6.7 % of its slots, T1 1.5 %, T2 0.4 %, the rest waiting in place |
+| per received byte | about 80 slots of T0 plus 3 to 5 slots per bit of T1 or T2 | 4 slots of T0 (RECV, OUT, the loop) |
+| per transmitted byte | 4 slots per symbol (WAITD, SHO pair, LDD, JNZ) on symbols the controller had stuffed and NRZI-coded | 4 slots (LDB, SEND, the loop); sync, stuffing, NRZI and EOP in hardware |
+
+**10BASE-T node** (`bin/eth_chip.exe`, `results/assists/eth10-node.txt`). `../eth10-node`'s ARP and
+ping demo: requests built by `host_stack.py` (scapy) go down the line (`line.ml`) into ui_in[2]
+and its squelch into ui_in[3]; the edge sampler (Manchester), the framer (after the SFD, to the
+burst's end) and the CRC unit (CRC-32 residue) receive them, and T0 (16 words) moves each byte to
+the host as it arrives and reports a good or bad frame. The host answers with `../eth10-node`'s
+engine model (that prototype's match-and-rewrite engine, which the architecture note would put in a
+PE segment, is not on this chip), and T2 (53 words) copies the reply from HOSTIN into the bank,
+defers while the line is busy, sends preamble, SFD and frame to the serialiser (Manchester, 3 clocks
+per half-bit, TP_IDL of 6 half-bits as the tail), keeps the 9.6 µs gap and sends link pulses while
+idle. Judged by the clause-14 checker and by `host_stack.py check`:
+
+| run | result |
+|---|---|
+| seed 1: 19 directed and 20 random requests | 29 of 29 replies correct, 10 correctly unanswered (the bad FCS reported bad by the chip's CRC check); 0 clause-14 violations, TP_IDL 300 to 350 ns; host stack **PASS** |
+| seed 2: directed and 100 random | 109 of 109, 10 unanswered; 0 violations; host stack **PASS** |
+| specification against RTL | 0 mismatching clocks in 6.3 million |
+| controls: TP_IDL of 4 half-bits, a 6-byte preamble, inverted Manchester, the receive CRC unchecked | 4 of 4 fail: the first two at the clause-14 checker, the last two at the host stack (and the model comparison) |
+| transmit | one thread, 53 words, 4 slots per byte (12 available) plus 4 to copy the frame in; `../eth10-node`'s firmware used all four threads (two of every three slots each) and 33 words each, 132 words, with a hardware feeder permuting the bits |
+
+**Headroom** (`usb_chip.exe rates`, `results/assists/bit-path-rates.txt`). The chip talks USB to
+itself: T2 sends a 64-byte data packet (a third 0xFF, so plenty of stuffing) through the serialiser
+on uio 6 and 7, the receive side reads the same pads, T0 stores what arrives and the CRC verdict
+in the bank. 4 of 4 packets whole with a good CRC at 40, 20, 10, 5, 4, 3 and **2 clocks per bit
+(30 Mbit/s)**; at 1 clock per bit none, because a thread moves a byte in 4 slots (16 clocks): the
+limit is now the byte loop, not the bit layer. The firmware bit layer needed 10 slots per bit and
+works at low speed only (1.5 Mbit/s, -4 % to +2 %); full-speed USB's 5 clocks per bit now fits as
+far as moving bits and bytes goes. Not measured: full-speed turnaround (the host model is
+low-speed only; T0's token check takes about 20 slots, more than full speed's 7.5-bit window at 5
+clocks per bit, so a full-speed device would need the IN reply decided before the token ends).
+
 ## Open issues
 
 

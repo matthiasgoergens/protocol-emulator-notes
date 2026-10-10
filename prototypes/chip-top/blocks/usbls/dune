@@ -1,0 +1,6 @@
+; ../../../usb-ls: the independent low-speed USB host model (ls_host.ml), the reference device,
+; the bench and its scenarios, the descriptors, and fw_codec's CRC and token helpers, unchanged
+; (symlinks). bin/usb_chip.ml runs the chip-top device against them.
+(library
+ (name usbls)
+ (wrapped false))
