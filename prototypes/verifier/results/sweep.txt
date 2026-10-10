@@ -1,7 +1,7 @@
 # command: main.exe sweep
-# commit: 538bc41945be70d26c6754ea2bb483813af7d103 (with uncommitted changes)
+# commit: 26a56d4bc9aea3e7b2415056ae5ce30f7e97199a (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-10T12:00:01+08:00
+# date: 2026-10-10T12:12:50+08:00
 uart_b5_n1                                   PROVED    entries    42  events    11  cross-check 1 runs covered
 uart_b5_n2                                   PROVED    entries    82  events    21  cross-check 1 runs covered
 uart_b5_n3                                   PROVED    entries   122  events    31  cross-check 1 runs covered
@@ -637,7 +637,15 @@ i2c2_ctl_fast_l4095                          PROVED    entries  1222  events   3
 i2c2_target_standard_su19                    PROVED    entries  7029  events  6035  cross-check 6 runs covered
 i2c2_target_fast_su6                         PROVED    entries  7029  events  6035  cross-check 6 runs covered
 i2c2_target_fast_su1                         PROVED    entries  7023  events  6035  cross-check 6 runs covered
+spi2_target_m0msb                            PROVED    entries   159  events   119  cross-check 4 runs covered
+spi2_target_m0lsb                            PROVED    entries   159  events   119  cross-check 4 runs covered
+spi2_target_m1msb                            PROVED    entries   155  events   114  cross-check 4 runs covered
+spi2_target_m1lsb                            PROVED    entries   155  events   114  cross-check 4 runs covered
+spi2_target_m2msb                            PROVED    entries   159  events   119  cross-check 4 runs covered
+spi2_target_m2lsb                            PROVED    entries   159  events   119  cross-check 4 runs covered
+spi2_target_m3msb                            PROVED    entries   155  events   114  cross-check 4 runs covered
+spi2_target_m3lsb                            PROVED    entries   155  events   114  cross-check 4 runs covered
 
-sweep: 635 images; proved 635, rejected 0 (of which 0 with every interpreter run meeting the specification)
-interpreter cross-check: 9725 runs, 7316846 instruction entries and 3457425 channel events measured; images with a measured state outside the certificate: 0; proved images with a failing run: 0
-# elapsed 23.82 s, max rss 50780 kB
+sweep: 643 images; proved 643, rejected 0 (of which 0 with every interpreter run meeting the specification)
+interpreter cross-check: 9757 runs, 9236794 instruction entries and 5372197 channel events measured; images with a measured state outside the certificate: 0; proved images with a failing run: 0
+# elapsed 24.74 s, max rss 51344 kB

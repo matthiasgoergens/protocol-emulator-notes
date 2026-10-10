@@ -22,12 +22,12 @@ let driver = match Sys.getenv_opt "DEMO_DRIVER" with Some "rtl" -> `Rtl | _ -> `
 (* Run spec and RTL together for [clocks]; [world] gives the outside world's pad levels each
    clock from the pads the chip shows; [on_clock] sees each clock's outputs. Returns whether they
    agreed on every pad, every clock. *)
-let run_board (b : Board.t) ~world ~clocks ~on_clock =
+let run_board ?(quiet = false) (b : Board.t) ~world ~clocks ~on_clock =
   let spec = S.create () and rtl = Chip_sim.create () in
   let cores = match driver with
     | `Spec -> [ Board.spec_core spec; Board.rtl_core rtl ]
     | `Rtl -> [ Board.rtl_core rtl; Board.spec_core spec ] in
-  pr "  the board is driven by the %s's pads\n" (match driver with `Spec -> "specification" | `Rtl -> "RTL");
+  if not quiet then pr "  the board is driven by the %s's pads\n" (match driver with `Spec -> "specification" | `Rtl -> "RTL");
   let agree = ref true and first = ref None in
   for c = 0 to clocks - 1 do
     let smp = Board.samples b ~ext:(world ~clock:c b.out) in
@@ -319,7 +319,68 @@ let i2c_target () =
   pr "I2C target on the combined chip: %s\n%!" (if ok then "PASS" else "FAIL");
   ok
 
-let demos = [ ("uart", uart); ("spi", spi); ("i2c", i2c); ("i2c-target", i2c_target) ]
+(* ---- SPI target ---- *)
+
+(* one SPI target run on the chip: thread 0 in [mode] on ui_in[0] (SCLK), ui_in[1] (MOSI),
+   ui_in[3] (CS), uo_out[2] (MISO), against the controller of peers.ml at [half] clocks a phase;
+   the host prefills HOSTIN with the replies and drains HOSTOUT *)
+let spi_target_run ?(quiet = false) ~(mode : Fw.spi_mode) ~half ~phase ~seed () =
+  let pr fmt = if quiet then Printf.ifprintf stdout fmt else Printf.printf fmt in
+  let rng = Random.State.make [| seed |] in
+  let sent = List.init 4 (fun _ -> Random.State.int rng 256) and replies = List.init 4 (fun _ -> Random.State.int rng 256) in
+  let prog = Fw.spi_target ~sclk:0 ~mosi:1 ~miso:2 ~cs:3 ~mode () in
+  let b = Board.create () in
+  let h = b.host in
+  let words = load h [ (0, prog) ] in
+  Host.submit h (Host.Write { tgt = t_reg; addr = r_padsel 2; data = [ sel (src_seq 2) 1 ] });
+  Host.submit h (Host.Write { tgt = t_hostin; addr = 0; data = replies });
+  let pm = { Peers.Spi.cpol = mode.cpol; cpha = mode.cpha; msb = mode.msb } in
+  let c = ref None in
+  Host.submit h (Host.Call (fun () -> c := Some (Peers.Spi.controller ~start:(b.clock + 400 + phase) ~mode:pm ~act:half ~idl:half ~css:200 ~csh:40 sent)));
+  Host.wreg h r_ctrl 3;
+  let got = ref [] in
+  let clocks = 3000 + 400 + (8 * 4 * 2 * half) + 3000 in
+  drain b h got ~every:300 ~until:(clocks - 1500);
+  let outs = ref (mode.cpol, 0, 1) in
+  let world ~clock:_ (o : S.outputs) =
+    (match !c with
+     | Some c -> outs := Peers.Spi.controller_step c ~miso:(level o 2)
+     | None -> ());
+    let s, m, q = !outs in
+    let smp = Array.make n_pads 0 in
+    smp.(0) <- Board.rep4 s; smp.(1) <- Board.rep4 m; smp.(3) <- Board.rep4 q;
+    smp in
+  let agree = run_board ~quiet b ~world ~clocks ~on_clock:(fun _ _ -> ()) in
+  let hex l = String.concat " " (List.map (Printf.sprintf "%02x") l) in
+  let ctl_read = match !c with Some c -> List.rev c.rx | None -> [] in
+  let host = List.filter_map (fun (t, v) -> if t = 0 then Some v else None) !got in
+  pr "  %s, SCLK %.2f MHz: %d words loaded; the controller read %s (the host gave %s); the host read %s (the controller sent %s); end of transaction reported: %b\n"
+    (Fw.spi_mode_name mode) (Fw.clock_hz /. float (2 * half) /. 1e6) words (hex ctl_read) (hex replies) (hex host) (hex sent) (List.mem (1, 0) !got);
+  pr "  RTL and specification agree on every pad, every clock: %b\n" agree;
+  agree && ctl_read = replies && host = sent && List.mem (1, 0) !got && not !overflow
+
+let spi_target () =
+  pr "== SPI target on the combined chip: thread 0 on ui_in[0] (SCLK), ui_in[1] (MOSI), ui_in[3] (CS) and\n";
+  pr "   uo_out[2] (MISO), against the controller of peers.ml; the host supplies the replies through\n";
+  pr "   HOSTIN and reads the bytes received from HOSTOUT\n";
+  let m3 = { Fw.cpol = 1; cpha = 1; msb = false } and m0 = { Fw.cpol = 0; cpha = 0; msb = true } in
+  let a = spi_target_run ~mode:m3 ~half:30 ~phase:0 ~seed:1 () in
+  let b = spi_target_run ~mode:m0 ~half:30 ~phase:1 ~seed:2 () in
+  (* the fastest SCLK on the chip, bytes back to back, 8 phases each: the pads add two clocks of
+     latency to the bench's one *)
+  let fastest = ref 0 in
+  List.iter (fun half ->
+      let ok = List.for_all (fun ph -> spi_target_run ~quiet:true ~mode:m0 ~half ~phase:ph ~seed:(10 + ph) ()) (List.init 8 Fun.id) in
+      pr "  mode 0 msb, half %d clocks (%.2f MHz), 8 phases: %s\n" half (Fw.clock_hz /. float (2 * half) /. 1e6) (if ok then "all right" else "some wrong");
+      if ok && (!fastest = 0 || half < !fastest) && (!fastest = 0 || half = !fastest - 1) then fastest := half)
+    [ 24; 23; 22; 21; 20; 19 ];
+  pr "  fastest on the chip, every phase right (each run also compares specification and RTL on every pad): half %d clocks, %.2f MHz\n"
+    !fastest (Fw.clock_hz /. float (2 * !fastest) /. 1e6);
+  let ok = a && b && !fastest > 0 in
+  pr "SPI target on the combined chip: %s\n%!" (if ok then "PASS" else "FAIL");
+  ok
+
+let demos = [ ("uart", uart); ("spi", spi); ("i2c", i2c); ("i2c-target", i2c_target); ("spi-target", spi_target) ]
 
 let () =
   let ok = match Array.to_list Sys.argv with

@@ -1,7 +1,7 @@
 # command: main.exe planted
-# commit: 538bc41945be70d26c6754ea2bb483813af7d103 (with uncommitted changes)
+# commit: 26a56d4bc9aea3e7b2415056ae5ce30f7e97199a (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-10T11:59:57+08:00
+# date: 2026-10-10T12:12:46+08:00
 PLANTED spi_p8 (LDD a wraps to 4095)         REJECTED  entries    71  events    28
     pc 8: 4098 slots may pass without an event in state byte 0 bit 1 mosi, whose deadline is 2
     path (9 instructions from pc 0):
@@ -457,5 +457,37 @@ PLANTED i2c2 target, set-up 6 slots against a declared 7 REJECTED  entries  7029
     ... 6 violations in all
     interpreter (6 runs): fails: slot 1443 pc 72: read bit 1: SCL released gap 7, declared 8
 
-planted: 24 bugs, 0 not rejected
-# elapsed 3.43 s, max rss 31156 kB
+PLANTED spi2 target mode 1 firmware against the mode 0 specification REJECTED  entries    34  events    19
+    pc 7: event p2:set=1 (first bit driven after CS low) has gap 4..? slots, declared 5..?
+    path (6 instructions from pc 0):
+        0  setp mask=04 val=0 oe=0 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  waitp pin3==0 fail=1         state waiting for CS low                 dl=0 since=1 due=1 time=1..?
+        2  waitc cond=9 fail=5          state CS low                             dl=0 since=1 due=1 time=2..?
+        3  in                           state CS low                             dl=0 since=2 due=2 time=3..?
+        4  jmp 7                        state CS low                             dl=0 since=3..? due=3..? time=4..?
+        7  setp mask=04 val=1 oe=1 q=0  state CS low                             dl=0 since=4..? due=4..? time=5..?
+    pc 7: event p2:set=1 (first bit driven after CS low) has gap 4 slots, declared 5..?
+    pc 10: 2 slots may pass without an event in state bit 1: leading edge, whose deadline is 1
+    ... 8 violations in all
+    interpreter (4 runs): fails: slot 29 pc 7: first bit driven after CS low gap 4, declared 5..?
+
+PLANTED spi2 target mode 0, MOSI sampled after the trailing edge REJECTED  entries    37  events    20
+    pc 13: event p0:seen=0 (gap 1) is not one the specification accepts in state bit 1: leading edge
+    path (10 instructions from pc 0):
+        0  setp mask=04 val=0 oe=0 q=0  state start                              dl=0 since=0 due=0 time=0
+        1  waitp pin3==0 fail=1         state waiting for CS low                 dl=0 since=1 due=1 time=1..?
+        2  waitc cond=9 fail=5          state CS low                             dl=0 since=1 due=1 time=2..?
+        3  in                           state CS low                             dl=0 since=2 due=2 time=3..?
+        4  jmp 7                        state CS low                             dl=0 since=3..? due=3..? time=4..?
+        7  waitc cond=7 fail=10         state CS low                             dl=0 since=4..? due=4..? time=5..?
+       10  setp mask=04 val=0 oe=1 q=0  state CS low                             dl=0 since=5..? due=5..? time=6..?
+       11  nop                          state a byte's first leading edge, or CS dl=0 since=1 due=1 time=7..?
+       12  waitp pin0==1 fail=40        state a byte's first leading edge, or CS dl=0 since=2 due=2 time=8..?
+       13  waitp pin0==0 fail=13        state bit 1: leading edge                dl=0 since=1 due=1 time=9..?
+    pc 13: event p0:timeout(0) (gap 1) is not one the specification accepts in state bit 1: leading edge
+    pc 13: event p0:seen=0 (gap 1) is not one the specification accepts in state bit 1: leading edge
+    ... 4 violations in all
+    interpreter (4 runs): fails: slot 84 pc 13: event p0:timeout(0) not accepted in state bit 1: leading edge
+
+planted: 26 bugs, 0 not rejected
+# elapsed 4.12 s, max rss 31156 kB

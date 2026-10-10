@@ -327,7 +327,10 @@ target, replies to HOSTOUT. I2C controller in Fast-mode on `uio[6]`, `uio[7]` wi
 stretching the clock, 300 ns edges, the host feeding 22 command bytes through HOSTIN (16 deep):
 the whole transaction with a repeated START and reads. I2C target on the same pins against a
 Fast-mode controller, the host answering each request as it reads HOSTOUT: the target holds SCL
-low up to 717 clocks while the host link turns round. **PASS** both ways for each. The host must drain HOSTOUT often (8
+low up to 717 clocks while the host link turns round. SPI target in modes 3 and 0 at 1 MHz on
+`ui_in` and `uo_out[2]`, and a speed search: right up to 1.36 MHz with bytes back to back (the
+pads' latency costs 2 clocks of half period against the bench's 1.5 MHz). **PASS** both ways for
+each. The host must drain HOSTOUT often (8
 entries; the two SPI threads make 9 within 2,000 clocks), and the run checks the sticky
 overflow bit.
 

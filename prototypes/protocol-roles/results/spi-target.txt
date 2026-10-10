@@ -1,0 +1,46 @@
+# command: ./_build/default/main.exe spi-target
+# commit: 26a56d4bc9aea3e7b2415056ae5ce30f7e97199a (with uncommitted changes)
+# date: 2026-10-10T12:16:44+08:00
+== Task 5: SPI target, modes 0-3, msb and lsb first, 60 MHz core clock
+The peer controller (peers.ml) sends 4 random bytes; the target answers with the host's 4 bytes.
+
+Standard rates, interpreter and RTL in lockstep, 2 runs each:
+  mode 0 msb   100 kHz ok (lockstep 0), 500 kHz ok (lockstep 0), 1000 kHz ok (lockstep 0); page 45 words
+  mode 0 lsb   100 kHz ok (lockstep 0), 500 kHz ok (lockstep 0), 1000 kHz ok (lockstep 0); page 45 words
+  mode 1 msb   100 kHz ok (lockstep 0), 500 kHz ok (lockstep 0), 1000 kHz ok (lockstep 0); page 46 words
+  mode 1 lsb   100 kHz ok (lockstep 0), 500 kHz ok (lockstep 0), 1000 kHz ok (lockstep 0); page 46 words
+  mode 2 msb   100 kHz ok (lockstep 0), 500 kHz ok (lockstep 0), 1000 kHz ok (lockstep 0); page 45 words
+  mode 2 lsb   100 kHz ok (lockstep 0), 500 kHz ok (lockstep 0), 1000 kHz ok (lockstep 0); page 45 words
+  mode 3 msb   100 kHz ok (lockstep 0), 500 kHz ok (lockstep 0), 1000 kHz ok (lockstep 0); page 46 words
+  mode 3 lsb   100 kHz ok (lockstep 0), 500 kHz ok (lockstep 0), 1000 kHz ok (lockstep 0); page 46 words
+
+The fastest SCLK it follows (half periods act = idle, in clocks; 4 bytes; back to back: 12 phases;
+with gaps: 40 to 51 clocks between bytes, 4 phases each):
+               bytes back to back                 40 to 51 clocks between bytes     
+  mode 0 msb   half 20 clocks, 1.50 MHz (MISO set-up 3) half 16 clocks, 1.88 MHz (MISO set-up 3)
+  mode 0 lsb   half 20 clocks, 1.50 MHz (MISO set-up 3) half 16 clocks, 1.88 MHz (MISO set-up 3)
+  mode 1 msb   half 20 clocks, 1.50 MHz (MISO set-up 3) half 20 clocks, 1.50 MHz (MISO set-up 7)
+  mode 1 lsb   half 20 clocks, 1.50 MHz (MISO set-up 3) half 20 clocks, 1.50 MHz (MISO set-up 7)
+  mode 2 msb   half 20 clocks, 1.50 MHz (MISO set-up 3) half 16 clocks, 1.88 MHz (MISO set-up 3)
+  mode 2 lsb   half 20 clocks, 1.50 MHz (MISO set-up 3) half 16 clocks, 1.88 MHz (MISO set-up 3)
+  mode 3 msb   half 20 clocks, 1.50 MHz (MISO set-up 3) half 20 clocks, 1.50 MHz (MISO set-up 7)
+  mode 3 lsb   half 20 clocks, 1.50 MHz (MISO set-up 3) half 20 clocks, 1.50 MHz (MISO set-up 7)
+  (MISO set-up: the least number of clocks between MISO's last change and a sampling edge, at that speed)
+
+Why, one clock faster (mode 0 msb, bytes back to back): 8 of 12 phases wrong at half 19 clocks
+    phase 0: the controller read e8 60 0f c8 (the target sent e8 e0 0f 48): MISO WRONG; the host got 1c 77 4c 08 (sent 1c 77 4c 08): MOSI right
+    phase 2: the controller read ba 5b dc 31 (the target sent ba db dc b1): MISO WRONG; the host got a3 2a e1 fb (sent a3 2a e1 fb): MOSI right
+  mode 0 msb with gaps, at half 15 clocks: 41 of 48 runs wrong; the bits wrong: 01 02 04 05 08 0a 10 11 15 20 22 28 2a 40 41 44 45 50 51 55 (not only the first bit)
+  mode 1 msb with gaps, at half 19 clocks: 3 of 48 runs wrong; the bits wrong: 80 (only the first bit of a byte)
+
+Controls (each must fail the check named):
+  host has no data ready: the controller reads 0xFF (read ff ff ff ff)                 CAUGHT
+  mode 1 firmware judged as mode 0: 15 MISO changes in the sampling phase              CAUGHT
+  mode 0 firmware judged as mode 1: 16 MISO changes in the sampling phase              CAUGHT
+  mode 3 target, mode 2 controller (data wrong)                                        CAUGHT
+  msb-first target, lsb-first controller (data wrong)                                  CAUGHT
+  one clock past the limit, phase 0: wrong                                             CAUGHT
+  lockstep: RTL bug "WAITC 9 inverted" (4156 clocks differ)                            CAUGHT
+
+SPI target: PASS
+# elapsed 23.35 s, max rss 16716 kB

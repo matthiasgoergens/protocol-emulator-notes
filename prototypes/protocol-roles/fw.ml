@@ -385,3 +385,57 @@ let i2c_target ~sda ~scl ~addr ~su () =
         (* after a NACK the controller sends a STOP or a repeated START during this SCL high *)
         Label "monitor_after_nack"; W (Isa2.shi ~pin:sda ~msb:1 ()) ] @ poll_high ~on_low:"monitor_low" in
   assemble items
+
+(* ------------------------------------------------------------------------------------------ *)
+(* SPI target, modes 0-3, msb or lsb first
+
+   The target follows SCLK by polling: a wait for an edge is WAITP sclk = level with its fail
+   target itself at dl = 0 (one look a slot). As in the controller, MISO is written by SETP after a
+   branch on the accumulator bit going out (WAITC acc bit 7, or 0 lsb first, at dl = 0; three
+   slots, the SETP in the second), and MOSI is sampled by SHI, which shifts the received bit in.
+
+   Host interface: each byte received goes to the host (OUT tag 0); each byte sent is the host's
+   next byte (IN) if it has one ready, else 0xFF (WAITC on host_in_valid, no waiting: SPI has no
+   way to hold the controller); when CS rises the target releases MISO and reports tag 1.
+
+   Schedule, in slots after the slot in which the poll sees an edge (L: leading, T: trailing):
+   CPHA 0: SHI (sample) at L + 1; MISO's next bit written at T + 3 (JNZ or JMP, WAITC, SETP).
+   CPHA 1: MISO's bit written at L + 2 (WAITC, SETP); SHI at T + 1.
+   The work between bytes is placed in the phase that has room for it: after the eighth sample
+   (CPHA 0: in SCLK's active phase; CPHA 1: after the last trailing edge) the target reports the
+   byte (OUT) and takes the next one (WAITC, IN or LDA 0xFF: 3 slots), 4 slots in all. Between
+   bytes, the wait for the next byte's first leading edge also looks at CS (3 slots a look); within
+   a byte CS is not looked at, so a transaction must be a whole number of bytes.
+   At CS low the target takes its first byte and drives MISO: in CPHA 0 the first bit, 5 slots
+   after it sees CS fall; in CPHA 1 a placeholder 1, 4 slots after, until the first leading edge.
+   main.exe spi-target measures the fastest SCLK it follows and why. *)
+let spi_target ~sclk ~mosi ~miso ~cs ~(mode : spi_mode) () =
+  let active = 1 - mode.cpol and idle = mode.cpol in
+  let accbit = if mode.msb then 7 else 0 in
+  let n = ref 0 in
+  let lbl s = incr n; Printf.sprintf "%s%d" s !n in
+  let wait_for pin value = let l = lbl "w" in [ Label l; Waitp { pin; value; fail = l } ] in
+  let miso_out () =
+    let z = lbl "z" and j = lbl "j" in
+    [ Waitc { cond = Isa2.c_acc accbit; fail = z }; drive miso 1; Jmp j; Label z; drive miso 0; W Isa2.nop; Label j ] in
+  let sample = W (Isa2.shi ~pin:mosi ~msb:(if mode.msb then 1 else 0) ()) in
+  (* the next byte to send: the host's, or 0xFF; 3 slots either way *)
+  let take () =
+    let nd = lbl "nodata" and ld = lbl "loaded" in
+    [ Waitc { cond = Isa2.c_host; fail = nd }; W Isa2.in_; Jmp ld; Label nd; W (Isa2.lda 0xFF); W Isa2.nop; Label ld ] in
+  (* the first leading edge of a byte, looking at CS between looks at SCLK *)
+  let first_lead = [ Label "bw"; Waitp { pin = sclk; value = active; fail = "bc" } ] in
+  let items =
+    [ setp ~pins:(bit miso) ~value:0 ~oe:0;
+      Label "idle"; Waitp { pin = cs; value = 0; fail = "idle" } ] @ take ()
+    @ (if mode.cpha = 0 then
+         [ Label "byte" ] @ miso_out () @ first_lead @ [ sample ] @ wait_for sclk idle @ [ W (Isa2.ldc 6) ]
+         @ [ Label "loop" ] @ miso_out () @ wait_for sclk active @ [ sample ] @ wait_for sclk idle @ [ Jnz "loop" ]
+         @ miso_out () @ wait_for sclk active @ [ sample; W (Isa2.out ~tag:0 ()) ] @ take () @ wait_for sclk idle @ [ Jmp "byte" ]
+       else
+         [ drive miso 1; Label "byte" ] @ first_lead @ miso_out () @ wait_for sclk idle @ [ sample; W (Isa2.ldc 6) ]
+         @ [ Label "loop" ] @ wait_for sclk active @ miso_out () @ wait_for sclk idle @ [ sample; Jnz "loop" ]
+         @ wait_for sclk active @ miso_out () @ wait_for sclk idle @ [ sample; W (Isa2.out ~tag:0 ()) ] @ take () @ [ Jmp "byte" ])
+    @ [ Label "bc"; Waitp { pin = cs; value = 0; fail = "end" }; Jmp "bw";
+        Label "end"; setp ~pins:(bit miso) ~value:0 ~oe:0; W (Isa2.outi ~tag:1 0); Jmp "idle" ] in
+  assemble items

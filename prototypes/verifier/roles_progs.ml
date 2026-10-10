@@ -479,5 +479,132 @@ let i2c_target_planted () =
         let x = w.(!i) in w.(!i) <- w.(!i + 1); w.(!i + 1) <- x; w);
     { t with name = "PLANTED i2c2 target, set-up 6 slots against a declared 7"; spec = i2c_target_spec ~sda:6 ~scl:7 ~su:7 } ]
 
-let sweep () = uart_images () @ spi_images () @ i2c_images () @ i2c_target_images ()
-let planted () = uart_planted () @ spi_planted () @ i2c_planted () @ i2c_target_planted ()
+(* ---- SPI target ---- *)
+
+(* fw.ml, spi_target. Polls (SCLK, CS) are expiries and observations with no deadline; the
+   responses have exact gaps, in slots after the observation that triggers them:
+   - MISO released at slot 0; CS seen low: MISO driven 5 slots later (CPHA 0: the first bit) or
+     4 (CPHA 1: a placeholder 1).
+   - CPHA 0: leading edge seen: MOSI sampled 1 slot later; trailing edge seen: MISO's next bit
+     3 slots later. After the eighth sample the trailing edge is awaited 5 slots later (OUT and
+     the next byte, then the poll).
+   - CPHA 1: leading edge seen: MISO's bit 2 slots later; trailing edge seen: MOSI sampled 1 slot
+     later.
+   - Between bytes the first leading edge's poll alternates with a look at CS (1 slot after an
+     expiry on SCLK); CS high: MISO released 1 slot later, and the target waits for CS again.
+   The next byte is taken with IN only after WAITC has seen the host's byte ready, so on the chip
+   the IN does not wait unless another thread reads HOSTIN in between; A1 lets the host's input
+   change on any slot, so there the specification has "at least" (the first MISO write after CS,
+   and CPHA 0's trailing-edge poll after the eighth sample, at least 5 slots; CPHA 1's
+   placeholder at least 4) where the firmware's comment states exact counts. *)
+let spi_target_spec ~sclk ~mosi ~miso ~cs ~(mode : Fw.spi_mode) =
+  let bl = builder () in
+  let st name = fresh bl name in
+  let tr ~gap src pats dst label = add bl ~src pats gap ~dst label in
+  let any = at_least 1 in
+  let active = 1 - mode.cpol and idle = mode.cpol in
+  (* a poll at state [s]: an expiry stays, an observation goes to a new state *)
+  let wait_for s pin v name =
+    let d = st name in
+    tr ~gap:any s [ (pin, Timeout v) ] s (name ^ ": not yet");
+    tr ~gap:any s [ (pin, Seen v) ] d name; d in
+  (* MISO written from the data: either level *)
+  let miso_write ~gap src dst label =
+    tr ~gap src [ (miso, Set H) ] dst label; tr ~gap src [ (miso, Set L) ] dst label in
+  let idle_st = st "waiting for CS low" in
+  tr ~gap:(ex 0) 0 [ (miso, Set Z) ] idle_st "MISO released";
+  let csl = wait_for idle_st cs 0 "CS low" in
+  (* between bytes: the first leading edge's poll, alternating with a look at CS *)
+  let bw = st "a byte's first leading edge, or CS high" and bc = st "looking at CS between bytes" in
+  let ended = st "CS high: MISO to be released" and l1 = st "bit 1: leading edge" in
+  tr ~gap:any bw [ (sclk, Timeout active) ] bc "no leading edge yet";
+  tr ~gap:any bw [ (sclk, Seen active) ] l1 "bit 1: leading edge";
+  tr ~gap:any bc [ (cs, Seen 0) ] bw "CS still low";
+  tr ~gap:any bc [ (cs, Timeout 0) ] ended "CS high";
+  tr ~gap:(ex 1) ended [ (miso, Set Z) ] idle_st "MISO released at the end";
+  if mode.cpha = 0 then begin
+    miso_write ~gap:(at_least 5) csl bw "first bit driven after CS low";
+    let cur = ref l1 in
+    for k = 1 to 8 do
+      let smp = st (Printf.sprintf "bit %d sampled" k) in
+      tr ~gap:(ex 1) !cur [ (mosi, Smp) ] smp (Printf.sprintf "bit %d: MOSI sampled" k);
+      (* the trailing edge's poll; after the eighth sample it starts 5 slots later (OUT and the
+         next byte first) *)
+      let polling = st (Printf.sprintf "bit %d: waiting for the trailing edge" k)
+      and t = st (Printf.sprintf "bit %d: trailing edge" k) in
+      let first = if k = 8 then at_least 5 else ex 1 in
+      tr ~gap:first smp [ (sclk, Timeout idle) ] polling (Printf.sprintf "bit %d: no trailing edge yet" k);
+      tr ~gap:first smp [ (sclk, Seen idle) ] t (Printf.sprintf "bit %d: trailing edge" k);
+      tr ~gap:(ex 1) polling [ (sclk, Timeout idle) ] polling (Printf.sprintf "bit %d: no trailing edge yet" k);
+      tr ~gap:(ex 1) polling [ (sclk, Seen idle) ] t (Printf.sprintf "bit %d: trailing edge" k);
+      if k < 8 then begin
+        let m = st (Printf.sprintf "bit %d: MISO set" (k + 1)) in
+        miso_write ~gap:(ex 3) t m (Printf.sprintf "bit %d: MISO" (k + 1));
+        cur := wait_for m sclk active (Printf.sprintf "bit %d: leading edge" (k + 1))
+      end else miso_write ~gap:(ex 3) t bw "next byte's first bit"
+    done
+  end else begin
+    let mp = st "MISO placeholder driven" in
+    tr ~gap:(at_least 4) csl [ (miso, Set H) ] mp "placeholder 1 driven after CS low";
+    tr ~gap:any mp [ (sclk, Timeout active) ] bc "no leading edge yet";
+    tr ~gap:any mp [ (sclk, Seen active) ] l1 "bit 1: leading edge";
+    let cur = ref l1 in
+    for k = 1 to 8 do
+      let m = st (Printf.sprintf "bit %d: MISO set" k) in
+      miso_write ~gap:(ex 2) !cur m (Printf.sprintf "bit %d: MISO" k);
+      let t = wait_for m sclk idle (Printf.sprintf "bit %d: trailing edge" k) in
+      let smp = st (Printf.sprintf "bit %d sampled" k) in
+      tr ~gap:(ex 1) t [ (mosi, Smp) ] smp (Printf.sprintf "bit %d: MOSI sampled" k);
+      if k < 8 then cur := wait_for smp sclk active (Printf.sprintf "bit %d: leading edge" (k + 1))
+      else begin
+        tr ~gap:any smp [ (sclk, Timeout active) ] bc "next byte: no leading edge yet";
+        tr ~gap:any smp [ (sclk, Seen active) ] l1 "next byte: leading edge"
+      end
+    done
+  end;
+  finish bl ~name:(Printf.sprintf "spi target %s" (Fw.spi_mode_name mode)) ~pins:[ sclk; mosi; miso; cs ]
+
+let spi_ctl_world ~sclk ~mosi ~miso ~cs ~(mode : Fw.spi_mode) ~seed =
+  let rng = Random.State.make [| seed; 202 |] in
+  let pm = { Peers.Spi.cpol = mode.cpol; cpha = mode.cpha; msb = mode.msb } in
+  (* transactions one after another: 1 to 4 bytes at a random speed and gap *)
+  let rec make start acc k =
+    if k = 0 then List.rev acc
+    else
+      let h = 20 + Random.State.int rng 60 and n = 1 + Random.State.int rng 4 in
+      let c = Peers.Spi.controller ~start ~gap:(Random.State.int rng 50) ~mode:pm ~act:h ~idl:(h + Random.State.int rng 3)
+          ~css:(40 + Random.State.int rng 200) ~csh:(10 + Random.State.int rng 100) (List.init n (fun _ -> Random.State.int rng 256)) in
+      let len = 400 + n * (8 * (2 * h + 3) + 50) + 300 in
+      make (start + len) ((start, start + len, c) :: acc) (k - 1) in
+  let cs_list = make 50 [] 8 in
+  let idle_out = (mode.cpol, 0, 1) in
+  fun ~clock ~pin_out ~pin_oe ->
+    let m = if (pin_oe lsr miso) land 1 = 1 then (pin_out lsr miso) land 1 else 1 in
+    let s, o, q = match List.find_opt (fun (a, b, _) -> clock >= a && clock < b) cs_list with
+      | Some (_, _, c) -> Peers.Spi.controller_step c ~miso:m
+      | None -> idle_out in
+    0xFF land lnot ((1 lsl sclk) lor (1 lsl mosi) lor (1 lsl cs)) lor (s lsl sclk) lor (o lsl mosi) lor (q lsl cs)
+
+let spi_target ?(thread = 0) ?image ~(mode : Fw.spi_mode) () =
+  let sclk = 0 and mosi = 1 and miso = 2 and cs = 3 in
+  { name = Printf.sprintf "spi2_target_m%d%s" (2 * mode.cpol + mode.cpha) (if mode.msb then "msb" else "lsb");
+    words = page (Fw.spi_target ~sclk ~mosi ~miso ~cs ~mode:(Option.value image ~default:mode) ());
+    spec = spi_target_spec ~sclk ~mosi ~miso ~cs ~mode; thread;
+    env = Peer { seeds = [ 1; 2; 3; 4 ]; host = Some (fun rng -> Random.State.int rng 256);
+                 world = (fun ~seed -> spi_ctl_world ~sclk ~mosi ~miso ~cs ~mode ~seed) } }
+
+let spi_target_images () = List.map (fun mode -> spi_target ~mode ()) spi_modes
+
+let spi_target_planted () =
+  let m0 = List.hd spi_modes and m1 = List.nth spi_modes 2 in
+  [ { (spi_target ~image:m1 ~mode:m0 ()) with name = "PLANTED spi2 target mode 1 firmware against the mode 0 specification" };
+    with_words (spi_target ~mode:m0 ()) ~name:"PLANTED spi2 target mode 0, MOSI sampled after the trailing edge" (fun w ->
+        (* the first SHI swapped with the poll for the trailing edge that follows it *)
+        let i = ref 0 in
+        while not ((w.(!i) lsr 12) land 15 = Isa2.op_shi) do incr i done;
+        let x = w.(!i) in w.(!i) <- w.(!i + 1); w.(!i + 1) <- x;
+        (* the poll's fail target was itself; it moved one word up *)
+        w.(!i) <- (w.(!i) land 0xFF00) lor !i; w) ]
+
+let sweep () = uart_images () @ spi_images () @ i2c_images () @ i2c_target_images () @ spi_target_images ()
+let planted () = uart_planted () @ spi_planted () @ i2c_planted () @ i2c_target_planted () @ spi_target_planted ()

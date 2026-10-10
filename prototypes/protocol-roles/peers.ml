@@ -118,7 +118,70 @@ module Spi = struct
       Queue.push t.out t.pipe;
       Queue.pop t.pipe
     end
+  (* A controller: SCLK [act] clocks active and [idl] clocks idle a bit, CS falling [css] clocks
+     before the first edge and rising [csh] after the last, [gap] more idle clocks between bytes.
+     MOSI changes on the shift edge (CPHA 0: the first bit at CS fall, the others at trailing
+     edges; CPHA 1: at leading edges); MISO is read at the sampling edge, in the clock the edge is
+     driven. The bus levels are one clock behind the controller's own outputs, as a wire would
+     be; [start] delays everything. Returns its outputs for a clock; [rx] collects MISO bytes. *)
+  type controller = {
+    cm : mode; tx : int array;
+    sched : (int * [ `Cs of int | `Sclk of int | `Mosi of int | `Sample of int ]) list;   (* clock, action *)
+    mutable rx : int list;                  (* newest first *)
+    mutable cur : int;
+    mutable o_sclk : int; mutable o_mosi : int; mutable o_cs : int;
+    mutable left : (int * [ `Cs of int | `Sclk of int | `Mosi of int | `Sample of int ]) list;
+    mutable done_ : bool;
+  }
+
+  let controller ?(start = 0) ?(gap = 0) ~mode ~act ~idl ~css ~csh bytes =
+    let tx = Array.of_list bytes in
+    let ev = ref [] and t = ref start in
+    let add a = ev := (!t, a) :: !ev in
+    let active = 1 - mode.cpol in
+    add (`Cs 0);
+    if mode.cpha = 0 then add (`Mosi (bit_of ~msb:mode.msb tx.(0) 0));
+    t := !t + css;
+    Array.iteri (fun i b ->
+        for k = 0 to 7 do
+          add (`Sclk active);
+          if mode.cpha = 0 then add (`Sample (8 * i + k)) else add (`Mosi (bit_of ~msb:mode.msb b k));
+          t := !t + act;
+          add (`Sclk mode.cpol);
+          if mode.cpha = 1 then add (`Sample (8 * i + k))
+          else if k < 7 then add (`Mosi (bit_of ~msb:mode.msb b (k + 1)))
+          else if i + 1 < Array.length tx then add (`Mosi (bit_of ~msb:mode.msb tx.(i + 1) 0));
+          t := !t + idl + (if k = 7 then gap else 0)
+        done) tx;
+    t := !t - idl + csh;
+    add (`Cs 1);
+    let sched = List.rev !ev in
+    { cm = mode; tx; sched; rx = []; cur = 0; o_sclk = mode.cpol; o_mosi = 0; o_cs = 1; left = sched; done_ = false }
+
+  (* one clock: [miso] is the line now; returns (sclk, mosi, cs) driven during the next clock *)
+  let controller_step c ~miso =
+    let bits = ref [] in
+    let rec go () = match c.left with
+      | (t, a) :: r when t <= c.cur ->
+        c.left <- r;
+        (match a with
+         | `Cs v -> c.o_cs <- v | `Sclk v -> c.o_sclk <- v | `Mosi v -> c.o_mosi <- v
+         | `Sample k -> bits := (k, miso) :: !bits);
+        go ()
+      | _ -> () in
+    go ();
+    List.iter (fun (k, v) ->
+        let i = k / 8 and j = k mod 8 in
+        if j = 0 then c.rx <- 0 :: c.rx;
+        let b = List.hd c.rx in
+        let b = if c.cm.msb then b lor (v lsl (7 - j)) else b lor (v lsl j) in
+        c.rx <- b :: List.tl c.rx;
+        ignore i) (List.rev !bits);
+    if c.left = [] then c.done_ <- true;
+    c.cur <- c.cur + 1;
+    (c.o_sclk, c.o_mosi, c.o_cs)
 end
+
 
 (* ------------------------------------------------------------------------------------------ *)
 (* I2C (NXP UM10204). Open-drain lines: a line is low when any device pulls it low and high

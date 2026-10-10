@@ -5,6 +5,7 @@ let () =
     | [ "spi" ] -> T_spi.run_all ()
     | [ "i2c" ] -> T_i2c.run_all ()
     | [ "i2c-target" ] -> T_i2c_target.run_all ()
-    | [ "dump"; dir ] -> T_uart.dump dir && T_spi.dump dir && T_i2c.dump dir && T_i2c_target.dump dir
-    | _ -> prerr_endline "usage: main.exe uart | spi | i2c | i2c-target | dump DIR"; exit 2 in
+    | [ "spi-target" ] -> T_spi_target.run_all ()
+    | [ "dump"; dir ] -> T_uart.dump dir && T_spi.dump dir && T_i2c.dump dir && T_i2c_target.dump dir && T_spi_target.dump dir
+    | _ -> prerr_endline "usage: main.exe uart | spi | i2c | i2c-target | spi-target | dump DIR"; exit 2 in
   exit (if ok then 0 else 1)

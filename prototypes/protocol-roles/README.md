@@ -10,7 +10,7 @@ programmes (`../sequencer-v2/isa2.ml`) for the chip's 60 MHz clock:
 2. SPI controller in modes 0-3, msb or lsb first, full duplex, from 100 kHz to 1.5 MHz (1.875 MHz in modes 1 and 3);
 3. I2C controller at Standard-mode (100 kHz) and Fast-mode (400 kHz), with reads, repeated START and clock stretching, against the specification's timing parameters;
 4. I2C target with a 7-bit address, ACK and NACK, writes drained and reads supplied by the host, clock stretching while it waits for the host;
-5. (to come) SPI target in modes 0-3.
+5. SPI target in modes 0-3, msb or lsb first: 1.5 MHz in every mode, 1.88 MHz in modes 0 and 2 with gaps between bytes, and why.
 
 Build: `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17). `./run_all.sh`
 regenerates every result file (niced, one job at a time, waiting while the load is 16 or more).
@@ -23,7 +23,7 @@ regenerates every result file (niced, one job at a time, waiting while the load 
 | `fw.ml` | the firmware generators; each states its schedule in slots in its comment |
 | `peers.ml` | the devices at the other end, written from the protocols' definitions, in real time at 60 MHz: they know nothing of slots or threads |
 | `bench.ml` | interpreter (`isa2.ml`) and RTL (`sequencer2.ml` through `harness2.ml`) in lockstep, every clock: effects and all architectural state of all four threads |
-| `t_uart.ml`, `t_spi.ml`, `t_i2c.ml`, `t_i2c_target.ml` | tasks 1 to 4 |
+| `t_uart.ml`, `t_spi.ml`, `t_i2c.ml`, `t_i2c_target.ml`, `t_spi_target.ml` | tasks 1 to 5 |
 | `isa2.ml`, `sequencer2.ml`, `harness2.ml` | links to `../sequencer-v2`, unchanged |
 
 Every programme here is checked six ways:
@@ -374,3 +374,107 @@ host polls HOSTOUT and answers each request through HOSTIN; its own latency thro
 link makes the target hold SCL low for up to 717 clocks (the controller's own low phase is 80).
 The controller sees every ACK and byte, the host gets every report, and specification and RTL
 agree on every pad.
+
+## 5. SPI target, modes 0-3 (`results/spi-target.txt`)
+
+**Design** (`fw.ml`, `spi_target`, 45 words in CPHA 0, 46 in CPHA 1). The target follows SCLK
+by polling (one look a slot) and uses the controller's trick for full duplex: MISO is written by
+SETP after a branch on the outgoing accumulator bit (3 slots), MOSI is sampled by SHI, which
+shifts. CPHA 0: MOSI sampled 1 slot after the poll sees the leading edge, MISO's next bit written
+3 slots after it sees the trailing edge. CPHA 1: MISO written 2 slots after the leading edge,
+MOSI sampled 1 slot after the trailing edge. The bytes it sends are the host's (IN), or 0xFF when
+the host has none ready (it cannot hold an SPI controller back); each byte received goes to the
+host, and CS rising releases MISO and reports the end. Between bytes the target reports the byte
+and takes the next one (OUT, WAITC, IN: 4 slots), placed where it costs least: in CPHA 0 in the
+active phase of the eighth bit, in CPHA 1 after its trailing edge. CS is looked at only between
+bytes, so a transaction must be a whole number of bytes.
+
+**Measured** against the controller of `peers.ml`, which samples MISO exactly at its own sampling
+edge (no time allowed after the edge): at 100 kHz, 500 kHz and 1 MHz in all 8 configurations,
+interpreter and RTL in lockstep, the controller reads the host's bytes, the host gets the
+controller's, and every MISO change falls in the phase where the mode does not sample.
+
+**The fastest SCLK it follows** (half periods equal; every run right at that speed and every
+slower one; back to back: 12 phases of the controller against the core clock; with gaps: the gap
+over 12 consecutive values, 40 to 51 clocks, at 4 phases each, so that the next byte's first edge
+falls at every point of the target's poll):
+
+| | bytes back to back | gaps between bytes |
+|---|---|---|
+| modes 0 and 2 | 20 clocks a half period: **1.50 MHz** | 16: **1.88 MHz** |
+| modes 1 and 3 | 20: **1.50 MHz** | 20: **1.50 MHz** |
+| mode 0 on the combined chip | 22: **1.36 MHz** | |
+
+The first search used one gap (40 clocks) and reported 1.67 MHz for modes 1 and 3. With one gap
+the next byte's first edge lands at only 4 of the 12 points of the target's 3-slot poll between
+bytes; varying the gap finds the slower alignment.
+
+**Why.** One clock faster, in every case that fails it is MISO, never MOSI: the controller reads
+wrong bits, the host gets every byte right (`results/spi-target.txt` shows two failing runs of
+each). MOSI is sampled one slot after the target sees the sampling edge, half a period before the
+controller changes it, so it has room. MISO must be written after the target sees the shift edge
+and be on the pin by the controller's next sampling edge. The chains, in the bench (the core reads
+an edge one clock after the controller makes it; the poll then sees it within one slot, 0 to 3
+clocks; a write shows on the pin in the clock it is made):
+- CPHA 0, gaps between bytes: MISO is written 3 slots (12 clocks) after the poll sees the trailing
+  edge, so 13 to 16 clocks after it, and must be there by the next leading edge, a half period
+  later: the limit is a half period of 16 clocks (1.88 MHz), as measured.
+- CPHA 0, bytes back to back: in the eighth bit the poll for the trailing edge starts only 6 slots
+  after the leading edge is seen (the sample, OUT, and 3 slots to take the next byte), 25 to 28
+  clocks after that edge; the next byte's first bit follows 12 clocks after the trailing edge is
+  seen, 37 to 40 clocks after the eighth leading edge, and must come by the next leading edge, two
+  half periods after it: the limit is 20 clocks (1.50 MHz), as measured. The failing runs have
+  exactly that bit wrong (0xE0 read as 0x60, 0x48 as 0xC8).
+- On the chip the pads add a clock each way (the pad shows an output a clock later, the core sees
+  samples two clocks old instead of one), 41 to 44 clocks, so 22 (1.36 MHz), as measured there.
+- CPHA 1: MISO is written 2 slots after the leading edge is seen. Within a byte the poll sees it
+  within a slot; between bytes the poll for a byte's first leading edge also looks at CS, so it
+  looks at SCLK only every third slot and sees the edge up to 11 clocks late; MISO then comes
+  up to 19 clocks after the leading edge and must be there by the trailing edge, a half period
+  later: the limit is 20 clocks (1.50 MHz), gaps or not, and one clock faster only the first bit
+  of a byte is ever wrong (3 of 48 runs at 19 clocks), as measured. In CPHA 0 one clock past the
+  limit with gaps (15 clocks) many bits are wrong, not only the first: there the per-bit chain
+  above binds.
+A faster target would need the next byte fetched before the eighth bit, or MISO's next bit
+prepared without the 3-slot branch; neither fits one accumulator. These numbers are for 50 %
+duty; the requirement is per phase.
+
+**Controls**, each of which must fail and does: the host with no data (the controller reads
+0xFF); firmware built for mode 1 judged as mode 0, and the reverse (15 and 16 MISO changes in the
+sampling phase); a mode 3 target against a mode 2 controller, and msb first against lsb first
+(wrong data); one clock past the limit (wrong); the RTL bug "WAITC 9 inverted" under the
+lockstep (4,156 clocks differ). As with the controller, the data alone does not tell CPHA apart at
+these speeds (a mode 0 target and a mode 1 controller exchange the right bytes), and a polling
+mode 0 target also works with a mode 2 controller: it takes the idle-high SCLK at CS fall as an
+immediate first leading edge. The MISO phase check is what tells the modes apart.
+
+**sigrok**: sigrok's `spi` decoder on all 8 configurations at 1 MHz, MOSI against the
+controller's bytes and MISO against the host's: 8 of 8, and 24 of 24 teeth caught.
+
+**Verifier**: specifications with the polls unbounded and the responses exact (MOSI sampled 1 slot
+after the leading or trailing edge is seen, MISO written 3 slots after the trailing edge or 2
+after the leading edge, MISO released 1 slot after CS is seen high). The target takes the next
+byte with IN only after WAITC has seen it ready, which on the chip cannot wait unless another
+thread reads HOSTIN in between; the verifier's assumption A1 lets the input change on any slot,
+so there the specification says "at least" (the first MISO write after CS, at least 5 or 4
+slots; in CPHA 0 the trailing-edge poll after the eighth sample, at least 5). The first version
+of the specification said "exactly" and was rightly rejected. 8 images, cross-checked against
+the peer controller running random transactions at random speeds: **8 of 8 proved**. Planted:
+mode 1 firmware against the mode 0 specification, MOSI sampled after the trailing edge: 2 of 2
+rejected.
+
+**Combined chip**: mode 3, lsb first, and mode 0, msb first, at 1 MHz on `ui_in` (SCLK, MOSI, CS)
+and `uo_out[2]` (MISO), the host prefilling HOSTIN with the replies and draining HOSTOUT: both
+right, specification and RTL agree on every pad. Mode 0 with bytes back to back, 8 phases a
+speed: right up to 22 clocks a half period (1.36 MHz), wrong at 21; the two extra clocks of pad
+latency over the bench cost about 2 clocks of half period.
+
+## Summary of the checks
+
+| | lockstep | peer | sigrok (traces, teeth) | verifier (images proved, planted rejected) | page (words) | chip |
+|---|---|---|---|---|---|---|
+| UART tx/rx, 12 rates | 0 mismatches | bytes and timing | 24, 48 | 48, 3 | 33 / 36 | 115200 baud both ways |
+| SPI controller | 0 | 8 configurations x 4-5 periods | 10, 30 | 48, 3 | 66 / 70 | modes 0 and 3 at once |
+| I2C controller | 0 | 4 corners x 2 modes, stretching | 2, 4 | 6, 3 | 143 | Fast-mode with stretching |
+| I2C target | 0 | 4 corners x 2 modes, slow host | 2, 4 | 3, 2 | 95 | Fast-mode, host over the link |
+| SPI target | 0 | 8 configurations x 3 rates, speed search over every alignment | 8, 24 | 8, 2 | 45 / 46 | modes 3 and 0, 1.36 MHz limit |

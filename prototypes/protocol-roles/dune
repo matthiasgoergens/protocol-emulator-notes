@@ -8,5 +8,5 @@
 
 (executable
  (name main)
- (modules t_uart t_spi t_i2c t_i2c_target main)
+ (modules t_uart t_spi t_i2c t_i2c_target t_spi_target main)
  (libraries hardcaml roles unix))

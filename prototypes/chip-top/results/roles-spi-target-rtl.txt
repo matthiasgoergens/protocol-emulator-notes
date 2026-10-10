@@ -1,0 +1,21 @@
+# command: env DEMO_DRIVER=rtl ./_build/default/bin/roles.exe spi-target
+# commit: 26a56d4bc9aea3e7b2415056ae5ce30f7e97199a (with uncommitted changes)
+# date: 2026-10-10T12:10:08+08:00
+== SPI target on the combined chip: thread 0 on ui_in[0] (SCLK), ui_in[1] (MOSI), ui_in[3] (CS) and
+   uo_out[2] (MISO), against the controller of peers.ml; the host supplies the replies through
+   HOSTIN and reads the bytes received from HOSTOUT
+  the board is driven by the RTL's pads
+  mode 3 lsb, SCLK 1.00 MHz: 46 words loaded; the controller read ac 12 cb 08 (the host gave ac 12 cb 08); the host read 46 e2 7e 7b (the controller sent 46 e2 7e 7b); end of transaction reported: true
+  RTL and specification agree on every pad, every clock: true
+  the board is driven by the RTL's pads
+  mode 0 msb, SCLK 1.00 MHz: 45 words loaded; the controller read 22 f6 39 7e (the host gave 22 f6 39 7e); the host read 35 21 0a c8 (the controller sent 35 21 0a c8); end of transaction reported: true
+  RTL and specification agree on every pad, every clock: true
+  mode 0 msb, half 24 clocks (1.25 MHz), 8 phases: all right
+  mode 0 msb, half 23 clocks (1.30 MHz), 8 phases: all right
+  mode 0 msb, half 22 clocks (1.36 MHz), 8 phases: all right
+  mode 0 msb, half 21 clocks (1.43 MHz), 8 phases: some wrong
+  mode 0 msb, half 20 clocks (1.50 MHz), 8 phases: some wrong
+  mode 0 msb, half 19 clocks (1.58 MHz), 8 phases: some wrong
+  fastest on the chip, every phase right (each run also compares specification and RTL on every pad): half 22 clocks, 1.36 MHz
+SPI target on the combined chip: PASS
+# elapsed 11.65 s, max rss 25144 kB

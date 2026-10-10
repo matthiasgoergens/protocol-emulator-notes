@@ -1,6 +1,6 @@
 # command: env DEMO_DRIVER=rtl ./_build/default/bin/roles.exe i2c-target
-# commit: 538bc41945be70d26c6754ea2bb483813af7d103 (with uncommitted changes)
-# date: 2026-10-10T11:58:02+08:00
+# commit: 26a56d4bc9aea3e7b2415056ae5ce30f7e97199a (with uncommitted changes)
+# date: 2026-10-10T12:09:55+08:00
 == I2C target at 0x50 on the combined chip: thread 0 on uio[6] (SDA) and uio[7] (SCL), against the
    Fast-mode controller of peers.ml, rise and fall 300 ns; the host reads HOSTOUT and answers
    through HOSTIN as the target asks (ACK for bytes written, the bytes to read), while the target
@@ -13,4 +13,4 @@
   longest SCL low phase on the bus: 717 clocks (the controller's own is 80: the rest is the target waiting for the host)
   RTL and specification agree on every pad, every clock: true
 I2C target on the combined chip: PASS
-# elapsed 2.03 s, max rss 23120 kB
+# elapsed 2.05 s, max rss 23824 kB
