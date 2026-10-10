@@ -1,0 +1,7 @@
+; prototypes/chip-top/src (symlinks): the chip's register map, host side, board, specification and
+; RTL. gen.ml and tt_top.ml are not needed here.
+(library
+ (name chip)
+ (wrapped false)
+ (flags (:standard -w -32-27-26-69-37))
+ (libraries base hardcaml seqv2 upe pstream psample eth10 mphase))

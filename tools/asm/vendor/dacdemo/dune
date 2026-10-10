@@ -1,0 +1,8 @@
+; ../../../onebit-dac/sim/dac.ml, unchanged (symlink): the one-bit DAC's PE configurations, its
+; pump firmware (ISA v2) and its bit-exact fast model. Its Spec is the PE array's
+; (../../blocks/upe, the same encoding as onebit-dac's copy since the additions were adopted).
+(library
+ (name dacdemo)
+ (modules dac)
+ (flags (:standard -open Upe -w -32-27-26-69-37))
+ (libraries hardcaml upe seqv2))
