@@ -1,6 +1,6 @@
 # command: _build/default/check.exe paths 1000000
-# base commit: 50ff10c (with this directory's uncommitted files)
-# ocaml 5.3.0, hardcaml v0.17; 2026-10-10T11:09:59+08:00
+# base commit: e3eeba1 (with this directory's uncommitted files)
+# ocaml 5.3.0, hardcaml v0.17; 2026-10-10T11:26:02+08:00
 == transmit serialiser and receive framer: RTL against model, every clock
   seed 1: 1000000 clocks, 0 mismatching ok
   seed 2: 1000000 clocks, 0 mismatching ok
@@ -30,4 +30,4 @@
   rx_history_kept_at_end     caught (seed 1; clock 235: rx history count: model 0 rtl 8)  the end of a frame does not restart the history count
 14 of 14 planted faults caught
 the independent references alone fail with 10 of the 14 faults: tx_first_bit_msb, tx_tail_skips_first, tx_no_final_stuff, tx_pair_not_complement, tx_period_off_by_one, tx_fifo_full_accepts, rx_pattern_old_history, rx_skip_off_by_one, rx_err_not_sticky, rx_history_kept_at_end
-paths: PASS (43 s)
+paths: PASS (42 s)

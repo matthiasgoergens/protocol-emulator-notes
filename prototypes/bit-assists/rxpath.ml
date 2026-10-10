@@ -180,7 +180,7 @@ let create ~clock ~clear ~(cfg : cfg_signals) ~bit ~valid ~active ~burst_end ~st
   cb <== reg spec (mux2 srx.keep dec.out_bit cb);
   let ce = reg spec (valid &: (dec.err |: srx.err)) in
   (* 2. the framer *)
-  let in_frame = wire 1 and nbits = wire 4 and sh = wire 8 and fbits = wire 8 and hist = wire 8 in
+  let in_frame = wire 1 and nbits = wire 3 and sh = wire 8 and fbits = wire 8 and hist = wire 8 in
   let err = wire 1 and ovf = wire 1 in
   let ending = in_frame &: ((cfg.s_end_inactive &: ~:active) |: (cfg.s_end_burst &: burst_end) |: stop) in
   let skip = if is "rx_skip_off_by_one" then cfg.s_skip +:. 1 else cfg.s_skip in
@@ -212,7 +212,7 @@ let create ~clock ~clear ~(cfg : cfg_signals) ~bit ~valid ~active ~burst_end ~st
   count <== reg spec (mux2 clear_fifo (zero 2) (count +: uresize push 2 -: uresize popping 2));
   let head = mux2 rd slot1 slot0 in
   in_frame <== reg spec (mux2 frame_start vdd (mux2 ending gnd in_frame));
-  nbits <== reg spec (mux2 frame_start (zero 4) (mux2 shift_in (mux2 (nbits ==:. 7) (zero 4) (nbits +:. 1)) nbits));
+  nbits <== reg spec (mux2 frame_start (zero 3) (mux2 shift_in (nbits +:. 1) nbits));
   sh <== reg spec (mux2 frame_start (zero 8) (mux2 shift_in sh' sh));
   fbits <== reg spec (mux2 frame_start (zero 8) (mux2 (shift_in &: (fbits <>:. 255)) (fbits +:. 1) fbits));
   let err_next = if is "rx_err_not_sticky" then packing &: ce else err |: (packing &: ce) in

@@ -154,7 +154,7 @@ let p_idle = 0 and p_data = 1 and p_tail1 = 2 and p_tail2 = 3
 (* [push], [push_data]: a byte offered this clock; [accept] says it was taken. *)
 let create ~clock ~clear ~(cfg : cfg_signals) ~push ~push_data =
   let spec = Reg_spec.create ~clock ~clear () in
-  let phase = wire 2 and ctr = wire 12 and sh = wire 8 and nb = wire 4 and tl = wire 4 in
+  let phase = wire 2 and ctr = wire 12 and sh = wire 8 and nb = wire 3 and tl = wire 4 in
   let a = wire 1 and b = wire 1 and busy = wire 1 in
   (* the FIFO: two slots, read pointer, count *)
   let count = wire 2 and rd = wire 1 in
@@ -210,7 +210,7 @@ let create ~clock ~clear ~(cfg : cfg_signals) ~push ~push_data =
   (* the shift register *)
   let after_take = mux2 have_sh (shifted sh) (shifted head) in
   sh <== reg spec (mux2 take after_take sh);
-  nb <== reg spec (mux2 is_idle (zero 4) (mux2 take (mux2 have_sh (nb -:. 1) (of_int ~width:4 7)) nb));
+  nb <== reg spec (mux2 is_idle (zero 3) (mux2 take (mux2 have_sh (nb -:. 1) (of_int ~width:3 7)) nb));
   (* FIFO *)
   let accept = push &: ((count <>:. depth) |: pop) in
   let accept = if is "tx_fifo_full_accepts" then push else accept in
