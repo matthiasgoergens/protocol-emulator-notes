@@ -28,6 +28,8 @@ let mkdir_p d = ignore (Sys.command (Printf.sprintf "mkdir --parents %s" (Filena
 
 let assemble file = Assembler.assemble_file ~include_dirs:[ "lib" ] (Filename.concat "examples" file)
 
+let read_file path = let ic = open_in_bin path in let s = really_input_string ic (in_channel_length ic) in close_in ic; s
+
 let page_words (r : Assembler.result) page = Image.page_words r.image page
 
 (* ---- automata up to state numbering ---- *)
@@ -405,8 +407,78 @@ let dac () =
   mkdir_p "results/traces/dac";
   Wave.vcd "results/traces/dac/dac.vcd" { c.trace with nets = Array.sub c.trace.nets 0 20000; pcs = Array.sub c.trace.pcs 0 20000; pads = Array.sub c.trace.pads 0 20000 }
 
+(* ---- WS2812 (docs/tutorial.md) ---- *)
+
+(* A WS2812 receiver written from the WS2812B datasheet: a high pulse of 0.40 us is a 0 and of
+   0.80 us a 1 (each +-150 ns); the low after it is 0.85 us after a 0 and 0.45 us after a 1 (each
+   +-150 ns); a low of 50 us or more ends the frame. Times are clocks at 60 MHz. Returns the frames
+   as byte lists, and the timing violations seen. *)
+let ws2812_decode (s : D.sample list) ~pin =
+  let ns clocks = float clocks *. 1000. /. 60. in
+  let edges = D.edges s pin in
+  let frames = ref [] and bits = ref [] and errors = ref [] in
+  let flush () =
+    if !bits <> [] then begin
+      let b = List.rev !bits in
+      if List.length b mod 8 <> 0 then errors := Printf.sprintf "frame of %d bits" (List.length b) :: !errors;
+      let rec bytes = function
+        | b0 :: b1 :: b2 :: b3 :: b4 :: b5 :: b6 :: b7 :: r ->
+          ((b0 lsl 7) lor (b1 lsl 6) lor (b2 lsl 5) lor (b3 lsl 4) lor (b4 lsl 3) lor (b5 lsl 2) lor (b6 lsl 1) lor b7) :: bytes r
+        | _ -> [] in
+      frames := bytes b :: !frames; bits := []
+    end in
+  let rec go = function
+    | (r, 1) :: (f, 0) :: rest ->
+      let th = ns (f - r) in
+      let bit = if th >= 250. && th <= 550. then Some 0 else if th >= 650. && th <= 950. then Some 1 else None in
+      (match bit with
+       | None -> errors := Printf.sprintf "high of %.0f ns at clock %d" th r :: !errors
+       | Some b ->
+         bits := b :: !bits;
+         (match rest with
+          | (r', 1) :: _ ->
+            let tl = ns (r' - f) in
+            if tl >= 50_000. then flush ()
+            else if (b = 0 && (tl < 700. || tl > 1000.)) || (b = 1 && (tl < 300. || tl > 600.)) then
+              errors := Printf.sprintf "low of %.0f ns after a %d at clock %d" tl b f :: !errors
+          | _ -> flush ()));
+      go rest
+    | _ :: rest -> go rest
+    | [] -> flush () in
+  go edges;
+  (List.rev !frames, List.rev !errors)
+
+let ws2812 () =
+  print_endline "== ws2812: WS2812 LED string, two LEDs (docs/tutorial.md)";
+  let r = assemble "ws2812.s" in
+  verify "ws2812" r;
+  let clocks = 40000 in
+  let _, c = both "ws2812" r.image ~clocks ~peers:(fun () -> []) () in
+  let frames, errors = ws2812_decode (Runner.samples c) ~pin:0 in
+  Printf.printf "  decoded: %s; timing violations: %d\n" (String.concat " | " (List.map hex frames)) (List.length errors);
+  List.iter (Printf.printf "    %s\n") errors;
+  check "ws2812: datasheet decoder reads one frame 12 34 56 9a bc de, every pulse in tolerance"
+    (frames = [ [ 0x12; 0x34; 0x56; 0x9A; 0xBC; 0xDE ] ] && errors = []);
+  write_trace "ws2812" c [ ("ws2812_pin", "0"); ("ws2812_rgb", "#341256,#bc9ade") ];
+  (* controls: a high part one slot short is rejected by the verifier and by the decoder *)
+  let src = read_file "examples/ws2812.s" in
+  let bad = Str.replace_first (Str.regexp_string "    delay HIGH - 1          ; s+1 .. s+5") "    delay HIGH - 2" src in
+  let rb = Assembler.assemble_string ~include_dirs:[ "lib"; "examples" ] ~name:"ws2812 (high part one slot short)" bad in
+  let vs = Verify.verify ~name:"ws2812-short" rb in
+  check "ws2812: control, high part one slot short: the verifier rejects it" (List.exists (fun (v : Verify.verdict) -> not v.ok) vs);
+  let short = Str.replace_first (Str.regexp_string "    delay HIGH - 1          ; s+1 .. s+5") "    nop" src in
+  let rs = Assembler.assemble_string ~include_dirs:[ "lib"; "examples" ] ~name:"ws2812 (high part 2 slots)" short in
+  let cs = Runner.run (Runner.Chip { rtl = false }) rs.image (opts clocks []) in
+  let _, errs = ws2812_decode (Runner.samples cs) ~pin:0 in
+  check "ws2812: control, a 133 ns high part: the decoder reports timing violations" (errs <> []);
+  let other = Str.replace_first (Str.regexp_string "0x12, 0x34") "0x13, 0x34" src in
+  let ro = Assembler.assemble_string ~include_dirs:[ "lib"; "examples" ] ~name:"ws2812 (other colour)" other in
+  let co = Runner.run (Runner.Chip { rtl = false }) ro.image (opts clocks []) in
+  check "ws2812: control, another colour in the bank is decoded as that colour"
+    (fst (ws2812_decode (Runner.samples co) ~pin:0) = [ [ 0x13; 0x34; 0x56; 0x9A; 0xBC; 0xDE ] ])
+
 let all = [ ("uart_tx", uart_tx); ("spi", spi); ("i2c_write", i2c_write); ("i2c_read", i2c_read); ("uart_rx", uart_rx);
-            ("bridge", bridge); ("dac", dac) ]
+            ("bridge", bridge); ("ws2812", ws2812); ("dac", dac) ]
 
 let () =
   let names = List.tl (Array.to_list Sys.argv) in

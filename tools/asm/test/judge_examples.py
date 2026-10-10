@@ -44,12 +44,30 @@ def judge_i2c_read(samples, rate, exp):
     return J.Verdict(problems, "decoded [%s]" % "; ".join(got))
 
 
+def judge_ws2812(samples, rate, exp):
+    d = "rgb_led_ws281x:din=%s" % exp["ws2812_pin"]
+    got = J.sigrok(samples, 8, rate, d, ["rgb_led_ws281x=rgb:reset"])
+    want = [c.upper() for c in exp["ws2812_rgb"].split(",")] + ["RESET"]
+    got_u = [g.upper() for g in got]
+    problems = [] if got_u == want else ["decoded [%s], expected [%s]" % ("; ".join(got), "; ".join(want))]
+    return J.Verdict(problems, "decoded [%s]" % "; ".join(got))
+
+
+def ws2812_teeth(t, exp):
+    pin = int(exp["ws2812_pin"])
+    r = J.edges(t, pin, "r")
+    # bit 3's data part: 6 slots (24 clocks) after its rise, 6 slots long
+    return [("the data part of bit 3 inverted", J.invert(t, [pin], r[3] + 24, r[3] + 48)),
+            ("the trace twice as slow (an analyser at the wrong rate)", J.stretch(t, 2.0))]
+
+
 CASES = [
     ("uart_tx", J.judge_uart, J.uart_teeth),
     ("spi", J.judge_spi, J.spi_teeth),
     ("i2c_write", J.judge_i2c, J.i2c_teeth),
     ("i2c_read", judge_i2c_read, J.i2c_teeth),
     ("bridge", J.judge_spi, J.spi_teeth),
+    ("ws2812", judge_ws2812, ws2812_teeth),
 ]
 
 
