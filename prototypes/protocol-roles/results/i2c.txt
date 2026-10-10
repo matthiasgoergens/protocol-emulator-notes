@@ -1,6 +1,6 @@
 # command: ./_build/default/main.exe i2c
-# commit: 2f04fcf533fb98c32191a608e9861f126d7f610e (with uncommitted changes)
-# date: 2026-10-10T11:41:39+08:00
+# commit: 538bc41945be70d26c6754ea2bb483813af7d103 (with uncommitted changes)
+# date: 2026-10-10T11:57:37+08:00
 == Task 3: I2C controller, Standard-mode and Fast-mode, 60 MHz core clock
 Transactions: write 0x55 0xAA to registers 0x10..0x11 of the target at 0x50; STOP; then set the
 pointer, repeated START, read 3 bytes (ACK, ACK, NACK), STOP. The target acknowledges, answers,
@@ -16,7 +16,7 @@ with it (each fall held 0..400 clocks at random).
   tSU;STA (ns)               >=     4700       4800       4800       4800       4800       4800 ok
   tSU;DAT (ns)               >=      250       4733       3733       4433       3733       3733 ok
   tHD;DAT (ns)               >=        0        333        333         33         33         33 ok
-  tVD;DAT, tVD;ACK (ns)      <=     3450        333       1333        633       1333       1333 ok
+  tVD;DAT, tVD;ACK (ns)      <=     3450        333       1333        333       1033       1333 ok
   tSU;STO (ns)               >=     4000       4133       4133       4133       4133       4133 ok
   tBUF (ns)                  >=     4700       5933       4933       5933       4933       4933 ok
   corner tr=0 tf=0 clocks: 3 STARTs (1 repeated), 2 STOPs; data ok; lockstep 0, 0 clocks differ; with stretching: tLOW >= 5067, tHIGH >= 4967 ns
@@ -36,7 +36,7 @@ with it (each fall held 0..400 clocks at random).
   tSU;STA (ns)               >=      600        733        700        733        700        700 ok
   tSU;DAT (ns)               >=      100       1333       1033       1033       1033       1033 ok
   tHD;DAT (ns)               >=        0        333        333         33         33         33 ok
-  tVD;DAT, tVD;ACK (ns)      <=      900        333        633        633        633        633 ok
+  tVD;DAT, tVD;ACK (ns)      <=      900        333        633        333        333        633 ok
   tSU;STO (ns)               >=      600        733        700        733        700        700 ok
   tBUF (ns)                  >=     1300       1867       1567       1867       1567       1567 ok
   corner tr=0 tf=0 clocks: 3 STARTs (1 repeated), 2 STOPs; data ok; lockstep 0, 0 clocks differ; with stretching: tLOW >= 1667, tHIGH >= 817 ns
@@ -56,7 +56,7 @@ Controls (each must fail the check named):
   Fast-mode with high = 8 slots: fSCL 441176 Hz > 400 kHz                              CAUGHT
   Fast-mode with su_sto = 5 slots: tSU;STO 400 ns < 600                                CAUGHT
   Fast-mode with hd_sta = 7 slots: tHD;STA 467 ns < 600                                CAUGHT
-  Fast-mode with SDA changed 22 slots after SCL low: tSU;DAT 200 ns < 100 or tVD 1767 > 900 CAUGHT
+  Fast-mode with SDA changed 22 slots after SCL low: tSU;DAT -100 ns < 100 or tVD 1767 > 900 CAUGHT
   no target at 0x51: NACKs reported (host tag1:01 tag1:01 tag3:00), STOP sent          CAUGHT
   target NACKs from its third data byte on (host tag1:00 tag1:00 tag1:00 tag1:01 tag1:01 tag3:00) CAUGHT
   target holds SCL for ever, stretch limit 200 slots: timeout reported (host tag1:00 tag2:00 tag2:00 tag2:00), SDA released CAUGHT
@@ -66,4 +66,4 @@ Controls (each must fail the check named):
   lockstep: RTL mutant "a wait times out at dl = 1" (2080 clocks differ)               CAUGHT
 
 I2C controller: PASS
-# elapsed 8.21 s, max rss 345568 kB
+# elapsed 7.78 s, max rss 345720 kB

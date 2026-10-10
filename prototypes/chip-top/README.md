@@ -325,7 +325,9 @@ clock, run with the board following either. UART at 115200 baud: thread 0 sends 
 thread 0 in mode 0 at 1 MHz and thread 1 in mode 3, lsb first, at 1.5 MHz, each against a peer
 target, replies to HOSTOUT. I2C controller in Fast-mode on `uio[6]`, `uio[7]` with a target
 stretching the clock, 300 ns edges, the host feeding 22 command bytes through HOSTIN (16 deep):
-the whole transaction with a repeated START and reads. **PASS** both ways for each. The host must drain HOSTOUT often (8
+the whole transaction with a repeated START and reads. I2C target on the same pins against a
+Fast-mode controller, the host answering each request as it reads HOSTOUT: the target holds SCL
+low up to 717 clocks while the host link turns round. **PASS** both ways for each. The host must drain HOSTOUT often (8
 entries; the two SPI threads make 9 within 2,000 clocks), and the run checks the sticky
 overflow bit.
 

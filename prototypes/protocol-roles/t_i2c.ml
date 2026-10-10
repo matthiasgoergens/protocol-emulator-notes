@@ -8,7 +8,9 @@
    moment a device starts or stops pulling), one that starts at an edge from the edge's end (the
    level reached), so the measured value is at most the true one, whatever the thresholds; the
    minimum over the four corners is then a lower bound for every rise and fall time up to the
-   maximum. Maximum limits (fSCL, tVD) are measured the other way round.
+   maximum. fSCL is the shortest rise-to-rise period; tVD (a maximum) is measured from SCL low,
+   the 30 % point at which UM10204 starts it and the model's line reads low, to the end of SDA's
+   edge.
 
    The controller is driven by the host's commands (Fw.i2c_commands), all queued at the start
    unless a run says otherwise. The peer is the register-file target of peers.ml at address
@@ -125,12 +127,15 @@ let measure (w : wave) =
   let ends = List.filter (fun c -> w.c_sda.(c) <> w.c_sda.(c - 1)) (List.init (n - 1) (fun i -> i + 1)) in
   let in_data c = not (List.mem c starts) && not (List.mem c stops) in
   let hd_dat = List.filter_map (fun c -> Option.map (fun f -> c - f) (last_before f_scl c)) changes in
+  (* set-up: from the end of SDA's edge to the start of the first SCL rise after the change began
+     (negative when SCL starts to rise before SDA has finished) *)
   let su_dat = List.filter_map (fun c ->
       match next_after ends (c - 1) with
-      | Some e when w.scl.(e) = 0 && in_data e -> Option.map (fun r -> r - e) (next_after rs_scl e)
+      | Some e when in_data e -> Option.map (fun r -> r - e) (next_after rs_scl c)
       | _ -> None) changes in
+  (* tVD from SCL low (UM10204: its 30 % point, where the model's line reads low) to SDA valid *)
   let vd = List.filter_map (fun c ->
-      match next_after ends (c - 1), last_before fs_scl c with
+      match next_after ends (c - 1), last_before f_scl c with
       | Some e, Some f -> Some (e - f) | _ -> None) changes in
   ignore r_sda; ignore fs_sda;
   { f_scl = (if periods = [] then 0. else Fw.clock_hz /. float (mn periods));

@@ -1,7 +1,7 @@
 # command: main.exe sweep
-# commit: 2f04fcf533fb98c32191a608e9861f126d7f610e (with uncommitted changes)
+# commit: 538bc41945be70d26c6754ea2bb483813af7d103 (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-10T11:43:52+08:00
+# date: 2026-10-10T12:00:01+08:00
 uart_b5_n1                                   PROVED    entries    42  events    11  cross-check 1 runs covered
 uart_b5_n2                                   PROVED    entries    82  events    21  cross-check 1 runs covered
 uart_b5_n3                                   PROVED    entries   122  events    31  cross-check 1 runs covered
@@ -634,7 +634,10 @@ i2c2_ctl_standard_l200                       PROVED    entries  1226  events   3
 i2c2_ctl_fast_l200                           PROVED    entries  1222  events   358  cross-check 6 runs covered
 i2c2_ctl_standard_l4095                      PROVED    entries  1226  events   358  cross-check 6 runs covered
 i2c2_ctl_fast_l4095                          PROVED    entries  1222  events   358  cross-check 6 runs covered
+i2c2_target_standard_su19                    PROVED    entries  7029  events  6035  cross-check 6 runs covered
+i2c2_target_fast_su6                         PROVED    entries  7029  events  6035  cross-check 6 runs covered
+i2c2_target_fast_su1                         PROVED    entries  7023  events  6035  cross-check 6 runs covered
 
-sweep: 632 images; proved 632, rejected 0 (of which 0 with every interpreter run meeting the specification)
-interpreter cross-check: 9707 runs, 6238769 instruction entries and 2655187 channel events measured; images with a measured state outside the certificate: 0; proved images with a failing run: 0
-# elapsed 20.36 s, max rss 51556 kB
+sweep: 635 images; proved 635, rejected 0 (of which 0 with every interpreter run meeting the specification)
+interpreter cross-check: 9725 runs, 7316846 instruction entries and 3457425 channel events measured; images with a measured state outside the certificate: 0; proved images with a failing run: 0
+# elapsed 23.82 s, max rss 50780 kB

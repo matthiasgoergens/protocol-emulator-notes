@@ -312,3 +312,76 @@ let i2c_ctl ?fault ?(stretch_limit = 4095) ~sda ~scl ~(timing : i2c_timing) () =
     (* a target held SCL past the stretch limit *)
     @ [ Label "timeout"; setp ~pins:(bit sda lor bit scl) ~value:0 ~oe:0; W (Isa2.outi ~tag:2 0); Jmp "idle" ] in
   assemble items
+
+(* ------------------------------------------------------------------------------------------ *)
+(* I2C target: 7-bit address, ACK and NACK, writes drained by the host, reads supplied by the
+   host, clock stretching while it waits for the host
+
+   Host interface: OUT tag 1, the address byte (address and R/W) when the target is addressed;
+   tag 0, each byte written to it, after which the target holds SCL low until the host answers
+   (IN): 0 to ACK the byte, anything else to NACK it; for a read, the target holds SCL low until
+   the host supplies the byte (IN), then reports the controller's answer to it with tag 2 (0 ACK,
+   1 NACK); tag 3, every STOP it sees.
+
+   The target polls the lines: a wait for a level is WAITP pin = v with its fail target itself at
+   dl = 0 (one look a slot); a branch on a level is WAITP at dl = 0 with another fail target. The
+   target never loads dl except for its set-up waits, which end at dl = 0. Response times, in
+   slots after the slot in which the poll sees the edge:
+     SCL high seen: the bit is sampled (SHI) 1 slot later; the controller's ACK to a byte read is
+       looked at 1 slot later.
+     SCL low seen after a byte's 8th bit: the target pulls SCL low (stretching) 2 slots later
+       after a written byte, 1 or 2 before a byte it sends; the address ACK (SDA low) is driven 3
+       slots later for a write address, 4 for a read address (the SKNE comparisons).
+     SCL low seen during a read: the next data bit (SHO od) 1 slot later.
+   After the host has answered, SDA is set and SCL released [su] slots later (the data set-up,
+   which must cover SDA's rise time and tSU;DAT: 19 slots for Standard-mode, 6 for Fast-mode).
+
+   START, repeated START and STOP: they may come only where a byte's first bit would; the target
+   samples that bit when SCL is seen high and then, until SCL is seen low, polls SDA (3 slots a
+   look): SDA falling is a (repeated) START, rising a STOP. When it is not addressed, and after a
+   NACK, it does the same at every SCL high (the "monitor"). This relies on the transmitter's
+   internal hold of at least 300 ns after SCL starts to fall (UM10204, note to table 10), which
+   keeps a data change out of SCL's falling edge; the target itself changes SDA only once it reads
+   SCL low, after the whole fall. *)
+let i2c_target ~sda ~scl ~addr ~su () =
+  if addr < 0 || addr > 0x7F || su < 1 then invalid_arg "i2c_target";
+  let n = ref 0 in
+  let lbl s = incr n; Printf.sprintf "%s%d" s !n in
+  let wait_for pin value = let l = lbl "w" in [ Label l; Waitp { pin; value; fail = l } ] in
+  (* While SCL is high after a byte's first bit has been sampled (in acc bit 0): SDA's change is a
+     START or a STOP; SCL low ends the poll at [on_low]. *)
+  let poll_high ~on_low =
+    let p0 = lbl "p0" and p1 = lbl "p1" in
+    [ Waitc { cond = Isa2.c_acc 0; fail = p0 };
+      Label p1; Waitp { pin = scl; value = 1; fail = on_low }; Waitp { pin = sda; value = 1; fail = "start" }; Jmp p1;
+      Label p0; Waitp { pin = scl; value = 1; fail = on_low }; Waitp { pin = sda; value = 0; fail = "stop" }; Jmp p0 ] in
+  let items =
+    [ setp ~pins:(bit sda lor bit scl) ~value:0 ~oe:0;
+      (* the monitor: at each SCL high, sample SDA and watch it until SCL is low again *)
+      Label "monitor" ] @ wait_for scl 1 @ [ W (Isa2.shi ~pin:sda ~msb:1 ()) ] @ poll_high ~on_low:"monitor_low"
+    @ [ Label "monitor_low"; Jmp "monitor";
+        Label "stop"; W (Isa2.outi ~tag:3 0); Jmp "monitor";
+        (* START or repeated START: the address byte, eight bits *)
+        Label "start"; W (Isa2.ldc 8); Label "abit" ] @ wait_for scl 0 @ wait_for scl 1
+    @ [ W (Isa2.shi ~pin:sda ~msb:1 ()); Jnz "abit" ] @ wait_for scl 0
+    @ [ W (Isa2.skne (addr lsl 1)); Jmp "wmatch"; W (Isa2.skne ((addr lsl 1) lor 1)); Jmp "rmatch"; Jmp "monitor";
+        (* addressed for a write: ACK, then bytes until a STOP or START *)
+        Label "wmatch"; drive_low sda; W (Isa2.out ~tag:1 ()) ] @ wait_for scl 1 @ wait_for scl 0
+    @ [ release sda;
+        Label "wbyte"; W (Isa2.ldc 8) ] @ wait_for scl 1 @ [ W (Isa2.shi ~pin:sda ~msb:1 ()) ] @ poll_high ~on_low:"wbits"
+    @ [ Label "wbits" ] @ wait_for scl 1 @ [ W (Isa2.shi ~pin:sda ~msb:1 ()) ] @ wait_for scl 0 @ [ Jnz "wbits" ]
+    (* a byte in: hold SCL low, give it to the host, wait for the host's answer *)
+    @ [ drive_low scl; W (Isa2.out ~tag:0 ()); W Isa2.in_; W (Isa2.skne 0); Jmp "wack";
+        Wait su; release scl ] @ wait_for scl 1 @ wait_for scl 0 @ [ Jmp "wbyte";
+        Label "wack"; drive_low sda; Wait su; release scl ] @ wait_for scl 1 @ wait_for scl 0 @ [ release sda; Jmp "wbyte";
+        (* addressed for a read: ACK, then bytes from the host until the controller NACKs *)
+        Label "rmatch"; drive_low sda; W (Isa2.out ~tag:1 ()) ] @ wait_for scl 1 @ wait_for scl 0
+    @ [ Label "rbyte"; drive_low scl; W Isa2.in_; W (Isa2.ldc 8); W (Isa2.sho ~od:1 ~pin:sda ~msb:1 ()); Wait su; release scl;
+        Label "rbits" ] @ wait_for scl 1 @ wait_for scl 0 @ [ W (Isa2.sho ~od:1 ~pin:sda ~msb:1 ()); Jnz "rbits" ]
+    @ wait_for scl 1 @ wait_for scl 0
+    @ [ release sda ] @ wait_for scl 1
+    @ [ Waitp { pin = sda; value = 0; fail = "rnack" }; W (Isa2.outi ~tag:2 0) ] @ wait_for scl 0 @ [ Jmp "rbyte";
+        Label "rnack"; W (Isa2.outi ~tag:2 1); Jmp "monitor_after_nack";
+        (* after a NACK the controller sends a STOP or a repeated START during this SCL high *)
+        Label "monitor_after_nack"; W (Isa2.shi ~pin:sda ~msb:1 ()) ] @ poll_high ~on_low:"monitor_low" in
+  assemble items

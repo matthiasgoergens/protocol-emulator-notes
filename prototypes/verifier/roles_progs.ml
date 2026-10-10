@@ -321,5 +321,163 @@ let i2c_planted () =
     { (i2c_ctl ~name:"fast" { Fw.fast_timing with low = 19 }) with name = "PLANTED i2c2 fast, SCL low 19 slots against 25";
                                                                 spec = i2c_ctl_spec ~sda:4 ~scl:5 ~t:Fw.fast_timing ~lm:4095 } ]
 
-let sweep () = uart_images () @ spi_images () @ i2c_images ()
-let planted () = uart_planted () @ spi_planted () @ i2c_planted ()
+(* ---- I2C target ---- *)
+
+(* fw.ml, i2c_target, with [su] its set-up wait. Every wait for a level is a poll, an expiry each
+   slot the level is not there (gap at least 1, no deadline: the controller and the host set the
+   pace), then an observation. What is exact is the target's response to what it sees:
+   - SCL seen high: SDA sampled (SHI) 1 slot later; in a read's ACK clock, SDA looked at 1 slot
+     later (seen 0: ACK; expiry: NACK).
+   - while SCL is high after a byte's first bit (the "poll"): SCL looked at 2 slots after each look
+     at SDA (or after the sample), SDA 1 slot after each look at SCL; SDA moved: a START (it was
+     1) or a STOP (it was 0); SCL low: the byte goes on (or, in the monitor, the next SCL high is
+     awaited).
+   - after the address's 8th bit, SCL seen low: SDA driven low (ACK) 3 or 4 slots later (write or
+     read address), or, not addressed, the monitor's next look at SCL 4 slots later.
+   - after a byte written, SCL seen low: SCL pulled low 2 slots later (stretching); then, after the
+     host's answer (IN, unbounded), SDA low (ACK) at least 5 slots after the stretch began and SCL
+     released su + 1 after that, or (NACK) SCL released at least su + 4 after the stretch began.
+   - a read: SCL pulled low 1 or 2 slots after SCL seen low; after the host's byte (IN), the first
+     bit (SHO od) at least 3 slots after; SCL released su + 1 after it; each later bit 1 slot after
+     SCL seen low; SDA released 1 slot after SCL seen low at the end of the 8th bit. *)
+let i2c_target_spec ~sda ~scl ~su =
+  let bl = builder () in
+  let st name = fresh bl name in
+  let tr ~gap src pats dst label = add bl ~src pats gap ~dst label in
+  let any = at_least 1 in
+  (* a poll at state [s]: an expiry stays, an observation goes to a new state *)
+  let wait_for s pin v name =
+    let d = st name in
+    tr ~gap:any s [ (pin, Timeout v) ] s (name ^ ": not yet");
+    tr ~gap:any s [ (pin, Seen v) ] d name; d in
+  let mon = st "monitor: waiting for SCL high" and started = st "START: waiting for SCL low" in
+  tr ~gap:(ex 0) 0 [ (sda, Set Z); (scl, Set Z) ] mon "both released";
+  (* the poll while SCL is high, from the state after a sample: [on_low] is where SCL low leads *)
+  let poll ps ~on_low label =
+    let b = st (label ^ ": SCL still high") in
+    tr ~gap:(ex 2) ps [ (scl, Seen 1) ] b (label ^ ": SCL still high");
+    tr ~gap:(ex 2) ps [ (scl, Timeout 1) ] on_low (label ^ ": SCL low");
+    tr ~gap:(ex 1) b [ (sda, Seen 1) ] ps (label ^ ": SDA still 1");
+    tr ~gap:(ex 1) b [ (sda, Seen 0) ] ps (label ^ ": SDA still 0");
+    tr ~gap:(ex 1) b [ (sda, Timeout 1) ] started (label ^ ": SDA fell: START");
+    tr ~gap:(ex 1) b [ (sda, Timeout 0) ] mon (label ^ ": SDA rose: STOP") in
+  (* the monitor *)
+  let mseen = wait_for mon scl 1 "monitor: SCL high" in
+  let msmp = st "monitor: SDA sampled" in
+  tr ~gap:(ex 1) mseen [ (sda, Smp) ] msmp "monitor: SDA sampled";
+  poll msmp ~on_low:mon "monitor";
+  (* the address byte *)
+  let cur = ref started in
+  for k = 1 to 8 do
+    let l = wait_for !cur scl 0 (Printf.sprintf "address bit %d: SCL low" k) in
+    let h = wait_for l scl 1 (Printf.sprintf "address bit %d: SCL high" k) in
+    let sm = st (Printf.sprintf "address bit %d sampled" k) in
+    tr ~gap:(ex 1) h [ (sda, Smp) ] sm (Printf.sprintf "address bit %d sampled" k);
+    cur := sm
+  done;
+  let alow = wait_for !cur scl 0 "address: SCL low after bit 8" in
+  let acked = st "address ACK: SDA low" in
+  tr ~gap:(Interval.range 3 4) alow [ (sda, Set L) ] acked "address matched: ACK";
+  tr ~gap:(ex 4) alow [ (scl, Timeout 1) ] mon "not addressed: back to the monitor (SCL low)";
+  tr ~gap:(ex 4) alow [ (scl, Seen 1) ] mseen "not addressed: back to the monitor (SCL high)";
+  let ah = wait_for acked scl 1 "address ACK clock: SCL high" in
+  let al = wait_for ah scl 0 "address ACK clock: SCL low" in
+  (* write: SDA released, then bytes *)
+  let wrel = st "write: waiting for a byte's first SCL high" in
+  tr ~gap:(ex 1) al [ (sda, Set Z) ] wrel "write: ACK released";
+  let w1h = wait_for wrel scl 1 "write bit 1: SCL high" in
+  let w1s = st "write bit 1 sampled" in
+  tr ~gap:(ex 1) w1h [ (sda, Smp) ] w1s "write bit 1 sampled";
+  let wbits = st "write bits 2-8: waiting for SCL high" in
+  poll w1s ~on_low:wbits "write bit 1";
+  let cur = ref wbits in
+  for k = 2 to 8 do
+    let h = wait_for !cur scl 1 (Printf.sprintf "write bit %d: SCL high" k) in
+    let sm = st (Printf.sprintf "write bit %d sampled" k) in
+    tr ~gap:(ex 1) h [ (sda, Smp) ] sm (Printf.sprintf "write bit %d sampled" k);
+    cur := wait_for sm scl 0 (Printf.sprintf "write bit %d: SCL low" k)
+  done;
+  let wstr = st "write: stretching, waiting for the host" in
+  tr ~gap:(ex 2) !cur [ (scl, Set L) ] wstr "write: SCL pulled low (stretch)";
+  let wack = st "write: ACK set" in
+  tr ~gap:(at_least 5) wstr [ (sda, Set L) ] wack "write: the host says ACK";
+  let wrel2 = st "write ACK: SCL released" and wnrel = st "write NACK: SCL released" in
+  tr ~gap:(ex (su + 1)) wack [ (scl, Set Z) ] wrel2 "write ACK: SCL released";
+  tr ~gap:(at_least (su + 4)) wstr [ (scl, Set Z) ] wnrel "write: the host says NACK, SCL released";
+  let h = wait_for wrel2 scl 1 "write ACK clock: SCL high" in
+  let l = wait_for h scl 0 "write ACK clock: SCL low" in
+  tr ~gap:(ex 1) l [ (sda, Set Z) ] wrel "write: ACK released, next byte";
+  let h = wait_for wnrel scl 1 "write NACK clock: SCL high" in
+  let l = wait_for h scl 0 "write NACK clock: SCL low" in
+  tr ~gap:any l [ (scl, Seen 1) ] w1h "write after a NACK: next byte's SCL high";
+  tr ~gap:any l [ (scl, Timeout 1) ] wrel "write after a NACK: waiting for SCL high";
+  (* read *)
+  let rstr = st "read: stretching, waiting for the host" in
+  tr ~gap:(ex 1) al [ (scl, Set L) ] rstr "read: SCL pulled low (stretch)";
+  let rb = st "read bit 1 set" in
+  tr ~gap:(at_least 3) rstr [ (sda, Data_od) ] rb "read: the host's byte, bit 1";
+  let rrel = st "read bit 1: SCL released" in
+  tr ~gap:(ex (su + 1)) rb [ (scl, Set Z) ] rrel "read bit 1: SCL released";
+  let cur = ref rrel in
+  for k = 2 to 8 do
+    let h = wait_for !cur scl 1 (Printf.sprintf "read bit %d: SCL high" (k - 1)) in
+    let l = wait_for h scl 0 (Printf.sprintf "read bit %d: SCL low" (k - 1)) in
+    let b = st (Printf.sprintf "read bit %d set" k) in
+    tr ~gap:(ex 1) l [ (sda, Data_od) ] b (Printf.sprintf "read bit %d set" k);
+    cur := b
+  done;
+  let h = wait_for !cur scl 1 "read bit 8: SCL high" in
+  let l = wait_for h scl 0 "read bit 8: SCL low" in
+  let rack = st "read ACK clock: SDA released" in
+  tr ~gap:(ex 1) l [ (sda, Set Z) ] rack "read: SDA released for the controller's ACK";
+  let rh = wait_for rack scl 1 "read ACK clock: SCL high" in
+  let racked = st "read: ACK seen" and rnack = st "read: NACK seen" in
+  tr ~gap:(ex 1) rh [ (sda, Seen 0) ] racked "read: ACK";
+  tr ~gap:(ex 1) rh [ (sda, Timeout 0) ] rnack "read: NACK";
+  let rl = wait_for racked scl 0 "read ACK clock: SCL low" in
+  tr ~gap:(ex 2) rl [ (scl, Set L) ] rstr "read: next byte, SCL pulled low (stretch)";
+  let nsmp = st "after a NACK: SDA sampled" in
+  tr ~gap:(ex 3) rnack [ (sda, Smp) ] nsmp "after a NACK: SDA sampled";
+  poll nsmp ~on_low:mon "after a NACK";
+  finish bl ~name:(Printf.sprintf "i2c target su=%d" su) ~pins:[ sda; scl ]
+
+let i2c_ctl_world ~sda ~scl ~(ct : Peers.I2c.ctiming) ~seed =
+  let rng = Random.State.make [| seed; 101 |] in
+  let byte () = Random.State.int rng 256 in
+  let ops = List.concat (List.init 6 (fun _ ->
+      let a = if Random.State.int rng 3 = 0 then byte () else 0xA0 lor Random.State.int rng 2 in
+      Peers.I2c.([ C_start; C_write a ] @
+                 (if a land 1 = 0 then List.init (1 + Random.State.int rng 3) (fun _ -> C_write (byte ()))
+                  else let n = 1 + Random.State.int rng 3 in List.init n (fun i -> C_read (i < n - 1)))
+                 @ (if Random.State.bool rng then [ C_stop ] else [ C_restart; C_write 0xA1; C_read false; C_stop ])))) in
+  let c = Peers.I2c.controller ct ops in
+  let pull = ref (false, false) in
+  fun ~clock:_ ~pin_out ~pin_oe ->
+    let pulls p = (pin_oe lsr p) land 1 = 1 && (pin_out lsr p) land 1 = 0 in
+    let s = if pulls sda || fst !pull then 0 else 1 and k = if pulls scl || snd !pull then 0 else 1 in
+    pull := Peers.I2c.controller_step c ~sda:s ~scl:k;
+    0xFF land lnot ((1 - s) lsl sda) land lnot ((1 - k) lsl scl)
+
+let i2c_target ?(thread = 3) ~su ~name ct =
+  let sda = 6 and scl = 7 in
+  { name = Printf.sprintf "i2c2_target_%s_su%d" name su; words = page (Fw.i2c_target ~sda ~scl ~addr:0x50 ~su ());
+    spec = i2c_target_spec ~sda ~scl ~su; thread;
+    env = Peer { seeds = [ 1; 2; 3; 4; 5; 6 ]; host = Some (fun rng -> if Random.State.int rng 2 = 0 then 0 else Random.State.int rng 256);
+                 world = (fun ~seed -> i2c_ctl_world ~sda ~scl ~ct ~seed) } }
+
+let i2c_target_images () =
+  [ i2c_target ~su:19 ~name:"standard" Peers.I2c.c_standard; i2c_target ~su:6 ~name:"fast" Peers.I2c.c_fast;
+    i2c_target ~su:1 ~name:"fast" Peers.I2c.c_fast ]
+
+let i2c_target_planted () =
+  let opcode w = (w lsr 12) land 15 in
+  let t = i2c_target ~su:6 ~name:"fast" Peers.I2c.c_fast in
+  [ with_words t ~name:"PLANTED i2c2 target, a read's first bit swapped with the set-up's LDD" (fun w ->
+        (* the first SHO (a read's first bit) one slot later, so SCL is released one slot after it *)
+        let i = ref 0 in
+        while not (opcode w.(!i) = Isa2.op_sho) do incr i done;
+        let x = w.(!i) in w.(!i) <- w.(!i + 1); w.(!i + 1) <- x; w);
+    { t with name = "PLANTED i2c2 target, set-up 6 slots against a declared 7"; spec = i2c_target_spec ~sda:6 ~scl:7 ~su:7 } ]
+
+let sweep () = uart_images () @ spi_images () @ i2c_images () @ i2c_target_images ()
+let planted () = uart_planted () @ spi_planted () @ i2c_planted () @ i2c_target_planted ()

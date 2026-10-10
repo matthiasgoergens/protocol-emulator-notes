@@ -9,7 +9,7 @@ programmes (`../sequencer-v2/isa2.ml`) for the chip's 60 MHz clock:
 1. UART transmit and receive at the common baud rates, with the bit-time error of each;
 2. SPI controller in modes 0-3, msb or lsb first, full duplex, from 100 kHz to 1.5 MHz (1.875 MHz in modes 1 and 3);
 3. I2C controller at Standard-mode (100 kHz) and Fast-mode (400 kHz), with reads, repeated START and clock stretching, against the specification's timing parameters;
-4. (to come) I2C target;
+4. I2C target with a 7-bit address, ACK and NACK, writes drained and reads supplied by the host, clock stretching while it waits for the host;
 5. (to come) SPI target in modes 0-3.
 
 Build: `opam exec --switch=5.3.0 -- dune build --root .` (Hardcaml v0.17). `./run_all.sh`
@@ -23,7 +23,7 @@ regenerates every result file (niced, one job at a time, waiting while the load 
 | `fw.ml` | the firmware generators; each states its schedule in slots in its comment |
 | `peers.ml` | the devices at the other end, written from the protocols' definitions, in real time at 60 MHz: they know nothing of slots or threads |
 | `bench.ml` | interpreter (`isa2.ml`) and RTL (`sequencer2.ml` through `harness2.ml`) in lockstep, every clock: effects and all architectural state of all four threads |
-| `t_uart.ml`, `t_spi.ml`, `t_i2c.ml` | tasks 1, 2 and 3 |
+| `t_uart.ml`, `t_spi.ml`, `t_i2c.ml`, `t_i2c_target.ml` | tasks 1 to 4 |
 | `isa2.ml`, `sequencer2.ml`, `harness2.ml` | links to `../sequencer-v2`, unchanged |
 
 Every programme here is checked six ways:
@@ -261,7 +261,7 @@ the question: tVD is now 633 ns at worst.
 
 **Controls**, each of which must fail and does: SCL low 19 slots in Fast-mode (tLOW 967 ns);
 high 8 slots (441 kHz); tSU;STO 5 slots (400 ns); tHD;STA 7 slots (467 ns); SDA changed 22 slots
-after SCL low (tSU;DAT 200 ns is still legal, but tVD 1,767 ns is not); no target at the address
+after SCL low (tSU;DAT -100 ns: SCL starts to rise before SDA has; tVD 1,767 ns); no target at the address
 (two NACKs reported, STOP sent); the target NACKing from its third data byte (reported); the
 target holding SCL for ever with a stretch limit of 200 slots (timeout reported, SDA released);
 the ACK read while SCL is still low, against a target whose ACK comes 833 ns after SCL falls
@@ -289,3 +289,88 @@ rise and fall 300 ns, the target stretching at random; the host keeps HOSTIN top
 22 command bytes (it holds 16) and drains HOSTOUT: the target sees the whole transaction, the
 host reads every result, the shortest SCL period is 170 clocks (352.9 kHz; the chip's pads add
 3 clocks to every rise seen), and specification and RTL agree on every pad.
+
+## 4. I2C target (`results/i2c-target.txt`)
+
+**Host interface** (`fw.ml`, `i2c_target`, 95 words). The target reports its address byte when
+it is addressed (tag 1), each byte written to it (tag 0), the controller's answer to each byte
+it sends (tag 2: 0 ACK, 1 NACK), and every STOP (tag 3). After a byte written to it, it holds
+SCL low until the host answers through IN (0 to ACK, anything else to NACK); before each byte it
+sends, it holds SCL low until the host supplies the byte. A host that answers late therefore
+only stretches the clock.
+
+**How it follows the bus.** Every wait is a poll (WAITP on itself at dl = 0, one look a slot);
+the target answers from the slot it sees an edge: it samples SDA 1 slot after seeing SCL high,
+drives the address ACK 3 or 4 slots after seeing SCL low (write or read address; the two SKNE
+comparisons), sends each later bit of a read 1 slot after SCL low, pulls SCL low to stretch 1
+or 2 slots after SCL low, and releases SCL a set-up time (6 slots in Fast-mode, 19 in
+Standard-mode, which covers the rise time and tSU;DAT) after setting SDA. While SCL is high after
+a byte's first bit it polls SDA (3 slots a look): a fall is a (repeated) START, a rise a STOP.
+
+**Measured**, interpreter and RTL in lockstep, against the controller of `peers.ml`, a script at
+the specification's timing that waits for SCL to read high and so honours stretching. The
+transaction: write 0x10 0x55 to the target, read three bytes (ACK, ACK, NACK), then a write to
+0x52, which it must not acknowledge. At all four corners of rise and fall time in both modes
+the controller sees every ACK and NACK and the three bytes the host supplied, and the host gets
+the ten reports in order. The target's own timing on the trace (ns; least, or greatest for tVD):
+
+| | SDA hold after SCL low | SDA set-up before SCL rises | tVD, where it did not stretch | SDA changes while SCL high | SCL pulled while high |
+|---|---|---|---|---|---|
+| Standard (limits) | >= 0 | >= 250 | <= 3,450 | 0 | 0 |
+| Standard (measured, worst corner) | 83 | 3,567 | 1,133 | 0 | 0 |
+| Fast (limits) | >= 0 | >= 100 | <= 900 | 0 | 0 |
+| Fast (measured, worst corner) | 83 | 200 | 617 | 0 | 0 |
+
+With a host that answers each request only 50 us after the target makes it, the target holds
+SCL low for up to 51.6 us (Standard) and 50.7 us (Fast), five times, and everything still
+arrives right; its set-up before releasing SCL is then at least 1,033 ns and 167 ns.
+
+**How fast it can follow.** The Fast-mode controller with every time scaled down, each speed at
+12 phases against the core clock: right at every phase up to SCL low 18 / high 15 clocks
+(1.77 MHz); at 16 / 14 clocks (1.94 MHz) the data still arrives, but the target changes SDA
+while SCL is high: the read address's ACK, driven 4 slots (16 clocks) after the target sees SCL
+low, lands after the controller's 16-clock low phase has ended (traced at clock 1,273 of the
+run). So the limit is the address comparison: 3 to 4 slots plus the input latency must fit in
+the controller's tLOW. Standard-mode and Fast-mode, whose tLOW is at least 4.7 and 1.3 us (282
+and 78 clocks), are far from it.
+
+**A finding about the peer.** At first the peer controller changed SDA 100 ns after starting to
+pull SCL low. With a 300 ns fall time SCL still reads high then, so the target saw a STOP. UM10204
+puts this on the transmitter: a note to its table 10 requires a device to hold SDA internally for
+at least 300 ns after SCL falls through VIH(min), to bridge the undefined region of SCL's falling
+edge. So the peer was out of specification; it now holds 333 ns,
+as this repository's controller does (5 slots). That out-of-specification controller is kept as a
+control. A version of the target that bridged the region itself (looking at SCL again 333 ns
+after seeing SDA move) was tried and dropped: it made the START detection take up to 600 ns,
+which is Fast-mode's tHD;STA itself.
+
+**Controls**, each of which must fail and does: the host NACKing the second byte written (the
+controller sees the NACK); addressed at 0x51 (no ACK, nothing reported but the STOP); a set-up of
+1 slot instead of 6 with a 300 ns rise, a slow host and a first bit of 1 (tSU;DAT -167 ns; 6
+slots give 167 ns); the controller without the 300 ns hold at a 300 ns fall (a false STOP); the
+RTL mutant "WAITD leaves at dl = 1" (40 clocks differ).
+
+A measurement bug found on the way: the set-up time was taken to the first SCL rise after the end
+of SDA's edge, which skips a rise that starts during the edge. It is now taken to the first rise
+after the change begins, so it can be negative; this changed one number of section 3's controls
+(the SDA-changed-late control now reads -100 ns, not 200 ns), and none of its results.
+
+**sigrok**: sigrok's `i2c` decoder on both modes at the slowest edges, with the target
+stretching for a host answering 50 us late: every annotation in order (the NACKed address and
+data byte to 0x52 included), against the intended transaction; both teeth caught.
+
+**Verifier**: a specification of the target's responses, written from the schedule above:
+polls are expiries and observations with no deadline; every response after an observation has
+its exact gap (the sample 1 slot after SCL high, the address ACK 3 to 4 slots after SCL low, the
+stretch 2 slots after, SCL released su + 1 slots after the ACK or the first bit, each read bit
+1 slot after SCL low, the controller's ACK looked at 1 slot after SCL high), and gaps of at least
+a bound across the host's IN. Three images (Standard with su 19, Fast with su 6 and su 1),
+cross-checked against the peer controller running random transactions (writes, reads, repeated
+STARTs, other addresses) with a random host: **3 of 3 proved**, 6,035 events checked each.
+Planted: a read's first bit one slot later; su 6 against a declared 7: 2 of 2 rejected.
+
+**Combined chip**: on `uio[6]` and `uio[7]` with the Fast-mode controller and 300 ns edges, the
+host polls HOSTOUT and answers each request through HOSTIN; its own latency through the host
+link makes the target hold SCL low for up to 717 clocks (the controller's own low phase is 80).
+The controller sees every ACK and byte, the host gets every report, and specification and RTL
+agree on every pad.

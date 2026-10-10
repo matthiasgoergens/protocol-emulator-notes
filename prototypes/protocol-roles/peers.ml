@@ -243,4 +243,86 @@ module I2c = struct
     t.p_sda <- sda; t.p_scl <- scl;
     if t.hold > 0 then t.hold <- t.hold - 1;
     (t.sda_low, t.hold > 0)
+
+  (* A controller, as a script of steps run one clock at a time. Its timing is given in clocks;
+     it waits for SCL to read high after releasing it (a target may stretch the clock) and times
+     its high phase from then. It records the ACKs it sees and the bytes it reads. *)
+  type cstep =
+    | Pull_sda of bool | Pull_scl of bool    (* true: pull low; false: release *)
+    | Delay of int                           (* clocks *)
+    | Until_scl_high
+    | Read_sda of (int -> unit)
+    | Act of (unit -> unit)
+
+  type ctiming = { c_low : int; c_high : int; c_hd_dat : int; c_hd_sta : int; c_su_sta : int; c_su_sto : int;
+                   c_buf : int; c_smp : int }
+
+  (* 100 kHz and 400 kHz with the specification's minima met: tLOW 5.0 / 1.33 us, tHIGH 5.0 /
+     1.17 us (from SCL seen high), tHD;STA 4.17 / 0.6 us; SDA changed 333 ns after it starts to
+     pull SCL low, the transmitter's internal hold of at least 300 ns that keeps a data change out
+     of SCL's falling edge (UM10204, note to table 10) *)
+  let c_standard = { c_low = 300; c_high = 300; c_hd_dat = 20; c_hd_sta = 250; c_su_sta = 290; c_su_sto = 250; c_buf = 290; c_smp = 150 }
+  let c_fast = { c_low = 80; c_high = 70; c_hd_dat = 20; c_hd_sta = 36; c_su_sta = 38; c_su_sto = 38; c_buf = 80; c_smp = 35 }
+
+  (* scaled to another clock rate (for finding the fastest SCL a target follows) *)
+  let c_scaled (t : ctiming) k =
+    let f x = max 1 (int_of_float (Float.round (float x *. k))) in
+    { c_low = f t.c_low; c_high = f t.c_high; c_hd_dat = f t.c_hd_dat; c_hd_sta = f t.c_hd_sta; c_su_sta = f t.c_su_sta;
+      c_su_sto = f t.c_su_sto; c_buf = f t.c_buf; c_smp = f t.c_smp }
+
+  type controller = {
+    q : cstep Queue.t;
+    mutable wait : int;
+    mutable c_sda_low : bool; mutable c_scl_low : bool;
+    mutable acks : bool list;          (* newest first: true = ACK *)
+    mutable reads : int list;          (* newest first *)
+    mutable done_ : bool;
+  }
+
+  type cop = C_start | C_restart | C_stop | C_write of int | C_read of bool   (* read: ACK it? *)
+
+  let controller (t : ctiming) ops =
+    let c = { q = Queue.create (); wait = 0; c_sda_low = false; c_scl_low = false; acks = []; reads = []; done_ = false } in
+    let add l = List.iter (fun s -> Queue.push s c.q) l in
+    (* one clock pulse with SCL low at its start: SDA set [c_hd_dat] after, SCL released at
+       [c_low], seen high, [sample] at [c_smp] after, SCL low [c_high] after seen high *)
+    let pulse ?(sample = fun _ -> ()) sda_low =
+      add [ Delay t.c_hd_dat; Pull_sda sda_low; Delay (t.c_low - t.c_hd_dat); Pull_scl false; Until_scl_high;
+            Delay t.c_smp; Read_sda sample; Delay (t.c_high - t.c_smp); Pull_scl true ] in
+    List.iter (function
+        | C_start -> add [ Delay t.c_buf; Pull_sda true; Delay t.c_hd_sta; Pull_scl true ]
+        | C_restart ->
+          add [ Delay t.c_hd_dat; Pull_sda false; Delay (t.c_low - t.c_hd_dat); Pull_scl false; Until_scl_high;
+                Delay t.c_su_sta; Pull_sda true; Delay t.c_hd_sta; Pull_scl true ]
+        | C_stop ->
+          add [ Delay t.c_hd_dat; Pull_sda true; Delay (t.c_low - t.c_hd_dat); Pull_scl false; Until_scl_high;
+                Delay t.c_su_sto; Pull_sda false; Delay t.c_buf ]
+        | C_write b ->
+          for k = 7 downto 0 do pulse ((b lsr k) land 1 = 0) done;
+          pulse ~sample:(fun v -> c.acks <- (v = 0) :: c.acks) false
+        | C_read ack ->
+          let v = ref 0 in
+          for _ = 7 downto 0 do pulse ~sample:(fun x -> v := (!v lsl 1) lor x) false done;
+          add [ Act (fun () -> c.reads <- !v :: c.reads) ];
+          pulse ack) ops;
+    add [ Act (fun () -> c.done_ <- true) ];
+    c
+
+  (* one clock on the bus levels; returns (pull SDA low, pull SCL low) for the next clock *)
+  let controller_step c ~sda ~scl =
+    if c.wait > 0 then c.wait <- c.wait - 1
+    else begin
+      let go = ref true in
+      while !go && not (Queue.is_empty c.q) do
+        match Queue.peek c.q with
+        | Pull_sda v -> ignore (Queue.pop c.q); c.c_sda_low <- v
+        | Pull_scl v -> ignore (Queue.pop c.q); c.c_scl_low <- v
+        | Delay n -> ignore (Queue.pop c.q); if n > 1 then (c.wait <- n - 1; go := false) else if n = 1 then go := false
+        | Until_scl_high -> if scl = 1 then ignore (Queue.pop c.q) else go := false
+        | Read_sda f -> ignore (Queue.pop c.q); f sda
+        | Act f -> ignore (Queue.pop c.q); f ()
+      done
+    end;
+    (c.c_sda_low, c.c_scl_low)
+
 end

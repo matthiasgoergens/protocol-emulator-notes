@@ -1,6 +1,6 @@
 # command: ./_build/default/bin/roles.exe uart
-# commit: 2f04fcf533fb98c32191a608e9861f126d7f610e (with uncommitted changes)
-# date: 2026-10-10T11:41:47+08:00
+# commit: 538bc41945be70d26c6754ea2bb483813af7d103 (with uncommitted changes)
+# date: 2026-10-10T11:57:51+08:00
 == UART at 115200 baud on the combined chip: thread 0 transmits the host's bytes (uo_out[0]),
    thread 1 receives from ui_in[0] and reports to the host
   programmes: transmit 33 words, receive 36 words (of 256 a page)
@@ -11,4 +11,4 @@
   RTL and specification agree on every pad, every clock: true
   HOSTOUT overflow seen: false
 UART on the combined chip: PASS
-# elapsed 1.42 s, max rss 22312 kB
+# elapsed 1.46 s, max rss 22492 kB

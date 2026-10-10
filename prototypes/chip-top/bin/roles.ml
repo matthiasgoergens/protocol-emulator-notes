@@ -258,7 +258,68 @@ let i2c () =
   pr "I2C controller on the combined chip: %s\n%!" (if ok then "PASS" else "FAIL");
   ok
 
-let demos = [ ("uart", uart); ("spi", spi); ("i2c", i2c) ]
+(* ---- I2C target ---- *)
+
+let i2c_target () =
+  pr "== I2C target at 0x50 on the combined chip: thread 0 on uio[6] (SDA) and uio[7] (SCL), against the\n";
+  pr "   Fast-mode controller of peers.ml, rise and fall 300 ns; the host reads HOSTOUT and answers\n";
+  pr "   through HOSTIN as the target asks (ACK for bytes written, the bytes to read), while the target\n";
+  pr "   holds SCL low\n";
+  let prog = Fw.i2c_target ~sda:4 ~scl:5 ~addr:0x50 ~su:6 () in
+  pr "  programme: %d words\n" (snd prog);
+  let b = Board.create () in
+  let h = b.host in
+  let words = load h [ (0, prog) ] in
+  i2c_pins h;
+  let cops = Peers.I2c.[ C_start; C_write 0xA0; C_write 0x10; C_write 0x55; C_stop;
+                         C_start; C_write 0xA1; C_read true; C_read true; C_read false; C_stop;
+                         C_start; C_write 0xA4; C_write 0x00; C_stop ] in
+  let c = Peers.I2c.controller Peers.I2c.c_fast cops in
+  let ready = ref false in
+  let world, trace = i2c_bus ~tr:18 ~tf:18 (fun ~sda ~scl -> Peers.I2c.controller_step c ~sda ~scl) ~ready in
+  Host.submit h (Host.Call (fun () -> ready := true));
+  Host.wreg h r_ctrl 3;
+  (* the host: poll HOSTOUT; answer each request *)
+  let got = ref [] and to_read = ref [ 0x3C; 0xC3; 0x5A ] and until = ref max_int in
+  let rec serve () =
+    Host.submit h (Host.Read { tgt = t_hostout; addr = 0; n = 16; k = (fun l ->
+        let es = hostout_pairs l in
+        got := !got @ es;
+        List.iter (fun (tag, v) ->
+            let answer = match tag with
+              | 0 -> Some 0x00
+              | 1 when v land 1 = 1 -> (match !to_read with x :: r -> to_read := r; Some x | [] -> None)
+              | 2 when v = 0 -> (match !to_read with x :: r -> to_read := r; Some x | [] -> None)
+              | _ -> None in
+            match answer with Some x -> Host.submit h (Host.Write { tgt = t_hostin; addr = 0; data = [ x ] }) | None -> ()) es) });
+    Host.submit h (Host.Idle 200);
+    (* go on 3,000 clocks after the controller is done, for the target's last report *)
+    Host.submit h (Host.Call (fun () ->
+        if c.done_ && !until = max_int then until := b.clock + 3000;
+        if b.clock < !until then serve ())) in
+  serve ();
+  let clocks = 60_000 in
+  let agree = run_board b ~world ~clocks ~on_clock:(fun _ _ -> ()) in
+  (* the target's stretches: SCL low on the bus while the controller has released it *)
+  pr "  %d words loaded through the link\n" words;
+  pr "  controller saw: ACKs %s, read %s (done: %b)\n"
+    (String.concat "" (List.map (fun a -> if a then "A" else "N") (List.rev c.acks)))
+    (String.concat " " (List.map (Printf.sprintf "%02x") (List.rev c.reads))) c.done_;
+  pr "  host read: %s\n" (String.concat " " (List.map (fun (t, v) -> Printf.sprintf "tag%d:%02x" t v) !got));
+  let lows = let l = List.rev !trace in
+    let rec go acc cur = function
+      | (_, _, 0) :: r -> go acc (cur + 1) r
+      | _ :: r -> go (if cur > 0 then cur :: acc else acc) 0 r
+      | [] -> acc in go [] 0 l in
+  pr "  longest SCL low phase on the bus: %d clocks (the controller's own is 80: the rest is the target waiting for the host)\n"
+    (List.fold_left max 0 lows);
+  pr "  RTL and specification agree on every pad, every clock: %b\n" agree;
+  let ok = agree && c.done_ && List.rev c.acks = [ true; true; true; true; false; false ] && List.rev c.reads = [ 0x3C; 0xC3; 0x5A ]
+           && !got = [ (1, 0xA0); (0, 0x10); (0, 0x55); (3, 0); (1, 0xA1); (2, 0); (2, 0); (2, 1); (3, 0); (3, 0) ] in
+  pr "I2C target on the combined chip: %s\n%!" (if ok then "PASS" else "FAIL");
+  ok
+
+let demos = [ ("uart", uart); ("spi", spi); ("i2c", i2c); ("i2c-target", i2c_target) ]
 
 let () =
   let ok = match Array.to_list Sys.argv with

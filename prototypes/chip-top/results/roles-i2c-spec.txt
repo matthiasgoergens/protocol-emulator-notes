@@ -1,6 +1,6 @@
 # command: ./_build/default/bin/roles.exe i2c
-# commit: 2f04fcf533fb98c32191a608e9861f126d7f610e (with uncommitted changes)
-# date: 2026-10-10T11:41:51+08:00
+# commit: 538bc41945be70d26c6754ea2bb483813af7d103 (with uncommitted changes)
+# date: 2026-10-10T11:57:55+08:00
 == I2C controller in Fast-mode on the combined chip: thread 0 on uio[6] (SDA) and uio[7] (SCL),
    the host's commands through HOSTIN, results through HOSTOUT; the register-file target of
    peers.ml at 0x50 on the bus, stretching the clock at random; rise and fall 300 ns
@@ -13,4 +13,4 @@
   RTL and specification agree on every pad, every clock: true
   HOSTOUT overflow seen: false
 I2C controller on the combined chip: PASS
-# elapsed 2.66 s, max rss 25496 kB
+# elapsed 2.64 s, max rss 25760 kB

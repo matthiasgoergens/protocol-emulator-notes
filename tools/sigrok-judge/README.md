@@ -50,7 +50,7 @@ A trace is one byte per sample (bit p is channel p) with a `.expected` file of `
 | S/PDIF | `prototypes/spdif` chip transmitter (`main.exe tx`) | `spdif` | preamble, 24-bit audio, V, U, C, P of every subframe |
 | 10BASE-T | n/a | none | no sigrok decoder exists, see below |
 | SPI, modes 0-3 | `prototypes/protocol-roles`: the SPI controller in all 8 configurations (mode, bit order) at 1 MHz, modes 0 and 3 at 1.5 MHz, against the peer target | `spi` with cpol, cpha, bitorder | MOSI: the bytes sent; MISO: the bytes the controller reported to the host |
-| I2C, Standard and Fast | `prototypes/protocol-roles`: the I2C controller against the peer target, slowest rise and fall, random clock stretching | `i2c` | every annotation in order (START, repeated START, address, data, ACK, NACK, STOP) against the intended transaction |
+| I2C, Standard and Fast | `prototypes/protocol-roles`: the I2C controller against the peer target, slowest rise and fall, random clock stretching; the I2C target against the peer controller, stretching while its host answers | `i2c` | every annotation in order (START, repeated START, address, data, ACK, NACK, STOP) against the intended transaction |
 | UART, standard rates | `prototypes/protocol-roles` (`main.exe dump`), interpreter and RTL in lockstep: the transmitter's pin, and the line the receiver read, at 12 rates from 9600 baud to 3 Mbaud, sampled at 60 MHz | `uart` | the bytes sent; for the receiver, the bytes it reported to the host |
 
 The dumpers are read-only taps on the existing benches (a `tap` argument in `ps2_bench.ml`, a `Bench.tap`
@@ -116,7 +116,7 @@ A tooth that is not flagged fails the run. `results/judge.txt` has the exact out
   appears, the pin dumps in those prototypes are the place to add a trace.
 - **Gate level:** only RTL and interpreter traces are judged, not the post-synthesis netlist
   (MarcosAsh also runs the decoder on the gate-level simulation).
-- **Other directions and roles:** PS/2 host direction, CAN receive on our nodes, I2C slave, SPI slave,
+- **Other directions and roles:** PS/2 host direction, CAN receive on our nodes, SPI slave,
   USB host side are not traced. JTAG/SWD have sigrok decoders (`jtag`, `swd`) but `proto-jtag-swd` is
   not dumped yet.
 - **Full-speed USB, 100BASE-TX and HDMI/video:** no trace, and sigrok has no decoder for the last two.

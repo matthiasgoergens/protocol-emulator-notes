@@ -1,9 +1,9 @@
 # command: judge.py --only roles
-# commit: 2f04fcf533fb98c32191a608e9861f126d7f610e
+# commit: 538bc41945be70d26c6754ea2bb483813af7d103
 # sigrok-cli 0.7.2
 # - libsigrokdecode 0.5.3/6:1:2 (rt: 0.5.3/6:1:2).
 # image: localhost/sigrok-judge:0.7.2-1 (base and packages pinned in Containerfile)
-# date: 2026-10-10T11:42:16+08:00
+# date: 2026-10-10T11:58:24+08:00
 # analyser rate: as simulated
 roles/i2c-ctl-fast: PASS: decoded [Start; Address write: 50; ACK; Data write: 10; ACK; Data write: 55; ACK; Data write: AA; ACK; Stop; Start; Address write: 50; ACK; Data write: 10; ACK; Start repeat; Address read: 50; ACK; Data read: 55; ACK; Data read: AA; ACK; Data read: A5; NACK; Stop]
   tooth roles/i2c-ctl-fast: SDA inverted over the high phase of the third SCL pulse: CAUGHT
@@ -15,6 +15,16 @@ roles/i2c-ctl-standard: PASS: decoded [Start; Address write: 50; ACK; Data write
       decoded [Start; Address write: 40; ACK; Data write: 10; ACK; Data write: 55; ACK; Data write: AA; ACK; Stop; Start; Address write: 50; ACK; Data write: 10; ACK; Start repeat; Address read: 50; ACK; Data read: 55; ACK; Data read: AA; ACK; Data read: A5; NACK; Stop], expected [Start; Address write: 50; ACK; Data write: 10; ACK; Data write: 55; ACK; Data write: AA; ACK; Stop; Start; Address write: 50; ACK; Data write: 10; ACK; Start repeat; Address read: 50; ACK; Data read: 55; ACK; Data read: AA; ACK; Data read: A5; NACK; Stop]
   tooth roles/i2c-ctl-standard: SDA 398 samples (0.6 of an SCL period) late against SCL: CAUGHT
       decoded [Start; Address write: 20; ACK; Stop; Start; Address write: 01; NACK; Start repeat; Address read: 2A; ACK; Stop; Start; Address read: 22; ACK; Data read: 00; NACK; Start repeat; Address write: 01; NACK; Start repeat; Address read: 04; ACK; Stop; Start; Address read: 2A; ACK; Stop; Start; Address write: 25; ACK; Stop; Start], expected [Start; Address write: 50; ACK; Data write: 10; ACK; Data write: 55; ACK; Data write: AA; ACK; Stop; Start; Address write: 50; ACK; Data write: 10; ACK; Start repeat; Address read: 50; ACK; Data read: 55; ACK; Data read: AA; ACK; Data read: A5; NACK; Stop]
+roles/i2c-target-fast: PASS: decoded [Start; Address write: 50; ACK; Data write: 10; ACK; Data write: 55; ACK; Stop; Start; Address read: 50; ACK; Data read: 3C; ACK; Data read: C3; ACK; Data read: 5A; NACK; Stop; Start; Address write: 52; NACK; Data write: 00; NACK; Stop]
+  tooth roles/i2c-target-fast: SDA inverted over the high phase of the third SCL pulse: CAUGHT
+      decoded [Start; Address write: 40; ACK; Data write: 10; ACK; Data write: 55; ACK; Stop; Start; Address read: 50; ACK; Data read: 3C; ACK; Data read: C3; ACK; Data read: 5A; NACK; Stop; Start; Address write: 52; NACK; Data write: 00; NACK; Stop], expected [Start; Address write: 50; ACK; Data write: 10; ACK; Data write: 55; ACK; Stop; Start; Address read: 50; ACK; Data read: 3C; ACK; Data read: C3; ACK; Data read: 5A; NACK; Stop; Start; Address write: 52; NACK; Data write: 00; NACK; Stop]
+  tooth roles/i2c-target-fast: SDA 101 samples (0.6 of an SCL period) late against SCL: CAUGHT
+      decoded [Start; Address write: 20; ACK; Stop; Start; Address write: 09; NACK; Start repeat; Address write: 29; NACK; Start repeat; Address write: 04; NACK; Start repeat; Address write: 1C; ACK; Stop; Start; Address read: 56; ACK; Stop; Start; Address write: 29; ACK; Stop; Start; Address write: 00; NACK; Start repeat], expected [Start; Address write: 50; ACK; Data write: 10; ACK; Data write: 55; ACK; Stop; Start; Address read: 50; ACK; Data read: 3C; ACK; Data read: C3; ACK; Data read: 5A; NACK; Stop; Start; Address write: 52; NACK; Data write: 00; NACK; Stop]
+roles/i2c-target-standard: PASS: decoded [Start; Address write: 50; ACK; Data write: 10; ACK; Data write: 55; ACK; Stop; Start; Address read: 50; ACK; Data read: 3C; ACK; Data read: C3; ACK; Data read: 5A; NACK; Stop; Start; Address write: 52; NACK; Data write: 00; NACK; Stop]
+  tooth roles/i2c-target-standard: SDA inverted over the high phase of the third SCL pulse: CAUGHT
+      decoded [Start; Address write: 40; ACK; Data write: 10; ACK; Data write: 55; ACK; Stop; Start; Address read: 50; ACK; Data read: 3C; ACK; Data read: C3; ACK; Data read: 5A; NACK; Stop; Start; Address write: 52; NACK; Data write: 00; NACK; Stop], expected [Start; Address write: 50; ACK; Data write: 10; ACK; Data write: 55; ACK; Stop; Start; Address read: 50; ACK; Data read: 3C; ACK; Data read: C3; ACK; Data read: 5A; NACK; Stop; Start; Address write: 52; NACK; Data write: 00; NACK; Stop]
+  tooth roles/i2c-target-standard: SDA 396 samples (0.6 of an SCL period) late against SCL: CAUGHT
+      decoded [Start; Address write: 20; ACK; Stop; Start; Address write: 09; NACK; Start repeat; Address write: 29; NACK; Start repeat; Address write: 04; NACK; Start repeat; Address write: 1C; ACK; Stop; Start; Address read: 56; ACK; Stop; Start; Address write: 29; ACK; Stop; Start; Address write: 00; NACK; Start repeat], expected [Start; Address write: 50; ACK; Data write: 10; ACK; Data write: 55; ACK; Stop; Start; Address read: 50; ACK; Data read: 3C; ACK; Data read: C3; ACK; Data read: 5A; NACK; Stop; Start; Address write: 52; NACK; Data write: 00; NACK; Stop]
 roles/spi-ctl-m0lsb-p15: PASS: MOSI 37 38 6C 1C, MISO 73 80 CB 9B
   tooth roles/spi-ctl-m0lsb-p15: MOSI inverted around the third sampling edge: CAUGHT
       MOSI decoded 33 38 6C 1C, sent 37 38 6C 1C

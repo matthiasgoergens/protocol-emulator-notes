@@ -1,7 +1,7 @@
 # command: main.exe planted
-# commit: 2f04fcf533fb98c32191a608e9861f126d7f610e (with uncommitted changes)
+# commit: 538bc41945be70d26c6754ea2bb483813af7d103 (with uncommitted changes)
 # ocamlopt 5.3.0
-# date: 2026-10-10T11:43:50+08:00
+# date: 2026-10-10T11:59:57+08:00
 PLANTED spi_p8 (LDD a wraps to 4095)         REJECTED  entries    71  events    28
     pc 8: 4098 slots may pass without an event in state byte 0 bit 1 mosi, whose deadline is 2
     path (9 instructions from pc 0):
@@ -415,5 +415,47 @@ PLANTED i2c2 fast, SCL low 19 slots against 25 REJECTED  entries  1222  events  
     ... 45 violations in all
     interpreter (6 runs): fails: slot 132 pc 59: read bit 1 or repeated START: SCL released gap 14, declared 20
 
-planted: 22 bugs, 0 not rejected
-# elapsed 1.73 s, max rss 29324 kB
+PLANTED i2c2 target, a read's first bit swapped with the set-up's LDD REJECTED  entries  7031  events  6035
+    pc 72: event p7:set=z (read bit 1: SCL released) has gap 5 slots, declared 7
+    path (2574 instructions from pc 0, last 14 shown):
+       19  skne 0xa0                    state address: SCL low after bit 8       dl=0 since=1 due=1 time=2560..?
+       21  skne 0xa1                    state address: SCL low after bit 8       dl=0 since=2 due=2 time=2561..?
+       22  jmp 62                       state address: SCL low after bit 8       dl=0 since=3 due=3 time=2562..?
+       62  setp mask=40 val=0 oe=1 q=0  state address: SCL low after bit 8       dl=0 since=4 due=4 time=2563..?
+       63  out tag=1 acc                state address ACK: SDA low               dl=0 since=1 due=1 time=2564..?
+       64  waitp pin7==1 fail=64        state address ACK: SDA low               dl=0 since=1..2 due=1..2 time=2565..?
+       65  waitp pin7==0 fail=65        state address ACK clock: SCL high        dl=0 since=1 due=1 time=2566..?
+       66  setp mask=80 val=0 oe=1 q=0  state address ACK clock: SCL low         dl=0 since=1 due=1 time=2567..?
+       67  in                           state read: stretching, waiting for the  dl=0 since=1 due=1 time=2568..?
+       68  ldc 8                        state read: stretching, waiting for the  dl=0 since=2..? due=2..? time=2569..?
+       69  ldd 4                        state read: stretching, waiting for the  dl=0 since=3..? due=3..? time=2570..?
+       70  sho pin6 msb od q=0          state read: stretching, waiting for the  dl=4 since=4..? due=8..? time=2571..?
+       71  waitd                        state read bit 1 set                     dl=3 since=1 due=4 time=2572..?
+       72  setp mask=80 val=0 oe=0 q=0  state read bit 1 set                     dl=0 since=5 due=5 time=2576..?
+    pc 72: event p7:set=z (read bit 1: SCL released) has gap 5 slots, declared 7
+    interpreter (6 runs): fails: slot 1442 pc 72: read bit 1: SCL released gap 5, declared 7
+
+PLANTED i2c2 target, set-up 6 slots against a declared 7 REJECTED  entries  7029  events  6035
+    pc 50: event p7:set=z (write: the host says NACK, SCL released) has gap 10..? slots, declared 11..?
+    path (2607 instructions from pc 0, last 14 shown):
+       40  shi pin6 msb                 state write bit 7: SCL high              dl=0 since=1 due=1 time=2593..?
+       41  waitp pin7==0 fail=41        state write bit 7 sampled                dl=0 since=1 due=1 time=2594..?
+       42  jnz 39                       state write bit 7: SCL low               dl=0 since=1 due=1 time=2595..?
+       39  waitp pin7==1 fail=39        state write bit 7: SCL low               dl=0 since=1..2 due=1..2 time=2596..?
+       40  shi pin6 msb                 state write bit 8: SCL high              dl=0 since=1 due=1 time=2597..?
+       41  waitp pin7==0 fail=41        state write bit 8 sampled                dl=0 since=1 due=1 time=2598..?
+       42  jnz 39                       state write bit 8: SCL low               dl=0 since=1 due=1 time=2599..?
+       43  setp mask=80 val=0 oe=1 q=0  state write bit 8: SCL low               dl=0 since=2 due=2 time=2600..?
+       44  out tag=0 acc                state write: stretching, waiting for the dl=0 since=1 due=1 time=2601..?
+       45  in                           state write: stretching, waiting for the dl=0 since=2 due=2 time=2602..?
+       46  skne 0x00                    state write: stretching, waiting for the dl=0 since=3..? due=3..? time=2603..?
+       48  ldd 4                        state write: stretching, waiting for the dl=0 since=4..? due=4..? time=2604..?
+       49  waitd                        state write: stretching, waiting for the dl=4 since=5..? due=9..? time=2605..?
+       50  setp mask=80 val=0 oe=0 q=0  state write: stretching, waiting for the dl=0 since=10..? due=10..? time=2610..?
+    pc 50: event p7:set=z (write: the host says NACK, SCL released) has gap 10..? slots, declared 11..?
+    pc 57: event p7:set=z (write ACK: SCL released) has gap 7 slots, declared 8
+    ... 6 violations in all
+    interpreter (6 runs): fails: slot 1443 pc 72: read bit 1: SCL released gap 7, declared 8
+
+planted: 24 bugs, 0 not rejected
+# elapsed 3.43 s, max rss 31156 kB
