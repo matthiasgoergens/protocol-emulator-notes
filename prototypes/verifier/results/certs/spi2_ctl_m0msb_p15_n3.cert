@@ -1,0 +1,131 @@
+# timing certificate
+# image spi2_ctl_m0msb_p15_n3 sha256 95085e73656e5d1ab89ecb401cb9dbf7140334da6512c7138b53590e7e465c45 (256 words, high byte first)
+# specification: spi controller mode 0 msb P=15 bytes=3, channel pins 1,2,3,4
+# verdict: PROVED; 325 table entries, 122 channel events checked
+# assumptions: kernel.ml A1-A5. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot
+# columns: pc, instruction, pins touched, specification state from -> to, slot of the event,
+#          gap since the previous channel event, declared gap, declared data (the level is that
+#          bit of that input byte: driven for a push-pull write, driven 0 or released for open drain)
+# deadlines: 0:0 1:1 2:1 3:9 4:4 5:5 6:1 7:6 8:3 9:5 10:1 11:6 12:3 13:5 14:1 15:6 16:3 17:5 18:1 19:6 20:3 21:5 22:1 23:6 24:3 25:5 26:1 27:6 28:3 29:5 30:1 31:6 32:3 33:5 34:1 35:6 36:6 37:5 38:1 39:6 40:3 41:5 42:1 43:6 44:3 45:5 46:1 47:6 48:3 49:5 50:1 51:6 52:3 53:5 54:1 55:6 56:3 57:5 58:1 59:6 60:3 61:5 62:1 63:6 64:3 65:5 66:1 67:6 68:6 69:5 70:1 71:6 72:3 73:5 74:1 75:6 76:3 77:5 78:1 79:6 80:3 81:5 82:1 83:6 84:3 85:5 86:1 87:6 88:3 89:5 90:1 91:6 92:3 93:5 94:1 95:6 96:3 97:5 98:1 99:6 100:8
+  0  setp mask=10 val=1 oe=1 q=0 p4:set=1                     0 -> 1   slot 0          gap 0         declared 0
+  1  setp mask=02 val=0 oe=1 q=0 p1:set=0                     1 -> 2   slot 1          gap 1         declared 1
+  2  setp mask=04 val=0 oe=1 q=0 p2:set=0                     2 -> 3   slot 2          gap 1         declared 1
+  5  setp mask=10 val=0 oe=1 q=0 p4:set=0                     3 -> 4   slot 11         gap 9         declared 9
+ 11  setp mask=04 val=0 oe=1 q=0 p2:set=0                     4 -> 5   slot 15         gap 4         declared 4
+ 15  setp mask=02 val=1 oe=1 q=0 p1:set=1                     5 -> 6   slot 20         gap 5         declared 5
+ 16  shi pin3 msb               p3:sample                    6 -> 7   slot 21         gap 1         declared 1
+ 19  setp mask=02 val=0 oe=1 q=0 p1:set=0                     7 -> 8   slot 27         gap 6         declared 6
+  9  setp mask=04 val=1 oe=1 q=0 p2:set=1                     8 -> 9   slot 30         gap 3         declared 3
+ 11  setp mask=04 val=0 oe=1 q=0 p2:set=0                     8 -> 9   slot 30         gap 3         declared 3
+ 15  setp mask=02 val=1 oe=1 q=0 p1:set=1                     9 -> 10  slot 35         gap 5         declared 5
+ 16  shi pin3 msb               p3:sample                   10 -> 11  slot 36         gap 1         declared 1
+ 19  setp mask=02 val=0 oe=1 q=0 p1:set=0                    11 -> 12  slot 42         gap 6         declared 6
+  9  setp mask=04 val=1 oe=1 q=0 p2:set=1                    12 -> 13  slot 45         gap 3         declared 3
+ 11  setp mask=04 val=0 oe=1 q=0 p2:set=0                    12 -> 13  slot 45         gap 3         declared 3
+ 15  setp mask=02 val=1 oe=1 q=0 p1:set=1                    13 -> 14  slot 50         gap 5         declared 5
+ 16  shi pin3 msb               p3:sample                   14 -> 15  slot 51         gap 1         declared 1
+ 19  setp mask=02 val=0 oe=1 q=0 p1:set=0                    15 -> 16  slot 57         gap 6         declared 6
+  9  setp mask=04 val=1 oe=1 q=0 p2:set=1                    16 -> 17  slot 60         gap 3         declared 3
+ 11  setp mask=04 val=0 oe=1 q=0 p2:set=0                    16 -> 17  slot 60         gap 3         declared 3
+ 15  setp mask=02 val=1 oe=1 q=0 p1:set=1                    17 -> 18  slot 65         gap 5         declared 5
+ 16  shi pin3 msb               p3:sample                   18 -> 19  slot 66         gap 1         declared 1
+ 19  setp mask=02 val=0 oe=1 q=0 p1:set=0                    19 -> 20  slot 72         gap 6         declared 6
+  9  setp mask=04 val=1 oe=1 q=0 p2:set=1                    20 -> 21  slot 75         gap 3         declared 3
+ 11  setp mask=04 val=0 oe=1 q=0 p2:set=0                    20 -> 21  slot 75         gap 3         declared 3
+ 15  setp mask=02 val=1 oe=1 q=0 p1:set=1                    21 -> 22  slot 80         gap 5         declared 5
+ 16  shi pin3 msb               p3:sample                   22 -> 23  slot 81         gap 1         declared 1
+ 19  setp mask=02 val=0 oe=1 q=0 p1:set=0                    23 -> 24  slot 87         gap 6         declared 6
+  9  setp mask=04 val=1 oe=1 q=0 p2:set=1                    24 -> 25  slot 90         gap 3         declared 3
+ 11  setp mask=04 val=0 oe=1 q=0 p2:set=0                    24 -> 25  slot 90         gap 3         declared 3
+ 15  setp mask=02 val=1 oe=1 q=0 p1:set=1                    25 -> 26  slot 95         gap 5         declared 5
+ 16  shi pin3 msb               p3:sample                   26 -> 27  slot 96         gap 1         declared 1
+ 19  setp mask=02 val=0 oe=1 q=0 p1:set=0                    27 -> 28  slot 102        gap 6         declared 6
+  9  setp mask=04 val=1 oe=1 q=0 p2:set=1                    28 -> 29  slot 105        gap 3         declared 3
+ 11  setp mask=04 val=0 oe=1 q=0 p2:set=0                    28 -> 29  slot 105        gap 3         declared 3
+ 15  setp mask=02 val=1 oe=1 q=0 p1:set=1                    29 -> 30  slot 110        gap 5         declared 5
+ 16  shi pin3 msb               p3:sample                   30 -> 31  slot 111        gap 1         declared 1
+ 19  setp mask=02 val=0 oe=1 q=0 p1:set=0                    31 -> 32  slot 117        gap 6         declared 6
+  9  setp mask=04 val=1 oe=1 q=0 p2:set=1                    32 -> 33  slot 120        gap 3         declared 3
+ 11  setp mask=04 val=0 oe=1 q=0 p2:set=0                    32 -> 33  slot 120        gap 3         declared 3
+ 15  setp mask=02 val=1 oe=1 q=0 p1:set=1                    33 -> 34  slot 125        gap 5         declared 5
+ 16  shi pin3 msb               p3:sample                   34 -> 35  slot 126        gap 1         declared 1
+ 19  setp mask=02 val=0 oe=1 q=0 p1:set=0                    35 -> 36  slot 132        gap 6         declared 6
+ 25  setp mask=04 val=1 oe=1 q=0 p2:set=1                    36 -> 37  slot 138        gap 6         declared 6
+ 31  setp mask=02 val=1 oe=1 q=0 p1:set=1                    37 -> 38  slot 143        gap 5         declared 5
+ 32  shi pin3 msb               p3:sample                   38 -> 39  slot 144        gap 1         declared 1
+ 35  setp mask=02 val=0 oe=1 q=0 p1:set=0                    39 -> 40  slot 150        gap 6         declared 6
+ 25  setp mask=04 val=1 oe=1 q=0 p2:set=1                    40 -> 41  slot 153        gap 3         declared 3
+ 27  setp mask=04 val=0 oe=1 q=0 p2:set=0                    40 -> 41  slot 153        gap 3         declared 3
+ 31  setp mask=02 val=1 oe=1 q=0 p1:set=1                    41 -> 42  slot 158        gap 5         declared 5
+ 32  shi pin3 msb               p3:sample                   42 -> 43  slot 159        gap 1         declared 1
+ 35  setp mask=02 val=0 oe=1 q=0 p1:set=0                    43 -> 44  slot 165        gap 6         declared 6
+ 25  setp mask=04 val=1 oe=1 q=0 p2:set=1                    44 -> 45  slot 168        gap 3         declared 3
+ 27  setp mask=04 val=0 oe=1 q=0 p2:set=0                    44 -> 45  slot 168        gap 3         declared 3
+ 31  setp mask=02 val=1 oe=1 q=0 p1:set=1                    45 -> 46  slot 173        gap 5         declared 5
+ 32  shi pin3 msb               p3:sample                   46 -> 47  slot 174        gap 1         declared 1
+ 35  setp mask=02 val=0 oe=1 q=0 p1:set=0                    47 -> 48  slot 180        gap 6         declared 6
+ 25  setp mask=04 val=1 oe=1 q=0 p2:set=1                    48 -> 49  slot 183        gap 3         declared 3
+ 27  setp mask=04 val=0 oe=1 q=0 p2:set=0                    48 -> 49  slot 183        gap 3         declared 3
+ 31  setp mask=02 val=1 oe=1 q=0 p1:set=1                    49 -> 50  slot 188        gap 5         declared 5
+ 32  shi pin3 msb               p3:sample                   50 -> 51  slot 189        gap 1         declared 1
+ 35  setp mask=02 val=0 oe=1 q=0 p1:set=0                    51 -> 52  slot 195        gap 6         declared 6
+ 25  setp mask=04 val=1 oe=1 q=0 p2:set=1                    52 -> 53  slot 198        gap 3         declared 3
+ 27  setp mask=04 val=0 oe=1 q=0 p2:set=0                    52 -> 53  slot 198        gap 3         declared 3
+ 31  setp mask=02 val=1 oe=1 q=0 p1:set=1                    53 -> 54  slot 203        gap 5         declared 5
+ 32  shi pin3 msb               p3:sample                   54 -> 55  slot 204        gap 1         declared 1
+ 35  setp mask=02 val=0 oe=1 q=0 p1:set=0                    55 -> 56  slot 210        gap 6         declared 6
+ 25  setp mask=04 val=1 oe=1 q=0 p2:set=1                    56 -> 57  slot 213        gap 3         declared 3
+ 27  setp mask=04 val=0 oe=1 q=0 p2:set=0                    56 -> 57  slot 213        gap 3         declared 3
+ 31  setp mask=02 val=1 oe=1 q=0 p1:set=1                    57 -> 58  slot 218        gap 5         declared 5
+ 32  shi pin3 msb               p3:sample                   58 -> 59  slot 219        gap 1         declared 1
+ 35  setp mask=02 val=0 oe=1 q=0 p1:set=0                    59 -> 60  slot 225        gap 6         declared 6
+ 25  setp mask=04 val=1 oe=1 q=0 p2:set=1                    60 -> 61  slot 228        gap 3         declared 3
+ 27  setp mask=04 val=0 oe=1 q=0 p2:set=0                    60 -> 61  slot 228        gap 3         declared 3
+ 31  setp mask=02 val=1 oe=1 q=0 p1:set=1                    61 -> 62  slot 233        gap 5         declared 5
+ 32  shi pin3 msb               p3:sample                   62 -> 63  slot 234        gap 1         declared 1
+ 35  setp mask=02 val=0 oe=1 q=0 p1:set=0                    63 -> 64  slot 240        gap 6         declared 6
+ 25  setp mask=04 val=1 oe=1 q=0 p2:set=1                    64 -> 65  slot 243        gap 3         declared 3
+ 27  setp mask=04 val=0 oe=1 q=0 p2:set=0                    64 -> 65  slot 243        gap 3         declared 3
+ 31  setp mask=02 val=1 oe=1 q=0 p1:set=1                    65 -> 66  slot 248        gap 5         declared 5
+ 32  shi pin3 msb               p3:sample                   66 -> 67  slot 249        gap 1         declared 1
+ 35  setp mask=02 val=0 oe=1 q=0 p1:set=0                    67 -> 68  slot 255        gap 6         declared 6
+ 43  setp mask=04 val=0 oe=1 q=0 p2:set=0                    68 -> 69  slot 261        gap 6         declared 6
+ 47  setp mask=02 val=1 oe=1 q=0 p1:set=1                    69 -> 70  slot 266        gap 5         declared 5
+ 48  shi pin3 msb               p3:sample                   70 -> 71  slot 267        gap 1         declared 1
+ 51  setp mask=02 val=0 oe=1 q=0 p1:set=0                    71 -> 72  slot 273        gap 6         declared 6
+ 41  setp mask=04 val=1 oe=1 q=0 p2:set=1                    72 -> 73  slot 276        gap 3         declared 3
+ 43  setp mask=04 val=0 oe=1 q=0 p2:set=0                    72 -> 73  slot 276        gap 3         declared 3
+ 47  setp mask=02 val=1 oe=1 q=0 p1:set=1                    73 -> 74  slot 281        gap 5         declared 5
+ 48  shi pin3 msb               p3:sample                   74 -> 75  slot 282        gap 1         declared 1
+ 51  setp mask=02 val=0 oe=1 q=0 p1:set=0                    75 -> 76  slot 288        gap 6         declared 6
+ 41  setp mask=04 val=1 oe=1 q=0 p2:set=1                    76 -> 77  slot 291        gap 3         declared 3
+ 43  setp mask=04 val=0 oe=1 q=0 p2:set=0                    76 -> 77  slot 291        gap 3         declared 3
+ 47  setp mask=02 val=1 oe=1 q=0 p1:set=1                    77 -> 78  slot 296        gap 5         declared 5
+ 48  shi pin3 msb               p3:sample                   78 -> 79  slot 297        gap 1         declared 1
+ 51  setp mask=02 val=0 oe=1 q=0 p1:set=0                    79 -> 80  slot 303        gap 6         declared 6
+ 41  setp mask=04 val=1 oe=1 q=0 p2:set=1                    80 -> 81  slot 306        gap 3         declared 3
+ 43  setp mask=04 val=0 oe=1 q=0 p2:set=0                    80 -> 81  slot 306        gap 3         declared 3
+ 47  setp mask=02 val=1 oe=1 q=0 p1:set=1                    81 -> 82  slot 311        gap 5         declared 5
+ 48  shi pin3 msb               p3:sample                   82 -> 83  slot 312        gap 1         declared 1
+ 51  setp mask=02 val=0 oe=1 q=0 p1:set=0                    83 -> 84  slot 318        gap 6         declared 6
+ 41  setp mask=04 val=1 oe=1 q=0 p2:set=1                    84 -> 85  slot 321        gap 3         declared 3
+ 43  setp mask=04 val=0 oe=1 q=0 p2:set=0                    84 -> 85  slot 321        gap 3         declared 3
+ 47  setp mask=02 val=1 oe=1 q=0 p1:set=1                    85 -> 86  slot 326        gap 5         declared 5
+ 48  shi pin3 msb               p3:sample                   86 -> 87  slot 327        gap 1         declared 1
+ 51  setp mask=02 val=0 oe=1 q=0 p1:set=0                    87 -> 88  slot 333        gap 6         declared 6
+ 41  setp mask=04 val=1 oe=1 q=0 p2:set=1                    88 -> 89  slot 336        gap 3         declared 3
+ 43  setp mask=04 val=0 oe=1 q=0 p2:set=0                    88 -> 89  slot 336        gap 3         declared 3
+ 47  setp mask=02 val=1 oe=1 q=0 p1:set=1                    89 -> 90  slot 341        gap 5         declared 5
+ 48  shi pin3 msb               p3:sample                   90 -> 91  slot 342        gap 1         declared 1
+ 51  setp mask=02 val=0 oe=1 q=0 p1:set=0                    91 -> 92  slot 348        gap 6         declared 6
+ 41  setp mask=04 val=1 oe=1 q=0 p2:set=1                    92 -> 93  slot 351        gap 3         declared 3
+ 43  setp mask=04 val=0 oe=1 q=0 p2:set=0                    92 -> 93  slot 351        gap 3         declared 3
+ 47  setp mask=02 val=1 oe=1 q=0 p1:set=1                    93 -> 94  slot 356        gap 5         declared 5
+ 48  shi pin3 msb               p3:sample                   94 -> 95  slot 357        gap 1         declared 1
+ 51  setp mask=02 val=0 oe=1 q=0 p1:set=0                    95 -> 96  slot 363        gap 6         declared 6
+ 41  setp mask=04 val=1 oe=1 q=0 p2:set=1                    96 -> 97  slot 366        gap 3         declared 3
+ 43  setp mask=04 val=0 oe=1 q=0 p2:set=0                    96 -> 97  slot 366        gap 3         declared 3
+ 47  setp mask=02 val=1 oe=1 q=0 p1:set=1                    97 -> 98  slot 371        gap 5         declared 5
+ 48  shi pin3 msb               p3:sample                   98 -> 99  slot 372        gap 1         declared 1
+ 51  setp mask=02 val=0 oe=1 q=0 p1:set=0                    99 -> 100 slot 378        gap 6         declared 6
+ 56  setp mask=10 val=1 oe=1 q=0 p4:set=1                   100 -> 101 slot 386        gap 8         declared 8

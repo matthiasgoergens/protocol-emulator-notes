@@ -1,0 +1,16 @@
+# command: ./_build/default/bin/roles.exe i2c
+# commit: 26a56d4bc9aea3e7b2415056ae5ce30f7e97199a (with uncommitted changes)
+# date: 2026-10-10T12:09:47+08:00
+== I2C controller in Fast-mode on the combined chip: thread 0 on uio[6] (SDA) and uio[7] (SCL),
+   the host's commands through HOSTIN, results through HOSTOUT; the register-file target of
+   peers.ml at 0x50 on the bus, stretching the clock at random; rise and fall 300 ns
+  programme: 143 words
+  the board is driven by the specification's pads
+  143 words loaded through the link
+  target saw: S A50w+ W10+ W55+ Waa+ P S A50w+ W10+ Sr A50r+ R55+ Raa+ Ra5- P
+  host read: tag1:00 tag1:00 tag1:00 tag1:00 tag3:00 tag1:00 tag1:00 tag1:00 tag0:55 tag0:aa tag0:a5 tag3:00
+  shortest SCL period on the bus: 170 clocks (352.9 kHz)
+  RTL and specification agree on every pad, every clock: true
+  HOSTOUT overflow seen: false
+I2C controller on the combined chip: PASS
+# elapsed 2.69 s, max rss 25264 kB

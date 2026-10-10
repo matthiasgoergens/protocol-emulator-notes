@@ -1,0 +1,15 @@
+# command: ./_build/default/bin/roles.exe spi
+# commit: 26a56d4bc9aea3e7b2415056ae5ce30f7e97199a (with uncommitted changes)
+# date: 2026-10-10T12:09:46+08:00
+== SPI controller on the combined chip: thread 0 in mode 0 msb first at 1 MHz (SCLK, MOSI, CS on
+   uo_out[0,1,3], MISO from ui_in[2]), thread 1 in mode 3 lsb first at 1.5 MHz (uo_out[4,5,7],
+   ui_in[6]), each against a peer target in its mode; received bytes to the host
+  programmes: 74 and 85 words
+  the board is driven by the specification's pads
+  159 words loaded through the link
+  thread 0: peer received 9f 00 00 00 (sent 9f 00 00 00); host read ff ef 40 18 (peer replied ff ef 40 18)
+  thread 1: peer received 0b 12 34 a5 5a (sent 0b 12 34 a5 5a); host read 3c c3 01 80 7e (peer replied 3c c3 01 80 7e)
+  RTL and specification agree on every pad, every clock: true
+  HOSTOUT overflow seen: false
+SPI controller on the combined chip: PASS
+# elapsed 0.44 s, max rss 21608 kB

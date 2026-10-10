@@ -74,11 +74,14 @@ let run ?(slots = 60_000) ?(stretch_max = 20_000) ~seed (cert : Kernel.certifica
                           match Random.State.int rng 10 with
                  | 0 | 1 | 2 | 3 | 4 -> 0 | 5 | 6 | 7 -> Random.State.int rng 40
                  | 8 -> Random.State.int rng 400 | _ -> Random.State.int rng stretch_max) } in
+  let clock = ref 0 in
+  let peer = match img.env with Peer { world; _ } -> world ~seed | _ -> (fun ~clock:_ ~pin_out:_ ~pin_oe:_ -> 0) in
   let pin_in_of () =
     let drv p = (st.pin_oe lsr p) land 1 = 1 and out p = (st.pin_out lsr p) land 1 in
     match img.env with
     | Pull_up -> List.fold_left (fun a p -> a lor ((if drv p then out p else 1) lsl p)) 0 [ 0; 1; 2; 3; 4; 5; 6; 7 ]
     | Random_inputs -> if seed mod 4 = 0 then 0 else Random.State.int rng 256
+    | Peer _ -> peer ~clock:!clock ~pin_out:st.pin_out ~pin_oe:st.pin_oe
     | I2c_slave { sda; scl } ->
       let master_scl = if drv scl then out scl else 1 in
       if master_scl = 1 && sl.prev_scl = 0 then sl.hold <- sl.stretch ();
@@ -89,6 +92,8 @@ let run ?(slots = 60_000) ?(stretch_max = 20_000) ~seed (cert : Kernel.certifica
       base lor (sda_v lsl sda) lor (scl_v lsl scl) in
   let random_io pin_in =
     match img.env with
+    | Peer { host = Some f; _ } ->
+      Isa2.io ~host_in:(f rng) ~host_in_valid:(Random.State.int rng 4 = 0) pin_in
     | Random_inputs ->
       Isa2.io ~host_in:(Random.State.int rng 256) ~host_in_valid:(Random.State.int rng 8 = 0)
         ~port_in:(Array.init 4 (fun _ -> Random.State.int rng 256))
@@ -102,7 +107,6 @@ let run ?(slots = 60_000) ?(stretch_max = 20_000) ~seed (cert : Kernel.certifica
   let slot = ref 0 in
   let halted_for = ref 0 in
   let max_deadline = List.fold_left (fun m tr -> match tr.Spec.gap.Interval.hi with Some x -> max m x | None -> m) 0 spec.transitions in
-  let clock = ref 0 in
   let stop = ref false in
   while not !stop && !slot < slots do
     let pin_in = pin_in_of () in

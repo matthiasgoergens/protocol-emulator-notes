@@ -42,3 +42,8 @@
  (name arith_equiv)
  (modules arith_equiv)
  (libraries hardcaml upe))
+
+(executable
+ (name roles)
+ (modules roles)
+ (libraries hardcaml chip seqv2 rolesfw))

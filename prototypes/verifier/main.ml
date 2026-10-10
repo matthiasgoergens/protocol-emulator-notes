@@ -23,6 +23,10 @@
 
 open Programmes
 
+(* the compiler sweep and planted bugs of programmes.ml, and ../protocol-roles's (roles_progs.ml) *)
+let sweep () = Programmes.sweep () @ Roles_progs.sweep ()
+let planted () = Programmes.planted () @ Roles_progs.planted ()
+
 type verdict = {
   img : image;
   res : Analyser.result;
@@ -134,6 +138,7 @@ let seeds_for img = match img.env with
          List.concat_map (fun n -> List.map (fun m -> 1000 + (64 * n) + m) (List.init (lm + 2) Fun.id @ [ 63 ]))
            (List.init releases (fun i -> i + 1)))
   | Random_inputs -> List.init 12 (fun i -> i + 1)
+  | Peer { seeds; _ } -> seeds
 
 (* run [img] on the interpreter with each seed: (all states covered, every run meets the spec,
    first message) *)

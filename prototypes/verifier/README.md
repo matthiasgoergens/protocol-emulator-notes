@@ -14,9 +14,9 @@ and the certificates on the RTL (section 8).
 
 | check | what | result |
 |---|---|---|
-| sweep | every programme the compiler emits in the sweep's parameter ranges (UART, SPI, I2C, UART from the host), plus the formal suite's deadline and watchdog programmes | **530 of 530 proved** |
+| sweep | every programme the compiler emits in the sweep's parameter ranges (UART, SPI, I2C, UART from the host), plus the formal suite's deadline and watchdog programmes; and the ISA v2 programmes of `../protocol-roles` (section 9) | **643 of 643 proved** (530 + 113) |
 | interpreter cross-check | each image run on `Isa2.Spec`; every measured state and event must lie in the certificate | 9,299 runs, 2,674,218 instruction entries and 441,297 channel events measured: **none outside the certificate**, no proved image with a failing run |
-| planted | 13 planted bugs, including SPI at period 8 (LDD wraps to 4095), I2C without WAITP, and two with the right timing and the wrong data | **13 of 13 rejected**, each with a path |
+| planted | 13 planted bugs, including SPI at period 8 (LDD wraps to 4095), I2C without WAITP, and two with the right timing and the wrong data; 13 more in `../protocol-roles`'s programmes (section 9) | **26 of 26 rejected**, each with a path |
 | mutants | every single-word mutant of five programmes, judged against interpreter runs | 1,220 mutants: 279 rejected with a failing run, 940 proved with every run meeting the specification, **0 proved with a failing run**, 1 rejected with no failing run (genuine, section 5) |
 | precision | correct programmes rejected | **0** of 1,042 correct programmes (530 sweep, 511 deterministic mutants, the balanced branch); 1 before the relational `due` (the balanced branch) |
 | random | random programmes against `Isa2.Spec` with random inputs | 3,000 programmes, 9,000 runs, 22,676,780 instruction entries: **0 outside the certificate** |
@@ -25,7 +25,7 @@ and the certificates on the RTL (section 8).
 | kernel proof | the kernel's one-instruction step against `Isa2`'s interpreter, by z3, for every instruction word (section 4) | **65,536 words x 8 key shapes: 524,288 queries, all unsatisfiable**; 8 of 8 planted step bugs give a counterexample |
 | RTL | certificates as SymbiYosys properties on the v2 core, every input free (section 8) | deadline programme, UART, SPI: **every property PROVED unbounded** (abc pdr); I2C with WAITP, a 3-byte UART, a 2-byte SPI: PROVED to a bound past every event's slot; every antecedent and final state reachable; **8 of 8 controls FAILED** |
 | compose | demo composition (UART, SPI, I2C, watchdog on four threads) and pin ownership | proved; planted pin clash rejected |
-| certificates | per-image certificates, ledger with SHA-256 of image and certificate | 530 images; `ledger-check` finds a matching certificate for every one |
+| certificates | per-image certificates, ledger with SHA-256 of image and certificate | 643 images; `ledger-check` finds a matching certificate for every one |
 
 ## 1. What it proves
 
@@ -412,11 +412,43 @@ own fetch path is trusted to present the pc it executes next (the lockstep test 
 proof of `../formal` cover it). The first event is checked from the first clock after a single
 clear clock with the boot pc 0.
 
+## 9. The programmes of ../protocol-roles
+
+(2026-10-10; `roles_progs.ml`.) `../protocol-roles` adds ISA v2 programmes for the standard
+settings of UART, SPI and I2C and for the target roles; their images are Fw's output (already
+ISA v2, no translation). `roles_progs.ml` writes each specification from the closed forms that
+`../protocol-roles/fw.ml` states in its comments, restated there rather than imported, and
+adds the images to the sweep (so to the certificates and the ledger) and to the planted bugs.
+The cross-check gained one environment, `Peer`: a device model of `../protocol-roles/peers.ml`
+on the pins (a UART transmitter at the nominal rate, at random phases, or noise; an SPI target;
+an I2C target; an I2C controller; an SPI controller), and optionally a generator of host bytes (commands for the I2C
+controller, answers for the I2C target).
+
+| programmes | images | result | planted |
+|---|---|---|---|
+| UART transmit (five bytes, one byte, from the host) and receive, at 12 rates from 9600 baud to 3 Mbaud | 48 | **48 proved**; data levels declared for the constant bytes | one bit's wait a slot short; msb first; one receive sample a slot late: **3 rejected** |
+| SPI controller, modes 0-3, msb and lsb first, P = 8 or 10, 15, 150 slots, 1 and 3 bytes; cross-checked against the peer target with random MISO delays | 48 | **48 proved**; every edge, MOSI write, MISO sample and CS edge at its slot; MOSI's value not declared (SETP after a branch on an accumulator the analysis has lost) | MISO sampled after the trailing edge; the MOSI = 0 path a slot short; mode 1 firmware against the mode 0 specification: **3 rejected** |
+| I2C controller (host commands), Standard and Fast timing, stretch limits 7, 200, 4,095; cross-checked against the peer target stretching at random and a host sending mostly commands | 6 | **6 proved**; one automaton for the command loop: exact gaps within each SCL clock, lower bounds where the host's IN may wait | the ACK read while SCL is low; no wait for SCL high; SCL low 19 slots against 25: **3 rejected** |
+| I2C target at 0x50, Standard (set-up 19) and Fast (set-up 6 and 1); cross-checked against the peer controller running random transactions and a random host | 3 | **3 proved**; polls are expiries and observations with no deadline, every response after an observation has its exact gap | a read's first bit a slot late; set-up 6 against a declared 7: **2 rejected** |
+| SPI target, modes 0-3, msb and lsb first; cross-checked against the peer controller running random transactions at random speeds | 8 | **8 proved**; polls unbounded, responses exact, "at least" after the IN that follows a WAITC on the host (A1) | mode 1 firmware against the mode 0 specification; MOSI sampled after the trailing edge: **2 rejected** |
+
+A note on A1 from the SPI target: it takes the host's next byte with IN right after WAITC has seen
+one ready. On the chip that IN cannot wait unless another thread reads HOSTIN in between; under A1
+the input may change on any slot, so the specification states "at least" for the gaps across it,
+not the exact counts of the firmware's comment. The first specification said "exactly" and the
+kernel rejected it with the path through the IN.
+
+The UART receiver's specification is the first here with cycles and unbounded waits: polling
+the line is an expiry event each slot, accepted in a state with no deadline; the samples then
+follow at exact gaps from the slot the start edge was seen. Its certificate is about 18,000
+entries.
+
 ## Files
 
 `kernel.ml` (trusted step, generic over a value domain, and check), `analyser.ml` (fixpoint),
 `spec.ml` (specifications), `interval.ml` (intervals, adapted from MarcosAsh), `programmes.ml`
 (images, specifications, planted bugs, precision cases), `sim.ml` (interpreter cross-check),
 `sha256.ml`, `kernel_proof.ml` and `kernel_z3.sh` (the step against `Isa2` by z3), `rtl.ml` and
-`rtl/run_rtl.sh` (certificates on the RTL), `main.ml` (commands), `run_all.sh`. `isa2.ml`,
-`compat.ml`, `isa.ml`, `compiler.ml` and `smt.ml` are links to the prototypes' own files.
+`rtl/run_rtl.sh` (certificates on the RTL), `main.ml` (commands), `run_all.sh`,
+`roles_progs.ml` (section 9). `isa2.ml`, `compat.ml`, `isa.ml`, `compiler.ml`, `smt.ml`,
+`asm.ml`, `fw.ml` and `peers.ml` are links to the prototypes' own files.

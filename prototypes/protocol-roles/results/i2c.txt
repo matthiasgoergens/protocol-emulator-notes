@@ -1,0 +1,69 @@
+# command: ./_build/default/main.exe i2c
+# commit: 538bc41945be70d26c6754ea2bb483813af7d103 (with uncommitted changes)
+# date: 2026-10-10T11:57:37+08:00
+== Task 3: I2C controller, Standard-mode and Fast-mode, 60 MHz core clock
+Transactions: write 0x55 0xAA to registers 0x10..0x11 of the target at 0x50; STOP; then set the
+pointer, repeated START, read 3 bytes (ACK, ACK, NACK), STOP. The target acknowledges, answers,
+holds SDA until 4 clocks after SCL falls; one run in each corner without clock stretching, one
+with it (each fall held 0..400 clocks at random).
+
+-- Standard-mode (limits from NXP UM10204 rev. 7.0, table 10); slots: low 76, high 74, hd_dat 5, hd_sta 66, su_sta 71, su_sto 61, buf 86, sample at 37
+  parameter                  limit        tr0   tf0   tr60  tf0   tr0   tf18  tr60  tf18    worst   ok
+  fSCL (Hz)                  <=   100000      99338      90361      99338      90361      99338 ok
+  tLOW (ns)                  >=     4700       5067       5067       4767       4767       4767 ok
+  tHIGH (ns)                 >=     4000       5000       5000       5000       5000       5000 ok
+  tHD;STA (ns)               >=     4000       4400       4400       4100       4100       4100 ok
+  tSU;STA (ns)               >=     4700       4800       4800       4800       4800       4800 ok
+  tSU;DAT (ns)               >=      250       4733       3733       4433       3733       3733 ok
+  tHD;DAT (ns)               >=        0        333        333         33         33         33 ok
+  tVD;DAT, tVD;ACK (ns)      <=     3450        333       1333        333       1033       1333 ok
+  tSU;STO (ns)               >=     4000       4133       4133       4133       4133       4133 ok
+  tBUF (ns)                  >=     4700       5933       4933       5933       4933       4933 ok
+  corner tr=0 tf=0 clocks: 3 STARTs (1 repeated), 2 STOPs; data ok; lockstep 0, 0 clocks differ; with stretching: tLOW >= 5067, tHIGH >= 4967 ns
+  corner tr=60 tf=0 clocks: 3 STARTs (1 repeated), 2 STOPs; data ok; lockstep 0, 0 clocks differ; with stretching: tLOW >= 5067, tHIGH >= 4950 ns
+  corner tr=0 tf=18 clocks: 3 STARTs (1 repeated), 2 STOPs; data ok; lockstep 0, 0 clocks differ; with stretching: tLOW >= 4767, tHIGH >= 4950 ns
+  corner tr=60 tf=18 clocks: 3 STARTs (1 repeated), 2 STOPs; data ok; lockstep 0, 0 clocks differ; with stretching: tLOW >= 4767, tHIGH >= 4950 ns
+  target saw: S A50w+ W10+ W55+ Waa+ P S A50w+ W10+ Sr A50r+ R55+ Raa+ Ra5- P
+  host got: tag1:00 tag1:00 tag1:00 tag1:00 tag3:00 tag1:00 tag1:00 tag1:00 tag0:55 tag0:aa tag0:a5 tag3:00
+  page: 147 words
+
+-- Fast-mode (limits from NXP UM10204 rev. 7.0, table 10); slots: low 25, high 12, hd_dat 5, hd_sta 15, su_sta 10, su_sto 10, buf 25, sample at 6
+  parameter                  limit        tr0   tf0   tr18  tf0   tr0   tf18  tr18  tf18    worst   ok
+  fSCL (Hz)                  <=   400000     394737     357143     394737     357143     394737 ok
+  tLOW (ns)                  >=     1300       1667       1667       1367       1367       1367 ok
+  tHIGH (ns)                 >=      600        867        833        867        833        833 ok
+  tHD;STA (ns)               >=      600       1000       1000        700        700        700 ok
+  tSU;STA (ns)               >=      600        733        700        733        700        700 ok
+  tSU;DAT (ns)               >=      100       1333       1033       1033       1033       1033 ok
+  tHD;DAT (ns)               >=        0        333        333         33         33         33 ok
+  tVD;DAT, tVD;ACK (ns)      <=      900        333        633        333        333        633 ok
+  tSU;STO (ns)               >=      600        733        700        733        700        700 ok
+  tBUF (ns)                  >=     1300       1867       1567       1867       1567       1567 ok
+  corner tr=0 tf=0 clocks: 3 STARTs (1 repeated), 2 STOPs; data ok; lockstep 0, 0 clocks differ; with stretching: tLOW >= 1667, tHIGH >= 817 ns
+  corner tr=18 tf=0 clocks: 3 STARTs (1 repeated), 2 STOPs; data ok; lockstep 0, 0 clocks differ; with stretching: tLOW >= 1667, tHIGH >= 817 ns
+  corner tr=0 tf=18 clocks: 3 STARTs (1 repeated), 2 STOPs; data ok; lockstep 0, 0 clocks differ; with stretching: tLOW >= 1367, tHIGH >= 817 ns
+  corner tr=18 tf=18 clocks: 3 STARTs (1 repeated), 2 STOPs; data ok; lockstep 0, 0 clocks differ; with stretching: tLOW >= 1367, tHIGH >= 817 ns
+  target saw: S A50w+ W10+ W55+ Waa+ P S A50w+ W10+ Sr A50r+ R55+ Raa+ Ra5- P
+  host got: tag1:00 tag1:00 tag1:00 tag1:00 tag3:00 tag1:00 tag1:00 tag1:00 tag0:55 tag0:aa tag0:a5 tag3:00
+  page: 143 words
+
+Each value is the least over every occurrence in the run (the greatest for fSCL and tVD), in ns;
+"worst" is over the four corners of the rise time tr and fall time tf (clocks: 0 or the
+specification's maximum, 1000/300 ns Standard, 300/300 ns Fast).
+
+Controls (each must fail the check named):
+  Fast-mode with low = 19 slots: tLOW 967 ns < 1300                                    CAUGHT
+  Fast-mode with high = 8 slots: fSCL 441176 Hz > 400 kHz                              CAUGHT
+  Fast-mode with su_sto = 5 slots: tSU;STO 400 ns < 600                                CAUGHT
+  Fast-mode with hd_sta = 7 slots: tHD;STA 467 ns < 600                                CAUGHT
+  Fast-mode with SDA changed 22 slots after SCL low: tSU;DAT -100 ns < 100 or tVD 1767 > 900 CAUGHT
+  no target at 0x51: NACKs reported (host tag1:01 tag1:01 tag3:00), STOP sent          CAUGHT
+  target NACKs from its third data byte on (host tag1:00 tag1:00 tag1:00 tag1:01 tag1:01 tag3:00) CAUGHT
+  target holds SCL for ever, stretch limit 200 slots: timeout reported (host tag1:00 tag2:00 tag2:00 tag2:00), SDA released CAUGHT
+  ACK read while SCL is low, target's ACK 50 clocks (833 ns, within tVD;ACK) after SCL falls: NACK seen (host tag1:01 tag1:01 tag1:01 tag1:01 tag3:00 tag1:01 tag1:01 tag1:01 tag0:68 tag0:ff tag0:ff tag3:00) CAUGHT
+  no wait for SCL high, target stretching 150 clocks: tHIGH 100 ns < 600 or data wrong CAUGHT
+  (not a control) slow host, a command every 2,000 clocks: data ok, tLOW >= 1667 ns, fSCL <= 394737 Hz
+  lockstep: RTL mutant "a wait times out at dl = 1" (2080 clocks differ)               CAUGHT
+
+I2C controller: PASS
+# elapsed 7.78 s, max rss 345720 kB

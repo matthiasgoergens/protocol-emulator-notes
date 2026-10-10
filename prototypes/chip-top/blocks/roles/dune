@@ -1,0 +1,6 @@
+; ../../../protocol-roles: the firmware generators (fw.ml, asm.ml) and the peer models (peers.ml),
+; unchanged (symlinks).
+(library
+ (name rolesfw)
+ (wrapped false)
+ (libraries seqv2))

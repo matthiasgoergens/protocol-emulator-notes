@@ -1,0 +1,12 @@
+; Protocol modes and roles on ISA v2 (README.md). isa2.ml, sequencer2.ml and harness2.ml are links
+; to ../sequencer-v2's own files, unchanged.
+(library
+ (name roles)
+ (wrapped false)
+ (modules isa2 sequencer2 harness2 asm fw peers bench)
+ (libraries hardcaml))
+
+(executable
+ (name main)
+ (modules t_uart t_spi t_i2c t_i2c_target t_spi_target main)
+ (libraries hardcaml roles unix))

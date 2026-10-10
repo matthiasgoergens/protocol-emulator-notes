@@ -1,0 +1,51 @@
+# command: ./_build/default/main.exe i2c-target
+# commit: 538bc41945be70d26c6754ea2bb483813af7d103 (with uncommitted changes)
+# date: 2026-10-10T11:57:45+08:00
+== Task 4: I2C target at address 0x50, Standard-mode and Fast-mode, 60 MHz core clock
+The controller (peers.ml) writes 0x10 0x55, reads three bytes (ACK, ACK, NACK), then writes to
+0x52, which the target must not acknowledge. The host answers ACK to each byte written and
+supplies the three bytes read, all queued at the start (so the stretches are short), or only
+50 us after the target asks (so it holds SCL low for that long).
+Page: 95 words.
+
+-- Standard-mode: the controller's SCL 300 clocks low, 300 high from seen high; target set-up 19 slots
+  tr   0 tf   0 clocks: all bytes, ACKs and host reports right; lockstep 0; target SDA: hold >= 83 ns, set-up >= 4467 ns (>= 250), valid <= 283 ns (<= 3450) where not stretched; SDA changes with SCL high 0; SCL pulled while high 0; 5 stretches, longest 100 clocks
+  tr  60 tf   0 clocks: all bytes, ACKs and host reports right; lockstep 0; target SDA: hold >= 83 ns, set-up >= 3867 ns (>= 250), valid <= 1133 ns (<= 3450) where not stretched; SDA changes with SCL high 0; SCL pulled while high 0; 5 stretches, longest 100 clocks
+  tr   0 tf  18 clocks: all bytes, ACKs and host reports right; lockstep 0; target SDA: hold >= 83 ns, set-up >= 3900 ns (>= 250), valid <= 617 ns (<= 3450) where not stretched; SDA changes with SCL high 0; SCL pulled while high 0; 5 stretches, longest 100 clocks
+  tr  60 tf  18 clocks: all bytes, ACKs and host reports right; lockstep 0; target SDA: hold >= 83 ns, set-up >= 3567 ns (>= 250), valid <= 1133 ns (<= 3450) where not stretched; SDA changes with SCL high 0; SCL pulled while high 0; 5 stretches, longest 100 clocks
+  host answering 50 us after each request, tr 0 tf 0: all right; the target stretched 5 times, the longest 3096 clocks (51.6 us); its set-up before releasing SCL >= 1333 ns; lockstep 0
+  host answering 50 us after each request, tr 60 tf 18: all right; the target stretched 5 times, the longest 3096 clocks (51.6 us); its set-up before releasing SCL >= 1033 ns; lockstep 0
+
+-- Fast-mode: the controller's SCL 80 clocks low, 70 high from seen high; target set-up 6 slots
+  tr   0 tf   0 clocks: all bytes, ACKs and host reports right; lockstep 0; target SDA: hold >= 83 ns, set-up >= 817 ns (>= 100), valid <= 283 ns (<= 900) where not stretched; SDA changes with SCL high 0; SCL pulled while high 0; 5 stretches, longest 48 clocks
+  tr  18 tf   0 clocks: all bytes, ACKs and host reports right; lockstep 0; target SDA: hold >= 83 ns, set-up >= 800 ns (>= 100), valid <= 433 ns (<= 900) where not stretched; SDA changes with SCL high 0; SCL pulled while high 0; 5 stretches, longest 48 clocks
+  tr   0 tf  18 clocks: all bytes, ACKs and host reports right; lockstep 0; target SDA: hold >= 83 ns, set-up >= 200 ns (>= 100), valid <= 617 ns (<= 900) where not stretched; SDA changes with SCL high 0; SCL pulled while high 0; 5 stretches, longest 48 clocks
+  tr  18 tf  18 clocks: all bytes, ACKs and host reports right; lockstep 0; target SDA: hold >= 83 ns, set-up >= 233 ns (>= 100), valid <= 617 ns (<= 900) where not stretched; SDA changes with SCL high 0; SCL pulled while high 0; 5 stretches, longest 48 clocks
+  host answering 50 us after each request, tr 0 tf 0: all right; the target stretched 5 times, the longest 3044 clocks (50.7 us); its set-up before releasing SCL >= 467 ns; lockstep 0
+  host answering 50 us after each request, tr 18 tf 18: all right; the target stretched 5 times, the longest 3044 clocks (50.7 us); its set-up before releasing SCL >= 167 ns; lockstep 0
+
+-- The fastest controller it follows (the Fast-mode script with every time scaled by k; tr = tf = 0):
+  (each speed run at 12 phases of the controller against the core clock; right = every run right)
+  k 1.00: SCL low 80 high 70 clocks (397 kHz): 12 of 12 right; target SDA valid <= 333 ns where not stretched
+  k 0.80: SCL low 64 high 56 clocks (496 kHz): 12 of 12 right; target SDA valid <= 333 ns where not stretched
+  k 0.60: SCL low 48 high 42 clocks (659 kHz): 12 of 12 right; target SDA valid <= 317 ns where not stretched
+  k 0.50: SCL low 40 high 35 clocks (789 kHz): 12 of 12 right; target SDA valid <= 300 ns where not stretched
+  k 0.40: SCL low 32 high 28 clocks (984 kHz): 12 of 12 right; target SDA valid <= 283 ns where not stretched
+  k 0.35: SCL low 28 high 25 clocks (1111 kHz): 12 of 12 right; target SDA valid <= 317 ns where not stretched
+  k 0.30: SCL low 24 high 21 clocks (1304 kHz): 12 of 12 right; target SDA valid <= 317 ns where not stretched
+  k 0.25: SCL low 20 high 18 clocks (1538 kHz): 12 of 12 right; target SDA valid <= 283 ns where not stretched
+  k 0.22: SCL low 18 high 15 clocks (1765 kHz): 12 of 12 right; target SDA valid <= 283 ns where not stretched
+  k 0.20: SCL low 16 high 14 clocks (1935 kHz): 0 of 12 right; target SDA valid <= 333 ns where not stretched
+  k 0.18: SCL low 14 high 13 clocks (2143 kHz): 0 of 12 right; target SDA valid <= 267 ns where not stretched
+  k 0.15: SCL low 12 high 11 clocks (2500 kHz): 0 of 12 right; target SDA valid <= 333 ns where not stretched
+  fastest with every run right (and every slower one too): 1765 kHz
+
+Controls (each must fail the check named):
+  the host NACKs the second byte written: the controller sees it (acks AANANN)           CAUGHT
+  addressed at 0x51: no ACK, nothing to the host but the STOP                            CAUGHT
+  set-up 1 slot against 6, 300 ns rise, host late, SDA rising: tSU;DAT -167 ns < 100 (6 slots: 167) CAUGHT
+  a controller without the 300 ns internal SDA hold (100 ns), 300 ns fall: the target sees a false STOP (wrong) CAUGHT
+  lockstep: RTL mutant "WAITD leaves at dl = 1" (40 clocks differ)                       CAUGHT
+
+I2C target: PASS
+# elapsed 5.75 s, max rss 616184 kB

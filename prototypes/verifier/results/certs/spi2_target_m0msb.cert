@@ -1,0 +1,109 @@
+# timing certificate
+# image spi2_target_m0msb sha256 59dce41922e78308139cd559260f53905e5d60416d67a61822062c2cc7e9b731 (256 words, high byte first)
+# specification: spi target mode 0 msb, channel pins 0,1,2,3
+# verdict: PROVED; 159 table entries, 119 channel events checked
+# assumptions: kernel.ml A1-A5. Slot s of thread t is clock 4s+t; q is the quarter-clock sub-slot
+# columns: pc, instruction, pins touched, specification state from -> to, slot of the event,
+#          gap since the previous channel event, declared gap, declared data (the level is that
+#          bit of that input byte: driven for a push-pull write, driven 0 or released for open drain)
+# deadlines: 0:0 5:1 6:1 7:1 8:1 9:3 11:1 12:1 13:1 14:3 16:1 17:1 18:1 19:3 21:1 22:1 23:1 24:3 26:1 27:1 28:1 29:3 31:1 32:1 33:1 34:3 36:1 37:1 38:1 39:3 41:1 43:1 44:3
+  0  setp mask=04 val=0 oe=0 q=0 p2:set=z                     0 -> 1   slot 0          gap 0         declared 0
+  1  waitp pin3==0 fail=1       p3:seen=0                    1 -> 2   slot 1..?       gap 1         declared 1..?
+  1  waitp pin3==0 fail=1       p3:timeout(0)                1 -> 1   slot 1..?       gap 1         declared 1..?
+  8  setp mask=04 val=1 oe=1 q=0 p2:set=1                     2 -> 3   slot 6..?       gap 5         declared 5..?
+  8  setp mask=04 val=1 oe=1 q=0 p2:set=1                     2 -> 3   slot 6..?       gap 5..?      declared 5..?
+ 10  setp mask=04 val=0 oe=1 q=0 p2:set=0                     2 -> 3   slot 6..?       gap 5..?      declared 5..?
+ 12  waitp pin0==1 fail=40      p0:seen=1                    3 -> 6   slot 8..?       gap 2         declared 1..?
+ 12  waitp pin0==1 fail=40      p0:timeout(1)                3 -> 4   slot 8..?       gap 2         declared 1..?
+ 13  shi pin1 msb               p1:sample                    6 -> 7   slot 9..?       gap 1         declared 1
+ 40  waitp pin3==0 fail=42      p3:seen=0                    4 -> 3   slot 9..?       gap 1         declared 1..?
+ 40  waitp pin3==0 fail=42      p3:timeout(0)                4 -> 5   slot 9..?       gap 1         declared 1..?
+ 14  waitp pin0==0 fail=14      p0:seen=0                    7 -> 9   slot 10..?      gap 1         declared 1
+ 14  waitp pin0==0 fail=14      p0:timeout(0)                7 -> 8   slot 10..?      gap 1         declared 1
+ 42  setp mask=04 val=0 oe=0 q=0 p2:set=z                     5 -> 1   slot 10..?      gap 1         declared 1
+ 14  waitp pin0==0 fail=14      p0:seen=0                    8 -> 9   slot 11..?      gap 1         declared 1
+ 14  waitp pin0==0 fail=14      p0:timeout(0)                8 -> 8   slot 11..?      gap 1         declared 1
+  1  waitp pin3==0 fail=1       p3:seen=0                    1 -> 2   slot 13..?      gap 1..3      declared 1..?
+  1  waitp pin3==0 fail=1       p3:timeout(0)                1 -> 1   slot 13..?      gap 1..3      declared 1..?
+ 17  setp mask=04 val=1 oe=1 q=0 p2:set=1                     9 -> 10  slot 13..?      gap 3         declared 3
+ 19  setp mask=04 val=0 oe=1 q=0 p2:set=0                     9 -> 10  slot 13..?      gap 3         declared 3
+ 21  waitp pin0==1 fail=21      p0:seen=1                   10 -> 11  slot 15..?      gap 1..2      declared 1..?
+ 21  waitp pin0==1 fail=21      p0:timeout(1)               10 -> 10  slot 15..?      gap 1..2      declared 1..?
+ 22  shi pin1 msb               p1:sample                   11 -> 12  slot 16..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   12 -> 14  slot 17..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               12 -> 13  slot 17..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   13 -> 14  slot 18..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               13 -> 13  slot 18..?      gap 1         declared 1
+ 17  setp mask=04 val=1 oe=1 q=0 p2:set=1                    14 -> 15  slot 20..?      gap 3         declared 3
+ 19  setp mask=04 val=0 oe=1 q=0 p2:set=0                    14 -> 15  slot 20..?      gap 3         declared 3
+ 21  waitp pin0==1 fail=21      p0:seen=1                   15 -> 16  slot 22..?      gap 1..2      declared 1..?
+ 21  waitp pin0==1 fail=21      p0:timeout(1)               15 -> 15  slot 22..?      gap 1..2      declared 1..?
+ 22  shi pin1 msb               p1:sample                   16 -> 17  slot 23..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   17 -> 19  slot 24..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               17 -> 18  slot 24..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   18 -> 19  slot 25..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               18 -> 18  slot 25..?      gap 1         declared 1
+ 17  setp mask=04 val=1 oe=1 q=0 p2:set=1                    19 -> 20  slot 27..?      gap 3         declared 3
+ 19  setp mask=04 val=0 oe=1 q=0 p2:set=0                    19 -> 20  slot 27..?      gap 3         declared 3
+ 21  waitp pin0==1 fail=21      p0:seen=1                   20 -> 21  slot 29..?      gap 1..2      declared 1..?
+ 21  waitp pin0==1 fail=21      p0:timeout(1)               20 -> 20  slot 29..?      gap 1..2      declared 1..?
+ 22  shi pin1 msb               p1:sample                   21 -> 22  slot 30..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   22 -> 24  slot 31..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               22 -> 23  slot 31..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   23 -> 24  slot 32..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               23 -> 23  slot 32..?      gap 1         declared 1
+ 17  setp mask=04 val=1 oe=1 q=0 p2:set=1                    24 -> 25  slot 34..?      gap 3         declared 3
+ 19  setp mask=04 val=0 oe=1 q=0 p2:set=0                    24 -> 25  slot 34..?      gap 3         declared 3
+ 21  waitp pin0==1 fail=21      p0:seen=1                   25 -> 26  slot 36..?      gap 1..2      declared 1..?
+ 21  waitp pin0==1 fail=21      p0:timeout(1)               25 -> 25  slot 36..?      gap 1..2      declared 1..?
+ 22  shi pin1 msb               p1:sample                   26 -> 27  slot 37..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   27 -> 29  slot 38..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               27 -> 28  slot 38..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   28 -> 29  slot 39..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               28 -> 28  slot 39..?      gap 1         declared 1
+ 17  setp mask=04 val=1 oe=1 q=0 p2:set=1                    29 -> 30  slot 41..?      gap 3         declared 3
+ 19  setp mask=04 val=0 oe=1 q=0 p2:set=0                    29 -> 30  slot 41..?      gap 3         declared 3
+ 21  waitp pin0==1 fail=21      p0:seen=1                   30 -> 31  slot 43..?      gap 1..2      declared 1..?
+ 21  waitp pin0==1 fail=21      p0:timeout(1)               30 -> 30  slot 43..?      gap 1..2      declared 1..?
+ 22  shi pin1 msb               p1:sample                   31 -> 32  slot 44..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   32 -> 34  slot 45..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               32 -> 33  slot 45..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   33 -> 34  slot 46..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               33 -> 33  slot 46..?      gap 1         declared 1
+ 17  setp mask=04 val=1 oe=1 q=0 p2:set=1                    34 -> 35  slot 48..?      gap 3         declared 3
+ 19  setp mask=04 val=0 oe=1 q=0 p2:set=0                    34 -> 35  slot 48..?      gap 3         declared 3
+ 21  waitp pin0==1 fail=21      p0:seen=1                   35 -> 36  slot 50..?      gap 1..2      declared 1..?
+ 21  waitp pin0==1 fail=21      p0:timeout(1)               35 -> 35  slot 50..?      gap 1..2      declared 1..?
+ 22  shi pin1 msb               p1:sample                   36 -> 37  slot 51..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   37 -> 39  slot 52..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               37 -> 38  slot 52..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:seen=0                   38 -> 39  slot 53..?      gap 1         declared 1
+ 23  waitp pin0==0 fail=23      p0:timeout(0)               38 -> 38  slot 53..?      gap 1         declared 1
+ 26  setp mask=04 val=1 oe=1 q=0 p2:set=1                    39 -> 40  slot 55..?      gap 3         declared 3
+ 28  setp mask=04 val=0 oe=1 q=0 p2:set=0                    39 -> 40  slot 55..?      gap 3         declared 3
+ 30  waitp pin0==1 fail=30      p0:seen=1                   40 -> 41  slot 57..?      gap 1..2      declared 1..?
+ 30  waitp pin0==1 fail=30      p0:timeout(1)               40 -> 40  slot 57..?      gap 1..2      declared 1..?
+ 31  shi pin1 msb               p1:sample                   41 -> 42  slot 58..?      gap 1         declared 1
+ 38  waitp pin0==0 fail=38      p0:seen=0                   42 -> 44  slot 63..?      gap 5         declared 5..?
+ 38  waitp pin0==0 fail=38      p0:seen=0                   42 -> 44  slot 63..?      gap 5..?      declared 5..?
+ 38  waitp pin0==0 fail=38      p0:timeout(0)               42 -> 43  slot 63..?      gap 5         declared 5..?
+ 38  waitp pin0==0 fail=38      p0:timeout(0)               42 -> 43  slot 63..?      gap 5..?      declared 5..?
+ 38  waitp pin0==0 fail=38      p0:seen=0                   43 -> 44  slot 64..?      gap 1         declared 1
+ 38  waitp pin0==0 fail=38      p0:timeout(0)               43 -> 43  slot 64..?      gap 1         declared 1
+  8  setp mask=04 val=1 oe=1 q=0 p2:set=1                    44 -> 3   slot 66..?      gap 3         declared 3
+ 10  setp mask=04 val=0 oe=1 q=0 p2:set=0                    44 -> 3   slot 66..?      gap 3         declared 3
+ 12  waitp pin0==1 fail=40      p0:seen=1                    3 -> 6   slot 68..?      gap 2         declared 1..?
+ 12  waitp pin0==1 fail=40      p0:timeout(1)                3 -> 4   slot 68..?      gap 2         declared 1..?
+ 13  shi pin1 msb               p1:sample                    6 -> 7   slot 69..?      gap 1         declared 1
+ 40  waitp pin3==0 fail=42      p3:seen=0                    4 -> 3   slot 69..?      gap 1         declared 1..?
+ 40  waitp pin3==0 fail=42      p3:timeout(0)                4 -> 5   slot 69..?      gap 1         declared 1..?
+ 14  waitp pin0==0 fail=14      p0:seen=0                    7 -> 9   slot 70..?      gap 1         declared 1
+ 14  waitp pin0==0 fail=14      p0:timeout(0)                7 -> 8   slot 70..?      gap 1         declared 1
+ 42  setp mask=04 val=0 oe=0 q=0 p2:set=z                     5 -> 1   slot 70..?      gap 1         declared 1
+ 14  waitp pin0==0 fail=14      p0:seen=0                    8 -> 9   slot 71..?      gap 1         declared 1
+ 14  waitp pin0==0 fail=14      p0:timeout(0)                8 -> 8   slot 71..?      gap 1         declared 1
+  1  waitp pin3==0 fail=1       p3:seen=0                    1 -> 2   slot 73..?      gap 1..3      declared 1..?
+  1  waitp pin3==0 fail=1       p3:timeout(0)                1 -> 1   slot 73..?      gap 1..3      declared 1..?
+  8  setp mask=04 val=1 oe=1 q=0 p2:set=1                     2 -> 3   slot 78..?      gap 5         declared 5..?
+  8  setp mask=04 val=1 oe=1 q=0 p2:set=1                     2 -> 3   slot 78..?      gap 5..?      declared 5..?
+ 10  setp mask=04 val=0 oe=1 q=0 p2:set=0                     2 -> 3   slot 78..?      gap 5..?      declared 5..?
