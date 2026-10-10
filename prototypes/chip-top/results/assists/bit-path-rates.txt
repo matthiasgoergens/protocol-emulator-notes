@@ -1,0 +1,12 @@
+# 2026-10-10T12:43:00+08:00; base commit 19acb29 with the uncommitted chip-top changes of this commit; ocaml 5.3.0, hardcaml v0.17
+# _build/default/bin/usb_chip.exe rates
+== headroom: the chip's bit path as a USB-style link to itself (one thread sends, one receives)
+   clocks per bit, Mbit/s: packets received whole with a good CRC, of 4 (64-byte payloads, a third 0xFF)
+    40 clocks ( 1.50 Mbit/s): 4 of 4; specification and RTL: 0 mismatching clocks
+    20 clocks ( 3.00 Mbit/s): 4 of 4; specification and RTL: 0 mismatching clocks
+    10 clocks ( 6.00 Mbit/s): 4 of 4; specification and RTL: 0 mismatching clocks
+     5 clocks (12.00 Mbit/s): 4 of 4; specification and RTL: 0 mismatching clocks
+     4 clocks (15.00 Mbit/s): 4 of 4; specification and RTL: 0 mismatching clocks
+     3 clocks (20.00 Mbit/s): 4 of 4; specification and RTL: 0 mismatching clocks
+     2 clocks (30.00 Mbit/s): 4 of 4; specification and RTL: 0 mismatching clocks
+     1 clocks (60.00 Mbit/s): 0 of 4; specification and RTL: 0 mismatching clocks

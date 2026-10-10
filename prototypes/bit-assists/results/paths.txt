@@ -1,0 +1,37 @@
+# command: _build/default/check.exe paths 1000000
+# base commit: 97aea18 (with this directory's uncommitted files)
+# ocaml 5.3.0, hardcaml v0.17; 2026-10-10T12:17:40+08:00
+== transmit serialiser and receive framer: RTL against model, every clock
+  seed 1: 1000000 clocks, 0 mismatching ok
+  seed 2: 1000000 clocks, 0 mismatching ok
+  seed 3: 1000000 clocks, 0 mismatching ok
+  seed 4: 1000000 clocks, 0 mismatching ok
+== against independent references, through the RTL
+  USB low speed: serialiser frame (sync to EOP, 40 clocks per symbol) = usb-ls fw_codec 100 of 100 ok
+  USB low speed: framer on that line gives the bytes after the sync; CRC fed after the PID 100 of 100 ok
+  USB: a packet after 0 to 14 bit times of idle J (decoded 1s) is received whole 75 of 75 ok
+  USB at 2 to 40 clocks per bit behind a sampler's timing: whole packets, CRC residue 60 of 60 ok
+  USB: CRC-16 over the framer's CRC feed of a data packet leaves the residue 0xB001 100 of 100 ok
+  10BASE-T: serialiser = eth_model Manchester, pair complementary, then 6 symbols TD+ high 100 of 100 ok
+  USB: a frame missing a stuff bit ends with the framer's error flag set         100 of 100 ok
+  10BASE-T: framer after the SFD gives the frame and FCS; CRC-32 residue 0xDEBB20E3 100 of 100 ok
+== planted faults in the two paths: each must be caught by the lockstep
+  tx_first_bit_msb           caught (seed 1; clock 5: tx a: model 0 rtl 1; tx b: model 1 rtl 0)  the first bit of a byte is its MSB even when LSB first is configured
+  tx_tail_skips_first        caught (seed 1; clock 9347: tx busy: model 1 rtl 0; tx active: model 1 rtl 0)  tail 1 lasts one symbol less than configured
+  tx_no_final_stuff          caught (seed 1; clock 70338: tx a: model 1 rtl 0; tx b: model 0 rtl 1; tx busy: model 1 rtl 0; tx active: model 1 rtl 0)  a stuff bit due after the last data bit is not sent
+  tx_pair_not_complement     caught (seed 1; clock 5: tx b: model 1 rtl 0)  line b repeats line a during data
+  tx_period_off_by_one       caught (seed 1; clock 33: tx a: model 1 rtl 0; tx b: model 0 rtl 1)  a symbol lasts period + 1 clocks
+  tx_fifo_full_accepts       caught (seed 1; clock 23: tx accept: model 0 rtl 1)  a push into a full FIFO overwrites the newest byte
+  rx_pattern_old_history     caught (seed 1; clock 594: frame start: model 1 rtl 0)  the start pattern is matched against the history before this bit
+  rx_no_half_duplex          caught (seed 1; clock 32634: frame start: model 0 rtl 1)  a frame starts on the pattern while the transmitter is active
+  rx_end_keeps_bit           caught (seed 1; clock 2912: rx bits: model 0 rtl 1; rx shift: model 153 rtl 50; rx frame bits: model 16 rtl 17)  the chain bit of the clock a frame ends is still packed
+  rx_start_keeps_fifo        caught (seed 1; clock 42971: rx count: model 0 rtl 1)  a frame start does not clear the FIFO
+  rx_skip_off_by_one         caught (seed 1; clock 126: crc valid: model 1 rtl 0)  the CRC feed skips one frame bit more than configured
+  rx_err_not_sticky          caught (seed 1; clock 165: rx err: model 1 rtl 0)  the error flag shows only the last chain bit's error
+  rx_msb_ignored             caught (seed 1; clock 127: rx shift: model 1 rtl 128)  bytes are packed LSB first even when MSB first is configured
+  rx_history_kept_at_end     caught (seed 1; clock 236: rx history count: model 0 rtl 8)  the end of a frame does not restart the history count
+  rx_destuff_outside_frame   caught (seed 1; clock 3199: rx chain valid: model 1 rtl 0; rx chain error: model 0 rtl 1)  the destuffer drops bits outside a frame too
+  rx_end_undelayed           caught (seed 1; clock 235: rx in frame: model 1 rtl 0; rx done: model 0 rtl 1; rx history count: model 8 rtl 0)  the end conditions are not delayed to the sampler's bits
+16 of 16 planted faults caught
+the independent references alone fail with 12 of the 16 faults: tx_first_bit_msb, tx_tail_skips_first, tx_no_final_stuff, tx_pair_not_complement, tx_period_off_by_one, tx_fifo_full_accepts, rx_pattern_old_history, rx_skip_off_by_one, rx_err_not_sticky, rx_history_kept_at_end, rx_destuff_outside_frame, rx_end_undelayed
+paths: PASS (49 s)

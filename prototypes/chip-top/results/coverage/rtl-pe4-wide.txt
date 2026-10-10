@@ -1,14 +1,18 @@
-layout 1|1|1|1, store 1024 words: 400 trials x 12000 clocks, 4800000 clocks compared, 0 trials with mismatches (289 s)
-  coverage (events counted on the specification): CRC check true 687055, HOSTIN push 20173, HOSTOUT entry arrived between tag and data 27, IN from host 7572, OUT to host 68660, RECV from a segment 6267, SEND to a segment 335173, STB 32526, a flag input set 1942320, host feed write 4972, host feed write waited for a SEND 3816, matcher hit 151195, op 0 455324, op 1 70269, op 2 31747, op 3 34189, op 4 39139, op 5 37104, op 6 39639, op 7 56526, op 8 19593, op 9 109339, op A 48366, op B 68660, op C 553120, op D 690957, op E 155842, op F 145779, recovered bit 134648, restart 476, sampler word 1688, streamer busy 342005, tap captured 4313
+layout 1|1|1|1, store 1024 words: 400 trials x 12000 clocks, 4800000 clocks compared, 0 trials with mismatches (367 s)
+  coverage (events counted on the specification): CRC check true 572637, HOSTIN push 18585, HOSTOUT entry arrived between tag and data 67, IN from host 6479, OUT to host 62010, RECV from a segment 8221, RECV from the framer 3716, SEND to a segment 167896, SEND to the serialiser 13475, STB 26211, a flag input set 2163550, frame end 1126, frame start 1311, host feed write 4805, host feed write waited for a SEND 756, matcher hit 259284, op 0 368005, op 1 50972, op 2 22885, op 3 28084, op 4 37207, op 5 27519, op 6 168275, op 7 44917, op 8 17184, op 9 84791, op A 40601, op B 62010, op C 445184, op D 786805, op E 119934, op F 119892, recovered bit 184091, restart 418, sampler word 1763, serialiser busy 821463, streamer busy 322032, tap captured 3291
 three-valued fixpoint from reset: 39 rounds
-RTL register coverage, layout 1|1|1|1: 4800000 clocks; register bits that changed 2519 of 2696 (93.4 %), rose and fell 2519; provably constant 152; changed of the rest 2519 of 2544 (99.0 %); constant yet changed (must be 0): 0
+RTL register coverage, layout 1|1|1|1: 4800000 clocks; register bits that changed 2733 of 2929 (93.3 %), rose and fell 2733; provably constant 170; changed of the rest 2733 of 2759 (99.1 %); constant yet changed (must be 0): 0
   CRC              32 of    32 changed (100.0 %),    32 rose and fell,    0 provably constant,    0 other never changed
   NCO              32 of    32 changed (100.0 %),    32 rose and fell,    0 provably constant,    0 other never changed
   PE array        620 of   620 changed (100.0 %),   620 rose and fell,    0 provably constant,    0 other never changed
-  edge sampler     24 of    24 changed (100.0 %),    24 rose and fell,    0 provably constant,    0 other never changed
-  glue           1034 of  1181 changed ( 87.6 %),  1034 rose and fell,  147 provably constant,    0 other never changed
+  edge sampler     25 of    25 changed (100.0 %),    25 rose and fell,    0 provably constant,    0 other never changed
+  glue           1120 of  1285 changed ( 87.2 %),  1120 rose and fell,  165 provably constant,    0 other never changed
+  linecode.ml       6 of     6 changed (100.0 %),     6 rose and fell,    0 provably constant,    0 other never changed
   matcher         123 of   149 changed ( 82.6 %),   123 rose and fell,    4 provably constant,   22 other never changed
+  rxpath.ml        60 of    60 changed (100.0 %),    60 rose and fell,    0 provably constant,    0 other never changed
   sampler         140 of   142 changed ( 98.6 %),   140 rose and fell,    0 provably constant,    2 other never changed
   sequencer       387 of   387 changed (100.0 %),   387 rose and fell,    0 provably constant,    0 other never changed
   streamer        127 of   129 changed ( 98.4 %),   127 rose and fell,    1 provably constant,    1 other never changed
-never-changed bits listed in never-pe4.txt
+  stuff.ml         10 of    10 changed (100.0 %),    10 rose and fell,    0 provably constant,    0 other never changed
+  txpath.ml        51 of    52 changed ( 98.1 %),    51 rose and fell,    0 provably constant,    1 other never changed
+never-changed bits listed in /var/tmp/chip-assists/suite-full3/never-pe4.txt

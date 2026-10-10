@@ -5,7 +5,9 @@
    - the PE array: Upe.Model (../unified-pe/verify/model.ml);
    - the streamer and the sampler: Pstream.Model and Psample.Model;
    - the edge-tracking sampler and the CRC unit: the models in Eth10.Edge_sampler and
-     Eth10.Crc_unit; the matcher: the closed form of Eth10.Model.
+     Eth10.Crc_unit; the matcher: the closed form of Eth10.Model;
+   - the bit-path assists: Txpath (the transmit serialiser) and Rxpath (the receive framer) of
+     ../bit-assists, built from its stuff tracker and line coder.
    New here, because nothing specified them before: the glue (host link, its FIFOs, the register
    file, the pin map and pad sources, the flag selects, the port holds between the threads and
    the array, the memories) and the pin NCO, which has RTL (../multiphase/nco.ml) but no model.
@@ -29,6 +31,8 @@ module PM = Psample.Model
 module ES = Eth10.Edge_sampler
 module CRC = Eth10.Crc_unit
 module MM = Eth10.Model
+module TX = Txpath
+module RX = Rxpath
 
 type config = { layout : US.layout; prog_words : int }
 
@@ -76,6 +80,8 @@ type t = {
   mutable mtime : int;
   mutable nco_acc : int;
   mutable nco_out : int;
+  mutable tx : TX.st;
+  mutable rx : RX.st;
   (* host link *)
   mutable prev_s : int; mutable prev_r : int;
   mutable nphase : int; mutable hi_nib : int;
@@ -132,6 +138,32 @@ let matcher_now t =
   let c = matcher_cfg t and x k = t.mhist.(k) in
   (MM.y_at c x t.mtime, MM.hit_at c x t.mtime)
 
+(* the bit-path assists' configurations *)
+let code_cfg v : Linecode.cfg = { mode = Linecode.mode_of_code (v land 3); invert = bit v 2 = 1; toggle_on = bit v 3 }
+let stuff_cfg v : Stuff.cfg = { run = v land 15; either = bit v 4 = 1; value = bit v 5 }
+
+let tx_cfg t : TX.cfg =
+  let r = t.regs in
+  let tail v : TX.tail = { len = v land 15; la = bit v 4; lb = bit v 5 } in
+  { period = r.(r_tx_per) lor ((r.(r_tx_per + 1) land 15) lsl 8); msb_first = bit r.(r_tx_code) 4 = 1;
+    stuff = stuff_cfg r.(r_tx_stuff); code = code_cfg r.(r_tx_code); tail1 = tail r.(r_tx_tail1); tail2 = tail r.(r_tx_tail2) }
+
+let rx_cfg t : RX.cfg =
+  let r = t.regs and c = t.regs.(r_bp_ctrl) in
+  { code = code_cfg r.(r_rx_code); stuff = stuff_cfg r.(r_rx_stuff); msb_first = bit r.(r_rx_code) 4 = 1;
+    pattern = r.(r_rx_pattern); pmask = r.(r_rx_pmask); start_on_pattern = bit c 7 = 1; half_duplex = bit c 4 = 1;
+    end_inactive = bit c 5 = 1; end_burst = bit c 6 = 1; skip = r.(r_rx_skip) }
+
+(* the MBX port that is the bit path's, if one is *)
+let bp_port t = let c = t.regs.(r_bp_ctrl) in if bit c 0 = 1 then Some ((c lsr 1) land 3) else None
+let crc_from_frame t = bit t.regs.(r_bp_ctrl) 3 = 1
+
+(* the edge sampler's active input, from this clock's pads *)
+let line_active t ~smp =
+  let lvl i = bit smp.(i) 3 in
+  let m = t.regs.(r_es_mode) and es_pad = t.regs.(r_es_pads) land 15 and act_pad = (t.regs.(r_es_pads) lsr 4) land 15 in
+  bit m 3 = 0 || lvl act_pad = 1 || (bit m 4 = 1 && lvl es_pad = 1)
+
 let boot t = Array.init 4 (fun th -> ((t.regs.(r_boot_page) lsr (2 * th)) land 3, t.regs.(r_boot_pc th)))
 
 (* coverage of chip-level events, for the lockstep's report (not part of the behaviour) *)
@@ -156,7 +188,7 @@ let create ?(cfg = default_config) () =
       str = SM.create { period = 1; width = 1; od_mask = 0; idle_out = 0; idle_oe = 0 };
       smp = PM.create { clocked = false; period = 1; width = 1; trig_pin = 0; trig_val = 0; offset = 0; frame_len = 0 };
       es = ES.init (); es_out = es_zero; es_last = 0; crc = 0; chain = Array.make 37 0; mhist = Array.make 1024 0;
-      mtime = 0; nco_acc = 0; nco_out = 0; prev_s = 0; prev_r = 0; nphase = 0; hi_nib = 0; pst = Idle;
+      mtime = 0; nco_acc = 0; nco_out = 0; tx = TX.init (); rx = RX.init (); prev_s = 0; prev_r = 0; nphase = 0; hi_nib = 0; pst = Idle;
       op = 0; tgt = 0; addr = 0; remaining = 0; rbuf = 0; rphase = 0; pend_action = None;
       pend_fetch = None; prog_lo = 0; str_lo = 0; str_hi = 0; hout_lat = false; smp_lat = false; last_fetch = None }
   in
@@ -171,7 +203,7 @@ type outputs = { pad_nib : int array; uio_oe : int }
 
 let taps t = (UM.state t.pe).taps
 
-let source t (taps : US.tap array) src =
+let rec source t (taps : US.tap array) src =
   if src < 8 then ((t.seq.pin_sub lsr (4 * src)) land 15, bit t.seq.pin_oe src)
   else if src < 12 then (rep4 (bit t.str.out (src - 8)), bit t.str.oe (src - 8))
   else if src = src_nco_quarter then (t.nco_out land 15, 1)
@@ -180,6 +212,10 @@ let source t (taps : US.tap array) src =
   else if src >= 16 && src < 20 then (rep4 (Bool.to_int taps.(src - 16).tf), 1)
   else if src >= 20 && src < 24 then (rep4 (taps.(src - 20).td land 1), 1)
   else if src = src_es_bit then (rep4 (es_level t), 1)
+  else if src = src_tx_a || src = src_tx_b then begin
+    if t.tx.busy then (rep4 (if src = src_tx_a then t.tx.a else t.tx.b), 1)
+    else source t taps ((t.regs.(r_tx_idle) lsr (if src = src_tx_a then 0 else 4)) land 7)
+  end
   else (0, 1)
 
 let outputs t =
@@ -202,7 +238,10 @@ let outputs t =
   if t.prev_r = 1 then uio_oe := !uio_oe lor 0xF;
   { pad_nib; uio_oe = !uio_oe }
 
-let flags t (taps : US.tap array) =
+(* [tx_pend]: a SEND to the bit path's port is on its way (registered in the core) *)
+let tx_active t = TX.active t.tx || (match t.push_pend, bp_port t with Some (p, _), Some q -> p = q | _ -> false)
+
+let flags t (taps : US.tap array) ~line_act =
   let src s =
     if s < 4 then taps.(s).tf
     else if s < 8 then taps.(s - 4).tv
@@ -215,6 +254,13 @@ let flags t (taps : US.tap array) =
     else if s = fl_stream_full then SM.full t.str
     else if s = fl_sample_valid then not (Queue.is_empty t.smp.fifo)
     else if s = fl_nco then bit t.nco_out 0 = 1
+    else if s = fl_rx_done then RX.done_ t.rx
+    else if s = fl_rx_err then t.rx.err
+    else if s = fl_rx_avail then not (Queue.is_empty t.rx.fifo)
+    else if s = fl_tx_active then tx_active t
+    else if s = fl_line_active then line_act
+    else if s = fl_line_inactive then not line_act
+    else if s = fl_rx_in_frame then t.rx.in_frame
     else false
   in
   let v = ref 0 in
@@ -242,6 +288,9 @@ let read_reg t a =
   else if a >= r_crc_raw && a < r_crc_raw + 4 then (t.crc lsr (8 * (a - r_crc_raw))) land 0xFF
   else if a = r_match then (let y, hit = matcher_now t in y lor (Bool.to_int hit lsl 7))
   else if a = r_smp_overflows then t.smp.overflows land 0xFF
+  else if a = r_bp_status then
+    Bool.to_int t.rx.in_frame lor (Bool.to_int t.rx.err lsl 1) lor (Bool.to_int t.rx.ovf lsl 2)
+    lor (Queue.length t.rx.fifo lsl 3) lor (Bool.to_int t.tx.busy lsl 5) lor (Queue.length t.tx.fifo lsl 6)
   else 0
 
 (* the byte a fetch returns, and whether it pops the sampler *)
@@ -300,6 +349,7 @@ let reset_all t ~smp =
   Queue.clear t.hostin; Queue.clear t.hostout; t.out_pend <- None; t.push_pend <- None;
   Array.fill t.send_hi 0 4 false; Array.fill t.hold_st 0 4 0; Array.fill t.hold_w 0 4 0;
   t.es <- ES.init (); t.es_out <- es_zero; t.es_last <- 0; t.crc <- 0; t.mtime <- 0; t.nco_acc <- 0; t.nco_out <- 0;
+  t.tx <- TX.init (); t.rx <- RX.init ();
   t.prev_s <- bit smp.(pad_hstb) 3; t.prev_r <- bit smp.(pad_hrd) 3;
   t.nphase <- 0; t.hi_nib <- 0; t.pst <- Idle; t.op <- 0; t.tgt <- 0; t.addr <- 0; t.remaining <- 0;
   t.rbuf <- 0; t.rphase <- 0; t.pend_action <- None; t.pend_fetch <- None;
@@ -321,7 +371,14 @@ let step t ~smp ~reset =
   else begin
     let lvl i = bit smp.(i) 3 in
     let running = run t and hold = held t and boot_now = boot t in
-    let flags = flags t taps in
+    let line_act = line_active t ~smp in
+    let flags = flags t taps ~line_act in
+    (* the bit path's port: RECV reads the framer's FIFO, SEND fills the serialiser's (the SEND
+       reaches it a clock later, so a SEND on its way counts as a byte in it) *)
+    let bpp = bp_port t in
+    let routed p = bpp = Some p in
+    let tx_pend = match t.push_pend with Some (p, _) when routed p -> 1 | _ -> 0 in
+    let tx_ready = (not hold) && Queue.length t.tx.fifo + tx_pend < TX.depth in
     let act = t.pend_action in
     let reg_act a = match act with Some (A_reg (x, b)) when x = a -> Some b | _ -> None in
     (* the host's fetch, from the state at the start of the clock *)
@@ -341,8 +398,11 @@ let step t ~smp ~reset =
       let io =
         Isa2.io ~pin_in4 ~host_in:(Option.value ~default:0 (Queue.peek_opt t.hostin))
           ~host_in_valid:(not (Queue.is_empty t.hostin))
-          ~port_in:(Array.init 4 (fun p -> if t.hold_st.(p) = 2 then t.hold_w.(p) lsr 8 else t.hold_w.(p) land 0xFF))
-          ~port_in_valid:(Array.map (fun s -> s <> 0) t.hold_st) ~port_out_ready:(Array.make 4 true) ~flags
+          ~port_in:(Array.init 4 (fun p ->
+              if routed p then Option.value ~default:0 (Queue.peek_opt t.rx.fifo)
+              else if t.hold_st.(p) = 2 then t.hold_w.(p) lsr 8 else t.hold_w.(p) land 0xFF))
+          ~port_in_valid:(Array.init 4 (fun p -> if routed p then not (Queue.is_empty t.rx.fifo) else t.hold_st.(p) <> 0))
+          ~port_out_ready:(Array.init 4 (fun p -> if routed p then tx_ready else true)) ~flags
           ?host_ctl pin_in
       in
       let w = t.prog.(Isa2.fetch_addr t.seq t.seq.thread land (t.cfg.prog_words - 1)) in
@@ -361,8 +421,10 @@ let step t ~smp ~reset =
       new_out := e.host_out
     end;
     (* the array: a thread's SEND (registered last clock) goes first; a host write waits *)
+    let thread_push = match t.push_pend with Some (p, _) when routed p -> None | x -> x in
+    let tx_push = match t.push_pend with Some (p, b) when routed p -> hit "SEND to the serialiser"; Some b | _ -> None in
     let mbx, host_mbx_done =
-      match t.push_pend, act with
+      match thread_push, act with
       | Some (p, b), _ -> ((true, p, (if t.send_hi.(p) then 1 else 0), b), false)
       | None, Some (A_peseg (sg, sel, b)) -> hit "host feed write"; ((true, sg, sel, b), true)
       | None, _ -> ((false, 0, 0, 0), false)
@@ -378,14 +440,17 @@ let step t ~smp ~reset =
         fixed_d = [| es_level t; 0; 0; 0 |]; fixed_v = [| t.es_out.valid; false; false; false |] };
     (* port glue: SEND byte order, RECV holding registers *)
     let port_reset = Option.value ~default:0 (reg_act r_port_reset) in
-    (match t.push_pend with Some (p, _) -> t.send_hi.(p) <- not t.send_hi.(p) | None -> ());
+    (match thread_push with Some (p, _) -> t.send_hi.(p) <- not t.send_hi.(p) | None -> ());
+    let hold_pops = Array.mapi (fun p x -> x && not (routed p)) port_pops in
+    let rx_pop = match bpp with Some p -> port_pops.(p) | None -> false in
+    if rx_pop then hit "RECV from the framer";
     for p = 0 to 3 do
       if bit port_reset p = 1 then (t.send_hi.(p) <- false; t.hold_st.(p) <- 0)
       else
         match t.hold_st.(p) with
         | 0 -> if taps.(p).tv then (hit "tap captured"; t.hold_st.(p) <- 1; t.hold_w.(p) <- taps.(p).td)
-        | 1 -> if port_pops.(p) then t.hold_st.(p) <- 2
-        | _ -> if port_pops.(p) then t.hold_st.(p) <- 0
+        | 1 -> if hold_pops.(p) then t.hold_st.(p) <- 2
+        | _ -> if hold_pops.(p) then t.hold_st.(p) <- 0
     done;
     t.push_pend <- !new_push;
     (* host FIFOs: pops before pushes, so a full FIFO takes a push in the clock its head leaves *)
@@ -402,9 +467,22 @@ let step t ~smp ~reset =
     let es_old = t.es_out and es_lvl = es_level t and c_residue_now = (crc_cfg t).residue in
     let _, hit_now = matcher_now t in
     if hold then begin
-      t.es <- ES.init (); t.es_out <- es_zero; t.es_last <- 0; t.crc <- 0; t.mtime <- 0; t.nco_acc <- 0; t.nco_out <- 0
+      t.es <- ES.init (); t.es_out <- es_zero; t.es_last <- 0; t.crc <- 0; t.mtime <- 0; t.nco_acc <- 0; t.nco_out <- 0;
+      t.tx <- TX.init (); t.rx <- RX.init ()
     end
     else begin
+      (* the bit-path assists: the framer on the edge sampler's bits of last clock (as the CRC
+         unit and the matcher), the serialiser with the SEND that left the core last clock *)
+      let pulse = Option.value ~default:0 (reg_act r_bp_pulse) in
+      let rx_in_frame = t.rx.in_frame in
+      let rxo =
+        RX.step (rx_cfg t) t.rx
+          { bit = es_old.bit; valid = es_old.valid; active = line_act; burst_end = es_old.burst_end; start = bit pulse 0 = 1;
+            stop = bit pulse 1 = 1; tx_active = TX.active t.tx; pop = rx_pop } in
+      if rxo.frame_start then hit "frame start";
+      if rx_in_frame && not t.rx.in_frame then hit "frame end";
+      if t.tx.busy then hit "serialiser busy";
+      ignore (TX.step (tx_cfg t) t.tx ~push:tx_push);
       if t.str.left > 0 || not (Queue.is_empty t.str.fifo) then hit "streamer busy";
       SM.step t.str;
       (match act with
@@ -418,15 +496,18 @@ let step t ~smp ~reset =
       ignore (PM.step t.smp ~pins ~pop:smp_pop);
       if Queue.length t.smp.fifo > before then hit "sampler word";
       let es_pad = t.regs.(r_es_pads) land 15 and act_pad = (t.regs.(r_es_pads) lsr 4) land 15 in
-      let active = bit t.regs.(r_es_mode) 3 = 0 || lvl act_pad = 1 in
+      let active = line_act in
+      ignore act_pad;
       if es_old.valid then hit "recovered bit";
       if hit_now then hit "matcher hit";
       if t.crc = c_residue_now then hit "CRC check true";
       t.es_last <- es_lvl;
       t.es_out <- ES.step_clock (es_cfg t) t.es ~active (List.init 4 (fun p -> bit smp.(es_pad) p));
-      let start = reg_act r_crc_start <> None || (bit t.regs.(r_crc_ctrl) 1 = 1 && hit_now) in
+      (* the CRC unit's bits: the edge sampler's, or the framer's feed, which also starts it *)
+      let cb, cv, fstart = if crc_from_frame t then (rxo.crc_bit, rxo.crc_valid, rxo.frame_start) else (es_old.bit, es_old.valid, false) in
+      let start = reg_act r_crc_start <> None || (bit t.regs.(r_crc_ctrl) 1 = 1 && hit_now) || fstart in
       let c = crc_cfg t in
-      t.crc <- (if start then c.init else if es_old.valid then CRC.step c t.crc es_old.bit else t.crc);
+      t.crc <- (if start then c.init else if cv then CRC.step c t.crc cb else t.crc);
       if es_old.valid then begin
         if t.mtime >= Array.length t.mhist then
           t.mhist <- Array.append t.mhist (Array.make (Array.length t.mhist) 0);

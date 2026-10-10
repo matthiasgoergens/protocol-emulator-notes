@@ -1,0 +1,5 @@
+corner                  setup ws setup vio  hold ws hold vio  best period
+nom_slow_1p08V_125C       -0.224         2   +0.256        0     16.89 ns (59.2 MHz)
+nom_typ_1p20V_25C         +2.609         0   +0.124        0     14.06 ns (71.1 MHz)
+nom_fast_1p32V_m40C       +3.209         0   +0.047        0     13.46 ns (74.3 MHz)
+cells (no fill/decap/tap/antenna) 28227, hold buffers 85, flip-flops 2735, design area 366498 um2, wire length 1705156 um, DRC 0

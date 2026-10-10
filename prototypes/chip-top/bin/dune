@@ -47,3 +47,13 @@
  (name roles)
  (modules roles)
  (libraries hardcaml chip seqv2 rolesfw))
+
+(executable
+ (name usb_chip)
+ (modules usb_chip)
+ (libraries hardcaml chip usbls unix))
+
+(executable
+ (name eth_chip)
+ (modules eth_chip)
+ (libraries hardcaml chip eth10node unix))

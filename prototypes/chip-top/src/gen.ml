@@ -75,6 +75,107 @@ let rand_op r : Upe.Spec.op =
     cin_lane = b (); swb = i 4; pwb = i 4; fwb = i 4; lout = i 4; lane_bc = b (); del = Random.State.int r 4 = 0;
     stream = b (); tap_p = b (); follow = Random.State.int r 4 = 0; ashr = (if b () then 0 else i 16); k = i 0x10000 }
 
+
+(* ---- the bit-path assists (registers 0x80-0x8D, r_es_mode bit 4) ----
+   Drawn from a stream of their own, seeded from the trial's without consuming it, so that every
+   draw the generator made before the assists existed is the same draw now. Profiles:
+   - off (a quarter of the trials): the registers stay at reset, the chip as without the assists;
+   - USB-like loopback: the serialiser's lines on uio 6 and 7 (pads 14, 15), which read back what
+     the chip drives, the edge sampler on pad 15 in NRZ mode with the OR of pad 14 as its active
+     input, NRZI and stuffing both ways, sync pattern 0x80, end on the line going inactive, the
+     CRC on the frame after the PID;
+   - Ethernet-like loopback: Manchester out on pad 14, the edge sampler in Manchester mode on it,
+     pass, SFD pattern, end at the burst end;
+   - random: every register random (wide: from the whole range).
+   The bit path's port is one of the four, at random; the threads' random SENDs and RECVs on it
+   then drive the serialiser and drain the framer. *)
+let bp_rng = ref (Random.State.make [| 0 |])
+let bp_profile = ref 0
+
+(* In the loopback profiles, two threads now and then get directed programmes: a sender of frames
+   (a sync or preamble, then a few bytes, runs of 1s and 0s favoured, on the bit path's port) and a
+   receiver (RECV on it, OUT, and a WAITC on the end-of-frame flag). *)
+let bp_threads r (h : Host.t) ~(cfg : S.config) ~pages ~ch ~sync =
+  let i n = Random.State.int r n in
+  let ts = i 4 in
+  let tr = (ts + 1 + i 3) mod 4 in
+  let byte () = match i 4 with 0 -> 0xFF | 1 -> 0x00 | 2 -> 0x7E | _ -> i 256 in
+  let sender =
+    List.concat_map (fun b -> [ Isa2.lda b; Isa2.send ~ch ~fail:0 ]) sync
+    @ List.concat (List.init (1 + i 6) (fun _ -> [ Isa2.lda (byte ()); Isa2.send ~ch ~fail:0 ])) in
+  (* the SENDs' fail targets: themselves (at dl = 0 a full FIFO makes them spin) *)
+  let sender = List.mapi (fun k w -> if w lsr 12 = Isa2.op_mbx then (w land lnot 0xFF) lor (0xC0 + k) else w) sender in
+  let sender = Array.of_list (sender @ [ Isa2.ldd (i 300); Isa2.waitd; Isa2.jmp 0xC0 ]) in
+  let receiver = [| Isa2.recv ~ch ~fail:0xE0; Isa2.out (); Isa2.waitc ~cond:(Isa2.c_flag 0) ~fail:0xE0; Isa2.outi ~tag:1 0xEE; Isa2.jmp 0xE0 |] in
+  let put t base words =
+    let addr = ((pages.(t) lsl 8) lor base) land (cfg.prog_words - 1) in
+    Host.submit h (Host.Write { tgt = t_prog; addr = 2 * addr; data = List.concat_map (fun w -> [ w land 0xFF; w lsr 8 ]) (Array.to_list words) });
+    Host.submit h (Host.Write { tgt = t_reg; addr = r_boot_pc t; data = [ base ] }) in
+  put ts 0xC0 sender;
+  put tr 0xE0 receiver;
+  Host.submit h (Host.Write { tgt = t_reg; addr = r_flagsel (4 * tr); data = [ fl_rx_done; fl_rx_err; fl_tx_active; fl_line_inactive ] })
+
+let bp_setup ?(mode = "mixed") r (h : Host.t) ~cfg ~pages =
+  bp_rng := Random.State.make [| Random.State.bits (Random.State.copy r); 0xb17 |];
+  let r = !bp_rng in
+  let i n = Random.State.int r n and chance p = Random.State.float r 1.0 < p in
+  let w a l = Host.submit h (Host.Write { tgt = t_reg; addr = a; data = l }) in
+  (* the ports mode keeps the segments' holding registers busy: there, mostly a loopback, so that
+     the bit path's port and a busy segment behind the same port meet *)
+  bp_profile := (if mode = "ports" && chance 0.8 then 1 + i 2 else i 4);
+  let pnum = i 4 in
+  let port () = (if chance 0.85 then 1 else 0) lor (pnum lsl 1) in
+  let threads sync = if chance 0.7 then bp_threads r h ~cfg ~pages ~ch:(4 + pnum) ~sync in
+  let p12 () = if !wide && chance 0.3 then i 4096 else 1 + i 8 in
+  match !bp_profile with
+  | 0 -> ()
+  | 1 ->
+    (* USB-like: P clocks per symbol; the edge sampler counts 4 sub-samples per clock *)
+    let per = if chance 0.5 then 2 + i 6 else 8 + i 55 in
+    let ctrl = port () lor (if chance 0.8 then 8 else 0) lor (if chance 0.15 then 16 else 0) lor 32 lor (if chance 0.2 then 64 else 0) lor 128 in
+    w r_bp_ctrl
+      [ ctrl; 0x01 lor (if chance 0.1 then 4 else 0); 0x26; 0x80;
+        (* the line before a frame is whatever the idle pins show, so the sync's first symbol is
+           decoded against a random level: often match only the last seven bits *)
+        (match i 5 with 0 | 1 -> 0xFF | 2 | 3 -> 0xFE | _ -> i 256); (if chance 0.7 then 8 else i 32);
+        0x05; 0x26; per land 0xFF; per lsr 8; 0x02; 0x11; 0x76 ];
+    w r_es_mode [ 2 lor 8 lor 16; 0xEF; 4; 0; 0xFF; 3; min 255 (2 * per); min 255 (4 * per) ];
+    w (r_padsel 14) [ src_tx_a; src_tx_b ];
+    threads [ 0x80 ]
+  | 2 ->
+    let per = 1 + i 6 in
+    let ctrl = port () lor (if chance 0.8 then 8 else 0) lor (if chance 0.15 then 16 else 0) lor 64 lor 128 lor (if chance 0.2 then 32 else 0) in
+    w r_bp_ctrl
+      [ ctrl; 0; 0; 0xD5; (if chance 0.8 then 0xFF else i 256); (if chance 0.7 then 0 else i 16);
+        0x02; 0; per; 0; 0x16; 0x00; 0x10 ];
+    w r_es_mode [ 0; 0x0E; 6 * per; 0; 16 * per; 0; 0; 0 ];
+    w (r_padsel 14) [ src_tx_a; src_tx_b ];
+    threads [ 0x55; 0x55; 0xD5 ]
+  | _ ->
+    let c = if !wide then i 256 else (i 256) land lnot (if chance 0.5 then 1 else 0) in
+    let t = p12 () in
+    w r_bp_ctrl
+      [ c; i 32; i 64; i 256; (if chance 0.5 then 0xFF else i 256); (if chance 0.5 then i 16 else i 256);
+        i 32; i 64; t land 0xFF; t lsr 8; i 64; i 64; i 128 ];
+    if chance 0.5 then w r_es_mode [ i 32 ];
+    if chance 0.5 then w (r_padsel (if chance 0.5 then 14 else 15)) [ (if chance 0.5 then src_tx_a else src_tx_b) lor (i 4 lsl 5) ]
+
+(* while running: pulses, live reconfiguration, status reads *)
+let bp_traffic (h : Host.t) =
+  let r = !bp_rng in
+  let i n = Random.State.int r n in
+  let w a l = Host.submit h (Host.Write { tgt = t_reg; addr = a; data = l }) in
+  match i 16 with
+  | 0 | 1 | 2 -> w r_bp_pulse [ 1 + i 3 ]
+  | 3 | 4 | 5 | 6 -> Host.submit h (Host.Read { tgt = t_reg; addr = r_bp_status; n = 1; k = ignore })
+  | 7 -> if !bp_profile = 3 then w r_tx_per [ 1 + i 8; 0 ]
+  | 8 -> if !bp_profile = 3 then w r_rx_pattern [ i 256; (if i 2 = 0 then 0xFF else i 256) ]
+  (* the loopback profiles keep their configuration but for the CRC source and half duplex *)
+  | 9 -> if !bp_profile = 3 then w (r_bp_ctrl + 1 + i 12) [ i 256 ]
+  | 10 -> if !bp_profile = 3 then w r_bp_ctrl [ i 256 ]
+  | 11 -> if !bp_profile = 3 then w r_es_mode [ i 32 ]
+  | _ -> Host.submit h (Host.Read { tgt = t_reg; addr = r_bp_ctrl; n = 15; k = ignore })
+
 (* the host's random traffic: a setup, then transactions while the programme runs *)
 let setup_traffic ?(mode = "mixed") r (h : Host.t) ~(cfg : S.config) =
   let i n = Random.State.int r n and chance p = Random.State.float r 1.0 < p in
@@ -155,6 +256,7 @@ let setup_traffic ?(mode = "mixed") r (h : Host.t) ~(cfg : S.config) =
     if chance 0.4 then Host.submit h (Host.Write { tgt = t_peseg; addr = (sg lsl 2) lor 3; data = [ List.nth [ 1; 2; 3; 5; 9 ] (i 5) ] })
   done;
   Host.submit h (Host.Write { tgt = t_bank; addr = (if mode = "memory" then 0 else i 1024); data = List.init 16 (fun _ -> i 256) });
+  bp_setup ~mode r h ~cfg ~pages;
   w r_ctrl 0;                                    (* release the assists *)
   w r_ctrl 1                                     (* run *)
 
@@ -174,6 +276,7 @@ let wide_traffic r (h : Host.t) =
   | _ -> Host.submit h (Host.Write { tgt = (if i 2 = 0 then t_pecfg else t_peinit); addr = i 65536; data = List.init (1 + i 8) (fun _ -> i 256) })
 
 let running_traffic ?(mode = "mixed") r (h : Host.t) =
+  if !bp_profile <> 0 && Random.State.int !bp_rng 12 = 0 then bp_traffic h else
   if !wide && Random.State.int r 8 = 0 then wide_traffic r h else
   let i n = Random.State.int r n in
   let w = Host.wreg h in

@@ -202,7 +202,38 @@ let other_modes () =
       if Float.abs off_pct <= 4.0 && not ok then uart_ok := false;
       pr "    baud offset %+5.1f %%: %s" off_pct (if ok then "16 of 16 bytes" else Printf.sprintf "%d bytes, wrong" (List.length got)))
     [ -6.0; -4.0; 0.0; 4.0; 6.0 ];
-  !bmc_ok && !uart_ok
+  (* NRZ at USB low speed (1.5 Mbit/s, 160 sub-samples per bit at n = 4), as ../chip-top uses it:
+     NRZI with bit stuffing leaves up to seven bit times without an edge (six 1s, then the stuffed
+     0's transition), 1,120 sub-samples, more than any 10-bit timeout below since_max. A timeout of
+     since_max never ends a burst, because since saturates there; the sampler then keeps
+     sampling through such runs (and through the idle line after a packet, which a framer behind
+     it ends on the line's state instead). *)
+  pr "  NRZ with resynchronisation, USB low speed (1.5 Mbit/s), n = 4 at 60 MHz, runs of 1 to 7 bits:";
+  let usb_ok = ref true and control_failed = ref false in
+  List.iter (fun (timeout, off_pct) ->
+      let control = timeout < Edge_sampler.since_max in
+      let bits = ref [] and lv = ref 1 in
+      while List.length !bits < 300 do
+        let k = if Random.int 3 = 0 then 7 else 1 + Random.int 7 in
+        bits := !bits @ List.init k (fun _ -> !lv); lv := 1 - !lv
+      done;
+      let bits = !bits in
+      let arr = Array.of_list bits in
+      let bit_ns = 1e9 /. 1.5e6 *. (1.0 +. (off_pct /. 100.0)) and t0 = 1000.0 in
+      let tend = t0 +. (float (Array.length arr) *. bit_ns) in
+      let line t = if t < t0 then 0 else if t >= tend then arr.(Array.length arr - 1) else arr.(int_of_float ((t -. t0) /. bit_ns)) in
+      let cfg = { Edge_sampler.mode = Nrz; holdoff = 16; timeout; offset = 80; period = 160; invert = false } in
+      let bursts, over = run_sampler ~n ~clock_hz ~cfg ~line ~cycles:(int_of_float (tend *. 1e-9 *. clock_hz) + 400) in
+      (* after the last edge the sampler keeps sampling the last level until its timeout *)
+      let got = match bursts with [ b ] -> List.filteri (fun i _ -> i < List.length bits) b | _ -> [] in
+      let ok = got = bits && not over in
+      if control then (if not ok then control_failed := true) else if not ok then usb_ok := false;
+      pr "    timeout %4d, host clock %+4.1f %%: %s%s" timeout off_pct
+        (if ok then Printf.sprintf "%d of %d bits in one burst" (List.length bits) (List.length bits)
+         else Printf.sprintf "%d bursts, %d bits" (List.length bursts) (List.length (List.concat bursts)))
+        (if control then " (control: a timeout below since_max ends the burst inside a 7-bit run; must fail)" else ""))
+    [ (Edge_sampler.since_max, -1.5); (Edge_sampler.since_max, 0.0); (Edge_sampler.since_max, 1.5); (Edge_sampler.since_max - 1, 0.0) ];
+  !bmc_ok && !uart_ok && !usb_ok && !control_failed
 
 let sampler () =
   pr "== edge sampler (edge_sampler.ml)";

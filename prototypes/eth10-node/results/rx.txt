@@ -24,6 +24,11 @@ crc: PASS
     baud offset  +0.0 %: 16 of 16 bytes
     baud offset  +4.0 %: 16 of 16 bytes
     baud offset  +6.0 %: 16 of 16 bytes
+  NRZ with resynchronisation, USB low speed (1.5 Mbit/s), n = 4 at 60 MHz, runs of 1 to 7 bits:
+    timeout 1023, host clock -1.5 %: 306 of 306 bits in one burst
+    timeout 1023, host clock +0.0 %: 304 of 304 bits in one burst
+    timeout 1023, host clock +1.5 %: 304 of 304 bits in one burst
+    timeout 1022, host clock +0.0 %: 24 bursts, 282 bits (control: a timeout below since_max ends the burst inside a 7-bit run; must fail)
 sampler: PASS
 == 10BASE-T receive path (rx_path.ml: edge sampler -> matcher -> packer + CRC unit)
   delay-line length that recovers frames: 18 (the design uses 18)

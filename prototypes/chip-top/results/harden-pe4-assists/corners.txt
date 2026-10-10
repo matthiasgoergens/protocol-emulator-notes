@@ -1,0 +1,5 @@
+corner                   setup ws       hold ws     setup vio      hold vio  setup r2r ws   hold r2r ws
+nom_fast_1p32V_m40C         3.209         0.047             0             0         5.831         0.047
+nom_slow_1p08V_125C        -0.224         0.256             2             0        -0.224         0.256
+nom_typ_1p20V_25C           2.609         0.124             0             0         4.671         0.124
+slacks in ns; negative = violated; r2r inf = no register-to-register path

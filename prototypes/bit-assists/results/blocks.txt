@@ -1,0 +1,36 @@
+# command: _build/default/check.exe blocks 1000000
+# base commit: dd4f7df (with this directory's uncommitted files)
+# ocaml 5.3.0, hardcaml v0.17; 2026-10-10T11:41:17+08:00
+== stuff tracker and line coder: RTL against model, every clock
+  seed 1: 1000000 clocks, 0 mismatching ok
+  seed 2: 1000000 clocks, 0 mismatching ok
+  seed 3: 1000000 clocks, 0 mismatching ok
+  seed 4: 1000000 clocks, 0 mismatching ok
+== against independent references, through the RTL
+  USB: RTL transmit chain = usb-ls fw_codec symbols (random packets)     300 of 300 ok
+  USB: RTL receive chain on fw_codec symbols gives the packet back, no violation 300 of 300 ok
+  USB: a missing stuff bit is a violation (RTL receive chain)            300 of 300 ok
+  CAN: RTL transmit stuffer = sequencer-ps2-can's stuffer (runs of either value) 300 of 300 ok
+  CAN: RTL destuffer on that stream gives the bits back, no violation    300 of 300 ok
+  10BASE-T: RTL Manchester encoder = eth_model's Manchester              300 of 300 ok
+  10BASE-T: RTL Manchester decoder on it gives the bits back, no code violation 300 of 300 ok
+  Manchester: a flipped half-bit is a code violation (RTL decoder)       300 of 300 ok
+  round trip, random configurations: RTL receive (RTL transmit x) = x    300 of 300 ok
+== planted faults: each must be caught by the lockstep (first seed that catches it)
+  stuff_off_by_one             caught (seed 1; clock 21: tx bit: model 1 rtl 0; tx stuffed: model 1 rtl 0; tx take: model 0 rtl 1)  a stuff bit after run + 1 bits
+  stuff_same_value             caught (seed 1; clock 21: tx bit: model 1 rtl 0)  the stuff bit repeats the run instead of breaking it
+  stuff_not_counted            caught (seed 1; clock 1414: rx keep: model 0 rtl 1; rx err: model 1 rtl 0)  a stuff bit does not count towards the next run (either mode)
+  destuff_no_error             caught (seed 1; clock 45: rx err: model 1 rtl 0)  a bit continuing the run after a full run is not a violation
+  destuff_keeps                caught (seed 1; clock 45: rx keep: model 0 rtl 1)  the stuff bit is passed on instead of dropped
+  restart_ignored              caught (seed 1; clock 1849: tx bit: model 0 rtl 1; tx stuffed: model 0 rtl 1; tx take: model 1 rtl 0; rx keep: model 1 rtl 0; rx err: model 0 rtl 1)  restart does not clear the count
+  nrzi_toggle_polarity         caught (seed 1; clock 2499: line: model 0 rtl 1)  NRZI toggles on the other bit value
+  manchester_halves_swapped    caught (seed 1; clock 136: line: model 1 rtl 0)  Manchester sends the bit first, then its complement
+  manchester_need_every_tick   caught (seed 1; clock 136: need bit: model 0 rtl 1)  Manchester takes a new bit at every symbol
+  invert_ignored_enc           caught (seed 1; clock 2: line: model 0 rtl 1)  the encoder ignores invert
+  nrzi_dec_reference_stuck     caught (seed 1; clock 2500: dec bit: model 1 rtl 0)  the NRZI decoder never updates its reference level
+  manchester_no_violation      caught (seed 1; clock 136: dec err: model 1 rtl 0)  the Manchester decoder reports no code violations
+  manchester_dec_first_half    caught (seed 1; clock 141: dec bit: model 0 rtl 1)  the Manchester decoder outputs the first half's level
+  enc_restart_ignored          caught (seed 1; clock 554: need bit: model 1 rtl 0)  restart does not reset the encoder (NRZI level, Manchester phase)
+14 of 14 planted faults caught
+the independent references alone fail with 12 of the 14 faults: stuff_off_by_one, stuff_same_value, stuff_not_counted, destuff_no_error, destuff_keeps, nrzi_toggle_polarity, manchester_halves_swapped, manchester_need_every_tick, invert_ignored_enc, nrzi_dec_reference_stuck, manchester_no_violation, manchester_dec_first_half
+blocks: PASS (11 s)

@@ -1,0 +1,6 @@
+; ../../../bit-assists: the stuff tracker, the line coder, and the transmit serialiser and receive
+; framer built from them, each with its model (symlinks).
+(library
+ (name bitassists)
+ (wrapped false)
+ (libraries hardcaml))
