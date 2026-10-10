@@ -1,0 +1,10 @@
+(library
+ (name bitassists)
+ (wrapped false)
+ (modules stuff linecode)
+ (libraries hardcaml))
+
+(executable
+ (name check)
+ (modules check)
+ (libraries hardcaml bitassists bitrefs unix))

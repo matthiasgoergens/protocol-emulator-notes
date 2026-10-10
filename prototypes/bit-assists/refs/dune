@@ -1,0 +1,6 @@
+; Independent references, written by other workstreams for their own protocols (symlinks), and
+; CAN's frame stuffer copied from ../../sequencer-ps2-can/can_fw.ml (it sits in a file that needs
+; that prototype's ISA).
+(library
+ (name bitrefs)
+ (wrapped false))
