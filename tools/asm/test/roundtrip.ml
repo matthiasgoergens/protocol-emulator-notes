@@ -152,11 +152,32 @@ let examples () =
       | r -> Printf.printf "example %s: %s\n" f (if roundtrip ~name:path r.image then "round trip identical" else "DIFFERS"))
     files
 
+(* controls: each planted disassembler bug must make some random image's round trip fail *)
+let controls () =
+  List.iter (fun bug ->
+      Disasm.plant := bug;
+      let rng = Random.State.make [| 99 |] in
+      let caught = ref 0 in
+      let before = !failures in
+      for _ = 1 to 200 do
+        let img = random_image rng in
+        let b1 = Image.bytes img in
+        match Assembler.assemble_string (Disasm.image ~layout:img.layout b1) with
+        | r -> if Image.bytes r.image <> b1 then incr caught
+        | exception _ -> incr caught
+      done;
+      failures := before;
+      Disasm.plant := "";
+      if !caught = 0 then fail "control: planted disassembler bug %s not caught by the round trip" bug
+      else Printf.printf "control: planted disassembler bug %s caught in %d of 200 random images\n" bug !caught)
+    [ "drop_q"; "peinit_order"; "skip_reg" ]
+
 let () =
   let n = try int_of_string Sys.argv.(1) with _ -> 2000 in
   all_words ();
   compiler_programmes ();
   random_images n;
   examples ();
+  controls ();
   if !failures = 0 then print_endline "ROUND TRIP: ALL IDENTICAL"
   else (Printf.printf "ROUND TRIP: %d FAILURES\n" !failures; exit 1)

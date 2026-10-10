@@ -8,6 +8,11 @@ open Regs
 
 exception Unsupported of string
 
+(* Planted bugs, for test/roundtrip.ml's controls only: each must make the round trip fail.
+   "" (the default) plants nothing. *)
+let plant = ref ""
+let planted b = !plant = b
+
 let label_name page pc = Printf.sprintf "L%d_%02x" page pc
 
 let buf_add = Buffer.add_string
@@ -39,7 +44,10 @@ let programme b (img : Image.t) ~threads =
       if pc <> !next then Printf.bprintf b ".org %d\n" pc;
       if Hashtbl.mem labels a then Printf.bprintf b "%s:\n" (label_name pg pc);
       let text =
-        if Insn.canonical w then Insn.to_asm ~target:(target pg) ~pc (Insn.decode w)
+        if Insn.canonical w then
+          let i = Insn.decode w in
+          let i = if planted "drop_q" then (match i with Insn.Setp x -> Insn.Setp { x with q = 0 } | Insn.Sho x -> Insn.Sho { x with q = 0 } | i -> i) else i in
+          Insn.to_asm ~target:(target pg) ~pc i
         else Printf.sprintf ".word 0x%04x" w in
       let comment = if Insn.canonical w then "" else "   ; " ^ Isa2.disasm w ^ " (ignored bits set)" in
       Printf.bprintf b "    %-40s%s\n" text comment;
@@ -133,7 +141,8 @@ let registers b (img : Image.t) =
       match group_print regs addrs dec with
       | Some text -> take addrs text
       | None -> ()) groups;
-  List.iter (fun (a, v) -> if not (Hashtbl.mem used a) then Printf.bprintf b ".reg 0x%02x, 0x%02x\n" a v) regs
+  if not (planted "skip_reg") then
+    List.iter (fun (a, v) -> if not (Hashtbl.mem used a) then Printf.bprintf b ".reg 0x%02x, 0x%02x\n" a v) regs
 
 (* ---- the array and the rest ---- *)
 
@@ -163,7 +172,7 @@ let array b (img : Image.t) =
         if List.length bytes <> 2 * size then raise (Unsupported (Printf.sprintf "PEINIT of segment %d: %d bytes for %d PEs" sg (List.length bytes) size));
         let arr = Array.of_list bytes in
         for i = 0 to size - 1 do
-          let k = size - 1 - i in
+          let k = if planted "peinit_order" then i else size - 1 - i in
           Printf.bprintf b ".peinit %d, %d, 0x%04x\n" sg i ((arr.(2 * k) lsl 8) lor arr.((2 * k) + 1))
         done
       end) img.peinit;
