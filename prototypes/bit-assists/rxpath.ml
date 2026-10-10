@@ -15,7 +15,10 @@
    1. The chain: with the sampler's [valid], its bit goes through the decoder and, if the decoder
       completes a bit, the destuffer; a kept bit becomes the chain bit of the next clock ([cv],
       [cb]), with [ce] set when the decoder (Manchester code violation) or the destuffer (stuff
-      violation) found an error.
+      violation) found an error. The destuffer drops and flags bits only in a frame; outside one
+      it only counts the run, so that the idle line before a packet (USB's J, decoded as 1s)
+      cannot make the sync's first bit a stuff bit, while the sync's own last bits still count
+      towards the first run of the frame, as USB requires.
    2. The framer, on this clock's chain bit. In a frame: an end condition ([end_inactive] and the
       line not active, [end_burst] and the sampler's burst end, or the host's [stop]) ends it, and
       this clock's chain bit is not part of it; otherwise a chain bit is shifted into the byte
@@ -87,6 +90,7 @@ let done_ st = (not st.in_frame) && Queue.is_empty st.fifo
 let matches c hist = (hist lxor c.pattern) land c.pmask = 0
 
 let step c st (i : inputs) =
+  let in_frame0 = st.in_frame in
   (* 2. the framer on this clock's chain bit, and 3. the CRC feed *)
   let ending = st.in_frame && ((c.end_inactive && not i.active) || (c.end_burst && i.burst_end) || i.stop) in
   let crc_valid = st.in_frame && (not ending) && st.cv && st.fbits >= c.skip in
@@ -120,7 +124,7 @@ let step c st (i : inputs) =
   (if i.valid then begin
      match Linecode.dec_step c.code st.dec i.bit with
      | Some b, cerr ->
-       let keep, serr = Stuff.rx_step c.stuff st.dst b in
+       let keep, serr = Stuff.rx_step ~drop:in_frame0 c.stuff st.dst b in
        st.cv <- keep; st.cb <- (if keep then b else st.cb); st.ce <- cerr || serr
      | None, cerr -> st.cv <- false; st.ce <- cerr
    end
@@ -161,7 +165,8 @@ let bugs =
     "rx_skip_off_by_one", "the CRC feed skips one frame bit more than configured";
     "rx_err_not_sticky", "the error flag shows only the last chain bit's error";
     "rx_msb_ignored", "bytes are packed LSB first even when MSB first is configured";
-    "rx_history_kept_at_end", "the end of a frame does not restart the history count" ]
+    "rx_history_kept_at_end", "the end of a frame does not restart the history count";
+    "rx_destuff_outside_frame", "the destuffer drops bits outside a frame too" ]
 
 type out = {
   head : Signal.t; nonempty : Signal.t; count : Signal.t;
@@ -174,13 +179,14 @@ let create ~clock ~clear ~(cfg : cfg_signals) ~bit ~valid ~active ~burst_end ~st
   let spec = Reg_spec.create ~clock ~clear () in
   (* 1. the chain *)
   let dec = Linecode.decoder ~clock ~clear ~cfg:cfg.s_code ~valid ~sym:bit in
-  let srx = Stuff.rx ~clock ~clear ~restart:gnd ~cfg:cfg.s_stuff ~valid:dec.out_valid ~b:dec.out_bit in
+  let in_frame = wire 1 in
+  let srx = Stuff.rx ~drop:(if is "rx_destuff_outside_frame" then vdd else in_frame) ~clock ~clear ~restart:gnd ~cfg:cfg.s_stuff ~valid:dec.out_valid ~b:dec.out_bit () in
   let cv = reg spec srx.keep in
   let cb = wire 1 in
   cb <== reg spec (mux2 srx.keep dec.out_bit cb);
   let ce = reg spec (valid &: (dec.err |: srx.err)) in
   (* 2. the framer *)
-  let in_frame = wire 1 and nbits = wire 3 and sh = wire 8 and fbits = wire 8 and hist = wire 8 in
+  let nbits = wire 3 and sh = wire 8 and fbits = wire 8 and hist = wire 8 in
   let err = wire 1 and ovf = wire 1 in
   let ending = in_frame &: ((cfg.s_end_inactive &: ~:active) |: (cfg.s_end_burst &: burst_end) |: stop) in
   let skip = if is "rx_skip_off_by_one" then cfg.s_skip +:. 1 else cfg.s_skip in

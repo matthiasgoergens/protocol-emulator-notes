@@ -21,7 +21,7 @@ let blocks_circuit () =
   let scfg : Stuff.cfg_signals = { s_run = input "run" 4; s_either = input "either" 1; s_value = input "value" 1 } in
   let lcfg : Linecode.cfg_signals = { s_mode = input "mode" 2; s_invert = input "invert" 1; s_toggle_on = input "toggle_on" 1 } in
   let tx = Stuff.tx ~clock ~clear ~restart ~cfg:scfg ~due:(input "due" 1) ~data_bit:(input "data_bit" 1) ~data_valid:(input "data_valid" 1) in
-  let rx = Stuff.rx ~clock ~clear ~restart ~cfg:scfg ~valid:(input "rx_valid" 1) ~b:(input "rx_bit" 1) in
+  let rx = Stuff.rx ~clock ~clear ~restart ~cfg:scfg ~valid:(input "rx_valid" 1) ~b:(input "rx_bit" 1) () in
   let enc = Linecode.encoder ~clock ~clear ~restart ~cfg:lcfg ~tick:(input "tick" 1) ~bit:(input "enc_bit" 1) in
   let dec = Linecode.decoder ~clock ~clear ~cfg:lcfg ~valid:(input "sym_valid" 1) ~sym:(input "sym" 1) in
   Circuit.create_exn ~name:"bit_assists_blocks"
@@ -171,7 +171,7 @@ let rtl_rx_chain (s : Stuff.cfg) (l : Linecode.cfg) syms =
   let clock = input "clock" 1 and clear = input "clear" 1 in
   let valid = input "valid" 1 and sym = input "sym" 1 in
   let dec = Linecode.decoder ~clock ~clear ~cfg:(Linecode.cfg_const l) ~valid ~sym in
-  let rx = Stuff.rx ~clock ~clear ~restart:gnd ~cfg:(Stuff.cfg_const s) ~valid:dec.out_valid ~b:dec.out_bit in
+  let rx = Stuff.rx ~clock ~clear ~restart:gnd ~cfg:(Stuff.cfg_const s) ~valid:dec.out_valid ~b:dec.out_bit () in
   let c = Circuit.create_exn ~name:"rx_chain" [ output "keep" rx.keep; output "bit" dec.out_bit; output "err" rx.err; output "cerr" dec.err ] in
   let sim = Cyclesim.create c in
   (* an input the circuit does not use (clear, in a configuration without state) is not a port *)
@@ -527,6 +527,23 @@ let paths_references ~seed =
   done;
   report "USB low speed: serialiser frame (sync to EOP, 40 clocks per symbol) = usb-ls fw_codec" !good n;
   report "USB low speed: framer on that line gives the bytes after the sync; CRC fed after the PID" !good_rx n;
+  (* the idle line before a packet decodes as 1s, as many as the gap is long: the destuffer must
+     not take the sync's first 0 for a stuff bit after six of them *)
+  let good = ref 0 and tried = ref 0 in
+  for idle = 0 to 14 do
+    for _ = 1 to 5 do
+      incr tried;
+      let bytes = random_bytes r (1 + Random.State.int r 6) in
+      let line = rtl_tx_frame Txpath.usb_ls (0x80 :: bytes) in
+      (* a previous packet's end (SE0, J) sets the decoder's reference, then [idle] bit times of J *)
+      let syms = [ (1, true); (0, false); (0, false) ] @ List.init idle (fun _ -> (0, true))
+                 @ List.map (fun (a, b) -> (b, a = 1 || b = 1)) line @ [ (0, true) ] in
+      match rtl_rx_frames Rxpath.usb_ls syms with
+      | [ (got, false, _) ] when got = bytes -> incr good
+      | _ -> ()
+    done
+  done;
+  report "USB: a packet after 0 to 14 bit times of idle J (decoded 1s) is received whole" !good !tried;
   (* the CRC residue over a real USB data packet: the framer's CRC feed through CRC-16/USB *)
   let good = ref 0 in
   for _ = 1 to n do

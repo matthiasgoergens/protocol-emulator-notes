@@ -68,9 +68,10 @@ let tx_commit c st = function
   | Data b -> commit c st b ~stuff_pos:false
   | Underrun -> ()
 
-(* Receive one bit: (kept, violation). *)
-let rx_step c st b =
-  let f = full c st in
+(* Receive one bit: (kept, violation). With [drop] false (outside a frame, for the receive
+   framer) the run is counted but no bit is dropped or flagged. *)
+let rx_step ?(drop = true) c st b =
+  let f = drop && full c st in
   let err = f && continues c st b in
   commit c st b ~stuff_pos:f;
   (not f, err)
@@ -151,13 +152,15 @@ let tx ~clock ~clear ~restart ~cfg ~due ~data_bit ~data_valid =
   { out_bit; take; stuffed; underrun }
 
 (* Receive. With [valid], bit [b] arrives; [keep] says it is a data bit, [err] that it is a stuff
-   violation. Combinational of this clock's state and inputs. *)
+   violation. Combinational of this clock's state and inputs. Without [drop] the run is counted
+   and nothing is dropped or flagged. *)
 type rx_out = { keep : Signal.t; err : Signal.t }
 
-let rx ~clock ~clear ~restart ~cfg ~valid ~b =
+let rx ?(drop = vdd) ~clock ~clear ~restart ~cfg ~valid ~b () =
   let spec = Reg_spec.create ~clock ~clear () in
   let full_w = wire 1 in
-  let full, cont, _, _ = core ~spec ~restart ~cfg ~update:valid ~b ~stuff_pos:(valid &: full_w) in
+  let full, cont, _, _ = core ~spec ~restart ~cfg ~update:valid ~b ~stuff_pos:(valid &: full_w &: drop) in
+  let full = full &: drop in
   full_w <== full;
   let keep = valid &: (if is "destuff_keeps" then vdd else ~:full) in
   let err = valid &: full &: (if is "destuff_no_error" then gnd else cont b) in

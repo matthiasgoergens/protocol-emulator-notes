@@ -1,6 +1,6 @@
 # command: _build/default/check.exe paths 1000000
-# base commit: e3eeba1 (with this directory's uncommitted files)
-# ocaml 5.3.0, hardcaml v0.17; 2026-10-10T11:26:02+08:00
+# base commit: dd4f7df (with this directory's uncommitted files)
+# ocaml 5.3.0, hardcaml v0.17; 2026-10-10T11:41:17+08:00
 == transmit serialiser and receive framer: RTL against model, every clock
   seed 1: 1000000 clocks, 0 mismatching ok
   seed 2: 1000000 clocks, 0 mismatching ok
@@ -9,6 +9,7 @@
 == against independent references, through the RTL
   USB low speed: serialiser frame (sync to EOP, 40 clocks per symbol) = usb-ls fw_codec 100 of 100 ok
   USB low speed: framer on that line gives the bytes after the sync; CRC fed after the PID 100 of 100 ok
+  USB: a packet after 0 to 14 bit times of idle J (decoded 1s) is received whole 75 of 75 ok
   USB: CRC-16 over the framer's CRC feed of a data packet leaves the residue 0xB001 100 of 100 ok
   10BASE-T: serialiser = eth_model Manchester, pair complementary, then 6 symbols TD+ high 100 of 100 ok
   USB: a frame missing a stuff bit ends with the framer's error flag set         100 of 100 ok
@@ -28,6 +29,7 @@
   rx_err_not_sticky          caught (seed 1; clock 165: rx err: model 1 rtl 0)  the error flag shows only the last chain bit's error
   rx_msb_ignored             caught (seed 1; clock 127: rx shift: model 1 rtl 128)  bytes are packed LSB first even when MSB first is configured
   rx_history_kept_at_end     caught (seed 1; clock 235: rx history count: model 0 rtl 8)  the end of a frame does not restart the history count
-14 of 14 planted faults caught
-the independent references alone fail with 10 of the 14 faults: tx_first_bit_msb, tx_tail_skips_first, tx_no_final_stuff, tx_pair_not_complement, tx_period_off_by_one, tx_fifo_full_accepts, rx_pattern_old_history, rx_skip_off_by_one, rx_err_not_sticky, rx_history_kept_at_end
-paths: PASS (42 s)
+  rx_destuff_outside_frame   caught (seed 1; clock 3199: rx chain valid: model 1 rtl 0; rx chain error: model 0 rtl 1)  the destuffer drops bits outside a frame too
+15 of 15 planted faults caught
+the independent references alone fail with 11 of the 15 faults: tx_first_bit_msb, tx_tail_skips_first, tx_no_final_stuff, tx_pair_not_complement, tx_period_off_by_one, tx_fifo_full_accepts, rx_pattern_old_history, rx_skip_off_by_one, rx_err_not_sticky, rx_history_kept_at_end, rx_destuff_outside_frame
+paths: PASS (46 s)
