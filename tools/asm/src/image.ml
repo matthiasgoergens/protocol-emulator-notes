@@ -13,7 +13,8 @@
      4. BANK: data bank bytes;
      5. PECFG per segment: the configuration chain, 8 bytes per PE, last PE's byte 7 first;
      6. PEINIT per segment: the init chain, 2 bytes per PE, last PE's high byte first;
-     7. PESEG per segment: feed low, feed high, control, repeat, those that are set;
+     7. PESEG: per segment feed low, feed high and control, those that are set; then every
+        segment's repeat register (a repeat period starts the feed ticking, so it comes last);
      8. MATCH: the matcher's 37 configuration bits, one byte each;
      9. HOSTIN: bytes for the threads' IN, at most 16 (the FIFO's depth);
     10. REG 0 <- the final control value (run, and whether the assists run);
@@ -76,9 +77,15 @@ let bytes t =
   List.iter (fun (a, bs) -> emit (chunks ~tgt:t_bank ~addr:a bs)) (runs t.bank);
   Array.iteri (fun sg bs -> if bs <> [] then emit (chunks ~tgt:t_pecfg ~addr:(sg lsl 8) ~step:0 bs)) t.pecfg;
   Array.iteri (fun sg bs -> if bs <> [] then emit (chunks ~tgt:t_peinit ~addr:(sg lsl 8) ~step:0 bs)) t.peinit;
-  Array.iteri (fun sg regs ->
-      List.iter (fun (a, bs) -> emit (chunks ~tgt:t_peseg ~addr:a bs))
-        (runs (List.map (fun (r, b) -> ((sg lsl 2) lor r, b)) regs))) t.peseg;
+  (* feed and control registers of every segment first, the repeat registers last: a repeat
+     period starts the feed ticking, and the array should start in one piece, after every
+     segment's control is in place (chip-top's DAC demo writes them in this order too) *)
+  let seg_phase keep =
+    Array.iteri (fun sg regs ->
+        List.iter (fun (a, bs) -> emit (chunks ~tgt:t_peseg ~addr:a bs))
+          (runs (List.filter_map (fun (r, b) -> if keep r then Some ((sg lsl 2) lor r, b) else None) regs))) t.peseg in
+  seg_phase (fun r -> r < 3);
+  seg_phase (fun r -> r = 3);
   if t.matcher <> [] then emit (chunks ~tgt:t_match ~addr:0 ~step:0 t.matcher);
   if t.hostin <> [] then emit (chunks ~tgt:t_hostin ~addr:0 ~step:0 t.hostin);
   emit (cmd ~tgt:t_reg ~addr:r_ctrl [ t.ctrl ]);

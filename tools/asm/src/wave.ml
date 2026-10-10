@@ -13,6 +13,7 @@ type trace = {
   pcs : int array array;                     (* per clock, the 4 threads' (page lsl 8) lor pc *)
   outs : (int * int * int) list;             (* (run clock, tag, byte) *)
   clock_hz : int;
+  pads : int array array;                    (* chip runs: per clock, the 16 output pads' nibbles; else [||] *)
 }
 
 (* ---- VCD ---- *)
@@ -27,11 +28,13 @@ let vcd path tr =
   p "$scope module chip $end\n";
   for k = 0 to 7 do p "$var wire 1 n%d net%d $end\n" k k done;
   for t = 0 to 3 do p "$var wire 10 t%d pc%d $end\n" t t done;
+  let pad_list = if tr.pads = [||] then [] else Regs.general_out_pads in
+  List.iter (fun k -> p "$var wire 1 o%d pad_out%d $end\n" k k) pad_list;
   p "$var wire 8 ob out_byte $end\n$var wire 3 ot out_tag $end\n$var wire 1 os out_strobe $end\n";
   p "$var integer 32 ck run_clock $end\n";
   p "$upscope $end\n$enddefinitions $end\n";
   let bin w v = String.init w (fun i -> if (v lsr (w - 1 - i)) land 1 = 1 then '1' else '0') in
-  let last_net = Array.make 8 (-1) and last_pc = Array.make 4 (-1) in
+  let last_net = Array.make 8 (-1) and last_pc = Array.make 4 (-1) and last_pad = Array.make 16 (-1) in
   let outs = Hashtbl.create 64 in
   List.iter (fun (c, tag, b) -> Hashtbl.replace outs c (tag, b)) tr.outs;
   let strobe = ref (-1) in
@@ -43,6 +46,9 @@ let vcd path tr =
           let v = (nets.(k) lsr q) land 1 in
           if v <> last_net.(k) then (Printf.bprintf changes "%dn%d\n" v k; last_net.(k) <- v)
         done;
+        List.iter (fun k ->
+            let v = (tr.pads.(i).(k) lsr q) land 1 in
+            if v <> last_pad.(k) then (Printf.bprintf changes "%do%d\n" v k; last_pad.(k) <- v)) pad_list;
         if q = 0 then begin
           for t = 0 to 3 do
             let v = tr.pcs.(i).(t) in

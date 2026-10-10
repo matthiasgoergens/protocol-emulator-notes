@@ -112,7 +112,7 @@ let run_isa (img : Image.t) o =
     visible := out_now
   done;
   { mode = Isa;
-    trace = { Wave.t0 = 0; nets; pcs; outs = List.rev !outs; clock_hz = 60_000_000 };
+    trace = { Wave.t0 = 0; nets; pcs; outs = List.rev !outs; clock_hz = 60_000_000; pads = [||] };
     received = List.rev !received; port_pushes = List.rev !pushes; run_start = 0; agree = None; first_diff = None;
     log = [] }
 
@@ -170,7 +170,7 @@ let run_chip ?(rtl = true) (img : Image.t) o =
   let received = ref [] in
   host_program b.host img ~hostin:o.hostin ~received;
   let map = pin_map img in
-  let nets = Array.make o.clocks [||] and pcs = Array.make o.clocks [||] in
+  let nets = Array.make o.clocks [||] and pcs = Array.make o.clocks [||] and pads = Array.make o.clocks [||] in
   let outs = ref [] and first_diff = ref None in
   (* after the run's window, 2,000 more clocks with the same world, so that the host can drain
      HOSTOUT; nothing of them is recorded, but OUTs executed then may reach the host *)
@@ -186,6 +186,7 @@ let run_chip ?(rtl = true) (img : Image.t) o =
     let inside = rc >= 0 && rc < o.clocks in
     if inside then begin
       nets.(rc) <- w;
+      pads.(rc) <- Array.copy b.out.pad_nib;
       pcs.(rc) <- Array.init 4 (fun t -> (spec.seq.pages.(t) lsl 8) lor spec.seq.pcs.(t))
     end;
     let smp = Board.samples b ~ext in
@@ -200,7 +201,7 @@ let run_chip ?(rtl = true) (img : Image.t) o =
     @ (if status land 2 <> 0 then [ "chip status: HOSTIN overflowed" ] else [])
     @ (if status land 4 <> 0 then [ "chip status: HOSTOUT overflowed: the host lost OUT bytes" ] else []) in
   { mode = Chip { rtl };
-    trace = { Wave.t0 = 0; nets; pcs; outs = List.rev !outs; clock_hz = 60_000_000 };
+    trace = { Wave.t0 = 0; nets; pcs; outs = List.rev !outs; clock_hz = 60_000_000; pads };
     received = List.rev !received; port_pushes = []; run_start = k0;
     agree = (if rtl then Some (!first_diff = None) else None); first_diff = !first_diff; log }
 
