@@ -76,7 +76,7 @@ let () =
   let show (r : Runner.result) =
     let name = match r.mode with Isa -> "interpreter" | Chip { rtl = true } -> "chip (specification and RTL)" | Chip _ -> "chip (specification)" in
     Printf.printf "%s: %d clocks%s\n" name !clocks (if r.run_start > 0 then Printf.sprintf ", started at chip clock %d after the host-link load" r.run_start else "");
-    Printf.printf "  host received: %s\n" (match r.received with [] -> "nothing"
+    Printf.printf "  OUT executed in the run: %d; host received: %s\n" (List.length r.trace.outs) (match r.received with [] -> "nothing"
         | l -> String.concat " " (List.map (fun (t, b) -> if t = 0 then Printf.sprintf "%02x" b else Printf.sprintf "%02x/%d" b t) l));
     (match r.agree with
      | Some true -> print_endline "  specification and RTL: equal on every pad, every clock"
@@ -94,9 +94,17 @@ let () =
      (match Runner.compare a c with
       | None -> Printf.printf "interpreter and chip: equal nets on every clock of the run\n"
       | Some k -> Printf.printf "interpreter and chip: nets DIFFER at run clock %d\n" k; bad := true);
-     if a.received <> c.received then (print_endline "interpreter and chip: the host received different bytes"; bad := true)
+     if a.trace.outs <> c.trace.outs then (print_endline "interpreter and chip: the threads' OUTs differ (byte, tag or clock)"; bad := true)
+     else Printf.printf "interpreter and chip: the same %d OUTs at the same clocks\n" (List.length a.trace.outs)
    | _ -> ());
   (match chip with Some { agree = Some false; _ } -> bad := true | _ -> ());
+  (* the host link must deliver every OUT of the run, in order (and may deliver later ones) *)
+  (match chip with
+   | Some c ->
+     let sent = List.map (fun (_, t, b) -> (t, b)) c.trace.outs in
+     let rec prefix a b = match a, b with [], _ -> true | x :: a', y :: b' -> x = y && prefix a' b' | _ -> false in
+     if not (prefix sent c.received) then (print_endline "chip: the host did not receive the threads' OUTs in order"; bad := true)
+   | None -> ());
   let main = match chip, isa with Some c, _ -> c | None, Some a -> a | None, None -> assert false in
   List.iter (fun (p : Peers.t) -> List.iter (fun l -> Printf.printf "  %s: %s\n" p.name l) (p.report ()))
     (if chip <> None then chip_peers else isa_peers);

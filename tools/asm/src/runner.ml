@@ -57,10 +57,15 @@ let isa_io ~(seen : int array) ~host =
 
 let reg_of (img : Image.t) a = match Image.reg img a with Some v -> v | None -> reset_value a
 
-(* net k's output pad (the first general pad showing sequencer pin k) and input pad *)
+(* net k's output pad and input pad. The output pad is the pad that both shows sequencer pin k
+   and is pin k's input pad (a bidirectional uio pin, as I2C needs), else the first general pad
+   showing pin k. *)
 let pin_map (img : Image.t) =
-  let out_pad k = List.find_opt (fun p -> reg_of img (r_padsel p) land 31 = src_seq k) general_out_pads in
-  Array.init 8 (fun k -> (out_pad k, reg_of img (r_pinin k) land 15))
+  let in_pad k = reg_of img (r_pinin k) land 15 in
+  let out_pad k =
+    let shows = List.filter (fun p -> reg_of img (r_padsel p) land 31 = src_seq k) general_out_pads in
+    if List.mem (in_pad k) shows then Some (in_pad k) else List.nth_opt shows 0 in
+  Array.init 8 (fun k -> (out_pad k, in_pad k))
 
 (* What net k shows when sequencer pin k has quarter levels [nib] and enable [oe], as the chip's
    pad stage makes it (chip_spec.ml, [outputs]): a push-pull pad (0-7) always drives, the pin's
@@ -167,7 +172,9 @@ let run_chip ?(rtl = true) (img : Image.t) o =
   let map = pin_map img in
   let nets = Array.make o.clocks [||] and pcs = Array.make o.clocks [||] in
   let outs = ref [] and first_diff = ref None in
-  let total = k0 + o.clocks in
+  (* after the run's window, 2,000 more clocks with the same world, so that the host can drain
+     HOSTOUT; nothing of them is recorded, but OUTs executed then may reach the host *)
+  let total = k0 + o.clocks + 2000 in
   for c = 0 to total - 1 do
     if c = k0 && not (Chip_spec.run spec) then failwith "the run did not start at the predicted clock";
     let rc = c - k0 in
@@ -176,7 +183,8 @@ let run_chip ?(rtl = true) (img : Image.t) o =
     Array.iteri (fun k (_, ip) -> ext.(ip) <- w.(k)) map;
     (* uio pads that are outputs of a net are that net's wire *)
     Array.iteri (fun k (op, _) -> match op with Some p when p >= 8 -> ext.(p) <- w.(k) | _ -> ()) map;
-    if rc >= 0 then begin
+    let inside = rc >= 0 && rc < o.clocks in
+    if inside then begin
       nets.(rc) <- w;
       pcs.(rc) <- Array.init 4 (fun t -> (spec.seq.pages.(t) lsl 8) lor spec.seq.pcs.(t))
     end;
@@ -184,12 +192,7 @@ let run_chip ?(rtl = true) (img : Image.t) o =
     (match Board.advance b cores ~smp ~reset:(c < 2) with
      | [ a; r ] -> if (a.pad_nib <> r.pad_nib || a.uio_oe <> r.uio_oe) && !first_diff = None then first_diff := Some c
      | _ -> ());
-    if rc >= 0 then (match spec.out_pend with Some (tag, by) -> outs := (rc, tag, by) :: !outs | None -> ())
-  done;
-  (* let the host drain what is left *)
-  for _ = 1 to 2000 do
-    let smp = Board.samples b ~ext:(Array.make n_pads 15) in
-    ignore (Board.advance b [ Board.spec_core spec ] ~smp ~reset:false)
+    if inside then (match spec.out_pend with Some (tag, by) -> outs := (rc, tag, by) :: !outs | None -> ())
   done;
   let status = Chip_spec.status spec in
   let log =

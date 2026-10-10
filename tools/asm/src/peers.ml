@@ -82,6 +82,7 @@ type i2c_state = Idle | Addr | Ack_addr | Wr | Ack_wr | Rd | Ack_rd
 
 let i2c_target ~sda ~scl ~addr ?(stretch = 0) (mem : int array) =
   let st = ref Idle and sh = ref 0 and nb = ref 0 and ptr = ref 0 and first = ref false and reading = ref false in
+  let started = ref false in
   let acked = ref false and pull_sda = ref false and hold_scl = ref 0 in
   let p_sda = ref 1 and p_scl = ref 1 in
   let log = ref [] in
@@ -97,11 +98,11 @@ let i2c_target ~sda ~scl ~addr ?(stretch = 0) (mem : int array) =
         if !p_scl = 1 && c = 1 && !p_sda = 1 && d = 0 && not !pull_sda then begin
           (* START or repeated START (SDA falls while SCL is high, and not by our own hand) *)
           if !st <> Idle && !st <> Addr then say "%d: repeated START" clock else say "%d: START" clock;
-          st := Addr; sh := 0; nb := 0
+          st := Addr; sh := 0; nb := 0; started := true
         end
         else if !p_scl = 1 && c = 1 && !p_sda = 0 && d = 1 && not !pull_sda then begin
-          if !st <> Idle then say "%d: STOP" clock;
-          st := Idle
+          if !started then say "%d: STOP" clock;
+          started := false; st := Idle
         end
         else if !p_scl = 0 && c = 1 then begin
           (* rising SCL: the receiver samples *)
