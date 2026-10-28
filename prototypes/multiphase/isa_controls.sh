@@ -8,14 +8,21 @@ seq="$here/../deadline-sequencer"
 backup=$(mktemp --tmpdir=/var/tmp sequencer.ml.XXXXXX)
 cp "$seq/sequencer.ml" "$backup"
 trap 'cp "$backup" "$seq/sequencer.ml"; rm --force "$backup"' EXIT
-run() { (cd "$seq" && nice ionice opam exec --switch=5.3.0 -- dune exec ./main.exe 2>&1 | grep --extended-regexp 'lockstep|ALL|FAILURES') || true; }
+# run VERDICT: prints the lockstep lines. The lockstep exits 1 on a mismatch, so the verdict is read from
+# its text; a run that did not print the expected verdict line (tool absent or crashed) fails this script
+run() {
+  local want=$1 log
+  log=$(cd "$seq" && nice ionice opam exec --switch=5.3.0 -- dune exec ./main.exe 2>&1) || true
+  printf '%s\n' "$log" | grep --extended-regexp 'lockstep|ALL|FAILURES' || true
+  printf '%s\n' "$log" | grep --quiet --line-regexp "$want" || { echo "NOT RUN or wrong verdict: expected $want"; exit 1; }
+}
 {
-  echo "unmutated:"; run
+  echo "unmutated:"; run "ALL PASS"
   for m in 's/(of_int ~width:2 p <: q_reg.value)/(of_int ~width:2 p <=: q_reg.value)/' \
            's/(concat_msb \[ nib; select acc 7 4 \])/(concat_msb [ rev4 nib; select acc 7 4 ])/' \
            's/pin_out_n <-- with_pin_bit sho_bit; sub_q <-- q/pin_out_n <-- with_pin_bit sho_bit/'; do
     cp "$backup" "$seq/sequencer.ml"; sed --in-place "$m" "$seq/sequencer.ml"
     if cmp --silent "$seq/sequencer.ml" "$backup"; then echo "mutation did not apply: $m"; exit 1; fi
-    echo "mutant $m:"; run
+    echo "mutant $m:"; run FAILURES
   done
 } | tee "$here/results/isa-controls.txt"
