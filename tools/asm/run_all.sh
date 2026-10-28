@@ -23,7 +23,12 @@ run() {   # result file, command...
   wait_load
   { header "$*"; nice ionice "$@" 2>&1; echo "exit $?"; } > "results/$out" || true
   echo "$out: $(grep --extended-regexp 'ALL|FAIL|DRIFT' "results/$out" | tail --lines=1)"
+  # a crashed or absent tool leaves "exit 127" and no verdict line: that is a failure, not a pass
+  if ! grep --quiet '^exit 0$' "results/$out" || ! grep --quiet --invert-match --extended-regexp '^(#|exit )' "results/$out"; then
+    echo "NOT PASS: $out (tool failed or printed nothing)" >&2; status=1
+  fi
 }
+status=0
 mkdir --parents results
 wait_load
 nice ionice opam exec --switch=5.3.0 -- dune build --root . 2>&1
@@ -32,3 +37,4 @@ run roundtrip.txt "$B/test/roundtrip.exe" 2000
 run docs-drift.txt "$B/test/docs_drift.exe"
 run examples.txt "$B/test/examples.exe"
 run judge.txt ./test/judge_examples.py
+exit $status

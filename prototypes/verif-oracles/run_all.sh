@@ -24,7 +24,12 @@ run() {   # result-name, command...
   wait_load
   { header "$@"; nice ionice "$@" 2>&1; echo "exit $?"; } > "$out" || true
   echo "wrote $out: $(grep --extended-regexp 'PASS|FAIL' "$out" | tail --lines=1)"
+  # a crashed or absent tool leaves "exit 127" and no verdict line: that is a failure, not a pass
+  if ! grep --quiet '^exit 0$' "$out" || ! grep --quiet --invert-match --extended-regexp '^(#|exit )' "$out"; then
+    echo "NOT PASS: $out (tool failed or printed nothing)" >&2; status=1
+  fi
 }
+status=0
 wait_load
 nice ionice opam exec --switch=5.3.0 -- dune build --root . 2>&1
 run crc-maths $B/crc/crc_oracle.exe maths
@@ -42,3 +47,4 @@ run hazard-controls $B/hazard/hazard_controls.exe
 run hazard-base $B/stall/hazard_base.exe
 run hazard-wide $B/stall-wide/hazard_wide.exe
 run hazard-bridge $B/hazard-mp/hazard_bridge.exe
+exit $status
