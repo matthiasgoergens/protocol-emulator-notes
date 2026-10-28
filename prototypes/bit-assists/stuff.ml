@@ -135,7 +135,10 @@ let core ~spec ~restart ~(cfg : cfg_signals) ~update ~b ~stuff_pos =
 
 (* Transmit. When [due] (a bit goes out this clock): if a stuff bit is due it goes out and the
    data bit is not taken; else the data bit [data_bit] goes out if [data_valid] and is taken; else
-   [underrun]. Outputs are combinational of this clock's state and inputs. *)
+   [underrun]. Outputs are combinational of this clock's state and inputs.
+   Contract: [restart] and [due] are never high in the same clock. A bit sent in a restart clock
+   goes out but is not counted, so the next run could exceed [run] (Aristotle's counterexample,
+   aristotle-runs/RESULTS.md); txpath drives them from two values of one phase register. *)
 type tx_out = { out_bit : Signal.t; take : Signal.t; stuffed : Signal.t; underrun : Signal.t }
 
 let tx ~clock ~clear ~restart ~cfg ~due ~data_bit ~data_valid =
