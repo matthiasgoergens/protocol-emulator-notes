@@ -326,6 +326,15 @@ It is not a replacement for our BMC. Our loop gives counterexamples in the progr
 replayed on the specification. On the UART, whose frame is about 50 rounds long, k-induction and
 IC3 found no proof in 15 minutes, while the BMC checks two whole frames in under a second.
 
+**Follow-up, 2026-10-28** (`results/kind2-uart-split.txt`). With Kind 2's default engine set
+(adding 2-induction and the invariant generators) and 30 minutes, the UART model is still not
+proved, but BMC finds no violation to 3,510 rounds (14,040 clocks, about 63 frames). Split into
+one property per bit slot (`~split`, after parthDOOM/escapement's per-assertion proofs), only the
+reachable-pc condition is proved (2-induction), and BMC reaches fewer rounds (2,934). Splitting
+alone does not help: what the proof lacks is an invariant tying the monitor's sample count to the
+transmitting thread's pc and shift register, which escapement supplies as lemma groups. The
+split model's planted-stretch control fails all ten bit-slot properties (k = 24 to 67).
+
 A dense-time timed automaton (UPPAAL) would add nothing for this machine: time is a slot counter
 by construction, and a discrete model is exact.
 

@@ -1,0 +1,28 @@
+# command: kind2 --z3_bin z3 --smt_solver Z3 --color false --timeout 1800 <model>   (default engine set)
+# commit: f3253f35f63ddd1680bb8d12ff2f81d1791546d3; kind2 v3.0.0; Z3 version 5.1.0 - 64 bit; date 2026-10-28
+# input sha256: b49f6b039e52c443e2aed994ad8eb5d35973bc70123ba7d90f32ac340fcceda2  uart-every-byte.lus
+# input sha256: b95678cdc8c1299da5db8423a4bdce0f8508b598e6afc6e5ce9e83d1049067b6  uart-every-byte-split.lus
+== kind2/uart-every-byte.lus (one property)
+<Warning> In bounded model checking: a check-sat resulted in `unknown`. This is most likely due to non-linear expressions in the model, usually multiplications `v_1 * v_2` or divisions `v_1 / v_2`. Consider running Kind 2 with `--check_sat_assume false` or abstracting non-linear expressions using contracts.
+<Note> Incomplete analysis result: Not all properties could be proven invariant
+InvProp[L724C3]: true up to 3510 steps
+<Timeout> Wallclock timeout.
+exit=30 wall=1800s
+== kind2/uart-every-byte-split.lus (in_reach, bit0_ok..bit9_ok, ok)
+<Success> Property InvProp[L815C3] is valid by 2-induction after 0.164s.
+<Warning> In bounded model checking: a check-sat resulted in `unknown`. This is most likely due to non-linear expressions in the model, usually multiplications `v_1 * v_2` or divisions `v_1 / v_2`. Consider running Kind 2 with `--check_sat_assume false` or abstracting non-linear expressions using contracts.
+<Note> Incomplete analysis result: Not all properties could be proven invariant
+InvProp[L837C3]: true up to 2934 steps
+InvProp[L835C3]: true up to 2934 steps
+InvProp[L833C3]: true up to 2934 steps
+InvProp[L831C3]: true up to 2934 steps
+InvProp[L829C3]: true up to 2934 steps
+InvProp[L827C3]: true up to 2934 steps
+InvProp[L825C3]: true up to 2934 steps
+InvProp[L823C3]: true up to 2934 steps
+InvProp[L821C3]: true up to 2934 steps
+InvProp[L819C3]: true up to 2934 steps
+InvProp[L817C3]: true up to 2934 steps
+InvProp[L815C3]: valid (k=2)
+<Timeout> Wallclock timeout.
+exit=30 wall=1800s
