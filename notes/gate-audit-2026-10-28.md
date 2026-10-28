@@ -91,3 +91,12 @@ and output files declared, a freshness check (result newer than the inputs and t
 
 Not addressed anywhere in the repository: stale result files (nothing compares a result's date or commit with
 the tool or inputs that should have produced it).
+
+## Normal case after the fixes (checked afterwards, 2026-10-28)
+
+- `prototypes/formal/report.sh` on the committed results: exit 0, 61 PROVED; controls 15 FAILED,
+  2 VACUOUS.
+- `prototypes/chip-top/suite.sh quick` (what CI runs): exit 0, "suite quick: passed", 131 s.
+
+The other changed scripts' normal paths (precheck controls, equivalence runs, the asm, spdif and
+verif-oracles suites, isa_controls) were not re-run here.
