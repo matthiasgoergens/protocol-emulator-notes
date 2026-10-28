@@ -1,0 +1,43 @@
+The directory holds one Verilog module, generated from a Hardcaml description, so its internal
+signal names are machine-generated and carry no meaning. Below is the English specification of
+the module. Verify that the RTL meets the specification: work out the properties that matter,
+prove or refute each one, and give a counterexample trace for any you refute. Where the RTL and
+the specification disagree, treat it as a bug in the RTL. Report ambiguities in the
+specification as such.
+
+Clocking for this module: one clock, `clock`, rising edge. `clear` is a synchronous,
+active-high reset: at a rising edge with clear = 1, every register becomes 0. Outputs called
+combinational depend on the current register state and the current inputs. Configuration inputs
+(cfg_*) may change at any clock; each clock follows the rules with that clock's configuration.
+
+Module stuff_rx: the receive half of a bit-stuffing tracker (destuffing with a violation
+check), protocol-agnostic. Example configurations: USB, a 0 after six 1s (cfg_run = 6,
+cfg_either = 0, cfg_value = 1); CAN, the complement after five equal bits of either value
+(cfg_run = 5, cfg_either = 1); HDLC, a 0 after five 1s (cfg_run = 5, cfg_either = 0,
+cfg_value = 1).
+
+Inputs: valid, b (one received bit per clock with valid = 1), restart, cfg_run[3:0],
+cfg_either, cfg_value. Outputs: keep, err.
+
+State: a run count (4 bits) and the previous bit.
+
+Continuing the run: in "ones" mode (cfg_either = 0) a bit continues the run if it equals
+cfg_value; in "either" mode (cfg_either = 1) a bit continues the run if it equals the previous
+bit. The run is full when cfg_run != 0 and count >= cfg_run. cfg_run = 0 switches stuffing off:
+no bit is ever a stuff bit.
+
+The run is counted over every bit on the line, stuff bits included. A bit received while the run
+is full occupies a stuff position. On a clock with valid = 1:
+- if the bit occupies a stuff position, or does not continue the run, the count restarts: in
+  either mode at 1 (the bit starts a run of one); in ones mode at 1 if the bit equals cfg_value,
+  else at 0;
+- otherwise the count increments, saturating at 15;
+- the previous bit becomes b.
+With valid = 0 the state does not change. restart = 1 at a clock edge clears the count and the
+previous bit to 0, and takes precedence over a valid bit in the same clock (restart marks a frame
+start).
+
+Outputs, combinational:
+- keep = valid and not full: the bit is a data bit (a stuff bit is dropped);
+- err = valid and full and the bit continues the run: a stuff violation (USB: seven 1s; CAN: a
+  stuff error). After a violation the count restarts as after any stuff bit.
