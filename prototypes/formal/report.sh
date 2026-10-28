@@ -7,9 +7,10 @@
 set -o errexit -o nounset -o pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 cd "$HERE"
+missing=0
 section() {   # title, file, planted-pattern
   echo "== $1 ($2)"
-  if [ ! -f "$2" ]; then echo "  (no result file)"; return; fi
+  if [ ! -f "$2" ]; then echo "  (no result file: NOT RUN)"; missing=1; return; fi
   grep --extended-regexp '^(PROPERTY|COVER|DECLARATION)|^  COVER' "$2" | sed 's/^  //' | while IFS= read -r line; do
     if [[ $line =~ $3 ]]; then echo "  [control] $line"; else echo "  $line"; fi
   done
@@ -36,3 +37,6 @@ cp results/summary.txt.tmp results/summary.txt
 } >> results/summary.txt
 rm --force results/summary.txt.tmp
 cat results/summary.txt
+# a missing result file, or no property at all, is not a clean report
+[ "$missing" = 0 ] || { echo "NOT COMPLETE: a result file is missing" >&2; exit 1; }
+[ -n "$counts" ] || { echo "NOT COMPLETE: no PROPERTY line in any result file" >&2; exit 1; }
