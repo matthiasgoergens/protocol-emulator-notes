@@ -110,12 +110,13 @@ let collect roots =
   List.rev !apps, !vars
 
 (* [write ~ok ~slots ~extra oc]: [ok] is the property (a Bool term over state variables and the
-   round's inputs); [extra] are further state variables (monitors) as slots *)
-let write oc ~node ~(ok : Smt.term) ~(slots : slot list) ~final =
+   round's inputs); [extra] are further state variables (monitors) as slots. [props] are further
+   named properties, each checked on its own (Kind 2 then uses those it proves as lemmas). *)
+let write ?(props = []) oc ~node ~(ok : Smt.term) ~(slots : slot list) ~final =
   let by_var = Hashtbl.create 64 in
   List.iter (fun s -> Hashtbl.replace by_var s.var.Smt.id s) slots;
   (* the cone of influence: start from ok, add the next-state term of every state variable met *)
-  let roots = ref [ ok ] and in_cone = Hashtbl.create 64 in
+  let roots = ref (ok :: List.map snd props) and in_cone = Hashtbl.create 64 in
   let rec fix () =
     let _, vars = collect !roots in
     let fresh = List.filter (fun (v : Smt.term) -> Hashtbl.mem by_var v.id && not (Hashtbl.mem in_cone v.id)) vars in
@@ -134,9 +135,11 @@ let write oc ~node ~(ok : Smt.term) ~(slots : slot list) ~final =
     (String.concat "; " (List.map (fun (v : Smt.term) -> Printf.sprintf "%s : %s" (expr v) (ty v)) inputs));
   List.iter (fun s -> Printf.fprintf oc "  %s : %s;\n" (ident s.sname) (ty s.var)) state;
   List.iter (fun (t : Smt.term) -> Printf.fprintf oc "  n%d : %s;\n" t.id (ty t)) apps;
+  List.iter (fun (name, _) -> Printf.fprintf oc "  %s : bool;\n" (ident name)) props;
   Printf.fprintf oc "let\n";
   List.iter (fun s ->
       Printf.fprintf oc "  %s = %s -> pre %s;\n" (ident s.sname) (expr (Smt.k ~w:(Smt.width s.var) s.init)) (ref_ (s.next final))) state;
   List.iter (fun (t : Smt.term) -> match t.node with App _ -> Printf.fprintf oc "  n%d = %s;\n" t.id (expr t) | _ -> ()) apps;
+  List.iter (fun (name, t) -> Printf.fprintf oc "  %s = %s;\n  --%%PROPERTY %s;\n" (ident name) (ref_ t) (ident name)) props;
   Printf.fprintf oc "  ok = %s;\n  --%%PROPERTY ok;\ntel\n" (ref_ ok);
   List.length state, List.length inputs, List.length apps
