@@ -43,13 +43,18 @@ if [ "$what" = all ] || [ "$what" = bmc ]; then
 fi
 if [ "$what" = all ] || [ "$what" = kind2 ]; then
   ./_build/default/main.exe kind2-export
+  k2bad=0
   { header "kind2 on kind2/*.lus"; echo "# $("$KIND2" --version)"
     for f in kind2/*.lus; do
       wait_load
       echo "== $f"
       start=$(date +%s.%N)
-      nice ionice "$KIND2" --z3_bin "$(command -v "$Z3")" --smt_solver Z3 --color false --enable BMC --enable IND --enable IC3IA --timeout 900 "$f" 2>&1 \
-        | grep --extended-regexp "^<|valid|invalid|unknown|timeout|k=" || true
+      # a missing or crashed Kind 2 prints no property line: that is NOT RUN and fails the script,
+      # not an empty (and so apparently clean) section
+      k2=$(nice ionice "$KIND2" --z3_bin "$(command -v "$Z3")" --smt_solver Z3 --color false --enable BMC --enable IND --enable IC3IA --timeout 900 "$f" 2>&1) || true
+      printf '%s\n' "$k2" | grep --extended-regexp "^<|valid|invalid|unknown|timeout|k=" || true
+      printf '%s\n' "$k2" | grep --quiet --extended-regexp '^<(Success|Failure)>|: (valid|invalid|unknown)' \
+        || { echo "NOT RUN: no Kind 2 verdict for $f"; k2bad=1; }
       printf 'wall %.1f s\n' "$(echo "$(date +%s.%N) - $start" | bc)"
-    done; } 2>&1 | tee results/kind2.txt
+    done; exit $k2bad; } 2>&1 | tee results/kind2.txt
 fi

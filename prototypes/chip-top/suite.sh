@@ -32,7 +32,9 @@ run() {   # name, command...
   wait_load
   echo "== $name: $*"
   nice ionice "$@" > "$out/$name.txt" 2>&1 || { echo "FAILED: $name (log $out/$name.txt)"; tail --lines=20 "$out/$name.txt"; exit 1; }
-  grep --extended-regexp 'trials with mismatches|planted integration bugs caught|RTL register coverage|^inputs:|equivalent|DIFFERS' "$out/$name.txt" || true
+  # a tool that exited 0 but printed no result line (a stub, a changed executable) is NOT RUN, not a pass
+  grep --extended-regexp 'trials with mismatches|planted integration bugs caught|RTL register coverage|^inputs:|equivalent|DIFFERS|control caught' "$out/$name.txt" \
+    || { echo "NOT RUN: no result line in $out/$name.txt"; exit 1; }
 }
 # The coverage floor: the share of the register bits that are not provably constant which
 # changed. The full runs reach 99.0 % (4 PEs) and 99.1 % (8 PEs); what is left is unreachable by

@@ -26,8 +26,10 @@ run() {   # name, arguments...
   wait_load
   { header "main.exe $*"; nice ionice ./_build/default/main.exe "$@" 2>&1; echo "exit $?"; } > "results/$name.txt" || true
   tail --lines=1 "results/$name.txt" | sed "s/^/$name: /"
-  grep --quiet '^ALL CHECKS PASS' "results/$name.txt" || echo "$name: checks failed, see results/$name.txt"
+  grep --quiet '^ALL CHECKS PASS' "results/$name.txt" && grep --quiet '^exit 0$' "results/$name.txt" \
+    || { echo "$name: checks failed, see results/$name.txt"; status=1; }
 }
+status=0
 want() { [ $# -eq 0 ] && return 0; for w in "${SUITES[@]}"; do [ "$w" = "$1" ] && return 0; done; return 1; }
 SUITES=("$@")
 if [ ${#SUITES[@]} -eq 0 ]; then SUITES=(pacer tx controls roundtrip jitter tolerance rx demo sigrok); fi
@@ -41,7 +43,8 @@ for s in "${SUITES[@]}"; do
     tolerance) run tolerance tolerance ;;
     rx) run rx-random rx 40 2026 ;;
     demo) run demo demo 1.0 ;;
-    sigrok) wait_load; { header "sigrok_check.sh"; ./sigrok_check.sh 2>&1; echo "exit $?"; } > results/sigrok.txt || true; tail --lines=2 results/sigrok.txt ;;
+    sigrok) wait_load; { header "sigrok_check.sh"; ./sigrok_check.sh 2>&1; echo "exit $?"; } > results/sigrok.txt || true; tail --lines=2 results/sigrok.txt; grep --quiet '^exit 0$' results/sigrok.txt || { echo "sigrok: checks failed"; status=1; } ;;
     *) echo "unknown suite $s" >&2; exit 2 ;;
   esac
 done
+exit $status

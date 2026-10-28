@@ -566,10 +566,12 @@ def main():
     print("# date: " + datetime.datetime.now().astimezone().isoformat(timespec="seconds"))
     print("# analyser rate: " + (f"{a.rate:g} Hz (resampled)" if a.rate else "as simulated"))
     failed = 0
+    ran = 0
     rows = []
     for c in CASES + role_cases(tr):
         if only and c["name"] not in only and not (c["name"].startswith("roles/") and "roles" in only):
             continue
+        ran += 1
         stem = c["stem"]
         binf, expf = tr / (stem + ".bin"), tr / ((c.get("expected") or stem) + ".expected")
         if not binf.exists() or not expf.exists():
@@ -620,6 +622,9 @@ def main():
     for n, why in NO_DECODER:
         print(f"  {n}: {why}")
     print()
+    if not ran:   # a typo in --only, or no cases at all, must not read as a pass
+        print("NO CASES RUN (NOT PASS)")
+        return 1
     print("ALL CHECKS PASS" if not failed else f"{failed} CHECK(S) FAILED")
     return 1 if failed else 0
 
