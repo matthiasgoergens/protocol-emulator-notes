@@ -1,0 +1,12 @@
+NAME                                               STATUS                 EVIDENCE CREATED BY UPDATED        LOCATION
+---------------------------------------------------------------------------------------------------------------------------
+StuffRxSpec.either_mode_stuff_bit_starts_run       PROVED                 -        you        4 mins ago     stuff_rx.v:1
+StuffRxSpec.either_mode_stuff_after_full_run       PROVED                 -        Aristotle  4 mins ago     stuff_rx.v:1
+StuffRxSpec.ones_mode_violation_restarts_run       PROVED                 -        you        4 mins ago     stuff_rx.v:1
+StuffRxSpec.ones_mode_run_restarts_after_other_bit PROVED                 -        Aristotle  4 mins ago     stuff_rx.v:1
+StuffRxSpec.ones_mode_stuff_after_full_run         PROVED                 -        Aristotle  4 mins ago     stuff_rx.v:1
+StuffRxSpec.violation_never_kept                   PROVED                 -        Aristotle  10 mins ago    stuff_rx.v:23
+StuffRxSpec.outputs_low_without_valid              PROVED                 -        Aristotle  10 mins ago    stuff_rx.v:21
+StuffRxSpec.stuffing_off_keeps_every_bit           PROVED                 -        you        10 mins ago    stuff_rx.v:20
+StuffRxSpec.err_follows_spec                       PROVED                 -        you        10 mins ago    stuff_rx.v:119
+StuffRxSpec.keep_follows_spec                      PROVED                 -        you        10 mins ago    stuff_rx.v:118

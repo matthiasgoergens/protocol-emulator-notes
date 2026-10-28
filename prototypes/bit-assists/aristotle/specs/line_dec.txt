@@ -1,0 +1,24 @@
+Module line_dec: a line decoder with three modes, selected by cfg_mode[1:0]: 0 = pass, 1 = NRZI,
+2 = Manchester (IEEE 802.3 convention: a 1 is low then high); 3 behaves as pass. cfg_invert
+inverts every received symbol; cfg_toggle_on is the NRZI bit value that toggles the level (USB:
+0). There is no restart: a receiver decodes across the idle gap, which is the reference level for
+the first symbol.
+
+Inputs: valid, sym (one received symbol per clock with valid = 1), cfg_mode, cfg_invert,
+cfg_toggle_on. Outputs: out_valid, out_bit, err, all combinational.
+
+Let s = sym XOR cfg_invert.
+- A reference register holds s of the previous valid symbol (in every mode); it starts at 0.
+- pass: out_valid = valid, out_bit = s, err = 0.
+- NRZI: out_valid = valid; out_bit = cfg_toggle_on if s differs from the reference, else the
+  complement of cfg_toggle_on; err = 0.
+- Manchester: valid symbols pair into bit cells (a phase register alternates at each valid
+  symbol in Manchester mode, starting at the first half). At a first-half symbol, out_valid = 0
+  and err = 0, and s is stored. At a second-half symbol, out_valid = 1, out_bit = s (the
+  second half's level, which is the bit), and err = 1 if s equals the stored first half (a code
+  violation: both halves equal).
+With valid = 0 all outputs are 0 and the state does not change.
+
+Consequence to check: line_dec in Manchester mode decodes what an IEEE 802.3 Manchester encoder
+with the same cfg_invert sends, with err = 0, when its first symbol arrives at a first-half
+phase; and any bit cell whose two halves are equal gives err = 1.

@@ -1,0 +1,12 @@
+The directory holds one Verilog module, generated from a Hardcaml description, so its internal
+signal names are machine-generated and carry no meaning. Below is the English specification of
+the module. Verify that the RTL meets the specification: work out the properties that matter,
+prove or refute each one, and give a counterexample trace for any you refute. Where the RTL and
+the specification disagree, treat it as a bug in the RTL. Report ambiguities in the
+specification as such.
+
+Clocking for this module: one clock, `clock`, rising edge. `clear` is a synchronous,
+active-high reset: at a rising edge with clear = 1, every register becomes 0. Outputs called
+combinational depend on the current register state and the current inputs. Configuration inputs
+(cfg_*) may change at any clock; each clock follows the rules with that clock's configuration.
+
