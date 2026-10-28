@@ -60,12 +60,19 @@ lib.write_gds(gds)
 PYEOF
 }
 
+bad=0
 for c in $CONTROLS; do
   mkdir --parents "$OUT/$c"
   cp "$STAGE/info.yaml" "$OUT/$c/info.yaml"
   plant "$c" "$STAGE/tt_submission" "$OUT/$c/tt_submission"
   status=0
   "$HERE/precheck.sh" "$OUT/stage" "$OUT/$c/report" "$OUT/$c" > "$OUT/$c.out" 2>&1 || status=$?
-  echo "control $c: precheck exit $status ($( [ "$status" = 0 ] && echo 'PASSED: control NOT detected' || echo 'rejected, as it should be'))" | tee --append "$OUT/summary.txt"
+  # "rejected" needs the precheck's own report with a failed check; a nonzero exit without one (podman
+  # or the venv missing, the plant failing) is NOT RUN, not a detection
+  if [ "$status" = 0 ]; then verdict='PASSED: control NOT detected'; bad=1
+  elif grep --quiet '^| .*❌' "$OUT/$c/report/results.md" 2>/dev/null; then verdict='rejected, as it should be'
+  else verdict='NOT RUN: no failed check in a report, see '"$OUT/$c.out"; bad=1; fi
+  echo "control $c: precheck exit $status ($verdict)" | tee --append "$OUT/summary.txt"
   grep --extended-regexp '^\| .*(❌|✅)' "$OUT/$c/report/results.md" | tee --append "$OUT/summary.txt" >/dev/null || true
 done
+exit $bad
