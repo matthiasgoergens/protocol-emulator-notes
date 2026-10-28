@@ -8,3 +8,8 @@
  (name check)
  (modules check)
  (libraries hardcaml bitassists bitrefs unix))
+
+(executable
+ (name emit)
+ (modules emit)
+ (libraries hardcaml bitassists))

@@ -1,0 +1,28 @@
+Module line_enc: a line encoder with three modes, selected by cfg_mode[1:0]: 0 = pass, 1 = NRZI,
+2 = Manchester (IEEE 802.3 convention); 3 behaves as pass. cfg_invert inverts every symbol;
+cfg_toggle_on selects the NRZI bit value that toggles the level (USB toggles on 0).
+
+Inputs: tick (emit one symbol this clock), bit (the data bit offered), restart, cfg_mode,
+cfg_invert, cfg_toggle_on. Outputs: need_bit, sym, line.
+
+need_bit (combinational): whether `bit` is consumed at this tick. Always 1 in pass and NRZI
+mode. In Manchester mode a bit takes two ticks (two half-bit symbols) and need_bit is 1 only at
+the first half of a bit cell.
+
+sym (combinational): the symbol this tick emits, before cfg_invert is applied:
+- pass: sym = bit;
+- NRZI: a level register; the new level = level XOR (bit == cfg_toggle_on), and sym is the new
+  level; the level register takes the new level at a tick in NRZI mode;
+- Manchester: at the first half of a bit cell sym is the complement of `bit` and the bit is
+  latched; at the second half sym is the latched bit. So a 1 is sent low then high.
+Then sym is XORed with cfg_invert, in every mode.
+
+line: a register that takes sym at every clock with tick = 1 and holds otherwise; line shows
+each symbol from the clock after its tick.
+
+restart = 1 at a clock edge puts NRZI at the idle level 0 and Manchester at the start of a bit
+cell (and clears the latched bit), taking precedence over a tick in the same clock. It does not
+affect line.
+
+Consequence to check: in Manchester mode, the two symbols of every bit cell differ, and the
+second equals the data bit XOR cfg_invert.
