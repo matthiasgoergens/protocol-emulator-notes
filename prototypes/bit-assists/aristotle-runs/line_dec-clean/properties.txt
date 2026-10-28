@@ -1,0 +1,12 @@
+NAME                                             STATUS                 EVIDENCE CREATED BY UPDATED        LOCATION
+-------------------------------------------------------------------------------------------------------------------------
+LineDecSpec.manchester_equal_halves_flag_error   PROVED                 -        you        5 mins ago     line_dec.v:110
+LineDecSpec.manchester_decodes_ieee8023_encoder  PROVED                 -        you        5 mins ago     line_dec.v:1
+LineDecSpec.nrzi_first_symbol_against_zero       PROVED                 -        Aristotle  5 mins ago     line_dec.v:17
+LineDecSpec.nrzi_decodes_against_previous_symbol PROVED                 -        Aristotle  5 mins ago     line_dec.v:14
+LineDecSpec.pass_mode_outputs                    PROVED                 -        you        5 mins ago     line_dec.v:19
+LineDecSpec.out_valid_err_zero_without_valid     PROVED                 -        you        5 mins ago     line_dec.v:20
+LineDecSpec.out_bit_follows_spec                 PROVED                 -        you        5 mins ago     line_dec.v:22
+LineDecSpec.err_follows_spec                     PROVED                 -        you        5 mins ago     line_dec.v:23
+LineDecSpec.out_valid_follows_spec               PROVED                 -        you        5 mins ago     line_dec.v:21
+LineDecSpec.out_bit_zero_without_valid           REFUTED                BOTH     you        7 mins ago     line_dec.v:109
