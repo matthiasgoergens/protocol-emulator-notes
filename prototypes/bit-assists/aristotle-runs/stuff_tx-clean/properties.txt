@@ -1,0 +1,14 @@
+NAME                                                   STATUS                 EVIDENCE CREATED BY UPDATED        LOCATION
+-------------------------------------------------------------------------------------------------------------------------------
+stuff_tx.Spec.usb_no_seven_ones_counting_restart_clock REFUTED                BOTH     Aristotle  6 mins ago     stuff_tx.v:136
+stuff_tx.Spec.either_mode_stuff_after_full_run         PROVED                 -        Aristotle  7 mins ago     stuff_tx.v:138
+stuff_tx.Spec.ones_mode_stuff_after_full_run           PROVED                 -        Aristotle  7 mins ago     stuff_tx.v:138
+stuff_tx.Spec.either_mode_run_bound                    PROVED                 -        Aristotle  7 mins ago     stuff_tx.v:136
+stuff_tx.Spec.ones_mode_run_bound                      PROVED                 -        Aristotle  7 mins ago     stuff_tx.v:136
+stuff_tx.Spec.can_no_six_equal_bits                    PROVED                 -        you        7 mins ago     stuff_tx.v:136
+stuff_tx.Spec.usb_zero_after_six_ones                  PROVED                 -        you        7 mins ago     stuff_tx.v:138
+stuff_tx.Spec.usb_no_seven_ones                        PROVED                 -        you        7 mins ago     stuff_tx.v:136
+stuff_tx.Spec.idle_rule                                PROVED                 -        you        11 mins ago    stuff_tx.v:1
+stuff_tx.Spec.underrun_rule                            PROVED                 -        you        11 mins ago    stuff_tx.v:139
+stuff_tx.Spec.data_bit_rule                            PROVED                 -        you        11 mins ago    stuff_tx.v:137
+stuff_tx.Spec.stuff_bit_rule                           PROVED                 -        you        11 mins ago    stuff_tx.v:138

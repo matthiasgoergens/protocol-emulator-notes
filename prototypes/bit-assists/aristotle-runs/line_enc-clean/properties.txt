@@ -1,0 +1,15 @@
+NAME                                                  STATUS                 EVIDENCE CREATED BY UPDATED        LOCATION
+-----------------------------------------------------------------------------------------------------------------------------
+LineEncSpec.manchester_cell_symbols_differ_any_invert REFUTED                BOTH     you        14 mins ago    line_enc.v:25
+LineEncSpec.manchester_cell_symbols_differ            PROVED                 -        you        17 mins ago    line_enc.v:25
+LineEncSpec.manchester_cell_symbols                   PROVED                 -        you        17 mins ago    line_enc.v:25
+LineEncSpec.manchester_halves_alternate               PROVED                 -        you        17 mins ago    line_enc.v:23
+LineEncSpec.nrzi_successive_symbols                   PROVED                 -        you        17 mins ago    line_enc.v:25
+LineEncSpec.nrzi_level_from_idle                      PROVED                 -        you        17 mins ago    line_enc.v:25
+LineEncSpec.restart_returns_to_idle                   PROVED                 -        you        17 mins ago    line_enc.v:21
+LineEncSpec.line_register_rule                        PROVED                 -        you        17 mins ago    line_enc.v:24
+LineEncSpec.pass_mode_sym                             PROVED                 -        you        17 mins ago    line_enc.v:25
+LineEncSpec.need_bit_high_outside_manchester          PROVED                 -        you        17 mins ago    line_enc.v:23
+LineEncSpec.line_follows_spec                         PROVED                 -        Aristotle  17 mins ago    line_enc.v:24
+LineEncSpec.sym_follows_spec                          PROVED                 -        Aristotle  17 mins ago    line_enc.v:25
+LineEncSpec.need_bit_follows_spec                     PROVED                 -        Aristotle  17 mins ago    line_enc.v:23

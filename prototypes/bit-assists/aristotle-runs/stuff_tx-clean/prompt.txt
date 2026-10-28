@@ -1,0 +1,49 @@
+The directory holds one Verilog module, generated from a Hardcaml description, so its internal
+signal names are machine-generated and carry no meaning. Below is the English specification of
+the module. Verify that the RTL meets the specification: work out the properties that matter,
+prove or refute each one, and give a counterexample trace for any you refute. Where the RTL and
+the specification disagree, treat it as a bug in the RTL. Report ambiguities in the
+specification as such.
+
+Clocking for this module: one clock, `clock`, rising edge. `clear` is a synchronous,
+active-high reset: at a rising edge with clear = 1, every register becomes 0. Outputs called
+combinational depend on the current register state and the current inputs. Configuration inputs
+(cfg_*) may change at any clock; each clock follows the rules with that clock's configuration.
+
+Module stuff_tx: the transmit half of a bit-stuffing tracker (inserting stuff bits),
+protocol-agnostic. Example configurations: USB, a 0 after six 1s (cfg_run = 6, cfg_either = 0,
+cfg_value = 1); CAN, the complement after five equal bits of either value (cfg_run = 5,
+cfg_either = 1); HDLC, a 0 after five 1s (cfg_run = 5, cfg_either = 0, cfg_value = 1).
+
+Inputs: due (a bit goes out on the line this clock), data_bit, data_valid (the next data bit and
+whether one is available), restart, cfg_run[3:0], cfg_either, cfg_value. Outputs: out_bit, take,
+stuffed, underrun.
+
+State: a run count (4 bits) and the previous bit sent.
+
+Continuing the run: in "ones" mode (cfg_either = 0) a bit continues the run if it equals
+cfg_value; in "either" mode (cfg_either = 1) a bit continues the run if it equals the previous bit
+sent. The run is full when cfg_run != 0 and count >= cfg_run. cfg_run = 0 switches stuffing off.
+
+Outputs, combinational:
+- when due = 1 and the run is full: stuffed = 1, take = 0, underrun = 0, and out_bit is the stuff
+  bit, which breaks the run: in either mode the complement of the previous bit sent; in ones mode
+  the complement of cfg_value;
+- when due = 1, the run is not full and data_valid = 1: out_bit = data_bit, take = 1 (the data bit
+  is consumed), stuffed = 0, underrun = 0;
+- when due = 1, the run is not full and data_valid = 0: underrun = 1, take = 0, stuffed = 0
+  (nothing is sent; the serialiser takes this as the end of the frame);
+- when due = 0: take = stuffed = underrun = 0.
+out_bit matters only when stuffed or take is 1.
+
+State update, only on a clock where a bit is sent (stuffed = 1 or take = 1), with that bit: the
+run is counted over every bit on the line, stuff bits included. If the bit is a stuff bit, or does
+not continue the run, the count restarts: in either mode at 1 (the bit starts a run of one); in
+ones mode at 1 if the bit equals cfg_value, else at 0. Otherwise the count increments, saturating
+at 15. The previous bit becomes the bit sent. On other clocks the state does not change.
+restart = 1 at a clock edge clears the count and the previous bit to 0 and takes precedence over
+sending in the same clock (restart marks a frame start).
+
+Consequence to check: in USB configuration, out_bit never shows seven consecutive 1s among the
+bits sent since a restart, and a 0 is inserted after every six consecutive 1s; in CAN
+configuration the bits sent never contain six equal consecutive bits.
