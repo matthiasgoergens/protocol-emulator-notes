@@ -118,7 +118,9 @@ module Make (V : Isa2.VALUE) = struct
     assert (bit_clocks mod 2 = 0);
     { pin; bit_clocks; tx_thread; busy = c 1 0; count = c 16 0; byte = c 8 0; frames = c 8 0 }
 
-  let uart_rx_step r ~thread ~(io : S.io) ~(e : S.effects) ~(st : S.state) =
+  (* [per_bit], when given, also receives each bit slot's failure, or-ed into its element k (0
+     the start bit, 9 the stop bit), so a checker can take the slots as separate properties. *)
+  let uart_rx_step ?per_bit r ~thread ~(io : S.io) ~(e : S.effects) ~(st : S.state) =
     let line = ite (bit st.pin_oe r.pin) (extract st.pin_out ~hi:r.pin ~lo:r.pin) (c 1 1) in
     if thread = r.tx_thread then r.byte <- ite e.host_in_ready io.host_in r.byte;
     let busy = eq r.busy (c 1 1) in
@@ -128,7 +130,9 @@ module Make (V : Isa2.VALUE) = struct
     for k = 0 to 9 do
       let expected = if k = 0 then c 1 0 else if k = 9 then c 1 1 else extract r.byte ~hi:(k - 1) ~lo:(k - 1) in
       let sample = and_ busy (eq count (c 16 (half + k * r.bit_clocks))) in
-      bad := or_ !bad (and_ sample (not_ (eq line expected)))
+      let fail = and_ sample (not_ (eq line expected)) in
+      Option.iter (fun a -> a.(k) <- or_ a.(k) fail) per_bit;
+      bad := or_ !bad fail
     done;
     let last = and_ busy (eq count (c 16 (half + 9 * r.bit_clocks))) in
     r.busy <- ite (and_ (not_ busy) (eq line (c 1 0))) (c 1 1) (ite last (c 1 0) r.busy);
