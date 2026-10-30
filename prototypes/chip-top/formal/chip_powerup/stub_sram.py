@@ -29,6 +29,8 @@ def stub(m):
         assert need in conn, (name, need)
     # the proof's memory model reads every clock; refuse an instance where that is not so
     assert conn["A_MEN"] == "vdd" and conn["A_REN"] == "vdd" and conn["A_CLK"] == "clk", conn
+    # and nothing else steers it: the delay trim fixed, the BIST mux off
+    assert conn["A_DLY"] == "vdd" and conn["A_BIST_EN"] == "gnd", conn
     aw = (words - 1).bit_length()
     n += 1
     ports.extend([f"pu_raddr_{n}", f"pu_dout_{n}", f"pu_in_{n}"])

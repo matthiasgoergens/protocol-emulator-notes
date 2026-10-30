@@ -7,9 +7,11 @@
 //   - every SRAM write agrees: enable, and address, data and mask when enabled.
 // The SRAM macros are outside the copies (stub_sram.py): both copies read one memory of arbitrary
 // contents, so they get the same word when they read the same address and independent words
-// otherwise. The write assertion is what makes that sound: once the writes agree, so do the two
-// memories, except at addresses written before reset took hold, which the host reloads anyway.
-// So what is proved is: after reset, the pins depend only on the inputs and the memory contents.
+// otherwise. Nothing ties a word to its address over time, so this covers every memory content
+// (and more). The write assertion is what makes it sound: once the writes agree, so do the two
+// memories. So what is proved is: from equal SRAM contents when reset takes hold, the pins depend
+// only on the inputs. The SRAM's own power-up contents are not made deterministic by anything
+// on the chip; that is why the host reloads the programme after every power-up.
 module chip_powerup #(parameter RESET_CLOCKS = 4) (
     input rst_n_in, input [7:0] ui_in, input [7:0] uio_in,
     input [7:0] dout1_a, input [7:0] dout1_b, input [15:0] dout2_a, input [15:0] dout2_b
