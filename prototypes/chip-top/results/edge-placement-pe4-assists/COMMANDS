@@ -1,0 +1,6 @@
+# 2026-10-30, on the routed harden of section 8 (/var/tmp/tt-harden/assists-pe4, CLOCK_PERIOD 16.67):
+# 55-odb-cellfrequencytables/tt_um_chip_top.odb, 56-openroad-rcx/nom/tt_um_chip_top.nom.spef, final/sdc.
+# openroad from localhost/librelane-tt:3.1.0.dev3, one run per corner with env ODB SPEF SDC OUT and
+# LIBS = stdcell + io + both SRAM macro libraries of that corner (PDK ihp-sg13cmos5l 2bbec755):
+#   openroad -exit -no_splash edges.tcl      -> edges-<corner>.txt, and the two uo_out[0] paths
+#   python3 -I summarise.py .                -> summary.txt
