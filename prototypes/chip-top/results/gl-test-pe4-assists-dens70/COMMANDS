@@ -1,0 +1,19 @@
+cocotb gate-level test (tt/test, make GATES=yes) on the submitted density-70 harden, 2026-10-30 19:12 SGT.
+
+Tree: git archive of emulator master at eed9c1c9ebc69482c31051f146e008555cacbc24 (tt/), into /var/tmp/gl-test-2026-10-30.
+Netlist: /var/tmp/tt-closure-2026-10-30/stage-dens70p/tt_submission/tt_um_chip_top.v
+  sha256 c22022bf433c389f3ca472f834bb0f17af74b366f27ec97e29f0235043be89b1
+  (stage /var/tmp/tt-closure-2026-10-30/stage-dens70p; same harden as ../harden-pe4-assists-dens70)
+Tools: Icarus Verilog 13.0, cocotb 2.0.1 (uv venv, tt/test/requirements.txt), Python 3.12,
+  PDK_ROOT=/var/tmp/roundtrip-cmos5l/pdk (IHP-Open-PDK 2bbec755).
+
+  cp $NL tt/test/gate_level_netlist.v
+  cd tt/test && PDK_ROOT=... make GATES=yes          -> gl-test.log, results.xml: TESTS=2 PASS=2
+
+The compile line (gl-test.log) lists only the PDK cell, UDP, IO and SRAM models, the netlist and tb_chip.v:
+no RTL is compiled.  Flops start at X in this simulation (Icarus UDPs); the tests read the pins with int(),
+which raises on X/Z, so every value read after reset was a defined 0/1.
+
+Controls (each in a fresh copy of the tree, netlist edited by plant.py):
+  plant.py gate_level_netlist.v 'uo_out[0]'   -> plant-uo_out0-stuck0.log:  test_programme_drives_pins FAIL ("pins 0xa4"), 1 of 2 fail
+  plant.py gate_level_netlist.v 'uio_out[0]'  -> plant-uio_out0-stuck0.log: both FAIL (read-back loses bit 4 of each byte)

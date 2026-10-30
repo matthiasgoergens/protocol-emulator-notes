@@ -55,6 +55,8 @@ integrated top, see `notes/codex-brainstorm-2026-09-25.md`), so the wrapper is m
 
 The gate-level test is `make GATES=yes` in `test/` with `PDK_ROOT` set and the stage's
 `tt_submission/<top>.v` copied to `test/gate_level_netlist.v`.
+On the submitted density-70 harden it passes (2 of 2), and planted stuck-at faults on two output pins
+make it fail: `../prototypes/chip-top/results/gl-test-pe4-assists-dens70/`.
 
 `make` generates `src/deadline_sequencer_v2.v` first, which needs Hardcaml v0.17 (opam switch 5.3.0
 on this machine; `OPAM_SWITCH=` uses the current environment). cocotb 2.0.1 does not build on

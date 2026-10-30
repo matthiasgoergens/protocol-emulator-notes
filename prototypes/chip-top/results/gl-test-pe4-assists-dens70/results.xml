@@ -1,0 +1,7 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1793358727" />
+    <testcase name="test_registers_read_back" classname="test_chip" file="/var/tmp/gl-test-2026-10-30/tt/test/test_chip.py" lineno="86" time="0.264739990234375" sim_time_ns="5880.0" ratio_time="22210.471469740634" />
+    <testcase name="test_programme_drives_pins" classname="test_chip" file="/var/tmp/gl-test-2026-10-30/tt/test/test_chip.py" lineno="96" time="0.17148065567016602" sim_time_ns="8460.0" ratio_time="49335.01080303987" />
+  </testsuite>
+</testsuites>
