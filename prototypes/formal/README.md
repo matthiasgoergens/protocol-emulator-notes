@@ -383,6 +383,9 @@ the previous pins) would probably need strengthening invariants first.
 
 ## 5. Power-up determinism (SymbiYosys)
 
+This section is the core alone. The whole chip as submitted (array, assists, host link, pin
+stage, SRAM) is proved by k-induction in `../chip-top/README.md` section 9.
+
 After MarcosAsh's `formal/powerup.sby` (credits). `powerup/powerup.sv` instantiates two copies
 of the v2 core as it is synthesised (`powerup/emit_core.ml`: the Verilog of `tt/src`, no debug
 ports). No register of the core has an initial value, so each copy starts from its own arbitrary

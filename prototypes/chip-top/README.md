@@ -923,6 +923,49 @@ synthesising for delay grows the logic, and on this die the longer wires cost mo
 corner than the faster gates gain (`/var/tmp/tt-closure-2026-10-30/stage-delay/`, metrics not kept
 in the repository).
 
+## 9. Power-up determinism of the whole chip (2026-10-31)
+
+The organisers' FAQ of 2026-10-09: flops do not start at 0, and a deselected design is powered
+down and loses its state. Section 7's array proof and `../formal` section 5 cover parts; this one
+covers the chip as submitted, `chip_tt.v` (core, array, assists, host link, loader, pin stage on
+both clock edges, reset synchroniser), sha256 424dd53c… of the density-70 harden.
+
+`formal/chip_powerup/`: two copies, independent arbitrary register contents, the same inputs,
+`rst_n` held low for 4 clocks and free afterwards. Both clock edges are modelled (`multiclock`;
+96 registers clock on `~clk`). `stub_sram.py` turns the two SRAM macros into ports, and the
+harness gives both copies one memory of arbitrary contents (the same word for the same registered
+read address); asserting that every write agrees keeps the two real memories equal. The
+property, from the end of reset on: `uo_out`, `uio_oe` and the enabled `uio_out` agree, and so do
+the SRAM writes. Every host reload after a reselection is an input sequence, so it is covered.
+
+Results (`results/chip-powerup.txt`, commit 0771c01):
+
+| task | what | result |
+|---|---|---|
+| bmc | pins and writes, 24 half clocks | PASS |
+| bmc_held | every register equal as well, 24 half clocks | PASS |
+| noreset | control: no reset | FAIL |
+| plant `cfgreg_00`, `link_state` | control: register loses its reset | FAIL |
+| plant `seg0_ctrl` | as above | PASS: no pin reaches it within 12 clocks |
+| **prove_ind** | every register equal, **unbounded** (k-induction, yices, depth 8) | **PASS** (40 min) |
+| plant `cfgreg_00` under prove_ind | control | induction FAILs (31 s) |
+
+**Reset does not clear the matcher's configuration chain.** The 37 bits shifted in through target
+10 are loaded under an enable and never cleared; the proof assumes them equal when reset ends,
+like the SRAM. So a programme that uses the matcher must have all 37 bits loaded first
+(`../../tt/docs/info.md` says so). `chip_spec.ml` starts the chain at 0, and Hardcaml's
+simulation starts every register at 0, so no lockstep run could show the difference.
+
+How the proof got there. `abc pdr` on the
+pins alone (12.5k latches after the two-edge rewrite) ran 4 h without a verdict. k-induction
+needs an inductive helper, and the helper had to be every register: one that took only the
+registers with `if (reset_sync)` missed the 175 cleared through `reset_sync | x` and eight that
+Hardcaml clears with a mux on D (`_13424 = _386 ? ... : ...`), which yices' counterexample to
+induction showed. The librelane image has no SMT solver, so prove_ind runs on YosysHQ's OSS CAD
+Suite (release 2026-10-14) in a container without network. Codex reviewed the harness for
+soundness (`/var/tmp/chip-top-formal/chip-powerup/codex-review-round2.txt`): it counted 988
+registers, 951 in the helper and 37 in the chain, and found no gap.
+
 ## Open issues
 
 

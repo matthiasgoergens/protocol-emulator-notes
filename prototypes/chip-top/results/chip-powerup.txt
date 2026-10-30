@@ -1,0 +1,34 @@
+# formal/chip_powerup/run_chip_powerup.sh bmc bmc_held noreset plant:cfgreg_00 plant:seg0_ctrl plant:link_state prove_ind plant:cfgreg_00:prove_ind: depth 24 half clocks for bmc; chip_tt.v sha256 424dd53c626d89b63c8c8a4eee3c6a92937357897259370766e54e43a2ca6d2a; commit 0771c01; 2026-10-31T04:01:30+08:00
+== bmc: DONE (PASS, rc=0)
+summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:07 (7)
+summary: engine_0 (abc bmc3) returned PASS
+summary: engine_0 did not produce any traces
+== bmc_held: DONE (PASS, rc=0)
+summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:08 (8)
+summary: engine_0 (abc bmc3) returned PASS
+summary: engine_0 did not produce any traces
+== noreset: DONE (FAIL, rc=2)
+summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:08 (8)
+summary: engine_0 (abc bmc3) returned FAIL
+summary: engine_0 did not produce any traces
+== plant:cfgreg_00: DONE (FAIL, rc=2)
+summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:07 (7)
+summary: engine_0 (abc bmc3) returned FAIL
+summary: engine_0 did not produce any traces
+== plant:seg0_ctrl: DONE (PASS, rc=0)
+summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:07 (7)
+summary: engine_0 (abc bmc3) returned PASS
+summary: engine_0 did not produce any traces
+== plant:link_state: DONE (FAIL, rc=2)
+summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:07 (7)
+summary: engine_0 (abc bmc3) returned FAIL
+summary: engine_0 did not produce any traces
+== prove_ind: DONE (PASS, rc=0)
+summary: Elapsed clock time [H:MM:SS (secs)]: 0:39:59 (2399)
+summary: engine_0 (smtbmc yices) returned pass for basecase
+summary: engine_0 (smtbmc yices) returned pass for induction
+summary: engine_0 did not produce any traces
+== plant:cfgreg_00:prove_ind: DONE (UNKNOWN, rc=4)
+summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:31 (31)
+summary: engine_0 (smtbmc yices) returned pass for basecase
+summary: engine_0 (smtbmc yices) returned FAIL for induction
