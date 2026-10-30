@@ -117,14 +117,15 @@ edge, 2 and 3 on the falling edge, and the core's nibble folded onto the half gr
 quarter late. This is the note's "both clock edges first (free)" step, marked here as a
 deviation of the hardened chip from the simulated one at the pins only.
 
-**Where the half-clock edges land** (section 8's harden, post-route timing with extracted parasitics,
-`results/edge-placement-pe4-assists/`, 2026-10-30). Every `uo_out` pad is a rising-edge lane
+**Where the half-clock edges land** (section 8's density-70 harden, the submitted one; post-route
+timing with extracted parasitics, `results/edge-placement-pe4-assists-dens70/`, 2026-10-30). Every `uo_out` pad is a rising-edge lane
 flip-flop and a falling-edge one (clocked through a local inverter) into one `xor2` and one buffer,
 so at most one XOR input changes per half clock and the logic cannot make a runt pulse. What moves
 an edge off the half-clock grid is the clock path and the data-dependent delay through the XOR.
-Taking the worst pairing of the two, a falling-edge-launched edge lands at most 0.56 ns early
-relative to a rising-edge-launched one at the slow corner (0.37 typical, 0.26 fast; 13, 9 and 6 % of a
-quarter clock), and the narrowest half-clock pulse is 7.58 ns of the ideal 8.34 (7.83, 8.00). These
+Taking the worst pairing of the two, a falling-edge-launched edge lands at most 0.46 ns early
+relative to a rising-edge-launched one at the slow corner (0.31 typical, 0.21 fast; 11, 7 and 5 % of a
+quarter clock), and the narrowest half-clock pulse is 7.70 ns of the ideal 8.34 (7.92, 8.07). On the
+density-60 harden it was 0.56 ns and 7.58 ns (`results/edge-placement-pe4-assists/`). These
 assume a 50 % duty cycle at the `clk` pin: each 1 % of duty-cycle error moves the falling-edge
 edges by a further 0.17 ns, which only a measurement on the board can bound.
 

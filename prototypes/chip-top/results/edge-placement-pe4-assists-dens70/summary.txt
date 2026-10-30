@@ -1,0 +1,27 @@
+slow: worst |offset| 0.46 ns (11% of a quarter clock), narrowest pulse 7.70 ns of an ideal 8.34 on uo_out[4]
+  uo_out[0]  clk-to-pad rise-launched 2.41-2.79 ns, fall-launched (from fall edge) 2.36-2.71 ns; worst offset -0.45 ns; narrowest half-clock pulse 7.73 ns
+  uo_out[1]  clk-to-pad rise-launched 2.23-2.59 ns, fall-launched (from fall edge) 2.18-2.52 ns; worst offset -0.41 ns; narrowest half-clock pulse 7.83 ns
+  uo_out[2]  clk-to-pad rise-launched 2.35-2.73 ns, fall-launched (from fall edge) 2.28-2.62 ns; worst offset -0.46 ns; narrowest half-clock pulse 7.80 ns
+  uo_out[3]  clk-to-pad rise-launched 2.33-2.69 ns, fall-launched (from fall edge) 2.28-2.61 ns; worst offset -0.43 ns; narrowest half-clock pulse 7.74 ns
+  uo_out[4]  clk-to-pad rise-launched 2.37-2.74 ns, fall-launched (from fall edge) 2.31-2.65 ns; worst offset -0.46 ns; narrowest half-clock pulse 7.70 ns
+  uo_out[5]  clk-to-pad rise-launched 2.22-2.58 ns, fall-launched (from fall edge) 2.14-2.46 ns; worst offset -0.43 ns; narrowest half-clock pulse 7.78 ns
+  uo_out[6]  clk-to-pad rise-launched 2.38-2.75 ns, fall-launched (from fall edge) 2.33-2.66 ns; worst offset -0.45 ns; narrowest half-clock pulse 7.71 ns
+  uo_out[7]  clk-to-pad rise-launched 2.24-2.60 ns, fall-launched (from fall edge) 2.20-2.52 ns; worst offset -0.40 ns; narrowest half-clock pulse 7.80 ns
+typ: worst |offset| 0.31 ns (7% of a quarter clock), narrowest pulse 7.92 ns of an ideal 8.34 on uo_out[4]
+  uo_out[0]  clk-to-pad rise-launched 1.57-1.83 ns, fall-launched (from fall edge) 1.54-1.77 ns; worst offset -0.29 ns; narrowest half-clock pulse 7.94 ns
+  uo_out[1]  clk-to-pad rise-launched 1.47-1.72 ns, fall-launched (from fall edge) 1.44-1.67 ns; worst offset -0.27 ns; narrowest half-clock pulse 8.00 ns
+  uo_out[2]  clk-to-pad rise-launched 1.54-1.80 ns, fall-launched (from fall edge) 1.49-1.73 ns; worst offset -0.31 ns; narrowest half-clock pulse 7.97 ns
+  uo_out[3]  clk-to-pad rise-launched 1.53-1.77 ns, fall-launched (from fall edge) 1.50-1.72 ns; worst offset -0.28 ns; narrowest half-clock pulse 7.94 ns
+  uo_out[4]  clk-to-pad rise-launched 1.55-1.80 ns, fall-launched (from fall edge) 1.52-1.74 ns; worst offset -0.30 ns; narrowest half-clock pulse 7.92 ns
+  uo_out[5]  clk-to-pad rise-launched 1.46-1.70 ns, fall-launched (from fall edge) 1.41-1.62 ns; worst offset -0.29 ns; narrowest half-clock pulse 7.97 ns
+  uo_out[6]  clk-to-pad rise-launched 1.56-1.81 ns, fall-launched (from fall edge) 1.52-1.75 ns; worst offset -0.29 ns; narrowest half-clock pulse 7.92 ns
+  uo_out[7]  clk-to-pad rise-launched 1.48-1.71 ns, fall-launched (from fall edge) 1.45-1.66 ns; worst offset -0.27 ns; narrowest half-clock pulse 7.98 ns
+fast: worst |offset| 0.21 ns (5% of a quarter clock), narrowest pulse 8.07 ns of an ideal 8.34 on uo_out[6]
+  uo_out[0]  clk-to-pad rise-launched 1.08-1.26 ns, fall-launched (from fall edge) 1.07-1.24 ns; worst offset -0.20 ns; narrowest half-clock pulse 8.08 ns
+  uo_out[1]  clk-to-pad rise-launched 1.03-1.21 ns, fall-launched (from fall edge) 1.02-1.18 ns; worst offset -0.19 ns; narrowest half-clock pulse 8.12 ns
+  uo_out[2]  clk-to-pad rise-launched 1.08-1.26 ns, fall-launched (from fall edge) 1.05-1.22 ns; worst offset -0.21 ns; narrowest half-clock pulse 8.10 ns
+  uo_out[3]  clk-to-pad rise-launched 1.06-1.23 ns, fall-launched (from fall edge) 1.04-1.20 ns; worst offset -0.19 ns; narrowest half-clock pulse 8.08 ns
+  uo_out[4]  clk-to-pad rise-launched 1.07-1.25 ns, fall-launched (from fall edge) 1.06-1.21 ns; worst offset -0.20 ns; narrowest half-clock pulse 8.07 ns
+  uo_out[5]  clk-to-pad rise-launched 1.01-1.18 ns, fall-launched (from fall edge) 0.99-1.14 ns; worst offset -0.19 ns; narrowest half-clock pulse 8.10 ns
+  uo_out[6]  clk-to-pad rise-launched 1.08-1.25 ns, fall-launched (from fall edge) 1.06-1.22 ns; worst offset -0.20 ns; narrowest half-clock pulse 8.07 ns
+  uo_out[7]  clk-to-pad rise-launched 1.03-1.19 ns, fall-launched (from fall edge) 1.01-1.17 ns; worst offset -0.18 ns; narrowest half-clock pulse 8.11 ns
