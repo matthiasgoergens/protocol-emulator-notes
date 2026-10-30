@@ -51,7 +51,9 @@ request returns the parser to idle, which also resynchronises it.
 The cocotb test in `test/` does exactly this with a two-word programme that drives `uo` to 0xA5.
 
 **Power-up and reselection.** Flip-flops and SRAM start with arbitrary contents. After the reset,
-everything the pins do depends only on the inputs and on what the host has loaded. A deselected
+everything the pins do depends only on the inputs and on what the host has loaded. Reset does not
+clear the matcher's configuration, so shift in all 37 bits (target 10) before a programme uses
+the matcher. A deselected
 design is powered down and loses everything, so after selecting it again, reset it and load the
 programme again.
 
