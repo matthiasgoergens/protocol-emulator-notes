@@ -1,0 +1,35 @@
+# Power-up determinism of the whole chip (chip_powerup.sv); run_chip_powerup.sh prepares chip_pu.v.
+#   prove    unbounded, abc pdr
+#   bmc      bounded, __DEPTH__ half clocks, abc bmc3: a quick first failure, if any
+#   noreset  the control: RESET_CLOCKS=0, must FAIL
+[tasks]
+prove
+bmc
+noreset
+
+[options]
+prove: mode prove
+bmc: mode bmc
+bmc: depth __DEPTH__
+noreset: mode bmc
+noreset: depth 40
+multiclock on
+# no SMT solver in the image: verdicts only, no counterexample trace
+aigsmt none
+
+[engines]
+prove: abc pdr
+bmc: abc bmc3
+noreset: abc bmc3
+
+[script]
+read -formal chip_pu.v
+read -formal chip_powerup.sv
+prove: prep -top chip_powerup
+bmc: prep -top chip_powerup
+noreset: chparam -set RESET_CLOCKS 0 chip_powerup
+noreset: prep -top chip_powerup
+
+[files]
+chip_pu.v
+chip_powerup.sv
