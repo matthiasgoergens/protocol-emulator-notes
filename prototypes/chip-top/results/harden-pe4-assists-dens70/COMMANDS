@@ -1,0 +1,7 @@
+# 2026-10-30: tt/src/config.json with PL_TARGET_DENSITY_PCT 70 (was 60), everything else as section 8.
+HARDEN_THREADS=6 tt/scripts/harden.sh /var/tmp/tt-closure-2026-10-30/stage-dens70p        # 2914 s
+tt/scripts/precheck.sh /var/tmp/tt-closure-2026-10-30/stage-dens70p .../precheck-dens70p   # precheck.txt
+G=.../stage-dens70p/tt_submission/tt_um_chip_top.gds  M=$PDK_ROOT/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/verilog/sg13cmos5l_stdcell.v
+prototypes/chip-top/_build/default/bin/edge_phase.exe structure $G $M all       # edge-structure.txt
+prototypes/chip-top/_build/default/bin/edge_phase.exe gates $G $M 1,1,1,1 all   # edge-gates.txt
+prototypes/chip-top/_build/default/bin/gate_lockstep.exe $G $M 1,1,1,1 20 5000 2 stim=wide   # gate-lockstep.txt

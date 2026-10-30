@@ -884,6 +884,7 @@ d66cf17, 6x4, `CLOCK_PERIOD` 16.67, `chip.sdc`, the 1024 x 8 at the right end), 
 |---|---|---|---|---|---|---|---|---|---|---|
 | section 7, `results/harden-pe4/` | +0.255 / +0.253 | +3.095 / +0.114 | +3.619 / +0.031 | 16.42 ns, 60.9 MHz | 25,931 | 78 | 2,519 | 335,998 µm² | 1.44 M µm | 0, match, 0, 9 of 9 |
 | **with the assists**, `results/harden-pe4-assists/` | **-0.224** / +0.256 (2 endpoints) | +2.609 / +0.124 | +3.209 / +0.047 | **16.89 ns, 59.2 MHz** | 28,227 | 85 | 2,735 | 366,498 µm² | 1.71 M µm | **0, match, 0, 9 of 9** |
+| **with the assists, density 70** (submitted), `results/harden-pe4-assists-dens70/` | **+0.140** / +0.251 | +2.976 / +0.118 | +3.511 / +0.030 | **16.53 ns, 60.5 MHz** | 28,208 | not counted | 2,735 | 366,536 µm² | 1.58 M µm | **0, match, 0, 9 of 9** |
 
 Area: 300,567 µm² synthesised, 366,498 placed (growth 1.22, as before); 45 % of the core. By RTL
 origin (`synth/area_by_origin.py`), the serialiser, the framer, the stuff trackers and the line
@@ -906,12 +907,24 @@ segment's input (a change of the array's specification, one more clock of latenc
 fewer configuration bits for the assists (the 14 registers are most of their glue). The 8-PE chip
 was not hardened again (it missed 60 MHz before).
 
+**Closing 60 MHz (2026-10-30): placement density 70.** The cheapest lever turned out to be none of
+those: `PL_TARGET_DENSITY_PCT` 70 instead of the template's 60 (one line in `tt/src/config.json`,
+nothing else changed) packs the placement, cuts the wire by 8 % (1.71 to 1.58 M µm) and turns the
+slow corner's -0.224 ns into +0.140 ns with no violations at any corner (row "density 70" above,
+`results/harden-pe4-assists-dens70/`). Fast-corner hold drops from +0.047 to +0.030 ns. Routing DRC 0,
+LVS match, antenna 0 and Tiny Tapeout's precheck 9 of 9 as before; on its GDS the gate lockstep
+compares 200,000 output words with 0 mismatches (20 trials of 5,000 clocks, wide stimulus), and the
+edge-phase test and structural rule give exactly the plant counts of the earlier hardens (26 of 42
+plants caught by behaviour, the 16 second-stage samplers by the rule only). A run with
+`SYNTH_STRATEGY` "DELAY 1" at density 60 was started at the same time
+(`/var/tmp/tt-closure-2026-10-30/`); density 70 was adopted without waiting for it.
+
 ## Open issues
 
 
 - **Timing at 8 PEs and more.** 60 MHz was met at every corner with 4 PEs (+0.26 ns at the slow
-  corner); with the assists of section 8 the 4-PE chip misses it at the slow corner by 0.22 ns
-  (59.2 MHz), on the same array paths. 8 PEs miss it at the slow corner only (-1.33 ns, about 55.5 MHz), on long Metal3 wires
+  corner); with the assists of section 8 the 4-PE chip missed it at the slow corner by 0.22 ns
+  (59.2 MHz) on the same array paths, and meets it at placement density 70 (+0.14 ns). 8 PEs miss it at the slow corner only (-1.33 ns, about 55.5 MHz), on long Metal3 wires
   around a congested horizontal layer (section 7); typical and fast have about 3 ns to spare.
   Levers not tried: a floorplan with the PE rows nearer to each other, a register stage at each
   segment's input (a change of the array's specification), a lower placement density only around
