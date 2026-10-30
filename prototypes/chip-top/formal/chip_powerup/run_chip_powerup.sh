@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Power-up determinism of the whole chip (chip_powerup.sv), with its controls.
 #   formal/chip_powerup/run_chip_powerup.sh [TASK...]     default: bmc noreset plant:cfgreg_00 plant:seg0_ctrl plant:link_state prove
-# TASK is prove, bmc or noreset (chip_powerup.sby), or plant:REG: REG loses its reset (the
+# TASK is prove, prove_state, bmc, bmc_state or noreset (chip_powerup.sby), or plant:REG: REG loses its reset (the
 # "if (reset_sync) REG <= ...; else" branch is deleted) and the bmc task must then FAIL.
 # CHIP_TT=path uses that chip_tt.v instead of regenerating it (e.g. a harden stage's src/chip_tt.v);
 # either way its sha256 is recorded.  -> ../../results/chip-powerup.txt
@@ -18,8 +18,11 @@ else
   "$REPO/tt/scripts/regen_chip.sh" "$WORK/chip_tt.v"
 fi
 python3 "$HERE/stub_sram.py" "$WORK/chip_tt.v" "$WORK/chip_pu.v" > /dev/null
+STATE_BITS=$(python3 "$HERE/stub_sram.py" "$WORK/chip_tt.v" "$WORK/chip_pu_state.v" state 2>&1 > /dev/null \
+  | sed --quiet 's/^pu_state: [0-9]* registers, \([0-9]*\) bits$/\1/p')
+[ -n "$STATE_BITS" ]
 cp "$HERE/chip_powerup.sv" "$WORK/"
-sed "s/__DEPTH__/$DEPTH/g" "$HERE/chip_powerup.sby" > "$WORK/chip_powerup.sby"
+sed "s/__DEPTH__/$DEPTH/g; s/__STATE_BITS__/$STATE_BITS/g" "$HERE/chip_powerup.sby" > "$WORK/chip_powerup.sby"
 
 run() {  # run DIR TASK
   timeout 7200 nice ionice podman run --rm --userns=keep-id --volume "$WORK:$WORK" --workdir "$1" \
@@ -30,7 +33,7 @@ for t in $TASKS; do
     plant:*)
       reg=${t#plant:}; dir=$WORK/plant-$reg
       rm --recursive --force "$dir"; mkdir --parents "$dir"
-      cp "$WORK/chip_powerup.sv" "$WORK/chip_powerup.sby" "$dir/"
+      cp "$WORK/chip_powerup.sv" "$WORK/chip_powerup.sby" "$WORK/chip_pu_state.v" "$dir/"
       python3 - "$WORK/chip_pu.v" "$dir/chip_pu.v" "$reg" <<'EOF'
 import re, sys
 src, dst, reg = sys.argv[1:]

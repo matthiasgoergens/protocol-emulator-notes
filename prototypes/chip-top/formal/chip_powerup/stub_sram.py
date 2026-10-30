@@ -1,18 +1,21 @@
 # Rewrite the chip's generated Verilog (chip_tt.v) for the whole-chip power-up proof: each IHP SRAM
 # macro instance becomes ports of the module, so the harness can give both copies one shared memory.
 #
-#   stub_sram.py chip_tt.v chip_pu.v
+#   stub_sram.py chip_tt.v chip_pu.v [state]
 #
 # Per macro N (in order of appearance) the module gains
 #   output [AW-1:0]  pu_raddr_N   the address of the previous clock (the macro reads every clock:
 #                                 A_MEN and A_REN are tied high)
 #   input  [DW-1:0]  pu_dout_N    the read data, driven by the harness
 #   output [..]      pu_in_N      {A_WEN, A_ADDR, A_DIN, A_BM}: what the macro would be given now
-# and the module is renamed chip_pu.  Nothing else changes.
+# and the module is renamed chip_pu.  With "state", it also gains
+#   output [..]      pu_state     every register cleared by reset_sync, concatenated
+# for the proof's inductive helper (chip_powerup.sv, STATE_EQ).  Nothing else changes.
 import re
 import sys
 
 src, dst = sys.argv[1], sys.argv[2]
+with_state = sys.argv[3:] == ["state"]
 s = open(src).read()
 assert s.count("module chip_tt (") == 1
 s = s.replace("module chip_tt (", "module chip_pu (", 1)
@@ -51,6 +54,16 @@ def stub(m):
 
 s, count = inst.subn(lambda m: stub(m) + ";", s)
 assert count == 2, count
+if with_state:
+    width = {m.group(4): int(m.group(2)) - int(m.group(3)) + 1 if m.group(1) else 1
+             for m in re.finditer(r"^\s*reg\s*(\[(\d+):(\d+)\])?\s*(\w+)\s*;", s, re.M)}
+    regs = re.findall(r"always @\(posedge \w+\) begin\s*if \(reset_sync\)\s*(\w+) <=", s)
+    assert regs and all(r in width for r in regs)
+    bits = sum(width[r] for r in regs)
+    ports.append("pu_state")
+    decls.append(f"    output [{bits - 1}:0] pu_state;\n")
+    s = s.replace("endmodule", f"    assign pu_state = {{{', '.join(regs)}}};\nendmodule", 1)
+    print(f"pu_state: {len(regs)} registers, {bits} bits", file=sys.stderr)
 header_end = s.index(");", s.index("module chip_pu ("))
 s = s[:header_end] + "".join(f",\n    {p}" for p in ports) + "\n" + s[header_end:]
 first_decl = s.index("    input rst_n;")

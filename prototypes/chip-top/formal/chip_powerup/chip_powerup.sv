@@ -12,6 +12,8 @@
 // memories. So what is proved is: from equal SRAM contents when reset takes hold, the pins depend
 // only on the inputs. The SRAM's own power-up contents are not made deterministic by anything
 // on the chip; that is why the host reloads the programme after every power-up.
+// With STATE_EQ (task prove_state; stub_sram.py ... state), every register that reset_sync clears
+// must also agree: a stronger property, and the inductive core the pin property lacks.
 module chip_powerup #(parameter RESET_CLOCKS = 4) (
     input rst_n_in, input [7:0] ui_in, input [7:0] uio_in,
     input [7:0] dout1_a, input [7:0] dout1_b, input [15:0] dout2_a, input [15:0] dout2_b
@@ -34,12 +36,24 @@ module chip_powerup #(parameter RESET_CLOCKS = 4) (
   chip_pu copy_a (.rst_n(rst_n), .clk(clk), .ui_in(ui_in), .uio_in(uio_in),
     .uo_out(uo_a), .uio_out(uio_out_a), .uio_oe(oe_a),
     .pu_raddr_1(raddr1_a), .pu_dout_1(dout1_a), .pu_in_1(in1_a),
-    .pu_raddr_2(raddr2_a), .pu_dout_2(dout2_a), .pu_in_2(in2_a));
+    .pu_raddr_2(raddr2_a), .pu_dout_2(dout2_a), .pu_in_2(in2_a)
+`ifdef STATE_EQ
+    , .pu_state(state_a)
+`endif
+    );
   chip_pu copy_b (.rst_n(rst_n), .clk(clk), .ui_in(ui_in), .uio_in(uio_in),
     .uo_out(uo_b), .uio_out(uio_out_b), .uio_oe(oe_b),
     .pu_raddr_1(raddr1_b), .pu_dout_1(d1_b), .pu_in_1(in1_b),
-    .pu_raddr_2(raddr2_b), .pu_dout_2(d2_b), .pu_in_2(in2_b));
+    .pu_raddr_2(raddr2_b), .pu_dout_2(d2_b), .pu_in_2(in2_b)
+`ifdef STATE_EQ
+    , .pu_state(state_b)
+`endif
+    );
 
+`ifdef STATE_EQ
+  wire [`STATE_EQ-1:0] state_a, state_b;
+  always @(*) if (!in_reset) a_state: assert (state_a == state_b);
+`endif
   // pu_in_N = {wen, addr, din, bm}; wen is the top bit
   wire wen1 = in1_a[26], wen2 = in2_a[41];
   always @(*) if (!in_reset) begin

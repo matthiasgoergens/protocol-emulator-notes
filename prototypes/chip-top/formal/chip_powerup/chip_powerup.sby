@@ -1,16 +1,24 @@
-# Power-up determinism of the whole chip (chip_powerup.sv); run_chip_powerup.sh prepares chip_pu.v.
-#   prove    unbounded, abc pdr
-#   bmc      bounded, __DEPTH__ half clocks, abc bmc3: a quick first failure, if any
-#   noreset  the control: RESET_CLOCKS=0, must FAIL
+# Power-up determinism of the whole chip (chip_powerup.sv); run_chip_powerup.sh prepares chip_pu.v
+# and chip_pu_state.v and substitutes __DEPTH__ and __STATE_BITS__.
+#   prove        pins and SRAM writes, unbounded, abc pdr
+#   prove_state  as prove, plus every register reset_sync clears (STATE_EQ): stronger, and inductive
+#   bmc          pins and SRAM writes, bounded, __DEPTH__ half clocks, abc bmc3
+#   bmc_state    as bmc with STATE_EQ: a quick first failure of the helper, if any
+#   noreset      the control: RESET_CLOCKS=0, must FAIL
 [tasks]
 prove
+prove_state
 bmc
+bmc_state
 noreset
 
 [options]
 prove: mode prove
+prove_state: mode prove
 bmc: mode bmc
 bmc: depth __DEPTH__
+bmc_state: mode bmc
+bmc_state: depth __DEPTH__
 noreset: mode bmc
 noreset: depth 40
 multiclock on
@@ -19,17 +27,26 @@ aigsmt none
 
 [engines]
 prove: abc pdr
+prove_state: abc pdr
 bmc: abc bmc3
+bmc_state: abc bmc3
 noreset: abc bmc3
 
 [script]
-read -formal chip_pu.v
-read -formal chip_powerup.sv
-prove: prep -top chip_powerup
-bmc: prep -top chip_powerup
+prove: read -formal chip_pu.v
+bmc: read -formal chip_pu.v
+noreset: read -formal chip_pu.v
+prove_state: read -formal chip_pu_state.v
+bmc_state: read -formal chip_pu_state.v
+prove: read -formal chip_powerup.sv
+bmc: read -formal chip_powerup.sv
+noreset: read -formal chip_powerup.sv
+prove_state: read -formal -D STATE_EQ=__STATE_BITS__ chip_powerup.sv
+bmc_state: read -formal -D STATE_EQ=__STATE_BITS__ chip_powerup.sv
 noreset: chparam -set RESET_CLOCKS 0 chip_powerup
-noreset: prep -top chip_powerup
+prep -top chip_powerup
 
 [files]
 chip_pu.v
+chip_pu_state.v
 chip_powerup.sv
