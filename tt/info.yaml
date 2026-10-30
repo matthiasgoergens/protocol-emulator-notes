@@ -21,24 +21,24 @@ project:
 
 pinout:
   # Inputs
-  ui[0]: "in0"
-  ui[1]: "in1"
-  ui[2]: "in2"
-  ui[3]: "in3"
-  ui[4]: "in4"
-  ui[5]: "in5"
-  ui[6]: "in6"
-  ui[7]: "in7"
+  ui[0]: "gen_in0 (any protocol input)"
+  ui[1]: "gen_in1 (any protocol input)"
+  ui[2]: "gen_in2 (any protocol input)"
+  ui[3]: "gen_in3 (any protocol input)"
+  ui[4]: "gen_in4 (any protocol input)"
+  ui[5]: "gen_in5 (any protocol input)"
+  ui[6]: "gen_in6 (any protocol input)"
+  ui[7]: "gen_in7 (any protocol input)"
 
   # Outputs
-  uo[0]: "out0"
-  uo[1]: "out1"
-  uo[2]: "out2"
-  uo[3]: "out3"
-  uo[4]: "out4"
-  uo[5]: "out5"
-  uo[6]: "out6"
-  uo[7]: "out7"
+  uo[0]: "gen_out0 (push-pull, source-selected)"
+  uo[1]: "gen_out1 (push-pull, source-selected)"
+  uo[2]: "gen_out2 (push-pull, source-selected)"
+  uo[3]: "gen_out3 (push-pull, source-selected)"
+  uo[4]: "gen_out4 (push-pull, source-selected)"
+  uo[5]: "gen_out5 (push-pull, source-selected)"
+  uo[6]: "gen_out6 (push-pull, source-selected)"
+  uo[7]: "gen_out7 (push-pull, source-selected)"
 
   # Bidirectional pins
   uio[0]: "host_d0"
@@ -47,8 +47,8 @@ pinout:
   uio[3]: "host_d3"
   uio[4]: "host_strobe"
   uio[5]: "host_read"
-  uio[6]: "io14"
-  uio[7]: "io15"
+  uio[6]: "gen_io14 (open drain, source-selected)"
+  uio[7]: "gen_io15 (open drain, source-selected)"
 
 # Do not change!
 yaml_version: 6
