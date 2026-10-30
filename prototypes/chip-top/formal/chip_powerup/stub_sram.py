@@ -9,8 +9,9 @@
 #   input  [DW-1:0]  pu_dout_N    the read data, driven by the harness
 #   output [..]      pu_in_N      {A_WEN, A_ADDR, A_DIN, A_BM}: what the macro would be given now
 # and the module is renamed chip_pu.  With "state", it also gains
-#   output [..]      pu_state     every register cleared by reset_sync, concatenated
-# for the proof's inductive helper (chip_powerup.sv, STATE_EQ).  Nothing else changes.
+#   output [..]      pu_state     every register cleared by reset_sync (directly or ORed), concatenated
+#   output [..]      pu_held      every register loaded under an enable and never cleared
+# for the proof's inductive helper (chip_powerup.sv, STATE_EQ and HELD_EQ).  Nothing else changes.
 import re
 import sys
 
@@ -57,13 +58,20 @@ assert count == 2, count
 if with_state:
     width = {m.group(4): int(m.group(2)) - int(m.group(3)) + 1 if m.group(1) else 1
              for m in re.finditer(r"^\s*reg\s*(\[(\d+):(\d+)\])?\s*(\w+)\s*;", s, re.M)}
-    regs = re.findall(r"always @\(posedge \w+\) begin\s*if \(reset_sync\)\s*(\w+) <=", s)
-    assert regs and all(r in width for r in regs)
-    bits = sum(width[r] for r in regs)
-    ports.append("pu_state")
-    decls.append(f"    output [{bits - 1}:0] pu_state;\n")
-    s = s.replace("endmodule", f"    assign pu_state = {{{', '.join(regs)}}};\nendmodule", 1)
-    print(f"pu_state: {len(regs)} registers, {bits} bits", file=sys.stderr)
+    # cleared by reset_sync, directly or through "assign w = reset_sync | ..."
+    resets = {"reset_sync"} | set(re.findall(r"assign (\w+) = reset_sync \|", s))
+    regs = [r for c, r in re.findall(r"always @\(posedge \w+\) begin\s*if \((\w+)\)\s*(\w+) <=", s)
+            if c in resets]
+    # loaded under an enable and never cleared: they hold their power-up value until written
+    held = [r for c, r in re.findall(r"always @\(posedge \w+\) begin\s*if \((\w+)\)\s*(\w+) <=", s)
+            if c not in resets and not re.search(r"if \(" + c + r"\)\s*" + r + r" <= [^;]+;\s*else", s)]
+    for port, rs in (("pu_state", regs), ("pu_held", held)):
+        assert rs and all(r in width for r in rs)
+        bits = sum(width[r] for r in rs)
+        ports.append(port)
+        decls.append(f"    output [{bits - 1}:0] {port};\n")
+        s = s.replace("endmodule", f"    assign {port} = {{{', '.join(rs)}}};\nendmodule", 1)
+        print(f"{port}: {len(rs)} registers, {bits} bits", file=sys.stderr)
 header_end = s.index(");", s.index("module chip_pu ("))
 s = s[:header_end] + "".join(f",\n    {p}" for p in ports) + "\n" + s[header_end:]
 first_decl = s.index("    input rst_n;")

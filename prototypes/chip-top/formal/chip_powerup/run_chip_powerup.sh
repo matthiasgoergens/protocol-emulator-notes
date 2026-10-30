@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Power-up determinism of the whole chip (chip_powerup.sv), with its controls.
 #   formal/chip_powerup/run_chip_powerup.sh [TASK...]     default: bmc noreset plant:cfgreg_00 plant:seg0_ctrl plant:link_state prove
-# TASK is prove, prove_state, bmc, bmc_state or noreset (chip_powerup.sby), or plant:REG: REG loses its reset (the
+# TASK is prove, prove_state, prove_held, bmc, bmc_state, bmc_held or noreset (chip_powerup.sby), or plant:REG: REG loses its reset (the
 # "if (reset_sync) REG <= ...; else" branch is deleted) and the bmc task must then FAIL.
 # CHIP_TT=path uses that chip_tt.v instead of regenerating it (e.g. a harden stage's src/chip_tt.v);
 # either way its sha256 is recorded.  -> ../../results/chip-powerup.txt
@@ -13,16 +13,17 @@ DEPTH=${DEPTH:-24}
 TASKS=${*:-bmc noreset plant:cfgreg_00 plant:seg0_ctrl plant:link_state prove}
 mkdir --parents "$WORK"
 if [ -n "${CHIP_TT:-}" ]; then
-  cp "$CHIP_TT" "$WORK/chip_tt.v"
+  [ "$CHIP_TT" -ef "$WORK/chip_tt.v" ] || cp "$CHIP_TT" "$WORK/chip_tt.v"
 else
   "$REPO/tt/scripts/regen_chip.sh" "$WORK/chip_tt.v"
 fi
 python3 "$HERE/stub_sram.py" "$WORK/chip_tt.v" "$WORK/chip_pu.v" > /dev/null
-STATE_BITS=$(python3 "$HERE/stub_sram.py" "$WORK/chip_tt.v" "$WORK/chip_pu_state.v" state 2>&1 > /dev/null \
-  | sed --quiet 's/^pu_state: [0-9]* registers, \([0-9]*\) bits$/\1/p')
-[ -n "$STATE_BITS" ]
+BITS=$(python3 "$HERE/stub_sram.py" "$WORK/chip_tt.v" "$WORK/chip_pu_state.v" state 2>&1 > /dev/null)
+STATE_BITS=$(echo "$BITS" | sed --quiet 's/^pu_state: [0-9]* registers, \([0-9]*\) bits$/\1/p')
+HELD_BITS=$(echo "$BITS" | sed --quiet 's/^pu_held: [0-9]* registers, \([0-9]*\) bits$/\1/p')
+[ -n "$STATE_BITS" ] && [ -n "$HELD_BITS" ]
 cp "$HERE/chip_powerup.sv" "$WORK/"
-sed "s/__DEPTH__/$DEPTH/g; s/__STATE_BITS__/$STATE_BITS/g" "$HERE/chip_powerup.sby" > "$WORK/chip_powerup.sby"
+sed "s/__DEPTH__/$DEPTH/g; s/__STATE_BITS__/$STATE_BITS/g; s/__HELD_BITS__/$HELD_BITS/g" "$HERE/chip_powerup.sby" > "$WORK/chip_powerup.sby"
 
 run() {  # run DIR TASK
   timeout 7200 nice ionice podman run --rm --userns=keep-id --volume "$WORK:$WORK" --workdir "$1" \

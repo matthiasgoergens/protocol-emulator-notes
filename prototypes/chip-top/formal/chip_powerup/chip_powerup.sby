@@ -4,12 +4,15 @@
 #   prove_state  as prove, plus every register reset_sync clears (STATE_EQ): stronger, and inductive
 #   bmc          pins and SRAM writes, bounded, __DEPTH__ half clocks, abc bmc3
 #   bmc_state    as bmc with STATE_EQ: a quick first failure of the helper, if any
+#   prove_held, bmc_held  as prove_state and bmc_state, plus HELD_EQ (matcher chain equal at reset)
 #   noreset      the control: RESET_CLOCKS=0, must FAIL
 [tasks]
 prove
 prove_state
+prove_held
 bmc
 bmc_state
+bmc_held
 noreset
 
 [options]
@@ -19,6 +22,9 @@ bmc: mode bmc
 bmc: depth __DEPTH__
 bmc_state: mode bmc
 bmc_state: depth __DEPTH__
+prove_held: mode prove
+bmc_held: mode bmc
+bmc_held: depth __DEPTH__
 noreset: mode bmc
 noreset: depth 40
 multiclock on
@@ -30,6 +36,8 @@ prove: abc pdr
 prove_state: abc pdr
 bmc: abc bmc3
 bmc_state: abc bmc3
+prove_held: abc pdr
+bmc_held: abc bmc3
 noreset: abc bmc3
 
 [script]
@@ -38,11 +46,15 @@ bmc: read -formal chip_pu.v
 noreset: read -formal chip_pu.v
 prove_state: read -formal chip_pu_state.v
 bmc_state: read -formal chip_pu_state.v
+prove_held: read -formal chip_pu_state.v
+bmc_held: read -formal chip_pu_state.v
 prove: read -formal chip_powerup.sv
 bmc: read -formal chip_powerup.sv
 noreset: read -formal chip_powerup.sv
-prove_state: read -formal -D STATE_EQ=__STATE_BITS__ chip_powerup.sv
-bmc_state: read -formal -D STATE_EQ=__STATE_BITS__ chip_powerup.sv
+prove_state: read -formal -D STATE_EQ=__STATE_BITS__ -D HELD_BITS=__HELD_BITS__ chip_powerup.sv
+bmc_state: read -formal -D STATE_EQ=__STATE_BITS__ -D HELD_BITS=__HELD_BITS__ chip_powerup.sv
+prove_held: read -formal -D STATE_EQ=__STATE_BITS__ -D HELD_BITS=__HELD_BITS__ -D HELD_EQ chip_powerup.sv
+bmc_held: read -formal -D STATE_EQ=__STATE_BITS__ -D HELD_BITS=__HELD_BITS__ -D HELD_EQ chip_powerup.sv
 noreset: chparam -set RESET_CLOCKS 0 chip_powerup
 prep -top chip_powerup
 
