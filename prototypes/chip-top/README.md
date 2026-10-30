@@ -889,7 +889,7 @@ misses by 0.22 ns on 2 endpoints (`critical-paths.txt`). Both failing paths, and
 family that limits 8 PEs in section 7. None starts or ends in the assists. With 9 % more cells and
 18 % more wire in the same floorplan the array's wires got longer: section 7 measured this path
 at about 31 cells and its worst cells as drivers of long Metal3 wires. Options, cheapest first:
-accept 59.2 MHz at the slow corner (the RP2040 host can make 57.6 or 58.0 MHz as easily as 60);
+accept 59.2 MHz at the slow corner (the RP2040 host can make 57.6 or 58.0 MHz as easily as 60, but 10BASE-T transmit needs exactly 60 MHz: 3 clocks per half-bit against a ±100 ppm tolerance, `../eth10-node/README.md`, so this option gives up Ethernet transmit and was rejected on 2026-10-30);
 a floorplan that keeps the array together, away from the assists' glue; a register stage at each
 segment's input (a change of the array's specification, one more clock of latency per segment);
 fewer configuration bits for the assists (the 14 registers are most of their glue). The 8-PE chip
