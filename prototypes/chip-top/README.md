@@ -916,9 +916,12 @@ slow corner's -0.224 ns into +0.140 ns with no violations at any corner (row "de
 LVS match, antenna 0 and Tiny Tapeout's precheck 9 of 9 as before; on its GDS the gate lockstep
 compares 200,000 output words with 0 mismatches (20 trials of 5,000 clocks, wide stimulus), and the
 edge-phase test and structural rule give exactly the plant counts of the earlier hardens (26 of 42
-plants caught by behaviour, the 16 second-stage samplers by the rule only). A run with
-`SYNTH_STRATEGY` "DELAY 1" at density 60 was started at the same time
-(`/var/tmp/tt-closure-2026-10-30/`); density 70 was adopted without waiting for it.
+plants caught by behaviour, the 16 second-stage samplers by the rule only). The other
+lever tried at the same time, `SYNTH_STRATEGY` "DELAY 1" at density 60, made it worse: -1.100 ns
+with 56 violations at the slow corner, 1.92 M µm of wire (+13 %) and utilisation 54 % against 51 %:
+synthesising for delay grows the logic, and on this die the longer wires cost more at the slow
+corner than the faster gates gain (`/var/tmp/tt-closure-2026-10-30/stage-delay/`, metrics not kept
+in the repository).
 
 ## Open issues
 
