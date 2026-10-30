@@ -9,7 +9,7 @@
 #   input  [DW-1:0]  pu_dout_N    the read data, driven by the harness
 #   output [..]      pu_in_N      {A_WEN, A_ADDR, A_DIN, A_BM}: what the macro would be given now
 # and the module is renamed chip_pu.  With "state", it also gains
-#   output [..]      pu_state     every register cleared by reset_sync (directly or ORed), concatenated
+#   output [..]      pu_state     every other register, concatenated
 #   output [..]      pu_held      every register loaded under an enable and never cleared
 # for the proof's inductive helper (chip_powerup.sv, STATE_EQ and HELD_EQ).  Nothing else changes.
 import re
@@ -58,13 +58,15 @@ assert count == 2, count
 if with_state:
     width = {m.group(4): int(m.group(2)) - int(m.group(3)) + 1 if m.group(1) else 1
              for m in re.finditer(r"^\s*reg\s*(\[(\d+):(\d+)\])?\s*(\w+)\s*;", s, re.M)}
-    # cleared by reset_sync, directly or through "assign w = reset_sync | ..."
+    # loaded under an enable and never cleared: they hold their power-up value until written.
+    # Other registers are cleared at reset, through "if (reset_sync)", "if (reset_sync | x)" or a
+    # mux on D, or (the reset synchroniser, input stages) follow the inputs; pu_state takes them
+    # all and bmc_state checks that reset makes them equal.
     resets = {"reset_sync"} | set(re.findall(r"assign (\w+) = reset_sync \|", s))
-    regs = [r for c, r in re.findall(r"always @\(posedge \w+\) begin\s*if \((\w+)\)\s*(\w+) <=", s)
-            if c in resets]
-    # loaded under an enable and never cleared: they hold their power-up value until written
     held = [r for c, r in re.findall(r"always @\(posedge \w+\) begin\s*if \((\w+)\)\s*(\w+) <=", s)
             if c not in resets and not re.search(r"if \(" + c + r"\)\s*" + r + r" <= [^;]+;\s*else", s)]
+    regs = [r for r in dict.fromkeys(re.findall(r"^\s*(\w+) <=", s, re.M))
+            if r not in held and not r.startswith("pu_raddr_q_")]
     for port, rs in (("pu_state", regs), ("pu_held", held)):
         assert rs and all(r in width for r in rs)
         bits = sum(width[r] for r in rs)
