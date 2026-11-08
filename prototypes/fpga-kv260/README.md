@@ -83,9 +83,10 @@ quarter-clock grid beyond what the both-edges output stage does.
 
 1. **Get the chip's Verilog.** `tt/src/chip_tt.v` is generated from `../chip-top`'s Hardcaml and
    is never committed. Either run `../../tt/scripts/regen_chip.sh` (needs OCaml), or take it from
-   a bundle made by `make_bundle.sh` for the same commit.
+   a bundle made by `make_bundle.sh`, in a checkout of the commit the bundle names.
 2. **Build.** `vivado -mode batch -source vivado/build.tcl -tclargs build` needs the KV260 board
-   files from XHub. It prints the actual `pl_clk0` frequency, the address of `kv260_core`, and the
+   files from XHub. Everything goes into the directory `build`; the bitstream and its `.bin` are in
+   `build/kv260_bench.runs/impl_1/`. It prints the actual `pl_clk0` frequency, the address of `kv260_core`, and the
    worst setup and hold slack. Expect to fix details on the first run.
 3. **Load.** On the KV260's Linux the bitstream is loaded together with a device-tree overlay.
    The overlay is also what starts `pl_clk0` at its set frequency: one report says the PL clocks
@@ -100,7 +101,10 @@ quarter-clock grid beyond what the both-edges output stage does.
    diff sim-ds.trace board-ds.trace && diff sim-ds.samples board-ds.samples
    python3 host/check.py ds.meta board-ds
    ```
-   `--repeat 10` also checks that ten runs record the same log.
+   `--repeat 10` also checks that ten runs record the same log. If `build.tcl` put the bench
+   somewhere other than 0xA0000000, pass `--base`. The simulation's numbers to expect: 2,131
+   frames, 10,753 clocks, 2,269 log entries, 16 samples.
+   Leave Pmod pins 7, 8 and 9 unconnected for this comparison: anything on them changes the log.
 6. **With a real I2C device.** Put a device at address 0x50 (for example a 24C-series EEPROM)
    on Pmod pins 7 (SDA) and 8 (SCL), with pull-ups of about 2.2 kohm to 3.3 V. The demo's bus
    runs near 1 MHz at a 60 MHz chip clock, so the device must support Fast-mode Plus. Then

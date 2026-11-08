@@ -3,10 +3,13 @@
 #
 #   vivado -mode batch -source vivado/build.tcl -tclargs OUT_DIR
 #
+# OUT_DIR (default ../build) receives the project, timing.rpt, utilization.rpt, methodology.rpt
+# and kv260_bench.xsa; the bitstream and its .bin are in OUT_DIR/kv260_bench.runs/impl_1/.
+#
 # NOT YET RUN: written without access to Vivado. Expect to fix details on the first run, and
 # please report what had to change. Needs the KV260 board files (Vivado: Tools > XHub Stores >
-# Boards, "Kria KV260 Vision AI Starter Kit") and ../../tt/src/chip_tt.v (../README.md, "Getting
-# the chip's Verilog").
+# Boards, "Kria KV260 Vision AI Starter Kit") and ../../tt/src/chip_tt.v (../README.md, "Running it
+# on the board", step 1).
 #
 # The block design: the Zynq processor system with the board's preset (DDR, MIO), its pl_clk0 at
 # 60 MHz, and M_AXI_HPM0_FPD (32 bits) through an AXI SmartConnect to kv260_core's register port,
@@ -17,7 +20,7 @@ set root [file normalize $here/..]
 set tt [file normalize $root/../../tt/src]
 set out [expr {[llength $argv] ? [file normalize [lindex $argv 0]] : "$root/build"}]
 
-if {![file exists $tt/chip_tt.v]} { error "missing $tt/chip_tt.v: see README.md, Getting the chip's Verilog" }
+if {![file exists $tt/chip_tt.v]} { error "missing $tt/chip_tt.v: see prototypes/fpga-kv260/README.md, Running it on the board, step 1" }
 
 create_project kv260_bench $out -part xck26-sfvc784-2LV-c -force
 set boards [get_board_parts -quiet -latest_file_version *kv260_som*]
