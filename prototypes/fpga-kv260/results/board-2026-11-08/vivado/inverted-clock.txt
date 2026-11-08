@@ -1,0 +1,4 @@
+QUERY registers: 3662, with IS_C_INVERTED=1: 56
+QUERY inverted-clock net bd/kv260_bd_i/kv260_core_0/inst/bench/chip/chip/_516 driven by BUFGCE (bd/kv260_bd_i/clk_wiz_0/inst/clkout1_buf)
+QUERY inverted-clock net bd/kv260_bd_i/kv260_core_0/inst/bench/s_axi_aclk driven by BUFGCE (bd/kv260_bd_i/clk_wiz_0/inst/clkout1_buf)
+QUERY clock nets driven by a LUT: 0

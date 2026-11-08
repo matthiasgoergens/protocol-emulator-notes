@@ -1,0 +1,25 @@
+What vivado/build.tcl printed in each of the four builds, 2026-11-08 (Vivado 2026.1). 1: your build.tcl at 8db03c9;
+2: with the MMCM, clk_wiz input frequency set by hand; 3: final fixes; 4: final fixes plus I2C_INTERNAL.
+
+== build 1
+pl_clk0: 58.822941 MHz (want 60)
+address: /zynq_ultra_ps_e_0/Data/SEG_kv260_core_0_reg0 at 0x00A0000000, range 0x0000001000
+ERROR: [Synth 8-6735] net type must be explicitly specified for 'rst_n' when default_nettype is none [tt/src/chip_tt.v:11]
+
+== build 2
+bench clock:  MHz from pl_clk0 at 99.999001 MHz (want 60)
+ERROR: [BD 41-238] Port/Pin property FREQ_HZ does not match between /clk_wiz_0/clk_in1(99999000) and /zynq_ultra_ps_e_0/pl_clk0(99999001)
+
+== build 3
+pl_clk0: 99.999001 MHz (want 100: the overlay sets it; the MMCM makes 60)
+bench clock: 60011954 Hz (want 60 MHz within 1 %)
+address: /zynq_ultra_ps_e_0/Data/SEG_kv260_core_0_reg0 at 0x00A0000000, range 0x0000001000
+worst setup slack 2.433 ns, worst hold slack 0.017 ns
+
+== build 4
+verilog defines: I2C_INTERNAL
+pl_clk0: 99.999001 MHz (want 100: the overlay sets it; the MMCM makes 60)
+bench clock: 60011954 Hz (want 60 MHz within 1 %)
+address: /zynq_ultra_ps_e_0/Data/SEG_kv260_core_0_reg0 at 0x00A0000000, range 0x0000001000
+worst setup slack 2.518 ns, worst hold slack 0.018 ns
+

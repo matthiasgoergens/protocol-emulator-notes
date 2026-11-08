@@ -1,0 +1,13 @@
+Release kv260-bundle-8db03c9 (kv260-bundle-8db03c99e167.tar.gz) against what we generated with run_sim.sh at 8db03c9
+(opam: OCaml 5.3.0, Hardcaml v0.17.1, dune 3.24.2; Icarus Verilog 14.0 devel), and against the board run with I2C_INTERNAL:
+
+424dd53c626d89b6  chip_tt.v  identical to ours
+55c569218c9f2fb6  ds.ops  identical to ours
+be4cffba0a657f0f  ds.meta  identical to ours
+00cf59804a34fc0d  sim-ds.info  identical to ours
+61fabeff815dbeb3  sim-ds.samples  identical to ours
+c2b2b033d0e976cd  sim-ds.trace  identical to ours
+ebf4b72e105d61bf  check-sim-ds.txt  identical to ours
+
+sim-ds.trace   identical to board-ds.trace (I2C_INTERNAL), all 10 runs
+sim-ds.samples identical to board-ds.samples (I2C_INTERNAL), all 10 runs

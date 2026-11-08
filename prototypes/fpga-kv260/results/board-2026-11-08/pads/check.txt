@@ -1,0 +1,9 @@
+$ python3 host/check.py ds.meta board-ds
+21609 clocks in the trace (expected 10753), run set at clock 4528
+  run: WRONG: status 2 (2: done, nothing dropped), 21609 clocks played
+  uart bytes: WRONG: 0x0f@4580(framing) 0x2d@10138 0x00@10778(framing) 0xc8@16844
+  uart edge spacing: WRONG: 22 edges, all on the 64-clock grid: False
+  spi bytes: ok: 0xa5 0x3c
+  i2c bytes: WRONG: 0xa0-nak stop=True
+  host drained: ok: 16 samples (want 16), 0x01 0x01 (want 0x01 0x01)
+FAIL

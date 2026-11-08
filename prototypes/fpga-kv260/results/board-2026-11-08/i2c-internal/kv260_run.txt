@@ -1,0 +1,16 @@
+$ sudo python3 guard.py -- kv260_run.py ds.ops board-ds --repeat 10      (2026-11-08 13:07 UTC, I2C_INTERNAL build)
+guard: chiptop-bench is the loaded app; running kv260_run.py ds.ops board-ds --repeat 10
+chip clock: 60.017 MHz
+run 0: status 2, 10753 clocks, 2269 trace entries -> board-ds.*
+run 1: status 2, 10753 clocks, 2269 trace entries -> board-ds.rep1.*
+run 2: status 2, 10753 clocks, 2269 trace entries -> board-ds.rep2.*
+run 3: status 2, 10753 clocks, 2269 trace entries -> board-ds.rep3.*
+run 4: status 2, 10753 clocks, 2269 trace entries -> board-ds.rep4.*
+run 5: status 2, 10753 clocks, 2269 trace entries -> board-ds.rep5.*
+run 6: status 2, 10753 clocks, 2269 trace entries -> board-ds.rep6.*
+run 7: status 2, 10753 clocks, 2269 trace entries -> board-ds.rep7.*
+run 8: status 2, 10753 clocks, 2269 trace entries -> board-ds.rep8.*
+run 9: status 2, 10753 clocks, 2269 trace entries -> board-ds.rep9.*
+all 10 runs identical
+$ diff -q sim-ds.trace board-ds.trace && diff -q sim-ds.samples board-ds.samples
+(no difference: both identical)

@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: Apache-2.0
+// Device-tree overlay for the bench as a Kria app named chiptop-bench (dfx-mgr: xmutil loadapp),
+// as used on a KV260 running Kria Ubuntu 22.04 on 2026-11-08 (../results/board-2026-11-08/).
+// On that image the overlay target is fpga-full (newer images use fpga-region).
+//
+// - firmware-name: the bitstream as made by bootgen (README.md in this directory).
+// - pl_clk0 at 100 MHz: the PS cannot make 60 MHz (asked for 60, Vivado reports 58.822941 MHz),
+//   so ../vivado/build.tcl makes the 60 MHz bench clock with an MMCM from pl_clk0.
+// - config-afi 14 is the PS's FPD AFI_FS register, the width of M_AXI_HPM0/1_FPD. 0x000 is 32 bit,
+//   what the build uses (psu_init in the .xsa writes AFI_FS bits 9:8 = 0). With a wrong width
+//   only every fourth register reads back right. The register keeps its value after the app is
+//   unloaded: a design loaded afterwards that expects 128 bit (0xa00) must set it itself.
+// - The bench at 0xA0000000 gets no node: no driver claims it; host/kv260_run.py maps it through
+//   /dev/mem, after guard.py has checked that this app is the one loaded.
+/dts-v1/;
+/plugin/;
+
+&fpga_full {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	firmware-name = "chiptop-bench.bit.bin";
+	resets = <&zynqmp_reset 116>, <&zynqmp_reset 117>, <&zynqmp_reset 118>, <&zynqmp_reset 119>;
+};
+
+&amba {
+	afi0: afi0 {
+		compatible = "xlnx,afi-fpga";
+		config-afi = <0 0>, <1 0>, <2 0>, <3 0>, <4 0>, <5 0>, <6 0>, <7 0>,
+			     <8 0>, <9 0>, <10 0>, <11 0>, <12 0>, <13 0>, <14 0x000>, <15 0x000>;
+		resets = <&zynqmp_reset 116>, <&zynqmp_reset 117>, <&zynqmp_reset 118>, <&zynqmp_reset 119>;
+	};
+
+	clocking0: clocking0 {
+		compatible = "xlnx,fclk";
+		#clock-cells = <0>;
+		clocks = <&zynqmp_clk 71>;
+		clock-output-names = "fabric_clk";
+		assigned-clocks = <&zynqmp_clk 71>;
+		assigned-clock-rates = <100000000>;
+	};
+};

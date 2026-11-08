@@ -1,0 +1,10 @@
+$ diff sim-ds.trace board-ds.trace | head -6
+2110,2112c2110,2113
+< 4602 00000404 01430080
+< 4617 00000606 01430080
+< 4626 00000606 01c30000
+---
+> 4602 00000404 01030080
+
+$ diff sim-ds.samples board-ds.samples
+(no difference)
