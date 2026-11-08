@@ -3,9 +3,9 @@
  (modules lockstep)
  (libraries hardcaml chip pstream hwfuzz unix))
 
-(executable
- (name demos)
- (modules demos)
+(executables
+ (names demos fpga_ops)
+ (modules demos fpga_ops ds_host)
  (libraries hardcaml chip seqv2 upe ds dacdemo unix))
 
 (executable

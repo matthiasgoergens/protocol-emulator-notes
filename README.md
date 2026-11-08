@@ -12,8 +12,9 @@ programmable blocks, and every protocol and every demo is a programme or a confi
 Timing is exact by construction, so a compiler can check before anything runs that a programme
 meets its deadlines.
 
-Everything here is design, simulation and measurement. Nothing has been fabricated, and the FPGA
-bring-up is prepared but not yet run on a board.
+Everything here is design, simulation and measurement. Nothing has been fabricated, and no FPGA
+run has happened yet: a test bench that puts the whole chip on an AMD Kria KV260
+(`prototypes/fpga-kv260`) passes in simulation and is waiting for its first board run.
 
 ## The chip
 
@@ -74,7 +75,8 @@ work is `notes/backlog.md`.
 | Video | PAL and NTSC composite colour, a retro console, a platformer game, a wave-interference game | `prototypes/retro-console`, `prototypes/platformer`, `prototypes/wave-engine`, `prototypes/video-nco` |
 | Audio and radio | one-bit audio output with noise shaping, IMA ADPCM and SBC decoding, FM transmit | `prototypes/onebit-dac`, `prototypes/multiphase` |
 | Gadgets | a GPS finder that tells you by sound whether you are getting closer, the chip as a logic analyser and oscilloscope | `prototypes/gps-hotcold`, `prototypes/scope` |
-| FPGA test bench | ULX3S top level, host runner and checker; DVI output to a monitor | `prototypes/fpga-ulx3s`, `prototypes/hdmi-ulx3s` |
+| FPGA test bench | the whole chip on a KV260: frames from the host model played clock by clock, every pad change logged and compared with simulation | `prototypes/fpga-kv260` |
+| FPGA test bench (earlier) | ULX3S top level for the first sequencer, host runner and checker; DVI output to a monitor | `prototypes/fpga-ulx3s`, `prototypes/hdmi-ulx3s` |
 
 Each directory's README states what was checked, how, and what was not.
 

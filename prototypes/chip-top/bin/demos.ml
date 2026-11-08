@@ -47,45 +47,15 @@ let run_board ?(cfg = S.default_config) (b : Board.t) ~(world : world) ~clocks ~
   (match !first with Some c -> pr "  RTL and specification first differ at clock %d\n" c | None -> ());
   !agree, spec
 
-(* ---- the programme store image of earlier-variant programmes ---- *)
-
-(* thread t's base-ISA programme, translated to ISA v2 (../sequencer-v2/compat.ml) and moved to
-   page 0, offset 64 t: the host-side loader's job *)
-let store_image_base (progs : int array array) =
-  List.concat
-    (List.mapi
-       (fun t p ->
-         let words = Array.mapi (fun pc w -> Compat.relocate ~base:(64 * t) (Compat.of_base ~quarter:true ~pc_bits:6 ~addr:pc w)) p in
-         [ (128 * t, List.concat_map (fun w -> [ w land 0xFF; w lsr 8 ]) (Array.to_list words)) ])
-       (Array.to_list progs))
-
 (* ---- UART, SPI, I2C ---- *)
 
 let ds ?trace_dir () =
   pr "== UART, SPI and I2C (../deadline-sequencer firmware, unchanged) on the combined chip\n";
-  let mem, listings = D.build () in
-  List.iter (fun (n, _, l) -> pr "  %s: %d words\n" n l) listings;
   let b = Board.create () in
-  let h = b.host in
-  Host.wreg h r_ctrl 2;
-  List.iter (fun (a, data) -> Host.submit h (Host.Write { tgt = t_prog; addr = a; data })) (store_image_base mem);
-  Host.submit h (Host.Write { tgt = t_reg; addr = r_boot_pc 0; data = [ 0; 64; 128; 192; 0 ] });
-  (* logical pins: UART 0, SCLK 1, MOSI 2, CS 3 on uo_out[3:0] (undriven level 1); SDA 4 and SCL 5
-     on uio[6] and uio[7], the open-drain pins, which they also read back *)
-  let sel src undriven = src lor (undriven lsl 6) in
-  Host.submit h (Host.Write { tgt = t_reg; addr = r_padsel 0; data = [ sel 0 1; sel 1 1; sel 2 1; sel 3 1 ] });
-  Host.submit h (Host.Write { tgt = t_reg; addr = r_padsel 14; data = [ sel 4 0; sel 5 0 ] });
-  Host.submit h (Host.Write { tgt = t_reg; addr = r_pinin 4; data = [ 14; 15 ] });
   let run_at = ref max_int in
-  Host.submit h (Host.Call (fun () -> run_at := b.clock + 10));
-  Host.wreg h r_ctrl 3;                         (* run; the assists stay held *)
-  let demo_clocks = 6000 in
-  (* after the demo, the host drains the I2C master's OUT bytes *)
-  let host_bytes = ref [] in
-  Host.submit h (Host.Idle demo_clocks);
-  Host.submit h (Host.Read { tgt = t_hostout; addr = 0; n = 8; k = (fun l ->
-      let rec pairs = function t :: d :: r -> (if t land 0x80 <> 0 then [ d ] else []) @ pairs r | _ -> [] in
-      host_bytes := pairs l) });
+  let listings, host_bytes = Ds_host.submit b.host ~on_run:(fun () -> run_at := b.clock + 10) in
+  List.iter (fun (n, _, l) -> pr "  %s: %d words\n" n l) listings;
+  let h = b.host and demo_clocks = Ds_host.demo_clocks in
   let sl = D.new_slave () in
   let bus = ref 0xFF in
   let trace = ref [] in

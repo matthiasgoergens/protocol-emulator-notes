@@ -28,9 +28,10 @@ type t = {
   mutable wait : int;
   mutable s : int; mutable r : int; mutable d : int option;
   mutable busy_clocks : int;
+  mutable sampled : bool;       (* a Sample ran in the latest clock (for exporting the host's levels) *)
 }
 
-let create () = { q = Queue.create (); wait = 0; s = 0; r = 0; d = None; busy_clocks = 0 }
+let create () = { q = Queue.create (); wait = 0; s = 0; r = 0; d = None; busy_clocks = 0; sampled = false }
 
 let idle t = Queue.is_empty t.q && t.wait = 0
 
@@ -73,6 +74,7 @@ let submit t = function
 (* One clock. [d_in] is the level of the four data lines during this clock (whoever drives
    them). Returns what the host drives during this clock: (S, R, D or None). *)
 let clock t ~d_in =
+  t.sampled <- false;
   if t.wait > 0 then t.wait <- t.wait - 1
   else begin
     let continue = ref true in
@@ -83,7 +85,7 @@ let clock t ~d_in =
       | Toggle_s -> t.s <- 1 - t.s
       | Set_r v -> t.r <- v
       | Wait n -> t.wait <- n - 1; continue := false
-      | Sample f -> f d_in
+      | Sample f -> t.sampled <- true; f d_in
       | Do f -> f ()
     done
   end;
