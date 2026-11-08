@@ -1,0 +1,9 @@
+== build
+| Rule    | Severity | Description                                | Checks |
+| CLKC-56 | Advisory | MMCME4 with global clock driver has no LOC | 1      |
+
+== build_i2cint
+| Rule    | Severity | Description                                | Checks |
+| HPDR-1  | Warning  | Port pin direction inconsistency           | 2      |
+| CLKC-56 | Advisory | MMCME4 with global clock driver has no LOC | 1      |
+

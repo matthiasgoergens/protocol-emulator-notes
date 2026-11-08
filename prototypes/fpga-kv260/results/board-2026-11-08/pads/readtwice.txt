@@ -1,0 +1,8 @@
+$ sudo python3 guard.py -- readtwice.py      (the stored trace of run 1 read three times, no new run)
+guard: chiptop-bench is the loaded app; running readtwice.py
+status 2 clocks 10753 entries 2293
+readout 0: zero entries at [2151, 2152], clock not increasing at [2151, 2152, 2241, 2243], TRACE_ADDR off at []
+readout 1: zero entries at [2151, 2152], clock not increasing at [2151, 2152, 2241, 2243], TRACE_ADDR off at []
+readout 2: zero entries at [2151, 2152], clock not increasing at [2151, 2152, 2241, 2243], TRACE_ADDR off at []
+readout 1 vs 0: 0 entries differ, first []
+readout 2 vs 0: 0 entries differ, first []

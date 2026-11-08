@@ -37,7 +37,18 @@ module kv260_top (
   // where the chip enables uio[7:6] it drives the pin; elsewhere the pin floats to the pull-up
   assign pmod7 = uio67_oe[0] ? uio67_out[0] : 1'bz;
   assign pmod8 = uio67_oe[1] ? uio67_out[1] : 1'bz;
+`ifdef I2C_INTERNAL
+  // First board run (2026-11-08): with only the FPGA's internal pull-ups, a released line read
+  // high 18-50 clocks later (SCL) and 41 clocks later (SDA), so the chip's I2C controller ran
+  // differently from the simulation; and the slow, asynchronous edge reached the recorder
+  // unsynchronised, which wrote a few corrupt entries (zero, partial, or stale). With
+  // I2C_INTERNAL the chip reads the lines as sim/tb_bench.v resolves them (low only where the
+  // chip drives low), so a board run can equal the simulation clock for clock. The pads still
+  // show the chip's drive for a logic analyser.
+  assign uio67_in = ~(uio67_oe & ~uio67_out);
+`else
   assign uio67_in = {pmod8, pmod7};
+`endif
   assign pmod10 = heartbeat;
   // the fan at full speed: nothing in this design controls it
   assign fan_en_b = 1'b0;

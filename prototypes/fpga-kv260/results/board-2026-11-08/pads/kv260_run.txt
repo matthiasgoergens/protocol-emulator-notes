@@ -1,0 +1,6 @@
+$ sudo python3 guard.py -- kv260_run.py ds.ops board-ds --repeat 10      (2026-11-08 12:55 UTC)
+guard: chiptop-bench is the loaded app; running kv260_run.py ds.ops board-ds --repeat 10
+chip clock: 60.017 MHz
+run 0: status 2, 10753 clocks, 2292 trace entries -> board-ds.*
+run 1: status 2, 10753 clocks, 2293 trace entries -> board-ds.rep1.*
+run 1 differs from run 0

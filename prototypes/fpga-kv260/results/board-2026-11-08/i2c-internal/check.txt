@@ -1,0 +1,9 @@
+$ python3 host/check.py ds.meta board-ds
+10753 clocks in the trace (expected 10753), run set at clock 4528
+  run: ok: status 2 (2: done, nothing dropped), 10753 clocks played
+  uart bytes: ok: 0x4f@4580 0x4b@5220 0x21@5860
+  uart edge spacing: ok: 20 edges, all on the 64-clock grid: True
+  spi bytes: ok: 0xa5 0x3c
+  i2c bytes: ok: 0xa0-nak 0x5a-nak stop=True
+  host drained: ok: 16 samples (want 16), 0x01 0x01 (want 0x01 0x01)
+PASS
