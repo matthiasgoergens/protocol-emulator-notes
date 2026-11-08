@@ -1,0 +1,2198 @@
+Reading additional input from stdin...
+OpenAI Codex v0.167.0
+--------
+workdir: /home/matthias/prog/janestreet/emulator
+model: gpt-6-luna
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a1ba6a-b2b8-7ac1-a044-db79d2f4eff6
+--------
+user
+Review commit HEAD (git show HEAD) in this repository: an FPGA test bench that puts a chip design
+(tt/src/chip_tt.v, generated; tt/src/chip_project.v wraps it as tt_um_chip_top) on an AMD Kria
+KV260. Files: prototypes/fpga-kv260/ (rtl/*.v, vivado/build.tcl, constraints/kv260.xdc,
+host/kv260_run.py, host/check.py, sim/*.v) and prototypes/chip-top/bin/{fpga_ops,ds_host}.ml,
+src/host.ml. Read prototypes/fpga-kv260/README.md first.
+
+Your job is to BREAK it, not to approve it. "Looks fine" is a failed review. Find concrete
+defects, each with the exact line and a scenario that shows it, in particular:
+- fpga_bench.v player: off-by-one in frame loading/prefetch (frame_raddr, ptr, left, load), the
+  first frame after reset, back-to-back 1-clock frames, the END frame, a run restarted after DONE,
+  ptr running off the end; sampling (which clock's data-line level is captured).
+- recorder: whether entries capture both halves of each clock correctly and whether the cycle
+  stamp matches; trace full behaviour; BRAM inference vs read-during-write.
+- fpga_axil.v: AXI4-Lite protocol violations (handshakes, a master that asserts AWVALID and
+  WVALID in different cycles, back-to-back transactions, read side effects firing twice), and
+  anything that could hang the PS (Linux) on an access.
+- clocking on UltraScale+: the chip clocks 48 flops on ~clk (assign _516 = ~clk); the recorder
+  uses negedge; what Vivado does with that and whether timing constraints are complete.
+- build.tcl: Vivado Tcl that will not work as written (property names, automation rules, paths,
+  make_wrapper output location, write_cfgmem arguments). Be specific.
+- kv260_run.py: /dev/mem access widths, mmap of a 4 KiB page at the AXI base, anything unsafe.
+- check.py: decoders that would PASS a wrong run.
+You may run things: iverilog/vvp/yosys are at /var/tmp/oss-cad-suite-20261014/oss-cad-suite/bin;
+prototypes/fpga-kv260/run_sim.sh /var/tmp/fpga-kv260-codex runs everything (PDK_ROOT=/var/tmp/roundtrip-cmos5l/pdk).
+Prefer measuring to reading. Do not modify tracked files; write scratch files under
+/var/tmp/fpga-kv260-codex only. Report findings ranked by severity, each with evidence.
+2026-11-08T09:08:38.258763Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/\"" })
+2026-11-08T09:08:38.893696Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=\"https://mcp.datadoghq.eu/.well-known/oauth-protected-resource/api/unstable/mcp-server/mcp\"" })
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Failed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Failed
+codex
+I’ll read the README first, then trace the RTL and scripts against concrete timing/protocol cases. I’ll keep all scratch work under `/var/tmp/fpga-kv260-codex` and won’t change tracked files.
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 cat prototypes/fpga-kv260/README.md' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+# The chip on a KV260: an FPGA test bench
+
+This directory puts the chip as submitted to Tiny Tapeout (`tt_um_chip_top`, built from
+`../chip-top`) on an AMD Kria KV260. The board's ARM processor plays the host's part, the role the
+RP2040 has on Tiny Tapeout's demo board. Everything that can be checked without the board has
+been, in simulation, and the steps that need the board are marked **not yet run**.
+
+`../fpga-ulx3s` is an earlier test bench for a different board (Lattice ECP5, open tools). It
+carries an older sequencer, not the chip.
+
+## How a run works
+
+The processor never drives the chip's pins in real time. It loads a list of **frames** into the
+FPGA and sets start. A frame says what the host drives on the host link (the four data lines
+`uio[3:0]`, the strobe `uio[4]`, the read request `uio[5]`) and on `ui_in`, and for how many clocks.
+A small **player** in the FPGA then plays the frames, clock by clock, after holding the chip in
+reset for a fixed number of clocks. A **recorder** logs every change of the chip's pads with its
+clock number. Because the outputs change on both clock edges, each output is logged once for each
+half of the clock. The processor reads the log back when the run is done.
+
+The frames come from the same host model that the simulations use (`../chip-top/src/host.ml`), via
+`../chip-top/bin/fpga_ops.exe`. A run on the board is therefore fixed clock by clock, and should
+record exactly what a simulation of the same frames records. A difference between the two is a
+finding: a wrong clock, a timing failure on the FPGA, or an FPGA mapping that differs from the
+simulated logic. On its own, the recorded log can also be judged by decoding it (`host/check.py`).
+
+The first demo is the UART, SPI and I2C demo of `../chip-top/bin/demos.exe ds`. The host loads the
+earlier sequencer's firmware into the programme store, sets the pins and starts the sequencer.
+The chip then sends "OK!" on the UART, 0xa5 0x3c on SPI, and 0xa0 0x5a on I2C. After that the host
+drains what the I2C controller reported.
+
+## Files
+
+| file | what |
+|---|---|
+| `rtl/fpga_bench.v` | board-independent: the chip, the player, the recorder, the register map (in its header comment) |
+| `rtl/sram_fpga.v` | stand-ins for IHP's two SRAM macros, under the macros' names, as block RAM |
+| `rtl/fpga_axil.v` | AXI4-Lite port for the register map |
+| `rtl/kv260_core.v` | the two above; the module that goes into the Vivado block design |
+| `rtl/kv260_top.v`, `constraints/kv260.xdc` | the Pmod pins and the fan |
+| `vivado/build.tcl` | project, block design (Zynq processor system, `pl_clk0` at 60 MHz), bitstream. **Not yet run** |
+| `host/kv260_run.py` | runs frames on the board from its Linux and writes the log. **Not yet run** |
+| `host/check.py` | judges a log of the demo, from the board or from simulation |
+| `sim/tb_bench.v` | simulation of the whole bench driven through its AXI port, as the processor drives it |
+| `sim/tb_sram_equiv.v` | the SRAM stand-ins against IHP's behavioural model |
+| `run_sim.sh` | all the checks below that need no board |
+| `make_bundle.sh` | packs the generated chip Verilog, the frames and the simulated run for whoever has the board |
+
+## What has been checked here (`./run_sim.sh`, 2026-11-08)
+
+- **The SRAM stand-ins** match IHP's behavioural model (IHP-Open-PDK,
+  `RM_IHPSG13_1P_core_behavioral_bm_bist.v`) over 200,000 random clocks with both memories, two
+  thirds of them reads, writes often read back at once: 0 differences. Only the case the chip uses
+  is modelled (`chip_tt.v` ties the bit mask to all ones and the enables to 1), and a simulation
+  stops if those ties change. A read-first stand-in fails this check (110,970 differences).
+- **The demo through the simulated bench**: 2,131 frames loaded through the AXI port, 10,753 clocks
+  played (the number the exporter computed), and `host/check.py` decodes the right output:
+  UART 0x4f 0x4b 0x21 with every edge on the 64-clock bit grid, SPI 0xa5 0x3c, and I2C 0xa0 0x5a
+  each without an acknowledge (nothing is on the bus), followed by a STOP. The host read back
+  0x01 0x01 from HOSTOUT, the controller's "not acknowledged" report for each byte. With a
+  modelled I2C device, `demos.exe ds` gets 0x00 0x00 instead.
+- **The checks catch faults**: a stand-in with one more clock of read latency makes every decode
+  fail, and the checker fails when told to expect an I2C device. The demo alone does not tell a
+  read-first memory from a write-through one (the trace was identical), which is why the
+  equivalence check exists.
+- **Synthesis for UltraScale+ with Yosys** (`synth_xilinx -family xcup`): the chip's memories map
+  to 2 RAMB18E2, the frame memory and log to 60 RAMB36E2 (the KV260's K26 has 144), no latches,
+  and `check -assert` passes. The 56 flops clocked on the falling edge are the output stage's
+  second edge and the recorder's half-clock capture. This is not Vivado: its timing and its
+  handling of the inverted clock are the board run's first questions.
+
+## What a board run adds, and what it cannot
+
+It adds the whole digital design at its real clock rate, synthesised by a second tool, with real
+pins on the Pmod connector, a real I2C device if one is attached, and the log checked against the
+simulation for every clock.
+
+It cannot show anything about the chip's process: timing on IHP's 130 nm cells, the area, the
+analogue parts, or where the half-clock edges land on silicon. It also does not exercise the
+quarter-clock grid beyond what the both-edges output stage does.
+
+## Running it on the board
+
+1. **Get the chip's Verilog.** `tt/src/chip_tt.v` is generated from `../chip-top`'s Hardcaml and
+   is never committed. Either run `../../tt/scripts/regen_chip.sh` (needs OCaml), or take it from
+   a bundle made by `make_bundle.sh` for the same commit.
+2. **Build.** `vivado -mode batch -source vivado/build.tcl -tclargs build` needs the KV260 board
+   files from XHub. It prints the actual `pl_clk0` frequency, the address of `kv260_core`, and the
+   worst setup and hold slack. Expect to fix details on the first run.
+3. **Load.** On the KV260's Linux the bitstream is loaded together with a device-tree overlay.
+   The overlay is also what starts `pl_clk0` at its set frequency: one report says the PL clocks
+   do not run when a bitstream is loaded over JTAG alone. AMD's flow generates the overlay from
+   the `.xsa` that `build.tcl` writes.
+4. **First check: the clock.** `host/kv260_run.py` measures the chip clock with the bench's
+   free-running counter and stops unless it is 60 MHz within 1 %. Pmod pin 10 toggles every
+   0.5 s at 60 MHz, which an LED or a meter can see.
+5. **Run and compare:**
+   ```
+   sudo python3 host/kv260_run.py ds.ops board-ds --repeat 10
+   diff sim-ds.trace board-ds.trace && diff sim-ds.samples board-ds.samples
+   python3 host/check.py ds.meta board-ds
+   ```
+   `--repeat 10` also checks that ten runs record the same log.
+6. **With a real I2C device.** Put a device at address 0x50 (for example a 24C-series EEPROM)
+   on Pmod pins 7 (SDA) and 8 (SCL), with pull-ups of about 2.2 kohm to 3.3 V. The demo's bus
+   runs near 1 MHz at a 60 MHz chip clock, so the device must support Fast-mode Plus. Then
+   `check.py ... --i2c-device` expects both bytes acknowledged and 0x00 0x00 from HOSTOUT. The log
+   then differs from the simulation on the I2C pins, as it should.
+
+A logic analyser on Pmod pins 1 to 4 (UART, SPI clock, data and select) shows the same bytes
+independently.
+
+## Frames
+
+One 32-bit word each, in hex, one per line; the full layout is in `rtl/fpga_bench.v` and
+`../chip-top/bin/fpga_ops.ml`. Bits 15:0 hold the number of clocks (0 ends the run), then the data
+lines, whether the host drives them, the strobe, the read request, a flag for sampling the data
+lines, and `ui_in`. A demo with an outside world that reacts (an I2C device, a SPI target) needs
+that world either on the Pmod pins or in the FPGA. Only fixed levels on `ui_in` can come from
+the frames.
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 git show --stat --oneline HEAD' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+7e48e27 fpga-kv260: a test bench that puts the whole chip on a KV260, checked in simulation
+ README.md                                   |   8 +-
+ prototypes/chip-top/bin/demos.ml            |  36 +---
+ prototypes/chip-top/bin/ds_host.ml          |  42 +++++
+ prototypes/chip-top/bin/dune                |   6 +-
+ prototypes/chip-top/bin/fpga_ops.ml         |  71 ++++++++
+ prototypes/chip-top/src/host.ml             |   6 +-
+ prototypes/fpga-kv260/.gitignore            |   1 +
+ prototypes/fpga-kv260/README.md             | 120 ++++++++++++++
+ prototypes/fpga-kv260/constraints/kv260.xdc |  36 ++++
+ prototypes/fpga-kv260/host/check.py         | 144 ++++++++++++++++
+ prototypes/fpga-kv260/host/kv260_run.py     | 118 +++++++++++++
+ prototypes/fpga-kv260/make_bundle.sh        |  38 +++++
+ prototypes/fpga-kv260/rtl/fpga_axil.v       |  96 +++++++++++
+ prototypes/fpga-kv260/rtl/fpga_bench.v      | 248 ++++++++++++++++++++++++++++
+ prototypes/fpga-kv260/rtl/kv260_core.v      |  63 +++++++
+ prototypes/fpga-kv260/rtl/kv260_top.v       |  44 +++++
+ prototypes/fpga-kv260/rtl/sram_fpga.v       | 104 ++++++++++++
+ prototypes/fpga-kv260/run_sim.sh            |  48 ++++++
+ prototypes/fpga-kv260/sim/tb_bench.v        | 155 +++++++++++++++++
+ prototypes/fpga-kv260/sim/tb_sram_equiv.v   |  65 ++++++++
+ prototypes/fpga-kv260/vivado/build.tcl      |  89 ++++++++++
+ 21 files changed, 1497 insertions(+), 41 deletions(-)
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 git show HEAD:prototypes/fpga-kv260/rtl/fpga_bench.v' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ * The board-independent part of the FPGA test bench (../README.md): the chip as submitted to
+ * Tiny Tapeout (tt_um_chip_top), a player that plays the host's side of the host link from a
+ * stored list of frames, and a recorder that logs every change of the chip's pads with its clock
+ * number. A processor reads and writes it through a small register bus; fpga_axil.v puts that bus
+ * on AXI4-Lite.
+ *
+ * Everything, the bus included, runs on the chip's one clock (60 MHz on the chip). Once the
+ * processor has loaded the frames and set start, the run is fixed clock by clock: the processor's
+ * timing does not reach the chip, so a run on the board and a simulation of this file with the
+ * same frames should record the same trace.
+ *
+ * Frames (written by ../chip-top/bin/fpga_ops.exe), one 32-bit word each:
+ *   [15:0]  clocks to hold these levels, 1..65535; 0 ends the run
+ *   [19:16] D, the level the host drives on the host link data lines uio[3:0]
+ *   [20]    the host drives D (otherwise the lines are left to the chip)
+ *   [21]    S, the host link strobe (uio[4])    [22] R, the read request (uio[5])
+ *   [23]    sample the data lines at the start of the frame's first clock (the levels of the
+ *           clock before, as ../chip-top/bin/edge_phase.ml's host sees them)
+ *   [31:24] ui_in
+ *
+ * Register map (byte offsets; reads have side effects only where noted):
+ *   0x00 R   identifier 0x46423031 ("FB01")
+ *   0x04 W   bit 0: start (reset the chip for RESET_CLOCKS, then play from frame 0);
+ *            bit 1: stop (back to idle, chip held in reset)
+ *        R   bit 0 busy, bit 1 done, bit 2 trace full (entries were dropped),
+ *            bit 3 ran off the end of the frame memory without an end frame
+ *   0x08 RW  RESET_CLOCKS, clocks of reset before the first frame (default 16, at least 2)
+ *   0x0C RW  UI_MASK: bits of ui_in taken from the ui_ext pins as well (ORed with the frames')
+ *   0x10 RW  FRAME_ADDR, where the next FRAME_DATA write goes
+ *   0x14 W   FRAME_DATA: store a frame at FRAME_ADDR and advance it (ignored while busy)
+ *   0x18 R   clocks played since the first frame
+ *   0x1C R   free-running clock counter (read it twice, some time apart, to measure the clock)
+ *   0x20 R   samples taken
+ *   0x24 RW  SAMPLE_ADDR
+ *   0x28 R   the sample at SAMPLE_ADDR (bits 3:0); the read advances SAMPLE_ADDR
+ *   0x2C R   trace entries recorded (bits 30:0); bit 31 set if the trace filled up
+ *   0x30 RW  TRACE_ADDR
+ *   0x34 R   entry TRACE_ADDR, word 0: the clock number
+ *   0x38 R   word 1: {uio_out 2nd half, uio_out 1st half, uo_out 2nd half, uo_out 1st half}
+ *   0x3C R   word 2: {7'b0, rst_n, uio_in, ui_in, uio_oe}; the read advances TRACE_ADDR
+ *
+ * Trace: one entry for the first clock played and one for every clock in which any recorded
+ * level differs from the clock before. The chip's output stage changes pads on both clock edges,
+ * so each output is recorded twice per clock: as it was just before the falling edge (first
+ * half) and just before the next rising edge (second half). Inputs are recorded as the chip is
+ * given them during the clock.
+ */
+
+`default_nettype none
+
+module fpga_bench #(
+    parameter integer FRAME_AW = 14,       // 16384 frames
+    parameter integer TRACE_AW = 14,       // 16384 trace entries
+    parameter integer SAMPLE_AW = 10,      // 1024 samples
+    parameter integer HEARTBEAT_HALF = 30_000_000
+) (
+    input  wire        clk,
+    // register bus: one-clock read and write strobes, read data in the clock after re
+    input  wire [ 7:0] bus_addr,
+    input  wire [31:0] bus_wdata,
+    input  wire        bus_we,
+    input  wire        bus_re,
+    output reg  [31:0] bus_rdata = 32'd0,
+    // the chip's general pins, for the board's connectors
+    output wire [ 7:0] uo_out,
+    output wire [ 1:0] uio67_out,          // uio[7:6]: the open-drain capable pins
+    output wire [ 1:0] uio67_oe,
+    input  wire [ 1:0] uio67_in,           // the levels on the uio[7:6] pins
+    input  wire [ 7:0] ui_ext,             // inputs from the board, enabled by UI_MASK
+    output reg         heartbeat = 1'b0    // toggles every HEARTBEAT_HALF clocks
+);
+  // ---------------------------------------------------------------- control registers
+  localparam [1:0] IDLE = 2'd0, RESET = 2'd1, RUN = 2'd2, DONE = 2'd3;
+  reg [1:0] state = IDLE;
+  reg [15:0] reset_clocks = 16'd16;
+  reg [7:0] ui_mask = 8'd0;
+  reg [15:0] reset_left = 16'd0;
+  reg ran_off = 1'b0;
+  reg [31:0] cycles = 32'd0, free = 32'd0;
+  reg [31:0] beat = 32'd0;
+
+  // ---------------------------------------------------------------- frame memory and player
+  (* ram_style = "block" *) reg [31:0] frames[0:(1<<FRAME_AW)-1];
+  reg [FRAME_AW-1:0] frame_waddr = 0;
+  reg [FRAME_AW:0] ptr = 0;                // next frame to load; the top bit marks running off
+  reg [31:0] frame_q = 32'd0;              // frames[read address of the clock before]
+  reg [15:0] left = 16'd0;                 // clocks left in the current frame
+  reg [3:0] f_d = 4'd0;
+  reg f_drive = 1'b0, f_s = 1'b0, f_r = 1'b0;
+  reg [7:0] f_ui = 8'd0;
+  reg rst_n = 1'b0;
+
+  // the chip
+  wire [7:0] chip_uo, chip_uio_out, chip_uio_oe;
+  // the host link data lines: the chip's where it drives them, else the host's, else 0
+  wire [3:0] d_line = (chip_uio_oe[3:0] & chip_uio_out[3:0]) |
+                      (~chip_uio_oe[3:0] & (f_drive ? f_d : 4'd0));
+  wire [7:0] ui_in = f_ui | (ui_ext & ui_mask);
+  wire [7:0] uio_in = {uio67_in, f_r, f_s, d_line};
+
+  tt_um_chip_top chip (
+      .ui_in(ui_in), .uo_out(chip_uo), .uio_in(uio_in), .uio_out(chip_uio_out),
+      .uio_oe(chip_uio_oe), .ena(1'b1), .clk(clk), .rst_n(rst_n)
+  );
+  assign uo_out = chip_uo;
+  assign uio67_out = chip_uio_out[7:6];
+  assign uio67_oe = chip_uio_oe[7:6];
+
+  // a frame is loaded at the end of the last reset clock and at the end of each frame's last clock
+  wire load = (state == RESET && reset_left == 16'd1) || (state == RUN && left == 16'd1);
+  wire end_frame = frame_q[15:0] == 16'd0 || ptr[FRAME_AW];
+  wire [FRAME_AW-1:0] frame_raddr = load ? ptr[FRAME_AW-1:0] + 1'b1 : ptr[FRAME_AW-1:0];
+  always @(posedge clk) frame_q <= frames[frame_raddr];
+
+  // samples
+  reg [3:0] samples[0:(1<<SAMPLE_AW)-1];
+  reg [SAMPLE_AW:0] n_samples = 0;
+  reg [SAMPLE_AW-1:0] sample_raddr = 0;
+
+  wire start = bus_we && bus_addr == 8'h04 && bus_wdata[0];
+  wire stop = bus_we && bus_addr == 8'h04 && bus_wdata[1];
+
+  always @(posedge clk) begin
+    free <= free + 1'b1;
+    if (beat == HEARTBEAT_HALF - 1) begin
+      beat <= 32'd0;
+      heartbeat <= ~heartbeat;
+    end else beat <= beat + 1'b1;
+
+    if (bus_we && bus_addr == 8'h14 && (state == IDLE || state == DONE)) begin
+      frames[frame_waddr] <= bus_wdata;
+      frame_waddr <= frame_waddr + 1'b1;
+    end
+    if (bus_we && bus_addr == 8'h10) frame_waddr <= bus_wdata[FRAME_AW-1:0];
+
+    if (stop) begin
+      state <= IDLE;
+      rst_n <= 1'b0;
+    end else if (start && state != RESET && state != RUN) begin
+      state <= RESET;
+      rst_n <= 1'b0;
+      // at least 2, so that frame 0 is read before it is loaded
+      reset_left <= reset_clocks < 16'd2 ? 16'd2 : reset_clocks;
+      ptr <= 0;
+      cycles <= 32'd0;
+      n_samples <= 0;
+      ran_off <= 1'b0;
+      {f_d, f_drive, f_s, f_r, f_ui} <= 0;
+    end else begin
+      case (state)
+        RESET: reset_left <= reset_left - 1'b1;
+        RUN: begin
+          cycles <= cycles + 1'b1;
+          left <= left - 1'b1;
+        end
+        default: ;
+      endcase
+      if (load) begin
+        if (end_frame) begin
+          state <= DONE;
+          ran_off <= ptr[FRAME_AW];
+          // the levels of the last frame stay, and the chip keeps running
+        end else begin
+          state <= RUN;
+          rst_n <= 1'b1;
+          ptr <= ptr + 1'b1;
+          left <= frame_q[15:0];
+          f_d <= frame_q[19:16];
+          f_drive <= frame_q[20];
+          f_s <= frame_q[21];
+          f_r <= frame_q[22];
+          f_ui <= frame_q[31:24];
+          if (frame_q[23] && !n_samples[SAMPLE_AW]) begin
+            samples[n_samples[SAMPLE_AW-1:0]] <= d_line;
+            n_samples <= n_samples + 1'b1;
+          end
+        end
+      end
+    end
+  end
+
+  // ---------------------------------------------------------------- recorder
+  reg [7:0] uo_h1 = 8'd0, uio_h1 = 8'd0;   // captured at the falling edge: the first half
+  always @(negedge clk) begin
+    uo_h1 <= chip_uo;
+    uio_h1 <= chip_uio_out;
+  end
+  // this clock's levels, complete at its end
+  wire [31:0] w1 = {chip_uio_out, uio_h1, chip_uo, uo_h1};
+  wire [31:0] w2 = {7'd0, rst_n, uio_in, ui_in, chip_uio_oe};
+  (* ram_style = "block" *) reg [95:0] trace[0:(1<<TRACE_AW)-1];
+  reg [TRACE_AW:0] n_trace = 0;
+  reg trace_full = 1'b0;
+  reg [63:0] last = 64'd0;
+  reg first = 1'b0;
+  reg [TRACE_AW-1:0] trace_raddr = 0;
+  reg [95:0] trace_q = 96'd0;
+  always @(posedge clk) begin
+    trace_q <= trace[trace_raddr];
+    if (start && state != RESET && state != RUN) begin
+      n_trace <= 0;
+      trace_full <= 1'b0;
+      first <= 1'b1;
+    end else if (state == RUN) begin
+      // [cycles] is this clock's number: it advances at this same edge
+      if (first || {w2, w1} != last) begin
+        if (n_trace[TRACE_AW]) trace_full <= 1'b1;
+        else begin
+          trace[n_trace[TRACE_AW-1:0]] <= {w2, w1, cycles};
+          n_trace <= n_trace + 1'b1;
+        end
+      end
+      last <= {w2, w1};
+      first <= 1'b0;
+    end
+  end
+
+  // ---------------------------------------------------------------- register reads
+  always @(posedge clk) begin
+    if (bus_we && bus_addr == 8'h08) reset_clocks <= bus_wdata[15:0];
+    if (bus_we && bus_addr == 8'h0C) ui_mask <= bus_wdata[7:0];
+    if (bus_we && bus_addr == 8'h24) sample_raddr <= bus_wdata[SAMPLE_AW-1:0];
+    if (bus_we && bus_addr == 8'h30) trace_raddr <= bus_wdata[TRACE_AW-1:0];
+    if (bus_re && bus_addr == 8'h28) sample_raddr <= sample_raddr + 1'b1;
+    if (bus_re && bus_addr == 8'h3C) trace_raddr <= trace_raddr + 1'b1;
+    if (bus_re)
+      case (bus_addr)
+        8'h00: bus_rdata <= 32'h46423031;
+        8'h04: bus_rdata <= {28'd0, ran_off, trace_full, state == DONE, state == RESET || state == RUN};
+        8'h08: bus_rdata <= {16'd0, reset_clocks};
+        8'h0C: bus_rdata <= {24'd0, ui_mask};
+        8'h10: bus_rdata <= frame_waddr;
+        8'h18: bus_rdata <= cycles;
+        8'h1C: bus_rdata <= free;
+        8'h20: bus_rdata <= n_samples;
+        8'h24: bus_rdata <= sample_raddr;
+        8'h28: bus_rdata <= {28'd0, samples[sample_raddr]};
+        8'h2C: bus_rdata <= {trace_full, {(31 - TRACE_AW - 1) {1'b0}}, n_trace};
+        8'h30: bus_rdata <= trace_raddr;
+        8'h34: bus_rdata <= trace_q[31:0];
+        8'h38: bus_rdata <= trace_q[63:32];
+        8'h3C: bus_rdata <= trace_q[95:64];
+        default: bus_rdata <= 32'hDEADBEEF;
+      endcase
+  end
+endmodule
+
+hook: PreToolUse
+hook: PreToolUse Completed
+2026-11-08T09:08:56.703474Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/\"" })
+2026-11-08T09:08:57.454163Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=\"https://mcp.datadoghq.eu/.well-known/oauth-protected-resource/api/unstable/mcp-server/mcp\"" })
+hook: PreToolUse
+hook: PreToolUse Completed
+2026-11-08T09:08:59.707930Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=\"https://mcp.datadoghq.eu/.well-known/oauth-protected-resource/api/unstable/mcp-server/mcp\"" })
+2026-11-08T09:08:59.870390Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/\"" })
+hook: PreToolUse
+hook: PreToolUse Completed
+2026-11-08T09:09:02.648372Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://api.githubcopilot.com/.well-known/oauth-protected-resource/mcp/\"" })
+2026-11-08T09:09:03.373143Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=\"https://mcp.datadoghq.eu/.well-known/oauth-protected-resource/api/unstable/mcp-server/mcp\"" })
+codex
+The README’s simulation claim is useful as a baseline, but the review target includes edge cases outside that demo. I’m checking frame sequencing and recorder timing directly, then I’ll run the supplied simulation and add focused scratch benches for boundaries it doesn’t cover.
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 cat prototypes/fpga-kv260/run_sim.sh' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
+# Everything about the KV260 test bench that can be checked without the board:
+#   1. the SRAM stand-ins against IHP's behavioural model (random reads and writes);
+#   2. the UART, SPI and I2C demo's frames, exported from the host model;
+#   3. the bench (AXI port, player, chip, recorder) simulated with those frames, as the board's
+#      processor would drive it, and the recorded run judged by host/check.py;
+#   4. synthesis for UltraScale+ with Yosys: block RAMs inferred, no latches.
+#
+#   ./run_sim.sh [WORK_DIR]       default /var/tmp/fpga-kv260
+# Needs the OSS CAD Suite tools on PATH (iverilog, vvp, yosys), opam with the chip-top switch,
+# and PDK_ROOT pointing at an IHP-Open-PDK checkout with ihp-sg13cmos5l (for step 1 only).
+set -o errexit -o nounset -o pipefail
+HERE=$(cd "$(dirname "$0")" && pwd)
+W=${1:-/var/tmp/fpga-kv260}
+TT=$HERE/../../tt/src
+CHIP=$HERE/../chip-top
+mkdir --parents "$W/ops"
+
+"$HERE/../../tt/scripts/regen_chip.sh"
+
+if [ -n "${PDK_ROOT:-}" ]; then
+  IHP=$PDK_ROOT/ihp-sg13cmos5l/libs.ref/sg13cmos5l_sram/verilog/RM_IHPSG13_1P_core_behavioral_bm_bist.v
+  iverilog -g2012 -o "$W/eq.vvp" "$HERE/sim/tb_sram_equiv.v" "$HERE/rtl/sram_fpga.v" "$IHP"
+  nice vvp -n "$W/eq.vvp" +seed=7 | tee "$W/sram-equiv.log"
+else
+  echo "PDK_ROOT unset: skipping the SRAM equivalence check"
+fi
+
+(cd "$CHIP" && nice ionice opam exec --switch="${OPAM_SWITCH-5.3.0}" -- dune build --root . ./bin/fpga_ops.exe)
+"$CHIP/_build/default/bin/fpga_ops.exe" "$W/ops"
+
+iverilog -g2012 -o "$W/tb.vvp" "$HERE/sim/tb_bench.v" "$HERE/rtl/fpga_axil.v" "$HERE/rtl/fpga_bench.v" \
+  "$HERE/rtl/sram_fpga.v" "$TT/chip_project.v" "$TT/chip_tt.v"
+nice vvp -n "$W/tb.vvp" +frames="$W/ops/ds.ops" +out="$W/sim-ds" | tee "$W/sim-ds.log"
+python3 -I "$HERE/host/check.py" "$W/ops/ds.meta" "$W/sim-ds" | tee "$W/check-sim-ds.txt"
+
+cat > "$W/synth.ys" <<EOF
+read_verilog -DSYNTHESIS $HERE/rtl/kv260_core.v $HERE/rtl/fpga_axil.v $HERE/rtl/fpga_bench.v $HERE/rtl/sram_fpga.v $TT/chip_project.v $TT/chip_tt.v
+synth_xilinx -family xcup -top kv260_core -flatten
+check -assert
+stat
+EOF
+nice ionice yosys -q -l "$W/synth.log" "$W/synth.ys" 2> "$W/synth.stderr"
+echo "synthesis (Yosys, UltraScale+), cells:"
+grep --extended-regexp '^ +[0-9]+ +(RAMB|URAM|LD|FD)' "$W/synth.log" | awk '{print $2, $1}' | sort --unique
+if grep --quiet --extended-regexp '^ +[0-9]+ +LD' "$W/synth.log"; then echo "latches inferred" >&2; exit 1; fi
+echo "run_sim: all checks passed; files in $W"
+
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba prototypes/fpga-kv260/rtl/fpga_bench.v' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+     1	/*
+     2	 * SPDX-License-Identifier: Apache-2.0
+     3	 * The board-independent part of the FPGA test bench (../README.md): the chip as submitted to
+     4	 * Tiny Tapeout (tt_um_chip_top), a player that plays the host's side of the host link from a
+     5	 * stored list of frames, and a recorder that logs every change of the chip's pads with its clock
+     6	 * number. A processor reads and writes it through a small register bus; fpga_axil.v puts that bus
+     7	 * on AXI4-Lite.
+     8	 *
+     9	 * Everything, the bus included, runs on the chip's one clock (60 MHz on the chip). Once the
+    10	 * processor has loaded the frames and set start, the run is fixed clock by clock: the processor's
+    11	 * timing does not reach the chip, so a run on the board and a simulation of this file with the
+    12	 * same frames should record the same trace.
+    13	 *
+    14	 * Frames (written by ../chip-top/bin/fpga_ops.exe), one 32-bit word each:
+    15	 *   [15:0]  clocks to hold these levels, 1..65535; 0 ends the run
+    16	 *   [19:16] D, the level the host drives on the host link data lines uio[3:0]
+    17	 *   [20]    the host drives D (otherwise the lines are left to the chip)
+    18	 *   [21]    S, the host link strobe (uio[4])    [22] R, the read request (uio[5])
+    19	 *   [23]    sample the data lines at the start of the frame's first clock (the levels of the
+    20	 *           clock before, as ../chip-top/bin/edge_phase.ml's host sees them)
+    21	 *   [31:24] ui_in
+    22	 *
+    23	 * Register map (byte offsets; reads have side effects only where noted):
+    24	 *   0x00 R   identifier 0x46423031 ("FB01")
+    25	 *   0x04 W   bit 0: start (reset the chip for RESET_CLOCKS, then play from frame 0);
+    26	 *            bit 1: stop (back to idle, chip held in reset)
+    27	 *        R   bit 0 busy, bit 1 done, bit 2 trace full (entries were dropped),
+    28	 *            bit 3 ran off the end of the frame memory without an end frame
+    29	 *   0x08 RW  RESET_CLOCKS, clocks of reset before the first frame (default 16, at least 2)
+    30	 *   0x0C RW  UI_MASK: bits of ui_in taken from the ui_ext pins as well (ORed with the frames')
+    31	 *   0x10 RW  FRAME_ADDR, where the next FRAME_DATA write goes
+    32	 *   0x14 W   FRAME_DATA: store a frame at FRAME_ADDR and advance it (ignored while busy)
+    33	 *   0x18 R   clocks played since the first frame
+    34	 *   0x1C R   free-running clock counter (read it twice, some time apart, to measure the clock)
+    35	 *   0x20 R   samples taken
+    36	 *   0x24 RW  SAMPLE_ADDR
+    37	 *   0x28 R   the sample at SAMPLE_ADDR (bits 3:0); the read advances SAMPLE_ADDR
+    38	 *   0x2C R   trace entries recorded (bits 30:0); bit 31 set if the trace filled up
+    39	 *   0x30 RW  TRACE_ADDR
+    40	 *   0x34 R   entry TRACE_ADDR, word 0: the clock number
+    41	 *   0x38 R   word 1: {uio_out 2nd half, uio_out 1st half, uo_out 2nd half, uo_out 1st half}
+    42	 *   0x3C R   word 2: {7'b0, rst_n, uio_in, ui_in, uio_oe}; the read advances TRACE_ADDR
+    43	 *
+    44	 * Trace: one entry for the first clock played and one for every clock in which any recorded
+    45	 * level differs from the clock before. The chip's output stage changes pads on both clock edges,
+    46	 * so each output is recorded twice per clock: as it was just before the falling edge (first
+    47	 * half) and just before the next rising edge (second half). Inputs are recorded as the chip is
+    48	 * given them during the clock.
+    49	 */
+    50	
+    51	`default_nettype none
+    52	
+    53	module fpga_bench #(
+    54	    parameter integer FRAME_AW = 14,       // 16384 frames
+    55	    parameter integer TRACE_AW = 14,       // 16384 trace entries
+    56	    parameter integer SAMPLE_AW = 10,      // 1024 samples
+    57	    parameter integer HEARTBEAT_HALF = 30_000_000
+    58	) (
+    59	    input  wire        clk,
+    60	    // register bus: one-clock read and write strobes, read data in the clock after re
+    61	    input  wire [ 7:0] bus_addr,
+    62	    input  wire [31:0] bus_wdata,
+    63	    input  wire        bus_we,
+    64	    input  wire        bus_re,
+    65	    output reg  [31:0] bus_rdata = 32'd0,
+    66	    // the chip's general pins, for the board's connectors
+    67	    output wire [ 7:0] uo_out,
+    68	    output wire [ 1:0] uio67_out,          // uio[7:6]: the open-drain capable pins
+    69	    output wire [ 1:0] uio67_oe,
+    70	    input  wire [ 1:0] uio67_in,           // the levels on the uio[7:6] pins
+    71	    input  wire [ 7:0] ui_ext,             // inputs from the board, enabled by UI_MASK
+    72	    output reg         heartbeat = 1'b0    // toggles every HEARTBEAT_HALF clocks
+    73	);
+    74	  // ---------------------------------------------------------------- control registers
+    75	  localparam [1:0] IDLE = 2'd0, RESET = 2'd1, RUN = 2'd2, DONE = 2'd3;
+    76	  reg [1:0] state = IDLE;
+    77	  reg [15:0] reset_clocks = 16'd16;
+    78	  reg [7:0] ui_mask = 8'd0;
+    79	  reg [15:0] reset_left = 16'd0;
+    80	  reg ran_off = 1'b0;
+    81	  reg [31:0] cycles = 32'd0, free = 32'd0;
+    82	  reg [31:0] beat = 32'd0;
+    83	
+    84	  // ---------------------------------------------------------------- frame memory and player
+    85	  (* ram_style = "block" *) reg [31:0] frames[0:(1<<FRAME_AW)-1];
+    86	  reg [FRAME_AW-1:0] frame_waddr = 0;
+    87	  reg [FRAME_AW:0] ptr = 0;                // next frame to load; the top bit marks running off
+    88	  reg [31:0] frame_q = 32'd0;              // frames[read address of the clock before]
+    89	  reg [15:0] left = 16'd0;                 // clocks left in the current frame
+    90	  reg [3:0] f_d = 4'd0;
+    91	  reg f_drive = 1'b0, f_s = 1'b0, f_r = 1'b0;
+    92	  reg [7:0] f_ui = 8'd0;
+    93	  reg rst_n = 1'b0;
+    94	
+    95	  // the chip
+    96	  wire [7:0] chip_uo, chip_uio_out, chip_uio_oe;
+    97	  // the host link data lines: the chip's where it drives them, else the host's, else 0
+    98	  wire [3:0] d_line = (chip_uio_oe[3:0] & chip_uio_out[3:0]) |
+    99	                      (~chip_uio_oe[3:0] & (f_drive ? f_d : 4'd0));
+   100	  wire [7:0] ui_in = f_ui | (ui_ext & ui_mask);
+   101	  wire [7:0] uio_in = {uio67_in, f_r, f_s, d_line};
+   102	
+   103	  tt_um_chip_top chip (
+   104	      .ui_in(ui_in), .uo_out(chip_uo), .uio_in(uio_in), .uio_out(chip_uio_out),
+   105	      .uio_oe(chip_uio_oe), .ena(1'b1), .clk(clk), .rst_n(rst_n)
+   106	  );
+   107	  assign uo_out = chip_uo;
+   108	  assign uio67_out = chip_uio_out[7:6];
+   109	  assign uio67_oe = chip_uio_oe[7:6];
+   110	
+   111	  // a frame is loaded at the end of the last reset clock and at the end of each frame's last clock
+   112	  wire load = (state == RESET && reset_left == 16'd1) || (state == RUN && left == 16'd1);
+   113	  wire end_frame = frame_q[15:0] == 16'd0 || ptr[FRAME_AW];
+   114	  wire [FRAME_AW-1:0] frame_raddr = load ? ptr[FRAME_AW-1:0] + 1'b1 : ptr[FRAME_AW-1:0];
+   115	  always @(posedge clk) frame_q <= frames[frame_raddr];
+   116	
+   117	  // samples
+   118	  reg [3:0] samples[0:(1<<SAMPLE_AW)-1];
+   119	  reg [SAMPLE_AW:0] n_samples = 0;
+   120	  reg [SAMPLE_AW-1:0] sample_raddr = 0;
+   121	
+   122	  wire start = bus_we && bus_addr == 8'h04 && bus_wdata[0];
+   123	  wire stop = bus_we && bus_addr == 8'h04 && bus_wdata[1];
+   124	
+   125	  always @(posedge clk) begin
+   126	    free <= free + 1'b1;
+   127	    if (beat == HEARTBEAT_HALF - 1) begin
+   128	      beat <= 32'd0;
+   129	      heartbeat <= ~heartbeat;
+   130	    end else beat <= beat + 1'b1;
+   131	
+   132	    if (bus_we && bus_addr == 8'h14 && (state == IDLE || state == DONE)) begin
+   133	      frames[frame_waddr] <= bus_wdata;
+   134	      frame_waddr <= frame_waddr + 1'b1;
+   135	    end
+   136	    if (bus_we && bus_addr == 8'h10) frame_waddr <= bus_wdata[FRAME_AW-1:0];
+   137	
+   138	    if (stop) begin
+   139	      state <= IDLE;
+   140	      rst_n <= 1'b0;
+   141	    end else if (start && state != RESET && state != RUN) begin
+   142	      state <= RESET;
+   143	      rst_n <= 1'b0;
+   144	      // at least 2, so that frame 0 is read before it is loaded
+   145	      reset_left <= reset_clocks < 16'd2 ? 16'd2 : reset_clocks;
+   146	      ptr <= 0;
+   147	      cycles <= 32'd0;
+   148	      n_samples <= 0;
+   149	      ran_off <= 1'b0;
+   150	      {f_d, f_drive, f_s, f_r, f_ui} <= 0;
+   151	    end else begin
+   152	      case (state)
+   153	        RESET: reset_left <= reset_left - 1'b1;
+   154	        RUN: begin
+   155	          cycles <= cycles + 1'b1;
+   156	          left <= left - 1'b1;
+   157	        end
+   158	        default: ;
+   159	      endcase
+   160	      if (load) begin
+   161	        if (end_frame) begin
+   162	          state <= DONE;
+   163	          ran_off <= ptr[FRAME_AW];
+   164	          // the levels of the last frame stay, and the chip keeps running
+   165	        end else begin
+   166	          state <= RUN;
+   167	          rst_n <= 1'b1;
+   168	          ptr <= ptr + 1'b1;
+   169	          left <= frame_q[15:0];
+   170	          f_d <= frame_q[19:16];
+   171	          f_drive <= frame_q[20];
+   172	          f_s <= frame_q[21];
+   173	          f_r <= frame_q[22];
+   174	          f_ui <= frame_q[31:24];
+   175	          if (frame_q[23] && !n_samples[SAMPLE_AW]) begin
+   176	            samples[n_samples[SAMPLE_AW-1:0]] <= d_line;
+   177	            n_samples <= n_samples + 1'b1;
+   178	          end
+   179	        end
+   180	      end
+   181	    end
+   182	  end
+   183	
+   184	  // ---------------------------------------------------------------- recorder
+   185	  reg [7:0] uo_h1 = 8'd0, uio_h1 = 8'd0;   // captured at the falling edge: the first half
+   186	  always @(negedge clk) begin
+   187	    uo_h1 <= chip_uo;
+   188	    uio_h1 <= chip_uio_out;
+   189	  end
+   190	  // this clock's levels, complete at its end
+   191	  wire [31:0] w1 = {chip_uio_out, uio_h1, chip_uo, uo_h1};
+   192	  wire [31:0] w2 = {7'd0, rst_n, uio_in, ui_in, chip_uio_oe};
+   193	  (* ram_style = "block" *) reg [95:0] trace[0:(1<<TRACE_AW)-1];
+   194	  reg [TRACE_AW:0] n_trace = 0;
+   195	  reg trace_full = 1'b0;
+   196	  reg [63:0] last = 64'd0;
+   197	  reg first = 1'b0;
+   198	  reg [TRACE_AW-1:0] trace_raddr = 0;
+   199	  reg [95:0] trace_q = 96'd0;
+   200	  always @(posedge clk) begin
+   201	    trace_q <= trace[trace_raddr];
+   202	    if (start && state != RESET && state != RUN) begin
+   203	      n_trace <= 0;
+   204	      trace_full <= 1'b0;
+   205	      first <= 1'b1;
+   206	    end else if (state == RUN) begin
+   207	      // [cycles] is this clock's number: it advances at this same edge
+   208	      if (first || {w2, w1} != last) begin
+   209	        if (n_trace[TRACE_AW]) trace_full <= 1'b1;
+   210	        else begin
+   211	          trace[n_trace[TRACE_AW-1:0]] <= {w2, w1, cycles};
+   212	          n_trace <= n_trace + 1'b1;
+   213	        end
+   214	      end
+   215	      last <= {w2, w1};
+   216	      first <= 1'b0;
+   217	    end
+   218	  end
+   219	
+   220	  // ---------------------------------------------------------------- register reads
+   221	  always @(posedge clk) begin
+   222	    if (bus_we && bus_addr == 8'h08) reset_clocks <= bus_wdata[15:0];
+   223	    if (bus_we && bus_addr == 8'h0C) ui_mask <= bus_wdata[7:0];
+   224	    if (bus_we && bus_addr == 8'h24) sample_raddr <= bus_wdata[SAMPLE_AW-1:0];
+   225	    if (bus_we && bus_addr == 8'h30) trace_raddr <= bus_wdata[TRACE_AW-1:0];
+   226	    if (bus_re && bus_addr == 8'h28) sample_raddr <= sample_raddr + 1'b1;
+   227	    if (bus_re && bus_addr == 8'h3C) trace_raddr <= trace_raddr + 1'b1;
+   228	    if (bus_re)
+   229	      case (bus_addr)
+   230	        8'h00: bus_rdata <= 32'h46423031;
+   231	        8'h04: bus_rdata <= {28'd0, ran_off, trace_full, state == DONE, state == RESET || state == RUN};
+   232	        8'h08: bus_rdata <= {16'd0, reset_clocks};
+   233	        8'h0C: bus_rdata <= {24'd0, ui_mask};
+   234	        8'h10: bus_rdata <= frame_waddr;
+   235	        8'h18: bus_rdata <= cycles;
+   236	        8'h1C: bus_rdata <= free;
+   237	        8'h20: bus_rdata <= n_samples;
+   238	        8'h24: bus_rdata <= sample_raddr;
+   239	        8'h28: bus_rdata <= {28'd0, samples[sample_raddr]};
+   240	        8'h2C: bus_rdata <= {trace_full, {(31 - TRACE_AW - 1) {1'b0}}, n_trace};
+   241	        8'h30: bus_rdata <= trace_raddr;
+   242	        8'h34: bus_rdata <= trace_q[31:0];
+   243	        8'h38: bus_rdata <= trace_q[63:32];
+   244	        8'h3C: bus_rdata <= trace_q[95:64];
+   245	        default: bus_rdata <= 32'hDEADBEEF;
+   246	      endcase
+   247	  end
+   248	endmodule
+
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 git status --short' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+?? notes/codex-brainstorm-run.log
+?? notes/reviews/
+?? prototypes/composite-video/__pycache__/
+?? prototypes/crazy-network/crazy_network.v
+?? prototypes/gain-cell/drc/merge-ARRAY_2T_allthick_L45n/
+?? prototypes/gain-cell/drc/merge-ARRAY_2T_thick_L45n/
+?? prototypes/gain-cell/drc/merge-ARRAY_2T_thin_L13n/
+?? prototypes/gain-cell/drc/merge-ARRAY_2T_thin_L13n_P/
+?? prototypes/gain-cell/drc/merge-ARRAY_2T_thin_L13n_S2/
+?? prototypes/gain-cell/drc/merge-ARRAY_3T_allthick_L45n/
+?? prototypes/gain-cell/drc/merge-ARRAY_3T_thick_L45n/
+?? prototypes/gain-cell/drc/merge-ARRAY_3T_thin_L13n/
+?? prototypes/gain-cell/drc/merge-ARRAY_3T_thin_L13n_P/
+?? prototypes/gain-cell/drc/merge-ARRAY_3T_thin_L13n_S2/
+?? prototypes/gain-cell/drc/merge-ARRAY_MIXED/
+?? prototypes/gain-cell/drc/run1/
+?? prototypes/gain-cell/drc/v2-2T/
+?? prototypes/gain-cell/drc/v2-3T/
+?? prototypes/gain-cell/drc/v2-tmp.log
+?? prototypes/gain-cell/drc/v2-tmp/
+?? prototypes/gain-cell/drc/v3-ARRAY_2T_thin_L13n/
+?? prototypes/gain-cell/drc/v3-ARRAY_3T_thick_L45n/
+?? prototypes/gain-cell/drc/v3-ARRAY_3T_thin_L13n/
+?? prototypes/gain-cell/drc/v3-ARRAY_MIXED/
+?? prototypes/gain-cell/lvs/2T.log
+?? prototypes/gain-cell/lvs/2T/lvs_run_2026_09_24_15_52_18.log
+?? prototypes/gain-cell/lvs/2T/r.log
+?? prototypes/gain-cell/lvs/2T/r.lvsdb
+?? prototypes/gain-cell/lvs/3T.log
+?? prototypes/gain-cell/lvs/3T/lvs_run_2026_09_24_15_52_14.log
+?? prototypes/gain-cell/lvs/3T/r.log
+?? prototypes/gain-cell/lvs/3T/r.lvsdb
+?? prototypes/gain-cell/lvs/dummy-mixed.cir
+?? prototypes/gain-cell/lvs/dummy.cir
+?? prototypes/gain-cell/lvs/mixed.log
+?? prototypes/gain-cell/lvs/mixed/r.log
+?? prototypes/gain-cell/lvs/mixed/r.lvsdb
+?? prototypes/hwfuzz/build.log
+?? prototypes/hwfuzz/results/packet_coverage.txt
+?? prototypes/hwfuzz/results/packet_dictionary.txt
+?? prototypes/hwfuzz/results/packet_random.txt
+?? prototypes/hwfuzz/results/sweep_packet.log
+?? prototypes/retro-console/retro_console.v
+?? prototypes/semiring-ring/build.log
+?? prototypes/semiring-ring/cells.txt
+?? prototypes/semiring-ring/out/reel_000.bin
+?? prototypes/semiring-ring/out/reel_000.png
+?? prototypes/semiring-ring/out/reel_001.bin
+?? prototypes/semiring-ring/out/reel_001.png
+?? prototypes/semiring-ring/out/reel_002.bin
+?? prototypes/semiring-ring/out/reel_002.png
+?? prototypes/semiring-ring/out/reel_003.bin
+?? prototypes/semiring-ring/out/reel_003.png
+?? prototypes/semiring-ring/out/reel_004.bin
+?? prototypes/semiring-ring/out/reel_004.png
+?? prototypes/semiring-ring/out/reel_005.bin
+?? prototypes/semiring-ring/out/reel_005.png
+?? prototypes/semiring-ring/out/reel_006.bin
+?? prototypes/semiring-ring/out/reel_006.png
+?? prototypes/semiring-ring/out/reel_007.bin
+?? prototypes/semiring-ring/out/reel_007.png
+?? prototypes/semiring-ring/out/reel_008.bin
+?? prototypes/semiring-ring/out/reel_008.png
+?? prototypes/semiring-ring/out/reel_009.bin
+?? prototypes/semiring-ring/out/reel_009.png
+?? prototypes/semiring-ring/out/reel_010.bin
+?? prototypes/semiring-ring/out/reel_010.png
+?? prototypes/semiring-ring/out/reel_011.bin
+?? prototypes/semiring-ring/out/reel_011.png
+?? prototypes/semiring-ring/out/reel_012.bin
+?? prototypes/semiring-ring/out/reel_012.png
+?? prototypes/semiring-ring/out/reel_013.bin
+?? prototypes/semiring-ring/out/reel_013.png
+?? prototypes/semiring-ring/out/reel_014.bin
+?? prototypes/semiring-ring/out/reel_014.png
+?? prototypes/semiring-ring/out/reel_015.bin
+?? prototypes/semiring-ring/out/reel_015.png
+?? prototypes/semiring-ring/out/reel_016.bin
+?? prototypes/semiring-ring/out/reel_016.png
+?? prototypes/semiring-ring/out/reel_017.bin
+?? prototypes/semiring-ring/out/reel_017.png
+?? prototypes/semiring-ring/out/reel_018.bin
+?? prototypes/semiring-ring/out/reel_018.png
+?? prototypes/semiring-ring/out/reel_019.bin
+?? prototypes/semiring-ring/out/reel_019.png
+?? prototypes/semiring-ring/out/reel_020.bin
+?? prototypes/semiring-ring/out/reel_020.png
+?? prototypes/semiring-ring/out/reel_021.bin
+?? prototypes/semiring-ring/out/reel_021.png
+?? prototypes/semiring-ring/out/reel_022.bin
+?? prototypes/semiring-ring/out/reel_022.png
+?? prototypes/semiring-ring/out/reel_023.bin
+?? prototypes/semiring-ring/out/reel_023.png
+?? prototypes/semiring-ring/out/reel_024.bin
+?? prototypes/semiring-ring/out/reel_024.png
+?? prototypes/semiring-ring/out/reel_025.bin
+?? prototypes/semiring-ring/out/reel_025.png
+?? prototypes/semiring-ring/out/reel_026.bin
+?? prototypes/semiring-ring/out/reel_026.png
+?? prototypes/semiring-ring/out/reel_027.bin
+?? prototypes/semiring-ring/out/reel_027.png
+?? prototypes/semiring-ring/out/reel_028.bin
+?? prototypes/semiring-ring/out/reel_028.png
+?? prototypes/semiring-ring/out/reel_029.bin
+?? prototypes/semiring-ring/out/reel_029.png
+?? prototypes/semiring-ring/out/reel_030.bin
+?? prototypes/semiring-ring/out/reel_030.png
+?? prototypes/semiring-ring/out/reel_031.bin
+?? prototypes/semiring-ring/out/reel_031.png
+?? prototypes/semiring-ring/out/reel_032.bin
+?? prototypes/semiring-ring/out/reel_032.png
+?? prototypes/semiring-ring/out/reel_033.bin
+?? prototypes/semiring-ring/out/reel_033.png
+?? prototypes/semiring-ring/out/reel_034.bin
+?? prototypes/semiring-ring/out/reel_034.png
+?? prototypes/semiring-ring/out/reel_035.bin
+?? prototypes/semiring-ring/out/reel_035.png
+?? prototypes/semiring-ring/out/reel_036.bin
+?? prototypes/semiring-ring/out/reel_036.png
+?? prototypes/semiring-ring/out/reel_037.bin
+?? prototypes/semiring-ring/out/reel_037.png
+?? prototypes/semiring-ring/out/reel_038.bin
+?? prototypes/semiring-ring/out/reel_038.png
+?? prototypes/semiring-ring/out/reel_039.bin
+?? prototypes/semiring-ring/out/reel_039.png
+?? prototypes/semiring-ring/out/reel_040.bin
+?? prototypes/semiring-ring/out/reel_040.png
+?? prototypes/semiring-ring/out/reel_041.bin
+?? prototypes/semiring-ring/out/reel_041.png
+?? prototypes/semiring-ring/out/reel_042.bin
+?? prototypes/semiring-ring/out/reel_042.png
+?? prototypes/semiring-ring/out/reel_043.bin
+?? prototypes/semiring-ring/out/reel_043.png
+?? prototypes/semiring-ring/out/reel_044.bin
+?? prototypes/semiring-ring/out/reel_044.png
+?? prototypes/semiring-ring/out/reel_045.bin
+?? prototypes/semiring-ring/out/reel_045.png
+?? prototypes/semiring-ring/out/reel_046.bin
+?? prototypes/semiring-ring/out/reel_046.png
+?? prototypes/semiring-ring/out/reel_047.bin
+?? prototypes/semiring-ring/out/reel_047.png
+?? prototypes/semiring-ring/semiring_ring.v
+?? prototypes/semiring-ring/tv.log
+?? prototypes/sorting-search/__pycache__/
+?? prototypes/sorting-search/out/complete_n10.json
+?? prototypes/sorting-search/out/complete_n4.json
+?? prototypes/sorting-search/out/complete_n6.json
+?? prototypes/sorting-search/out/complete_n8.json
+?? prototypes/sorting-search/out/hypercube_map.png
+?? prototypes/sorting-search/out/hypercube_n16.err
+?? prototypes/sorting-search/out/hypercube_n16.json
+?? prototypes/sorting-search/out/hypercube_n8.json
+?? prototypes/sorting-search/out/line_n16.err
+?? prototypes/sorting-search/out/line_n16.json
+?? prototypes/sorting-search/out/maps.png
+?? prototypes/sorting-search/out/rand3_n16.err
+?? prototypes/sorting-search/out/rand3_n16.json
+?? prototypes/sorting-search/out/rand4_n16.err
+?? prototypes/sorting-search/out/rand4_n16.json
+?? prototypes/sorting-search/out/ring+rand1_n16.err
+?? prototypes/sorting-search/out/ring+rand1_n16.json
+?? prototypes/sorting-search/out/ring+rand2_n16.err
+?? prototypes/sorting-search/out/ring+rand2_n16.json
+?? prototypes/sorting-search/out/ring_n16.err
+?? prototypes/sorting-search/out/ring_n16.json
+?? prototypes/wave-engine/wave_engine.v
+?? synth_sg13g2.log
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 ls -ld /var/tmp /var/tmp/fpga-kv260-codex /tmp' in /home/matthias/prog/janestreet/emulator
+ exited 2 in 0ms:
+ls: cannot access '/var/tmp/fpga-kv260-codex': No such file or directory
+drwxrwxrwt   27 nobody nobody  760 Nov  8 17:09 /tmp
+drwxrwxrwt 2482 nobody nobody 4096 Nov  8 17:06 /var/tmp
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'PATH=/var/tmp/oss-cad-suite-20261014/oss-cad-suite/bin:$PATH PDK_ROOT=/var/tmp/roundtrip-cmos5l/pdk nice -n 10 ionice -c 3 prototypes/fpga-kv260/run_sim.sh /tmp/fpga-kv260-codex' in /home/matthias/prog/janestreet/emulator
+ exited 1 in 219ms:
+mktemp: failed to create directory via template ‘/var/tmp/tt-regen-chip.XXXXXX’: Read-only file system
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba prototypes/fpga-kv260/host/kv260_run.py' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+     1	#!/usr/bin/env python3
+     2	# SPDX-License-Identifier: Apache-2.0
+     3	"""Run frames on the KV260 test bench, from the board's own Linux (as root, for /dev/mem).
+     4	
+     5	    kv260_run.py FRAMES OUT_PREFIX [--base 0xA0000000] [--repeat N]
+     6	
+     7	Does what sim/tb_bench.v does in simulation and writes the same files: OUT_PREFIX.info,
+     8	.samples and .trace. So `diff` against a simulation of the same frames compares the board with
+     9	the simulation clock for clock, and host/check.py judges either.
+    10	
+    11	Before the run it checks the bench's identifier and measures the chip clock with the bench's
+    12	free-running counter; it stops if the clock is not 60 MHz within 1 %, since a wrong or stopped
+    13	PL clock is the likeliest first-bring-up fault. With --repeat N it runs N times and stops at the
+    14	first run whose files differ from the first: the run is fixed clock by clock, so they should not.
+    15	
+    16	Python standard library only. --base is where the block design put kv260_core (build.tcl prints
+    17	it; M_AXI_HPM0_FPD's window starts at 0xA0000000).
+    18	"""
+    19	import argparse
+    20	import ctypes
+    21	import mmap
+    22	import os
+    23	import sys
+    24	import time
+    25	
+    26	ID = 0x46423031
+    27	
+    28	
+    29	class Bench:
+    30	    def __init__(self, base):
+    31	        fd = os.open("/dev/mem", os.O_RDWR | os.O_SYNC)
+    32	        self.mm = mmap.mmap(fd, 4096, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE, offset=base)
+    33	        os.close(fd)
+    34	
+    35	    def rd(self, off):
+    36	        # one 32-bit load: some registers advance an address when read
+    37	        return ctypes.c_uint32.from_buffer(self.mm, off).value
+    38	
+    39	    def wr(self, off, v):
+    40	        ctypes.c_uint32.from_buffer(self.mm, off).value = v & 0xFFFFFFFF
+    41	
+    42	
+    43	def clock_mhz(b, seconds=0.5):
+    44	    t0, c0 = time.monotonic(), b.rd(0x1C)
+    45	    time.sleep(seconds)
+    46	    t1, c1 = time.monotonic(), b.rd(0x1C)
+    47	    return ((c1 - c0) & 0xFFFFFFFF) / (t1 - t0) / 1e6
+    48	
+    49	
+    50	def run(b, frames, prefix):
+    51	    b.wr(0x04, 2)                                 # stop: idle, chip in reset
+    52	    b.wr(0x10, 0)
+    53	    for w in frames:
+    54	        b.wr(0x14, w)
+    55	    if b.rd(0x10) != len(frames):
+    56	        sys.exit(f"frame memory: FRAME_ADDR {b.rd(0x10)} after {len(frames)} frames")
+    57	    b.wr(0x04, 1)
+    58	    t0 = time.monotonic()
+    59	    while b.rd(0x04) & 1:
+    60	        if time.monotonic() - t0 > 60:
+    61	            sys.exit("run did not finish in 60 s")
+    62	        time.sleep(0.001)
+    63	    status, played = b.rd(0x04), b.rd(0x18)
+    64	    with open(prefix + ".info", "w") as f:
+    65	        f.write(f"status {status}\nclocks {played}\n")
+    66	    n = b.rd(0x20)
+    67	    b.wr(0x24, 0)
+    68	    with open(prefix + ".samples", "w") as f:
+    69	        for _ in range(n):
+    70	            f.write(f"{b.rd(0x28) & 0xF:01x}\n")
+    71	    v = b.rd(0x2C)
+    72	    n = v & 0x7FFFFFFF
+    73	    b.wr(0x30, 0)
+    74	    with open(prefix + ".trace", "w") as f:
+    75	        for _ in range(n):
+    76	            w0, w1, w2 = b.rd(0x34), b.rd(0x38), b.rd(0x3C)
+    77	            f.write(f"{w0} {w1:08x} {w2:08x}\n")
+    78	    return status, played, n
+    79	
+    80	
+    81	def main():
+    82	    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    83	    ap.add_argument("frames")
+    84	    ap.add_argument("prefix")
+    85	    ap.add_argument("--base", type=lambda s: int(s, 0), default=0xA0000000)
+    86	    ap.add_argument("--repeat", type=int, default=1)
+    87	    a = ap.parse_args()
+    88	    frames = []
+    89	    for line in open(a.frames):
+    90	        w = int(line, 16)
+    91	        frames.append(w)
+    92	        if w == 0:
+    93	            break
+    94	    else:
+    95	        sys.exit("no end frame")
+    96	    b = Bench(a.base)
+    97	    if b.rd(0x00) != ID:
+    98	        sys.exit(f"identifier {b.rd(0x00):#010x} at {a.base:#x}, want {ID:#010x}: wrong --base, or the bitstream is not loaded")
+    99	    mhz = clock_mhz(b)
+   100	    print(f"chip clock: {mhz:.3f} MHz")
+   101	    if abs(mhz - 60) > 0.6:
+   102	        sys.exit("the chip clock is not 60 MHz: check pl_clk0 (it is set by the device tree overlay when the bitstream is loaded)")
+   103	    first = None
+   104	    for k in range(a.repeat):
+   105	        prefix = a.prefix if k == 0 else f"{a.prefix}.rep{k}"
+   106	        status, played, n = run(b, frames, prefix)
+   107	        print(f"run {k}: status {status}, {played} clocks, {n} trace entries -> {prefix}.*")
+   108	        files = [open(prefix + s).read() for s in (".info", ".samples", ".trace")]
+   109	        if first is None:
+   110	            first = files
+   111	        elif files != first:
+   112	            sys.exit(f"run {k} differs from run 0")
+   113	    if a.repeat > 1:
+   114	        print(f"all {a.repeat} runs identical")
+   115	
+   116	
+   117	if __name__ == "__main__":
+   118	    main()
+
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba prototypes/fpga-kv260/constraints/kv260.xdc' in /home/matthias/prog/janestreet/emulator
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba prototypes/fpga-kv260/rtl/fpga_axil.v' in /home/matthias/prog/janestreet/emulator
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba prototypes/fpga-kv260/vivado/build.tcl' in /home/matthias/prog/janestreet/emulator
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba prototypes/fpga-kv260/host/check.py' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+     1	# SPDX-License-Identifier: Apache-2.0
+     2	# KV260 carrier: the Pmod connector and the fan enable, for ../rtl/kv260_top.v.
+     3	#
+     4	# Package pins from AMD's KV260 platform constraints (Xilinx/kv260-vitis, release-2021.1,
+     5	# platforms/vivado/kv260_ispMipiRx_vcu_DP/xdc/pin.xdc), which put a Digilent Pmod I2S2 on this
+     6	# connector: its transmit side (Pmod pins 1-4) on H12 E10 D10 C11 and its receive side (pins 7-10)
+     7	# on B10 E12 D11 B11. The mapping of package pin to Pmod pin number is read from that module's
+     8	# pinout; check it against the carrier schematic before wiring anything that could be damaged.
+     9	# The bank is 3.3 V (HDA bank).
+    10	
+    11	set_property PACKAGE_PIN H12 [get_ports pmod1]
+    12	set_property PACKAGE_PIN E10 [get_ports pmod2]
+    13	set_property PACKAGE_PIN D10 [get_ports pmod3]
+    14	set_property PACKAGE_PIN C11 [get_ports pmod4]
+    15	set_property PACKAGE_PIN B10 [get_ports pmod7]
+    16	set_property PACKAGE_PIN E12 [get_ports pmod8]
+    17	set_property PACKAGE_PIN D11 [get_ports pmod9]
+    18	set_property PACKAGE_PIN B11 [get_ports pmod10]
+    19	set_property IOSTANDARD LVCMOS33 [get_ports {pmod1 pmod2 pmod3 pmod4 pmod7 pmod8 pmod9 pmod10}]
+    20	
+    21	# The I2C pins are open drain. These internal pull-ups only keep the lines defined with nothing
+    22	# attached; a real I2C device needs real pull-ups (about 2.2 kohm to 3.3 V), since the demo's bus
+    23	# runs near 1 MHz at a 60 MHz chip clock.
+    24	set_property PULLUP true [get_ports {pmod7 pmod8}]
+    25	set_property PULLDOWN true [get_ports pmod9]
+    26	
+    27	# Fan enable, active low (same file, "Fan Speed Enable").
+    28	set_property PACKAGE_PIN A12 [get_ports fan_en_b]
+    29	set_property IOSTANDARD LVCMOS33 [get_ports fan_en_b]
+    30	set_property SLEW SLOW [get_ports fan_en_b]
+    31	set_property DRIVE 4 [get_ports fan_en_b]
+    32	
+    33	# The pins are watched with a logic analyser and the inputs are asynchronous to the chip clock;
+    34	# none of them has a timing relation that the tools should try to meet.
+    35	set_false_path -to [get_ports {pmod1 pmod2 pmod3 pmod4 pmod7 pmod8 pmod10 fan_en_b}]
+    36	set_false_path -from [get_ports {pmod7 pmod8 pmod9}]
+
+ succeeded in 0ms:
+     1	/*
+     2	 * SPDX-License-Identifier: Apache-2.0
+     3	 * AXI4-Lite slave for fpga_bench's register bus. One transaction at a time; a write takes the
+     4	 * address and data in either order; each accepted read gives exactly one bus_re pulse, which
+     5	 * matters because some reads advance an address. Responses are always OKAY.
+     6	 * The s_axi_* names let Vivado infer the interface when this module is added to a block design.
+     7	 */
+     8	
+     9	`default_nettype none
+    10	
+    11	module fpga_axil (
+    12	    input  wire        s_axi_aclk,
+    13	    input  wire        s_axi_aresetn,
+    14	    input  wire [ 7:0] s_axi_awaddr,
+    15	    input  wire [ 2:0] s_axi_awprot,
+    16	    input  wire        s_axi_awvalid,
+    17	    output reg         s_axi_awready = 1'b0,
+    18	    input  wire [31:0] s_axi_wdata,
+    19	    input  wire [ 3:0] s_axi_wstrb,
+    20	    input  wire        s_axi_wvalid,
+    21	    output reg         s_axi_wready = 1'b0,
+    22	    output wire [ 1:0] s_axi_bresp,
+    23	    output reg         s_axi_bvalid = 1'b0,
+    24	    input  wire        s_axi_bready,
+    25	    input  wire [ 7:0] s_axi_araddr,
+    26	    input  wire [ 2:0] s_axi_arprot,
+    27	    input  wire        s_axi_arvalid,
+    28	    output reg         s_axi_arready = 1'b0,
+    29	    output wire [31:0] s_axi_rdata,
+    30	    output wire [ 1:0] s_axi_rresp,
+    31	    output reg         s_axi_rvalid = 1'b0,
+    32	    input  wire        s_axi_rready,
+    33	    // to fpga_bench
+    34	    output reg  [ 7:0] bus_addr = 8'd0,
+    35	    output reg  [31:0] bus_wdata = 32'd0,
+    36	    output reg         bus_we = 1'b0,
+    37	    output reg         bus_re = 1'b0,
+    38	    input  wire [31:0] bus_rdata
+    39	);
+    40	  assign s_axi_bresp = 2'b00;
+    41	  assign s_axi_rresp = 2'b00;
+    42	  assign s_axi_rdata = bus_rdata;          // held: fpga_bench updates it only on bus_re
+    43	
+    44	  reg have_aw = 1'b0, have_w = 1'b0;
+    45	  reg [7:0] aw = 8'd0;
+    46	  reg [31:0] wd = 32'd0;
+    47	  reg rd_wait = 1'b0;
+    48	
+    49	  always @(posedge s_axi_aclk) begin
+    50	    bus_we <= 1'b0;
+    51	    bus_re <= 1'b0;
+    52	    s_axi_awready <= 1'b0;
+    53	    s_axi_wready <= 1'b0;
+    54	    s_axi_arready <= 1'b0;
+    55	    if (!s_axi_aresetn) begin
+    56	      have_aw <= 1'b0;
+    57	      have_w <= 1'b0;
+    58	      s_axi_bvalid <= 1'b0;
+    59	      s_axi_rvalid <= 1'b0;
+    60	      rd_wait <= 1'b0;
+    61	    end else begin
+    62	      // write: collect address and data, then one bus_we and the response
+    63	      if (!have_aw && s_axi_awvalid && !s_axi_awready && !s_axi_bvalid) begin
+    64	        s_axi_awready <= 1'b1;
+    65	        have_aw <= 1'b1;
+    66	        aw <= s_axi_awaddr;
+    67	      end
+    68	      if (!have_w && s_axi_wvalid && !s_axi_wready && !s_axi_bvalid) begin
+    69	        s_axi_wready <= 1'b1;
+    70	        have_w <= 1'b1;
+    71	        wd <= s_axi_wdata;
+    72	      end
+    73	      if (have_aw && have_w && !s_axi_bvalid && !rd_wait && !bus_re) begin
+    74	        bus_addr <= {aw[7:2], 2'b00};
+    75	        bus_wdata <= wd;
+    76	        bus_we <= 1'b1;
+    77	        have_aw <= 1'b0;
+    78	        have_w <= 1'b0;
+    79	        s_axi_bvalid <= 1'b1;
+    80	      end else if (s_axi_bvalid && s_axi_bready) s_axi_bvalid <= 1'b0;
+    81	
+    82	      // read: one bus_re, the data a clock later
+    83	      if (s_axi_arvalid && !s_axi_arready && !rd_wait && !s_axi_rvalid && !(have_aw && have_w)) begin
+    84	        s_axi_arready <= 1'b1;
+    85	        bus_addr <= {s_axi_araddr[7:2], 2'b00};
+    86	        bus_re <= 1'b1;
+    87	        rd_wait <= 1'b1;
+    88	      end else if (rd_wait && !bus_re) begin
+    89	        rd_wait <= 1'b0;
+    90	        s_axi_rvalid <= 1'b1;
+    91	      end else if (s_axi_rvalid && s_axi_rready) s_axi_rvalid <= 1'b0;
+    92	    end
+    93	  end
+    94	
+    95	  wire _unused = &{1'b0, s_axi_awprot, s_axi_arprot, s_axi_wstrb};
+    96	endmodule
+
+ succeeded in 0ms:
+     1	# SPDX-License-Identifier: Apache-2.0
+     2	# Build the KV260 test bench: project, block design, bitstream.
+     3	#
+     4	#   vivado -mode batch -source vivado/build.tcl -tclargs OUT_DIR
+     5	#
+     6	# NOT YET RUN: written without access to Vivado. Expect to fix details on the first run, and
+     7	# please report what had to change. Needs the KV260 board files (Vivado: Tools > XHub Stores >
+     8	# Boards, "Kria KV260 Vision AI Starter Kit") and ../../tt/src/chip_tt.v (../README.md, "Getting
+     9	# the chip's Verilog").
+    10	#
+    11	# The block design: the Zynq processor system with the board's preset (DDR, MIO), its pl_clk0 at
+    12	# 60 MHz, and M_AXI_HPM0_FPD (32 bits) through an AXI SmartConnect to kv260_core's register port,
+    13	# all on pl_clk0. kv260_core's pins are made external and kv260_top.v puts them on the Pmod.
+    14	
+    15	set here [file dirname [file normalize [info script]]]
+    16	set root [file normalize $here/..]
+    17	set tt [file normalize $root/../../tt/src]
+    18	set out [expr {[llength $argv] ? [file normalize [lindex $argv 0]] : "$root/build"}]
+    19	
+    20	if {![file exists $tt/chip_tt.v]} { error "missing $tt/chip_tt.v: see README.md, Getting the chip's Verilog" }
+    21	
+    22	create_project kv260_bench $out -part xck26-sfvc784-2LV-c -force
+    23	set boards [get_board_parts -quiet -latest_file_version *kv260_som*]
+    24	if {$boards eq ""} { error "no KV260 board files: install them from XHub (Tools > XHub Stores > Boards)" }
+    25	set_property board_part [lindex $boards end] [current_project]
+    26	
+    27	add_files [list \
+    28	  $root/rtl/kv260_top.v $root/rtl/kv260_core.v $root/rtl/fpga_axil.v $root/rtl/fpga_bench.v \
+    29	  $root/rtl/sram_fpga.v $tt/chip_project.v $tt/chip_tt.v]
+    30	add_files -fileset constrs_1 $root/constraints/kv260.xdc
+    31	update_compile_order -fileset sources_1
+    32	
+    33	create_bd_design kv260_bd
+    34	set ps [create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e zynq_ultra_ps_e_0]
+    35	apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1"} $ps
+    36	set_property -dict [list \
+    37	  CONFIG.PSU__USE__M_AXI_GP0 {1} \
+    38	  CONFIG.PSU__USE__M_AXI_GP1 {0} \
+    39	  CONFIG.PSU__USE__M_AXI_GP2 {0} \
+    40	  CONFIG.PSU__MAXIGP0__DATA_WIDTH {32} \
+    41	  CONFIG.PSU__FPGA_PL0_ENABLE {1} \
+    42	  CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {60} \
+    43	] $ps
+    44	
+    45	create_bd_cell -type module -reference kv260_core kv260_core_0
+    46	apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \
+    47	  Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} \
+    48	  Master {/zynq_ultra_ps_e_0/M_AXI_HPM0_FPD} Slave {/kv260_core_0/s_axi} \
+    49	  ddr_seg {Auto} intc_ip {New AXI SmartConnect} master_apm {0}} \
+    50	  [get_bd_intf_pins kv260_core_0/s_axi]
+    51	# the whole bench must be on pl_clk0: check what the automation connected
+    52	set clk_net [get_bd_nets -of_objects [get_bd_pins kv260_core_0/s_axi_aclk]]
+    53	if {[lsearch [get_bd_pins -of_objects $clk_net] */pl_clk0] < 0} {
+    54	  error "kv260_core's clock is not pl_clk0: [get_bd_pins -of_objects $clk_net]"
+    55	}
+    56	foreach p {uo_out uio67_out uio67_oe uio67_in ui_ext heartbeat} {
+    57	  make_bd_pins_external -name $p [get_bd_pins kv260_core_0/$p]
+    58	}
+    59	assign_bd_address
+    60	validate_bd_design
+    61	save_bd_design
+    62	
+    63	puts "pl_clk0: [get_property CONFIG.PSU__CRL_APB__PL0_REF_CTRL__ACT_FREQMHZ $ps] MHz (want 60)"
+    64	foreach seg [get_bd_addr_segs -of_objects [get_bd_addr_spaces zynq_ultra_ps_e_0/Data]] {
+    65	  puts "address: $seg at [get_property OFFSET $seg], range [get_property RANGE $seg]"
+    66	}
+    67	
+    68	make_wrapper -files [get_files kv260_bd.bd] -top
+    69	add_files -norecurse [glob $out/kv260_bench.gen/sources_1/bd/kv260_bd/hdl/kv260_bd_wrapper.v]
+    70	set_property top kv260_top [current_fileset]
+    71	update_compile_order -fileset sources_1
+    72	
+    73	launch_runs impl_1 -to_step write_bitstream -jobs 8
+    74	wait_on_run impl_1
+    75	if {[get_property PROGRESS [get_runs impl_1]] ne "100%"} { error "implementation failed" }
+    76	
+    77	open_run impl_1
+    78	report_timing_summary -file $out/timing.rpt
+    79	report_utilization -file $out/utilization.rpt
+    80	report_methodology -file $out/methodology.rpt
+    81	set wns [get_property SLACK [get_timing_paths -max_paths 1 -setup]]
+    82	set whs [get_property SLACK [get_timing_paths -max_paths 1 -hold]]
+    83	puts "worst setup slack $wns ns, worst hold slack $whs ns"
+    84	
+    85	# the bitstream as a .bin for fpgautil / xmutil on the board's Linux
+    86	set bit [glob $out/kv260_bench.runs/impl_1/kv260_top.bit]
+    87	write_cfgmem -force -format BIN -interface SMAPx32 -disablebitswap -loadbit "up 0x0 $bit" $out/kv260_top.bin
+    88	write_hw_platform -fixed -force -include_bit $out/kv260_bench.xsa
+    89	puts "done: $bit, $out/kv260_top.bin, $out/kv260_bench.xsa"
+
+ succeeded in 0ms:
+     1	#!/usr/bin/env python3
+     2	# SPDX-License-Identifier: Apache-2.0
+     3	"""Judge a run of the UART, SPI and I2C demo on the FPGA test bench from its recorded files.
+     4	
+     5	    check.py META PREFIX [--i2c-device]
+     6	
+     7	META is ds.meta from ../chip-top/bin/fpga_ops.exe; PREFIX.info, .trace and .samples come from
+     8	kv260_run.py on the board or from sim/tb_bench.v. The trace is decoded on its own (it does not
+     9	need a simulation to compare with): the UART bytes on uo_out[0] and their bit timing, the SPI
+    10	bytes on uo_out[3:1], the I2C bytes and acknowledges on uio[7:6], and the bytes the host drained
+    11	from HOSTOUT. Without --i2c-device nothing answers on the I2C bus, so every byte must be
+    12	unacknowledged and the controller reports 0x01 per byte; with it, a device at address 0x50 (for
+    13	example a 24C-series EEPROM) must acknowledge both bytes and the controller reports 0x00.
+    14	"""
+    15	import sys
+    16	
+    17	
+    18	def read_meta(path):
+    19	    meta = {}
+    20	    for line in open(path):
+    21	        if line.startswith("#") or not line.strip():
+    22	            continue
+    23	        k, v = line.split(None, 1)
+    24	        v = v.strip()
+    25	        meta[k] = [int(x) for x in v.split(",")] if "," in v else int(v)
+    26	    return meta
+    27	
+    28	
+    29	def read_trace(path, total):
+    30	    """Per clock, for the [total] clocks played: (uo 1st half, uo 2nd half, uio_in)."""
+    31	    entries = []
+    32	    for line in open(path):
+    33	        c, w1, w2 = line.split()
+    34	        entries.append((int(c), int(w1, 16), int(w2, 16)))
+    35	    clocks = []
+    36	    for (c, w1, w2), nxt in zip(entries, entries[1:] + [None]):
+    37	        end = nxt[0] if nxt else total
+    38	        for _ in range(c, end):
+    39	            clocks.append((w1 & 0xFF, (w1 >> 8) & 0xFF, (w2 >> 16) & 0xFF))
+    40	    return clocks
+    41	
+    42	
+    43	def bit(v, i):
+    44	    return (v >> i) & 1
+    45	
+    46	
+    47	def uart(clocks, start, bit_clocks):
+    48	    """8N1 bytes on uo_out[0]; returns (byte, clock of start bit, framing ok)."""
+    49	    out, c = [], start
+    50	    lv = [bit(h2, 0) for _, h2, _ in clocks]
+    51	    while c < len(lv) - 10 * bit_clocks:
+    52	        if lv[c - 1] == 1 and lv[c] == 0:
+    53	            mid = c + bit_clocks // 2
+    54	            bits = [lv[mid + k * bit_clocks] for k in range(1, 9)]
+    55	            stop = lv[mid + 9 * bit_clocks]
+    56	            out.append((sum(b << k for k, b in enumerate(bits)), c, stop == 1 and lv[mid] == 0))
+    57	            c = mid + 9 * bit_clocks
+    58	        c += 1
+    59	    return out
+    60	
+    61	
+    62	def spi(clocks, start):
+    63	    """Mode 0, msb first: MOSI uo_out[2] at each rise of SCLK uo_out[1] while CS uo_out[3] is low."""
+    64	    out, cur, n = [], 0, 0
+    65	    for c in range(max(start, 1), len(clocks)):
+    66	        p, q = clocks[c - 1][1], clocks[c][1]
+    67	        if bit(q, 3) == 1:
+    68	            cur, n = 0, 0
+    69	            continue
+    70	        if bit(p, 1) == 0 and bit(q, 1) == 1:
+    71	            cur = (cur << 1) | bit(q, 2)
+    72	            n += 1
+    73	            if n == 8:
+    74	                out.append(cur)
+    75	                cur, n = 0, 0
+    76	    return out
+    77	
+    78	
+    79	def i2c(clocks, start):
+    80	    """Bytes with their acknowledge bit (0 = acknowledged), and whether a STOP followed."""
+    81	    sda = [bit(u, 6) for _, _, u in clocks]
+    82	    scl = [bit(u, 7) for _, _, u in clocks]
+    83	    out, bits, active, stopped = [], [], False, False
+    84	    for c in range(max(start, 1), len(clocks)):
+    85	        if scl[c] and scl[c - 1] and sda[c - 1] and not sda[c]:
+    86	            active, bits, stopped = True, [], False
+    87	        elif scl[c] and scl[c - 1] and not sda[c - 1] and sda[c]:
+    88	            active, stopped = False, True
+    89	        elif active and not scl[c - 1] and scl[c]:
+    90	            bits.append(sda[c])
+    91	            if len(bits) == 9:
+    92	                out.append((sum(b << (7 - k) for k, b in enumerate(bits[:8])), bits[8]))
+    93	                bits = []
+    94	    return out, stopped
+    95	
+    96	
+    97	def hostout(samples):
+    98	    nib = [int(x, 16) for x in samples]
+    99	    by = [(nib[i] << 4) | nib[i + 1] for i in range(0, len(nib) - 1, 2)]
+   100	    return [d for t, d in zip(by[0::2], by[1::2]) if t & 0x80]
+   101	
+   102	
+   103	def main():
+   104	    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+   105	    device = "--i2c-device" in sys.argv
+   106	    if len(args) != 2:
+   107	        sys.exit(__doc__)
+   108	    meta = read_meta(args[0])
+   109	    info = read_meta(args[1] + ".info")
+   110	    clocks = read_trace(args[1] + ".trace", info["clocks"])
+   111	    samples = open(args[1] + ".samples").read().split()
+   112	    run = meta["run_clock"]
+   113	    ok = True
+   114	
+   115	    def judge(name, good, detail):
+   116	        nonlocal ok
+   117	        ok &= good
+   118	        print(f"  {name}: {'ok' if good else 'WRONG'}: {detail}")
+   119	
+   120	    print(f"{len(clocks)} clocks in the trace (expected {meta['clocks']}), run set at clock {run}")
+   121	    judge("run", info["status"] == 2 and len(clocks) == meta["clocks"],
+   122	          f"status {info['status']} (2: done, nothing dropped), {len(clocks)} clocks played")
+   123	    u = uart(clocks, run, meta["uart_bit_clocks"])
+   124	    judge("uart bytes", [b for b, _, f in u if f] == meta["uart_bytes"] and all(f for _, _, f in u),
+   125	          " ".join(f"0x{b:02x}@{c}{'' if f else '(framing)'}" for b, c, f in u))
+   126	    lv = [bit(h2, 0) for _, h2, _ in clocks]
+   127	    edges = [c for c in range(run, len(lv)) if lv[c] != lv[c - 1]]
+   128	    off = [(e - edges[0]) % meta["uart_bit_clocks"] for e in edges] if edges else []
+   129	    judge("uart edge spacing", bool(edges) and not any(off), f"{len(edges)} edges, all on the {meta['uart_bit_clocks']}-clock grid: {not any(off)}")
+   130	    s = spi(clocks, run)
+   131	    judge("spi bytes", s == meta["spi_bytes"], " ".join(f"0x{b:02x}" for b in s))
+   132	    i, stopped = i2c(clocks, run)
+   133	    want_ack = 0 if device else 1
+   134	    judge("i2c bytes", [b for b, _ in i] == meta["i2c_bytes"] and all(a == want_ack for _, a in i) and stopped,
+   135	          " ".join(f"0x{b:02x}{'+ack' if a == 0 else '-nak'}" for b, a in i) + f" stop={stopped}")
+   136	    h = hostout(samples)
+   137	    want = [want_ack] * len(meta["i2c_bytes"])
+   138	    judge("host drained", h == want, " ".join(f"0x{b:02x}" for b in h) + f" (want {' '.join(f'0x{b:02x}' for b in want)})")
+   139	    print("PASS" if ok else "FAIL")
+   140	    sys.exit(0 if ok else 1)
+   141	
+   142	
+   143	if __name__ == "__main__":
+   144	    main()
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+2026-11-08T09:10:16.490262Z ERROR codex_core::tools::router: error=Command blocked by PreToolUse hook: Use '| tee <file> | head/tail' instead of bare '| head/tail' to avoid discarding data. Append '# no-tee' to override.. Command: nice -n 10 ionice -c 3 rg -n 'assign _516|posedge _516|negedge clk|always @\(' tt/src/chip_tt.v | head -50
+hook: PreToolUse Blocked
+hook: PreToolUse Failed
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+2026-11-08T09:10:16.493465Z ERROR codex_core::tools::router: error=Command blocked by PreToolUse hook: Use '| tee <file> | head/tail' instead of bare '| head/tail' to avoid discarding data. Append '# no-tee' to override.. Command: nice -n 10 ionice -c 3 rg -n 'write_hw_platform|write_cfgmem|PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ|apply_bd_automation' /opt /tools /home/matthias 2>/dev/null | head -50
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+hook: PreToolUse Completed
+hook: PreToolUse Blocked
+hook: PreToolUse Failed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 git show HEAD:prototypes/chip-top/bin/fpga_ops.ml' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+(* Export the UART, SPI and I2C demo's host side (Ds_host) as frames for the FPGA test bench's
+   player (../fpga-kv260/README.md, "Frames").
+
+     fpga_ops.exe OUT_DIR    writes OUT_DIR/ds.ops (one frame per line, hex) and OUT_DIR/ds.meta
+
+   The host model (src/host.ml) decides per clock what the host drives on the strobe S, the read
+   request R and the data lines D, and when it samples D. The exporter runs it on its own, clock by
+   clock, and merges runs of identical clocks into frames. A frame is one 32-bit word:
+
+     bits 15:0  clocks to hold the levels (1 to 65535); 0 ends the stream
+     bits 19:16 D, the level the host drives on the data lines
+     bit 20     the host drives D (otherwise it has released them to the chip)
+     bit 21     S          bit 22  R
+     bit 23     sample D in the frame's first clock
+     bits 31:24 ui_in, the chip's general inputs (0 throughout this demo)
+
+   The host's data samples are not needed here: the host's reaction to what it reads is only
+   used after the demo, to decode the drained bytes, and that decoding is redone on the board's
+   samples by ../fpga-kv260/host/check.py. *)
+
+module D = Ds.Demo_cut
+
+(* clocks of idle levels before the first command, so that the chip's reset synchroniser has
+   released the core before the host starts *)
+let lead_in = 32
+
+let () =
+  let dir = match Sys.argv with [| _; d |] -> d | _ -> prerr_endline "usage: fpga_ops.exe OUT_DIR"; exit 2 in
+  let h = Host.create () in
+  Host.submit h (Host.Idle lead_in);
+  let clock = ref 0 and run_clock = ref (-1) in
+  let _listings, _ = Ds_host.submit h ~on_run:(fun () -> run_clock := !clock) in
+  (* per clock: (s, r, d, sampled) *)
+  let levels = ref [] in
+  while not (Host.idle h) do
+    let s, r, d = Host.clock h ~d_in:0 in
+    levels := (s, r, d, h.sampled) :: !levels;
+    incr clock
+  done;
+  let levels = List.rev !levels in
+  let word (s, r, d, sampled) n =
+    let dv, drive = match d with Some v -> (v, 1) | None -> (0, 0) in
+    n lor (dv lsl 16) lor (drive lsl 20) lor (s lsl 21) lor (r lsl 22) lor ((if sampled then 1 else 0) lsl 23)
+  in
+  (* a sampled clock starts a frame; following clocks with the same levels and no sample join it *)
+  let frames = ref [] and cur = ref None in
+  let flush () = match !cur with Some (l, n) -> frames := word l n :: !frames; cur := None | None -> () in
+  List.iter (fun ((s, r, d, sampled) as l) ->
+      match !cur with
+      | Some (((s', r', d', _) as first), n) when (not sampled) && s = s' && r = r' && d = d' && n < 0xFFFF ->
+        cur := Some (first, n + 1)
+      | _ -> flush (); cur := Some (l, 1))
+    levels;
+  flush ();
+  let frames = List.rev !frames in
+  let samples = List.length (List.filter (fun (_, _, _, sm) -> sm) levels) in
+  let oc = open_out (Filename.concat dir "ds.ops") in
+  List.iter (Printf.fprintf oc "%08x\n") frames;
+  Printf.fprintf oc "%08x\n" 0;
+  close_out oc;
+  let bytes l = String.concat "," (List.map (Printf.sprintf "%d") l) in
+  let oc = open_out (Filename.concat dir "ds.meta") in
+  Printf.fprintf oc
+    "# the UART, SPI and I2C demo (prototypes/chip-top/bin/ds_host.ml) as player frames; written by fpga_ops.exe\n\
+     frames %d\nclocks %d\nsamples %d\nrun_clock %d\ndemo_clocks %d\n\
+     # pads: UART on uo_out[0], SCLK uo_out[1], MOSI uo_out[2], CS uo_out[3], SDA uio[6], SCL uio[7]\n\
+     uart_bit_clocks %d\nspi_period_clocks %d\nuart_bytes %s\nspi_bytes %s\ni2c_bytes %s\n"
+    (List.length frames) !clock samples !run_clock Ds_host.demo_clocks (D.bit_slots * D.slot) (D.spi_period * D.slot)
+    (bytes D.uart_bytes) (bytes D.spi_bytes) (bytes D.i2c_bytes);
+  close_out oc;
+  Printf.printf "fpga_ops: %d frames, %d clocks, %d samples, run at clock %d -> %s\n" (List.length frames) !clock samples !run_clock dir
+
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba prototypes/fpga-kv260/rtl/kv260_top.v' in /home/matthias/prog/janestreet/emulator
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba prototypes/fpga-kv260/rtl/kv260_core.v' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+     1	/*
+     2	 * SPDX-License-Identifier: Apache-2.0
+     3	 * Top level for the KV260: the block design (the Zynq processor system and kv260_core, built by
+     4	 * ../vivado/build.tcl, which also generates kv260_bd_wrapper) and the carrier's Pmod connector.
+     5	 *
+     6	 * Pmod pins (../constraints/kv260.xdc):
+     7	 *   1 uo_out[0]  UART TX         7 uio[6]  I2C SDA, open drain
+     8	 *   2 uo_out[1]  SPI SCLK        8 uio[7]  I2C SCL, open drain
+     9	 *   3 uo_out[2]  SPI MOSI        9 ui_in[0], when UI_MASK bit 0 is set
+    10	 *   4 uo_out[3]  SPI CS         10 heartbeat: toggles every 0.5 s at 60 MHz
+    11	 * (the UART, SPI and I2C demo's pins; other demos may use them differently)
+    12	 */
+    13	
+    14	`default_nettype none
+    15	
+    16	module kv260_top (
+    17	    output wire pmod1,
+    18	    output wire pmod2,
+    19	    output wire pmod3,
+    20	    output wire pmod4,
+    21	    inout  wire pmod7,
+    22	    inout  wire pmod8,
+    23	    input  wire pmod9,
+    24	    output wire pmod10,
+    25	    output wire fan_en_b
+    26	);
+    27	  wire [7:0] uo_out;
+    28	  wire [1:0] uio67_out, uio67_oe, uio67_in;
+    29	  wire heartbeat;
+    30	
+    31	  kv260_bd_wrapper bd (
+    32	      .uo_out(uo_out), .uio67_out(uio67_out), .uio67_oe(uio67_oe), .uio67_in(uio67_in),
+    33	      .ui_ext({7'd0, pmod9}), .heartbeat(heartbeat)
+    34	  );
+    35	
+    36	  assign {pmod4, pmod3, pmod2, pmod1} = uo_out[3:0];
+    37	  // where the chip enables uio[7:6] it drives the pin; elsewhere the pin floats to the pull-up
+    38	  assign pmod7 = uio67_oe[0] ? uio67_out[0] : 1'bz;
+    39	  assign pmod8 = uio67_oe[1] ? uio67_out[1] : 1'bz;
+    40	  assign uio67_in = {pmod8, pmod7};
+    41	  assign pmod10 = heartbeat;
+    42	  // the fan at full speed: nothing in this design controls it
+    43	  assign fan_en_b = 1'b0;
+    44	endmodule
+
+ succeeded in 0ms:
+     1	/*
+     2	 * SPDX-License-Identifier: Apache-2.0
+     3	 * The test bench with its AXI4-Lite port: the module that goes into the Vivado block design as a
+     4	 * module reference (../vivado/build.tcl), next to the Zynq processor system. Its AXI clock is the
+     5	 * chip's clock (pl_clk0, set to 60 MHz), so there is one clock domain.
+     6	 *
+     7	 * The pins stay as separate in, out and enable signals here; kv260_top.v turns them into the
+     8	 * Pmod connector's pads.
+     9	 */
+    10	
+    11	`default_nettype none
+    12	
+    13	module kv260_core (
+    14	    input  wire        s_axi_aclk,
+    15	    input  wire        s_axi_aresetn,
+    16	    input  wire [ 7:0] s_axi_awaddr,
+    17	    input  wire [ 2:0] s_axi_awprot,
+    18	    input  wire        s_axi_awvalid,
+    19	    output wire        s_axi_awready,
+    20	    input  wire [31:0] s_axi_wdata,
+    21	    input  wire [ 3:0] s_axi_wstrb,
+    22	    input  wire        s_axi_wvalid,
+    23	    output wire        s_axi_wready,
+    24	    output wire [ 1:0] s_axi_bresp,
+    25	    output wire        s_axi_bvalid,
+    26	    input  wire        s_axi_bready,
+    27	    input  wire [ 7:0] s_axi_araddr,
+    28	    input  wire [ 2:0] s_axi_arprot,
+    29	    input  wire        s_axi_arvalid,
+    30	    output wire        s_axi_arready,
+    31	    output wire [31:0] s_axi_rdata,
+    32	    output wire [ 1:0] s_axi_rresp,
+    33	    output wire        s_axi_rvalid,
+    34	    input  wire        s_axi_rready,
+    35	    output wire [ 7:0] uo_out,
+    36	    output wire [ 1:0] uio67_out,
+    37	    output wire [ 1:0] uio67_oe,
+    38	    input  wire [ 1:0] uio67_in,
+    39	    input  wire [ 7:0] ui_ext,
+    40	    output wire        heartbeat
+    41	);
+    42	  wire [7:0] bus_addr;
+    43	  wire [31:0] bus_wdata, bus_rdata;
+    44	  wire bus_we, bus_re;
+    45	
+    46	  fpga_axil axil (
+    47	      .s_axi_aclk(s_axi_aclk), .s_axi_aresetn(s_axi_aresetn),
+    48	      .s_axi_awaddr(s_axi_awaddr), .s_axi_awprot(s_axi_awprot), .s_axi_awvalid(s_axi_awvalid),
+    49	      .s_axi_awready(s_axi_awready), .s_axi_wdata(s_axi_wdata), .s_axi_wstrb(s_axi_wstrb),
+    50	      .s_axi_wvalid(s_axi_wvalid), .s_axi_wready(s_axi_wready), .s_axi_bresp(s_axi_bresp),
+    51	      .s_axi_bvalid(s_axi_bvalid), .s_axi_bready(s_axi_bready), .s_axi_araddr(s_axi_araddr),
+    52	      .s_axi_arprot(s_axi_arprot), .s_axi_arvalid(s_axi_arvalid), .s_axi_arready(s_axi_arready),
+    53	      .s_axi_rdata(s_axi_rdata), .s_axi_rresp(s_axi_rresp), .s_axi_rvalid(s_axi_rvalid),
+    54	      .s_axi_rready(s_axi_rready),
+    55	      .bus_addr(bus_addr), .bus_wdata(bus_wdata), .bus_we(bus_we), .bus_re(bus_re), .bus_rdata(bus_rdata)
+    56	  );
+    57	
+    58	  fpga_bench bench (
+    59	      .clk(s_axi_aclk), .bus_addr(bus_addr), .bus_wdata(bus_wdata), .bus_we(bus_we),
+    60	      .bus_re(bus_re), .bus_rdata(bus_rdata), .uo_out(uo_out), .uio67_out(uio67_out),
+    61	      .uio67_oe(uio67_oe), .uio67_in(uio67_in), .ui_ext(ui_ext), .heartbeat(heartbeat)
+    62	  );
+    63	endmodule
+
+codex
+The supplied end-to-end run could not start because the sandbox makes `/var/tmp` read-only: `run_sim.sh` hard-codes a `mktemp` location there during chip regeneration. I’ll still verify what I can with direct tool runs and static timing of the RTL; I’ll distinguish confirmed failures from items that need Vivado or board access.
+hook: PreToolUse
+hook: PreToolUse Completed
+web search: 
+web search: site:docs.amd.com write_hw_platform -file Vivado Tcl write_cfgmem -file syntax
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba prototypes/chip-top/src/host.ml' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+     1	(* The host's side of the host link (README, "Host link protocol"), as a per-clock driver: it
+     2	   decides what the host drives on S, R and D in each clock and samples D when it reads. It
+     3	   obeys the protocol's timing with the margins below, and knows nothing about the chip beyond
+     4	   the protocol. *)
+     5	
+     6	open Regs
+     7	
+     8	type txn =
+     9	  | Write of { tgt : int; addr : int; data : int list }
+    10	  | Read of { tgt : int; addr : int; n : int; k : int list -> unit }   (* n >= 1 bytes *)
+    11	  | Idle of int
+    12	  | Call of (unit -> unit)                                              (* runs when reached *)
+    13	
+    14	(* micro-steps, one or more per clock until a wait *)
+    15	type step =
+    16	  | Set_d of int                (* drive D *)
+    17	  | Release_d
+    18	  | Toggle_s
+    19	  | Set_r of int
+    20	  | Wait of int                 (* clocks *)
+    21	  | Sample of (int -> unit)     (* read D now *)
+    22	  | Do of (unit -> unit)
+    23	
+    24	let write_setup = 2 and write_hold = 2 and read_gap = 8 and turnaround = 8
+    25	
+    26	type t = {
+    27	  q : step Queue.t;
+    28	  mutable wait : int;
+    29	  mutable s : int; mutable r : int; mutable d : int option;
+    30	  mutable busy_clocks : int;
+    31	  mutable sampled : bool;       (* a Sample ran in the latest clock (for exporting the host's levels) *)
+    32	}
+    33	
+    34	let create () = { q = Queue.create (); wait = 0; s = 0; r = 0; d = None; busy_clocks = 0; sampled = false }
+    35	
+    36	let idle t = Queue.is_empty t.q && t.wait = 0
+    37	
+    38	let push_steps t l = List.iter (fun s -> Queue.push s t.q) l
+    39	
+    40	let byte_steps b =
+    41	  [ Set_d (b lsr 4); Wait write_setup; Toggle_s; Wait write_hold;
+    42	    Set_d (b land 15); Wait write_setup; Toggle_s; Wait write_hold ]
+    43	
+    44	let cmd t ~op ~tgt ~addr ~count =
+    45	  List.iter (fun b -> push_steps t (byte_steps b))
+    46	    [ (op lsl 4) lor tgt; (addr lsr 8) land 0xFF; addr land 0xFF; count - 1 ]
+    47	
+    48	let submit t = function
+    49	  | Write { tgt; addr; data } ->
+    50	    (* at most 256 bytes per command *)
+    51	    let rec go addr = function
+    52	      | [] -> ()
+    53	      | l ->
+    54	        let chunk = List.filteri (fun i _ -> i < 256) l and rest = List.filteri (fun i _ -> i >= 256) l in
+    55	        cmd t ~op:op_write ~tgt ~addr ~count:(List.length chunk);
+    56	        List.iter (fun b -> push_steps t (byte_steps b)) chunk;
+    57	        go (addr + List.length chunk) rest
+    58	    in
+    59	    go addr data
+    60	  | Read { tgt; addr; n; k } ->
+    61	    assert (n >= 1 && n <= 256);
+    62	    cmd t ~op:op_read ~tgt ~addr ~count:n;
+    63	    let acc = ref [] and hi = ref 0 in
+    64	    push_steps t [ Release_d; Wait turnaround; Set_r 1; Wait read_gap ];
+    65	    for _ = 1 to n do
+    66	      push_steps t
+    67	        [ Sample (fun v -> hi := v); Toggle_s; Wait read_gap;
+    68	          Sample (fun v -> acc := ((!hi lsl 4) lor v) :: !acc); Toggle_s; Wait read_gap ]
+    69	    done;
+    70	    push_steps t [ Set_r 0; Wait turnaround; Do (fun () -> k (List.rev !acc)) ]
+    71	  | Idle n -> push_steps t [ Wait n ]
+    72	  | Call f -> push_steps t [ Do f ]
+    73	
+    74	(* One clock. [d_in] is the level of the four data lines during this clock (whoever drives
+    75	   them). Returns what the host drives during this clock: (S, R, D or None). *)
+    76	let clock t ~d_in =
+    77	  t.sampled <- false;
+    78	  if t.wait > 0 then t.wait <- t.wait - 1
+    79	  else begin
+    80	    let continue = ref true in
+    81	    while !continue && not (Queue.is_empty t.q) do
+    82	      match Queue.pop t.q with
+    83	      | Set_d v -> t.d <- Some v
+    84	      | Release_d -> t.d <- None
+    85	      | Toggle_s -> t.s <- 1 - t.s
+    86	      | Set_r v -> t.r <- v
+    87	      | Wait n -> t.wait <- n - 1; continue := false
+    88	      | Sample f -> t.sampled <- true; f d_in
+    89	      | Do f -> f ()
+    90	    done
+    91	  end;
+    92	  if not (idle t) then t.busy_clocks <- t.busy_clocks + 1;
+    93	  (t.s, t.r, t.d)
+    94	
+    95	(* convenience: register writes and reads *)
+    96	let wreg t a v = submit t (Write { tgt = t_reg; addr = a; data = [ v land 0xFF ] })
+    97	let wreg32 t a v = submit t (Write { tgt = t_reg; addr = a; data = List.init 4 (fun k -> (v lsr (8 * k)) land 0xFF) })
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc "nice -n 10 ionice -c 3 find /var/tmp /tmp -maxdepth 3 -type f -name 'ds.ops' -o -name 'tb.vvp'" in /home/matthias/prog/janestreet/emulator
+ exited 1 in 2639ms:
+find: ‘/var/tmp/goal0-p2-service-update-preflight-20260917-p2’: Permission denied
+find: ‘/var/tmp/goal0-p3-host-preflight-20260924-p2’: Permission denied
+find: ‘/var/tmp/goal0-p2-host-image-semantic-20260917-p1’: Permission denied
+find: ‘/var/tmp/goal0-p2-host-install-preflight-20260917-p3’: Permission denied
+find: ‘/var/tmp/goal0-p2-host-install-preflight-20260917-p5’: Permission denied
+find: ‘/var/tmp/goal0-p3-host-preflight-20260924-p5’: Permission denied
+find: ‘/var/tmp/goal0-p2-resume-preflight-review-20260917-p1’: Permission denied
+find: ‘/var/tmp/goal0-p3-host-preflight-20260924-p3’: Permission denied
+find: ‘/var/tmp/goal0-p3-host-preflight-20260924-p4’: Permission denied
+find: ‘/var/tmp/goal0-p2-service-update-preflight-20260917-p1’: Permission denied
+find: ‘/var/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-bluetooth.service-ovIrui’: Permission denied
+find: ‘/var/tmp/goal0-p2-service-update-preflight-20260917-p3’: Permission denied
+find: ‘/var/tmp/goal0-p2-host-install-preflight-20260917-p1’: Permission denied
+find: ‘/var/tmp/goal0-p2-input-snapshot-20260917-p1’: Permission denied
+find: ‘/var/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-ntpd.service-MO0ADA’: Permission denied
+find: ‘/var/tmp/goal0-offload-package-20260916-p2’: Permission denied
+find: ‘/var/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-polkit.service-GtwB4h’: Permission denied
+find: ‘/var/tmp/goal0-p2-resume-preflight-review-20260917-p2’: Permission denied
+find: ‘/var/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-systemd-logind.service-p1mX5W’: Permission denied
+find: ‘/var/tmp/goal0-p2-host-install-preflight-20260917-p2’: Permission denied
+find: ‘/var/tmp/pstore-audit-20260924’: Permission denied
+find: ‘/var/tmp/goal0-v726-pair-build-20260924-p2-invalid-parent-reserialisation’: Permission denied
+find: ‘/var/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-dbus-broker.service-FpMwKt’: Permission denied
+find: ‘/var/tmp/goal0-p2-resume-preflight-20260917-p2’: Permission denied
+/var/tmp/fpga-kv260/ops/ds.ops
+/var/tmp/fpga-kv260/mut/tb.vvp
+/var/tmp/fpga-kv260/tb.vvp
+find: ‘/var/tmp/goal0-p3-host-preflight-20260924-p1’: Permission denied
+find: ‘/var/tmp/goal0-p3-hook-mask-test-20260924-p3’: Permission denied
+find: ‘/var/tmp/reconcile-async-waiter-build-20260916-p4’: Permission denied
+find: ‘/var/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-colord.service-FUxCnR’: Permission denied
+find: ‘/var/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-bolt.service-06cZFJ’: Permission denied
+find: ‘/var/tmp/bcachefs-goal1-from-rescue/stock-dkms-d8-target-contract-20260830-v4’: Permission denied
+find: ‘/var/tmp/bcachefs-goal1-from-rescue/stock-dkms-c0a-target-contract-20260830-v3’: Permission denied
+find: ‘/var/tmp/goal0-p2-resume-preflight-review-20260917-p3’: Permission denied
+find: ‘/var/tmp/goal0-v726-pair-build-20260924-p2-failed-dubious-ownership’: Permission denied
+find: ‘/var/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-hung-task-warner.service-gEJtrj’: Permission denied
+/var/tmp/array-uses/lockstep/tb.vvp
+find: ‘/var/tmp/goal0-p2-resume-preflight-20260917-p1’: Permission denied
+find: ‘/var/tmp/goal0-p3-hook-mask-empty-20260924-p1’: Permission denied
+find: ‘/var/tmp/goal0-p2-host-install-preflight-20260917-p4’: Permission denied
+find: ‘/var/tmp/goal0-p4-install-20261024-p1’: Permission denied
+find: ‘/var/tmp/goal0-v726-headers-20260924-p1-failed-dangling-kernel-doc’: Permission denied
+find: ‘/var/tmp/goal0-bcachefs-swap-build-20260916-p1’: Permission denied
+/var/tmp/fpga-kv260-run/tb.vvp
+/var/tmp/fpga-kv260-run/ops/ds.ops
+/var/tmp/fpga-kv260-run/kv260-bundle-7e48e272af84/ds.ops
+find: ‘/var/tmp/goal0-p3-hook-mask-test-20260924-p1’: Permission denied
+find: ‘/var/tmp/goal0-p3-hook-mask-test-20260924-p2’: Permission denied
+find: ‘/tmp/codex-daemon-1000’: Permission denied
+find: ‘/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-colord.service-GUNh0r’: Permission denied
+find: ‘/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-ntpd.service-wstVih’: Permission denied
+find: ‘/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-polkit.service-NFimwh’: Permission denied
+find: ‘/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-systemd-logind.service-DT5nFb’: Permission denied
+find: ‘/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-bolt.service-wBdqK8’: Permission denied
+find: ‘/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-bluetooth.service-RgaJ1R’: Permission denied
+find: ‘/tmp/systemd-private-da0854c2273d43f2a1d3e8be5d3c30e7-hung-task-warner.service-xJkDta’: Permission denied
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 ls -l /var/tmp/fpga-kv260-run/tb.vvp /var/tmp/fpga-kv260-run/ops/ds.ops /var/tmp/fpga-kv260-run/sim-ds.log' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+-rw-r--r-- 1 matthias matthias   19179 Nov  8 17:06 /var/tmp/fpga-kv260-run/ops/ds.ops
+-rw-r--r-- 1 matthias matthias     321 Nov  8 17:06 /var/tmp/fpga-kv260-run/sim-ds.log
+-rwxr-xr-x 1 matthias matthias 2395689 Nov  8 17:06 /var/tmp/fpga-kv260-run/tb.vvp
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 /var/tmp/oss-cad-suite-20261014/oss-cad-suite/bin/vvp -n /var/tmp/fpga-kv260-run/tb.vvp +frames=/var/tmp/fpga-kv260-run/ops/ds.ops +out=/tmp/fpga-kv260-codex-rerun' in /home/matthias/prog/janestreet/emulator
+ succeeded in 4966ms:
+WARNING: /home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/sim/tb_bench.v:92: $readmemh(/var/tmp/fpga-kv260-run/ops/ds.ops): Not enough words in the file for the requested range [0:16383].
+tb: 2131 frames loaded (FRAME_ADDR 2131)
+tb: status 00000002, 10753 clocks played
+tb: 16 samples
+tb: 2269 trace entries
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 python3 prototypes/fpga-kv260/host/check.py /var/tmp/fpga-kv260-run/ops/ds.meta /tmp/fpga-kv260-codex-rerun' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+10753 clocks in the trace (expected 10753), run set at clock 4528
+  run: ok: status 2 (2: done, nothing dropped), 10753 clocks played
+  uart bytes: ok: 0x4f@4580 0x4b@5220 0x21@5860
+  uart edge spacing: ok: 20 edges, all on the 64-clock grid: True
+  spi bytes: ok: 0xa5 0x3c
+  i2c bytes: ok: 0xa0-nak 0x5a-nak stop=True
+  host drained: ok: 0x01 0x01 (want 0x01 0x01)
+PASS
+
+hook: PreToolUse
+hook: PreToolUse Completed
+web search: 
+web search: 
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 /var/tmp/oss-cad-suite-20261014/oss-cad-suite/bin/iverilog -g2012 -o /tmp/fpga-kv260-codex-tb.vvp prototypes/fpga-kv260/sim/tb_bench.v prototypes/fpga-kv260/rtl/fpga_axil.v prototypes/fpga-kv260/rtl/fpga_bench.v prototypes/fpga-kv260/rtl/sram_fpga.v tt/src/chip_project.v tt/src/chip_tt.v' in /home/matthias/prog/janestreet/emulator
+ succeeded in 177ms:
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 /var/tmp/oss-cad-suite-20261014/oss-cad-suite/bin/vvp -n /tmp/fpga-kv260-codex-tb.vvp +frames=/var/tmp/fpga-kv260-run/ops/ds.ops +out=/tmp/fpga-kv260-codex-current' in /home/matthias/prog/janestreet/emulator
+ succeeded in 4913ms:
+WARNING: prototypes/fpga-kv260/sim/tb_bench.v:92: $readmemh(/var/tmp/fpga-kv260-run/ops/ds.ops): Not enough words in the file for the requested range [0:16383].
+tb: 2131 frames loaded (FRAME_ADDR 2131)
+tb: status 00000002, 10753 clocks played
+tb: 16 samples
+tb: 2269 trace entries
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 python3 prototypes/fpga-kv260/host/check.py /var/tmp/fpga-kv260-run/ops/ds.meta /tmp/fpga-kv260-codex-current' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+10753 clocks in the trace (expected 10753), run set at clock 4528
+  run: ok: status 2 (2: done, nothing dropped), 10753 clocks played
+  uart bytes: ok: 0x4f@4580 0x4b@5220 0x21@5860
+  uart edge spacing: ok: 20 edges, all on the 64-clock grid: True
+  spi bytes: ok: 0xa5 0x3c
+  i2c bytes: ok: 0xa0-nak 0x5a-nak stop=True
+  host drained: ok: 0x01 0x01 (want 0x01 0x01)
+PASS
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc 'nice -n 10 ionice -c 3 nl -ba prototypes/fpga-kv260/sim/tb_bench.v' in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+     1	/*
+     2	 * SPDX-License-Identifier: Apache-2.0
+     3	 * Simulation of the test bench as the board's processor drives it, through the AXI4-Lite port:
+     4	 * load the frames, start, wait for done, read back the samples and the trace. Writes the same
+     5	 * files as ../host/kv260_run.py does on the board, so the two can be compared with diff.
+     6	 *
+     7	 *   +frames=FILE    frames, one hex word per line (../chip-top/bin/fpga_ops.exe)
+     8	 *   +out=PREFIX     writes PREFIX.info, PREFIX.samples and PREFIX.trace
+     9	 *
+    10	 * The uio[7:6] pins are pulled up and nothing else drives them, as on a board with nothing
+    11	 * plugged into those pins.
+    12	 */
+    13	
+    14	`timescale 1ns / 1ps
+    15	`default_nettype none
+    16	
+    17	module tb_bench;
+    18	  reg clk = 1'b0;
+    19	  always #8.333 clk = ~clk;                // 60 MHz
+    20	
+    21	  reg aresetn = 1'b0;
+    22	  reg [7:0] awaddr = 0, araddr = 0;
+    23	  reg awvalid = 0, wvalid = 0, bready = 0, arvalid = 0, rready = 0;
+    24	  reg [31:0] wdata = 0;
+    25	  wire awready, wready, bvalid, arready, rvalid;
+    26	  wire [1:0] bresp, rresp;
+    27	  wire [31:0] rdata;
+    28	  wire [7:0] bus_addr;
+    29	  wire [31:0] bus_wdata, bus_rdata;
+    30	  wire bus_we, bus_re;
+    31	
+    32	  fpga_axil axil (
+    33	      .s_axi_aclk(clk), .s_axi_aresetn(aresetn),
+    34	      .s_axi_awaddr(awaddr), .s_axi_awprot(3'd0), .s_axi_awvalid(awvalid), .s_axi_awready(awready),
+    35	      .s_axi_wdata(wdata), .s_axi_wstrb(4'hF), .s_axi_wvalid(wvalid), .s_axi_wready(wready),
+    36	      .s_axi_bresp(bresp), .s_axi_bvalid(bvalid), .s_axi_bready(bready),
+    37	      .s_axi_araddr(araddr), .s_axi_arprot(3'd0), .s_axi_arvalid(arvalid), .s_axi_arready(arready),
+    38	      .s_axi_rdata(rdata), .s_axi_rresp(rresp), .s_axi_rvalid(rvalid), .s_axi_rready(rready),
+    39	      .bus_addr(bus_addr), .bus_wdata(bus_wdata), .bus_we(bus_we), .bus_re(bus_re), .bus_rdata(bus_rdata)
+    40	  );
+    41	
+    42	  wire [7:0] uo_out;
+    43	  wire [1:0] uio67_out, uio67_oe;
+    44	  // open drain with pull-ups: a pin is low only where the chip drives it low
+    45	  wire [1:0] uio67_pin = ~(uio67_oe & ~uio67_out);
+    46	  wire heartbeat;
+    47	  fpga_bench #(.HEARTBEAT_HALF(1000)) bench (
+    48	      .clk(clk), .bus_addr(bus_addr), .bus_wdata(bus_wdata), .bus_we(bus_we), .bus_re(bus_re),
+    49	      .bus_rdata(bus_rdata), .uo_out(uo_out), .uio67_out(uio67_out), .uio67_oe(uio67_oe),
+    50	      .uio67_in(uio67_pin), .ui_ext(8'd0), .heartbeat(heartbeat)
+    51	  );
+    52	
+    53	  task axi_write(input [7:0] a, input [31:0] d);
+    54	    begin
+    55	      @(posedge clk);
+    56	      awaddr <= a; wdata <= d; awvalid <= 1; wvalid <= 1; bready <= 1;
+    57	      fork
+    58	        begin @(posedge clk); while (!awready) @(posedge clk); awvalid <= 0; end
+    59	        begin @(posedge clk); while (!wready) @(posedge clk); wvalid <= 0; end
+    60	      join
+    61	      while (!bvalid) @(posedge clk);
+    62	      @(posedge clk);
+    63	      bready <= 0;
+    64	    end
+    65	  endtask
+    66	
+    67	  task axi_read(input [7:0] a, output [31:0] d);
+    68	    begin
+    69	      @(posedge clk);
+    70	      araddr <= a; arvalid <= 1; rready <= 1;
+    71	      @(posedge clk);
+    72	      while (!arready) @(posedge clk);
+    73	      arvalid <= 0;
+    74	      while (!rvalid) @(posedge clk);
+    75	      d = rdata;
+    76	      @(posedge clk);
+    77	      rready <= 0;
+    78	    end
+    79	  endtask
+    80	
+    81	  reg [31:0] frames[0:16383];
+    82	  reg [1023:0] frames_file, out, name;
+    83	  integer n_frames, i, f, n;
+    84	  reg [31:0] v, w0, w1, w2, status, played;
+    85	
+    86	  initial begin
+    87	    if (!$value$plusargs("frames=%s", frames_file) || !$value$plusargs("out=%s", out)) begin
+    88	      $display("usage: +frames=FILE +out=PREFIX");
+    89	      $finish(2);
+    90	    end
+    91	    for (i = 0; i < 16384; i = i + 1) frames[i] = 32'hx;
+    92	    $readmemh(frames_file, frames);
+    93	    n_frames = 0;
+    94	    while (frames[n_frames] !== 32'd0) begin
+    95	      if (frames[n_frames] === 32'hx) begin $display("no end frame"); $finish(2); end
+    96	      n_frames = n_frames + 1;
+    97	    end
+    98	    repeat (4) @(posedge clk);
+    99	    aresetn <= 1;
+   100	
+   101	    axi_read(8'h00, v);
+   102	    if (v !== 32'h46423031) begin $display("identifier %h", v); $finish(2); end
+   103	    axi_write(8'h10, 0);
+   104	    for (i = 0; i <= n_frames; i = i + 1) axi_write(8'h14, frames[i]);
+   105	    axi_read(8'h10, v);
+   106	    $display("tb: %0d frames loaded (FRAME_ADDR %0d)", n_frames + 1, v);
+   107	    axi_write(8'h04, 1);
+   108	    v = 1;
+   109	    while (v[0]) begin
+   110	      repeat (200) @(posedge clk);
+   111	      axi_read(8'h04, v);
+   112	    end
+   113	    status = v;
+   114	    axi_read(8'h18, played);
+   115	    $display("tb: status %h, %0d clocks played", status, played);
+   116	    $sformat(name, "%0s.info", out);
+   117	    f = $fopen(name, "w");
+   118	    $fwrite(f, "status %0d\nclocks %0d\n", status, played);
+   119	    $fclose(f);
+   120	
+   121	    $sformat(name, "%0s.samples", out);
+   122	    f = $fopen(name, "w");
+   123	    axi_read(8'h20, v);
+   124	    n = v;
+   125	    axi_write(8'h24, 0);
+   126	    for (i = 0; i < n; i = i + 1) begin
+   127	      axi_read(8'h28, v);
+   128	      $fwrite(f, "%01x\n", v[3:0]);
+   129	    end
+   130	    $fclose(f);
+   131	    $display("tb: %0d samples", n);
+   132	
+   133	    axi_read(8'h2C, v);
+   134	    n = v[30:0];
+   135	    if (v[31]) $display("tb: trace full");
+   136	    $sformat(name, "%0s.trace", out);
+   137	    f = $fopen(name, "w");
+   138	    axi_write(8'h30, 0);
+   139	    for (i = 0; i < n; i = i + 1) begin
+   140	      axi_read(8'h34, w0);
+   141	      axi_read(8'h38, w1);
+   142	      axi_read(8'h3C, w2);
+   143	      $fwrite(f, "%0d %08x %08x\n", w0, w1, w2);
+   144	    end
+   145	    $fclose(f);
+   146	    $display("tb: %0d trace entries", n);
+   147	    $finish(0);
+   148	  end
+   149	
+   150	  initial begin
+   151	    #500_000_000;
+   152	    $display("tb: timeout");
+   153	    $finish(2);
+   154	  end
+   155	endmodule
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc "nice -n 10 ionice -c 3 python3 -c 'import importlib.util; p=\"prototypes/fpga-kv260/host/check.py\"; s=importlib.util.spec_from_file_location(\"c\",p); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); n=1400; lv=[1]*n; c=n-64; lv[c]=0; clocks=[(i, v, 0) for i,v in enumerate(lv)]; print(\"tail falling edge\", c, \"within final 640 clocks:\", c >= n-640); print(\"decoded UART records:\", m.uart(clocks, 0, 64)); print(\"edge is grid aligned:\", c % 64 == 0)'" in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+tail falling edge 1336 within final 640 clocks: True
+decoded UART records: []
+edge is grid aligned: False
+
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Failed
+exec
+/bin/bash -lc "nice -n 10 ionice -c 3 python3 -c 'import importlib.util; p=\"prototypes/fpga-kv260/host/check.py\"; s=importlib.util.spec_from_file_location(\"c\",p); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); n=1408; lv=[1]*n; c=n-64; lv[c]=0; clocks=[(i, v, 0) for i,v in enumerate(lv)]; edges=[i for i in range(1,n) if lv[i] "'!= lv[i-1]]; print("tail falling edge", c, "within final 640 clocks:", c >= n-640); print("decoded UART records:", m.uart(clocks, 0, 64)); print("edge is grid aligned:", all(e % 64 == 0 for e in edges))'"'" in /home/matthias/prog/janestreet/emulator
+ succeeded in 0ms:
+tail falling edge 1344 within final 640 clocks: True
+decoded UART records: []
+edge is grid aligned: False
+
+codex
+## Findings
+
+1. **High — Vivado build stops at cfgmem generation.** [`build.tcl:87`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/vivado/build.tcl:87) calls `write_cfgmem` without the required `-size` argument. After implementation succeeds, Vivado will reject this command, so the script will not produce the advertised `.bin` or reach XSA export. AMD’s Tcl reference marks `-size` as required for `write_cfgmem`. [AMD UG835](https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands/write_cfgmem)
+
+2. **Medium — AXI writes ignore byte strobes, including zero-strobe writes.** [`fpga_axil.v:71-75`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/rtl/fpga_axil.v:71) saves WDATA but not WSTRB, and [`fpga_axil.v:95`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/rtl/fpga_axil.v:95) marks WSTRB unused. Consequently, a legal write to offset `0x04` with `WSTRB=0000` and `WDATA=1` still starts playback; a partial write to `0x08` also replaces the whole reset-clock value. The AW/W split-cycle handling and read-side-effect pulse did not show a concrete defect in my review.
+
+3. **Medium — the checker can accept a run with a malformed trailing UART start.** [`check.py:51-58`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/host/check.py:51) stops scanning UART starts during the final ten bit periods. I confirmed with a synthetic trace that a falling edge in that window produces no decoded UART record. If a run has the expected complete bytes and then an extra grid-aligned, truncated start near the end, the byte check ignores it and the edge-spacing check can still pass.
+
+4. **Low — host-drain decoding discards untagged sample pairs.** [`check.py:97-100`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/host/check.py:97) retains only pairs whose tag byte has bit 7 set. Extra or malformed samples with an untagged byte are silently ignored; [`check.py:136-138`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/host/check.py:136) does not compare the sample count to the metadata. Such extra records can therefore coexist with a passing host-drain check.
+
+## Checks and limits
+
+I rebuilt the bench from the current RTL, ran the supplied demo frames, and ran `check.py`: it completed with 2,131 frames, 10,753 clocks, and all demo decodes passing. That checks the normal demo path, not the malformed-trace cases above.
+
+The full `run_sim.sh` could not start: its chip-regeneration step uses a hard-coded `/var/tmp` `mktemp` path, which is read-only in this environment. I did not find a concrete frame-prefetch, reset/restart, end-frame, or recorder half-clock defect in the RTL review. I also could not confirm Vivado’s handling of the inverted chip clock or its final timing constraints without a Vivado run; those remain unverified.
+tokens used
+79,259
+## Findings
+
+1. **High — Vivado build stops at cfgmem generation.** [`build.tcl:87`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/vivado/build.tcl:87) calls `write_cfgmem` without the required `-size` argument. After implementation succeeds, Vivado will reject this command, so the script will not produce the advertised `.bin` or reach XSA export. AMD’s Tcl reference marks `-size` as required for `write_cfgmem`. [AMD UG835](https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands/write_cfgmem)
+
+2. **Medium — AXI writes ignore byte strobes, including zero-strobe writes.** [`fpga_axil.v:71-75`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/rtl/fpga_axil.v:71) saves WDATA but not WSTRB, and [`fpga_axil.v:95`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/rtl/fpga_axil.v:95) marks WSTRB unused. Consequently, a legal write to offset `0x04` with `WSTRB=0000` and `WDATA=1` still starts playback; a partial write to `0x08` also replaces the whole reset-clock value. The AW/W split-cycle handling and read-side-effect pulse did not show a concrete defect in my review.
+
+3. **Medium — the checker can accept a run with a malformed trailing UART start.** [`check.py:51-58`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/host/check.py:51) stops scanning UART starts during the final ten bit periods. I confirmed with a synthetic trace that a falling edge in that window produces no decoded UART record. If a run has the expected complete bytes and then an extra grid-aligned, truncated start near the end, the byte check ignores it and the edge-spacing check can still pass.
+
+4. **Low — host-drain decoding discards untagged sample pairs.** [`check.py:97-100`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/host/check.py:97) retains only pairs whose tag byte has bit 7 set. Extra or malformed samples with an untagged byte are silently ignored; [`check.py:136-138`](/home/matthias/prog/janestreet/emulator/prototypes/fpga-kv260/host/check.py:136) does not compare the sample count to the metadata. Such extra records can therefore coexist with a passing host-drain check.
+
+## Checks and limits
+
+I rebuilt the bench from the current RTL, ran the supplied demo frames, and ran `check.py`: it completed with 2,131 frames, 10,753 clocks, and all demo decodes passing. That checks the normal demo path, not the malformed-trace cases above.
+
+The full `run_sim.sh` could not start: its chip-regeneration step uses a hard-coded `/var/tmp` `mktemp` path, which is read-only in this environment. I did not find a concrete frame-prefetch, reset/restart, end-frame, or recorder half-clock defect in the RTL review. I also could not confirm Vivado’s handling of the inverted chip clock or its final timing constraints without a Vivado run; those remain unverified.
