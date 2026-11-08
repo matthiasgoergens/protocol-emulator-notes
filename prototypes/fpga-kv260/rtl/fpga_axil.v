@@ -2,7 +2,9 @@
  * SPDX-License-Identifier: Apache-2.0
  * AXI4-Lite slave for fpga_bench's register bus. One transaction at a time; a write takes the
  * address and data in either order; each accepted read gives exactly one bus_re pulse, which
- * matters because some reads advance an address. Responses are always OKAY.
+ * matters because some reads advance an address. Only full-word writes (all four strobes) reach
+ * the bus: the registers have side effects and no byte lanes, so a partial write is acknowledged
+ * and ignored. Responses are always OKAY.
  * The s_axi_* names let Vivado infer the interface when this module is added to a block design.
  */
 
@@ -44,6 +46,7 @@ module fpga_axil (
   reg have_aw = 1'b0, have_w = 1'b0;
   reg [7:0] aw = 8'd0;
   reg [31:0] wd = 32'd0;
+  reg full = 1'b0;                         // the write had all four strobes
   reg rd_wait = 1'b0;
 
   always @(posedge s_axi_aclk) begin
@@ -69,11 +72,12 @@ module fpga_axil (
         s_axi_wready <= 1'b1;
         have_w <= 1'b1;
         wd <= s_axi_wdata;
+        full <= &s_axi_wstrb;
       end
       if (have_aw && have_w && !s_axi_bvalid && !rd_wait && !bus_re) begin
         bus_addr <= {aw[7:2], 2'b00};
         bus_wdata <= wd;
-        bus_we <= 1'b1;
+        bus_we <= full;
         have_aw <= 1'b0;
         have_w <= 1'b0;
         s_axi_bvalid <= 1'b1;
@@ -92,5 +96,5 @@ module fpga_axil (
     end
   end
 
-  wire _unused = &{1'b0, s_axi_awprot, s_axi_arprot, s_axi_wstrb};
+  wire _unused = &{1'b0, s_axi_awprot, s_axi_arprot};
 endmodule

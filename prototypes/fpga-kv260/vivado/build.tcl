@@ -70,6 +70,8 @@ add_files -norecurse [glob $out/kv260_bench.gen/sources_1/bd/kv260_bd/hdl/kv260_
 set_property top kv260_top [current_fileset]
 update_compile_order -fileset sources_1
 
+# also a .bin of the bitstream (write_bitstream -bin_file)
+set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
 launch_runs impl_1 -to_step write_bitstream -jobs 8
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] ne "100%"} { error "implementation failed" }
@@ -82,8 +84,6 @@ set wns [get_property SLACK [get_timing_paths -max_paths 1 -setup]]
 set whs [get_property SLACK [get_timing_paths -max_paths 1 -hold]]
 puts "worst setup slack $wns ns, worst hold slack $whs ns"
 
-# the bitstream as a .bin for fpgautil / xmutil on the board's Linux
 set bit [glob $out/kv260_bench.runs/impl_1/kv260_top.bit]
-write_cfgmem -force -format BIN -interface SMAPx32 -disablebitswap -loadbit "up 0x0 $bit" $out/kv260_top.bin
 write_hw_platform -fixed -force -include_bit $out/kv260_bench.xsa
-puts "done: $bit, $out/kv260_top.bin, $out/kv260_bench.xsa"
+puts "done: $bit (and kv260_top.bin next to it), $out/kv260_bench.xsa"

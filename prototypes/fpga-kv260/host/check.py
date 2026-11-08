@@ -45,12 +45,17 @@ def bit(v, i):
 
 
 def uart(clocks, start, bit_clocks):
-    """8N1 bytes on uo_out[0]; returns (byte, clock of start bit, framing ok)."""
-    out, c = [], start
+    """8N1 bytes on uo_out[0]; returns (byte, clock of start bit, framing ok). A start bit whose
+    frame does not fit before the end of the run is returned with byte None and framing not ok,
+    so that a truncated extra byte fails the check instead of going unseen."""
+    out, c = [], max(start, 1)
     lv = [bit(h2, 0) for _, h2, _ in clocks]
-    while c < len(lv) - 10 * bit_clocks:
+    while c < len(lv):
         if lv[c - 1] == 1 and lv[c] == 0:
             mid = c + bit_clocks // 2
+            if mid + 9 * bit_clocks >= len(lv):
+                out.append((None, c, False))
+                break
             bits = [lv[mid + k * bit_clocks] for k in range(1, 9)]
             stop = lv[mid + 9 * bit_clocks]
             out.append((sum(b << k for k, b in enumerate(bits)), c, stop == 1 and lv[mid] == 0))
@@ -95,9 +100,15 @@ def i2c(clocks, start):
 
 
 def hostout(samples):
+    """HOSTOUT entries {valid, tag} then the byte: the valid entries' bytes, and whether every
+    valid entry comes before every empty one (an empty entry is 0x00 0x00)."""
     nib = [int(x, 16) for x in samples]
     by = [(nib[i] << 4) | nib[i + 1] for i in range(0, len(nib) - 1, 2)]
-    return [d for t, d in zip(by[0::2], by[1::2]) if t & 0x80]
+    pairs = list(zip(by[0::2], by[1::2]))
+    valid = [d for t, d in pairs if t & 0x80]
+    k = len(valid)
+    well_formed = all(t & 0x80 for t, _ in pairs[:k]) and all(p == (0, 0) for p in pairs[k:])
+    return valid, well_formed
 
 
 def main():
@@ -122,7 +133,7 @@ def main():
           f"status {info['status']} (2: done, nothing dropped), {len(clocks)} clocks played")
     u = uart(clocks, run, meta["uart_bit_clocks"])
     judge("uart bytes", [b for b, _, f in u if f] == meta["uart_bytes"] and all(f for _, _, f in u),
-          " ".join(f"0x{b:02x}@{c}{'' if f else '(framing)'}" for b, c, f in u))
+          " ".join(f"{'?' if b is None else f'0x{b:02x}'}@{c}{'' if f else '(framing)'}" for b, c, f in u))
     lv = [bit(h2, 0) for _, h2, _ in clocks]
     edges = [c for c in range(run, len(lv)) if lv[c] != lv[c - 1]]
     off = [(e - edges[0]) % meta["uart_bit_clocks"] for e in edges] if edges else []
@@ -133,9 +144,11 @@ def main():
     want_ack = 0 if device else 1
     judge("i2c bytes", [b for b, _ in i] == meta["i2c_bytes"] and all(a == want_ack for _, a in i) and stopped,
           " ".join(f"0x{b:02x}{'+ack' if a == 0 else '-nak'}" for b, a in i) + f" stop={stopped}")
-    h = hostout(samples)
+    h, well_formed = hostout(samples)
     want = [want_ack] * len(meta["i2c_bytes"])
-    judge("host drained", h == want, " ".join(f"0x{b:02x}" for b in h) + f" (want {' '.join(f'0x{b:02x}' for b in want)})")
+    judge("host drained", len(samples) == meta["samples"] and well_formed and h == want,
+          f"{len(samples)} samples (want {meta['samples']}), " + " ".join(f"0x{b:02x}" for b in h)
+          + f" (want {' '.join(f'0x{b:02x}' for b in want)})" + ("" if well_formed else ", malformed entries"))
     print("PASS" if ok else "FAIL")
     sys.exit(0 if ok else 1)
 

@@ -22,6 +22,7 @@ module tb_bench;
   reg [7:0] awaddr = 0, araddr = 0;
   reg awvalid = 0, wvalid = 0, bready = 0, arvalid = 0, rready = 0;
   reg [31:0] wdata = 0;
+  reg [3:0] wstrb = 4'hF;
   wire awready, wready, bvalid, arready, rvalid;
   wire [1:0] bresp, rresp;
   wire [31:0] rdata;
@@ -32,7 +33,7 @@ module tb_bench;
   fpga_axil axil (
       .s_axi_aclk(clk), .s_axi_aresetn(aresetn),
       .s_axi_awaddr(awaddr), .s_axi_awprot(3'd0), .s_axi_awvalid(awvalid), .s_axi_awready(awready),
-      .s_axi_wdata(wdata), .s_axi_wstrb(4'hF), .s_axi_wvalid(wvalid), .s_axi_wready(wready),
+      .s_axi_wdata(wdata), .s_axi_wstrb(wstrb), .s_axi_wvalid(wvalid), .s_axi_wready(wready),
       .s_axi_bresp(bresp), .s_axi_bvalid(bvalid), .s_axi_bready(bready),
       .s_axi_araddr(araddr), .s_axi_arprot(3'd0), .s_axi_arvalid(arvalid), .s_axi_arready(arready),
       .s_axi_rdata(rdata), .s_axi_rresp(rresp), .s_axi_rvalid(rvalid), .s_axi_rready(rready),
@@ -100,6 +101,12 @@ module tb_bench;
 
     axi_read(8'h00, v);
     if (v !== 32'h46423031) begin $display("identifier %h", v); $finish(2); end
+    // a write without all four strobes is acknowledged and ignored
+    wstrb = 4'h0;
+    axi_write(8'h08, 5);
+    wstrb = 4'hF;
+    axi_read(8'h08, v);
+    if (v !== 32'd16) begin $display("tb: a zero-strobe write changed RESET_CLOCKS to %0d", v); $finish(2); end
     axi_write(8'h10, 0);
     for (i = 0; i <= n_frames; i = i + 1) axi_write(8'h14, frames[i]);
     axi_read(8'h10, v);
